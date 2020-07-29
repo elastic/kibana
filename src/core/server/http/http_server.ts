@@ -167,7 +167,11 @@ export class HttpServer {
         const payloadTimeout = isSafeMethod(route.method) ? undefined : timeout?.payload;
 
         // Hapi server requires the socket to be greater than payload settings so we add 1 millisecond
-        const socketTimeout = payloadTimeout ? payloadTimeout + 1 : undefined;
+        const socketTimeout = timeout?.idleSocket
+          ? timeout.idleSocket
+          : payloadTimeout
+          ? payloadTimeout + 1
+          : undefined;
 
         const kibanaRouteState: KibanaRouteState = {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),

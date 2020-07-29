@@ -68,6 +68,7 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
+    socketTimeout: 2000,
   } as HttpConfig;
 
   configWithSSL = {
@@ -997,193 +998,289 @@ describe('body options', () => {
 });
 
 describe('timeout options', () => {
-  test('should accept a payload timeout which is 3 minutes in milliseconds, "300000" for a POST', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+  describe('payload timeout', () => {
+    test('POST routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
 
-    const router = new Router('', logger, enhanceWithContext);
-    router.post(
-      {
-        path: '/',
-        validate: false,
-        options: {
-          timeout: {
-            payload: 300000,
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
           },
         },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({
-            body: {
-              timeout: req.route.options.timeout,
-            },
-          });
-        } catch (err) {
-          return res.internalError({ body: err.message });
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
         }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(200, {
-        timeout: {
-          payload: 300000,
-          idleSocket: 300001,
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .post('/')
+        .send({ test: 1 })
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+            idleSocket: 300001,
+          },
+        });
+    });
+
+    test('GET routes ignore the specified payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
         },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener).get('/').expect(200, {
+        timeout: {},
       });
-  });
+    });
 
-  test('should accept a payload timeout which is 3 minutes in milliseconds, "300000" for a GET', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+    test('DELETE routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
 
-    const router = new Router('', logger, enhanceWithContext);
-    router.get(
-      {
-        path: '/',
-        validate: false,
-        options: {
-          timeout: {
-            payload: 300000,
+      const router = new Router('', logger, enhanceWithContext);
+      router.delete(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
           },
         },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({
-            body: {
-              timeout: req.route.options.timeout,
-            },
-          });
-        } catch (err) {
-          return res.internalError({ body: err.message });
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: {
+                  payload: 300000,
+                  idleSocket: 300001,
+                },
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
         }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener).get('/').expect(200, {
-      timeout: {},
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .delete('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+            idleSocket: 300001,
+          },
+        });
+    });
+
+    test('PUT routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.put(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .put('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+            idleSocket: 300001,
+          },
+        });
+    });
+
+    test('PATCH routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.patch(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          try {
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
+          } catch (err) {
+            return res.internalError({ body: err.message });
+          }
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .patch('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+            idleSocket: 300001,
+          },
+        });
     });
   });
 
-  test('should accept a payload timeout which is 3 minutes in milliseconds, "300000" for a DELETE', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
+  describe('idleSocket timeout', () => {
+    test('sets the socket timeout when specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
 
-    const router = new Router('', logger, enhanceWithContext);
-    router.delete(
-      {
-        path: '/',
-        validate: false,
-        options: {
-          timeout: {
-            payload: 300000,
-          },
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: { timeout: { idleSocket: 12000 } },
         },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({
-            body: {
-              timeout: {
-                payload: 300000,
-                idleSocket: 300001,
-              },
-            },
-          });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener)
-      .delete('/')
-      .expect(200, {
-        timeout: {
-          payload: 300000,
-          idleSocket: 300001,
-        },
-      });
-  });
-
-  test('should accept a payload timeout which is 3 minutes in milliseconds, "300000" for a PUT', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.put(
-      {
-        path: '/',
-        validate: false,
-        options: {
-          timeout: {
-            payload: 300000,
-          },
-        },
-      },
-      (context, req, res) => {
-        try {
+        (context, req, res) => {
           return res.ok({
             body: {
               timeout: req.route.options.timeout,
             },
           });
-        } catch (err) {
-          return res.internalError({ body: err.message });
         }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener)
-      .put('/')
-      .expect(200, {
-        timeout: {
-          payload: 300000,
-          idleSocket: 300001,
-        },
-      });
-  });
+      );
+      registerRouter(router);
 
-  test('should accept a payload timeout which is 3 minutes in milliseconds, "300000" for a PATCH', async () => {
-    const { registerRouter, server: innerServer } = await server.setup(config);
-
-    const router = new Router('', logger, enhanceWithContext);
-    router.patch(
-      {
-        path: '/',
-        validate: false,
-        options: {
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
           timeout: {
-            payload: 300000,
+            idleSocket: 12000,
+          },
+        });
+    });
+
+    test(`payload timeout doesn't cause the specified idleSocket timeout to be overwritten`, async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: {
+            timeout: {
+              payload: 11000,
+              idleSocket: 12000,
+            },
           },
         },
-      },
-      (context, req, res) => {
-        try {
-          return res.ok({
-            body: {
-              timeout: req.route.options.timeout,
-            },
-          });
-        } catch (err) {
-          return res.internalError({ body: err.message });
+        (context, req, res) => {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
         }
-      }
-    );
-    registerRouter(router);
-    await server.start();
-    await supertest(innerServer.listener)
-      .patch('/')
-      .expect(200, {
-        timeout: {
-          payload: 300000,
-          idleSocket: 300001,
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .post('/')
+        .send({})
+        .expect(200, {
+          timeout: {
+            payload: 11000,
+            idleSocket: 12000,
+          },
+        });
+    });
+
+    // this can ideally be deleted in the future once https://github.com/hapijs/hapi/issues/4122 is resolved
+    test(`idleSocket timeout must be larger than the payload timeout`, async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: {
+            timeout: {
+              payload: 13000,
+              idleSocket: 12000,
+            },
+          },
         },
-      });
+        (context, req, res) => {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        }
+      );
+
+      registerRouter(router);
+
+      await expect(() => server.start()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Payload timeout must be shorter than socket timeout: post /"`
+      );
+    });
   });
 });
 

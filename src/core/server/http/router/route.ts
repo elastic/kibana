@@ -153,6 +153,11 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      * Milliseconds to receive the payload
      */
     payload?: number;
+
+    /**
+     * Milliseconds the socket can be idle before it's closed
+     */
+    idleSocket?: number;
   };
 }
 
