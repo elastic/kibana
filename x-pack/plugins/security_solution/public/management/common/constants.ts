@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ManagementStoreGlobalNamespace, AdministrationSubTab } from '../types';
-import { APP_ID, APP_DETECTIONS_PATH } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 
 // --[ ROUTING ]---------------------------------------------------------------------------
