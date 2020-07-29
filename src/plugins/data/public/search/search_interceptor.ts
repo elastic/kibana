@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter, tap } from 'rxjs/operators';
+import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';

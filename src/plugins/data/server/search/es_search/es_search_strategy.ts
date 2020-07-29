@@ -43,8 +43,6 @@ export const esSearchStrategyProvider = (
         ...request.params,
       };
 
-      const startTime = new Date().getTime();
-
       try {
         const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
           'search',
@@ -52,13 +50,13 @@ export const esSearchStrategyProvider = (
           options
         )) as SearchResponse<any>;
 
-        if (usage) usage.trackSuccess(new Date().getTime() - startTime);
+        if (usage) usage.trackSuccess(rawResponse.took);
 
         // The above query will either complete or timeout and throw an error.
         // There is no progress indication on this api.
         return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
       } catch (e) {
-        if (usage) usage.trackError(new Date().getTime() - startTime);
+        if (usage) usage.trackError();
         throw e;
       }
     },

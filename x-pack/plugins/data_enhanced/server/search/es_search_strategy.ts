@@ -30,6 +30,10 @@ export interface AsyncSearchResponse<T> {
   response: SearchResponse<T>;
 }
 
+export function isAsyncSearchResponse(response: any): response is AsyncSearchResponse {
+  return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
+}
+
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   usage?: SearchUsage
@@ -43,7 +47,6 @@ export const enhancedEsSearchStrategyProvider = (
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
-    const startTime = new Date().getTime();
 
     try {
       const response =
@@ -51,11 +54,16 @@ export const enhancedEsSearchStrategyProvider = (
           ? await rollupSearch(caller, { ...request, params }, options)
           : await asyncSearch(caller, { ...request, params }, options);
 
-      if (usage) usage.trackSuccess(new Date().getTime() - startTime);
+      if (
+        usage &&
+        (!isAsyncSearchResponse(response) || (!response.is_partial && !response.is_running))
+      ) {
+        usage.trackSuccess(response.rawResponse.took);
+      }
 
       return response;
     } catch (e) {
-      if (usage) usage.trackError(new Date().getTime() - startTime);
+      if (usage) usage.trackError();
       throw e;
     }
   };
