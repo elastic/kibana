@@ -95,6 +95,7 @@ export class FeatureCatalogueRegistry {
 }
 
 export type FeatureCatalogueRegistrySetup = ReturnType<FeatureCatalogueRegistry['setup']>;
+export type FeatureCatalogueRegistryStart = ReturnType<FeatureCatalogueRegistry['start']>;
 
 const compareByKey = <T>(key: keyof T) => (left: T, right: T) => {
   if (left[key] < right[key]) {
