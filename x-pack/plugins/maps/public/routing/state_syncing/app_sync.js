@@ -31,6 +31,7 @@ export function startAppStateSyncing(appStateManager) {
   };
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(query, stateContainer, {
     filters: esFilters.FilterStateStore.APP_STATE,
+    query: true,
   });
 
   // sets up syncing app state container with url

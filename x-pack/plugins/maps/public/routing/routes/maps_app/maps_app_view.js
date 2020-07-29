@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
-import { getData, getUiSettings, getCoreChrome } from '../../../kibana_services';
+import { getData, getCoreChrome } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
 import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
 import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
@@ -201,13 +201,15 @@ export class MapsAppView extends React.Component {
     }
     const appFilters = this._appStateManager.getFilters() || [];
 
+    const query = getInitialQuery({
+      mapStateJSON,
+      appState: this._appStateManager.getAppState(),
+    });
+    if (query) getData().query.setQuery(query);
+
     this._onQueryChange({
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
-      query: getInitialQuery({
-        mapStateJSON,
-        appState: this._appStateManager.getAppState(),
-        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
-      }),
+      query,
       time: getInitialTimeFilters({
         mapStateJSON,
         globalState,
