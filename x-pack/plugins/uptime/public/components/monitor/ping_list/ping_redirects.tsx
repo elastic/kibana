@@ -49,15 +49,17 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         </EuiText>
       }
       <EuiSpacer size="s" />
-      <EuiCodeBlock paddingSize="m">
+      <div>
         <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
         {list?.map((url: string, ind: number) => (
           <div key={ind}>
             <EuiIcon type="sortDown" />
-            <StyledLink href={url}>{url}</StyledLink>
+            <StyledLink href={url}>
+              {url} <EuiIcon type={'popout'} size="s" />
+            </StyledLink>
           </div>
         ))}
-      </EuiCodeBlock>
+      </div>
     </div>
   ) : null;
 };
