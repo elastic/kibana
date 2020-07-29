@@ -21,7 +21,6 @@ import {
   GetAgentConfigsResponse,
   GetPackagesResponse,
 } from '../../../../../../ingest_manager/common/types/rest_spec';
-import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 import { GetPolicyListResponse } from '../../policy/types';
 
 const generator = new EndpointDocGenerator('seed');
@@ -76,9 +75,10 @@ export const mockHostDetailsApiResult = (): HostInfo => {
 const hostListApiPathHandlerMocks = ({
   hostsResults = mockHostResultList({ total: 3 }).hosts,
   epmPackages = [generator.generateEpmPackage()],
-  ingestPackageConfigs = mockPolicyResultList({ total: 0 }).items,
+  ingestPackageConfigs = [],
   policyResponse = generator.generatePolicyResponse(),
 }: {
+  /** route handlers will be setup for each individual host in this array */
   hostsResults?: HostResultList['hosts'];
   epmPackages?: GetPackagesResponse['response'];
   ingestPackageConfigs?: GetPolicyListResponse['items'];
@@ -129,6 +129,7 @@ const hostListApiPathHandlerMocks = ({
   // Build a GET route handler for each host details based on the list of Hosts passed on input
   if (hostsResults) {
     hostsResults.forEach((host) => {
+      // @ts-ignore
       apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
     });
   }
@@ -141,11 +142,9 @@ export const setHostListApiMockImplementation = (
   {
     hostsResults = mockHostResultList({ total: 3 }).hosts,
     ...pathHandlersOptions
-  }: Parameters<typeof hostListApiPathHandlerMocks>[0] & {
-    hostsResults?: HostResultList['hosts'];
-  } = {}
+  }: Parameters<typeof hostListApiPathHandlerMocks>[0] = {}
 ): void => {
-  const apiHandlers = hostListApiPathHandlerMocks(pathHandlersOptions);
+  const apiHandlers = hostListApiPathHandlerMocks({ ...pathHandlersOptions, hostsResults });
   const hostApiResponse: HostResultList = {
     hosts: hostsResults,
     request_page_size: 10,

@@ -16,6 +16,7 @@ import {
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
+  HostPolicyResponse,
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
   HostStatus,
@@ -244,9 +245,11 @@ describe('when on the hosts page', () => {
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
     let agentId: string;
-    const dispatchServerReturnedHostPolicyResponse = (
+    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+
+    const createPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
-    ) => {
+    ): HostPolicyResponse => {
       const policyResponse = docGenerator.generatePolicyResponse();
       const malwareResponseConfigurations =
         policyResponse.Endpoint.policy.applied.response.configurations.malware;
@@ -292,21 +295,28 @@ describe('when on the hosts page', () => {
       policyResponse.Endpoint.policy.applied.actions.push(unknownAction);
       malwareResponseConfigurations.concerned_actions.push(unknownAction.name);
 
+      return policyResponse;
+    };
+
+    const dispatchServerReturnedHostPolicyResponse = (
+      overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
+    ) => {
       reactTestingLibrary.act(() => {
         store.dispatch({
           type: 'serverReturnedHostPolicyResponse',
           payload: {
-            policy_response: policyResponse,
+            policy_response: createPolicyResponse(overallStatus),
           },
         });
       });
     };
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const {
         host_status,
         metadata: { host, ...details },
       } = mockHostDetailsApiResult();
+
       hostDetails = {
         host_status,
         metadata: {
@@ -320,34 +330,37 @@ describe('when on the hosts page', () => {
 
       agentId = hostDetails.metadata.elastic.agent.id;
 
-      coreStart.http.get.mockReturnValue(Promise.resolve(hostDetails));
+      const policy = docGenerator.generatePolicyPackageConfig();
+      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
+
+      setHostListApiMockImplementation(coreStart.http, {
+        hostsResults: [hostDetails],
+        ingestPackageConfigs: [policy],
+      });
 
       reactTestingLibrary.act(() => {
-        history.push({
-          ...history.location,
-          search: '?selected_host=1',
-        });
+        history.push('/hosts?selected_host=1');
       });
-      reactTestingLibrary.act(() => {
-        store.dispatch({
-          type: 'serverReturnedHostDetails',
-          payload: hostDetails,
-        });
-      });
+
+      renderAndWaitForData = async () => {
+        const renderResult = render();
+        await middlewareSpy.waitForAction('serverReturnedHostDetails');
+        return renderResult;
+      };
     });
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('should show the flyout', () => {
-      const renderResult = render();
+    it('should show the flyout', async () => {
+      const renderResult = await renderAndWaitForData();
       return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
         expect(flyout).not.toBeNull();
       });
     });
 
     it('should display policy name value as a link', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
@@ -356,10 +369,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should update the URL when policy name link is clicked', async () => {
-      const policyItem = mockPolicyResultList({ total: 1 }).items[0];
-      coreStart.http.get.mockReturnValue(Promise.resolve({ item: policyItem }));
-
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -372,7 +382,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should display policy status value as a link', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
@@ -381,7 +391,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should update the URL when policy status link is clicked', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -394,7 +404,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should display Success overall policy status', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.success);
       });
@@ -408,7 +418,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should display Warning overall policy status', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
       });
@@ -422,7 +432,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should display Failed overall policy status', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
       });
@@ -436,7 +446,7 @@ describe('when on the hosts page', () => {
     });
 
     it('should display Unknown overall policy status', async () => {
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse('' as HostPolicyResponseActionStatus);
       });
@@ -451,7 +461,7 @@ describe('when on the hosts page', () => {
 
     it('should include the link to reassignment in Ingest', async () => {
       coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
-      const renderResult = render();
+      const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
@@ -463,7 +473,7 @@ describe('when on the hosts page', () => {
     describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
         coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
-        const renderResult = render();
+        const renderResult = await renderAndWaitForData();
         const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(linkToReassign);
@@ -484,13 +494,14 @@ describe('when on the hosts page', () => {
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
         });
-        renderResult = render();
+        renderResult = await renderAndWaitForData();
         const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(policyStatusLink);
         });
         await userChangedUrlChecker;
+        await middlewareSpy.waitForAction('serverReturnedHostPolicyResponse');
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse();
         });
