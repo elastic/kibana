@@ -21,13 +21,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useTrackPageview } from '../../../observability/public';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { OVERVIEW_ROUTE, SETTINGS_ROUTE, CLIENT_ALERT_TYPES } from '../../common/constants';
+import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
 import * as labels from './translations';
 import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
+import { CLIENT_ALERT_TYPES } from '../../common/constants/alerts';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';

@@ -195,7 +195,7 @@ const UnstyledProcessEventDot = React.memo(
              * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
              * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
              */
-            beginElement: () => void;
+            beginElement?: () => void;
           })
         | null;
     } = React.createRef();
@@ -238,10 +238,8 @@ const UnstyledProcessEventDot = React.memo(
     const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
-      if (animationTarget.current !== null) {
-        // This works but the types are missing in the typescript DOM lib
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (animationTarget.current as any).beginElement();
+      if (animationTarget.current?.beginElement) {
+        animationTarget.current.beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
@@ -297,7 +295,8 @@ const UnstyledProcessEventDot = React.memo(
      */
     return (
       <div
-        data-test-subj={'resolverNode'}
+        data-test-subj="resolver:node"
+        data-test-resolver-node-id={nodeID}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
@@ -317,7 +316,7 @@ const UnstyledProcessEventDot = React.memo(
             () => {
               handleFocus();
               handleClick();
-            } /* a11y note: this is strictly an alternate to the button, so no tabindex  is necessary*/
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
           }
           role="img"
           aria-labelledby={labelHTMLID}
