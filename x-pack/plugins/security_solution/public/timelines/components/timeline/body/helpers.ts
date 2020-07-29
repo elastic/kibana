@@ -106,7 +106,8 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   return (
     get(['agent', 'type', 0], ecsData) === 'endpoint' &&
-    get(['process', 'entity_id'], ecsData)?.length > 0
+    get(['process', 'entity_id'], ecsData)?.length === 1 &&
+    get(['process', 'entity_id', 0], ecsData) !== ''
   );
 };
 

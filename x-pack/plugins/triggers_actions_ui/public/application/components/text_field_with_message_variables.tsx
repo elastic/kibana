@@ -7,9 +7,10 @@ import React, { useState } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import './add_message_variables.scss';
 import { AddMessageVariables } from './add_message_variables';
+import { ActionVariable } from '../../types';
 
 interface Props {
-  messageVariables: string[] | undefined;
+  messageVariables?: ActionVariable[];
   paramsProperty: string;
   index: number;
   inputTargetValue?: string;
