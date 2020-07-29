@@ -205,13 +205,12 @@ export function setQuery({
   filters = [],
   refresh = false,
 }: {
-  filters?: Filter[];
+  filters: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   refresh?: boolean;
 }) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const state = getState();
     const prevQuery = getQuery(getState());
     const prevTriggeredAt =
       prevQuery && prevQuery.queryLastTriggeredAt
@@ -220,13 +219,13 @@ export function setQuery({
 
     dispatch({
       type: SET_QUERY,
-      timeFilters: timeFilters ? timeFilters : getTimeFilters(state),
+      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
       query: {
-        ...(query ? query : getQuery(state)),
+        ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
-      filters: filters ? filters : getFilters(state),
+      filters: filters ? filters : getFilters(getState()),
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
