@@ -14,8 +14,11 @@ describe('MonitorStatusList component', () => {
   let pings: Ping[];
 
   beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => '2019-06-21 15:29:26');
-    moment.prototype.from = jest.fn(() => 'a few moments ago');
+    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue('2019-06-21 15:29:26');
+
+    const fromSpy = jest.spyOn(moment.prototype, 'from');
+    fromSpy.mockReturnValue('a few moments ago');
   });
 
   beforeEach(() => {

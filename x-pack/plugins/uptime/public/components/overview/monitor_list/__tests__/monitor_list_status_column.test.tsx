@@ -13,11 +13,14 @@ import { STATUS } from '../../../../../common/constants';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => 'Thu May 09 2019 10:15:11 GMT-0400');
-    moment.prototype.fromNow = jest.fn(() => 'a few seconds ago');
-    // Only for testing purposes we allow extending Date here
-    // eslint-disable-next-line no-extend-native
-    Date.prototype.toString = jest.fn(() => 'Tue, 01 Jan 2019 00:00:00 GMT');
+    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue('Thu May 09 2019 10:15:11 GMT-0400');
+
+    const fromNowSpy = jest.spyOn(moment.prototype, 'fromNow');
+    fromNowSpy.mockReturnValue('a few seconds ago');
+
+    const toStringSpy = jest.spyOn(Date.prototype, 'toString');
+    toStringSpy.mockReturnValue('Tue, 01 Jan 2019 00:00:00 GMT');
   });
 
   let upChecks: Ping[];
