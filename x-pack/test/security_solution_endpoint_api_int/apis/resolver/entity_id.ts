@@ -15,7 +15,7 @@ import {
   EndpointDocGenerator,
   Event,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
-import { GeneratedEvents } from '../../services/resolver';
+import { InsertedEvents } from '../../services/resolver';
 
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,7 +26,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   describe('Resolver handling of entity ids', () => {
     describe('entity api', () => {
       let origin: Event;
-      let genData: GeneratedEvents;
+      let genData: InsertedEvents;
       before(async () => {
         origin = generator.generateEvent({ parentEntityID: 'a' });
         origin.process.entity_id = '';
@@ -68,7 +68,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       let childNoEntityID: Event;
       let childWithEntityID: Event;
       let events: Event[];
-      let genData: GeneratedEvents;
+      let genData: InsertedEvents;
 
       before(async () => {
         // construct a tree with an origin and two direct children. One child will not have an entity_id. That child
@@ -109,7 +109,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       let ancestor2: Event;
       let ancestorNoEntityID: Event;
       let events: Event[];
-      let genData: GeneratedEvents;
+      let genData: InsertedEvents;
 
       before(async () => {
         // construct a tree with an origin that has two ancestors. The origin will have an empty string as one of the

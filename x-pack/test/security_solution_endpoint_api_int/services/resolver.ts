@@ -35,7 +35,7 @@ export interface GeneratedTrees {
 /**
  * Structure containing the events inserted into ES and the index they live in
  */
-export interface GeneratedEvents {
+export interface InsertedEvents {
   events: Event[];
   indices: string[];
 }
@@ -53,7 +53,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
     async insertEvents(
       events: Event[],
       eventsIndex: string = processIndex
-    ): Promise<GeneratedEvents> {
+    ): Promise<InsertedEvents> {
       const body = events.reduce((array: Array<BulkCreateHeader | Event>, doc) => {
         array.push({ create: { _index: eventsIndex } }, doc);
         return array;
