@@ -223,16 +223,6 @@ describe('LayerPanel', () => {
       const panel = mount(group.prop('panel'));
 
       expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
-      act(() => {
-        panel.find('EuiTab#visualization').simulate('click');
-      });
-      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          groupId: 'a',
-          accessor: 'newid',
-        })
-      );
     });
 
     it('should keep the popover open when configuring a new dimension', () => {

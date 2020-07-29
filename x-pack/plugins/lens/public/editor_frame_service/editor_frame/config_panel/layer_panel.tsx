@@ -52,6 +52,11 @@ export function LayerPanel(
 
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+
+  React.useEffect(() => {
+    setPopoverState(initialPopoverState);
+  }, [props.activeVisualizationId]);
+
   if (
     !datasourcePublicAPI ||
     !props.activeVisualizationId ||
