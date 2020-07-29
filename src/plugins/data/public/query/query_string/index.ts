@@ -16,9 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { QueryStart } from '../../../query';
 
-export const clearStateFromSavedQuery = (queryService: QueryStart) => {
-  queryService.filterManager.removeAll();
-  queryService.queryString.clearQuery();
-};
+export { QueryStringContract, QueryStringManager } from './query_string_manager';
