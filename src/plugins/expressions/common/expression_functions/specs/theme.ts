@@ -38,7 +38,7 @@ export type ExpressionFunctionTheme = ExpressionFunctionDefinition<
 export const theme: ExpressionFunctionTheme = {
   name: 'theme',
   aliases: [],
-  help: i18n.translate('expressions.functions.fontHelpText', {
+  help: i18n.translate('expressions.functions.themeHelpText', {
     defaultMessage: 'Reads a theme setting.',
   }),
   inputTypes: ['null'],
