@@ -1514,7 +1514,7 @@ For Vega visualizations, there are two different views: *Request* and *Vega debu
 
 Vega uses the {ref}/search-search.html[{es} search API] to get documents and aggregation 
 results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests. 
-In case your specification has more than one request, you can switch between them using the *Request* dropdown.
+In case your specification has more than one request, you can switch between the views using the *View* dropdown.
 
 [role="screenshot"]
 image::visualize/images/vega_tutorial_inspect_requests.png[]
