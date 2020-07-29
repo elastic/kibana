@@ -75,7 +75,8 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 }) => {
   const [myStepData, setMyStepData] = useState<AboutStepRule>(stepAboutDefaultValue);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    defineRuleData?.index ?? []
+    defineRuleData?.index ?? [],
+    'step_about_rule'
   );
   const canUseExceptions =
     defineRuleData?.ruleType &&
