@@ -91,5 +91,13 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         5000
       );
     },
+    async waitUntilDataIsLoaded() {
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('data-missing', { timeout: 0 })) {
+          await refreshApp();
+        }
+        await testSubjects.missingOrFail('data-missing');
+      });
+    },
   };
 }

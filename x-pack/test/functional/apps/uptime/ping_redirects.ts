@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const { uptime: uptimePage } = getPageObjects(['uptime']);
+  const { uptime: uptimePage, header } = getPageObjects(['uptime', 'header']);
   const uptime = getService('uptime');
   const esArchiver = getService('esArchiver');
+
   const archive = 'uptime/blank';
 
   const monitor = () => uptime.monitor;
 
   describe('Ping redirects', () => {
-    const start = moment()
-      .subtract('15', 'm')
-      .toISOString();
-    const end = moment().toISOString();
+    const start = '~ 15 minutes ago';
+    const end = 'now';
 
     const MONITOR_ID = 'redirect-testing-id';
 
@@ -58,6 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('display redirect info in detail panel', async () => {
+      await header.waitUntilLoadingHasFinished();
       await monitor().hasRedirectInfo();
     });
 

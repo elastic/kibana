@@ -40,8 +40,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Observer location', () => {
-    const start = moment().subtract('15', 'm').toISOString();
-    const end = moment().toISOString();
+    const start = '~ 15 minutes ago';
+    const end = 'now';
 
     before(async () => {
       await addMonitorWithNoLocation();
