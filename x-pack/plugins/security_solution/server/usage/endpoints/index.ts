@@ -220,7 +220,7 @@ export const getEndpointTelemetryFromFleet = async (
     try {
       const { attributes: metadataAttributes } = endpointAgents[i];
       const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
-      const { host, os, elastic } = localMetadata as AgentLocalMetadata; // AgentMetadata is just an empty blob, casting for our  use case
+      const { host, os, elastic } = localMetadata as AgentLocalMetadata;
 
       if (!uniqueHostIds.has(host.id)) {
         uniqueHostIds.add(host.id);
@@ -244,10 +244,13 @@ export const getEndpointTelemetryFromFleet = async (
             policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
           }
         }
+        throw new Error('I broke!');
       }
     } catch (error) {
-      // continue with the loop if any unexpected errors happen
-      // We will not get policy specifics or 24 hour activity for this iteration of the loop
+      console.log("ERROR: ", error); // eslint-disable-line
+      // All errors thrown in the loop would be handled here
+      // Not logging any errors to avoid leaking any potential PII
+      // Depending on when the error is thrown in the loop some specifics may be missing, but it allows the loop to continue
     }
   }
 

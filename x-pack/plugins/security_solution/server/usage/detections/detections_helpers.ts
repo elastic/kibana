@@ -23,6 +23,9 @@ interface DetectionsMetric {
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
 
+/**
+ * Default detection rule usage count
+ */
 export const initialRulesUsage: DetectionRulesUsage = {
   custom: {
     enabled: 0,
@@ -34,6 +37,9 @@ export const initialRulesUsage: DetectionRulesUsage = {
   },
 };
 
+/**
+ * Default ml job usage count
+ */
 export const initialMlJobsUsage: MlJobsUsage = {
   custom: {
     enabled: 0,
