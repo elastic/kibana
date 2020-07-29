@@ -186,11 +186,11 @@ export const PolicyList = React.memo(() => {
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteSuccessToast', {
             defaultMessage: 'Success!',
           }),
-          text: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
-              defaultMessage="Policy has been deleted."
-            />
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails',
+            {
+              defaultMessage: 'Policy has been deleted.',
+            }
           ),
         });
       } else {

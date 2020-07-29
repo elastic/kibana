@@ -31,7 +31,7 @@ import {
   isLoading,
   apiError,
 } from '../store/policy_details/selectors';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
@@ -84,7 +84,7 @@ export const PolicyDetails = React.memo(() => {
               defaultMessage: 'Success!',
             }
           ),
-          text: (
+          text: toMountPoint(
             <span data-test-subj="policyDetailsSuccessMessage">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
@@ -103,7 +103,7 @@ export const PolicyDetails = React.memo(() => {
           title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),
-          text: <>{policyUpdateStatus.error!.message}</>,
+          text: policyUpdateStatus.error!.message,
         });
       }
     }

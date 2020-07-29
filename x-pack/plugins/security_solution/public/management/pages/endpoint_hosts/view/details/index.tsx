@@ -59,18 +59,12 @@ export const HostDetailsFlyout = memo(() => {
   useEffect(() => {
     if (error !== undefined) {
       toasts.addDanger({
-        title: (
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.errorTitle"
-            defaultMessage="Could not find host"
-          />
-        ),
-        text: (
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.errorBody"
-            defaultMessage="Please exit the flyout and select an available host."
-          />
-        ),
+        title: i18n.translate('xpack.securitySolution.endpoint.host.details.errorTitle', {
+          defaultMessage: 'Could not find host',
+        }),
+        text: i18n.translate('xpack.securitySolution.endpoint.host.details.errorBody', {
+          defaultMessage: 'Please exit the flyout and select an available host.',
+        }),
       });
     }
   }, [error, toasts]);
