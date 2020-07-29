@@ -124,8 +124,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerUrlGenerator(pluginsSetup.share, core);
         }
       } else {
-        // if ml is disabled in elasticsearch,
-        // disable ML in kibana
+        // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater.next(() => ({
           status: AppStatus.inaccessible,
         }));
