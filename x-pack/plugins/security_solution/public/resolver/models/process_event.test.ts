@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { eventType, orderByTime } from './process_event';
+import { eventType, orderByTime, userInfoForProcess } from './process_event';
 
 import { mockProcessEvent } from './process_event_test_helpers';
 import { LegacyEndpointEvent, ResolverEvent } from '../../../common/endpoint/types';
@@ -22,6 +22,22 @@ describe('process event', () => {
     it("returns the right value when the subType is 'creation_event'", () => {
       event.endgame.event_subtype_full = 'creation_event';
       expect(eventType(event)).toEqual('processCreated');
+    });
+  });
+  describe('userInfoForProcess', () => {
+    let event: LegacyEndpointEvent;
+    beforeEach(() => {
+      event = mockProcessEvent({
+        user: {
+          name: 'aaa',
+          domain: 'bbb',
+        },
+      });
+    });
+    it('returns the right user info for the process', () => {
+      const { name, domain } = userInfoForProcess(event)!;
+      expect(name).toEqual('aaa');
+      expect(domain).toEqual('bbb');
     });
   });
   describe('orderByTime', () => {
