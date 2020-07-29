@@ -11,7 +11,8 @@ import { setPolicyListApiMockImplementation } from '../store/policy_list/test_mo
 
 jest.mock('../../../../common/components/link_to');
 
-describe('when on the policies page', () => {
+// Skipping these test now that the Policy List has been hidden
+describe.skip('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
