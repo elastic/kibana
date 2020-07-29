@@ -9,6 +9,7 @@
 import * as t from 'io-ts';
 
 import { list_id } from '../common/schemas';
+import { RequiredKeepUndefined } from '../../types';
 
 export const exportListItemQuerySchema = t.exact(
   t.type({
@@ -17,5 +18,7 @@ export const exportListItemQuerySchema = t.exact(
   })
 );
 
-export type ExportListItemQuerySchema = t.TypeOf<typeof exportListItemQuerySchema>;
+export type ExportListItemQuerySchema = RequiredKeepUndefined<
+  t.TypeOf<typeof exportListItemQuerySchema>
+>;
 export type ExportListItemQuerySchemaEncoded = t.OutputOf<typeof exportListItemQuerySchema>;

@@ -16,4 +16,4 @@ export const readListSchema = t.exact(
   })
 );
 
-export type ReadListSchema = t.TypeOf<typeof readListSchema>;
+export type ReadListSchema = t.OutputOf<typeof readListSchema>;

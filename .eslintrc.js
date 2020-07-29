@@ -771,19 +771,22 @@ module.exports = {
     },
 
     /**
-     * APM overrides
+     * APM and Observability overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
-        'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
-      },
-    },
-    {
-      plugins: ['react-hooks'],
-      files: ['x-pack/plugins/apm/**/*.{ts,tsx}'],
-      rules: {
+        'react/function-component-definition': [
+          'warn',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
@@ -1220,6 +1223,12 @@ module.exports = {
             peerDependencies: true,
           },
         ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/storybook/**'],
+      rules: {
+        'import/no-extraneous-dependencies': 0,
       },
     },
     {

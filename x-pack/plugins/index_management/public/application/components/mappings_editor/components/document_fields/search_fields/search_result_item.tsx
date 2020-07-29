@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SearchResult } from '../../../types';
 import { TYPE_DEFINITION } from '../../../constants';
-import { useDispatch } from '../../../mappings_state';
+import { useDispatch } from '../../../mappings_state_context';
 import { getTypeLabelFromType } from '../../../lib';
 import { DeleteFieldProvider } from '../fields/delete_field_provider';
 

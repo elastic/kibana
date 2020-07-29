@@ -202,6 +202,20 @@ export const schema: FormSchema = {
           defaultMessage: 'Threshold',
         }
       ),
+      validations: [
+        {
+          validator: fieldValidators.numberGreaterThanField({
+            than: 1,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.thresholdValueFieldData.numberGreaterThanOrEqualOneErrorMessage',
+              {
+                defaultMessage: 'Value must be greater than or equal one.',
+              }
+            ),
+            allowEquality: true,
+          }),
+        },
+      ],
     },
   },
 };

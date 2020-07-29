@@ -51,7 +51,7 @@ export const IGNORE_FILE_GLOBS = [
   '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -124,7 +124,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
   'src/legacy/core_plugins/tile_map/public/__tests__/shadedCircleMarkers.png',
   'src/legacy/core_plugins/tile_map/public/__tests__/shadedGeohashGrid.png',
