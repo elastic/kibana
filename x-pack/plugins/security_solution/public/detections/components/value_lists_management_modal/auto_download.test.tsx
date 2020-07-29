@@ -7,12 +7,16 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import { globalNode } from '../../../common/mock';
 import { AutoDownload } from './auto_download';
 
 describe('AutoDownload', () => {
   beforeEach(() => {
     // our DOM environment lacks this function that our component needs
-    window.URL.revokeObjectURL = jest.fn();
+    Object.defineProperty(globalNode.window.URL, 'revokeObjectURL', {
+      writable: true,
+      value: jest.fn(),
+    });
   });
 
   it('calls onDownload once if a blob is provided', () => {
