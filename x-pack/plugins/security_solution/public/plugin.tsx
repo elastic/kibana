@@ -176,7 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: OVERVIEW,
       order: 9000,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_OVERVIEW_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -204,7 +204,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: DETECTION_ENGINE,
       order: 9001,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_DETECTIONS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -231,7 +231,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: HOSTS,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_HOSTS_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -258,7 +258,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: NETWORK,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_NETWORK_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -285,7 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: TIMELINES,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_TIMELINES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -312,7 +312,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: CASE,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
       mount: async (params: AppMountParameters) => {
         const [
@@ -339,7 +339,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: ADMINISTRATION,
       order: 9002,
       euiIconType: APP_ICON,
-      category: DEFAULT_APP_CATEGORIES.securitySolution,
+      category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
       mount: async (params: AppMountParameters) => {
         const [
