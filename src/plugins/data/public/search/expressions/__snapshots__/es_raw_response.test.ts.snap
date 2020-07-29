@@ -5,25 +5,45 @@ Object {
   "columns": Array [
     Object {
       "id": "2.buckets.key",
+      "meta": Object {
+        "field": "2.buckets.key",
+        "params": Object {},
+        "type": "string",
+      },
       "name": "2.buckets.key",
-      "type": "string",
     },
     Object {
       "id": "2.buckets.doc_count",
+      "meta": Object {
+        "field": "2.buckets.doc_count",
+        "params": Object {},
+        "type": "number",
+      },
       "name": "2.buckets.doc_count",
-      "type": "number",
     },
     Object {
       "id": "2.doc_count_error_upper_bound",
+      "meta": Object {
+        "field": "2.doc_count_error_upper_bound",
+        "params": Object {},
+        "type": "number",
+      },
       "name": "2.doc_count_error_upper_bound",
-      "type": "number",
     },
     Object {
       "id": "2.sum_other_doc_count",
+      "meta": Object {
+        "field": "2.sum_other_doc_count",
+        "params": Object {},
+        "type": "number",
+      },
       "name": "2.sum_other_doc_count",
-      "type": "number",
     },
   ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
   "rows": Array [
     Object {
       "2.buckets.doc_count": 1033,
@@ -47,15 +67,27 @@ Object {
   "columns": Array [
     Object {
       "id": "order_date",
+      "meta": Object {
+        "field": "order_date",
+        "params": Object {},
+        "type": "object",
+      },
       "name": "order_date",
-      "type": "object",
     },
     Object {
       "id": "products.created_on",
+      "meta": Object {
+        "field": "products.created_on",
+        "params": Object {},
+        "type": "object",
+      },
       "name": "products.created_on",
-      "type": "object",
     },
   ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
   "rows": Array [
     Object {
       "order_date": Array [
@@ -103,15 +135,27 @@ Object {
   "columns": Array [
     Object {
       "id": "order_date",
+      "meta": Object {
+        "field": "order_date",
+        "params": Object {},
+        "type": "object",
+      },
       "name": "order_date",
-      "type": "object",
     },
     Object {
       "id": "products.created_on",
+      "meta": Object {
+        "field": "products.created_on",
+        "params": Object {},
+        "type": "object",
+      },
       "name": "products.created_on",
-      "type": "object",
     },
   ],
+  "meta": Object {
+    "source": "*",
+    "type": "esdsl",
+  },
   "rows": Array [
     Object {
       "order_date": Array [
