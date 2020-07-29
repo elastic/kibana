@@ -29,7 +29,6 @@ export default function (providerContext: FtrProviderContext) {
       await ingestManager.setup();
     });
     loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./policy_list'));
     loadTestFile(require.resolve('./policy_details'));
   });
 }

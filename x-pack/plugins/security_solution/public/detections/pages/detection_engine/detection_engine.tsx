@@ -36,7 +36,7 @@ import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/
 import { useUserInfo } from '../../components/user_info';
 import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
-import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
@@ -144,7 +144,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-        <DetectionEngineNoIndex />
+        <DetectionEngineNoIndex
+          needsSignalsIndex={isSignalIndexExists === false}
+          needsListsIndex={needsListsConfiguration}
+        />
       </WrapperPage>
     );
   }
