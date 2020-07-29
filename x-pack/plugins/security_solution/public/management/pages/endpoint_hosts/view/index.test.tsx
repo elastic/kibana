@@ -72,7 +72,7 @@ describe('when on the hosts page', () => {
     beforeEach(async () => {
       setHostListApiMockImplementation(coreStart.http, {
         hostsResults: [],
-        ingestPackageConfigs: mockPolicyResultList({ total: 3 }).items,
+        endpointPackageConfigs: mockPolicyResultList({ total: 3 }).items,
       });
     });
     afterEach(() => {
@@ -144,7 +144,7 @@ describe('when on the hosts page', () => {
 
           setHostListApiMockImplementation(coreStart.http, {
             hostsResults: hostListData,
-            ingestPackageConfigs,
+            endpointPackageConfigs: ingestPackageConfigs,
           });
         });
       });
@@ -335,7 +335,7 @@ describe('when on the hosts page', () => {
 
       setHostListApiMockImplementation(coreStart.http, {
         hostsResults: [hostDetails],
-        ingestPackageConfigs: [policy],
+        endpointPackageConfigs: [policy],
       });
 
       reactTestingLibrary.act(() => {
