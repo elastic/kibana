@@ -7,8 +7,8 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { americanTypewriter } from '../../../common/lib/fonts';
-import { FontPicker } from './font_picker';
+import { americanTypewriter } from '../../../../common/lib/fonts';
+import { FontPicker } from '../font_picker';
 
 storiesOf('components/FontPicker', module)
   .add('default', () => <FontPicker onSelect={action('onSelect')} />)

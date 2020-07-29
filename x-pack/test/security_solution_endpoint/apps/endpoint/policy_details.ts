@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
         await testSubjects.existOrFail('policyDetailsIdNotFoundMessage');
         expect(await testSubjects.getVisibleText('policyDetailsIdNotFoundMessage')).to.equal(
-          'Saved object [ingest-package-configs/invalid-id] not found'
+          'Package config invalid-id not found'
         );
       });
     });
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
         expect(await testSubjects.getVisibleText('policyDetailsSuccessMessage')).to.equal(
-          `Policy ${policyInfo.packageConfig.name} has been updated.`
+          `Integration ${policyInfo.packageConfig.name} has been updated.`
         );
       });
       it('should persist update on the screen', async () => {
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.policy.navigateToPolicyList();
+        await pageObjects.endpoint.navigateToHostList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
 
         expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(

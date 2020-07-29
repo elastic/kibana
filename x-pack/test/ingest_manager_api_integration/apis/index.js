@@ -22,6 +22,7 @@ export default function ({ loadTestFile }) {
     // Package configs
     loadTestFile(require.resolve('./package_config/create'));
     loadTestFile(require.resolve('./package_config/update'));
+    loadTestFile(require.resolve('./package_config/get'));
     // Agent config
     loadTestFile(require.resolve('./agent_config/index'));
   });
