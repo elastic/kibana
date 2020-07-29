@@ -419,7 +419,7 @@ export default function ({ getService }) {
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
-      await delay(100);
+      await delay(500);
 
       // second run should still be successful
       const successfulRunNowResult = await runTaskNow({
@@ -432,7 +432,7 @@ export default function ({ getService }) {
         expect(task.state.count).to.eql(2);
       });
 
-      await delay(100);
+      await delay(500);
 
       // third run should fail
       const failedRunNowResult = await runTaskNow({
