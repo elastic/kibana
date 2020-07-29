@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
 } from '../../../../src/plugins/home/public';
 
 export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
@@ -17,13 +18,14 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
       defaultMessage: 'Metrics',
     }),
     description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
-      defaultMessage:
-        'Explore infrastructure metrics and logs for common servers, containers, and services.',
+      defaultMessage: 'Monitor all infrastructure metrics.',
     }),
     icon: 'metricsApp',
     path: `/app/metrics`,
-    showOnHomePage: true,
+    homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
     category: FeatureCatalogueCategory.DATA,
+    solution: 'observability',
+    order: 100,
   });
 
   homePlugin.featureCatalogue.register({
@@ -37,7 +39,6 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     }),
     icon: 'logsApp',
     path: `/app/logs`,
-    showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
   });
 };

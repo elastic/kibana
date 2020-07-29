@@ -79,34 +79,48 @@ export class EnterpriseSearchPlugin implements Plugin {
     plugins.home.featureCatalogue.register({
       id: 'enterpriseSearch',
       title: 'Enterprise Search',
-      icon: AppSearchLogo,
+      icon: 'logoEnterpriseSearch',
       description: 'Search everything',
       path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
       category: FeatureCatalogueCategory.SOLUTION,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+      order: 100,
+    });
+
+    plugins.home.featureCatalogue.register({
+      id: 'enterpriseSearch-overview',
+      title: 'Enterprise Search overview',
+      icon: 'logoEnterpriseSearch',
+      description: 'Build a powerful search experience.',
+      path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
+      category: FeatureCatalogueCategory.DATA,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+      solution: 'enterpriseSearch',
+      order: 100,
     });
 
     plugins.home.featureCatalogue.register({
       id: 'appSearch',
       title: 'App Search',
       icon: AppSearchLogo,
-      description:
-        'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
+      description: 'Connect your users to relevant data.',
       path: '/app/enterprise_search/app_search',
       category: FeatureCatalogueCategory.DATA,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
-      solution: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+      solution: 'enterpriseSearch',
+      order: 200,
     });
 
     plugins.home.featureCatalogue.register({
       id: 'workplaceSearch',
       title: 'Workplace Search',
       icon: WorkplaceSearchLogo,
-      description:
-        'Search all documents, files, and sources available across your virtual workplace.',
+      description: "Unify your team's content.",
       path: '/app/enterprise_search/workplace_search',
       category: FeatureCatalogueCategory.DATA,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+      solution: 'enterpriseSearch',
+      order: 300,
     });
   }
 

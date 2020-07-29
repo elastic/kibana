@@ -30,7 +30,7 @@ import {
 
 interface Props {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   iconType: IconType;
 }
 
@@ -43,11 +43,13 @@ export const SolutionsTitle: FunctionComponent<Props> = ({ title, subtitle, icon
       <EuiTitle className="eui-textInheritColor" size="s">
         <p>{title}</p>
       </EuiTitle>
-      <EuiText size="s">
-        <p>
-          {subtitle} <EuiIcon type="sortRight" />
-        </p>
-      </EuiText>
+      {subtitle ? (
+        <EuiText size="s">
+          <p>
+            {subtitle} <EuiIcon type="sortRight" />
+          </p>
+        </EuiText>
+      ) : null}
     </EuiFlexItem>
   </EuiFlexGroup>
 );

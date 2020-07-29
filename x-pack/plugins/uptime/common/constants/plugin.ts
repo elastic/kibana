@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const PLUGIN = {
   APP_ROOT_ID: 'react-uptime-root',
   DESCRIPTION: i18n.translate('xpack.uptime.pluginDescription', {
-    defaultMessage: 'Uptime monitoring',
+    defaultMessage: 'Measure SLAs and react to issues.',
     description: 'The description text that will appear in the feature catalogue.',
   }),
   ID: 'uptime',

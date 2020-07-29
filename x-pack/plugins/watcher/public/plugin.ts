@@ -92,7 +92,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       }),
       icon: 'watchesApp',
       path: '/app/management/insightsAndAlerting/watcher/watches',
-      showOnHomePage: false,
     };
 
     home.featureCatalogue.register(watcherHome);
@@ -105,7 +104,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       // which is a less frustrating UX.
       if (valid) {
         watcherESApp.enable();
-        watcherHome.showOnHomePage = true;
       } else {
         watcherESApp.disable();
       }

@@ -21,7 +21,6 @@ export const registerFeature = (homePlugin: HomePublicPluginSetup) => {
     }),
     icon: 'grokApp',
     path: '/app/dev_tools#/grokdebugger',
-    showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN,
   });
 };

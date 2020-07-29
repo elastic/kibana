@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import { Capabilities } from 'src/core/public';
-import { AppCategory } from 'src/core/types';
-
+import { Capabilities, AppCategory } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 
-// /** @public */
-// export enum FeatureCatalogueCategory {
-//   ADMIN = 'admin',
-//   DATA = 'data',
-//   OTHER = 'other',
-//   SOLUTION = 'solution',
-// }
+/** @public */
+export enum FeatureCatalogueCategory {
+  ADMIN = 'admin',
+  DATA = 'data',
+  OTHER = 'other',
+  SOLUTION = 'solution',
+}
 
 /** @public */
 export enum FeatureCatalogueHomePageSection {
   ADD_DATA = 'add_data',
   MANAGE_DATA = 'manage_data',
-  SOLUTION = 'solution',
+  SOLUTION_PANEL = 'solution_panel',
 }
 
 /** @public */
@@ -44,7 +42,7 @@ export interface FeatureCatalogueEntry {
   /** Title of feature displayed to the user. */
   readonly title: string;
   /** The solution to display this feature in. */
-  readonly category: AppCategory;
+  readonly category: FeatureCatalogueCategory;
   /** One-line description of feature displayed to the user. */
   readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
@@ -55,6 +53,8 @@ export interface FeatureCatalogueEntry {
   homePageSection?: FeatureCatalogueHomePageSection;
   /** An ordinal used to sort features relative to one another for display on the home page */
   readonly order?: number;
+  /** The solution id this app should be displayed under */
+  readonly solution?: string;
 }
 
 export class FeatureCatalogueRegistry {

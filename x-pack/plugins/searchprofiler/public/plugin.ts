@@ -34,7 +34,6 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       }),
       icon: 'searchProfilerApp',
       path: '/app/dev_tools#/searchprofiler',
-      showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 

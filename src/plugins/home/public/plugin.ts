@@ -133,6 +133,20 @@ export class HomePublicPlugin
       category: FeatureCatalogueCategory.DATA,
       order: 100,
     });
+    featureCatalogue.register({
+      id: 'kibana',
+      title: i18n.translate('home.kibana.featureCatalogueTitle', {
+        defaultMessage: 'Kibana',
+      }),
+      description: i18n.translate('home.kibana.featureCatalogueDescription', {
+        defaultMessage: 'Visualize & Analyze',
+      }),
+      icon: 'logoKibana',
+      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+      path: '/app/dashboard',
+      category: FeatureCatalogueCategory.SOLUTION,
+      order: 100,
+    });
 
     return {
       featureCatalogue,

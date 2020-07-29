@@ -14,7 +14,10 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+} from '../../../../../src/plugins/home/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
@@ -62,8 +65,10 @@ export class UptimePlugin
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
         path: '/app/uptime#/',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
+        solution: 'observability',
+        order: 300,
       });
     }
 

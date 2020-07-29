@@ -13,6 +13,7 @@ import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../licensing/public';
@@ -70,7 +71,6 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
             }),
             icon: 'pipelineApp',
             path: '/app/management/ingest/pipelines',
-            showOnHomePage: true,
             category: FeatureCatalogueCategory.ADMIN,
           });
         });

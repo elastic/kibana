@@ -120,7 +120,7 @@ export class Home extends Component {
 
   findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
 
-  renderDirectory = (directory) =>
+  renderFeatureCard = (directory) =>
     directory ? (
       <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
         <Synopsis
@@ -134,27 +134,29 @@ export class Home extends Component {
       </EuiFlexItem>
     ) : null;
 
-  renderSectionCards = (section) =>
+  renderFeatureCardsBySection = (section) =>
     this.props.directories
       .filter((directory) => directory.homePageSection === section)
       .sort((directoryA, directoryB) => directoryA.order - directoryB.order)
-      .map(this.renderDirectory);
+      .map(this.renderFeatureCard);
 
   renderNormal() {
-    const { addBasePath } = this.props;
+    const { addBasePath, directories } = this.props;
 
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
     const advancedSettings = this.findDirectoryById('advanced_settings');
 
-    const addDataFeatureCards = this.renderSectionCards(FeatureCatalogueHomePageSection.ADD_DATA);
-    const manageDataFeatureCards = this.renderSectionCards(
+    const addDataFeatureCards = this.renderFeatureCardsBySection(
+      FeatureCatalogueHomePageSection.ADD_DATA
+    );
+    const manageDataFeatureCards = this.renderFeatureCardsBySection(
       FeatureCatalogueHomePageSection.MANAGE_DATA
     );
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatureCards.length < 1 && devTools) {
-      manageDataFeatureCards.push(this.renderDirectory(devTools));
+      manageDataFeatureCards.push(this.renderFeatureCard(devTools));
     }
 
     return (
@@ -213,7 +215,7 @@ export class Home extends Component {
         </div>
         <div className="homPageMainContainer">
           <main className="homPageMain" data-test-subj="homeApp">
-            <SolutionsPanel addBasePath={addBasePath} findDirectoryById={this.findDirectoryById} />
+            <SolutionsPanel addBasePath={addBasePath} directories={directories} />
 
             {/* If there is only one card in each add and manage data section, this displays the two sections side by side */}
             {addDataFeatureCards.length === 1 && manageDataFeatureCards.length === 1 ? (
@@ -300,7 +302,7 @@ Home.propTypes = {
       path: PropTypes.string.isRequired,
       homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
-      solutionId: PropTypes.string,
+      solution: PropTypes.object,
       order: PropTypes.number,
     })
   ),

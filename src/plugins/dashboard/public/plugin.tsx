@@ -350,13 +350,13 @@ export class DashboardPlugin
           defaultMessage: 'Dashboard',
         }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+          defaultMessage: 'Visualize every aspect of your data.',
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
-        solutionId: 'kibana',
+        solution: 'kibana',
         order: 100,
       });
     }

@@ -6,16 +6,21 @@
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON } from '../common/constants';
 import { getAppTitle } from '../common/i18n_getters';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
+} from '../../../../src/plugins/home/public';
 
 export const featureCatalogueEntry = {
   id: APP_ID,
   title: getAppTitle(),
   description: i18n.translate('xpack.maps.feature.appDescription', {
-    defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
+    defaultMessage: 'Plot your geographic information.',
   }),
   icon: APP_ICON,
   path: '/app/maps',
-  showOnHomePage: true,
+  homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
   category: FeatureCatalogueCategory.DATA,
+  solution: 'kibana',
+  order: 400,
 };

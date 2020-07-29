@@ -22,6 +22,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
+  FeatureCatalogueHomePageSection,
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
@@ -59,12 +60,14 @@ export class GraphPlugin
         id: 'graph',
         title: 'Graph',
         description: i18n.translate('xpack.graph.pluginDescription', {
-          defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
+          defaultMessage: 'Reveal patterns and relationships.',
         }),
         icon: 'graphApp',
         path: '/app/graph',
-        showOnHomePage: true,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
+        solution: 'kibana',
+        order: 600,
       });
     }
 
@@ -119,7 +122,10 @@ export class GraphPlugin
       toggleNavLink(licenseInformation, core.chrome.navLinks);
       if (home) {
         if (licenseInformation.showAppLink) {
-          home.featureCatalogue.showOnHomePage('graph');
+          home.featureCatalogue.showOnHomePage(
+            'graph',
+            FeatureCatalogueHomePageSection.SOLUTION_PANEL
+          );
         } else {
           home.featureCatalogue.hideFromHomePage('graph');
         }
