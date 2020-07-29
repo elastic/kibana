@@ -159,7 +159,7 @@ describe('useExceptionList', () => {
         http: mockKibanaHttpService,
         listIds: ['list_id'],
         namespaceTypes: ['single'],
-        pagination: { page: 1, perPage: 20, total: 0 },
+        pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
       });
     });
@@ -207,7 +207,7 @@ describe('useExceptionList', () => {
         http: mockKibanaHttpService,
         listIds: ['list_id_endpoint'],
         namespaceTypes: ['agnostic'],
-        pagination: { page: 1, perPage: 20, total: 0 },
+        pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
       });
     });
@@ -251,7 +251,7 @@ describe('useExceptionList', () => {
         false,
         [],
         {
-          page: 1,
+          page: 0,
           perPage: 20,
           total: 0,
         },
@@ -305,7 +305,7 @@ describe('useExceptionList', () => {
         http: mockKibanaHttpService,
         listIds: ['list_id', 'list_id_endpoint'],
         namespaceTypes: ['single', 'agnostic'],
-        pagination: { page: 1, perPage: 20, total: 0 },
+        pagination: { page: 1, perPage: 20 },
         signal: new AbortController().signal,
       });
     });

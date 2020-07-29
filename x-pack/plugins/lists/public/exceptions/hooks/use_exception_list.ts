@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchExceptionListsItemsByListIds } from '../api';
-import { Pagination, UseExceptionListProps } from '../types';
+import { FilterExceptionsOptions, Pagination, UseExceptionListProps } from '../types';
 import { ExceptionListItemSchema, NamespaceType } from '../../../common/schemas';
 
 type Func = () => void;
@@ -24,12 +24,12 @@ export type ReturnExceptionListAndItems = [
  * @param http Kibana http service
  * @param lists array of ExceptionIdentifiers for all lists to fetch
  * @param onError error callback
+ * @param onSuccess callback when all lists fetched successfully
+ * @param filterOptions optional - filter by fields or tags
  * @param showDetectionsListsOnly boolean, if true, only detection lists are searched
  * @param showEndpointListsOnly boolean, if true, only endpoint lists are searched
  * @param matchFilters boolean, if true, applies first filter in filterOptions to
  * all lists
- * @param onSuccess callback when all lists fetched successfully
- * @param filterOptions optional - filter by fields or tags
  * @param pagination optional
  *
  */
@@ -41,39 +41,51 @@ export const useExceptionList = ({
     perPage: 20,
     total: 0,
   },
-  filterOptions = [],
-  showDetectionsListsOnly = false,
-  showEndpointListsOnly = false,
-  matchFilters = false,
+  filterOptions,
+  showDetectionsListsOnly,
+  showEndpointListsOnly,
+  matchFilters,
   onError,
   onSuccess,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
   const [exceptionItems, setExceptionListItems] = useState<ExceptionListItemSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
-  const fetchExceptionListItems = useRef<Func | null>(null);
+  const fetchExceptionListsItems = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const listIds = useMemo(
-    () =>
+  const { ids, namespaces } = useMemo(
+    (): { ids: string[]; namespaces: NamespaceType[] } =>
       lists
-        .map(({ listId }) => listId)
-        .sort()
-        .join(),
-    [lists]
+        .filter((list) => {
+          if (showDetectionsListsOnly) {
+            return list.type === 'detection';
+          } else if (showEndpointListsOnly) {
+            return list.type === 'endpoint';
+          } else {
+            return true;
+          }
+        })
+        .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
+          (acc, { listId, namespaceType }) => ({
+            ids: [...acc.ids, listId],
+            namespaces: [...acc.namespaces, namespaceType],
+          }),
+          { ids: [], namespaces: [] }
+        ),
+    [lists, showDetectionsListsOnly, showEndpointListsOnly]
   );
   const filters = useMemo(
-    () =>
-      filterOptions
-        .map(({ filter }) => filter)
-        .sort()
-        .join(),
+    (): FilterExceptionsOptions[] =>
+      matchFilters && filterOptions.length > 0 ? ids.map(() => filterOptions[0]) : filterOptions,
+    [matchFilters, filterOptions, ids]
+  );
+  const idsAsString = useMemo((): string => ids.join(), [ids]);
+  const namespacesAsString = useMemo((): string => namespaces.join(), [namespaces]);
+  const filterAsString = useMemo(
+    (): string => filterOptions.map(({ filter }) => filter).join(','),
     [filterOptions]
   );
-  const filterTags = useMemo(
-    () =>
-      filterOptions
-        .map(({ tags }) => tags)
-        .sort()
-        .join(),
+  const filterTagsAsString = useMemo(
+    (): string => filterOptions.map(({ tags }) => tags.join(',')).join(),
     [filterOptions]
   );
 
@@ -83,49 +95,45 @@ export const useExceptionList = ({
       const abortCtrl = new AbortController();
 
       const fetchData = async (): Promise<void> => {
-        const { ids, namespaces } = lists
-          .filter((list) => {
-            if (showDetectionsListsOnly) {
-              return list.type === 'detection';
-            } else if (showEndpointListsOnly) {
-              return list.type === 'endpoint';
-            } else {
-              return true;
-            }
-          })
-          .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
-            (acc, { listId, namespaceType }) => ({
-              ids: [...acc.ids, listId],
-              namespaces: [...acc.namespaces, namespaceType],
-            }),
-            { ids: [], namespaces: [] }
-          );
-        const filter =
-          matchFilters && filterOptions.length > 0
-            ? ids.map(() => filterOptions[0])
-            : filterOptions;
         try {
-          if (ids.length > 0 && namespaces.length > 0) {
-            setLoading(true);
+          setLoading(true);
 
-            const {
-              data,
-              page,
-              per_page: perPage,
-              total,
-            } = await fetchExceptionListsItemsByListIds({
-              filterOptions: filter,
+          if (ids.length === 0 && isSubscribed) {
+            setPagination({
+              page: 0,
+              perPage: pagination.perPage,
+              total: 0,
+            });
+            setExceptionListItems([]);
+
+            if (onSuccess != null) {
+              onSuccess({
+                exceptions: [],
+                pagination: {
+                  page: 0,
+                  perPage: pagination.perPage,
+                  total: 0,
+                },
+              });
+            }
+            setLoading(false);
+          } else {
+            const { page, per_page, total, data } = await fetchExceptionListsItemsByListIds({
+              filterOptions: filters,
               http,
               listIds: ids,
               namespaceTypes: namespaces,
-              pagination,
+              pagination: {
+                page: pagination.page,
+                perPage: pagination.perPage,
+              },
               signal: abortCtrl.signal,
             });
 
             if (isSubscribed) {
               setPagination({
                 page,
-                perPage,
+                perPage: per_page,
                 total,
               });
               setExceptionListItems(data);
@@ -135,21 +143,15 @@ export const useExceptionList = ({
                   exceptions: data,
                   pagination: {
                     page,
-                    perPage,
+                    perPage: per_page,
                     total,
                   },
                 });
               }
-              setLoading(false);
-            }
-          } else {
-            if (isSubscribed) {
-              setLoading(false);
             }
           }
         } catch (error) {
           if (isSubscribed) {
-            setLoading(false);
             setExceptionListItems([]);
             setPagination({
               page: 1,
@@ -161,11 +163,15 @@ export const useExceptionList = ({
             }
           }
         }
+
+        if (isSubscribed) {
+          setLoading(false);
+        }
       };
 
       fetchData();
 
-      fetchExceptionListItems.current = fetchData;
+      fetchExceptionListsItems.current = fetchData;
       return (): void => {
         isSubscribed = false;
         abortCtrl.abort();
@@ -173,16 +179,15 @@ export const useExceptionList = ({
     }, // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       http,
-      listIds,
+      idsAsString,
+      namespacesAsString,
       setExceptionListItems,
       pagination.page,
       pagination.perPage,
-      filters,
-      filterTags,
-      showDetectionsListsOnly,
-      showEndpointListsOnly,
+      filterAsString,
+      filterTagsAsString,
     ]
   );
 
-  return [loading, exceptionItems, paginationInfo, fetchExceptionListItems.current];
+  return [loading, exceptionItems, paginationInfo, fetchExceptionListsItems.current];
 };

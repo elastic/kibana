@@ -299,6 +299,45 @@ describe('useApi', () => {
     });
   });
 
+  test('it does not invoke "fetchExceptionListsItemsByListIds" if no listIds', async () => {
+    const output = getFoundExceptionListItemSchemaMock();
+    const onSuccessMock = jest.fn();
+    const spyOnFetchExceptionListsItemsByListIds = jest
+      .spyOn(api, 'fetchExceptionListsItemsByListIds')
+      .mockResolvedValue(output);
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
+        useApi(mockKibanaHttpService)
+      );
+      await waitForNextUpdate();
+
+      await result.current.getExceptionListsItems({
+        filterOptions: [],
+        lists: [{ id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' }],
+        onError: jest.fn(),
+        onSuccess: onSuccessMock,
+        pagination: {
+          page: 1,
+          perPage: 20,
+          total: 0,
+        },
+        showDetectionsListsOnly: false,
+        showEndpointListsOnly: true,
+      });
+
+      expect(spyOnFetchExceptionListsItemsByListIds).not.toHaveBeenCalled();
+      expect(onSuccessMock).toHaveBeenCalledWith({
+        exceptions: [],
+        pagination: {
+          page: 0,
+          perPage: 20,
+          total: 0,
+        },
+      });
+    });
+  });
+
   test('invokes "onError" callback if "fetchExceptionListsItemsByListIds" fails', async () => {
     const mockError = new Error('failed to delete item');
     jest.spyOn(api, 'fetchExceptionListsItemsByListIds').mockRejectedValue(mockError);

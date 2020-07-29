@@ -161,6 +161,15 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
                 total,
               },
             });
+          } else {
+            onSuccess({
+              exceptions: [],
+              pagination: {
+                page: 0,
+                perPage: pagination.perPage,
+                total: 0,
+              },
+            });
           }
         } catch (error) {
           onError(error);
