@@ -19,8 +19,7 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/63339
-  describe.skip('custom elements', function () {
+  describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
