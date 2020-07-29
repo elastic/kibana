@@ -874,7 +874,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'GET',
   });
-  // what is going on with github?
+
   ml.updateModelSnapshot = ca({
     urls: [
       {
