@@ -89,7 +89,7 @@ image::images/lens_aggregation_labels.png[Quick function options]
 [[layers]]
 ==== Add layers and indices
 
-X and y charts allow you to visualize multiple data layers and indices so that you can compare and analyze data from multiple sources.
+Area, line, and bar charts allow you to visualize multiple data layers and indices so that you can compare and analyze data from multiple sources.
 
 To add a layer, click *+*, then drag and drop the fields for the new layer. 
 
@@ -145,7 +145,7 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 
 Make your visualization look exactly how you want with the customization options.
 
-. Click *Average of taxful_total_price*, then Change the *Label* to `Sales`.
+. Click *Average of taxful_total_price*, then change the *Label* to `Sales`.
 +
 [role="screenshot"]
 image::images/lens_tutorial_3.1.png[Lens tutorial]
