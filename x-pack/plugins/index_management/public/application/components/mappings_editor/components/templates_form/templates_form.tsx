@@ -9,11 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
-import { Types, useDispatch } from '../../mappings_state';
+import { MappingsTemplates } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { templatesFormSchema } from './templates_form_schema';
 import { documentationService } from '../../../../services/documentation';
-
-type MappingsTemplates = Types['MappingsTemplates'];
 
 interface Props {
   value?: MappingsTemplates;
