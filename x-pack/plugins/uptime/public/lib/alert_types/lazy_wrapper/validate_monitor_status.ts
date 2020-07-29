@@ -8,8 +8,8 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
 import {
   AtomicStatusCheckParamsType,
-  StatusCheckParamsType,
   MonitorAvailabilityType,
+  StatusCheckParamsType,
 } from '../../../../common/runtime_types';
 import { ValidationResult } from '../../../../../triggers_actions_ui/public';
 
