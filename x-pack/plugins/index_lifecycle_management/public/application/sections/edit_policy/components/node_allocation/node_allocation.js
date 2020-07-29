@@ -12,6 +12,7 @@ import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiLoadingSpinner } f
 import { PHASE_NODE_ATTRS } from '../../../../constants';
 import { LearnMoreLink } from '../../../components/learn_more_link';
 import { ErrableFormRow } from '../../form_errors';
+import { NodeAttrsDetails } from '../node_attrs_details';
 
 const learnMoreLinks = (
   <Fragment>
@@ -30,20 +31,24 @@ const learnMoreLinks = (
 );
 
 export class NodeAllocation extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isShowingNodeDetailsFlyout: false,
+      selectedNodeAttrsForDetails: undefined,
+    };
+  }
+
   componentDidMount() {
     this.props.fetchNodes();
   }
 
+  showNodeDetailsFlyout = (selectedNodeAttrsForDetails) => {
+    this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
+  };
+
   render() {
-    const {
-      phase,
-      setPhaseData,
-      isShowingErrors,
-      phaseData,
-      showNodeDetailsFlyout,
-      nodeOptions,
-      errors,
-    } = this.props;
+    const { phase, setPhaseData, isShowingErrors, phaseData, nodeOptions, errors } = this.props;
     if (!nodeOptions) {
       return (
         <Fragment>
@@ -100,9 +105,10 @@ export class NodeAllocation extends Component {
         {!!phaseData[PHASE_NODE_ATTRS] ? (
           <EuiButtonEmpty
             data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
+            style={{ maxWidth: 400 }}
             flush="left"
             iconType="eye"
-            onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+            onClick={() => this.showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
           >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
@@ -114,6 +120,13 @@ export class NodeAllocation extends Component {
         )}
         {learnMoreLinks}
         <EuiSpacer size="m" />
+
+        {this.state.isShowingNodeDetailsFlyout ? (
+          <NodeAttrsDetails
+            selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
+            close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
+          />
+        ) : null}
       </Fragment>
     );
   }

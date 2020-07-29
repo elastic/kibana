@@ -7,10 +7,8 @@
 import { handleActions } from 'redux-actions';
 import {
   fetchedNodes,
-  setSelectedNodeAttrs,
   setSelectedPrimaryShardCount,
   setSelectedReplicaCount,
-  fetchedNodeDetails,
 } from '../actions/nodes';
 
 const defaultState = {
@@ -29,22 +27,6 @@ export const nodes = handleActions(
         ...state,
         isLoading: false,
         nodes,
-      };
-    },
-    [fetchedNodeDetails](state, { payload }) {
-      const { selectedNodeAttrs, details } = payload;
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          [selectedNodeAttrs]: details,
-        },
-      };
-    },
-    [setSelectedNodeAttrs](state, { payload: selectedNodeAttrs }) {
-      return {
-        ...state,
-        selectedNodeAttrs,
       };
     },
     [setSelectedPrimaryShardCount](state, { payload }) {
