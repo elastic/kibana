@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
+import { TransformMatrix3d } from '../../lib/aeroelastic';
 
-export const HoverAnnotation = ({ transformMatrix, text }) => {
+interface Props {
+  transformMatrix: TransformMatrix3d;
+  text: string;
+}
+
+export const TooltipAnnotation: FC<Props> = ({ transformMatrix, text }) => {
   const newStyle = {
     transform: `${matrixToCSS(transformMatrix)} translate(1em, -1em)`,
   };
@@ -19,7 +25,7 @@ export const HoverAnnotation = ({ transformMatrix, text }) => {
   );
 };
 
-HoverAnnotation.propTypes = {
+TooltipAnnotation.propTypes = {
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   text: PropTypes.string.isRequired,
 };
