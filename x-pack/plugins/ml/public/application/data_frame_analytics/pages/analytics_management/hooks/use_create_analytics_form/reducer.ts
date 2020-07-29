@@ -553,12 +553,29 @@ export function reducer(state: State, action: Action): State {
       });
 
     case ACTION.SWITCH_TO_FORM:
-      const { jobConfig: config } = state;
+      const { jobConfig: config, indexPatternsMap, jobIds } = state;
       const { jobId } = state.form;
       // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
+
       if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;
+      }
+
+      formState.jobIdExists = jobIds.some((id) => formState.jobId === id);
+      formState.jobIdEmpty = jobId === '';
+      formState.jobIdValid = isJobIdValid(jobId);
+      formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);
+
+      formState.destinationIndexNameEmpty = formState.destinationIndex === '';
+      formState.destinationIndexNameValid = isValidIndexName(formState.destinationIndex);
+      formState.destinationIndexPatternTitleExists =
+        state.indexPatternsMap[formState.destinationIndex] !== undefined;
+
+      if (formState.numTopFeatureImportanceValues !== undefined) {
+        formState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          formState.numTopFeatureImportanceValues
+        );
       }
 
       return validateForm({
