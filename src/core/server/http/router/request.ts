@@ -197,12 +197,14 @@ export class KibanaRequest<
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+    const timeout = request.route.settings.timeout?.socket;
 
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
+      timeout: typeof timeout === 'number' ? timeout - 1 : undefined, // We are forced to have the timeout be 1 millisecond greater than the server and payload so we subtract one here to give the user consist settings
       body: isSafeMethod(method)
         ? undefined
         : {

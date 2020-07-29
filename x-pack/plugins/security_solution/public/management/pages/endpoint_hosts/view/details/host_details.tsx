@@ -121,7 +121,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
-          defaultMessage: 'Policy',
+          defaultMessage: 'Integration',
         }),
         description: (
           <>
@@ -136,7 +136,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Configuration response',
         }),
         description: (
           <EuiHealth
@@ -216,7 +216,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
+            defaultMessage="Reassign Configuration"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
         </LinkToApp>

@@ -46,6 +46,69 @@ export function mockTreeWith2AncestorsAndNoChildren({
   } as unknown) as ResolverTree;
 }
 
+export function mockTreeWithAllProcessesTerminated({
+  originID,
+  firstAncestorID,
+  secondAncestorID,
+}: {
+  secondAncestorID: string;
+  firstAncestorID: string;
+  originID: string;
+}): ResolverTree {
+  const secondAncestor: ResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    name: 'a',
+    parentEntityId: 'none',
+    timestamp: 0,
+  });
+  const firstAncestor: ResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    name: 'b',
+    parentEntityId: secondAncestorID,
+    timestamp: 1,
+  });
+  const originEvent: ResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    name: 'c',
+    parentEntityId: firstAncestorID,
+    timestamp: 2,
+  });
+  const secondAncestorTermination: ResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    name: 'a',
+    parentEntityId: 'none',
+    timestamp: 0,
+    lifecycleType: 'end',
+  });
+  const firstAncestorTermination: ResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    name: 'b',
+    parentEntityId: secondAncestorID,
+    timestamp: 1,
+    lifecycleType: 'end',
+  });
+  const originEventTermination: ResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    name: 'c',
+    parentEntityId: firstAncestorID,
+    timestamp: 2,
+    lifecycleType: 'end',
+  });
+  return ({
+    entityID: originID,
+    children: {
+      childNodes: [],
+    },
+    ancestry: {
+      ancestors: [
+        { lifecycle: [secondAncestor, secondAncestorTermination] },
+        { lifecycle: [firstAncestor, firstAncestorTermination] },
+      ],
+    },
+    lifecycle: [originEvent, originEventTermination],
+  } as unknown) as ResolverTree;
+}
+
 export function mockTreeWithNoAncestorsAnd2Children({
   originID,
   firstChildID,
@@ -162,4 +225,34 @@ export function mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents
     },
     lifecycle: [origin, originClone],
   } as unknown) as ResolverTree;
+}
+
+export function mockTreeWithNoProcessEvents(): ResolverTree {
+  return {
+    entityID: 'entityID',
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    relatedEvents: {
+      events: [],
+      nextEvent: null,
+    },
+    relatedAlerts: {
+      alerts: [],
+      nextAlert: null,
+    },
+    lifecycle: [],
+    ancestry: {
+      ancestors: [],
+      nextAncestor: null,
+    },
+    stats: {
+      totalAlerts: 0,
+      events: {
+        total: 0,
+        byCategory: {},
+      },
+    },
+  };
 }

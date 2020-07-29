@@ -18,14 +18,7 @@
  */
 import { QueryStart } from '../../../query';
 
-export const clearStateFromSavedQuery = (
-  queryService: QueryStart,
-  setQueryStringState: Function,
-  defaultLanguage: string
-) => {
+export const clearStateFromSavedQuery = (queryService: QueryStart) => {
   queryService.filterManager.removeAll();
-  setQueryStringState({
-    query: '',
-    language: defaultLanguage,
-  });
+  queryService.queryString.clearQuery();
 };

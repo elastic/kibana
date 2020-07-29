@@ -328,13 +328,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         lists: ExceptionIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
-        (acc, { id, namespace_type, type }) => {
+        (acc, { id, list_id, namespace_type, type }) => {
           const { allowedExceptionListTypes, lists } = acc;
           const shouldAddEndpoint =
             type === ExceptionListTypeEnum.ENDPOINT &&
             !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
           return {
-            lists: [...lists, { id, namespaceType: namespace_type, type }],
+            lists: [...lists, { id, listId: list_id, namespaceType: namespace_type, type }],
             allowedExceptionListTypes: shouldAddEndpoint
               ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
               : allowedExceptionListTypes,
@@ -366,7 +366,10 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal
+            globalFullScreen={globalFullScreen}
+            show={showGlobalFilters({ globalFullScreen, graphEventId })}
+          >
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 

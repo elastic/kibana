@@ -43,6 +43,7 @@ export async function getLocalUIFilters({
       const response = await client.search(query);
 
       const filter = localUIFilters[name];
+
       const buckets = response?.aggregations?.by_terms?.buckets ?? [];
 
       return {
