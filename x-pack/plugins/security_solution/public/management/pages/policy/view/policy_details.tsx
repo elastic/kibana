@@ -43,7 +43,7 @@ import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
-import { getPoliciesPath } from '../../../common/routing';
+import { getHostListPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
@@ -57,7 +57,7 @@ export const PolicyDetails = React.memo(() => {
     },
   } = useKibana();
   const toasts = useToasts();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -71,6 +71,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
+  const hostListRouterPath = getHostListPath({ name: 'hostList' });
 
   // Handle showing update statuses
   useEffect(() => {
@@ -87,7 +88,7 @@ export const PolicyDetails = React.memo(() => {
             <span data-test-subj="policyDetailsSuccessMessage">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
-                defaultMessage="Policy {name} has been updated."
+                defaultMessage="Integration {name} has been updated."
                 values={{ name: policyName }}
               />
             </span>
@@ -108,11 +109,11 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler(getPoliciesPath());
+  const handleBackToListOnClick = useNavigateByRouterEventHandler(hostListRouterPath);
 
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: getPoliciesPath() }];
-  }, [routeState?.onCancelNavigateTo]);
+    return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
+  }, [hostListRouterPath, routeState?.onCancelNavigateTo]);
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 
   const handleSaveOnClick = useCallback(() => {
@@ -161,11 +162,11 @@ export const PolicyDetails = React.memo(() => {
         iconType="arrowLeft"
         contentProps={{ style: { paddingLeft: '0' } }}
         onClick={handleBackToListOnClick}
-        href={formatUrl(getPoliciesPath(search))}
+        href={formatUrl(hostListRouterPath)}
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.details.backToListTitle"
-          defaultMessage="Back to policy list"
+          defaultMessage="Back to endpoint hosts"
         />
       </EuiButtonEmpty>
       <PageViewHeaderTitle className="eui-textTruncate">{policyItem.name}</PageViewHeaderTitle>
@@ -305,7 +306,7 @@ const ConfirmUpdate = React.memo<{
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply the updates to all active endpoints assigned to this policy"
+                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent configuration."
               />
             </EuiCallOut>
             <EuiSpacer size="xl" />

@@ -127,6 +127,9 @@ export const buildExpression = (
                   function: 'lens_xy_legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
+                    showSingleSeries: state.legend.showSingleSeries
+                      ? [state.legend.showSingleSeries]
+                      : [],
                     position: [state.legend.position],
                   },
                 },

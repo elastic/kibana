@@ -279,8 +279,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       decimalPlaces?: string;
     }) {
       if (from) {
-        const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        await retry.try(async () => {
+          const fromCombobox = await find.byCssSelector('[id$="from-row"] .euiComboBox');
+          await comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        });
       }
       if (to) {
         const toCombobox = await find.byCssSelector('[id$="to-row"] .euiComboBox');
@@ -313,9 +315,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
-      const metricValue = (await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`))[
-        nth
-      ];
+      const metricValue = (
+        await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
@@ -406,7 +408,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getViewTable(): Promise<string> {
-      const tableView = await testSubjects.find('tableView');
+      const tableView = await testSubjects.find('tableView', 20000);
       return await tableView.getVisibleText();
     }
 

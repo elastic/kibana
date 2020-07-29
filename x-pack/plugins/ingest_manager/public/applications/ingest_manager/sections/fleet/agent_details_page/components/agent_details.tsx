@@ -37,7 +37,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
         },
         {
           title: i18n.translate('xpack.ingestManager.agentDetails.hostIdLabel', {
-            defaultMessage: 'Host ID',
+            defaultMessage: 'Agent ID',
           }),
           description: agent.id,
         },
@@ -52,7 +52,10 @@ export const AgentDetailsContent: React.FunctionComponent<{
             defaultMessage: 'Agent configuration',
           }),
           description: agentConfig ? (
-            <EuiLink href={getHref('configuration_details', { configId: agent.config_id! })}>
+            <EuiLink
+              href={getHref('configuration_details', { configId: agent.config_id! })}
+              className="eui-textBreakWord"
+            >
               {agentConfig.name || agent.config_id}
             </EuiLink>
           ) : (

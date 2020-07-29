@@ -12,6 +12,7 @@ import {
   META,
   TYPE,
   USER,
+  VERSION,
 } from '../../../common/constants.mock';
 import { getConfigMockDecoded } from '../../config.mock';
 
@@ -29,6 +30,7 @@ export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStream
   stream: new TestReadable(),
   type: TYPE,
   user: USER,
+  version: VERSION,
 });
 
 export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({

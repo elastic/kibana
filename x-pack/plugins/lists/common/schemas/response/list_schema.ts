@@ -15,6 +15,7 @@ import {
   description,
   deserializerOrUndefined,
   id,
+  immutable,
   metaOrUndefined,
   name,
   serializerOrUndefined,
@@ -22,6 +23,7 @@ import {
   type,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
 export const listSchema = t.exact(
@@ -32,6 +34,7 @@ export const listSchema = t.exact(
     description,
     deserializer: deserializerOrUndefined,
     id,
+    immutable,
     meta: metaOrUndefined,
     name,
     serializer: serializerOrUndefined,
@@ -39,6 +42,7 @@ export const listSchema = t.exact(
     type,
     updated_at,
     updated_by,
+    version,
   })
 );
 
