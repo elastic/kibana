@@ -22,7 +22,7 @@ export const LearnMoreLink: React.FunctionComponent<Props> = ({ docPath, text })
     <FormattedMessage id="xpack.indexLifecycleMgmt.learnMore" defaultMessage="Learn more" />
   );
   return (
-    <EuiLink href={createDocLink(docPath)} target="_blank">
+    <EuiLink href={createDocLink(docPath)} target="_blank" external={true}>
       {content}
     </EuiLink>
   );
