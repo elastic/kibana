@@ -140,6 +140,7 @@ export function FieldSelect({
     currentIndexPattern,
     fieldMap,
     operationByField,
+    existingFields,
   ]);
 
   return (
