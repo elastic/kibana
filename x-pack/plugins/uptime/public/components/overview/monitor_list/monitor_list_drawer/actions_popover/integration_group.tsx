@@ -67,16 +67,17 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
             href={getApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
             message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
-              defaultMessage: 'Check APM for domain',
+              defaultMessage: 'Show APM Data',
               description:
-                'A message explaining that when the user clicks the associated link, it will navigate to the APM app and search for the selected domain',
+                'A message explaining that when the user clicks the associated link, it will navigate to the APM app',
             })}
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.observabilityIntegrationsColumn.apmIntegrationLink.tooltip',
               {
-                defaultMessage: 'Click here to check APM for the domain "{domain}".',
+                defaultMessage:
+                  'Click here to check APM for the domain "{domain}" or explicitly defined "service name".',
                 description:
-                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain.',
+                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain or explicitly defined service name.',
                 values: {
                   domain,
                 },
