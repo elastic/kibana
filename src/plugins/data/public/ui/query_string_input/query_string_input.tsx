@@ -71,7 +71,6 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: IIndexPattern[];
-  queryBarDivRefInstance: RefObject<HTMLDivElement>;
 }
 
 const KEY_CODES = {
@@ -95,7 +94,6 @@ export class QueryStringInputUI extends Component<Props, State> {
     selectionStart: null,
     selectionEnd: null,
     indexPatterns: [],
-    queryBarDivRefInstance: createRef(),
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -104,6 +102,7 @@ export class QueryStringInputUI extends Component<Props, State> {
   private abortController?: AbortController;
   private services = this.props.kibana.services;
   private componentIsUnmounting = false;
+  private queryBarDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -573,7 +572,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     return (
       <div
         className="euiFormControlLayout euiFormControlLayout--group kbnQueryBar__wrap"
-        ref={this.state.queryBarDivRefInstance}
+        ref={this.queryBarDivRefInstance}
       >
         {this.props.prepend}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
@@ -647,7 +646,7 @@ export class QueryStringInputUI extends Component<Props, State> {
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
-            queryBarRect={this.state.queryBarDivRefInstance.current?.getBoundingClientRect()}
+            queryBarRect={this.queryBarDivRefInstance.current?.getBoundingClientRect()}
             dropdownHeight={this.props.dropdownHeight}
           />
         </EuiPortal>

@@ -62,9 +62,8 @@ export class SuggestionsComponent extends Component<Props> {
       kbnTypeaheadDiv.style.top = isSuggestionsListFittable
         ? `${queryBarRect.top + queryBarRect.height}px`
         : `${queryBarRect.top - suggestionsListHeight}px`;
-      kbnTypeaheadDiv.style.maxHeight = this.props.dropdownHeight
-        ? this.props.dropdownHeight
-        : '60vh';
+      const defaultMaxHeight = '60vh';
+      kbnTypeaheadDiv.style.maxHeight = this.props.dropdownHeight || defaultMaxHeight;
     }
   };
 
