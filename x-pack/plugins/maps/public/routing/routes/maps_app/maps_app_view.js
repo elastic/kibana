@@ -13,7 +13,6 @@ import {
   getIndexPatternService,
   getToasts,
   getData,
-  getUiSettings,
   getCoreChrome,
 } from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
@@ -31,7 +30,7 @@ import {
 import { AppStateManager } from '../../state_syncing/app_state_manager';
 import { useAppStateSyncing } from '../../state_syncing/app_sync';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { GisMap } from '../../../connected_components/gis_map';
+import { MapContainer } from '../../../connected_components/map_container';
 import { goToSpecifiedPath } from '../../maps_router';
 
 const unsavedChangesWarning = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
@@ -266,6 +265,7 @@ export class MapsAppView extends React.Component {
 
   _initQueryTimeRefresh() {
     const { setRefreshConfig, savedMap } = this.props;
+    const { queryString } = getData().query;
     // TODO: Handle null when converting to TS
     const globalState = getGlobalState();
     const mapStateJSON = savedMap ? savedMap.mapStateJSON : undefined;
@@ -273,7 +273,6 @@ export class MapsAppView extends React.Component {
       query: getInitialQuery({
         mapStateJSON,
         appState: this._appStateManager.getAppState(),
-        userQueryLanguage: getUiSettings().get('search:queryLanguage'),
       }),
       time: getInitialTimeFilters({
         mapStateJSON,
@@ -284,6 +283,8 @@ export class MapsAppView extends React.Component {
         globalState,
       }),
     };
+
+    if (newState.query) queryString.setQuery(newState.query);
     this.setState({ query: newState.query, time: newState.time });
     updateGlobalState(
       {
@@ -455,7 +456,7 @@ export class MapsAppView extends React.Component {
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <GisMap
+          <MapContainer
             addFilters={(newFilters) => {
               newFilters.forEach((filter) => {
                 filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
