@@ -24,6 +24,8 @@ import { Bundle } from '../common';
 import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
 export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
+  const xpackDirSlash = Path.resolve(repoRoot, 'x-pack') + Path.sep;
+
   return plugins
     .filter((p) => p.isUiPlugin)
     .map(
@@ -35,6 +37,10 @@ export function getPluginBundles(plugins: KibanaPlatformPlugin[], repoRoot: stri
           sourceRoot: repoRoot,
           contextDir: p.directory,
           outputDir: Path.resolve(p.directory, 'target/public'),
+          banner: p.directory.startsWith(xpackDirSlash)
+            ? `/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.\n` +
+              ` * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */\n`
+            : undefined,
         })
     );
 }

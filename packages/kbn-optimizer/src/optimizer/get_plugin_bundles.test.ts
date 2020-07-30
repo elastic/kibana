@@ -42,12 +42,18 @@ it('returns a bundle for core and each plugin', () => {
           id: 'baz',
           isUiPlugin: true,
         },
+        {
+          directory: '/repo/x-pack/plugins/box',
+          id: 'box',
+          isUiPlugin: true,
+        },
       ],
       '/repo'
     ).map((b) => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
       Object {
+        "banner": undefined,
         "contextDir": <absolute path>/plugins/foo,
         "entry": "./public/index",
         "id": "foo",
@@ -56,10 +62,22 @@ it('returns a bundle for core and each plugin', () => {
         "type": "plugin",
       },
       Object {
+        "banner": undefined,
         "contextDir": "/outside/of/repo/plugins/baz",
         "entry": "./public/index",
         "id": "baz",
         "outputDir": "/outside/of/repo/plugins/baz/target/public",
+        "sourceRoot": <absolute path>,
+        "type": "plugin",
+      },
+      Object {
+        "banner": "/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
+     * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
+    ",
+        "contextDir": <absolute path>/x-pack/plugins/box,
+        "entry": "./public/index",
+        "id": "box",
+        "outputDir": <absolute path>/x-pack/plugins/box/target/public,
         "sourceRoot": <absolute path>,
         "type": "plugin",
       },

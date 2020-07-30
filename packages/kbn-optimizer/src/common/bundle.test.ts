@@ -48,6 +48,7 @@ it('creates cache keys', () => {
         "/foo/bar/c": 789,
       },
       "spec": Object {
+        "banner": undefined,
         "contextDir": "/foo/bar",
         "entry": "entry",
         "id": "bar",
@@ -77,6 +78,7 @@ it('parses bundles from JSON specs', () => {
   expect(bundles).toMatchInlineSnapshot(`
     Array [
       Bundle {
+        "banner": undefined,
         "cache": BundleCache {
           "path": "/foo/bar/target/.kbn-optimizer-cache",
           "state": undefined,

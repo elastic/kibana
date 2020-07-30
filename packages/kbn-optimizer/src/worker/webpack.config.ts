@@ -146,7 +146,11 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       },
     ],
 
-    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
+    plugins: [
+      new CleanWebpackPlugin(),
+      new DisallowedSyntaxPlugin(),
+      ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
+    ],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements

@@ -53,7 +53,7 @@ afterAll(async () => {
 it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
     dist: true,
   });
@@ -99,7 +99,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
+  assert('produce three bundle cache events while initializing', bundleCacheStates.length === 3);
 
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
@@ -109,17 +109,17 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert(
-    'produce two or three "running" states',
-    runningStates.length === 2 || runningStates.length === 3
+    'produce three to five "running" states',
+    runningStates.length >= 3 && runningStates.length <= 5
   );
 
   const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+  assert('produce three "bundle not cached" events', bundleNotCachedEvents.length === 3);
 
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
-    'produce one or two "compiler success" states',
-    successStates.length === 1 || successStates.length === 2
+    'produce one to three "compiler success" states',
+    successStates.length >= 1 && successStates.length <= 3
   );
 
   const otherStates = msgs.filter(
@@ -138,6 +138,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     '1 async bundle'
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
+  expectFileMatchesSnapshotWithCompression('x-pack/baz/target/public/baz.plugin.js', 'baz bundle');
 
   const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
@@ -177,12 +178,24 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
   `);
+
+  const baz = config.bundles.find((b) => b.id === 'baz')!;
+  expect(baz).toBeTruthy();
+  baz.cache.refresh();
+  expect(baz.cache.getModuleCount()).toBe(2);
+
+  expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+    ]
+  `);
 });
 
 it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
     dist: true,
   });
@@ -201,6 +214,7 @@ it('uses cache on second run and exist cleanly', async () => {
 
   expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
+      "initializing",
       "initializing",
       "initializing",
       "initializing",
