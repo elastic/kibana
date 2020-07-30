@@ -18,21 +18,24 @@ import { MlStartDependencies } from '../../plugin';
 
 import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
-export function registerManagementSection(
+export async function registerManagementSection(
   management: ManagementSetup | undefined,
   core: CoreSetup<MlStartDependencies>
 ) {
   if (management !== undefined) {
-    management.sections.section.insightsAndAlerting.registerApp({
-      id: 'jobsListLink',
-      title: i18n.translate('xpack.ml.management.jobsListTitle', {
-        defaultMessage: 'Machine Learning Jobs',
-      }),
-      order: 2,
-      async mount(params: ManagementAppMountParams) {
-        const { mountApp } = await import('./jobs_list');
-        return mountApp(core, params);
-      },
-    });
+    const [coreStart] = await core.getStartServices();
+    if (coreStart.application.capabilities.ml.canAccessML) {
+      management.sections.section.insightsAndAlerting.registerApp({
+        id: 'jobsListLink',
+        title: i18n.translate('xpack.ml.management.jobsListTitle', {
+          defaultMessage: 'Machine Learning Jobs',
+        }),
+        order: 2,
+        async mount(params: ManagementAppMountParams) {
+          const { mountApp } = await import('./jobs_list');
+          return mountApp(core, params);
+        },
+      });
+    }
   }
 }
