@@ -20,10 +20,10 @@
 import { act } from 'react-dom/test-utils';
 import sinon from 'sinon';
 
-import { REQUEST_TIME, createUseRequestHelpers } from './use_request.helpers';
+import { UseRequestHelpers, REQUEST_TIME, createUseRequestHelpers } from './use_request.helpers';
 
 describe('useRequest hook', () => {
-  let helpers;
+  let helpers: UseRequestHelpers;
 
   beforeEach(() => {
     helpers = createUseRequestHelpers();
@@ -128,6 +128,7 @@ describe('useRequest hook', () => {
           hookResult,
           getErrorWithBodyResponse,
         } = helpers;
+
         setupErrorWithBodyRequest();
         await completeRequest();
         expect(hookResult.error).toBe(getErrorWithBodyResponse().error);
@@ -143,7 +144,9 @@ describe('useRequest hook', () => {
         // NOTE: This emits the warning "You called act(async () => ...) without await", because
         // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
         // because we want to assert against the hook state while the Promise is pending.
-        act(() => hookResult.sendRequest());
+        act(() => {
+          hookResult.sendRequest();
+        });
         expect(hookResult.isLoading).toBe(true);
         expect(hookResult.error).toBe(getErrorResponse().error);
       });
@@ -179,7 +182,9 @@ describe('useRequest hook', () => {
         // NOTE: This emits the warning "You called act(async () => ...) without await", because
         // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
         // because we want to assert against the hook state while the Promise is pending.
-        act(() => hookResult.sendRequest());
+        act(() => {
+          hookResult.sendRequest();
+        });
         expect(hookResult.isLoading).toBe(true);
         expect(hookResult.data).toBe(getSuccessResponse().data);
       });
@@ -237,12 +242,16 @@ describe('useRequest hook', () => {
         // The initial request resolves, and then we'll immediately send a new one manually...
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(1);
-        act(() => hookResult.sendRequest());
+        act(() => {
+          hookResult.sendRequest();
+        });
 
         // The manual request resolves, and we'll send yet another one...
         await advanceTime(REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(2);
-        act(() => hookResult.sendRequest());
+        act(() => {
+          hookResult.sendRequest();
+        });
 
         // At this point, we've moved forward 3s. The poll is set at 2s. If sendRequest didn't
         // reset the poll, the request call count would be 4, not 3.
@@ -262,13 +271,16 @@ describe('useRequest hook', () => {
           getSendRequestSpy,
           getSuccessResponse,
         } = helpers;
+
         const HALF_REQUEST_TIME = REQUEST_TIME * 0.5;
         setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
 
         // We'll interrupt the poll with a sendRequest call before the original request resolves.
         await advanceTime(HALF_REQUEST_TIME);
         expect(getSendRequestSpy().callCount).toBe(0);
-        act(() => hookResult.sendRequest());
+        act(() => {
+          hookResult.sendRequest();
+        });
 
         // The original request will resolve and still set its result, despite the sendRequest call
         // "interrupting" it.

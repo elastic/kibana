@@ -39,7 +39,7 @@ export {
   UseRequestResponse,
   sendRequest,
   useRequest,
-} from './request/request';
+} from './request';
 
 export { indices } from './indices';
 

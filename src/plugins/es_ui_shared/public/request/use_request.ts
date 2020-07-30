@@ -19,19 +19,8 @@
 
 import { useEffect, useState, useRef, useMemo } from 'react';
 
-import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
-
-export interface SendRequestConfig {
-  path: string;
-  method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
-  query?: HttpFetchQuery;
-  body?: any;
-}
-
-export interface SendRequestResponse<D = any, E = Error> {
-  data: D | null;
-  error: E | null;
-}
+import { HttpSetup } from '../../../../../src/core/public';
+import { sendRequest, SendRequestConfig, SendRequestResponse } from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
@@ -44,28 +33,8 @@ export interface UseRequestResponse<D = any, E = Error> {
   isLoading: boolean;
   error: E | null;
   data?: D | null;
-  sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
+  sendRequest: () => Promise<SendRequestResponse<D, E>>;
 }
-
-export const sendRequest = async <D = any, E = Error>(
-  httpClient: HttpSetup,
-  { path, method, body, query }: SendRequestConfig
-): Promise<SendRequestResponse<D, E>> => {
-  try {
-    const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const response = await httpClient[method](path, { body: stringifiedBody, query });
-
-    return {
-      data: response.data ? response.data : response,
-      error: null,
-    };
-  } catch (e) {
-    return {
-      data: null,
-      error: e.response?.data ?? e.body,
-    };
-  }
-};
 
 export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
@@ -107,10 +76,6 @@ export const useRequest = <D = any, E = Error>(
     // Set new interval
     if (pollIntervalMsRef.current) {
       pollIntervalIdRef.current = setTimeout(sendRequestRef.current!, pollIntervalMsRef.current);
-
-      // pollIntervalIdRef.current = setTimeout(() => {
-      //   sendRequestRef.current();
-      // }, pollIntervalMsRef.current);
     }
   };
 

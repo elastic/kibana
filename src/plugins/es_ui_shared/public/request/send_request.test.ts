@@ -19,10 +19,10 @@
 
 import sinon from 'sinon';
 
-import { createSendRequestHelpers } from './send_request.helpers';
+import { SendRequestHelpers, createSendRequestHelpers } from './send_request.helpers';
 
 describe('sendRequest function', () => {
-  let helpers;
+  let helpers: SendRequestHelpers;
 
   beforeEach(() => {
     helpers = createSendRequestHelpers();

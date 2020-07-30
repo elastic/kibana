@@ -19,21 +19,36 @@
 
 import sinon from 'sinon';
 
-import { sendRequest as sendRequestUnbound } from './request';
+import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public';
+import {
+  SendRequestConfig,
+  SendRequestResponse,
+  sendRequest as originalSendRequest,
+} from './send_request';
 
-const successRequest = { method: 'post', path: '/success', body: {} };
+export interface SendRequestHelpers {
+  getSendRequestSpy: () => sinon.SinonStub;
+  sendSuccessRequest: () => Promise<SendRequestResponse>;
+  getSuccessResponse: () => SendRequestResponse;
+  sendErrorRequest: () => Promise<SendRequestResponse>;
+  getErrorResponse: () => SendRequestResponse;
+}
+
+const successRequest: SendRequestConfig = { method: 'post', path: '/success', body: {} };
 const successResponse = { statusCode: 200, data: { message: 'Success message' } };
 
 const errorValue = { statusCode: 400, statusText: 'Error message' };
-const errorRequest = { method: 'post', path: '/error', body: {} };
+const errorRequest: SendRequestConfig = { method: 'post', path: '/error', body: {} };
 const errorResponse = { response: { data: errorValue } };
 
-export const createSendRequestHelpers = () => {
-  const httpClient = {
-    post: (...args) => sendRequestSpy(...args),
-  };
-  const sendRequest = sendRequestUnbound.bind(null, httpClient);
+export const createSendRequestHelpers = (): SendRequestHelpers => {
   const sendRequestSpy = sinon.stub();
+  const httpClient = {
+    post: (path: string, options: HttpFetchOptions) => sendRequestSpy(path, options),
+  };
+  const sendRequest = originalSendRequest.bind(null, httpClient as HttpSetup) as <D = any, E = any>(
+    config: SendRequestConfig
+  ) => Promise<SendRequestResponse<D, E>>;
 
   // Set up successful request helpers.
   sendRequestSpy
