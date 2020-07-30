@@ -36,7 +36,6 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
-  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 
 interface State {
@@ -44,6 +43,7 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -82,21 +82,18 @@ export function App({
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
 }) {
-  const language =
-    storage.get('kibana.userQueryLanguage') ||
-    core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       isLoading: !!docId,
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
-      query: { query: '', language },
+      query: data.query.queryString.getDefaultQuery(),
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
+      originatingApp,
       filters: [],
       indicateNoData: false,
     };
@@ -321,9 +318,14 @@ export function App({
       .then(({ id }) => {
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
+        const currentOriginatingApp = state.originatingApp;
         setState((s) => ({
           ...s,
           isSaveModalVisible: false,
+          originatingApp:
+            saveProps.newCopyOnSave && !saveProps.returnToOrigin
+              ? undefined
+              : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
@@ -368,7 +370,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!originatingApp && lastKnownDoc?.id
+                ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -393,14 +395,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!originatingApp
+                    lastKnownDoc?.id && !!state.originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !originatingApp || !lastKnownDoc?.id,
+                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -466,12 +468,7 @@ export function App({
                   ...s,
                   savedQuery: undefined,
                   filters: data.query.filterManager.getGlobalFilters(),
-                  query: {
-                    query: '',
-                    language:
-                      storage.get('kibana.userQueryLanguage') ||
-                      core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-                  },
+                  query: data.query.queryString.getDefaultQuery(),
                 }));
               }}
               query={state.query}
@@ -523,7 +520,7 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
+            originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{

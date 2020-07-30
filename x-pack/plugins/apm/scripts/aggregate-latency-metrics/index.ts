@@ -10,7 +10,7 @@ import pLimit from 'p-limit';
 import pRetry from 'p-retry';
 import { parse, format } from 'url';
 import { set } from '@elastic/safer-lodash-set';
-import { unique, without, merge, flatten } from 'lodash';
+import { uniq, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
 import { ESSearchResponse } from '../../typings/elasticsearch';
 import {
@@ -114,8 +114,8 @@ export async function aggregateLatencyMetrics() {
     .filter(Boolean) as string[];
 
   const fields = only.length
-    ? unique(only)
-    : without(unique([...include, ...defaultFields]), ...exclude);
+    ? uniq(only)
+    : without(uniq([...include, ...defaultFields]), ...exclude);
 
   const globalFilter = argv.filter ? JSON.parse(String(argv.filter)) : {};
 
