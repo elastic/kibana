@@ -22,6 +22,7 @@ import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { Client } from 'elasticsearch';
+import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
 import { ClusterHealthParams } from 'elasticsearch';
