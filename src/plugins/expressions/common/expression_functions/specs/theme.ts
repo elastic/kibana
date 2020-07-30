@@ -52,10 +52,9 @@ export const theme: ExpressionFunctionTheme = {
       types: ['string'],
     },
     default: {
-      help: i18n.translate('expressions.functions.font.args.defaultHelpText', {
+      help: i18n.translate('expressions.functions.theme.args.defaultHelpText', {
         defaultMessage: 'default value in case theming info is not available.',
       }),
-      types: ['string', 'number'],
     },
   },
   fn: (input, args, handlers) => {
