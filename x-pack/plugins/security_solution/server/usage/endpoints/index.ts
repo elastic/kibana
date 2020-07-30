@@ -42,11 +42,14 @@ export interface AgentLocalMetadata extends AgentMetadata {
     };
   };
   host: {
+    hostname: string;
     id: string;
+    name: string;
   };
   os: {
     name: string;
     platform: string;
+    kernel: string;
     version: string;
     full: string;
   };
@@ -78,17 +81,20 @@ export const updateEndpointOSTelemetry = (
   os: AgentLocalMetadata['os'],
   osTracker: OSTracker
 ): OSTracker => {
-  const updatedOSTracker = cloneDeep(osTracker);
-  const { version: osVersion, platform: osPlatform, full: osFullName } = os;
-  if (osFullName && osVersion) {
-    if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
-    else {
-      updatedOSTracker[osFullName] = {
-        full_name: osFullName,
-        platform: osPlatform,
-        version: osVersion,
-        count: 1,
-      };
+  let updatedOSTracker = osTracker;
+  if (os && typeof os === 'object') {
+    updatedOSTracker = cloneDeep(osTracker);
+    const { version: osVersion, platform: osPlatform, full: osFullName } = os;
+    if (osFullName && osVersion) {
+      if (updatedOSTracker[osFullName]) updatedOSTracker[osFullName].count += 1;
+      else {
+        updatedOSTracker[osFullName] = {
+          full_name: osFullName,
+          platform: osPlatform,
+          version: osVersion,
+          count: 1,
+        };
+      }
     }
   }
 
@@ -211,7 +217,7 @@ export const getEndpointTelemetryFromFleet = async (
   if (!endpointAgents || endpointAgentsCount < 1) return endpointTelemetry;
 
   // Use unique hosts to prevent any potential duplicates
-  const uniqueHostIds: Set<string> = new Set();
+  const uniqueHosts: Set<string> = new Set();
   let osTracker: OSTracker = {};
   let dailyActiveCount = 0;
   let policyTracker: PoliciesTelemetry = { malware: { active: 0, inactive: 0, failure: 0 } };
@@ -222,8 +228,12 @@ export const getEndpointTelemetryFromFleet = async (
       const { last_checkin: lastCheckin, local_metadata: localMetadata } = metadataAttributes;
       const { host, os, elastic } = localMetadata as AgentLocalMetadata;
 
-      if (!uniqueHostIds.has(host.id)) {
-        uniqueHostIds.add(host.id);
+      // Although not perfect, the goal is to dedupe hosts to get the most recent data for a host
+      // An agent re-installed on the same host will have all the same id, name, and kernel details
+      // A cloned VM will have the same id, but "may" have the same name and kernel, but it's really up to the user.
+      const compoundUniqueId = `${host?.id}-${host?.hostname}-${os?.kernel}`;
+      if (!uniqueHosts.has(compoundUniqueId)) {
+        uniqueHosts.add(compoundUniqueId);
         const agentId = elastic?.agent?.id;
         osTracker = updateEndpointOSTelemetry(os, osTracker);
 
@@ -244,10 +254,8 @@ export const getEndpointTelemetryFromFleet = async (
             policyTracker = updateEndpointPolicyTelemetry(latestEndpointEvent, policyTracker);
           }
         }
-        throw new Error('I broke!');
       }
     } catch (error) {
-      console.log("ERROR: ", error); // eslint-disable-line
       // All errors thrown in the loop would be handled here
       // Not logging any errors to avoid leaking any potential PII
       // Depending on when the error is thrown in the loop some specifics may be missing, but it allows the loop to continue
@@ -255,7 +263,7 @@ export const getEndpointTelemetryFromFleet = async (
   }
 
   // All unique hosts with an endpoint installed, thus all unique endpoint installs
-  endpointTelemetry.total_installed = uniqueHostIds.size;
+  endpointTelemetry.total_installed = uniqueHosts.size;
   // Set the daily active count for the endpoints
   endpointTelemetry.active_within_last_24_hours = dailyActiveCount;
   // Get the objects to populate our OS Telemetry

@@ -15,6 +15,7 @@ import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 const testAgentId = 'testAgentId';
 const testConfigId = 'testConfigId';
 const testHostId = 'randoHostId';
+const testHostName = 'testDesktop';
 
 /** Mock OS Platform for endpoint telemetry */
 export const MockOSPlatform = 'somePlatform';
@@ -24,6 +25,8 @@ export const MockOSName = 'somePlatformName';
 export const MockOSVersion = '1';
 /** Mock OS Full Name for endpoint telemetry */
 export const MockOSFullName = 'somePlatformFullName';
+/** Mock OS Full Name for endpoint telemetry */
+export const MockOSKernel = 'popcorn';
 
 /**
  *
@@ -56,8 +59,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: testHostName,
+            name: testHostName,
             id: testHostId,
           },
           os: {
@@ -65,6 +68,7 @@ export const mockFleetObjectsResponse = (
             version: MockOSVersion,
             name: MockOSName,
             full: MockOSFullName,
+            kernel: MockOSKernel,
           },
         },
         packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
@@ -93,8 +97,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
+            name: hasDuplicates ? testHostName : 'oldRandoHostName',
             id: hasDuplicates ? testHostId : 'oldRandoHostId',
           },
           os: {
@@ -102,6 +106,7 @@ export const mockFleetObjectsResponse = (
             version: MockOSVersion,
             name: MockOSName,
             full: MockOSFullName,
+            kernel: hasDuplicates ? MockOSKernel : 'unpopped-popocorn',
           },
         },
         packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
