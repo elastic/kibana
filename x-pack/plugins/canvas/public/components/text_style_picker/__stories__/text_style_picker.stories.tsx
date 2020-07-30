@@ -8,11 +8,15 @@ import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { TextStylePicker } from '../text_style_picker';
+import { TextStylePicker, StyleProps } from '../text_style_picker';
 
 const Interactive = () => {
-  const [props, setProps] = useState({});
-  return <TextStylePicker onChange={setProps} {...props} />;
+  const [style, setStyle] = useState<StyleProps>({});
+  const onChange = (styleChange: StyleProps) => {
+    setStyle(styleChange);
+    action('onChange')(styleChange);
+  };
+  return <TextStylePicker onChange={onChange} {...style} />;
 };
 
 storiesOf('components/TextStylePicker', module)
