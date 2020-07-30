@@ -4,6 +4,7 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
@@ -33,6 +34,7 @@ def test() {
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
+    kibanaPipeline.scriptTask('@elastic/safer-lodash-set Tests', 'test/scripts/test/safer_lodash_set.sh'),
     kibanaPipeline.scriptTask('X-Pack SIEM cyclic dependency', 'test/scripts/test/xpack_siem_cyclic_dependency.sh'),
     kibanaPipeline.scriptTask('X-Pack List cyclic dependency', 'test/scripts/test/xpack_list_cyclic_dependency.sh'),
     kibanaPipeline.scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
