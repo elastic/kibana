@@ -14,7 +14,7 @@ import {
 
 // TODO: to remove, need to support Case
 import { transformers } from '../case/transformers';
-import { PushToServiceResponse, TransformFieldsArgs } from './case_types';
+import { PushToServiceResponse, TransformFieldsArgs, Comment } from './case_types';
 import { prepareFieldsForTransformation } from '../case/utils';
 
 const handshakeHandler = async ({
@@ -92,9 +92,10 @@ const pushToServiceHandler = async ({
     mapping.get('comments')?.actionType !== 'nothing'
   ) {
     res.comments = [];
+    const commentsTransformed = transformComments(comments, ['informationAdded']);
 
     const fieldsKey = mapping.get('comments')?.target ?? 'comments';
-    for (const currentComment of comments) {
+    for (const currentComment of commentsTransformed) {
       await externalService.updateIncident({
         incidentId: res.id,
         incident: {
@@ -138,6 +139,24 @@ export const transformFields = ({
       }).value,
     };
   }, {});
+};
+
+export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
+  return comments.map((c) => ({
+    ...c,
+    comment: flow(...pipes.map((p) => transformers[p]))({
+      value: c.comment,
+      date: c.updatedAt ?? c.createdAt,
+      user:
+        (c.updatedBy != null
+          ? c.updatedBy.fullName
+            ? c.updatedBy.fullName
+            : c.updatedBy.username
+          : c.createdBy.fullName
+          ? c.createdBy.fullName
+          : c.createdBy.username) ?? '',
+    }).value,
+  }));
 };
 
 export const api: ExternalServiceApi = {
