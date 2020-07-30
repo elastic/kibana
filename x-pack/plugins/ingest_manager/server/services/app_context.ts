@@ -24,8 +24,8 @@ class AppContextService {
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: IngestManagerAppContext['isProductionMode'] = false;
-  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] | undefined = packageJSON.version;
-  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] | undefined = packageJSON.branch;
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] = packageJSON.version;
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] = packageJSON.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -122,16 +122,10 @@ class AppContextService {
   }
 
   public getKibanaVersion() {
-    if (!this.kibanaVersion) {
-      throw new Error('Kibana version is not set.');
-    }
     return this.kibanaVersion;
   }
 
   public getKibanaBranch() {
-    if (!this.kibanaBranch) {
-      throw new Error('Kibana branch is not set.');
-    }
     return this.kibanaBranch;
   }
 
