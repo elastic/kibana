@@ -403,7 +403,7 @@ export default function ({ getService }) {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `30m` },
-        params: { failWith: 'error on run now', failOn: 3 },
+        params: { failWith: 'this task was meant to fail!', failOn: 3 },
       });
 
       await retry.try(async () => {
@@ -414,12 +414,13 @@ export default function ({ getService }) {
 
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(1);
+        expect(task.status).to.eql('idle');
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
-      await delay(500);
+      await delay(1000);
 
       // second run should still be successful
       const successfulRunNowResult = await runTaskNow({
@@ -430,9 +431,10 @@ export default function ({ getService }) {
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(2);
+        expect(task.status).to.eql('idle');
       });
 
-      await delay(500);
+      await delay(1000);
 
       // third run should fail
       const failedRunNowResult = await runTaskNow({
@@ -441,7 +443,7 @@ export default function ({ getService }) {
 
       expect(failedRunNowResult).to.eql({
         id: originalTask.id,
-        error: `Error: Failed to run task \"${originalTask.id}\": Error: error on run now`,
+        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
       });
 
       await retry.try(async () => {
