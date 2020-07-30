@@ -149,7 +149,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   options: {
                     sourceMap: !worker.dist,
                     config: {
-                      path: require.resolve('./postcss.config'),
+                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },
