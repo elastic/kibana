@@ -13,7 +13,7 @@ core: {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
-            client: IClusterClient;
+            client: IScopedClusterClient;
             legacy: {
                 client: ILegacyScopedClusterClient;
             };
