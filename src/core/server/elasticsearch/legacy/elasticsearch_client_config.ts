@@ -31,6 +31,7 @@ import { ElasticsearchConfig } from '../elasticsearch_config';
  * not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS
  * client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
  *
+ * @deprecated
  * @public
  */
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
