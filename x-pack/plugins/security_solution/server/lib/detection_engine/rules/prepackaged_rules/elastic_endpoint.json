@@ -1,20 +1,17 @@
 {
-  "author": [
-    "Elastic"
-  ],
+  "author": ["Elastic"],
   "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Elastic Endpoint alerts.",
   "enabled": true,
   "exceptions_list": [
     {
       "id": "endpoint_list",
+      "list_id": "endpoint_list",
       "namespace_type": "agnostic",
       "type": "endpoint"
     }
   ],
   "from": "now-10m",
-  "index": [
-    "logs-endpoint.alerts-*"
-  ],
+  "index": ["logs-endpoint.alerts-*"],
   "language": "kuery",
   "license": "Elastic License",
   "max_signals": 10000,
@@ -57,10 +54,7 @@
       "value": "99"
     }
   ],
-  "tags": [
-    "Elastic",
-    "Endpoint"
-  ],
+  "tags": ["Elastic", "Endpoint"],
   "timestamp_override": "event.ingested",
   "type": "query",
   "version": 1

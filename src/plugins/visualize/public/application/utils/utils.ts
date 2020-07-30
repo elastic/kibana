@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { ChromeStart, DocLinksStart } from 'kibana/public';
-import { Filter, UI_SETTINGS } from '../../../../data/public';
+import { Filter } from '../../../../data/public';
 import { VisualizeServices, SavedVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
@@ -49,12 +49,9 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
   });
 };
 
-export const getDefaultQuery = ({ localStorage, uiSettings }: VisualizeServices) => ({
-  query: '',
-  language:
-    localStorage.get('kibana.userQueryLanguage') ||
-    uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-});
+export const getDefaultQuery = ({ data }: VisualizeServices) => {
+  return data.query.queryString.getDefaultQuery();
+};
 
 export const visStateToEditorState = (
   { vis, savedVis }: SavedVisInstance,
