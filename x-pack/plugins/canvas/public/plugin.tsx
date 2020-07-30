@@ -19,9 +19,9 @@ import { getSessionStorage } from './lib/storage';
 import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 // @ts-expect-error untyped local
@@ -29,6 +29,8 @@ import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+import { CANVAS_EMBEDDABLE_TYPE, CanvasEmbeddableFactory } from './embeddable';
+import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public/core';
 export { CoreStart, CoreSetup };
 
 /**
@@ -38,12 +40,14 @@ export { CoreStart, CoreSetup };
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
+  embeddable: EmbeddableSetup;
   expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
 export interface CanvasStartDeps {
+  data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   inspector: InspectorStart;
@@ -81,6 +85,9 @@ export class CanvasPlugin
         defaultPath: `#${lastPath}`,
       }));
     }
+
+    const start = createStartServicesGetter(core.getStartServices);
+    plugins.embeddable.registerEmbeddableFactory(CANVAS_EMBEDDABLE_TYPE, new CanvasEmbeddableFactory({ start }));
 
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
