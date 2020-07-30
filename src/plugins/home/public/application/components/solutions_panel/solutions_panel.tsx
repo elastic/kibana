@@ -94,26 +94,25 @@ export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
     return solutionApps.length ? (
       <EuiFlexItem
         key={solution.id}
-        className={`homSolutionPanel__cardSecondary homSolutionsPanel__${solution.id}`}
+        className={`homSolutionsSection__container ${
+          solution.id === 'kibana' ? 'homSolutionsSection__single' : ''
+        }`}
         grow={1}
       >
         <EuiPanel
           paddingSize="none"
-          className="homSolutionsPanel__solutionPanel"
+          className="homSolutionsSection__panel"
           onClick={createAppNavigationHandler(solution.path)} // TODO: double check this url once enterprise search overview page is available
         >
           <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem
-              grow={1}
-              className={`homSolutionsPanel__header homSolutionsPanel__${solution.id}Header`}
-            >
+            <EuiFlexItem grow={1} className={`homSolutionsSection__panelHeader`}>
               <SolutionTitle
                 iconType={solution.icon}
                 title={solution.title}
                 subtitle={solution.description}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={1} className="homSolutionsPanel__appDescriptions">
+            <EuiFlexItem grow={1} className="homSolutionsSection__panelDescriptions">
               {getAppDescriptions(solutionApps)}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -122,11 +121,11 @@ export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
     ) : null;
   };
 
-  const halfWidthClass = 'homSolutionsPanel__column';
+  const halfWidthClass = 'homSolutionsSection__multiple';
 
   return solutions.length || kibana ? (
     <Fragment>
-      <EuiFlexGroup className="homSolutionsPanel" justifyContent="spaceAround">
+      <EuiFlexGroup className="homSolutionsSection" justifyContent="spaceAround">
         {solutions.length ? (
           <EuiFlexItem grow={1} className={halfWidthClass}>
             <EuiFlexGroup direction="column">{solutions.map(renderSolutionCard)}</EuiFlexGroup>

@@ -3,7 +3,6 @@ $homePageWidth: 1200px;
 
 .homPageContainer {
   display: flex;
-  height: calc(100vh - #{$euiHeaderHeightCompensation});
   flex-direction: column;
   background-color: $euiColorEmptyShade;
 }
