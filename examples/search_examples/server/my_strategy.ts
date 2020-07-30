@@ -18,7 +18,7 @@
  */
 
 import { ISearchStrategy, PluginStart } from '../../../src/plugins/data/server';
-import { IMyStrategyResponse } from '../common';
+import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
 
 export const mySearchStrategyProvider = (data: PluginStart): ISearchStrategy => {
   const es = data.search.getSearchStrategy('es');
@@ -28,7 +28,7 @@ export const mySearchStrategyProvider = (data: PluginStart): ISearchStrategy => 
       const esSearchRes = await es.search(context, request, options);
       return {
         ...esSearchRes,
-        cool: true,
+        cool: (request as IMyStrategyRequest).get_cool ? 'YES' : 'NOPE',
       };
     },
     cancel: async (context, id) => {
