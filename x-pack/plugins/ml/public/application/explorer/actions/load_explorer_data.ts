@@ -200,6 +200,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
           memoizedAnomalyDataChange(
             lastRefresh,
+            swimlaneContainerWidth,
             anomalyChartRecords,
             timerange.earliestMs,
             timerange.latestMs,
@@ -208,6 +209,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         } else {
           memoizedAnomalyDataChange(
             lastRefresh,
+            swimlaneContainerWidth,
             [],
             timerange.earliestMs,
             timerange.latestMs,

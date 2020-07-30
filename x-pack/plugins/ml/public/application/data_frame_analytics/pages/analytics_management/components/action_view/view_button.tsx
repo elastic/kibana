@@ -6,17 +6,14 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
-import {
-  getAnalysisType,
-  isRegressionAnalysis,
-  isOutlierAnalysis,
-  isClassificationAnalysis,
-} from '../../../../common/analytics';
+import { getAnalysisType } from '../../../../common/analytics';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { getResultsUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
+
+import { getViewLinkStatus } from './get_view_link_status';
 
 interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
@@ -30,32 +27,40 @@ export const ViewButton: FC<ViewButtonProps> = ({ item, isManagementTable }) => 
     },
   } = useMlKibana();
 
+  const { disabled, tooltipContent } = getViewLinkStatus(item);
   const analysisType = getAnalysisType(item.config.analysis);
-  const isDisabled =
-    !isRegressionAnalysis(item.config.analysis) &&
-    !isOutlierAnalysis(item.config.analysis) &&
-    !isClassificationAnalysis(item.config.analysis);
 
   const url = getResultsUrl(item.id, analysisType);
   const navigator = isManagementTable
     ? () => navigateToApp('ml', { path: url })
     : () => navigateToUrl(url);
 
-  return (
+  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
+    defaultMessage: 'View',
+  });
+
+  const button = (
     <EuiButtonEmpty
-      isDisabled={isDisabled}
+      aria-label={buttonText}
+      color="text"
+      data-test-subj="mlAnalyticsJobViewButton"
+      flush="left"
+      iconType="visTable"
+      isDisabled={disabled}
       onClick={navigator}
       size="xs"
-      color="text"
-      iconType="visTable"
-      aria-label={i18n.translate('xpack.ml.dataframe.analyticsList.viewAriaLabel', {
-        defaultMessage: 'View',
-      })}
-      data-test-subj="mlAnalyticsJobViewButton"
     >
-      {i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
-        defaultMessage: 'View',
-      })}
+      {buttonText}
     </EuiButtonEmpty>
   );
+
+  if (disabled) {
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        {button}
+      </EuiToolTip>
+    );
+  }
+
+  return button;
 };

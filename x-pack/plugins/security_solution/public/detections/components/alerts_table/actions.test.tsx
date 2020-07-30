@@ -70,7 +70,7 @@ describe('alert actions', () => {
           updateTimelineIsLoading,
         });
         const expected = {
-          from: 1541444305937,
+          from: '2018-11-05T18:58:25.937Z',
           timeline: {
             columns: [
               {
@@ -153,8 +153,8 @@ describe('alert actions', () => {
             ],
             dataProviders: [],
             dateRange: {
-              end: 1541444605937,
-              start: 1541444305937,
+              end: '2018-11-05T19:03:25.937Z',
+              start: '2018-11-05T18:58:25.937Z',
             },
             deletedEventIds: [],
             description: 'This is a sample rule description',
@@ -225,7 +225,7 @@ describe('alert actions', () => {
             version: null,
             width: 1100,
           },
-          to: 1541444605937,
+          to: '2018-11-05T19:03:25.937Z',
           ruleNote: '# this is some markdown documentation',
         };
 
@@ -375,8 +375,8 @@ describe('alert actions', () => {
       };
       const result = determineToAndFrom({ ecsData: ecsDataMock });
 
-      expect(result.from).toEqual(1584726886349);
-      expect(result.to).toEqual(1584727186349);
+      expect(result.from).toEqual('2020-03-20T17:54:46.349Z');
+      expect(result.to).toEqual('2020-03-20T17:59:46.349Z');
     });
 
     test('it uses current time timestamp if ecsData.timestamp is not provided', () => {
@@ -385,8 +385,8 @@ describe('alert actions', () => {
       };
       const result = determineToAndFrom({ ecsData: ecsDataMock });
 
-      expect(result.from).toEqual(1583085286349);
-      expect(result.to).toEqual(1583085586349);
+      expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
+      expect(result.to).toEqual('2020-03-01T17:59:46.349Z');
     });
   });
 });

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { get, isUndefined, noop, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, isUndefined, noop } from 'lodash';
 import { unset } from '../../utils';
 
 export function rename(oldKey, newKey) {

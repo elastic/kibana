@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
-import { isApiError } from '../../../../common/utils/api';
+import { isSecurityAppError } from '../../../../common/utils/api';
 
 type Func = () => void;
 
@@ -59,7 +59,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
             signalIndexName: null,
             createDeSignalIndex: createIndex,
           });
-          if (isApiError(error) && error.body.status_code !== 404) {
+          if (isSecurityAppError(error) && error.body.status_code !== 404) {
             errorToToaster({ title: i18n.SIGNAL_GET_NAME_FAILURE, error, dispatchToaster });
           }
         }
@@ -81,7 +81,7 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         }
       } catch (error) {
         if (isSubscribed) {
-          if (isApiError(error) && error.body.status_code === 409) {
+          if (isSecurityAppError(error) && error.body.status_code === 409) {
             fetchData();
           } else {
             setSignalIndex({

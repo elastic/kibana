@@ -15,7 +15,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
 import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
-import { UIFilters } from '../../typings/ui_filters';
+import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
 export const transactionGroupsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/transaction_groups',
@@ -71,12 +71,8 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
       transactionName,
       uiFilters: uiFiltersJson,
     } = context.params.query;
-    let uiFilters: UIFilters = {};
-    try {
-      uiFilters = JSON.parse(uiFiltersJson);
-    } catch (error) {
-      logger.error(error);
-    }
+
+    const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
     return getTransactionCharts({
       serviceName,
@@ -168,7 +164,6 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
     }),
     query: t.intersection([
       t.partial({
-        transactionType: t.string,
         transactionName: t.string,
       }),
       uiFiltersRt,
@@ -178,10 +173,12 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
+    const { transactionName } = context.params.query;
 
     return getTransactionAvgDurationByBrowser({
       serviceName,
       setup,
+      transactionName,
     });
   },
 }));

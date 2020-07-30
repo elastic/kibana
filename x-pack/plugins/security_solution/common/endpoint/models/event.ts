@@ -9,10 +9,15 @@ export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEven
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function isProcessStart(event: ResolverEvent): boolean {
+export function isStart(event: ResolverEvent): boolean {
   if (isLegacyEvent(event)) {
     return event.event?.type === 'process_start' || event.event?.action === 'fork_event';
   }
+
+  if (Array.isArray(event.event.type)) {
+    return event.event.type.includes('start');
+  }
+
   return event.event.type === 'start';
 }
 
@@ -32,9 +37,9 @@ export function eventName(event: ResolverEvent): string {
   }
 }
 
-export function eventId(event: ResolverEvent): string {
+export function eventId(event: ResolverEvent): number | undefined | string {
   if (isLegacyEvent(event)) {
-    return event.endgame.serial_event_id ? String(event.endgame.serial_event_id) : '';
+    return event.endgame.serial_event_id;
   }
   return event.event.id;
 }

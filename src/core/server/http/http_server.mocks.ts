@@ -93,7 +93,12 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
         settings: { tags: routeTags, auth: routeAuthRequired, app: kibanaRouteOptions },
       },
       raw: {
-        req: { socket },
+        req: {
+          socket,
+          // these are needed to avoid an error when consuming KibanaRequest.events
+          on: jest.fn(),
+          off: jest.fn(),
+        },
       },
     }),
     {

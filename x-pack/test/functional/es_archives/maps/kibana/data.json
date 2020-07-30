@@ -449,6 +449,37 @@
 {
   "type": "doc",
   "value": {
+    "id": "map:2de4de10-cc82-11ea-9b0a-eb2886fc84af",
+    "index": ".kibana",
+    "source": {
+      "map": {
+        "title" : "document example hidden",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":4.1,\"center\":{\"lon\":-100.61091,\"lat\":33.23887},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-20T01:00:00.000Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showSpatialFilters\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{}},\"type\":\"VECTOR_TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"z52lq\",\"label\":\"logstash\",\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"e1a5e1a6-676c-4a89-8ea9-0d91d64b73c6\",\"type\":\"ES_SEARCH\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[],\"applyGlobalQuery\":true,\"scalingType\":\"LIMIT\",\"indexPatternRefName\":\"layer_1_source_index_pattern\"},\"visible\":false,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[]}"
+      },
+      "type" : "map",
+      "references" : [
+        {
+          "name" : "layer_1_source_index_pattern",
+          "type" : "index-pattern",
+          "id" : "c698b940-e149-11e8-a35a-370a8516603a"
+        }
+      ],
+      "migrationVersion" : {
+        "map" : "7.9.0"
+      },
+      "updated_at" : "2020-07-23T01:16:47.600Z"
+    }
+  }
+}
+
+
+
+{
+  "type": "doc",
+  "value": {
     "id": "map:1649cc70-f736-11e8-8ce0-9723965e01e3",
     "index": ".kibana",
     "source": {
@@ -1022,7 +1053,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "query:okjpgs",
+    "id": "query:OKJpgs",
     "source": {
       "query": {
         "title": "OKJpgs",

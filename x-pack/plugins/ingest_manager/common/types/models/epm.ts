@@ -276,9 +276,7 @@ export interface IndexTemplate {
     mappings: any;
     aliases: object;
   };
-  data_stream: {
-    timestamp_field: string;
-  };
+  data_stream: object;
   composed_of: string[];
   _meta: object;
 }

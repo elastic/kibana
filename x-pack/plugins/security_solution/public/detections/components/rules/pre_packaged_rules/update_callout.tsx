@@ -51,18 +51,23 @@ const UpdatePrePackagedRulesCallOutComponent: React.FC<UpdatePrePackagedRulesCal
   }, [numberOfUpdatedRules, numberOfUpdatedTimelines]);
 
   return (
-    <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE}>
+    <EuiCallOut title={i18n.UPDATE_PREPACKAGED_RULES_TITLE} data-test-subj="update-callout">
       <p>
         {prepackagedRulesOrTimelines?.callOutMessage}
         <br />
         <EuiLink
-          href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
+          href={`${services.docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${services.docLinks.DOC_LINK_VERSION}/prebuilt-rules-changelog.html`}
           target="_blank"
         >
           {i18n.RELEASE_NOTES_HELP}
         </EuiLink>
       </p>
-      <EuiButton onClick={updateRules} size="s" isLoading={loading}>
+      <EuiButton
+        onClick={updateRules}
+        size="s"
+        isLoading={loading}
+        data-test-subj="update-callout-button"
+      >
         {prepackagedRulesOrTimelines?.buttonTitle}
       </EuiButton>
     </EuiCallOut>

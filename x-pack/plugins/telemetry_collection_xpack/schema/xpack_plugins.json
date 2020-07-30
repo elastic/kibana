@@ -246,10 +246,10 @@
               "properties": {
                 "malware": {
                   "properties": {
-                    "success": {
+                    "active": {
                       "type": "long"
                     },
-                    "warning": {
+                    "inactive": {
                       "type": "long"
                     },
                     "failure": {

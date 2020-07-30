@@ -13,7 +13,8 @@
           "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
           "alert": "7b44fba6773e37c806ce290ea9b7024e",
           "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
-          "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
+          "apm-telemetry": "3d1b76c39bfb2cc8296b024d73854724",
+          "app_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724",
           "application_usage_totals": "3d1b76c39bfb2cc8296b024d73854724",
           "application_usage_transactional": "43b8830d5d0df85a6823d290885fc9fd",
           "canvas-element": "7390014e1091044523666d97247392fc",
@@ -25,21 +26,23 @@
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
           "config": "c63748b75f39d0c54de12d12c1ccbc20",
           "dashboard": "d00f614b29a80360e1190193fd333bab",
-          "endpoint:exceptions-artifact": "053713a6b91811c7de078ead17384914",
-          "endpoint:exceptions-manifest": "67c28185da541c1404e7852d30498cd6",
-          "epm-packages": "04696e7dba1b9597f7d6ed78a4a76658",
+          "endpoint:user-artifact": "4a11183eee21e6fbad864f7a30b39ad0",
+          "endpoint:user-artifact-manifest": "67c28185da541c1404e7852d30498cd6",
+          "epm-packages": "8f6e0b09ea0374c4ffe98c3755373cff",
+          "exception-list": "4818e7dfc3e538562c80ec34eb6f841b",
+          "exception-list-agnostic": "4818e7dfc3e538562c80ec34eb6f841b",
           "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
-          "fleet-agent-actions": "00fe5651ed2da16b7f8159bbf0f7d910",
+          "fleet-agent-actions": "e520c855577170c24481be05c3ae14ec",
           "fleet-agent-events": "3231653fafe4ef3196fe3b32ab774bf2",
-          "fleet-agents": "578bbfa81650206927683ebde0c85409",
-          "fleet-enrollment-api-keys": "451e5c329b3ae9722dc7bc8f5921e05d",
+          "fleet-agents": "034346488514b7058a79140b19ddf631",
+          "fleet-enrollment-api-keys": "28b91e20b105b6f928e2012600085d8f",
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "2b2809653635caf490c93f090502d04c",
           "ingest-agent-configs": "9326f99c977fd2ef5ab24b6336a0675c",
-          "ingest-outputs": "87da6a0e27b3a61ad389fb7a7e2da293",
+          "ingest-outputs": "8aa988c376e65443fefc26f1075e93a3",
           "ingest-package-configs": "48e8bd97e488008e21c0b5a2367b83ad",
-          "ingest_manager_settings": "c5b0749b4ab03c582efd4c14cb8f132c",
+          "ingest_manager_settings": "012cf278ec84579495110bb827d1ed09",
           "inventory-view": "88fc7e12fd1b45b6f0787323ce4f18d2",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "lens": "d33c68a69ff1e78c9888dedd2164ac22",
@@ -54,10 +57,10 @@
           "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
           "references": "7997cf5a56cc02bdc9c93361bde732b0",
           "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
-          "search": "181661168bbadd1eff5902361e2a0d5c",
+          "search": "5c4b9a6effceb17ae8a0ab22d0c49767",
           "siem-detection-engine-rule-actions": "6569b288c169539db10cb262bf79de18",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "siem-ui-timeline": "17ec409954864e592ceec0c5eae29ad9",
+          "siem-ui-timeline": "94bc38c7a421d15fbfe8ea565370a421",
           "siem-ui-timeline-note": "8874706eedc49059d4cf0f5094559084",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
@@ -67,11 +70,12 @@
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-          "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
+          "upgrade-assistant-reindex-operation": "215107c281839ea9b3ad5f6419819763",
           "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
           "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "visualization": "52d7a13ad68a150c4525b292d23e12cc"
+          "visualization": "52d7a13ad68a150c4525b292d23e12cc",
+          "workplace_search_telemetry": "3d1b76c39bfb2cc8296b024d73854724"
         }
       },
       "dynamic": "strict",
@@ -219,913 +223,12 @@
           }
         },
         "apm-telemetry": {
-          "properties": {
-            "agents": {
-              "properties": {
-                "dotnet": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "go": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "java": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "js-base": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "nodejs": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "python": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "ruby": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "rum-js": {
-                  "properties": {
-                    "agent": {
-                      "properties": {
-                        "version": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
-                        }
-                      }
-                    },
-                    "service": {
-                      "properties": {
-                        "framework": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "language": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "properties": {
-                            "composite": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "name": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            },
-                            "version": {
-                              "ignore_above": 1024,
-                              "type": "keyword"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "cardinality": {
-              "properties": {
-                "transaction": {
-                  "properties": {
-                    "name": {
-                      "properties": {
-                        "all_agents": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "rum": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "user_agent": {
-                  "properties": {
-                    "original": {
-                      "properties": {
-                        "all_agents": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "rum": {
-                          "properties": {
-                            "1d": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "counts": {
-              "properties": {
-                "agent_configuration": {
-                  "properties": {
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "error": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "max_error_groups_per_service": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "max_transaction_groups_per_service": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "metric": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "onboarding": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "services": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "sourcemap": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "span": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "traces": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "transaction": {
-                  "properties": {
-                    "1d": {
-                      "type": "long"
-                    },
-                    "all": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "has_any_services": {
-              "type": "boolean"
-            },
-            "indices": {
-              "properties": {
-                "all": {
-                  "properties": {
-                    "total": {
-                      "properties": {
-                        "docs": {
-                          "properties": {
-                            "count": {
-                              "type": "long"
-                            }
-                          }
-                        },
-                        "store": {
-                          "properties": {
-                            "size_in_bytes": {
-                              "type": "long"
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "shards": {
-                  "properties": {
-                    "total": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "integrations": {
-              "properties": {
-                "ml": {
-                  "properties": {
-                    "all_jobs_count": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "retainment": {
-              "properties": {
-                "error": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "metric": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "onboarding": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "span": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "transaction": {
-                  "properties": {
-                    "ms": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
-            "services_per_agent": {
-              "properties": {
-                "dotnet": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "go": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "java": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "js-base": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "nodejs": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "python": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "ruby": {
-                  "null_value": 0,
-                  "type": "long"
-                },
-                "rum-js": {
-                  "null_value": 0,
-                  "type": "long"
-                }
-              }
-            },
-            "tasks": {
-              "properties": {
-                "agent_configuration": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "agents": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "cardinality": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "groupings": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "indices_stats": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "integrations": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "processor_events": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "services": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                },
-                "versions": {
-                  "properties": {
-                    "took": {
-                      "properties": {
-                        "ms": {
-                          "type": "long"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "version": {
-              "properties": {
-                "apm_server": {
-                  "properties": {
-                    "major": {
-                      "type": "long"
-                    },
-                    "minor": {
-                      "type": "long"
-                    },
-                    "patch": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "dynamic": "false",
+          "type": "object"
+        },
+        "app_search_telemetry": {
+          "dynamic": "false",
+          "type": "object"
         },
         "application_usage_totals": {
           "dynamic": "false",
@@ -1514,32 +617,44 @@
             }
           }
         },
-        "endpoint:exceptions-artifact": {
+        "endpoint:user-artifact": {
           "properties": {
             "body": {
               "type": "binary"
+            },
+            "compressionAlgorithm": {
+              "index": false,
+              "type": "keyword"
             },
             "created": {
               "index": false,
               "type": "date"
             },
-            "encoding": {
+            "decodedSha256": {
+              "index": false,
+              "type": "keyword"
+            },
+            "decodedSize": {
+              "index": false,
+              "type": "long"
+            },
+            "encodedSha256": {
+              "type": "keyword"
+            },
+            "encodedSize": {
+              "index": false,
+              "type": "long"
+            },
+            "encryptionAlgorithm": {
               "index": false,
               "type": "keyword"
             },
             "identifier": {
               "type": "keyword"
-            },
-            "sha256": {
-              "type": "keyword"
-            },
-            "size": {
-              "index": false,
-              "type": "long"
             }
           }
         },
-        "endpoint:exceptions-manifest": {
+        "endpoint:user-artifact-manifest": {
           "properties": {
             "created": {
               "index": false,
@@ -1557,7 +672,18 @@
               "enabled": false,
               "type": "object"
             },
-            "installed": {
+            "installed_es": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              },
+              "type": "nested"
+            },
+            "installed_kibana": {
               "properties": {
                 "id": {
                   "type": "keyword"
@@ -1578,6 +704,234 @@
               "type": "boolean"
             },
             "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "exception-list": {
+          "properties": {
+            "_tags": {
+              "type": "keyword"
+            },
+            "comments": {
+              "properties": {
+                "comment": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "keyword"
+                },
+                "created_by": {
+                  "type": "keyword"
+                },
+                "updated_at": {
+                  "type": "keyword"
+                },
+                "updated_by": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "keyword"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "keyword"
+            },
+            "entries": {
+              "properties": {
+                "entries": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "field": {
+                  "type": "keyword"
+                },
+                "list": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  },
+                  "type": "keyword"
+                }
+              }
+            },
+            "item_id": {
+              "type": "keyword"
+            },
+            "list_id": {
+              "type": "keyword"
+            },
+            "list_type": {
+              "type": "keyword"
+            },
+            "meta": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "tie_breaker_id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "updated_by": {
+              "type": "keyword"
+            }
+          }
+        },
+        "exception-list-agnostic": {
+          "properties": {
+            "_tags": {
+              "type": "keyword"
+            },
+            "comments": {
+              "properties": {
+                "comment": {
+                  "type": "keyword"
+                },
+                "created_at": {
+                  "type": "keyword"
+                },
+                "created_by": {
+                  "type": "keyword"
+                },
+                "updated_at": {
+                  "type": "keyword"
+                },
+                "updated_by": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "created_at": {
+              "type": "keyword"
+            },
+            "created_by": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "keyword"
+            },
+            "entries": {
+              "properties": {
+                "entries": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "operator": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "fields": {
+                        "text": {
+                          "type": "text"
+                        }
+                      },
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "field": {
+                  "type": "keyword"
+                },
+                "list": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "operator": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "value": {
+                  "fields": {
+                    "text": {
+                      "type": "text"
+                    }
+                  },
+                  "type": "keyword"
+                }
+              }
+            },
+            "item_id": {
+              "type": "keyword"
+            },
+            "list_id": {
+              "type": "keyword"
+            },
+            "list_type": {
+              "type": "keyword"
+            },
+            "meta": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "tie_breaker_id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "updated_by": {
               "type": "keyword"
             }
           }
@@ -1653,9 +1007,6 @@
             "config_id": {
               "type": "keyword"
             },
-            "config_newest_revision": {
-              "type": "integer"
-            },
             "config_revision": {
               "type": "integer"
             },
@@ -1675,6 +1026,9 @@
             "last_checkin": {
               "type": "date"
             },
+            "last_checkin_status": {
+              "type": "keyword"
+            },
             "last_updated": {
               "type": "date"
             },
@@ -1689,6 +1043,12 @@
             },
             "type": {
               "type": "keyword"
+            },
+            "unenrolled_at": {
+              "type": "date"
+            },
+            "unenrollment_started_at": {
+              "type": "date"
             },
             "updated_at": {
               "type": "date"
@@ -2029,6 +1389,10 @@
             "agent_auto_upgrade": {
               "type": "keyword"
             },
+            "has_seen_add_data_notice": {
+              "index": false,
+              "type": "boolean"
+            },
             "kibana_ca_sha256": {
               "type": "keyword"
             },
@@ -2337,52 +1701,7 @@
               },
               "type": "text"
             },
-            "dashboard": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "map": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "search": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
             "space": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "visualization": {
               "fields": {
                 "keyword": {
                   "ignore_above": 256,
@@ -2466,22 +1785,26 @@
         "search": {
           "properties": {
             "columns": {
+              "index": false,
               "type": "keyword"
             },
             "description": {
               "type": "text"
             },
             "hits": {
+              "index": false,
               "type": "integer"
             },
             "kibanaSavedObjectMeta": {
               "properties": {
                 "searchSourceJSON": {
+                  "index": false,
                   "type": "text"
                 }
               }
             },
             "sort": {
+              "index": false,
               "type": "keyword"
             },
             "title": {
@@ -2493,12 +1816,8 @@
           }
         },
         "server": {
-          "dynamic": "strict",
-          "properties": {
-            "uuid": {
-              "type": "keyword"
-            }
-          }
+          "dynamic": "false",
+          "type": "object"
         },
         "siem-detection-engine-rule-actions": {
           "properties": {
@@ -2649,6 +1968,9 @@
                           "type": "text"
                         }
                       }
+                    },
+                    "type": {
+                      "type": "text"
                     }
                   }
                 },
@@ -2685,6 +2007,9 @@
                       "type": "text"
                     }
                   }
+                },
+                "type": {
+                  "type": "text"
                 }
               }
             },
@@ -2703,6 +2028,9 @@
             },
             "eventType": {
               "type": "keyword"
+            },
+            "excludedRowRendererIds": {
+              "type": "text"
             },
             "favorite": {
               "properties": {
@@ -3013,19 +2341,31 @@
         "upgrade-assistant-reindex-operation": {
           "properties": {
             "errorMessage": {
-              "type": "keyword"
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             },
             "indexName": {
               "type": "keyword"
             },
             "lastCompletedStep": {
-              "type": "integer"
+              "type": "long"
             },
             "locked": {
               "type": "date"
             },
             "newIndexName": {
-              "type": "keyword"
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             },
             "reindexOptions": {
               "properties": {
@@ -3045,7 +2385,13 @@
               }
             },
             "reindexTaskId": {
-              "type": "keyword"
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             },
             "reindexTaskPercComplete": {
               "type": "float"
@@ -3173,6 +2519,10 @@
               "type": "text"
             }
           }
+        },
+        "workplace_search_telemetry": {
+          "dynamic": "false",
+          "type": "object"
         }
       }
     },
@@ -5655,7 +5005,7 @@
                   "type": "keyword"
                 },
                 "risk_score": {
-                  "type": "keyword"
+                  "type": "float"
                 },
                 "risk_score_mapping": {
                   "properties": {
@@ -5737,6 +5087,16 @@
                     }
                   }
                 },
+                "threshold": {
+                  "properties": {
+                    "field": {
+                      "type": "keyword"
+                    },
+                    "value": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "timeline_id": {
                   "type": "keyword"
                 },
@@ -5765,6 +5125,9 @@
             },
             "status": {
               "type": "keyword"
+            },
+            "threshold_count": {
+              "type": "float"
             }
           }
         },

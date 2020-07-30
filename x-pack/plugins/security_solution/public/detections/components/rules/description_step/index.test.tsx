@@ -450,7 +450,7 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Severity label');
+        expect(result[0].title).toEqual('Severity');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
@@ -464,7 +464,7 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Risk score label');
+        expect(result[0].title).toEqual('Risk score');
         expect(result[0].description).toEqual(21);
       });
     });

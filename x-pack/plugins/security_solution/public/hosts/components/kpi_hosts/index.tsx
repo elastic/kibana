@@ -21,10 +21,10 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 const kpiWidgetHeight = 247;
 
 interface GenericKpiHostProps {
-  from: number;
+  from: string;
   id: string;
   loading: boolean;
-  to: number;
+  to: string;
   narrowDateRange: UpdateDateRange;
 }
 

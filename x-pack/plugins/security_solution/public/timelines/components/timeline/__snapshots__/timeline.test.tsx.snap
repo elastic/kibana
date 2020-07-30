@@ -804,7 +804,8 @@ In other use cases the message field can be used to concatenate different values
                   },
                 ]
               }
-              end={1521862432253}
+              docValueFields={Array []}
+              end="2018-03-24T03:33:52.253Z"
               eventType="raw"
               filters={Array []}
               id="foo"
@@ -901,6 +902,7 @@ In other use cases the message field can be used to concatenate different values
               }
               indexToAdd={Array []}
               isLive={false}
+              isLoadingSource={false}
               isSaving={false}
               itemsPerPage={5}
               itemsPerPageOptions={
@@ -928,7 +930,7 @@ In other use cases the message field can be used to concatenate different values
                   "sortDirection": "desc",
                 }
               }
-              start={1521830963132}
+              start="2018-03-23T18:49:23.132Z"
               status="active"
               timelineType="default"
               toggleColumn={[MockFunction]}

@@ -5,9 +5,10 @@
  */
 
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
+import { useFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
@@ -45,6 +46,11 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   style,
   noPadding,
 }) => {
+  const { setGlobalFullScreen } = useFullScreen();
+  useEffect(() => {
+    setGlobalFullScreen(false); // exit full screen mode on page load
+  }, [setGlobalFullScreen]);
+
   const classes = classNames(className, {
     siemWrapperPage: true,
     'siemWrapperPage--restrictWidthDefault':

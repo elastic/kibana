@@ -16,7 +16,7 @@ interface IMarkdownEditorForm {
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
-  onClickTimeline?: (timelineId: string) => void;
+  onClickTimeline?: (timelineId: string, graphEventId?: string) => void;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
   topRightContent?: React.ReactNode;

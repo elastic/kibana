@@ -27,7 +27,7 @@ export const config = {
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-      transactionGroupBucketSize: schema.number({ defaultValue: 100 }),
+      transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
       maxTraceItems: schema.number({ defaultValue: 1000 }),
     }),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),

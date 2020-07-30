@@ -65,7 +65,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       title: i18n.translate('management.stackManagement.title', {
         defaultMessage: 'Stack Management',
       }),
-      order: 9003,
+      order: 9040,
       euiIconType: 'managementApp',
       category: DEFAULT_APP_CATEGORIES.management,
       async mount(params: AppMountParameters) {

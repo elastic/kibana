@@ -83,7 +83,7 @@ export const getThresholdSignalQueryFields = (filter: unknown) => {
         return { ...acc, ...item.match_phrase };
       }
 
-      if (item.bool.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
+      if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
         return { ...acc, ...(item.bool.should[0].match || item.bool.should[0].match_phrase) };
       }
 

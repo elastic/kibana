@@ -8,10 +8,11 @@ export {
   ListSchema,
   CommentsArray,
   CreateCommentsArray,
-  Comments,
-  CreateComments,
+  Comment,
+  CreateComment,
   ExceptionListSchema,
   ExceptionListItemSchema,
+  CreateExceptionListSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   Entry,
@@ -27,6 +28,7 @@ export {
   OperatorType,
   OperatorTypeEnum,
   ExceptionListTypeEnum,
+  comment,
   exceptionListItemSchema,
   exceptionListType,
   createExceptionListItemSchema,
@@ -41,3 +43,5 @@ export {
   ExceptionListType,
   Type,
 } from './schemas';
+
+export { ENDPOINT_LIST_ID } from './constants';

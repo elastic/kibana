@@ -21,7 +21,7 @@ const tickFormatY = (y?: number) => {
   return asPercent(y || 0, 1);
 };
 
-export const ErroneousTransactionsRateChart = () => {
+export function ErroneousTransactionsRateChart() {
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 
@@ -105,4 +105,4 @@ export const ErroneousTransactionsRateChart = () => {
       />
     </EuiPanel>
   );
-};
+}

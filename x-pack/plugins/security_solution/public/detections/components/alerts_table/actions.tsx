@@ -97,8 +97,8 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 
   const from = moment(ecsData.timestamp ?? new Date())
     .subtract(ellapsedTimeRule)
-    .valueOf();
-  const to = moment(ecsData.timestamp ?? new Date()).valueOf();
+    .toISOString();
+  const to = moment(ecsData.timestamp ?? new Date()).toISOString();
 
   return { to, from };
 };

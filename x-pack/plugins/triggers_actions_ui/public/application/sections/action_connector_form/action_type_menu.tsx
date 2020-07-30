@@ -81,7 +81,7 @@ export const ActionTypeMenu = ({
         <EuiCard
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="l" type={item.iconClass} />}
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}

@@ -55,6 +55,10 @@ export const addPrepackedRulesRoute = (
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        // This will create the endpoint list if it does not exist yet
+        await context.lists?.getExceptionListClient().createEndpointList();
+
         const rulesFromFileSystem = getPrepackagedRules();
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);

@@ -13,16 +13,16 @@ export interface AbsoluteTimeRange {
   kind: 'absolute';
   fromStr: undefined;
   toStr: undefined;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }
 
 export interface RelativeTimeRange {
   kind: 'relative';
   fromStr: string;
   toStr: string;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
 }
 
 export const isRelativeTimeRange = (
@@ -35,10 +35,7 @@ export const isAbsoluteTimeRange = (
 
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
-export type URLTimeRange = Omit<TimeRange, 'from' | 'to'> & {
-  from: string | TimeRange['from'];
-  to: string | TimeRange['to'];
-};
+export type URLTimeRange = TimeRange;
 
 export interface Policy {
   kind: 'manual' | 'interval';
@@ -83,6 +80,7 @@ export interface InputsRange {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  fullScreen?: boolean;
 }
 
 export interface LinkTo {

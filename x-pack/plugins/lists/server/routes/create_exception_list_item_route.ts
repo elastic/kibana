@@ -16,12 +16,14 @@ import {
 } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
+import { endpointDisallowedFields } from './endpoint_disallowed_fields';
+import { validateExceptionListSize } from './validate';
 
 export const createExceptionListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
@@ -70,6 +72,22 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
               statusCode: 409,
             });
           } else {
+            if (exceptionList.type === 'endpoint') {
+              for (const entry of entries) {
+                if (entry.type === 'list') {
+                  return siemResponse.error({
+                    body: `cannot add exception item with entry of type "list" to endpoint exception list`,
+                    statusCode: 400,
+                  });
+                }
+                if (endpointDisallowedFields.includes(entry.field)) {
+                  return siemResponse.error({
+                    body: `cannot add endpoint exception item on field ${entry.field}`,
+                    statusCode: 400,
+                  });
+                }
+              }
+            }
             const createdList = await exceptionLists.createExceptionListItem({
               _tags,
               comments,
@@ -87,6 +105,18 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
+              const listSizeError = await validateExceptionListSize(
+                exceptionLists,
+                listId,
+                namespaceType
+              );
+              if (listSizeError != null) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error(listSizeError);
+              }
               return response.ok({ body: validated ?? {} });
             }
           }

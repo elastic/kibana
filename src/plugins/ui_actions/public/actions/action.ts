@@ -68,6 +68,13 @@ export interface Action<Context extends {} = {}, T = ActionType>
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
+
+  /**
+   * Determines if action should be executed automatically,
+   * without first showing up in context menu.
+   * false by default.
+   */
+  shouldAutoExecute?(context: Context): Promise<boolean>;
 }
 
 /**
@@ -89,6 +96,13 @@ export interface ActionDefinition<Context extends object = object>
    * Executes the action.
    */
   execute(context: Context): Promise<void>;
+
+  /**
+   * Determines if action should be executed automatically,
+   * without first showing up in context menu.
+   * false by default.
+   */
+  shouldAutoExecute?(context: Context): Promise<boolean>;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

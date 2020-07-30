@@ -10,6 +10,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
 import { OpenTimelineResult, OpenTimelineProps } from '../types';
 import { TimelinesTableProps } from '../timelines_table';

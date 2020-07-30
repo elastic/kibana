@@ -20,6 +20,8 @@ import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_s
 import { vislibPointSeriesTypes } from './point_series';
 import percentileTestdata from './testdata_linechart_percentile.json';
 import percentileTestdataResult from './testdata_linechart_percentile_result.json';
+import percentileTestdataFloatValue from './testdata_linechart_percentile_float_value.json';
+import percentileTestdataFloatValueResult from './testdata_linechart_percentile_float_value_result.json';
 
 const maxBucketData = {
   get: (prop) => {
@@ -215,18 +217,26 @@ describe('Point Series Config Type Class Test Suite', function () {
   });
 
   describe('line chart', function () {
-    beforeEach(function () {
+    function prepareData({ cfg, data }) {
       const percentileDataObj = {
         get: (prop) => {
           return maxBucketData[prop] || maxBucketData.data[prop] || null;
         },
         getLabels: () => [],
-        data: percentileTestdata.data,
+        data: data,
       };
-      parsedConfig = vislibPointSeriesTypes.line(percentileTestdata.cfg, percentileDataObj);
-    });
+      const parsedConfig = vislibPointSeriesTypes.line(cfg, percentileDataObj);
+      return parsedConfig;
+    }
+
     it('should render a percentile line chart', function () {
-      expect(JSON.stringify(parsedConfig)).toEqual(JSON.stringify(percentileTestdataResult));
+      const parsedConfig = prepareData(percentileTestdata);
+      expect(parsedConfig).toMatchObject(percentileTestdataResult);
+    });
+
+    it('should render a percentile line chart when value is float', function () {
+      const parsedConfig = prepareData(percentileTestdataFloatValue);
+      expect(parsedConfig).toMatchObject(percentileTestdataFloatValueResult);
     });
   });
 });

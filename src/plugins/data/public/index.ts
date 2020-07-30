@@ -58,6 +58,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
   convertRangeFilterToTimeRangeString,
 } from './query';
 
@@ -99,6 +100,7 @@ export const esFilters = {
   convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
+  extractTimeRange,
 };
 
 export {
@@ -313,7 +315,7 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
   // aggs
@@ -437,6 +439,8 @@ export {
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+
+export { ApplyGlobalFilterActionContext } from './actions';
 
 export * from '../common/field_mapping';
 

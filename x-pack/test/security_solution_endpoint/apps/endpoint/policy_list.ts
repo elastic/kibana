@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
+          `v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
@@ -129,6 +129,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
         const endpointConfig = await pageObjects.policy.findPackageConfigEndpointCustomConfiguration();
         expect(endpointConfig).not.to.be(undefined);
+      });
+
+      it('should have empty value for package configuration name', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        expect(await pageObjects.ingestManagerCreatePackageConfig.getPackageConfigName()).to.be('');
       });
 
       it('should redirect user back to Policy List after a successful save', async () => {
