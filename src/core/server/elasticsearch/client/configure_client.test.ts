@@ -141,7 +141,7 @@ describe('configureClient', () => {
         headers: {},
         params: {
           method: 'GET',
-          path: '/foo',
+          path: '/_path',
           querystring: { hello: 'dolly' },
         },
         body: {
@@ -156,7 +156,7 @@ describe('configureClient', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "400 GET /foo [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
+            "400 GET /_path [illegal_argument_exception]: request [/_path] contains unrecognized parameter: [name]",
           ],
         ]
       `);
