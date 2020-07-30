@@ -37,6 +37,8 @@ export interface BundleSpec {
   readonly sourceRoot: string;
   /** Absolute path to the directory where output should be written */
   readonly outputDir: string;
+  /** Banner that should be written to all bundle JS files */
+  readonly banner?: string;
 }
 
 export class Bundle {
@@ -56,6 +58,8 @@ export class Bundle {
   public readonly sourceRoot: BundleSpec['sourceRoot'];
   /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
+  /** Banner that should be written to all bundle JS files */
+  public readonly banner: BundleSpec['banner'];
 
   public readonly cache: BundleCache;
 
@@ -66,6 +70,7 @@ export class Bundle {
     this.contextDir = spec.contextDir;
     this.sourceRoot = spec.sourceRoot;
     this.outputDir = spec.outputDir;
+    this.banner = spec.banner;
 
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
@@ -98,6 +103,7 @@ export class Bundle {
       contextDir: this.contextDir,
       sourceRoot: this.sourceRoot,
       outputDir: this.outputDir,
+      banner: this.banner,
     };
   }
 }
@@ -154,6 +160,13 @@ export function parseBundles(json: string) {
           throw new Error('`bundles[]` must have an absolute path `outputDir` property');
         }
 
+        const { banner } = spec;
+        if (banner !== undefined) {
+          if (!(typeof banner === 'string')) {
+            throw new Error('`bundles[]` must have a string `banner` property');
+          }
+        }
+
         return new Bundle({
           type,
           id,
@@ -161,6 +174,7 @@ export function parseBundles(json: string) {
           contextDir,
           sourceRoot,
           outputDir,
+          banner,
         });
       }
     );
