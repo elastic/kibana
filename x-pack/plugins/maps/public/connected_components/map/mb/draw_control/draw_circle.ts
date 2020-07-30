@@ -6,9 +6,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// @ts-ignore
+// @ts-expect-error
 import turfDistance from '@turf/distance';
-// @ts-ignore
+// @ts-expect-error
 import turfCircle from '@turf/circle';
 
 type DrawCircleState = {

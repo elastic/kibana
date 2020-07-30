@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import turfBbox from '@turf/bbox';
 import { FeatureCollection } from 'geojson';
 import { MapExtent } from '../../../common/descriptor_types';

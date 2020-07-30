@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-// @ts-ignore
 import bboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';

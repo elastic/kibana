@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
-// @ts-ignore
 import bbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';

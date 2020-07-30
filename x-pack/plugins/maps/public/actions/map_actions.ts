@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
-// @ts-ignore
 import bboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import uuid from 'uuid/v4';
