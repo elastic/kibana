@@ -200,7 +200,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   public async update<T>(
     type: string,
     id: string,
-    attributes: Partial<T>,
+    attributes: T,
     options?: SavedObjectsUpdateOptions
   ) {
     if (!this.options.service.isRegistered(type)) {
@@ -212,13 +212,20 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       options?.namespace
     );
     return this.handleEncryptedAttributesInResponse(
-      await this.options.baseClient.update(
+      await this.options.baseClient.create<T>(
         type,
-        id,
-        await this.options.service.encryptAttributes({ type, id, namespace }, attributes, {
-          user: this.options.getCurrentUser(),
-        }),
-        options
+        (await this.options.service.encryptAttributes(
+          { type, id, namespace },
+          attributes as Record<string, unknown>,
+          {
+            user: this.options.getCurrentUser(),
+          }
+        )) as T,
+        {
+          id,
+          overwrite: true,
+          ...options,
+        }
       ),
       attributes,
       namespace

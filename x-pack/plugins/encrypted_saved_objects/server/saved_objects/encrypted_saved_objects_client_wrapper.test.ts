@@ -1294,7 +1294,7 @@ describe('#update', () => {
       references: [],
     };
 
-    mockBaseClient.update.mockResolvedValue(mockedResponse);
+    mockBaseClient.create.mockResolvedValue(mockedResponse);
 
     await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
       ...mockedResponse,
@@ -1313,17 +1313,17 @@ describe('#update', () => {
       { user: mockAuthenticatedUser() }
     );
 
-    expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.update).toHaveBeenCalledWith(
+    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.create).toHaveBeenCalledWith(
       'known-type',
-      'some-id',
+
       {
         attrOne: 'one',
         attrSecret: '*secret*',
         attrNotSoSecret: '*not-so-secret*',
         attrThree: 'three',
       },
-      options
+      { id: 'some-id', overwrite: true, ...options }
     );
   });
 
@@ -1333,7 +1333,7 @@ describe('#update', () => {
       const options = { version: 'some-version', namespace };
       const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
 
-      mockBaseClient.update.mockResolvedValue(mockedResponse);
+      mockBaseClient.create.mockResolvedValue(mockedResponse);
 
       await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
         ...mockedResponse,
@@ -1351,12 +1351,12 @@ describe('#update', () => {
         { user: mockAuthenticatedUser() }
       );
 
-      expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
-      expect(mockBaseClient.update).toHaveBeenCalledWith(
+      expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.create).toHaveBeenCalledWith(
         'known-type',
-        'some-id',
+
         { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-        options
+        { id: 'some-id', overwrite: true, ...options }
       );
     };
 
@@ -1372,7 +1372,7 @@ describe('#update', () => {
 
   it('fails if base client fails', async () => {
     const failureReason = new Error('Something bad happened...');
-    mockBaseClient.update.mockRejectedValue(failureReason);
+    mockBaseClient.create.mockRejectedValue(failureReason);
 
     await expect(
       wrapper.update('known-type', 'some-id', {
@@ -1382,12 +1382,11 @@ describe('#update', () => {
       })
     ).rejects.toThrowError(failureReason);
 
-    expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.update).toHaveBeenCalledWith(
+    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.create).toHaveBeenCalledWith(
       'known-type',
-      'some-id',
       { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-      undefined
+      { id: 'some-id', overwrite: true }
     );
   });
 });
