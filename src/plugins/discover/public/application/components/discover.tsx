@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import moment from 'moment';
 import { EuiResizableContainer } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
 import { HitsCounter } from './hits_counter';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { TimechartHeader } from './timechart_header';
@@ -31,7 +32,7 @@ import { DiscoverUninitialized } from '../angular/directives/uninitialized';
 import { DiscoverHistogram } from '../angular/directives/histogram';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DiscoverFetchError } from './fetch_error/fetch_error';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonToggle } from '@elastic/eui';
+import './discover.scss';
 
 export function Discover({
   addColumn,
@@ -69,6 +70,7 @@ export function Discover({
   updateQuery,
   updateSavedQueryId,
 }: any) {
+  const [toggleOn, toggleChart] = useState(true);
   const toMoment = function (datetime: string) {
     if (!datetime) {
       return '';
@@ -80,10 +82,9 @@ export function Discover({
   }
   const { TopNavMenu } = getServices().navigation.ui;
   const { savedSearch } = opts;
-  const [toggleOn, setToggleOn] = useState(true);
 
   const onToggleChange = (e) => {
-    setToggleOn(e.target.checked);
+    toggleChart(e.target.checked);
   };
 
   return (
@@ -170,7 +171,7 @@ export function Discover({
                                 onResetQuery={resetQuery}
                               />
                             </EuiFlexItem>
-                            <EuiFlexItem className="dscResultCount__actions eui-textTruncate eui-textNoWrap">
+                            <EuiFlexItem className="dscResultCount__actions">
                               <TimechartHeader
                                 from={toMoment(timeRange.from)}
                                 to={toMoment(timeRange.to)}
@@ -182,7 +183,7 @@ export function Discover({
                                 bucketIntervalScale={bucketInterval.scale}
                               />
                             </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
+                            <EuiFlexItem className="dscResultCount__toggle" grow={false}>
                               <EuiButtonToggle
                                 label={toggleOn ? 'Hide chart' : 'Show chart'}
                                 iconType={toggleOn ? 'eyeClosed' : 'eye'}
