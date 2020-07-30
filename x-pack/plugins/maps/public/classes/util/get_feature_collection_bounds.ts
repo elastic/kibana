@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore
-import turf from 'turf';
+import turfBbox from '@turf/bbox';
 import { FeatureCollection } from 'geojson';
 import { MapExtent } from '../../../common/descriptor_types';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
@@ -28,7 +28,7 @@ export function getFeatureCollectionBounds(
     return null;
   }
 
-  const bbox = turf.bbox({
+  const bbox = turfBbox({
     type: 'FeatureCollection',
     features: visibleFeatures,
   });

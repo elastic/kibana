@@ -7,9 +7,10 @@
 
 import { Dispatch } from 'redux';
 // @ts-ignore
-import turf from 'turf';
-import uuid from 'uuid/v4';
+import bboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+import uuid from 'uuid/v4';
+
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -126,13 +127,13 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
     if (extent) {
       let doesBufferContainExtent = false;
       if (buffer) {
-        const bufferGeometry = turf.bboxPolygon([
+        const bufferGeometry = bboxPolygon([
           buffer.minLon,
           buffer.minLat,
           buffer.maxLon,
           buffer.maxLat,
         ]);
-        const extentGeometry = turf.bboxPolygon([
+        const extentGeometry = bboxPolygon([
           extent.minLon,
           extent.minLat,
           extent.maxLon,

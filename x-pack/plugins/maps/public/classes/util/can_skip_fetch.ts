@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 // @ts-ignore
-import turf from 'turf';
+import bboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';
 import { ISource } from '../sources/source';
@@ -27,13 +27,13 @@ export function updateDueToExtent(prevMeta: DataMeta = {}, nextMeta: DataMeta = 
     return NO_SOURCE_UPDATE_REQUIRED;
   }
 
-  const previousBufferGeometry = turf.bboxPolygon([
+  const previousBufferGeometry = bboxPolygon([
     previousBuffer.minLon,
     previousBuffer.minLat,
     previousBuffer.maxLon,
     previousBuffer.maxLat,
   ]);
-  const newBufferGeometry = turf.bboxPolygon([
+  const newBufferGeometry = bboxPolygon([
     newBuffer.minLon,
     newBuffer.minLat,
     newBuffer.maxLon,
