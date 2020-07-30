@@ -158,7 +158,7 @@ export type AppenderConfigType = TypeOf<typeof appendersSchema>;
 // @public
 export function assertNever(x: never): never;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
     // (undocumented)
     indices: {
@@ -168,7 +168,7 @@ export interface AssistanceAPIResponse {
     };
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
     method: 'GET';
@@ -622,7 +622,7 @@ export interface DeleteDocumentResponse {
     _version: number;
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
     // (undocumented)
     method: 'GET';
@@ -630,7 +630,7 @@ export interface DeprecationAPIClientParams extends GenericParams {
     path: '/_migration/deprecations';
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface DeprecationAPIResponse {
     // (undocumented)
     cluster_settings: DeprecationInfo[];
@@ -642,7 +642,7 @@ export interface DeprecationAPIResponse {
     node_settings: DeprecationInfo[];
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface DeprecationInfo {
     // (undocumented)
     details?: string;
@@ -677,6 +677,14 @@ export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transpo
     transport: {
         request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
     };
+};
+
+// @public
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'logQueries' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password'> & {
+    pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
+    requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
+    ssl?: Partial<ElasticsearchConfig['ssl']>;
+    keepAlive?: boolean;
 };
 
 // @public
@@ -715,6 +723,8 @@ export interface ElasticsearchServiceSetup {
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
+    readonly client: IClusterClient;
+    readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
     // @deprecated (undocumented)
     legacy: {
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
@@ -896,6 +906,12 @@ export interface HttpServiceStart {
 export type IBasePath = Pick<BasePath, keyof BasePath>;
 
 // @public
+export interface IClusterClient {
+    readonly asInternalUser: ElasticsearchClient;
+    asScoped: (request: ScopeableRequest) => IScopedClusterClient;
+}
+
+// @public
 export interface IContextContainer<THandler extends HandlerFunction<any>> {
     createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
@@ -912,6 +928,11 @@ export interface ICspConfig {
     readonly rules: string[];
     readonly strict: boolean;
     readonly warnLegacyBrowsers: boolean;
+}
+
+// @public
+export interface ICustomClusterClient extends IClusterClient {
+    close: () => Promise<void>;
 }
 
 // @public
@@ -935,13 +956,13 @@ export interface IKibanaSocket {
     getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
 }
 
-// @public
+// @public @deprecated
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
-// @public
+// @public @deprecated
 export type ILegacyCustomClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'close' | 'asScoped'>;
 
-// @public
+// @public @deprecated
 export type ILegacyScopedClusterClient = Pick<LegacyScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 
 // @public (undocumented)
@@ -956,7 +977,7 @@ export interface ImageValidation {
 // @public
 export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
     [indexName: string]: DeprecationInfo[];
@@ -996,6 +1017,12 @@ export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedOb
 
 // @public
 export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
+
+// @public
+export interface IScopedClusterClient {
+    readonly asCurrentUser: ElasticsearchClient;
+    readonly asInternalUser: ElasticsearchClient;
+}
 
 // @public
 export function isRelativeUrl(candidatePath: string): boolean;
@@ -1086,7 +1113,7 @@ export const kibanaResponseFactory: {
 // @public
 export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: LegacyCallAPIOptions): ReturnType<Client['bulk']>;
@@ -1330,15 +1357,13 @@ export interface LegacyAPICaller {
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<T>;
 }
 
-// @public
+// @public @deprecated
 export interface LegacyCallAPIOptions {
     signal?: AbortSignal;
     wrap401Errors?: boolean;
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IClusterClient"
-//
-// @public (undocumented)
+// @public @deprecated
 export class LegacyClusterClient implements ILegacyClusterClient {
     constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
@@ -1360,7 +1385,7 @@ export interface LegacyConfig {
     set(config: LegacyVars): void;
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> & Pick<ElasticsearchConfig, 'apiVersion' | 'customHeaders' | 'logQueries' | 'requestHeadersWhitelist' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'hosts' | 'username' | 'password'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
@@ -1368,7 +1393,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
     ssl?: Partial<ElasticsearchConfig['ssl']>;
 };
 
-// @public (undocumented)
+// @public
 export interface LegacyElasticsearchError extends Boom {
     // (undocumented)
     [code]?: string;
@@ -1401,9 +1426,7 @@ export class LegacyInternals implements ILegacyInternals {
 export interface LegacyRequest extends Request {
 }
 
-// Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "kibana" does not have an export "IScopedClusterClient"
-//
-// @public (undocumented)
+// @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
@@ -1559,10 +1582,10 @@ export interface LogRecord {
 export interface MetricsServiceSetup {
 }
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
-// @public (undocumented)
+// @public @deprecated (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 
 // @public
@@ -1812,6 +1835,7 @@ export interface RequestHandlerContext {
             typeRegistry: ISavedObjectTypeRegistry;
         };
         elasticsearch: {
+            client: IScopedClusterClient;
             legacy: {
                 client: ILegacyScopedClusterClient;
             };
