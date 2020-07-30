@@ -195,6 +195,91 @@ describe('KibanaRequest', () => {
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
+
+      describe('all aborted$ completed called in registration order', () => {
+        it('request handled', async () => {
+          const order: string[] = [];
+          const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
+            setupDeps
+          );
+          const router = createRouter('/');
+          registerOnPreAuth((request, response, toolkit) => {
+            request.events.aborted$.subscribe({
+              complete: () => {
+                order.push('complete aborted$ from registerOnPreAuth');
+              },
+            });
+            return toolkit.next();
+          });
+
+          router.get({ path: '/', validate: false }, async (context, request, res) => {
+            order.push('route handler');
+            request.events.aborted$.subscribe({
+              next: () => order.push('next from route handler'),
+              complete: () => order.push('complete aborted$ from route handler'),
+            });
+
+            return res.badRequest();
+          });
+
+          await server.start();
+
+          await supertest(innerServer.listener).get('/');
+
+          expect(order).toMatchInlineSnapshot(`
+          Array [
+            "route handler",
+            "complete aborted$ from registerOnPreAuth",
+            "complete aborted$ from route handler",
+          ]
+        `);
+        });
+        it('request aborted', async (done) => {
+          const order: string[] = [];
+          expect.assertions(1);
+          const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
+            setupDeps
+          );
+          const router = createRouter('/');
+
+          registerOnPreAuth((request, response, toolkit) => {
+            request.events.aborted$.subscribe({
+              complete: () => {
+                order.push('complete aborted$ from registerOnPreAuth');
+              },
+            });
+            return toolkit.next();
+          });
+
+          router.get({ path: '/', validate: false }, async (context, request, res) => {
+            order.push('route handler');
+            request.events.aborted$.subscribe({
+              complete: () => {
+                expect(order).toMatchInlineSnapshot(`
+                  Array [
+                    "route handler",
+                    "complete aborted$ from registerOnPreAuth",
+                  ]
+                `);
+                done();
+              },
+            });
+
+            // prevents the server to respond
+            await delay(30000);
+            return res.ok({ body: 'ok' });
+          });
+
+          await server.start();
+
+          const incomingRequest = supertest(innerServer.listener)
+            .get('/')
+            // end required to send request
+            .end();
+
+          setTimeout(() => incomingRequest.abort(), 50);
+        });
+      });
     });
   });
 });
