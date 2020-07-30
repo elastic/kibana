@@ -186,7 +186,7 @@ export class KibanaRequest<
 
   private getEvents(request: Request): KibanaRequestEvents {
     const finish$ = merge(
-      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.res, 'finish'), // Response is done
       fromEvent(request.raw.req, 'close') // connection was closed
     ).pipe(shareReplay(1), first());
     return {
