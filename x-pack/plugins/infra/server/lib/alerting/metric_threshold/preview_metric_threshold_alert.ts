@@ -36,7 +36,7 @@ export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
   iterations?: number,
   precalculatedNumberOfGroups?: number
-) => Promise<Array<number | null>> = async (
+) => Promise<number[][]> = async (
   {
     callCluster,
     params,
@@ -77,15 +77,6 @@ export const previewMetricThresholdAlert: (
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
     const previewResults = await Promise.all(
       groups.map(async (group) => {
-        const isNoData = alertResults.some((alertResult) => alertResult[group].isNoData);
-        if (isNoData) {
-          return null;
-        }
-        const isError = alertResults.some((alertResult) => alertResult[group].isError);
-        if (isError) {
-          return NaN;
-        }
-
         // Interpolate the buckets returned by evaluateAlert and return a count of how many of these
         // buckets would have fired the alert. If the alert interval and bucket interval are the same,
         // this will be a 1:1 evaluation of the alert results. If these are different, the interpolation
@@ -95,14 +86,25 @@ export const previewMetricThresholdAlert: (
           numberOfResultBuckets / alertResultsPerExecution
         );
         let numberOfTimesFired = 0;
+        let numberOfNoDataResults = 0;
+        let numberOfErrors = 0;
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
           const allConditionsFiredInMappedBucket = alertResults.every(
             (alertResult) => alertResult[group].shouldFire[mappedBucketIndex]
           );
+          const someConditionsNoDataInMappedBucket = alertResults.some((alertResult) => {
+            const hasNoData = alertResult[group].isNoData as boolean[];
+            return hasNoData[mappedBucketIndex];
+          });
+          const someConditionsErrorInMappedBucket = alertResults.some((alertResult) => {
+            return alertResult[group].isError;
+          });
           if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
+          if (someConditionsNoDataInMappedBucket) numberOfNoDataResults++;
+          if (someConditionsErrorInMappedBucket) numberOfErrors++;
         }
-        return numberOfTimesFired;
+        return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors];
       })
     );
     return previewResults;
@@ -152,9 +154,9 @@ export const previewMetricThresholdAlert: (
           // so filter these results out entirely and only regard the resultA portion
           .filter((value) => typeof value !== 'undefined')
           .reduce((a, b) => {
-            if (typeof a !== 'number') return a;
-            if (typeof b !== 'number') return b;
-            return a + b;
+            if (!a) return b;
+            if (!b) return a;
+            return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
           })
       );
       return zippedResult as any;
