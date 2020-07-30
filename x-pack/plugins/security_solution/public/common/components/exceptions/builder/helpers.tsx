@@ -75,27 +75,38 @@ export const getFilteredIndexPatterns = (
   }
 };
 
-// fields.filter(({ name }) => {
-//   if (field != null && selectedFieldIsTextType) {
-//     const keywordField = field.split('.').slice(-1).join('.');
+/**
+ * Fields of type 'text' do not generate autocomplete values, we want
+ * to find it's corresponding keyword type (if available) which does
+ * generate autocomplete values
+ *
+ * @param fields IFieldType fields
+ * @param selectedField the field name that was selected
+ * @param isTextType we only want a corresponding keyword field if
+ * the selected field is of type 'text'
+ *
+ */
+export const getCorrespondingKeywordField = ({
+  fields,
+  selectedField,
+}: {
+  fields: IFieldType[];
+  selectedField: string | undefined;
+}): IFieldType | undefined => {
+  const selectedFieldBits =
+    selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
+  const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
 
-//     return field === name || name === keywordField;
-//   } else {
-//     return field != null && field === name;
-//   }
-// }).reduce<{ foundField: IFieldType | null; foundKeywordField: IFieldType | null}>((acc, foundField) => {
-// if (selectedFieldIsTextType && foundField.esTypes != null && foundField.esTypes.includes('keyword')) {
-//   return {
-//     ...acc,
-//     foundKeywordField: foundField,
-//   }
-// } else {
-//   return {
-//     ...acc,
-//     foundField
-//   }
-// }
-// }, { foundField: null, foundKeywordField: null});
+  if (selectedFieldIsTextType && selectedFieldBits.length > 0) {
+    const keywordField = selectedFieldBits.slice(0, selectedFieldBits.length - 1).join('.');
+    const [foundKeywordField] = fields.filter(
+      ({ name }) => keywordField !== '' && keywordField === name
+    );
+    return foundKeywordField;
+  }
+
+  return undefined;
+};
 
 /**
  * Formats the entry into one that is easily usable for the UI, most of the
@@ -117,41 +128,16 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
-  const selectedFieldIsTextType = field != null && field.split('.').slice(-1)[0] === 'text';
-  const [selectedField] = fields.filter(({ name }) => field != null && field === name);
-  const foundFields = fields
-    .filter(({ name }) => {
-      if (field != null && selectedFieldIsTextType) {
-        const fieldBits = field.split('.');
-        const keywordField = fieldBits.slice(0, fieldBits.length - 1).join('.');
-
-        return field === name || name === keywordField;
-      } else {
-        return field != null && field === name;
-      }
-    })
-    .reduce<{ foundField: IFieldType; foundKeywordField: IFieldType }>((acc, foundField) => {
-      if (
-        selectedFieldIsTextType &&
-        foundField.esTypes != null &&
-        foundField.esTypes.includes('keyword')
-      ) {
-        return {
-          ...acc,
-          foundKeywordField: foundField,
-        };
-      } else {
-        return {
-          ...acc,
-          foundField,
-        };
-      }
-    }, {});
+  const [foundField] = fields.filter(({ name }) => field != null && field === name);
+  const correspondingKeywordField = getCorrespondingKeywordField({
+    fields,
+    selectedField: field,
+  });
 
   if (parent != null && parentIndex != null) {
     return {
-      field: foundFields.foundField,
-      correspondingKeywordField: foundFields.foundKeywordField,
+      field: foundField,
+      correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -160,8 +146,8 @@ export const getFormattedBuilderEntry = (
     };
   } else {
     return {
-      field: foundFields.foundField,
-      correspondingKeywordField: foundFields.foundKeywordField,
+      field: foundField,
+      correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: undefined,
@@ -220,6 +206,7 @@ export const getFormattedBuilderEntries = (
         value: undefined,
         entryIndex: index,
         parent: undefined,
+        correspondingKeywordField: undefined,
       };
 
       // User has selected to add a nested field, but not yet selected the field
