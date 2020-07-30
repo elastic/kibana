@@ -25,6 +25,7 @@ export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
 }> = ({ combinedJob, heightOffset = 0 }) => {
+  // the ace editor requires a fixed height
   const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
     heightOffset,
   ]);
