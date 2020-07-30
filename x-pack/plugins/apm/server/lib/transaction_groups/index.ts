@@ -10,19 +10,11 @@ import {
   SetupUIFilters,
 } from '../helpers/setup_request';
 import { transactionGroupsFetcher, Options } from './fetcher';
-import { transactionGroupsTransformer } from './transform';
 
 export async function getTransactionGroupList(
   options: Options,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end } = setup;
   const bucketSize = setup.config['xpack.apm.ui.transactionGroupBucketSize'];
-  const response = await transactionGroupsFetcher(options, setup, bucketSize);
-  return transactionGroupsTransformer({
-    response,
-    start,
-    end,
-    bucketSize,
-  });
+  return await transactionGroupsFetcher(options, setup, bucketSize);
 }
