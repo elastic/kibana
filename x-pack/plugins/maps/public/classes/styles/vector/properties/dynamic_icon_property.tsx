@@ -6,13 +6,18 @@
 
 import _ from 'lodash';
 import React from 'react';
+import { EuiTextColor } from '@elastic/eui';
+import { Map as MbMap } from 'mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
+// @ts-expect-error
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
-import { EuiTextColor } from '@elastic/eui';
+import { LegendProps } from './style_property';
 
-export class DynamicIconProperty extends DynamicStyleProperty {
+export class DynamicIconProperty<IconDynamicOptions> extends DynamicStyleProperty<
+  IconDynamicOptions
+> {
   isOrdinal() {
     return false;
   }
@@ -26,7 +31,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     return palette.length;
   }
 
-  syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
+  syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
     if (this._isIconDynamicConfigComplete()) {
       mbMap.setLayoutProperty(
         symbolLayerId,
@@ -64,11 +69,11 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     });
   }
 
-  _getMbIconImageExpression(iconPixelSize) {
+  _getMbIconImageExpression(iconPixelSize: number) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
-      //occurs when no data
+      // occurs when no data
       return null;
     }
 
@@ -79,16 +84,16 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     });
 
     if (fallbackSymbolId) {
-      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); //last item is fallback style for anything that does not match provided stops
+      mbStops.push(getMakiIconId(fallbackSymbolId, iconPixelSize)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
-      //occurs when no data
+      // occurs when no data
       return null;
     }
 
@@ -99,16 +104,16 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     });
 
     if (fallbackSymbolId) {
-      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); //last item is fallback style for anything that does not match provided stops
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
+    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
   _isIconDynamicConfigComplete() {
     return this._field && this._field.isValid();
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
     const breaks = [];
     stops.forEach(({ stop, style }) => {
