@@ -86,11 +86,6 @@ export default ({ getService }: FtrProviderContext) => {
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
         job_id: originalAnnotation._source.job_id,
-        type: ANNOTATION_TYPE.ANNOTATION,
-        event: 'model_change',
-        detector_index: 2,
-        partition_field_name: 'airline',
-        partition_field_value: 'ANA',
         _id: originalAnnotation._id,
       };
 
@@ -120,15 +115,8 @@ export default ({ getService }: FtrProviderContext) => {
       const originalAnnotation = annotationsForJob[0];
 
       const annotationUpdateRequestBody = {
-        timestamp: Date.now(),
-        end_timestamp: Date.now(),
-        annotation: 'Updated annotation',
+        ...commonAnnotationUpdateRequestBody,
         job_id: originalAnnotation._source.job_id,
-        type: ANNOTATION_TYPE.ANNOTATION,
-        event: 'model_change',
-        detector_index: 2,
-        partition_field_name: 'airline',
-        partition_field_value: 'ANA',
         _id: originalAnnotation._id,
       };
 

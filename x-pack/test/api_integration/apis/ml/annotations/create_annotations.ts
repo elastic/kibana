@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(fetchedAnnotation?.create_username).to.eql(USER.ML_POWERUSER);
     });
 
-    it('should successfully create annotation for user without required permission', async () => {
+    it('should successfully create annotation for user with ML read permissions', async () => {
       const { body } = await supertest
         .put('/api/ml/annotations/index')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
