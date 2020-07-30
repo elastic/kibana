@@ -12,10 +12,13 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
+
+import { useAppDependencies } from '../../../app_context';
 import { ActionParamsProps } from '../../../../types';
-import { JiraActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
+import { JiraActionParams } from './types';
+import { getCreateIssueMetadata } from './api';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -23,7 +26,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   index,
   errors,
   messageVariables,
+  actionConnector,
 }) => {
+  const { http } = useAppDependencies();
   const { title, description, comments, issueType, priority, labels, savedObjectId } =
     actionParams.subActionParams || {};
 
@@ -61,6 +66,21 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     const newProps = { ...actionParams.subActionParams, [key]: value };
     editAction('subActionParams', newProps, index);
   };
+
+  useEffect(() => {
+    let cancel = false;
+    const fetchData = async () => {
+      const createIssueMetadata = await getCreateIssueMetadata({
+        http,
+        connectorId: actionConnector.id,
+      });
+      console.log('createIssueMetadata', createIssueMetadata);
+    };
+    fetchData();
+    return () => {
+      cancel = true;
+    };
+  }, [http, actionConnector]);
 
   useEffect(() => {
     if (!actionParams.subAction) {
