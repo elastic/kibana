@@ -10,7 +10,7 @@ import { map } from 'rxjs/operators';
 import { getData } from '../../kibana_services';
 import { kbnUrlStateStorage } from '../maps_router';
 
-export function useAppStateSyncing(appStateManager) {
+export function startAppStateSyncing(appStateManager) {
   // get appStateContainer
   // sync app filters with app state container from data.query to state container
   const { query } = getData();
@@ -31,6 +31,7 @@ export function useAppStateSyncing(appStateManager) {
   };
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(query, stateContainer, {
     filters: esFilters.FilterStateStore.APP_STATE,
+    query: true,
   });
 
   // sets up syncing app state container with url
