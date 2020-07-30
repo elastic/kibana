@@ -6,7 +6,9 @@ def withPostBuildReporting(Closure closure) {
       runErrorReporter()
     }
 
-    postBuildReporting()
+    catchErrors {
+      publishJunit()
+    }
 
     def parallelWorkspace = "${env.WORKSPACE}/parallel"
     if (fileExists(parallelWorkspace)) {
@@ -22,8 +24,8 @@ def withPostBuildReporting(Closure closure) {
           .each { workspaceDir ->
             workspaceTasks[workspaceDir] = {
               dir(workspaceDir) {
-                stage('Post-Build') { // This stage is just to massage the Test Result UI in Jenkins
-                  postBuildReporting()
+                catchErrors {
+                  runbld.junit()
                 }
               }
             }
@@ -34,16 +36,6 @@ def withPostBuildReporting(Closure closure) {
         }
       }
     }
-  }
-}
-
-def postBuildReporting() {
-  catchErrors {
-    runbld.junit()
-  }
-
-  catchErrors {
-    publishJunit()
   }
 }
 
@@ -183,6 +175,10 @@ def withGcsArtifactUpload(workerName, closure) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+
+  dir(env.WORKSPACE) {
+    junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
+  }
 }
 
 def sendMail() {
