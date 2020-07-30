@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import bboxPolygon from '@turf/bbox-polygon';
+import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';
 import { ISource } from '../sources/source';
@@ -26,13 +26,13 @@ export function updateDueToExtent(prevMeta: DataMeta = {}, nextMeta: DataMeta = 
     return NO_SOURCE_UPDATE_REQUIRED;
   }
 
-  const previousBufferGeometry = bboxPolygon([
+  const previousBufferGeometry = turfBboxPolygon([
     previousBuffer.minLon,
     previousBuffer.minLat,
     previousBuffer.maxLon,
     previousBuffer.maxLat,
   ]);
-  const newBufferGeometry = bboxPolygon([
+  const newBufferGeometry = turfBboxPolygon([
     newBuffer.minLon,
     newBuffer.minLat,
     newBuffer.maxLon,

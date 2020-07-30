@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
-import bboxPolygon from '@turf/bbox-polygon';
+import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import uuid from 'uuid/v4';
 
@@ -126,13 +126,13 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
     if (extent) {
       let doesBufferContainExtent = false;
       if (buffer) {
-        const bufferGeometry = bboxPolygon([
+        const bufferGeometry = turfBboxPolygon([
           buffer.minLon,
           buffer.minLat,
           buffer.maxLon,
           buffer.maxLat,
         ]);
-        const extentGeometry = bboxPolygon([
+        const extentGeometry = turfBboxPolygon([
           extent.minLon,
           extent.minLat,
           extent.maxLon,
