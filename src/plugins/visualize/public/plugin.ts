@@ -43,6 +43,13 @@ import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
+import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import { setUISettings, setApplication, setIndexPatterns } from './services';
+import {
+  visualizeFieldAction,
+  VisualizeFieldContext,
+  ACTION_VISUALIZE_FIELD,
+} from './actions/visualize_field_action';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -52,12 +59,19 @@ export interface VisualizePluginStartDependencies {
   embeddable: EmbeddableStart;
   kibanaLegacy: KibanaLegacyStart;
   savedObjects: SavedObjectsStart;
+  uiActions: UiActionsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
+}
+
+declare module '../../ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
+  }
 }
 
 export interface FeatureFlagConfig {
@@ -109,6 +123,8 @@ export class VisualizePlugin
       stopUrlTracker();
     };
 
+    setUISettings(core.uiSettings);
+
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
@@ -135,7 +151,6 @@ export class VisualizePlugin
         const unlistenParentHistory = params.history.listen(() => {
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
-
         /**
          * current implementation uses 2 history objects:
          * 1. the hash history (used for the react hash router)
@@ -201,7 +216,12 @@ export class VisualizePlugin
     }
   }
 
-  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {}
+  public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
+    setApplication(core.application);
+    setIndexPatterns(plugins.data.indexPatterns);
+    // const visualizeFieldAction = createVisualizeFieldAction(core.application);
+    plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
+  }
 
   stop() {
     if (this.stopUrlTracking) {

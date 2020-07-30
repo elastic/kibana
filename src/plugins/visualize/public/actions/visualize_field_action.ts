@@ -21,8 +21,6 @@ import { stringify } from 'query-string';
 import { createAction } from '../../../ui_actions/public';
 import { getApplication, getUISettings, getIndexPatterns } from '../services';
 import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
-import { KBN_FIELD_TYPES } from '../../../data/public';
-// import { VisualizeConstants } from '../application/visualize_constants';
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
 
@@ -38,8 +36,6 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
     const indexPattern = await getIndexPatterns().get(context.indexPatternId);
     const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
     const aggsTermSize = getUISettings().get(AGGS_TERMS_SIZE_SETTING);
-    const isGeoPoint = field?.type === KBN_FIELD_TYPES.GEO_POINT;
-    const type = isGeoPoint ? 'tile_map' : 'histogram';
     let agg;
 
     // If we're visualizing a date field, and our index is time based (and thus has a time filter),
@@ -51,15 +47,6 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
         params: {
           field: context.fieldName,
           interval: 'auto',
-        },
-      };
-    } else if (isGeoPoint) {
-      agg = {
-        type: 'geohash_grid',
-        schema: 'segment',
-        params: {
-          field: context.fieldName,
-          precision: 3,
         },
       };
     } else {
@@ -76,10 +63,10 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
 
     const linkUrlParams = {
       indexPattern: context.indexPatternId,
-      type,
+      type: 'histogram',
       _a: rison.encode({
         vis: {
-          type,
+          type: 'histogram',
           aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],
         },
       } as any),
@@ -90,13 +77,3 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
     });
   },
 });
-
-// export const createVisualizeFieldAction = (application) =>
-//   createAction<typeof ACTION_VISUALIZE_FIELD>({
-//     type: ACTION_VISUALIZE_FIELD,
-//     getDisplayName: () => 'Visualize Field',
-//     execute: async (context) => {
-//       application.navigateToApp('visualize', { path: VisualizeConstants.LANDING_PAGE_PATH });
-//       // console.log(context.field);
-//     },
-//   });

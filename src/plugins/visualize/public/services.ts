@@ -17,4 +17,14 @@
  * under the License.
  */
 
-export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';
+import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
+import { createGetterSetter } from '../../../plugins/kibana_utils/public';
+import { IndexPatternsContract } from '../../../plugins/data/public';
+
+export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
+
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
