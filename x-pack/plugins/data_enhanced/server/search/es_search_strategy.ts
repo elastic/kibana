@@ -31,7 +31,7 @@ export interface AsyncSearchResponse<T> {
   response: SearchResponse<T>;
 }
 
-export function isAsyncSearchResponse(response: any): response is AsyncSearchResponse {
+export function isAsyncSearchResponse<T>(response: any): response is AsyncSearchResponse<T> {
   return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
 }
 
@@ -59,7 +59,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       if (
         usage &&
-        (!isAsyncSearchResponse(response) || (!response.is_partial && !response.is_running))
+        (!isAsyncSearchResponse<any>(response) || (!response.is_partial && !response.is_running))
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }
