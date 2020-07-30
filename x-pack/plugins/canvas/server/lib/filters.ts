@@ -6,7 +6,7 @@
 
 import {
   FilterType,
-  CanvasFilter,
+  ExpressionValueFilter,
   CanvasTimeFilter,
   CanvasLuceneFilter,
   CanvasExactlyFilter,
@@ -16,21 +16,23 @@ import {
  TODO: This could be pluggable
 */
 
-const isTimeFilter = (maybeTimeFilter: CanvasFilter): maybeTimeFilter is CanvasTimeFilter => {
+const isTimeFilter = (
+  maybeTimeFilter: ExpressionValueFilter
+): maybeTimeFilter is CanvasTimeFilter => {
   return maybeTimeFilter.filterType === FilterType.time;
 };
 const isLuceneFilter = (
-  maybeLuceneFilter: CanvasFilter
+  maybeLuceneFilter: ExpressionValueFilter
 ): maybeLuceneFilter is CanvasLuceneFilter => {
   return maybeLuceneFilter.filterType === FilterType.luceneQueryString;
 };
 const isExactlyFilter = (
-  maybeExactlyFilter: CanvasFilter
+  maybeExactlyFilter: ExpressionValueFilter
 ): maybeExactlyFilter is CanvasExactlyFilter => {
   return maybeExactlyFilter.filterType === FilterType.exactly;
 };
 
-export function time(filter: CanvasFilter) {
+export function time(filter: ExpressionValueFilter) {
   if (!isTimeFilter(filter) || !filter.column) {
     throw new Error('column is required for Elasticsearch range filters');
   }
@@ -41,7 +43,7 @@ export function time(filter: CanvasFilter) {
   };
 }
 
-export function luceneQueryString(filter: CanvasFilter) {
+export function luceneQueryString(filter: ExpressionValueFilter) {
   if (!isLuceneFilter(filter)) {
     throw new Error('Filter is not a lucene filter');
   }
@@ -52,7 +54,7 @@ export function luceneQueryString(filter: CanvasFilter) {
   };
 }
 
-export function exactly(filter: CanvasFilter) {
+export function exactly(filter: ExpressionValueFilter) {
   if (!isExactlyFilter(filter)) {
     throw new Error('Filter is not an exactly filter');
   }
@@ -64,3 +66,9 @@ export function exactly(filter: CanvasFilter) {
     },
   };
 }
+
+export const filters: Record<string, any> = {
+  exactly,
+  time,
+  luceneQueryString,
+};
