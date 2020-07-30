@@ -179,7 +179,7 @@ describe('Create Rollup Job, step 6: Review', () => {
         await new Promise((res) => setTimeout(res, 750));
 
         expect(startMock.http.post).toHaveBeenCalledWith(jobStartApiPath, expect.anything()); // It has been called!
-      }, 30000);
+      });
     });
   });
 });
