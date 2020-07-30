@@ -210,7 +210,7 @@ module.exports = function () {
       args: [
         'scripts/functional_tests',
         '--config',
-        'test/plugin_functional/config.js',
+        'test/plugin_functional/config.ts',
         '--bail',
         '--debug',
       ],
