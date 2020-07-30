@@ -75,6 +75,28 @@ export const getFilteredIndexPatterns = (
   }
 };
 
+// fields.filter(({ name }) => {
+//   if (field != null && selectedFieldIsTextType) {
+//     const keywordField = field.split('.').slice(-1).join('.');
+
+//     return field === name || name === keywordField;
+//   } else {
+//     return field != null && field === name;
+//   }
+// }).reduce<{ foundField: IFieldType | null; foundKeywordField: IFieldType | null}>((acc, foundField) => {
+// if (selectedFieldIsTextType && foundField.esTypes != null && foundField.esTypes.includes('keyword')) {
+//   return {
+//     ...acc,
+//     foundKeywordField: foundField,
+//   }
+// } else {
+//   return {
+//     ...acc,
+//     foundField
+//   }
+// }
+// }, { foundField: null, foundKeywordField: null});
+
 /**
  * Formats the entry into one that is easily usable for the UI, most of the
  * complexity was introduced with nested fields
@@ -95,11 +117,41 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
+  const selectedFieldIsTextType = field != null && field.split('.').slice(-1)[0] === 'text';
   const [selectedField] = fields.filter(({ name }) => field != null && field === name);
+  const foundFields = fields
+    .filter(({ name }) => {
+      if (field != null && selectedFieldIsTextType) {
+        const fieldBits = field.split('.');
+        const keywordField = fieldBits.slice(0, fieldBits.length - 1).join('.');
+
+        return field === name || name === keywordField;
+      } else {
+        return field != null && field === name;
+      }
+    })
+    .reduce<{ foundField: IFieldType; foundKeywordField: IFieldType }>((acc, foundField) => {
+      if (
+        selectedFieldIsTextType &&
+        foundField.esTypes != null &&
+        foundField.esTypes.includes('keyword')
+      ) {
+        return {
+          ...acc,
+          foundKeywordField: foundField,
+        };
+      } else {
+        return {
+          ...acc,
+          foundField,
+        };
+      }
+    }, {});
 
   if (parent != null && parentIndex != null) {
     return {
-      field: selectedField,
+      field: foundFields.foundField,
+      correspondingKeywordField: foundFields.foundKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -108,7 +160,8 @@ export const getFormattedBuilderEntry = (
     };
   } else {
     return {
-      field: selectedField,
+      field: foundFields.foundField,
+      correspondingKeywordField: foundFields.foundKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: undefined,
