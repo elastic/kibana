@@ -12,6 +12,7 @@ import {
   LegacyAPICaller,
   SharedGlobalConfig,
   RequestHandlerContext,
+  Logger,
 } from '../../../../../src/core/server';
 import {
   ISearchOptions,
@@ -36,6 +37,7 @@ export function isAsyncSearchResponse(response: any): response is AsyncSearchRes
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => {
   const search = async (
@@ -43,6 +45,7 @@ export const enhancedEsSearchStrategyProvider = (
     request: IEnhancedEsSearchRequest,
     options?: ISearchOptions
   ) => {
+    logger.info(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
@@ -69,6 +72,7 @@ export const enhancedEsSearchStrategyProvider = (
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
+    logger.info(`cancel ${id}`);
     const method = 'DELETE';
     const path = encodeURI(`/_async_search/${id}`);
     await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
