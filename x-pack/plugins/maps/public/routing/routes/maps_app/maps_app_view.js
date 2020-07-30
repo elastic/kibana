@@ -307,16 +307,16 @@ export class MapsAppView extends React.Component {
       return null;
     }
 
-    const topNavConfig = getTopNavConfig(
-      this.props.savedMap,
-      this.props.isOpenSettingsDisabled,
-      this.props.isSaveDisabled,
-      this.props.closeFlyout,
-      this.props.enableFullScreen,
-      this.props.openMapSettings,
-      this.props.inspectorAdapters,
-      this._setBreadcrumbs
-    );
+    const topNavConfig = getTopNavConfig({
+      savedMap: this.props.savedMap,
+      isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
+      isSaveDisabled: this.props.isSaveDisabled,
+      closeFlyout: this.props.closeFlyout,
+      enableFullScreen: this.props.enableFullScreen,
+      openMapSettings: this.props.openMapSettings,
+      inspectorAdapters: this.props.inspectorAdapters,
+      setBreadcrumbs: this._setBreadcrumbs,
+    });
 
     const { TopNavMenu } = getNavigation().ui;
     return (

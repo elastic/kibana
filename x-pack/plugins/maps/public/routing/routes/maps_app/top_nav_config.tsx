@@ -6,23 +6,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from 'src/plugins/inspector/public';
 import {
-  getNavigation,
   getCoreChrome,
   getMapsCapabilities,
   getInspector,
   getToasts,
   getCoreI18n,
-  getData,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModal,
+  OnSaveProps,
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+// @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
+import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
-export function getTopNavConfig(
+export function getTopNavConfig({
   savedMap,
   isOpenSettingsDisabled,
   isSaveDisabled,
@@ -30,8 +32,17 @@ export function getTopNavConfig(
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  setBreadcrumbs
-) {
+  setBreadcrumbs,
+}: {
+  savedMap: ISavedGisMap;
+  isOpenSettingsDisabled: boolean;
+  isSaveDisabled: boolean;
+  closeFlyout: () => void;
+  enableFullScreen: () => void;
+  openMapSettings: () => void;
+  inspectorAdapters: Adapters;
+  setBreadcrumbs: () => void;
+}) {
   return [
     {
       id: 'full-screen',
@@ -103,7 +114,7 @@ export function getTopNavConfig(
                 newCopyOnSave,
                 isTitleDuplicateConfirmed,
                 onTitleDuplicate,
-              }) => {
+              }: OnSaveProps) => {
                 const currentTitle = savedMap.title;
                 savedMap.title = newTitle;
                 savedMap.copyOnSave = newCopyOnSave;
@@ -141,7 +152,12 @@ export function getTopNavConfig(
   ];
 }
 
-async function doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs) {
+async function doSave(
+  savedMap: ISavedGisMap,
+  saveOptions: unknown,
+  closeFlyout: () => void,
+  setBreadcrumbs: () => void
+) {
   closeFlyout();
   savedMap.syncWithStore();
   let id;
