@@ -25,7 +25,7 @@ export function AnomalyDetectionSetupLink() {
   const { uiFilters } = useUrlParams();
   const environment = uiFilters.environment;
   const plugin = useApmPluginContext();
-  const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
+  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 

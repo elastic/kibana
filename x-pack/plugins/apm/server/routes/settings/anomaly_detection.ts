@@ -29,21 +29,14 @@ export const anomalyDetectionJobsRoute = createRoute(() => ({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    try {
-      const [jobs, legacyJobs] = await Promise.all([
-        getAnomalyDetectionJobs(setup, context.logger),
-        hasLegacyJobs(setup),
-      ]);
-      return {
-        jobs,
-        hasLegacyJobs: legacyJobs,
-      };
-    } catch (e) {
-      context.logger.warn(
-        `Error while retrieving ML jobs: "${e.name}:${e.message}"`
-      );
-      throw e;
-    }
+    const [jobs, legacyJobs] = await Promise.all([
+      getAnomalyDetectionJobs(setup, context.logger),
+      hasLegacyJobs(setup),
+    ]);
+    return {
+      jobs,
+      hasLegacyJobs: legacyJobs,
+    };
   },
 }));
 
@@ -68,12 +61,7 @@ export const createAnomalyDetectionJobsRoute = createRoute(() => ({
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
     }
 
-    try {
-      await createAnomalyDetectionJobs(setup, environments, context.logger);
-    } catch (e) {
-      context.logger.warn(`Error while creating ML job: "${e.message}"`);
-      throw e;
-    }
+    await createAnomalyDetectionJobs(setup, environments, context.logger);
   },
 }));
 

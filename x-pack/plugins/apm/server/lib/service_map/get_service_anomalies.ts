@@ -35,8 +35,9 @@ export async function getServiceAnomalies({
   const { ml, start, end } = setup;
 
   if (!ml) {
-    throw Boom.serverUnavailable(ML_ERRORS.ML_NOT_AVAILABLE);
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
+
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
