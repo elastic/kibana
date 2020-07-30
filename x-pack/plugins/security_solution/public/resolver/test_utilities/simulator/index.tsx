@@ -255,7 +255,7 @@ export class Simulator {
    * The outer panel container.
    */
   public panelElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:side-panel"]');
+    return this.findInDOM('[data-test-subj="resolver:panel"]');
   }
 
   /**
