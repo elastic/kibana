@@ -4,5 +4,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "data"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": []
 }

@@ -42,7 +42,6 @@ import {
 
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
-import { getEsQueryConfig, buildEsQuery, Field } from '../../../../src/plugins/data/common';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME, IMyStrategyRequest, IMyStrategyResponse } from '../../common';
@@ -51,7 +50,7 @@ import {
   DataPublicPluginStart,
   IndexPatternSelect,
   IndexPattern,
-  QueryState,
+  IndexPatternField,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -63,12 +62,12 @@ interface SearchExamplesAppDeps {
   data: DataPublicPluginStart;
 }
 
-function formatFieldToComboBox(field?: Field | null) {
+function formatFieldToComboBox(field?: IndexPatternField | null) {
   if (!field) return [];
   return formatFieldsToComboBox([field]);
 }
 
-function formatFieldsToComboBox(fields?: Field[]) {
+function formatFieldsToComboBox(fields?: IndexPatternField[]) {
   if (!fields) return [];
 
   return fields?.map((field) => {
@@ -89,14 +88,8 @@ export const SearchExamplesApp = ({
   const [getCool, setGetCool] = useState<boolean>(false);
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
-  const [numericFields, setNumericFields] = useState<Field[]>();
-  const [selectedField, setSelectedField] = useState<Field | null | undefined>();
-  const [queryState, setQueryState] = useState<QueryState | null>();
-
-  // Subscribe to get updates from the `data.query` service. It will fire whenever filters, time range or query string input change.
-  data.query.state$.subscribe(({ changes, state }) => {
-    setQueryState(state);
-  });
+  const [numericFields, setNumericFields] = useState<IndexPatternField[]>();
+  const [selectedField, setSelectedField] = useState<IndexPatternField | null | undefined>();
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
@@ -120,20 +113,8 @@ export const SearchExamplesApp = ({
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern || !selectedField) return;
 
-    // Read the query string, filters and time from the state we got from `data.query.state$`.
-    const timeFilter = data.query.timefilter.timefilter.createFilter(
-      indexPattern,
-      queryState?.time
-    );
-    const queryFilters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
-
     // Constuct the query portion of the search request
-    const esQuery = buildEsQuery(
-      indexPattern,
-      queryState?.query || [],
-      queryFilters,
-      getEsQueryConfig(uiSettings)
-    );
+    const query = data.query.getEsQuery(indexPattern);
 
     // Constuct the aggregations portion of the search request by using the `data.search.aggs` service.
     const aggs = [{ type: 'avg', params: { field: selectedField.name } }];
@@ -144,7 +125,7 @@ export const SearchExamplesApp = ({
         index: indexPattern.title,
         body: {
           aggs: aggsDsl,
-          query: esQuery,
+          query,
         },
       },
     };
