@@ -70,10 +70,12 @@ export const SearchExamplesApp = ({
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [queryState, setQueryState] = useState<QueryState | null>();
 
+  // Subscribe to get updates from the `data.query` service. It will fire whenever filters, time range or query string input change.
   data.query.state$.subscribe(({ changes, state }) => {
     setQueryState(state);
   });
 
+  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
     const setDefaultIndexPattern = async () => {
       const defaultIndexPattern = await data.indexPatterns.getDefault();
@@ -86,12 +88,14 @@ export const SearchExamplesApp = ({
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern) return;
 
+    // Read the query string, filters and time from the state we got from `data.query.state$`.
     const timeFilter = data.query.timefilter.timefilter.createFilter(
       indexPattern,
       queryState?.time
     );
     const queryFilters = [...(queryState?.filters || []), ...(timeFilter ? [timeFilter] : [])];
 
+    // Constuct the query portion of the search request
     const esQuery = buildEsQuery(
       indexPattern,
       queryState?.query || [],
@@ -99,17 +103,21 @@ export const SearchExamplesApp = ({
       getEsQueryConfig(uiSettings)
     );
 
+    // Constuct the aggregations portion of the search request by using the `data.search.aggs` service.
+    const aggs = [{ type: 'avg', params: { field: 'bytes' } }];
+    const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
+
     const request = {
       params: {
         index: indexPattern.title,
         body: {
-          aggs: {
-            avg_bytes: { avg: { field: 'bytes' } },
-          },
+          aggs: aggsDsl,
           query: esQuery,
         },
       },
     };
+
+    // Submit the search request using the `data.search` service.
     const searchSubscription$ = data.search
       .search(request, {
         strategy,
