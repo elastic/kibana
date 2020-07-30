@@ -230,7 +230,7 @@ const verifyLifecycleStats = (
   }
 };
 
-export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
