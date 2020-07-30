@@ -130,13 +130,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.discover.clickHistogramBar();
-        const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
-        const rowData = await PageObjects.discover.getDocTableField(1);
-        expect(rowData).to.have.string('Sep 21, 2015 @ 11:59:22.316');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.discover.clickHistogramBar(0);
+        await PageObjects.visualize.waitForVisualization();
+        const actualTimeString = await PageObjects.header.getPrettyDuration();
+        expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
