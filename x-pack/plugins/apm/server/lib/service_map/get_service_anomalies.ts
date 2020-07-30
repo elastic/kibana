@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from 'kibana/server';
+import Boom from 'boom';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseReturnType } from '../../../typings/common';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
-import { APM_ML_JOB_GROUP } from '../anomaly_detection/constants';
+import {
+  ServiceAnomalyStats,
+  ML_ERRORS,
+} from '../../../common/anomaly_detection';
+import { getMlJobsWithAPMGroup } from '../anomaly_detection/get_ml_jobs_with_apm_group';
 
 export const DEFAULT_ANOMALIES = { mlJobIds: [], serviceAnomalies: {} };
 
@@ -31,29 +35,15 @@ export async function getServiceAnomalies({
   const { ml, start, end } = setup;
 
   if (!ml) {
-    logger.warn('Anomaly detection plugin is not available.');
-    return DEFAULT_ANOMALIES;
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
+
   const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
-    logger.warn('Anomaly detection feature is not enabled for the space.');
-    return DEFAULT_ANOMALIES;
-  }
-  if (!mlCapabilities.isPlatinumOrTrialLicense) {
-    logger.warn(
-      'Unable to create anomaly detection jobs due to insufficient license.'
-    );
-    return DEFAULT_ANOMALIES;
+    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  let mlJobIds: string[] = [];
-  try {
-    mlJobIds = await getMLJobIds(ml, environment);
-  } catch (error) {
-    logger.error(error);
-    return DEFAULT_ANOMALIES;
-  }
-
+  const mlJobIds = await getMLJobIds(ml, environment);
   const params = {
     body: {
       size: 0,
@@ -92,7 +82,9 @@ export async function getServiceAnomalies({
       },
     },
   };
+
   const response = await ml.mlSystem.mlAnomalySearch(params);
+
   return {
     mlJobIds,
     serviceAnomalies: transformResponseToServiceAnomalies(
@@ -147,7 +139,7 @@ export async function getMLJobIds(
   ml: Required<Setup>['ml'],
   environment?: string
 ) {
-  const response = await ml.anomalyDetectors.jobs(APM_ML_JOB_GROUP);
+  const response = await getMlJobsWithAPMGroup(ml);
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
   const mlJobs = response.jobs.filter(

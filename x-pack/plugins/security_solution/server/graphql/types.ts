@@ -399,11 +399,6 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -428,6 +423,11 @@ export enum NetworkHttpFields {
 export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
+}
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
 }
 
 export type ToStringArrayNoNullable = any;
@@ -2336,8 +2336,6 @@ export interface GetAllTimelineQueryArgs {
 
   timelineType?: Maybe<TimelineType>;
 
-  templateTimelineType?: Maybe<TemplateTimelineType>;
-
   status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
@@ -2813,8 +2811,6 @@ export namespace QueryResolvers {
     onlyUserFavorite?: Maybe<boolean>;
 
     timelineType?: Maybe<TimelineType>;
-
-    templateTimelineType?: Maybe<TemplateTimelineType>;
 
     status?: Maybe<TimelineStatus>;
   }

@@ -22,12 +22,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 2,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: false,
-            showDetectionsList: false,
-            tags: [],
-          }}
+          showEndpointListsOnly={false}
+          showDetectionsListsOnly={false}
           ruleSettingsUrl={'some/url'}
           onRefreshClick={jest.fn()}
         />
@@ -49,12 +45,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: false,
-            showDetectionsList: false,
-            tags: [],
-          }}
+          showEndpointListsOnly={false}
+          showDetectionsListsOnly={false}
           ruleSettingsUrl={'some/url'}
           onRefreshClick={jest.fn()}
         />
@@ -77,12 +69,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: false,
-            showDetectionsList: false,
-            tags: [],
-          }}
+          showEndpointListsOnly={false}
+          showDetectionsListsOnly={false}
           ruleSettingsUrl={'some/url'}
           onRefreshClick={mockOnRefreshClick}
         />
@@ -104,12 +92,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: false,
-            showDetectionsList: false,
-            tags: [],
-          }}
+          showEndpointListsOnly={false}
+          showDetectionsListsOnly={false}
           ruleSettingsUrl={'some/url'}
           onRefreshClick={jest.fn()}
         />
@@ -130,12 +114,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: false,
-            showDetectionsList: true,
-            tags: [],
-          }}
+          showEndpointListsOnly={false}
+          showDetectionsListsOnly
           ruleSettingsUrl={'some/url'}
           onRefreshClick={jest.fn()}
         />
@@ -156,12 +136,8 @@ describe('ExceptionsViewerUtility', () => {
             totalItemCount: 1,
             pageSizeOptions: [5, 10, 20, 50, 100],
           }}
-          filterOptions={{
-            filter: '',
-            showEndpointList: true,
-            showDetectionsList: false,
-            tags: [],
-          }}
+          showEndpointListsOnly
+          showDetectionsListsOnly={false}
           ruleSettingsUrl={'some/url'}
           onRefreshClick={jest.fn()}
         />
