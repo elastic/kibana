@@ -39,6 +39,8 @@ import {
 import { ILayer } from '../classes/layers/layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
+// @ts-expect-error
+import { turfBboxToBounds } from '../elasticsearch_geo_utils';
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
@@ -351,13 +353,7 @@ export function fitToDataBounds() {
       return;
     }
 
-    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
-    const dataBounds = {
-      minLon: turfUnionBbox[0],
-      minLat: turfUnionBbox[1],
-      maxLon: turfUnionBbox[2],
-      maxLat: turfUnionBbox[3],
-    };
+    const dataBounds = turfBboxToBounds(turf.bbox(turf.multiPoint(corners)));
 
     dispatch(setGotoWithBounds(dataBounds));
   };
