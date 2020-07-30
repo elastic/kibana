@@ -25,8 +25,6 @@ export const MockOSName = 'somePlatformName';
 export const MockOSVersion = '1';
 /** Mock OS Full Name for endpoint telemetry */
 export const MockOSFullName = 'somePlatformFullName';
-/** Mock OS Full Name for endpoint telemetry */
-export const MockOSKernel = 'popcorn';
 
 /**
  *
@@ -68,7 +66,6 @@ export const mockFleetObjectsResponse = (
             version: MockOSVersion,
             name: MockOSName,
             full: MockOSFullName,
-            kernel: MockOSKernel,
           },
         },
         packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
@@ -106,7 +103,6 @@ export const mockFleetObjectsResponse = (
             version: MockOSVersion,
             name: MockOSName,
             full: MockOSFullName,
-            kernel: hasDuplicates ? MockOSKernel : 'unpopped-popocorn',
           },
         },
         packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],

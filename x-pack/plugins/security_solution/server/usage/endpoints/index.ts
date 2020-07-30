@@ -49,7 +49,6 @@ export interface AgentLocalMetadata extends AgentMetadata {
   os: {
     name: string;
     platform: string;
-    kernel: string;
     version: string;
     full: string;
   };
@@ -229,9 +228,9 @@ export const getEndpointTelemetryFromFleet = async (
       const { host, os, elastic } = localMetadata as AgentLocalMetadata;
 
       // Although not perfect, the goal is to dedupe hosts to get the most recent data for a host
-      // An agent re-installed on the same host will have all the same id, name, and kernel details
-      // A cloned VM will have the same id, but "may" have the same name and kernel, but it's really up to the user.
-      const compoundUniqueId = `${host?.id}-${host?.hostname}-${os?.kernel}`;
+      // An agent re-installed on the same host will have the same id and hostname
+      // A cloned VM will have the same id, but "may" have the same hostname, but it's really up to the user.
+      const compoundUniqueId = `${host?.id}-${host?.hostname}`;
       if (!uniqueHosts.has(compoundUniqueId)) {
         uniqueHosts.add(compoundUniqueId);
         const agentId = elastic?.agent?.id;
