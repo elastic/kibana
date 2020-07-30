@@ -31,11 +31,12 @@ import {
   isLoading,
   apiError,
 } from '../store/policy_details/selectors';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
+import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
@@ -51,11 +52,11 @@ import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const {
-    notifications,
     services: {
       application: { navigateToApp },
     },
   } = useKibana();
+  const toasts = useToasts();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
@@ -76,15 +77,14 @@ export const PolicyDetails = React.memo(() => {
   useEffect(() => {
     if (policyUpdateStatus) {
       if (policyUpdateStatus.success) {
-        notifications.toasts.success({
-          toastLifeTimeMs: 10000,
+        toasts.addSuccess({
           title: i18n.translate(
             'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
             {
               defaultMessage: 'Success!',
             }
           ),
-          body: (
+          text: toMountPoint(
             <span data-test-subj="policyDetailsSuccessMessage">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
@@ -99,16 +99,15 @@ export const PolicyDetails = React.memo(() => {
           navigateToApp(...routeState.onSaveNavigateTo);
         }
       } else {
-        notifications.toasts.danger({
-          toastLifeTimeMs: 10000,
+        toasts.addDanger({
           title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
             defaultMessage: 'Failed!',
           }),
-          body: <>{policyUpdateStatus.error!.message}</>,
+          text: policyUpdateStatus.error!.message,
         });
       }
     }
-  }, [navigateToApp, notifications.toasts, policyName, policyUpdateStatus, routeState]);
+  }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
 
   const handleBackToListOnClick = useNavigateByRouterEventHandler(hostListRouterPath);
 
