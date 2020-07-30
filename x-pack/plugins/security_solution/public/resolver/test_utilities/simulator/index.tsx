@@ -252,6 +252,20 @@ export class Simulator {
   }
 
   /**
+   * The element where nodes get drawn.
+   */
+  public panelElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj="resolver:side-panel"]');
+  }
+
+  /**
+   * The element where nodes get drawn.
+   */
+  public panelContentElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj^="resolver:panel:"]');
+  }
+
+  /**
    * Like `this.wrapper.find` but only returns DOM nodes.
    */
   private findInDOM(selector: string): ReactWrapper {
