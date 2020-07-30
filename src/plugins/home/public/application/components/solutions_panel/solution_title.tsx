@@ -35,17 +35,25 @@ interface Props {
 }
 
 export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
-  <EuiFlexGroup gutterSize="none" alignItems="center" className="homSolutionsPanel__solutionTitle">
+  <EuiFlexGroup
+    gutterSize="none"
+    alignItems="center"
+    className="homSolutionsSection__panelHeaderContent"
+  >
     <EuiFlexItem className="eui-textCenter">
-      <p>
-        <EuiToken iconType={iconType} shape="circle" fill="light" size="l" />
-      </p>
+      <EuiToken
+        iconType={iconType}
+        shape="circle"
+        fill="light"
+        size="l"
+        className="homSolutionsSection__panelIcon"
+      />
       <EuiTitle className="eui-textInheritColor" size="s">
         <p>{title}</p>
       </EuiTitle>
       {subtitle ? (
         <EuiText size="s">
-          <p>
+          <p className="homSolutionsSection__panelSubtitle">
             {subtitle} <EuiIcon type="sortRight" />
           </p>
         </EuiText>
