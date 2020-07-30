@@ -91,7 +91,7 @@ module.exports = async ({ config }) => {
         loader: 'postcss-loader',
         options: {
           config: {
-            path: resolve(REPO_ROOT, 'src/optimize/'),
+            path: require.resolve('@kbn/optimizer/postcss.config.js'),
           },
         },
       },

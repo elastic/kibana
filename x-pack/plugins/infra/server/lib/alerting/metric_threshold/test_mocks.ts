@@ -62,6 +62,19 @@ export const emptyMetricResponse = {
   },
 };
 
+export const emptyRateResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: [
+        {
+          doc_count: 2,
+          aggregatedValue_max: { value: null },
+        },
+      ],
+    },
+  },
+};
+
 export const basicCompositeResponse = {
   aggregations: {
     groupings: {
