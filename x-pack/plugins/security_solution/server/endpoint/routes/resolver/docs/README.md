@@ -7,18 +7,20 @@ This readme will describe the backend implementation for resolver.
 The ancestry array is an array of entity_ids. This array is included with each event sent by the elastic endpoint
 and defines the ancestors of a particular process. The array is formatted such that [0] of the array contains the direct
 parent of the process. [1] of the array contains the grandparent of the process. For example if Process A spawned process
-B which spawned process C. Process C's array would be [B,C].
-
-The ancestry array is currently limited to 20 values. The exact limit should not be relied on though.
+B which spawned process C. Process C's array would be [B,A].
 
 The presence of the ancestry array makes querying ancestors and children for a process more efficient.
+
+## Ancestry Array Limit
+
+The ancestry array is currently limited to 20 values. The exact limit should not be relied on though.
 
 ## Ancestors
 
 To query for ancestors of a process leveraging the ancestry array, we first retrieve the lifecycle events for the event_id
 passed in. Once we have the origin node we can check to see if the document has the `process.Ext.ancestry` array. If
 it does we can perform a search for the values in the array. This will retrieve all the ancestors for the process of interest
-up to the limit of the ancestry array size. Since the array is capped at 20, if the request is asking for more than 20
+up to the limit of the ancestry array. Since the array is capped at 20, if the request is asking for more than 20
 ancestors we will have to examine the most distant ancestor that has been retrieved and use its ancestry array to retrieve
 the next set of results to fulfill the request.
 
@@ -38,7 +40,7 @@ The code for handling the ancestor logic is in [here](../utils/ancestry_query_ha
 
 ![alt text](./resolver_tree_ancestry.png 'Retrieve ancestors')
 
-For this example let's assume that the ancestry array limit is 2. The process of interest is A (the entity_id of a node is the character in the circle). Process A has an ancestry array of `[3,2]`, its parent has an ancestry array of `[2,1]` etc. Here is the execution of a request for 3 ancestors for entity_id A.
+For this example let's assume that the _ancestry array limit_ is 2. The process of interest is A (the entity_id of a node is the character in the circle). Process A has an ancestry array of `[3,2]`, its parent has an ancestry array of `[2,1]` etc. Here is the execution of a request for 3 ancestors for entity_id A.
 
 **Request:** `GET /resolver/A/ancestry?ancestors=3`
 
@@ -69,7 +71,7 @@ Instead we can first query for 7 start events, which guarantees that we will hav
 
 ### Scenario Background
 
-In the scenarios below let's assume the ancestry array limit is 2. The times next to the nodes are the time the node was spawned. The value in red indicates that the process terminated at the time in red.
+In the scenarios below let's assume the _ancestry array limit_ is 2. The times next to the nodes are the time the node was spawned. The value in red indicates that the process terminated at the time in red.
 
 Let's also ignore the fact that retrieving the lifecycle events for a descendant actually takes two queries. Let's assume that it's taken care of, and when we say "query for lifecycle events" we get all the lifecycle events back for the descendants using the algorithm described in the [previous section](#start-events-vs-all-lifecycle-events)
 
@@ -124,7 +126,7 @@ This edge case will likely never be encountered but we'll try to solve it anyway
 }
 ```
 
-While we are iterating we also keep track of the largest ancestry array that we have seen. In our scenario that will be a size of 2. Then to determine the distant descendants we simply get the nodes that had the largest ancestry array size. In this scenario that'd be `[C, E, F, H]`.
+While we are iterating we also keep track of the largest ancestry array that we have seen. In our scenario that will be a size of 2. Then to determine the distant descendants we simply get the nodes that had the largest ancestry array length. In this scenario that'd be `[C, E, F, H]`.
 
 ### Handling Pagination
 
@@ -165,7 +167,7 @@ For this request we will do a query for _find all process nodes where their ance
 
 The odd thing about this response is that it did not receive D and J. The problem is that the backend does not have any concept of C in this second request because it was received in the previous one. It will be skipped based on the pagination cursor returned previously.
 
-This example highlights a scenario where it is not easy for the backend to go back and continue to get the descendants for C because of the limitation of the ancestry array size.
+This example highlights a scenario where it is not easy for the backend to go back and continue to get the descendants for C because of the limitation of the ancestry array.
 
 #### Pagination cursor for descendant nodes
 
@@ -175,7 +177,7 @@ For reference the time based order of the being nodes being spawned in this scen
 
 ![alt text](./resolver_tree_children_pagination.png 'Descendants Pagination Scenario')
 
-Let's imagine for a moment that the ancestry array size is 3 instead of 2. Taking our previous request we would instead get `[B, C, D]` because D started before G. In this case the last descendant for `B` is actually `D` and not `C`. This gets complicated because we'd have to keep track of which descendant was the last (time wise) one for each intermediate process node. In this example we'd need to find the last descendant for both `B` and `C`. We'd have to track the descendants for each process node and build a map to quickly be able to retrieve the last descendant.
+Let's imagine for a moment that the _ancestry array limit_ is 3 instead of 2. Taking our previous request we would instead get `[B, C, D]` because D started before G. In this case the last descendant for `B` is actually `D` and not `C`. This gets complicated because we'd have to keep track of which descendant was the last (time wise) one for each intermediate process node. In this example we'd need to find the last descendant for both `B` and `C`. We'd have to track the descendants for each process node and build a map to quickly be able to retrieve the last descendant.
 
 Instead of doing that we could also continue to get the immediate children of `B` by doing another request for `A` like was shown in previous example when using the after cursor. This would guarantee that all children (first level descendants of a node) had been retrieved.
 
