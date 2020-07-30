@@ -74,6 +74,9 @@ import {
   RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryActionContext,
+  UnlinkFromLibraryAction,
 } from './application';
 import {
   createDashboardUrlGenerator,
@@ -133,6 +136,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
     [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
     [ACTION_CLONE_PANEL]: ClonePanelActionContext;
+    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
   }
 }
 
@@ -395,6 +399,11 @@ export class DashboardPlugin
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
+
+    // TODO: once https://github.com/elastic/kibana/pull/73870 is merges, make this unlink from library action dependent on that config value.
+    const unlinkFromLibraryAction = new UnlinkFromLibraryAction(core);
+    uiActions.registerAction(unlinkFromLibraryAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,

@@ -32,3 +32,8 @@ export {
   ClonePanelActionContext,
   ACTION_CLONE_PANEL,
 } from './clone_panel_action';
+export {
+  UnlinkFromLibraryActionContext,
+  ACTION_UNLINK_FROM_LIBRARY,
+  UnlinkFromLibraryAction,
+} from './unlink_from_library_action';
