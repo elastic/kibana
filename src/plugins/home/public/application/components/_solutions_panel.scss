@@ -24,6 +24,12 @@
     .homSolutionsSection__panelIcon {
       margin: 0 auto $euiSizeS;
       padding: $euiSizeS;
+      background-color: $euiColorGhost;
+      box-shadow: none;
+
+      .euiIcon__fillNegative {
+        fill: $euiColorInk;
+      }
     }
   
     .homSolutionsSection__panelSubtitle {
