@@ -63,7 +63,7 @@ export class MonitoringPlugin
         description: i18n.translate('xpack.monitoring.monitoringDescription', {
           defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
         }),
-        order: 200,
+        order: 610,
       });
     }
 

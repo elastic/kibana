@@ -92,7 +92,7 @@ export class IndexLifecycleManagementPlugin {
           path: '/app/management/data/index_lifecycle_management',
           homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
           category: FeatureCatalogueCategory.ADMIN,
-          order: 400,
+          order: 640,
         });
       }
 

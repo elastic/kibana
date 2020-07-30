@@ -37,6 +37,6 @@ export function registerFeature(home: HomePublicPluginSetup) {
     homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
     category: FeatureCatalogueCategory.DATA,
     solution: 'kibana',
-    order: 200,
+    order: 420,
   });
 }

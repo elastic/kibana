@@ -22,5 +22,5 @@ export const featureCatalogueEntry = {
   homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
   category: FeatureCatalogueCategory.DATA,
   solution: 'kibana',
-  order: 400,
+  order: 440,
 };

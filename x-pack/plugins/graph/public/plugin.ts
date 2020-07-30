@@ -67,7 +67,7 @@ export class GraphPlugin
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: 'kibana',
-        order: 600,
+        order: 460,
       });
     }
 

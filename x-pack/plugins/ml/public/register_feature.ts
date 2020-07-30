@@ -34,7 +34,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
     category: FeatureCatalogueCategory.DATA,
     solution: 'kibana',
-    order: 500,
+    order: 450,
   });
 
   home.featureCatalogue.register({
@@ -49,6 +49,6 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     path: '/app/ml#/filedatavisualizer',
     homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
     category: FeatureCatalogueCategory.DATA,
-    order: 300,
+    order: 520,
   });
 };
