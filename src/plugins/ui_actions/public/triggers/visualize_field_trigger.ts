@@ -17,10 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
+import { Trigger } from '.';
+
+export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
+export const visualizeFieldTrigger: Trigger<'VISUALIZE_FIELD_TRIGGER'> = {
+  id: VISUALIZE_FIELD_TRIGGER,
+  title: 'Visualize field',
+  description: 'Triggered when user wants to visualize a field.',
+};

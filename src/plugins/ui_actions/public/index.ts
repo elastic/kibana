@@ -43,6 +43,8 @@ export {
   valueClickTrigger,
   APPLY_FILTER_TRIGGER,
   applyFilterTrigger,
+  VISUALIZE_FIELD_TRIGGER,
+  visualizeFieldTrigger,
 } from './triggers';
 export { TriggerContextMapping, TriggerId, ActionContextMapping, ActionType } from './types';
 export { ActionByType } from './actions';

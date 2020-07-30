@@ -19,7 +19,12 @@
 
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  APPLY_FILTER_TRIGGER,
+  VISUALIZE_FIELD_TRIGGER,
+} from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 import type { ApplyGlobalFilterActionContext } from '../../data/public';
 
@@ -39,6 +44,7 @@ export interface TriggerContextMapping {
   [SELECT_RANGE_TRIGGER]: RangeSelectContext;
   [VALUE_CLICK_TRIGGER]: ValueClickContext;
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
+  [VISUALIZE_FIELD_TRIGGER]: any;
 }
 
 const DEFAULT_ACTION = '';

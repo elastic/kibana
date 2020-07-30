@@ -70,7 +70,12 @@ import { createStartServicesGetter, StartServicesGetter } from '../../kibana_uti
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../ui_actions/public';
+import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import {
+  visualizeFieldAction,
+  VisualizeFieldContext,
+  ACTION_VISUALIZE_FIELD,
+} from './actions/visualize_field_action';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
@@ -109,6 +114,12 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
+}
+
+declare module '../../ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
+  }
 }
 
 /**
@@ -191,6 +202,7 @@ export class VisualizationsPlugin
       overlays: core.overlays,
     });
     setSavedSearchLoader(savedSearchLoader);
+    uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
     return {
       ...types,
       showNewVisModal,

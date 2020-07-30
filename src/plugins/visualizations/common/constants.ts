@@ -18,3 +18,4 @@
  */
 
 export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';
+export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';

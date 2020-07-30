@@ -19,10 +19,11 @@
 import React from 'react';
 import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { VISUALIZE_FIELD_TRIGGER } from '../../../../../ui_actions/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import { Bucket, FieldDetails } from './types';
-import { getServices } from '../../../kibana_services';
+import { getServices, getUiActions } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
@@ -80,8 +81,12 @@ export function DiscoverFieldDetails({
         <>
           <EuiLink
             onClick={() => {
-              getServices().core.application.navigateToApp(details.visualizeUrl.app, {
-                path: details.visualizeUrl.path,
+              // getServices().core.application.navigateToApp(details.visualizeUrl.app, {
+              //   path: details.visualizeUrl.path,
+              // });
+              getUiActions().executeTriggerActions(VISUALIZE_FIELD_TRIGGER, {
+                indexPatternId: indexPattern.id,
+                fieldName: field.name,
               });
             }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"

@@ -53,6 +53,7 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setUiActions,
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
@@ -313,6 +314,8 @@ export class DiscoverPlugin
       setAngularModule(module);
       this.innerAngularInitialized = true;
     };
+
+    setUiActions(plugins.uiActions);
 
     this.initializeServices = async () => {
       if (this.servicesInitialized) {
