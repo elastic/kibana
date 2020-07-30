@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
-import { MLErrorMessages } from '../../../../../common/anomaly_detection';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { JobsList } from './jobs_list';
 import { AddEnvironments } from './add_environments';
@@ -25,7 +25,6 @@ export type AnomalyDetectionApiResponse = APIReturnType<
 const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
   jobs: [],
   hasLegacyJobs: false,
-  errorCode: undefined,
 };
 
 export const AnomalyDetection = () => {
@@ -49,15 +48,7 @@ export const AnomalyDetection = () => {
   if (!hasValidLicense) {
     return (
       <EuiPanel>
-        <LicensePrompt
-          text={i18n.translate(
-            'xpack.apm.settings.anomaly_detection.license.text',
-            {
-              defaultMessage:
-                "To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability monitor your services with the aid of machine learning.",
-            }
-          )}
-        />
+        <LicensePrompt text={ML_ERRORS.INVALID_LICENSE} />
       </EuiPanel>
     );
   }
@@ -67,7 +58,7 @@ export const AnomalyDetection = () => {
       <EuiPanel>
         <EuiEmptyPrompt
           iconType="alert"
-          body={<>{MLErrorMessages.MISSING_READ_PRIVILEGES}</>}
+          body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>
     );
