@@ -227,7 +227,8 @@ export function SuggestionPanel({
     if (!stagedPreview && lastSelectedSuggestion !== -1) {
       setLastSelectedSuggestion(-1);
     }
-  }, [stagedPreview, lastSelectedSuggestion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stagedPreview]);
 
   if (!activeDatasourceId) {
     return null;
