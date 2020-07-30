@@ -51,11 +51,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async saveSearch(searchName: string) {
       await this.clickSaveSearchButton();
       // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-      await retry.waitFor(`saved search can be persisted name ${searchName}`, async () => {
-        await testSubjects.setValue('savedObjectTitle', searchName);
-        await testSubjects.click('confirmSaveSavedObjectButton');
-        return (await header.isGlobalLoadingIndicatorVisible()) === true;
-      });
+      await retry.waitFor(
+        `saved search title is set to ${searchName} and save button is clickable`,
+        async () => {
+          const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
+          await testSubjects.setValue('savedObjectTitle', searchName);
+          return (await saveButton.getAttribute('disabled')) !== 'true';
+        }
+      );
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
       // that the next action wouldn't have to retry.  But it doesn't really solve
