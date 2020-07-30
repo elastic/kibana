@@ -10,6 +10,7 @@ import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
+import packageJSON from '../../../../../package.json';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, IngestManagerAppContext } from '../plugin';
@@ -23,8 +24,8 @@ class AppContextService {
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: IngestManagerAppContext['isProductionMode'] = false;
-  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] | undefined;
-  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] | undefined;
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'] | undefined = packageJSON.version;
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'] | undefined = packageJSON.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
