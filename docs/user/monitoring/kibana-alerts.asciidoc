@@ -8,15 +8,15 @@ potential issues in the {stack}. These alerts are preconfigured based on the
 best practices recommended by Elastic. However, you can tailor them to meet your 
 specific needs.
 
-When you open the *Stack Monitoring* app, the preconfigured {kib} alerts are
+When you open the *{stack-monitor-app}* app, the preconfigured {kib} alerts are
 created automatically. They are stored alongside other {kib} alerts and co-exist
 with existing {watcher} cluster alerts. You can view details about the alerts
 that are active and view health and performance data for {es}, {es}, and Beats
 in real time, as well as analyze past performance. You can also modify active
-alerts in the *Stack Monitoring* app.
+alerts in the *{stack-monitor-app}* app.
 
-To review and modify all the available alerts, use the *Alerts and Actions* UI
-in the *Stack Management* app.
+To review and modify all the available alerts, use the *{alerts-ui}* UI
+in the *{stack-manage-app}* app.
 
 //These alerts are able to search across all monitored clusters and will detect and alert on various conditions configured by the alerts.
 
