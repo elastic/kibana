@@ -88,6 +88,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlDFAnalyticsJobCreationJobDescription');
     },
 
+    async assertJobDescriptionEditInputExists() {
+      await testSubjects.existOrFail('mlAnalyticsEditFlyoutDescriptionInput');
+    },
+
+    async assertJobMmlEditInputExists() {
+      await testSubjects.existOrFail('mlAnalyticsEditFlyoutmodelMemoryLimitInput');
+    },
+
     async assertJobIdValue(expectedValue: string) {
       const actualJobId = await testSubjects.getAttribute(
         'mlAnalyticsCreateJobFlyoutJobIdInput',
@@ -110,6 +118,28 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async assertJobDescriptionEditValue(expectedValue: string) {
+      const actualJobDescription = await testSubjects.getAttribute(
+        'mlAnalyticsEditFlyoutDescriptionInput',
+        'value'
+      );
+      expect(actualJobDescription).to.eql(
+        expectedValue,
+        `Job description edit should be '${expectedValue}' (got '${actualJobDescription}')`
+      );
+    },
+
+    async assertJobMmlEditValue(expectedValue: string) {
+      const actualMml = await testSubjects.getAttribute(
+        'mlAnalyticsEditFlyoutmodelMemoryLimitInput',
+        'value'
+      );
+      expect(actualMml).to.eql(
+        expectedValue,
+        `Job model memory limit edit should be '${expectedValue}' (got '${actualMml}')`
+      );
+    },
+
     async setJobId(jobId: string) {
       await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
         clearWithKeyboard: true,
@@ -122,6 +152,20 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
+    },
+
+    async setJobDescriptionEdit(jobDescription: string) {
+      await mlCommon.setValueWithChecks('mlAnalyticsEditFlyoutDescriptionInput', jobDescription, {
+        clearWithKeyboard: true,
+      });
+      await this.assertJobDescriptionEditValue(jobDescription);
+    },
+
+    async setJobMmlEdit(mml: string) {
+      await mlCommon.setValueWithChecks('mlAnalyticsEditFlyoutmodelMemoryLimitInput', mml, {
+        clearWithKeyboard: true,
+      });
+      await this.assertJobMmlEditValue(mml);
     },
 
     async assertSourceDataPreviewExists() {
@@ -479,6 +523,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async assertCreateButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateButton');
+    },
+
+    async updateAnalyticsJob() {
+      await testSubjects.existOrFail('analyticsEditFlyoutUpdateButton');
+      await testSubjects.click('analyticsEditFlyoutUpdateButton');
     },
 
     async isCreateButtonDisabled() {

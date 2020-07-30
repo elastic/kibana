@@ -88,6 +88,14 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await testSubjects.existOrFail('mlAnalyticsJobViewButton');
     }
 
+    public async openEditFlyout() {
+      await testSubjects.existOrFail('euiCollapsedItemActionsButton', { timeout: 5000 });
+      await testSubjects.click('euiCollapsedItemActionsButton');
+      await testSubjects.existOrFail('mlAnalyticsJobEditButton', { timeout: 5000 });
+      await testSubjects.click('mlAnalyticsJobEditButton');
+      await testSubjects.existOrFail('analyticsEditFlyout', { timeout: 5000 });
+    }
+
     async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
       const searchBarInput = await this.getAnalyticsSearchInput();
       const actualSearchValue = await searchBarInput.getAttribute('value');

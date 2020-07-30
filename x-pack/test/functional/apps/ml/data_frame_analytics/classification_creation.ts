@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const editedDescription = 'Edited description';
 
   describe('classification creation', function () {
     before(async () => {
@@ -167,10 +168,37 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+        it('should open the edit form for the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
+          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
+          const filteredRows = rows.filter((row) => row.id === testData.jobId);
+          expect(filteredRows).to.have.length(
+            1,
+            `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`
+          );
+          if (filteredRows?.length) {
+            await ml.dataFrameAnalyticsTable.openEditFlyout();
+          }
+        });
+
+        it('should input the description in the edit form', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobDescriptionEditInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobDescriptionEdit(editedDescription);
+        });
+
+        it('should input the model memory limit in the edit form', async () => {
+          await ml.dataFrameAnalyticsCreation.assertJobMmlEditInputExists();
+          await ml.dataFrameAnalyticsCreation.setJobMmlEdit('21mb');
+        });
+
+        it('should submit the edit job form', async () => {
+          await ml.dataFrameAnalyticsCreation.updateAnalyticsJob();
+        });
+
         it('displays details for the created job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
-            description: testData.jobDescription,
+            description: editedDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
