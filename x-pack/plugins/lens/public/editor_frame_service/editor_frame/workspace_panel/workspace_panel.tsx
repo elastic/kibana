@@ -85,29 +85,33 @@ export function InnerWorkspacePanel({
 
   const dragDropContext = useContext(DragContext);
 
-  const suggestionForDraggedField = useMemo(() => {
-    if (!dragDropContext.dragging || !activeDatasourceId) {
-      return;
-    }
+  const suggestionForDraggedField = useMemo(
+    () => {
+      if (!dragDropContext.dragging || !activeDatasourceId) {
+        return;
+      }
 
-    const hasData = Object.values(framePublicAPI.datasourceLayers).some(
-      (datasource) => datasource.getTableSpec().length > 0
-    );
+      const hasData = Object.values(framePublicAPI.datasourceLayers).some(
+        (datasource) => datasource.getTableSpec().length > 0
+      );
 
-    const suggestions = getSuggestions({
-      datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
-      datasourceStates,
-      visualizationMap:
-        hasData && activeVisualizationId
-          ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-          : visualizationMap,
-      activeVisualizationId,
-      visualizationState,
-      field: dragDropContext.dragging,
-    });
+      const suggestions = getSuggestions({
+        datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
+        datasourceStates,
+        visualizationMap:
+          hasData && activeVisualizationId
+            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+            : visualizationMap,
+        activeVisualizationId,
+        visualizationState,
+        field: dragDropContext.dragging,
+      });
 
-    return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
-  }, [dragDropContext.dragging]);
+      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dragDropContext.dragging]
+  );
 
   const [localState, setLocalState] = useState({
     expressionBuildError: undefined as string | undefined,
@@ -117,28 +121,32 @@ export function InnerWorkspacePanel({
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : null;
-  const expression = useMemo(() => {
-    try {
-      return buildExpression({
-        visualization: activeVisualization,
-        visualizationState,
-        datasourceMap,
-        datasourceStates,
-        framePublicAPI,
-      });
-    } catch (e) {
-      // Most likely an error in the expression provided by a datasource or visualization
-      setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
-    }
-  }, [
-    activeVisualization,
-    visualizationState,
-    datasourceMap,
-    datasourceStates,
-    framePublicAPI.dateRange,
-    framePublicAPI.query,
-    framePublicAPI.filters,
-  ]);
+  const expression = useMemo(
+    () => {
+      try {
+        return buildExpression({
+          visualization: activeVisualization,
+          visualizationState,
+          datasourceMap,
+          datasourceStates,
+          framePublicAPI,
+        });
+      } catch (e) {
+        // Most likely an error in the expression provided by a datasource or visualization
+        setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      activeVisualization,
+      visualizationState,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+      framePublicAPI.query,
+      framePublicAPI.filters,
+    ]
+  );
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
