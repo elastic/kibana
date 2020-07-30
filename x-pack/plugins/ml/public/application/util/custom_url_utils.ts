@@ -109,10 +109,12 @@ export function openCustomUrlWindow(url: string, urlConfig: UrlConfig, basePath:
 function isKibanaUrl(urlConfig: UrlConfig) {
   const urlValue = urlConfig.url_value;
   return (
+    // HashRouter based plugins
     urlValue.startsWith('discover#/') ||
     urlValue.startsWith('dashboards#/') ||
     urlValue.startsWith('apm#/') ||
-    urlValue.startsWith('security#/')
+    // BrowserRouter based plugins
+    urlValue.startsWith('security/')
   );
 }
 
