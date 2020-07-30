@@ -22,8 +22,9 @@ def withPostBuildReporting(Closure closure) {
           .each { workspaceDir ->
             workspaceTasks[workspaceDir] = {
               dir(workspaceDir) {
-                print "postBuildReporting: ${workspaceDir}"
-                postBuildReporting()
+                stage('Post-Build') { // This stage is just to massage the Test Result UI in Jenkins
+                  postBuildReporting()
+                }
               }
             }
           }
