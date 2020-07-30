@@ -71,7 +71,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
           <EuiText size={'xs'}>
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
-              defaultMessage={`SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted values.`}
+              defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted values."
               values={{
                 linkedFeatureImportanceValues: (
                   <EuiLink
@@ -79,7 +79,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
+                      id="xpack.ml.dataframe.analytics.explorationResults.linkedFeatureImportanceValues"
                       defaultMessage="feature importance values"
                     />
                   </EuiLink>
