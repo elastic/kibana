@@ -1,0 +1,33 @@
+[role="xpack"]
+[[kibana-alerts]]
+= {kib} Alerts
+
+The {stack} {monitor-features} provide
+<<alerting-getting-started,{kib} alerts>> out-of-the box to notify you of
+potential issues in the {stack}. These alerts are preconfigured based on the
+best practices recommended by Elastic. However, you can tailor them to meet your 
+specific needs.
+
+When you open the *Stack Monitoring* app, the preconfigured {kib} alerts are
+created automatically. They are stored alongside other {kib} alerts and co-exist
+with existing {watcher} cluster alerts. You can view details about the alerts
+that are active and view health and performance data for {es}, {es}, and Beats
+in real time, as well as analyze past performance. You can also modify active
+alerts in the *Stack Monitoring* app.
+
+To review and modify all the available alerts, use the *Alerts and Actions* UI
+in the *Stack Management* app.
+
+//These alerts are able to search across all monitored clusters and will detect and alert on various conditions configured by the alerts.
+
+[discrete]
+[[kibana-alerts-cpu-threshold]]
+== CPU threshold
+
+This alert is triggered when a node on the {stack} runs a consistently high CPU 
+load. By default, the trigger condition is set at 85% or more averaged over the
+last 5 minutes. The alert is grouped across all the nodes of the cluster by
+running checks on a schedule time of 1 minute with a re-notify internal of 1 day. 
+
+NOTE: Some action types are paid subscription features, while others are free.
+For a comparison of the Elastic subscription levels, see Alerting section on the {subscriptions}[Subscriptions page].
