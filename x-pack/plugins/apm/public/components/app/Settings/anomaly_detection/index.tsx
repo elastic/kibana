@@ -30,7 +30,7 @@ const DEFAULT_VALUE: AnomalyDetectionApiResponse = {
 
 export const AnomalyDetection = () => {
   const plugin = useApmPluginContext();
-  const canGetJobs = !!plugin.core.application.capabilities.ml.canGetJobs;
+  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
@@ -66,7 +66,7 @@ export const AnomalyDetection = () => {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="warning"
+          iconType="alert"
           body={<>{MLErrorMessages.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>
