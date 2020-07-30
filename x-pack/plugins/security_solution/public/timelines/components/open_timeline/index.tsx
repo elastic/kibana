@@ -126,7 +126,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     });
     const {
       timelineStatus,
-      templateTimelineType,
       templateTimelineFilter,
       installPrepackagedTimelines,
     } = useTimelineStatus({
@@ -147,7 +146,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         onlyUserFavorite: onlyFavorites,
         timelineType,
-        templateTimelineType,
         status: timelineStatus,
       });
     }, [
@@ -159,7 +157,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       sortDirection,
       timelineType,
       timelineStatus,
-      templateTimelineType,
       onlyFavorites,
     ]);
 
