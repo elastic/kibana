@@ -16,8 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const getActiveSeries = (panel) => {
-  const shouldNotApplyFilter = ['gauge', 'markdown'].includes(panel.type);
 
-  return (panel.series || []).filter((series) => !series.hidden || shouldNotApplyFilter);
+import { PanelSchema } from '../../../../common/types';
+import { PANEL_TYPES } from '../../../../common/panel_types';
+import { limitOfSeries } from '../../../../common/ui_restrictions';
+
+export const getActiveSeries = (panel: PanelSchema) => {
+  let visibleSeries = panel.series || [];
+
+  if (panel.type in limitOfSeries) {
+    visibleSeries = visibleSeries.slice(0, limitOfSeries[panel.type]);
+  }
+
+  // Toogle visibility functionality for 'gauge', 'markdown' is not accessible
+  const shouldNotApplyFilter = [PANEL_TYPES.GAUGE, PANEL_TYPES.MARKDOWN].includes(panel.type);
+
+  return visibleSeries.filter((series) => !series.hidden || shouldNotApplyFilter);
 };
