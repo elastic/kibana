@@ -6,7 +6,7 @@
 
 import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
-import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiHorizontalRule, EuiFormRow, EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ShareOptions, SpaceTarget } from '../types';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -44,6 +44,7 @@ export const ShareToSpaceForm = (props: Props) => {
             id="xpack.spaces.management.shareToSpace.shareWarningBody"
             defaultMessage="To avoid changes across spaces, make a copy instead."
           />
+          <EuiSpacer size="s" />
           <EuiButton
             onClick={() => props.makeCopy()}
             color="warning"

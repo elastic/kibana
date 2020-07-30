@@ -54,7 +54,7 @@ describe('ImportModeControl', () => {
           compressed={false}
           data-test-subj="importSavedObjectsImportModeOverwriteSwitch"
           disabled={false}
-          label="Automatically try to overwrite conflicts?"
+          label="Automatically try to overwrite conflicts"
           onChange={[Function]}
         />
       `);
@@ -100,7 +100,7 @@ describe('ImportModeControl', () => {
                     <EuiText
                       color="subdued"
                     >
-                      Check each imported object for similar origin IDs in the current space
+                      Check if each object was previously copied or imported into the destination space.
                     </EuiText>
                   </React.Fragment>
                   <EuiSpacer
@@ -111,7 +111,7 @@ describe('ImportModeControl', () => {
                     compressed={true}
                     data-test-subj="importSavedObjectsImportModeOverwriteSwitch"
                     disabled={false}
-                    label="Automatically try to overwrite conflicts?"
+                    label="Automatically try to overwrite conflicts"
                     onChange={[Function]}
                   />
                   <EuiSpacer
@@ -131,7 +131,7 @@ describe('ImportModeControl', () => {
                   <EuiText
                     color="subdued"
                   >
-                    All imported objects will be created with new random IDs
+                    All imported objects will be created with new random IDs.
                   </EuiText>
                 </React.Fragment>,
               },

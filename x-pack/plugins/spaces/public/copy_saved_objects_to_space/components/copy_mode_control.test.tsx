@@ -62,7 +62,7 @@ describe('CopyModeControl', () => {
                   compressed={true}
                   data-test-subj="cts-copy-mode-overwrite-switch"
                   disabled={false}
-                  label="Automatically try to overwrite conflicts?"
+                  label="Automatically try to overwrite conflicts"
                   onChange={[Function]}
                 />
                 <EuiSpacer

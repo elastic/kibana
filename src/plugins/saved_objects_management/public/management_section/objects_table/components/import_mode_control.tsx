@@ -48,7 +48,10 @@ export const ImportModeControl = ({
     ),
     text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
-      { defaultMessage: 'Check each imported object for similar origin IDs in the current space' }
+      {
+        defaultMessage:
+          'Check if each object was previously copied or imported into the destination space.',
+      }
     ),
   };
   const enabledOption = {
@@ -59,7 +62,7 @@ export const ImportModeControl = ({
     ),
     text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
-      { defaultMessage: 'All imported objects will be created with new random IDs' }
+      { defaultMessage: 'All imported objects will be created with new random IDs.' }
     ),
   };
   const createLabel = ({ title, text }: { title: string; text: string }) => (
@@ -81,7 +84,7 @@ export const ImportModeControl = ({
 
   const switchLabel = i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.overwriteSwitch',
-    { defaultMessage: 'Automatically try to overwrite conflicts?' }
+    { defaultMessage: 'Automatically try to overwrite conflicts' }
   );
   const overwriteSwitch = (
     <EuiSwitch

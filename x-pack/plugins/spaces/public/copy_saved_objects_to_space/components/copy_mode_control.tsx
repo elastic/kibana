@@ -66,7 +66,7 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
 
   const switchLabel = i18n.translate(
     'xpack.spaces.management.copyToSpace.copyModeControl.overwriteSwitch',
-    { defaultMessage: 'Automatically try to overwrite conflicts?' }
+    { defaultMessage: 'Automatically try to overwrite conflicts' }
   );
 
   return (
