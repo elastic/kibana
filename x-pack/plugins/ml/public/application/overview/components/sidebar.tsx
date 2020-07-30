@@ -59,7 +59,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or creating a new job. We recommend using {transforms} to create feature indices for analytics jobs."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
