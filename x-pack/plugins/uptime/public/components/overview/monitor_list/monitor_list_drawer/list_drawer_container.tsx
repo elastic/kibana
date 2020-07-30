@@ -5,43 +5,35 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../../../state';
 import { monitorDetailsSelector } from '../../../../state/selectors';
-import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
-import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 interface ContainerProps {
   summary: MonitorSummary;
-  monitorDetails: MonitorDetails;
-  loadMonitorDetails: typeof getMonitorDetailsAction.get;
 }
 
-const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, monitorDetails }) => {
+export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
   const monitorId = summary?.monitor_id;
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
+  const monitorDetails = useSelector((state: AppState) => monitorDetailsSelector(state, summary));
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    loadMonitorDetails({
-      dateStart,
-      dateEnd,
-      monitorId,
-    });
-  }, [dateStart, dateEnd, monitorId, loadMonitorDetails]);
+    dispatch(
+      getMonitorDetailsAction.get({
+        dateStart,
+        dateEnd,
+        monitorId,
+      })
+    );
+  }, [dateStart, dateEnd, monitorId, dispatch]);
   return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
 };
-
-const mapStateToProps = (state: AppState, { summary }: any) => ({
-  monitorDetails: monitorDetailsSelector(state, summary),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
-    dispatch(getMonitorDetailsAction.get(actionPayload)),
-});
-
-export const MonitorListDrawer = connect(mapStateToProps, mapDispatchToProps)(Container);
