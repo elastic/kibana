@@ -90,7 +90,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
           await this.clickOption(options.clickWithMouse, selectOptions[0]);
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          const firstOption = await find.byCssSelector('.euiFilterSelectItem');
+          const firstOption = await find.byCssSelector('.euiFilterSelectItem', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
       } else {

@@ -7,3 +7,5 @@
 import { MapExtent } from '../common/descriptor_types';
 
 export function scaleBounds(bounds: MapExtent, scaleFactor: number): MapExtent;
+
+export function turfBboxToBounds(turfBbox: unknown): MapExtent;

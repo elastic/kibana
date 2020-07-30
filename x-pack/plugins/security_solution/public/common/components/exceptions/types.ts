@@ -38,14 +38,14 @@ export interface ExceptionListItemIdentifiers {
 
 export interface FilterOptions {
   filter: string;
-  showDetectionsList: boolean;
-  showEndpointList: boolean;
   tags: string[];
 }
 
 export interface Filter {
   filter: Partial<FilterOptions>;
   pagination: Partial<ExceptionsPagination>;
+  showDetectionsListsOnly: boolean;
+  showEndpointListsOnly: boolean;
 }
 
 export interface ExceptionsPagination {
