@@ -54,7 +54,8 @@ interface EditExceptionModalProps {
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => css`
-    width: ${theme.eui.euiBreakpoints.m};
+    width: ${theme.eui.euiBreakpoints.l};
+    max-width: ${theme.eui.euiBreakpoints.l};
   `}
 `;
 
@@ -211,7 +212,11 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{i18n.EDIT_EXCEPTION_TITLE}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {exceptionListType === 'endpoint'
+              ? i18n.EDIT_ENDPOINT_EXCEPTION_TITLE
+              : i18n.EDIT_EXCEPTION_TITLE}
+          </EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -243,13 +248,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 
               <EuiSpacer />
 
-              {exceptionListType === 'endpoint' && (
-                <>
-                  <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
-                  <EuiSpacer />
-                </>
-              )}
-
               <AddExceptionComments
                 exceptionItemComments={exceptionItem.comments}
                 newCommentValue={comment}
@@ -269,6 +267,14 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                   disabled={shouldDisableBulkClose}
                 />
               </EuiFormRow>
+              {exceptionListType === 'endpoint' && (
+                <>
+                  <EuiSpacer />
+                  <EuiText color="subdued" size="s">
+                    {i18n.ENDPOINT_QUARANTINE_TEXT}
+                  </EuiText>
+                </>
+              )}
             </ModalBodySection>
           </>
         )}

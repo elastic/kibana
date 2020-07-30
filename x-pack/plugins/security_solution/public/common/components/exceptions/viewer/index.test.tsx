@@ -72,6 +72,7 @@ describe('ExceptionsViewer', () => {
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },
@@ -124,6 +125,7 @@ describe('ExceptionsViewer', () => {
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },
