@@ -14,7 +14,7 @@ exports[`Transform: Transform List Actions <StopAction /> Minimal initialization
     iconType="stop"
     isDisabled={true}
     onClick={[Function]}
-    size="s"
+    size="xs"
   >
     Stop
   </EuiButtonEmpty>
