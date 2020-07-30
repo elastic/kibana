@@ -175,7 +175,7 @@ export interface AggregationInputMap {
   [key: string]: AggregationOptionsMap;
 }
 
-type BucketSubAggregationResponse<
+type SubAggregationResponseOf<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
 > = TAggregationInputMap extends AggregationInputMap
@@ -191,10 +191,7 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: string | number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   histogram: {
@@ -202,16 +199,13 @@ interface AggregationResponsePart<
       {
         doc_count: number;
         key: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   date_histogram: {
     buckets: Array<
       DateHistogramBucket &
-        BucketSubAggregationResponse<TAggregationOptionsMap['aggs'], TDocument>
+        SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -253,7 +247,7 @@ interface AggregationResponsePart<
   };
   filter: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
         { doc_count: number } & AggregationResponseMap<
@@ -270,13 +264,16 @@ interface AggregationResponsePart<
         buckets: {
           [key in keyof TAggregationOptionsMap['filters']['filters']]: {
             doc_count: number;
-          } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+          } & SubAggregationResponseOf<
+            TAggregationOptionsMap['aggs'],
+            TDocument
+          >;
         };
       }
     : never;
   sampler: {
     doc_count: number;
-  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   derivative:
     | {
         value: number;
@@ -296,10 +293,7 @@ interface AggregationResponsePart<
       {
         key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
         doc_count: number;
-      } & BucketSubAggregationResponse<
-        TAggregationOptionsMap['aggs'],
-        TDocument
-      >
+      } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   diversified_sampler: {
