@@ -14,13 +14,13 @@ export class AppStateManager {
   _updated$ = new Subject();
 
   setQueryAndFilters({ query, savedQuery, filters }) {
-    if (this._query !== query) {
+    if (query && this._query !== query) {
       this._query = query;
     }
-    if (this._savedQuery !== savedQuery) {
+    if (savedQuery && this._savedQuery !== savedQuery) {
       this._savedQuery = savedQuery;
     }
-    if (this._filters !== filters) {
+    if (filters && this._filters !== filters) {
       this._filters = filters;
     }
     this._updated$.next();

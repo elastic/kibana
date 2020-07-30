@@ -14,9 +14,11 @@ import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
+  getFilters,
   getMapSettings,
   getWaitingForMapReadyLayerListRaw,
   getQuery,
+  getTimeFilters,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -217,13 +219,13 @@ export function setQuery({
 
     dispatch({
       type: SET_QUERY,
-      timeFilters,
+      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
       query: {
-        ...query,
+        ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
-      filters,
+      filters: filters ? filters : getFilters(getState()),
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
