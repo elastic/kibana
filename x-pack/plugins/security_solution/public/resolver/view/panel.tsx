@@ -60,10 +60,10 @@ const PanelContent = memo(function PanelContent() {
   // The "selected" node (and its corresponding event) in the tree control.
   // It may need to be synchronized with the ID indicated as selected via the `idFromParams`
   // memo above. When this is the case, it is handled by the layout effect below.
-  const selectedDescendantProcessId = useSelector(selectors.uiSelectedDescendantProcessId);
+  const selectedNode = useSelector(selectors.selectedNode);
   const uiSelectedEvent = useMemo(() => {
-    return graphableProcesses.find((evt) => event.entityId(evt) === selectedDescendantProcessId);
-  }, [graphableProcesses, selectedDescendantProcessId]);
+    return graphableProcesses.find((evt) => event.entityId(evt) === selectedNode);
+  }, [graphableProcesses, selectedNode]);
 
   // Until an event is dispatched during update, the event indicated as selected by params may
   // be different than the one in state.
@@ -162,19 +162,10 @@ const PanelContent = memo(function PanelContent() {
     return 'processListWithCounts';
   }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
 
-  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
-  const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
-  const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
-
   const panelInstance = useMemo(() => {
     if (panelToShow === 'processDetails') {
       return (
-        <ProcessDetails
-          processEvent={uiSelectedEvent!}
-          pushToQueryParams={pushToQueryParams}
-          isProcessTerminated={isProcessTerminated}
-          isProcessOrigin={false}
-        />
+        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
       );
     }
 
@@ -213,13 +204,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return (
-      <ProcessListWithCounts
-        pushToQueryParams={pushToQueryParams}
-        isProcessTerminated={isProcessTerminated}
-        isProcessOrigin={false}
-      />
-    );
+    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
   }, [
     uiSelectedEvent,
     crumbEvent,
@@ -227,7 +212,6 @@ const PanelContent = memo(function PanelContent() {
     pushToQueryParams,
     relatedStatsForIdFromParams,
     panelToShow,
-    isProcessTerminated,
   ]);
 
   return <>{panelInstance}</>;

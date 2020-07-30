@@ -69,7 +69,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 }) => {
   const [
     { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
-  ] = useFetchIndexPatterns(defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY));
+  ] = useFetchIndexPatterns(
+    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+    'events_viewer'
+  );
 
   useEffect(() => {
     if (createTimeline != null) {

@@ -110,26 +110,24 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.asset.thumbnailAltText', {
         defaultMessage: 'Asset thumbnail',
       }),
+    getConfirmModalButtonLabel: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
+    getConfirmModalMessageText: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalDetail', {
+        defaultMessage: 'Are you sure you want to remove this asset?',
+      }),
+    getConfirmModalTitle: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalTitle', {
+        defaultMessage: 'Remove Asset',
+      }),
   },
   AssetManager: {
     getButtonLabel: () =>
       i18n.translate('xpack.canvas.assetManager.manageButtonLabel', {
         defaultMessage: 'Manage assets',
       }),
-    getConfirmModalButtonLabel: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalButtonLabel', {
-        defaultMessage: 'Remove',
-      }),
-    getConfirmModalMessageText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalDetail', {
-        defaultMessage: 'Are you sure you want to remove this asset?',
-      }),
-    getConfirmModalTitle: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalTitle', {
-        defaultMessage: 'Remove Asset',
-      }),
-  },
-  AssetModal: {
     getDescription: () =>
       i18n.translate('xpack.canvas.assetModal.modalDescription', {
         defaultMessage:
@@ -160,6 +158,13 @@ export const ComponentStrings = {
         defaultMessage: '{percentageUsed}% space used',
         values: {
           percentageUsed,
+        },
+      }),
+    getCopyAssetMessage: (id: string) =>
+      i18n.translate('xpack.canvas.assetModal.copyAssetMessage', {
+        defaultMessage: `Copied '{id}' to clipboard`,
+        values: {
+          id,
         },
       }),
   },

@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { useLogAnalysisCapabilitiesContext } from '../../../../containers/logs/log_analysis';
 import {
   logEntryCategoriesModule,
   useLogEntryCategoriesModuleContext,
@@ -20,6 +21,7 @@ import type { ModuleId } from './setup_flyout_state';
 export const LogAnalysisModuleList: React.FC<{
   onViewModuleSetup: (module: ModuleId) => void;
 }> = ({ onViewModuleSetup }) => {
+  const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
   const { setupStatus: logEntryRateSetupStatus } = useLogEntryRateModuleContext();
   const { setupStatus: logEntryCategoriesSetupStatus } = useLogEntryCategoriesModuleContext();
 
@@ -35,6 +37,7 @@ export const LogAnalysisModuleList: React.FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryRateModule.moduleDescription}
             moduleName={logEntryRateModule.moduleName}
             moduleStatus={logEntryRateSetupStatus}
@@ -43,6 +46,7 @@ export const LogAnalysisModuleList: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryCategoriesModule.moduleDescription}
             moduleName={logEntryCategoriesModule.moduleName}
             moduleStatus={logEntryCategoriesSetupStatus}

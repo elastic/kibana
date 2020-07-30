@@ -24,6 +24,12 @@ export const FILE_PICKER_PROMPT = i18n.translate(
   }
 );
 
+export const FILE_PICKER_INVALID_FILE_TYPE = (fileTypes: string): string =>
+  i18n.translate('xpack.securitySolution.lists.uploadValueListExtensionValidationMessage', {
+    values: { fileTypes },
+    defaultMessage: 'File must be one of the following types: [{fileTypes}]',
+  });
+
 export const CLOSE_BUTTON = i18n.translate(
   'xpack.securitySolution.lists.closeValueListsModalTitle',
   {
@@ -58,6 +64,10 @@ export const uploadSuccessMessage = (fileName: string) =>
     defaultMessage: "Value list '{fileName}' was uploaded",
     values: { fileName },
   });
+
+export const EXPORT_ERROR = i18n.translate('xpack.securitySolution.lists.valueListsExportError', {
+  defaultMessage: 'There was an error exporting the value list.',
+});
 
 export const COLUMN_FILE_NAME = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.fileNameColumn',
@@ -134,5 +144,19 @@ export const KEYWORDS_RADIO = i18n.translate(
   'xpack.securitySolution.lists.valueListsForm.keywordsRadioLabel',
   {
     defaultMessage: 'Keywords',
+  }
+);
+
+export const IP_RANGE_RADIO = i18n.translate(
+  'xpack.securitySolution.lists.valueListsForm.ipRangesRadioLabel',
+  {
+    defaultMessage: 'IP ranges',
+  }
+);
+
+export const TEXT_RADIO = i18n.translate(
+  'xpack.securitySolution.lists.valueListsForm.textRadioLabel',
+  {
+    defaultMessage: 'Text',
   }
 );

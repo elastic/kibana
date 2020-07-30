@@ -82,6 +82,7 @@ describe('RuleDetailsPageComponent', () => {
       <TestProviders store={store}>
         <Router history={mockHistory}>
           <RuleDetailsPageComponent
+            graphEventId={undefined}
             query={{ query: '', language: 'language' }}
             filters={[]}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

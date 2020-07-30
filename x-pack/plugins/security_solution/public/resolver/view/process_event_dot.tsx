@@ -72,7 +72,6 @@ const UnstyledProcessEventDot = React.memo(
     event,
     projectionMatrix,
     isProcessTerminated,
-    isProcessOrigin,
     timeAtRender,
   }: {
     /**
@@ -95,10 +94,6 @@ const UnstyledProcessEventDot = React.memo(
      * Whether or not to show the process as terminated.
      */
     isProcessTerminated: boolean;
-    /**
-     * Whether or not to show the process as the originating event.
-     */
-    isProcessOrigin: boolean;
 
     /**
      * The time (unix epoch) at render.
@@ -117,8 +112,8 @@ const UnstyledProcessEventDot = React.memo(
     const [xScale] = projectionMatrix;
 
     // Node (html id=) IDs
-    const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
-    const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+    const ariaActiveDescendant = useSelector(selectors.ariaActiveDescendant);
+    const selectedNode = useSelector(selectors.selectedNode);
     const nodeID = processEventModel.uniquePidForProcess(event);
     const relatedEventStats = useSelector(selectors.relatedEventsStats)(nodeID);
 
@@ -200,7 +195,7 @@ const UnstyledProcessEventDot = React.memo(
              * `beginElement` is by [w3](https://www.w3.org/TR/SVG11/animate.html#__smil__ElementTimeControl__beginElement)
              * but missing in [TSJS-lib-generator](https://github.com/microsoft/TSJS-lib-generator/blob/15a4678e0ef6de308e79451503e444e9949ee849/inputfiles/addedTypes.json#L1819)
              */
-            beginElement: () => void;
+            beginElement?: () => void;
           })
         | null;
     } = React.createRef();
@@ -212,23 +207,26 @@ const UnstyledProcessEventDot = React.memo(
       isLabelFilled,
       labelButtonFill,
       strokeColor,
-    } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+    } = cubeAssetsForNode(
+      isProcessTerminated,
+      /**
+       * There is no definition for 'trigger process' yet. return false.
+       */ false
+    );
 
     const labelHTMLID = htmlIdGenerator('resolver')(`${nodeID}:label`);
 
-    const isAriaCurrent = nodeID === activeDescendantId;
-    const isAriaSelected = nodeID === selectedDescendantId;
+    const isAriaCurrent = nodeID === ariaActiveDescendant;
+    const isAriaSelected = nodeID === selectedNode;
 
     const dispatch = useResolverDispatch();
 
     const handleFocus = useCallback(() => {
       dispatch({
         type: 'userFocusedOnResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-        },
+        payload: nodeID,
       });
-    }, [dispatch, nodeHTMLID, nodeID]);
+    }, [dispatch, nodeID]);
 
     const handleRelatedEventRequest = useCallback(() => {
       dispatch({
@@ -240,20 +238,15 @@ const UnstyledProcessEventDot = React.memo(
     const { pushToQueryParams } = useResolverQueryParams();
 
     const handleClick = useCallback(() => {
-      if (animationTarget.current !== null) {
-        // This works but the types are missing in the typescript DOM lib
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (animationTarget.current as any).beginElement();
+      if (animationTarget.current?.beginElement) {
+        animationTarget.current.beginElement();
       }
       dispatch({
         type: 'userSelectedResolverNode',
-        payload: {
-          nodeId: nodeHTMLID(nodeID),
-          selectedProcessId: nodeID,
-        },
+        payload: nodeID,
       });
       pushToQueryParams({ crumbId: nodeID, crumbEvent: '' });
-    }, [animationTarget, dispatch, pushToQueryParams, nodeID, nodeHTMLID]);
+    }, [animationTarget, dispatch, pushToQueryParams, nodeID]);
 
     /**
      * Enumerates the stats for related events to display with the node as options,
@@ -302,7 +295,8 @@ const UnstyledProcessEventDot = React.memo(
      */
     return (
       <div
-        data-test-subj={'resolverNode'}
+        data-test-subj="resolver:node"
+        data-test-resolver-node-id={nodeID}
         className={`${className} kbn-resetFocusState`}
         role="treeitem"
         aria-level={ariaLevel === null ? undefined : ariaLevel}
@@ -318,6 +312,14 @@ const UnstyledProcessEventDot = React.memo(
         <svg
           viewBox="-15 -15 90 30"
           preserveAspectRatio="xMidYMid meet"
+          onClick={
+            () => {
+              handleFocus();
+              handleClick();
+            } /* a11y note: this is strictly an alternate to the button, so no tabindex is necessary*/
+          }
+          role="img"
+          aria-labelledby={labelHTMLID}
           style={{
             display: 'block',
             width: '100%',
@@ -325,6 +327,8 @@ const UnstyledProcessEventDot = React.memo(
             position: 'absolute',
             top: '0',
             left: '0',
+            outline: 'transparent',
+            border: 'none',
           }}
         >
           <g>
@@ -422,6 +426,7 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   menuAction={handleRelatedEventRequest}
                   menuTitle={subMenuAssets.relatedEvents.title}
+                  projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
                 />
               )}

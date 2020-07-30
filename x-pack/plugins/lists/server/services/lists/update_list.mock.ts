@@ -13,6 +13,7 @@ import {
   META,
   NAME,
   USER,
+  VERSION,
 } from '../../../common/constants.mock';
 
 export const getUpdateListOptionsMock = (): UpdateListOptions => ({
@@ -25,4 +26,5 @@ export const getUpdateListOptionsMock = (): UpdateListOptions => ({
   meta: META,
   name: NAME,
   user: USER,
+  version: VERSION,
 });
