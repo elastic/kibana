@@ -11,4 +11,5 @@ export {
   MINIMUM_LICENSE,
   isFullLicense,
   isMinimumLicense,
+  isMlEnabled,
 } from './ml_license';
