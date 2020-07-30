@@ -91,14 +91,6 @@ export class MapsAppView extends React.Component {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
     }
 
-    // Clean up app state filters
-    const { filterManager } = getData().query;
-    filterManager.filters.forEach((filter) => {
-      if (filter.$state.store === esFilters.FilterStateStore.APP_STATE) {
-        filterManager.removeFilter(filter);
-      }
-    });
-
     getCoreChrome().setBreadcrumbs([]);
   }
 
