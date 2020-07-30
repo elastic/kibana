@@ -24,7 +24,7 @@ export async function registerManagementSection(
 ) {
   if (management !== undefined) {
     const [coreStart] = await core.getStartServices();
-    if (coreStart.application.capabilities.ml.canAccessML) {
+    if (coreStart.application.capabilities.ml?.canAccessML) {
       management.sections.section.insightsAndAlerting.registerApp({
         id: 'jobsListLink',
         title: i18n.translate('xpack.ml.management.jobsListTitle', {
