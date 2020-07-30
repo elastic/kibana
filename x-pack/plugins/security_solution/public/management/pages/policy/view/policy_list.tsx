@@ -36,6 +36,7 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
+import { useToasts } from '../../../../common/lib/kibana';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -124,7 +125,8 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
-  const { services, notifications } = useKibana();
+  const { services } = useKibana();
+  const toasts = useToasts();
   const history = useHistory();
   const location = useLocation();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
@@ -167,13 +169,12 @@ export const PolicyList = React.memo(() => {
 
   useEffect(() => {
     if (apiError) {
-      notifications.toasts.danger({
+      toasts.addDanger({
         title: apiError.error,
-        body: apiError.message,
-        toastLifeTimeMs: 10000,
+        text: apiError.message,
       });
     }
-  }, [apiError, dispatch, notifications.toasts]);
+  }, [apiError, dispatch, toasts]);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -181,31 +182,29 @@ export const PolicyList = React.memo(() => {
       if (deleteStatus === true) {
         setPolicyIdToDelete('');
         setShowDelete(false);
-        notifications.toasts.success({
-          toastLifeTimeMs: 10000,
+        toasts.addSuccess({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteSuccessToast', {
             defaultMessage: 'Success!',
           }),
-          body: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
-              defaultMessage="Policy has been deleted."
-            />
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails',
+            {
+              defaultMessage: 'Policy has been deleted.',
+            }
           ),
         });
       } else {
-        notifications.toasts.danger({
-          toastLifeTimeMs: 10000,
+        toasts.addDanger({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToast', {
             defaultMessage: 'Failed!',
           }),
-          body: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
+          text: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
             defaultMessage: 'Failed to delete policy',
           }),
         });
       }
     }
-  }, [notifications.toasts, deleteStatus]);
+  }, [toasts, deleteStatus]);
 
   const paginationSetup = useMemo(() => {
     return {
