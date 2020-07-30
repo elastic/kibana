@@ -84,7 +84,8 @@ const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSetti
   return (
     settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
     settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
-    settings?.heartbeatIndices !== formFields?.heartbeatIndices
+    settings?.heartbeatIndices !== formFields?.heartbeatIndices ||
+    JSON.stringify(settings?.defaultConnectors) !== JSON.stringify(formFields?.defaultConnectors)
   );
 };
 
