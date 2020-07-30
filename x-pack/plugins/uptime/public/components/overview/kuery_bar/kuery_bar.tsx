@@ -5,8 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, htmlIdGenerator } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
@@ -94,7 +93,7 @@ export function KueryBar({
     setState({ ...state, suggestions: [] });
     setSuggestionLimit(15);
 
-    const currentRequest = uniqueId();
+    const currentRequest = htmlIdGenerator()();
     currentRequestCheck = currentRequest;
 
     try {
@@ -116,7 +115,7 @@ export function KueryBar({
             },
           ],
         })) || []
-      ).filter((suggestion: QuerySuggestion) => !startsWith(suggestion.text, 'span.'));
+      ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {
         return;
       }
