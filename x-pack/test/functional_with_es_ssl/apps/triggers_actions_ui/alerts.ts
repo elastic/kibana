@@ -391,7 +391,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResultsAfterDelete.length).to.eql(2);
+      expect(searchResultsAfterDelete).to.have.length(2);
+      expect(searchResultsAfterDelete[0].name).to.eql(createdAlertsSecondPage[0].name);
+      expect(searchResultsAfterDelete[1].name).to.eql(createdAlertsSecondPage[1].name);
     });
   });
 };
