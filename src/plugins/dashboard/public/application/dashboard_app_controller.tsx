@@ -57,7 +57,6 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
@@ -475,15 +474,10 @@ export class DashboardAppController {
               (!incomingEmbeddable.embeddableId ||
                 !container.getInput().panels[incomingEmbeddable.embeddableId])
             ) {
-              // TODO: Get rid of this, maybe by making the visualize embeddable also use the attributeService
-              const explicitInput =
-                incomingEmbeddable.type === 'lens' ||
-                (incomingEmbeddable.input as SavedObjectEmbeddableInput).savedObjectId
-                  ? incomingEmbeddable.input
-                  : {
-                      savedVis: incomingEmbeddable.input,
-                    };
-              container.addNewEmbeddable<EmbeddableInput>(incomingEmbeddable.type, explicitInput);
+              container.addNewEmbeddable<EmbeddableInput>(
+                incomingEmbeddable.type,
+                incomingEmbeddable.input
+              );
             }
           }
 
