@@ -18,15 +18,16 @@ import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/f
 import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 
 interface StatsAggregation {
-  buckets: Array<{ key: string; doc_count: number }>;
-}
-
-interface SeriesAggregation {
   buckets: Array<{
-    key_as_string: string;
-    key: number;
+    key: string;
     doc_count: number;
-    dataset: StatsAggregation;
+    series: {
+      buckets: Array<{
+        key_as_string: string;
+        key: number;
+        doc_count: number;
+      }>;
+    };
   }>;
 }
 
@@ -131,18 +132,13 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
       terms: {
         field: 'event.dataset',
         size: 4,
-      },
-    },
-    series: {
-      date_histogram: {
-        field: logParams.timestampField,
-        fixed_interval: params.bucketSize,
+        missing: 'unknown',
       },
       aggs: {
-        dataset: {
-          terms: {
-            field: 'event.dataset',
-            size: 4,
+        series: {
+          date_histogram: {
+            field: logParams.timestampField,
+            fixed_interval: params.bucketSize,
           },
         },
       },
@@ -152,34 +148,27 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
 
 function processLogsOverviewAggregations(aggregations: {
   stats: StatsAggregation;
-  series: SeriesAggregation;
 }): StatsAndSeries {
-  const processedStats = aggregations.stats.buckets.reduce<StatsAndSeries['stats']>(
-    (result, bucket) => {
-      result[bucket.key] = {
-        type: 'number',
-        label: bucket.key,
-        value: bucket.doc_count,
-      };
+  const processedStats: StatsAndSeries['stats'] = {};
+  const processedSeries: StatsAndSeries['series'] = {};
 
-      return result;
-    },
-    {}
-  );
+  aggregations.stats.buckets.forEach((stat) => {
+    const label = stat.key;
 
-  const processedSeries = aggregations.series.buckets.reduce<StatsAndSeries['series']>(
-    (result, bucket) => {
-      const x = bucket.key; // the timestamp of the bucket
-      bucket.dataset.buckets.forEach((b) => {
-        const label = b.key;
-        result[label] = result[label] || { label, coordinates: [] };
-        result[label].coordinates.push({ x, y: b.doc_count });
+    processedStats[stat.key] = {
+      type: 'number',
+      label,
+      value: stat.doc_count,
+    };
+
+    stat.series.buckets.forEach((series) => {
+      processedSeries[label] = processedSeries[label] || { label, coordinates: [] };
+      processedSeries[label].coordinates.push({
+        x: series.key,
+        y: series.doc_count,
       });
-
-      return result;
-    },
-    {}
-  );
+    });
+  });
 
   return {
     stats: processedStats,
