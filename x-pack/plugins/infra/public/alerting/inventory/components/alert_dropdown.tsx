@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 import { AlertFlyout } from './alert_flyout';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ManageAlertsContextMenuItem } from './manage_alerts_context_menu_item';
 
 export const InventoryAlertDropdown = () => {
