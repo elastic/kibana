@@ -40,7 +40,7 @@ const learnMoreLink = (
           defaultMessage="Learn about shard allocation"
         />
       }
-      docPath="shards-allocation.html"
+      docPath="modules-cluster.html#cluster-shard-allocation-settings"
     />
   </Fragment>
 );
@@ -158,6 +158,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
       </ErrableFormRow>
       {!!phaseData[PHASE_NODE_ATTRS] ? (
         <EuiButtonEmpty
+          style={{ maxWidth: 400 }}
           data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
           flush="left"
           iconType="eye"
