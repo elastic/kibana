@@ -15,7 +15,6 @@ import { ManageAlertsContextMenuItem } from '../../inventory/components/manage_a
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const kibana = useKibana();
 
   const { metricThresholdPrefill } = useAlertPrefillContext();
   const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
@@ -28,18 +27,12 @@ export const MetricsAlertDropdown = () => {
     setPopoverOpen(true);
   }, [setPopoverOpen]);
 
-  const menuItems = useMemo(() => {
-    return [
-      <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
-        <FormattedMessage
-          id="xpack.infra.alerting.createAlertButton"
-          defaultMessage="Create alert"
-        />
-      </EuiContextMenuItem>,
-      <ManageAlertsContextMenuItem />,
-    ];
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [kibana.services]);
+  const menuItems = [
+    <EuiContextMenuItem icon="bell" key="createLink" onClick={() => setFlyoutVisible(true)}>
+      <FormattedMessage id="xpack.infra.alerting.createAlertButton" defaultMessage="Create alert" />
+    </EuiContextMenuItem>,
+    <ManageAlertsContextMenuItem />,
+  ];
 
   return (
     <>
