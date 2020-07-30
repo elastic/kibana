@@ -5013,7 +5013,6 @@
     "xpack.apm.settings.anomaly_detection.legacy_jobs.body": "以前の統合のレガシー機械学習ジョブが見つかりました。これは、APMアプリでは使用されていません。",
     "xpack.apm.settings.anomaly_detection.legacy_jobs.button": "ジョブの確認",
     "xpack.apm.settings.anomaly_detection.legacy_jobs.title": "レガシーMLジョブはAPMアプリで使用されていません。",
-    "xpack.apm.settings.anomaly_detection.license.text": "異常検知を使用するには、Elastic Platinumライセンスのサブスクリプションが必要です。このライセンスがあれば、機械学習を活用して、サービスを監視できます。",
     "xpack.apm.settings.anomalyDetection": "異常検知",
     "xpack.apm.settings.anomalyDetection.addEnvironments.cancelButtonText": "キャンセル",
     "xpack.apm.settings.anomalyDetection.addEnvironments.createJobsButtonText": "ジョブの作成",
