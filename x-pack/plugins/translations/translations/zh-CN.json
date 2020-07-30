@@ -5009,7 +5009,6 @@
     "xpack.apm.settings.anomaly_detection.legacy_jobs.body": "我们在以前的集成中发现 APM 应用中不再使用的旧版 Machine Learning 作业",
     "xpack.apm.settings.anomaly_detection.legacy_jobs.button": "复查作业",
     "xpack.apm.settings.anomaly_detection.legacy_jobs.title": "旧版 ML 作业不再用于 APM 应用",
-    "xpack.apm.settings.anomaly_detection.license.text": "要使用异常检测，必须订阅 Elastic 白金级许可。使用该许可，您将能够借助 Machine Learning 监测服务。",
     "xpack.apm.settings.anomalyDetection": "异常检测",
     "xpack.apm.settings.anomalyDetection.addEnvironments.cancelButtonText": "取消",
     "xpack.apm.settings.anomalyDetection.addEnvironments.createJobsButtonText": "创建作业",
