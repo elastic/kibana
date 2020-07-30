@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/public';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -118,7 +119,7 @@ export function getTopNavConfig({
                 const currentTitle = savedMap.title;
                 savedMap.title = newTitle;
                 savedMap.copyOnSave = newCopyOnSave;
-                const saveOptions = {
+                const saveOptions: SavedObjectSaveOpts = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
@@ -154,7 +155,7 @@ export function getTopNavConfig({
 
 async function doSave(
   savedMap: ISavedGisMap,
-  saveOptions: unknown,
+  saveOptions: SavedObjectSaveOpts,
   closeFlyout: () => void,
   setBreadcrumbs: () => void
 ) {
