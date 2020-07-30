@@ -440,7 +440,7 @@ export const defaultEndpointExceptionItems = (
           ],
         },
         {
-          field: 'file.path',
+          field: 'file.path.text',
           operator: 'included',
           type: 'match',
           value: filePath ?? '',

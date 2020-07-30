@@ -2,9 +2,9 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-echo " -> Running mocha tests"
-cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:karma
+echo " -> Building legacy styles for x-pack canvas storyshot tests"
+cd "$KIBANA_DIR"
+node scripts/build_sass
 echo ""
 echo ""
 
