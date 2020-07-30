@@ -95,7 +95,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
+      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, listType);
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -124,7 +124,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         return comboBox;
       }
     },
-    [handleFieldChange, indexPattern, entry]
+    [handleFieldChange, indexPattern, entry, listType]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {

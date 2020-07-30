@@ -33,6 +33,8 @@ import {
   EmptyNestedEntry,
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import exceptionableFields from '../exceptionable_fields.json';
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -45,13 +47,21 @@ import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
  */
 export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
-  item: FormattedBuilderEntry
+  item: FormattedBuilderEntry,
+  type: ExceptionListType
 ): IIndexPattern => {
+  const indexPatterns = {
+    ...patterns,
+    fields: patterns.fields.filter(({ name }) =>
+      type === 'endpoint' ? exceptionableFields.includes(name) : true
+    ),
+  };
+
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
-      ...patterns,
-      fields: patterns.fields.filter(
+      ...indexPatterns,
+      fields: indexPatterns.fields.filter(
         (field) =>
           field.subType != null &&
           field.subType.nested != null &&
@@ -61,17 +71,17 @@ export const getFilteredIndexPatterns = (
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...patterns, fields: [item.field] };
+    return { ...indexPatterns, fields: [item.field] };
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
-      ...patterns,
-      fields: patterns.fields.filter(
+      ...indexPatterns,
+      fields: indexPatterns.fields.filter(
         (field) => field.subType != null && field.subType.nested != null
       ),
     };
   } else {
-    return patterns;
+    return indexPatterns;
   }
 };
 
