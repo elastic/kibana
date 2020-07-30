@@ -123,5 +123,9 @@
   "process.pe.product",
   "process.pgid",
   "process.working_directory.text",
-  "rule.uuid"
+  "rule.uuid",
+  "user.domain",
+  "user.email",
+  "user.hash",
+  "user.id"
 ]
