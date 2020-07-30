@@ -5,11 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { SavedObject, SavedObjectAttributes } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -189,20 +185,10 @@ function getGeoShapeAggCount(
   return _.sum(countsPerMap);
 }
 
-export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
-  return mapSavedObjects.map((savedMapObject) => {
-    const layerList =
-      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
-        ? JSON.parse(savedMapObject.attributes.layerListJSON)
-        : [];
-    return layerList as LayerDescriptor[];
-  });
-}
-
 export function buildMapsIndexPatternsTelemetry(
   indexPatternSavedObjects: IIndexPattern[],
   layerLists: LayerDescriptor[][]
-): any {
+): SavedObjectAttributes {
   const {
     indexPatternsWithGeoFieldCount,
     indexPatternsWithGeoPointFieldCount,
@@ -221,7 +207,6 @@ export function buildMapsIndexPatternsTelemetry(
 }
 
 export function buildMapsSavedObjectsTelemetry(
-  mapSavedObjects: MapSavedObject[],
   layerLists: LayerDescriptor[][]
 ): SavedObjectAttributes {
   const mapsCount = layerLists.length;
@@ -272,55 +257,53 @@ export function buildMapsSavedObjectsTelemetry(
   };
 }
 
-async function getTransformedSavedObjects(savedObjectType, savedObjectsTransform) {
-  const savedObjectsClient = getInternalRepository();
-
-  let page = 1;
-  let perPage = 1;
-  let total = 3;
-  let savedObjects = [];
-  const transformedResults = {};
-  while (page * perPage <= total) {
-    ({
-      page,
-      per_page: perPage,
-      saved_objects: savedObjects,
-      total,
-    } = await savedObjectsClient.find({
-      type: savedObjectType,
-    }));
-
-    _.mergeWith(transformedResults, savedObjectsTransform(savedObjects), (prevValue, newValue) => {
-      if (isNaN(newValue)) {
-        return prevValue;
-      } else if (isNaN(prevValue)) {
-        return newValue;
-      } else {
-        return prevValue + newValue;
-      }
-    });
-  }
-  return transformedResults;
+export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescriptor[][] {
+  return mapSavedObjects.map((savedMapObject) => {
+    const layerList =
+      savedMapObject.attributes && savedMapObject.attributes.layerListJSON
+        ? JSON.parse(savedMapObject.attributes.layerListJSON)
+        : [];
+    return layerList as LayerDescriptor[];
+  });
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
-  // The only overlap between saved objects telemetry & index patterns
-  // telemetry is in the use of layer lists. The telemetry builders
-  // are wrapped to build layers lists when saved objects telemetry
-  // is harvested and then use those lists when harvesting index
-  // patterns telemetry
-  const layerLists: LayerDescriptor[][] = [];
-  const savedObjectsTelemetryWrapper = (savedObjects) => {
-    const currentLayerLists = getLayerLists(savedObjects);
-    layerLists.concat(currentLayerLists);
-    return buildMapsSavedObjectsTelemetry(savedObjects, currentLayerLists);
-  };
-  const indexPatternsTelemetryWrapper = (savedObjects) =>
-    buildMapsIndexPatternsTelemetry(savedObjects, layerLists);
+  let currentPage = 1;
+  let perPage = 2; // Seed value
+  let total = 3; // Seed value
+  let savedObjects = [];
+  const savedObjectsClient = getInternalRepository();
+
+  // Harvest layers lists from saved maps for each page of results
+  let layerLists: LayerDescriptor[][] = [];
+  while (currentPage <= Math.ceil(total / perPage)) {
+    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find({
+      type: MAP_SAVED_OBJECT_TYPE,
+      page: currentPage++,
+    }));
+    const currentPageLayerLists = getLayerLists(savedObjects);
+    layerLists = layerLists.concat(currentPageLayerLists);
+  }
+  const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
+
+  // Harvest index patterns saved objects
+  currentPage = 1;
+  const indexPatternsTelemetry = {};
+  while (currentPage <= Math.ceil(total / perPage)) {
+    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find({
+      type: 'index-pattern',
+      page: currentPage++,
+    }));
+    _.mergeWith(
+      indexPatternsTelemetry,
+      buildMapsIndexPatternsTelemetry(savedObjects, layerLists),
+      (srcVal, objVal) => srcVal || 0 + objVal || 0
+    );
+  }
 
   return {
     showMapVisualizationTypes: config.showMapVisualizationTypes,
-    ...(await getTransformedSavedObjects(MAP_SAVED_OBJECT_TYPE, savedObjectsTelemetryWrapper)),
-    ...(await getTransformedSavedObjects('index-pattern', indexPatternsTelemetryWrapper)),
+    ...indexPatternsTelemetry,
+    ...savedObjectsTelemetry,
   };
 }
