@@ -58,8 +58,25 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vegalite`,
     check({}, true, {
       config: {
+        axis: {
+          domainColor: '#343741',
+          gridColor: '#69707d',
+          tickColor: '#343741',
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
+        style: {
+          'guide-label': {
+            fill: '#343741',
+          },
+          'guide-title': {
+            fill: '#343741',
+          },
+        },
+        title: {
+          color: '#343741',
+        },
       },
     })
   );
@@ -68,6 +85,12 @@ describe(`VegaParser._setDefaultColors`, () => {
     `vega`,
     check({}, false, {
       config: {
+        axis: {
+          domainColor: '#343741',
+          gridColor: '#69707d',
+          tickColor: '#343741',
+        },
+        background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         arc: { fill: '#54B399' },
         area: { fill: '#54B399' },
@@ -78,6 +101,17 @@ describe(`VegaParser._setDefaultColors`, () => {
         shape: { stroke: '#54B399' },
         symbol: { fill: '#54B399' },
         trail: { fill: '#54B399' },
+        style: {
+          'guide-label': {
+            fill: '#343741',
+          },
+          'guide-title': {
+            fill: '#343741',
+          },
+        },
+        title: {
+          color: '#343741',
+        },
       },
     })
   );

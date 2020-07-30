@@ -22,7 +22,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
 import { Utils } from '../data_model/utils';
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';

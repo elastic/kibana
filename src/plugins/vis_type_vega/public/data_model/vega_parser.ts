@@ -21,8 +21,7 @@ import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import hjson from 'hjson';
-// @ts-ignore
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
