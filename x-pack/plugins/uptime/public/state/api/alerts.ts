@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ACTION_GROUP_DEFINITIONS, API_URLS, CLIENT_ALERT_TYPES } from '../../../common/constants';
+import { ACTION_GROUP_DEFINITIONS, CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { Alert, AlertAction } from '../../../../triggers_actions_ui/public';
+import { API_URLS } from '../../../common/constants';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
