@@ -42,7 +42,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
         validateFunc = validateMonitorStatusParams;
       })();
     }
-    return validateFunc ? validateFunc(alertParams) : {};
+    return validateFunc ? validateFunc(alertParams) : { errors: undefined };
   },
   defaultActionMessage,
   requiresAppContext: false,
