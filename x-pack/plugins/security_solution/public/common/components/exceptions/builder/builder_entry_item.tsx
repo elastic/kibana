@@ -110,6 +110,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isDisabled={indexPattern == null}
           onChange={handleFieldChange}
           data-test-subj="exceptionBuilderEntryField"
+          fieldInputWidth={275}
         />
       );
 

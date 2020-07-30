@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { addBasePath } from './add_base_path';
 import { MonitorSummary } from '../../../../common/runtime_types';
 
@@ -13,10 +12,15 @@ export const getApmHref = (
   basePath: string,
   dateRangeStart: string,
   dateRangeEnd: string
-) =>
-  addBasePath(
+) => {
+  const clause = summary?.state?.service?.name
+    ? `service.name: "${summary.state.service.name}"`
+    : `url.domain: "${summary.state.url?.domain}"`;
+
+  return addBasePath(
     basePath,
     `/app/apm#/services?kuery=${encodeURI(
-      `url.domain: "${get(summary, 'state.url.domain')}"`
+      clause
     )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
   );
+};
