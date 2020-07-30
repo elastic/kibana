@@ -255,11 +255,11 @@ describe('Policy Details', () => {
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addSuccess.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'success',
-          iconType: 'check',
+          title: 'Success!',
+          text: expect.any(Function),
         });
       });
       it('should show an error notification toast if update fails', async () => {
@@ -270,11 +270,11 @@ describe('Policy Details', () => {
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addDanger.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'danger',
-          iconType: 'alert',
+          title: 'Failed!',
+          text: expect.any(String),
         });
       });
     });

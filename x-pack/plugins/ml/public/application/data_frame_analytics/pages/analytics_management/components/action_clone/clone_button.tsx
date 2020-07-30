@@ -424,7 +424,7 @@ export const CloneButton: FC<CloneButtonProps> = ({ isDisabled, onClick }) => {
       iconType="copy"
       isDisabled={isDisabled}
       onClick={onClick}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>
