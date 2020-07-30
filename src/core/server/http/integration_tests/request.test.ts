@@ -23,6 +23,7 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { schema } from '@kbn/config-schema';
 
 let server: HttpService;
 
@@ -171,6 +172,55 @@ describe('KibanaRequest', () => {
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('if in a preAuthHandler completes after the response is send', async () => {
+        const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+        const completeSpy = jest.fn();
+        registerOnPreAuth((req, response, toolkit) => {
+          req.events.aborted$.subscribe({
+            next: nextSpy,
+            complete: completeSpy,
+          });
+
+          return toolkit.next();
+        });
+
+        let error: Error | undefined;
+        router.post(
+          { path: '/', validate: { body: schema.any() } },
+          async (context, request, res) => {
+            // Spy should not have been called here
+            try {
+              expect(completeSpy).toHaveBeenCalledTimes(0);
+            } catch (err) {
+              error = err;
+            }
+
+            return res.ok({ body: 'ok' });
+          }
+        );
+
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .post('/')
+          .send({
+            data: 'test',
+          })
+          .expect(200);
+
+        expect(nextSpy).toHaveBeenCalledTimes(0);
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+
+        if (error) {
+          throw error;
+        }
       });
 
       it('completes & does not emit when request rejected', async () => {
