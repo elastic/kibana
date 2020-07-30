@@ -30,14 +30,6 @@ beforeEach(() => {
         { key: 'attrNotSoSecret', dangerouslyExposeValue: true },
       ]),
     },
-    {
-      type: 'known-type-with-allowed-explicit-ids',
-      allowsExplicitIDs: true,
-      attributesToEncrypt: new Set([
-        'attrSecret',
-        { key: 'attrNotSoSecret', dangerouslyExposeValue: true },
-      ]),
-    },
   ]);
 
   wrapper = new EncryptedSavedObjectsClientWrapper({
@@ -126,48 +118,6 @@ describe('#create', () => {
         attrThree: 'three',
       },
       { id: 'uuid-v4-id', overwrite: true }
-    );
-  });
-
-  it('allows explicit IDs when specified type allows it', async () => {
-    const attributes = {
-      attrOne: 'one',
-      attrSecret: 'secret',
-      attrNotSoSecret: 'not-so-secret',
-      attrThree: 'three',
-    };
-    const options = { overwrite: true, id: 'custom-uuid' };
-    const mockedResponse = {
-      id: 'custom-uuid',
-      type: 'known-type-with-allowed-explicit-ids',
-      attributes: {
-        attrOne: 'one',
-        attrSecret: '*secret*',
-        attrNotSoSecret: '*not-so-secret*',
-        attrThree: 'three',
-      },
-      references: [],
-    };
-
-    mockBaseClient.create.mockResolvedValue(mockedResponse);
-
-    expect(
-      await wrapper.create('known-type-with-allowed-explicit-ids', attributes, options)
-    ).toEqual({
-      ...mockedResponse,
-      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
-    });
-
-    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.create).toHaveBeenCalledWith(
-      'known-type-with-allowed-explicit-ids',
-      {
-        attrOne: 'one',
-        attrSecret: '*secret*',
-        attrNotSoSecret: '*not-so-secret*',
-        attrThree: 'three',
-      },
-      { id: 'custom-uuid', overwrite: true }
     );
   });
 
@@ -279,66 +229,6 @@ describe('#bulkCreate', () => {
           attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
         },
         bulkCreateParams[1],
-      ],
-      options
-    );
-  });
-
-  it('allows explicit IDs when specified type allows it', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: 'some-namespace' };
-    const mockedResponse = {
-      saved_objects: [
-        {
-          id: 'uuid-v4-id',
-          type: 'known-type-with-allowed-explicit-ids',
-          attributes,
-          references: [],
-        },
-        {
-          id: 'custom-uuid',
-          type: 'known-type-with-allowed-explicit-ids',
-          attributes,
-          references: [],
-        },
-        {
-          id: 'some-id',
-          type: 'unknown-type',
-          attributes,
-          references: [],
-        },
-      ],
-    };
-
-    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
-
-    const bulkCreateParams = [
-      { type: 'known-type-with-allowed-explicit-ids', attributes },
-      { id: 'custom-uuid', type: 'known-type-with-allowed-explicit-ids', attributes },
-      { id: 'some-id', type: 'unknown-type', attributes },
-    ];
-
-    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
-      saved_objects: [
-        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
-        { ...mockedResponse.saved_objects[1], attributes: { attrOne: 'one', attrThree: 'three' } },
-        mockedResponse.saved_objects[2],
-      ],
-    });
-
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
-      [
-        {
-          ...bulkCreateParams[0],
-          id: 'uuid-v4-id',
-          attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-        },
-        {
-          ...bulkCreateParams[1],
-          attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
-        },
-        bulkCreateParams[2],
       ],
       options
     );

@@ -159,26 +159,18 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    // SOs client does partial updates - we want to overwrite the whole object, so we'll use create with overwrite
-    const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
-      'action',
-      {
-        actionTypeId,
-        name,
-        config: validatedActionTypeConfig as SavedObjectAttributes,
-        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-      },
-      {
-        id,
-        overwrite: true,
-      }
-    );
+    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
+      actionTypeId,
+      name,
+      config: validatedActionTypeConfig as SavedObjectAttributes,
+      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+    });
 
     return {
       id,
-      actionTypeId: result.attributes.actionTypeId,
-      name: result.attributes.name,
-      config: result.attributes.config,
+      actionTypeId: result.attributes.actionTypeId as string,
+      name: result.attributes.name as string,
+      config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
     };
   }

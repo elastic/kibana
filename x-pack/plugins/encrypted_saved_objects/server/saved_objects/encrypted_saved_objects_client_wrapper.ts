@@ -60,13 +60,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
     // since IDs are part of the AAD used during encryption, that's why we control them within this
     // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id && !this.options.service.allowsExplicitIDs(type)) {
+    if (options.id) {
       throw new Error(
         'Predefined IDs are not allowed for saved objects with encrypted attributes.'
       );
     }
 
-    const id = options.id ?? generateID();
+    const id = generateID();
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -103,13 +103,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
         // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id && !this.options.service.allowsExplicitIDs(object.type)) {
+        if (object.id) {
           throw new Error(
             'Predefined IDs are not allowed for saved objects with encrypted attributes.'
           );
         }
 
-        const id = object.id ?? generateID();
+        const id = generateID();
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
