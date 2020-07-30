@@ -98,6 +98,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "locations": Array [],
@@ -144,6 +145,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "locations": Array [],
@@ -315,6 +317,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"monitor.ip\\"}}],\\"minimum_should_match\\":1}}]}}",
@@ -398,6 +401,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"url.full\\"}}],\\"minimum_should_match\\":1}}]}}",
@@ -531,6 +535,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}}",
@@ -583,6 +588,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "filters": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"ur.port\\"}}],\\"minimum_should_match\\":1}}",
@@ -623,6 +629,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 730,
               "certExpirationThreshold": 30,
+              "defaultConnectors": Array [],
               "heartbeatIndices": "heartbeat-8*",
             },
             "filters": undefined,
@@ -768,6 +775,7 @@ describe('status check alert', () => {
           "timerangeUnit",
           "timerange",
           "version",
+          "isAutoGenerated",
         ]
       `);
     });

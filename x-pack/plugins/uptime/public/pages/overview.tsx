@@ -19,7 +19,6 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
 
 interface Props {

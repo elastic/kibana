@@ -32,7 +32,7 @@ export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 export const createAlertAction = createAsyncAction<NewAlertParams, Alert>('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult>('GET ALERTS');
-export const getExistingAlertAction = createAsyncAction<MonitorIdParam, Alert>(
+export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Alert>(
   'GET EXISTING ALERTS'
 );
 export const deleteAlertAction = createAsyncAction<{ alertId: string }, any>('DELETE ALERTS');
@@ -58,7 +58,7 @@ export const alertsReducer = handleActions<AlertState>(
     ...handleAsyncAction<AlertState>('connectors', getConnectorsAction),
     ...handleAsyncAction<AlertState>('newAlert', createAlertAction),
     ...handleAsyncAction<AlertState>('alerts', getMonitorAlertsAction),
-    ...handleAsyncAction<AlertState>('anomalyAlert', getExistingAlertAction),
+    ...handleAsyncAction<AlertState>('anomalyAlert', getAnomalyAlertAction),
     ...handleAsyncAction<AlertState>('alertDeletion', deleteAlertAction),
   },
   initialState
@@ -66,12 +66,8 @@ export const alertsReducer = handleActions<AlertState>(
 
 export function* fetchAlertsEffect() {
   yield takeLatest(
-    getExistingAlertAction.get,
-    fetchEffectFactory(
-      fetchAlertRecords,
-      getExistingAlertAction.success,
-      getExistingAlertAction.fail
-    )
+    getAnomalyAlertAction.get,
+    fetchEffectFactory(fetchAlertRecords, getAnomalyAlertAction.success, getAnomalyAlertAction.fail)
   );
 
   yield takeLatest(deleteAlertAction.get, function* (action: Action<{ alertId: string }>) {
@@ -80,7 +76,8 @@ export function* fetchAlertsEffect() {
       yield put(deleteAlertAction.success(response));
       kibanaService.core.notifications.toasts.addSuccess('Alert successfully deleted!');
       const monitorId = yield select(monitorIdSelector);
-      yield put(getExistingAlertAction.get({ monitorId }));
+      yield put(getAnomalyAlertAction.get({ monitorId }));
+      yield put(getMonitorAlertsAction.get());
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
         title: 'Alert cannot be deleted',
@@ -120,3 +117,4 @@ export const connectorsSelector = ({ alerts }: AppState) => alerts.connectors;
 export const newAlertSelector = ({ alerts }: AppState) => alerts.newAlert;
 export const anomalyAlertSelector = ({ alerts }: AppState) => alerts.anomalyAlert;
 export const alertsSelector = ({ alerts }: AppState) => alerts.alerts;
+export const isAlertDeleting = ({ alerts }: AppState) => alerts.alertDeletion.loading;

@@ -15,6 +15,7 @@ import {
   connectorsSelector,
   createAlertAction,
   deleteAlertAction,
+  isAlertDeleting,
   newAlertSelector,
 } from '../../../state/alerts/alerts';
 import { BellIcon } from './bell_icon';
@@ -41,6 +42,8 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
 
   const { data: alerts, loading } = useSelector(alertsSelector);
   const { loading: isCreating } = useSelector(newAlertSelector);
+
+  const isDeleting = useSelector(isAlertDeleting);
 
   const hasAlert = (alerts?.data ?? []).find((alert) =>
     alert.params.search.includes(monitor.monitor_id)
@@ -80,10 +83,10 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
 
   return defaultConnectors.length > 0 ? (
     <div style={{ marginRight: 15 }}>
-      {(isCreating && isLoading) || loading ? (
+      {((isCreating || isDeleting) && isLoading) || loading ? (
         <EuiLoadingSpinner />
       ) : (
-        <EuiToolTip content={hasAlert ? 'Disable alert' : 'Enable alert'}>
+        <EuiToolTip content={hasAlert ? 'Disable down alert' : 'Enable down alert'}>
           <EuiButtonIcon
             aria-label={'Enable down alert'}
             onClick={hasAlert ? disableAlert : enableAlert}
