@@ -172,6 +172,7 @@ export const postAgentCheckinHandler: RequestHandler<
     const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => {
+      console.log('ABORT');
       abortController.abort();
     });
     const signal = abortController.signal;
@@ -226,6 +227,9 @@ export const postAgentEnrollHandler: RequestHandler<
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
   try {
+    request.events.aborted$.subscribe((ev) => {
+      console.log('ABORT FROM handler', ev);
+    }, console.log);
     const soClient = appContextService.getInternalUserSOClient(request);
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);

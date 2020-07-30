@@ -22,6 +22,8 @@ export async function enroll(
 ): Promise<Agent> {
   validateAgentVersion(metadata);
 
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
   if (existingAgent && existingAgent.active === true) {

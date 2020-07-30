@@ -48,7 +48,7 @@ export function createLimitedPreAuthHandler({
   isMatch: (request: KibanaRequest) => boolean;
   maxCounter: IMaxCounter;
 }) {
-  return function preAuthHandler(
+  return async function preAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
     toolkit: OnPreAuthToolkit
@@ -66,11 +66,15 @@ export function createLimitedPreAuthHandler({
 
     maxCounter.increase();
 
-    // requests.events.aborted$ has a bug (but has test which explicitly verifies) where it's fired even when the request completes
-    // https://github.com/elastic/kibana/pull/70495#issuecomment-656288766
-    request.events.aborted$.toPromise().then(() => {
-      maxCounter.decrease();
-    });
+    console.log('CREATE SUB', request.events.aborted$);
+    request.events.aborted$.subscribe((ev) => {
+      console.log('EVENT', ev);
+    }, console.log);
+
+    await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+    maxCounter.decrease();
+
+    console.log('AFTER TIMER 1');
 
     return toolkit.next();
   };
