@@ -25,6 +25,7 @@ export const getSignalsTemplate = (index: string) => {
     },
     index_patterns: [`${index}-*`],
     mappings: ecsMapping.mappings,
+    version: 1,
   };
   return template;
 };

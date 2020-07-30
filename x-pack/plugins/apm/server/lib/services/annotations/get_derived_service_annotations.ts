@@ -36,13 +36,8 @@ export async function getDerivedServiceAnnotations({
     ...getDocumentTypeFilterForAggregatedTransactions(
       useAggregatedTransactions
     ),
+    ...getEnvironmentUiFilterES(environment),
   ];
-
-  const environmentFilter = getEnvironmentUiFilterES(environment);
-
-  if (environmentFilter) {
-    filter.push(environmentFilter);
-  }
 
   const versions =
     (
@@ -89,11 +84,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: filter.concat({
-                term: {
-                  [SERVICE_VERSION]: version,
-                },
-              }),
+              filter: [...filter, { term: { [SERVICE_VERSION]: version } }],
             },
           },
           aggs: {

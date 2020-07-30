@@ -14,7 +14,8 @@ import { AppAction } from '../../../../common/store/actions';
 
 jest.mock('../../../../common/components/link_to');
 
-describe('when on the policies page', () => {
+// Skipping these test now that the Policy List has been hidden
+describe.skip('when on the policies page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
@@ -37,9 +38,9 @@ describe('when on the policies page', () => {
     expect(table).not.toBeNull();
   });
 
-  it('should display the onboarding steps', async () => {
+  it('should display the instructions', async () => {
     const renderResult = render();
-    const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+    const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
     expect(onboardingSteps).not.toBeNull();
   });
 

@@ -13,6 +13,7 @@ export interface SharedLayerState {
   numberDisplay: 'hidden' | 'percent' | 'value';
   categoryDisplay: 'default' | 'inside' | 'hide';
   legendDisplay: 'default' | 'show' | 'hide';
+  legendPosition?: 'left' | 'right' | 'top' | 'bottom';
   nestedLegend?: boolean;
   percentDecimals?: number;
 }

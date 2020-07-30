@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 
 const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
@@ -32,34 +31,25 @@ export interface AggParamsSum extends BaseAggParams {
   field: string;
 }
 
-export interface SumMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
-export const getSumMetricAgg = ({ getInternalStartServices }: SumMetricAggDependencies) => {
-  return new MetricAggType(
-    {
-      name: METRIC_TYPES.SUM,
-      title: sumTitle,
-      makeLabel(aggConfig) {
-        return i18n.translate('data.search.aggs.metrics.sumLabel', {
-          defaultMessage: 'Sum of {field}',
-          values: { field: aggConfig.getFieldDisplayName() },
-        });
-      },
-      isScalable() {
-        return true;
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
-        },
-      ],
+export const getSumMetricAgg = () => {
+  return new MetricAggType({
+    name: METRIC_TYPES.SUM,
+    title: sumTitle,
+    makeLabel(aggConfig) {
+      return i18n.translate('data.search.aggs.metrics.sumLabel', {
+        defaultMessage: 'Sum of {field}',
+        values: { field: aggConfig.getFieldDisplayName() },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    isScalable() {
+      return true;
+    },
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
+      },
+    ],
+  });
 };

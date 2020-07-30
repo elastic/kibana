@@ -6,6 +6,7 @@
 
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 
 import { ParentProcessDraggable } from './parent_process_draggable';

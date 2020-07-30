@@ -223,6 +223,21 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'POST',
   });
 
+  ml.updateDataFrameAnalytics = ca({
+    urls: [
+      {
+        fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_update',
+        req: {
+          analyticsId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    needBody: true,
+    method: 'POST',
+  });
+
   ml.deleteJob = ca({
     urls: [
       {

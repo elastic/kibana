@@ -11,8 +11,6 @@ import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getErrorRate } from '../lib/errors/get_error_rate';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
 
 export const errorsRoute = createRoute(() => ({
   path: '/api/apm/services/{serviceName}/errors',
@@ -80,35 +78,5 @@ export const errorDistributionRoute = createRoute(() => ({
     const { serviceName } = params.path;
     const { groupId } = params.query;
     return getErrorDistribution({ serviceName, groupId, setup });
-  },
-}));
-
-export const errorRateRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/errors/rate',
-  params: {
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-      }),
-      uiFiltersRt,
-      rangeRt,
-    ]),
-  },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { params } = context;
-    const { serviceName } = params.path;
-    const { groupId } = params.query;
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
-
-    return getErrorRate({
-      serviceName,
-      groupId,
-      setup,
-      useAggregatedTransactions,
-    });
   },
 }));

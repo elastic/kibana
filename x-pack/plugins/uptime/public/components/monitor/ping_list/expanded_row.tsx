@@ -47,7 +47,7 @@ const BodyDescription = ({ body }: { body: HttpResponseBody }) => {
 };
 
 const BodyExcerpt = ({ content }: { content: string }) =>
-  content ? <EuiCodeBlock>{content}</EuiCodeBlock> : null;
+  content ? <EuiCodeBlock overflowHeight={250}>{content}</EuiCodeBlock> : null;
 
 export const PingListExpandedRowComponent = ({ ping }: Props) => {
   const listItems = [];

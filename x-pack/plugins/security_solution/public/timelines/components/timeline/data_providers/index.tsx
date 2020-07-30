@@ -19,6 +19,7 @@ import {
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
+  OnToggleDataProviderType,
 } from '../events';
 
 import { DataProvider } from './data_provider';
@@ -28,12 +29,13 @@ import { useManageTimeline } from '../../manage_timeline';
 
 interface Props {
   browserFields: BrowserFields;
-  id: string;
+  timelineId: string;
   dataProviders: DataProvider[];
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onToggleDataProviderType: OnToggleDataProviderType;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -61,6 +63,7 @@ const DropTargetDataProviders = styled.div`
   position: relative;
   border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
+  padding: 5px 0;
   margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;
@@ -91,17 +94,18 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
 export const DataProviders = React.memo<Props>(
   ({
     browserFields,
-    id,
     dataProviders,
+    timelineId,
     onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
+    onToggleDataProviderType,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(id).isLoading, [
+    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
       getManageTimelineById,
-      id,
+      timelineId,
     ]);
     return (
       <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
@@ -112,16 +116,17 @@ export const DataProviders = React.memo<Props>(
           {dataProviders != null && dataProviders.length ? (
             <Providers
               browserFields={browserFields}
-              id={id}
+              timelineId={timelineId}
               dataProviders={dataProviders}
               onDataProviderEdited={onDataProviderEdited}
               onDataProviderRemoved={onDataProviderRemoved}
               onToggleDataProviderEnabled={onToggleDataProviderEnabled}
               onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+              onToggleDataProviderType={onToggleDataProviderType}
             />
           ) : (
-            <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(id)}>
-              <Empty />
+            <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
+              <Empty browserFields={browserFields} timelineId={timelineId} />
             </DroppableWrapper>
           )}
         </DropTargetDataProviders>

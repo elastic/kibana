@@ -13,6 +13,7 @@ export {
   IEventLogger,
   IEventLogClientService,
   IEvent,
+  IValidatedEvent,
   SAVED_OBJECT_REL_PRIMARY,
 } from './types';
 export const config = { schema: ConfigSchema };

@@ -45,6 +45,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await fieldSearch.type(name);
     }
 
+    public async clearFieldSearchInput() {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.clearValue();
+    }
+
     public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
@@ -185,6 +190,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await docHeader.getVisibleText();
     }
 
+    public async getDocTableRows() {
+      await header.waitUntilLoadingHasFinished();
+      const rows = await testSubjects.findAll('docTableRow');
+      return rows;
+    }
+
     public async getDocTableIndex(index: number) {
       const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       return await row.getVisibleText();
@@ -195,6 +206,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
       );
       return await field.getVisibleText();
+    }
+
+    public async skipToEndOfDocTable() {
+      // add the focus to the button to make it appear
+      const skipButton = await testSubjects.find('discoverSkipTableButton');
+      // force focus on it, to make it interactable
+      skipButton.focus();
+      // now click it!
+      return skipButton.click();
+    }
+
+    public async getDocTableFooter() {
+      return await testSubjects.find('discoverDocTableFooter');
     }
 
     public async clickDocSortDown() {
@@ -246,9 +270,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
-    public async clickFieldListItemAdd(field: string) {
+    public async clickFieldListItemToggle(field: string) {
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
+    }
+
+    public async clickFieldListItemAdd(field: string) {
+      // a filter check may make sense here, but it should be properly handled to make
+      // it work with the _score and _source fields as well
+      await this.clickFieldListItemToggle(field);
+    }
+
+    public async clickFieldListItemRemove(field: string) {
+      const selectedList = await testSubjects.find('fieldList-selected');
+      if (await testSubjects.descendantExists(`field-${field}`, selectedList)) {
+        await this.clickFieldListItemToggle(field);
+      }
     }
 
     public async clickFieldListItemVisualize(fieldName: string) {

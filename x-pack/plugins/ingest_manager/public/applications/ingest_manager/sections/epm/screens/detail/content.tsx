@@ -16,22 +16,22 @@ import { SideNavLinks } from './side_nav_links';
 import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
-type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
-export function Content(props: ContentProps) {
-  const { hasIconPanel, name, panel, version } = props;
-  const SideNavColumn = hasIconPanel
-    ? styled(LeftColumn)`
-        /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-        &&& {
-          margin-top: 77px;
-        }
-      `
-    : LeftColumn;
+type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 
-  // fixes IE11 problem with nested flex items
-  const ContentFlexGroup = styled(EuiFlexGroup)`
-    flex: 0 0 auto !important;
-  `;
+const SideNavColumn = styled(LeftColumn)`
+  /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
+  &&& {
+    margin-top: 77px;
+  }
+`;
+
+// fixes IE11 problem with nested flex items
+const ContentFlexGroup = styled(EuiFlexGroup)`
+  flex: 0 0 auto !important;
+`;
+
+export function Content(props: ContentProps) {
+  const { name, panel, version } = props;
   return (
     <ContentFlexGroup>
       <SideNavColumn>
@@ -75,13 +75,13 @@ function RightColumnContent(props: RightColumnContentProps) {
   const { assets, panel } = props;
   switch (panel) {
     case 'overview':
-      return (
+      return assets ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem grow={false}>
             <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      );
+      ) : null;
     default:
       return <EuiSpacer />;
   }

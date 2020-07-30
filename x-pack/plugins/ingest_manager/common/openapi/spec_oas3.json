@@ -922,7 +922,7 @@
       },
       "parameters": []
     },
-    "/packageConfigs": {
+    "/package_configs": {
       "get": {
         "summary": "PackageConfigs - List",
         "tags": [],
@@ -1237,7 +1237,7 @@
         ]
       }
     },
-    "/packageConfigs/{packageConfigId}": {
+    "/package_configs/{packageConfigId}": {
       "get": {
         "summary": "PackageConfigs - Info",
         "tags": [],
@@ -4146,9 +4146,6 @@
           "config_revision": {
             "type": ["number", "null"]
           },
-          "config_newest_revision": {
-            "type": "number"
-          },
           "last_checkin": {
             "type": "string"
           },
@@ -4206,6 +4203,7 @@
               "FAILED",
               "STOPPING",
               "STOPPED",
+              "DEGRADED",
               "DATA_DUMP",
               "ACKNOWLEDGED",
               "UNKNOWN"

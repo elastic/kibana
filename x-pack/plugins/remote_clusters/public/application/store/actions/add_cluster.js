@@ -6,12 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  addCluster as sendAddClusterRequest,
-  getRouter,
-  extractQueryParams,
-  redirect,
-} from '../../services';
+import { extractQueryParams } from '../../../shared_imports';
+import { addCluster as sendAddClusterRequest, getRouter, redirect } from '../../services';
 import { fatalError, toasts } from '../../services/notification';
 
 import {

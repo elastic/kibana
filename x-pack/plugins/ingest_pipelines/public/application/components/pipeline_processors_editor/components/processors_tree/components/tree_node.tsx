@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 
@@ -46,7 +46,7 @@ export const TreeNode: FunctionComponent<Props> = ({
     };
   }, [onAction, stringSelector, processor]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const renderOnFailureHandlersTree = () => {
+  const renderOnFailureHandlersTree = useCallback(() => {
     if (!processor.onFailure?.length) {
       return;
     }
@@ -79,7 +79,7 @@ export const TreeNode: FunctionComponent<Props> = ({
         />
       </div>
     );
-  };
+  }, [processor.onFailure, stringSelector, onAction, movingProcessor, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <PipelineProcessorsEditorItem

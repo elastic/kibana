@@ -28,7 +28,7 @@ import * as APIKeysService from '../../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_UPDATE_ACTIONS_INTERVAL_MS } from '../../../constants';
 import { createAgentAction, getNewActionsSince } from '../actions';
 import { appContextService } from '../../app_context';
-import { toPromiseAbortable, AbortError } from './rxjs_utils';
+import { toPromiseAbortable, AbortError, createSubscriberConcurrencyLimiter } from './rxjs_utils';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -95,19 +95,23 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-async function createAgentActionFromConfigIfOutdated(
+function shouldCreateAgentConfigAction(agent: Agent, config: FullAgentConfig | null): boolean {
+  if (!config || !config.revision) {
+    return false;
+  }
+  const isAgentConfigOutdated = !agent.config_revision || agent.config_revision < config.revision;
+  if (!isAgentConfigOutdated) {
+    return false;
+  }
+
+  return true;
+}
+
+async function createAgentActionFromConfig(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   config: FullAgentConfig | null
 ) {
-  if (!config || !config.revision) {
-    return;
-  }
-  const isAgentConfigOutdated = !agent.config_revision || agent.config_revision < config.revision;
-  if (!isAgentConfigOutdated) {
-    return;
-  }
-
   // Deep clone !not supporting Date, and undefined value.
   const newConfig = JSON.parse(JSON.stringify(config));
 
@@ -129,6 +133,10 @@ export function agentCheckinStateNewActionsFactory() {
   // Shared Observables
   const agentConfigs$ = new Map<string, Observable<FullAgentConfig | null>>();
   const newActions$ = createNewActionsSharedObservable();
+  // Rx operators
+  const concurrencyLimiter = createSubscriberConcurrencyLimiter(
+    appContextService.getConfig()?.fleet.agentConfigRolloutConcurrency ?? 10
+  );
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
@@ -146,9 +154,12 @@ export function agentCheckinStateNewActionsFactory() {
     if (!agentConfig$) {
       throw new Error(`Invalid state no observable for config ${configId}`);
     }
+
     const stream$ = agentConfig$.pipe(
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
-      mergeMap((config) => createAgentActionFromConfigIfOutdated(soClient, agent, config)),
+      filter((config) => shouldCreateAgentConfigAction(agent, config)),
+      concurrencyLimiter(),
+      mergeMap((config) => createAgentActionFromConfig(soClient, agent, config)),
       merge(newActions$),
       mergeMap(async (data) => {
         if (!data) {

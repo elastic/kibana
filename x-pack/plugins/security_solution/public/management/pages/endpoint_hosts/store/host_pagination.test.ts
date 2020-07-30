@@ -24,7 +24,7 @@ import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
-import { getEndpointListPath } from '../../../common/routing';
+import { getHostListPath } from '../../../common/routing';
 
 describe('host list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -56,7 +56,7 @@ describe('host list pagination: ', () => {
     queryParams = () => uiQueryParams(store.getState());
 
     historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(getEndpointListPath({ name: 'endpointList', ...nextQueryParams }));
+      return history.push(getHostListPath({ name: 'hostList', ...nextQueryParams }));
     };
   });
 
@@ -70,7 +70,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: getEndpointListPath({ name: 'endpointList' }),
+          pathname: getHostListPath({ name: 'hostList' }),
         },
       });
       await waitForAction('serverReturnedHostList');

@@ -7,7 +7,7 @@ import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
-import { ImportDataProps } from '../../alerts/containers/detection_engine/rules/types';
+import { ImportDataProps } from '../../detections/containers/detection_engine/rules/types';
 
 jest.mock('../../common/lib/kibana', () => {
   return {

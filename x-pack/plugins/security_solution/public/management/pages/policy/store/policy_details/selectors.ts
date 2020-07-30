@@ -11,6 +11,7 @@ import {
   Immutable,
   NewPolicyData,
   PolicyConfig,
+  PolicyData,
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
@@ -21,14 +22,25 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
 
 /**
+ * Given a Policy Data (package config) object, return back a new object with only the field
+ * needed for an Update/Create API action
+ * @param policy
+ */
+export const getPolicyDataForUpdate = (
+  policy: PolicyData | Immutable<PolicyData>
+): NewPolicyData | Immutable<NewPolicyData> => {
+  const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
+  return newPolicy;
+};
+
+/**
  * Return only the policy structure accepted for update/create
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
   if (policy) {
-    const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-    return newPolicy;
+    return getPolicyDataForUpdate(policy);
   }
 });
 

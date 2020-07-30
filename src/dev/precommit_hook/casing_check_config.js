@@ -30,6 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
   '**/Gruntfile.js',
@@ -50,7 +51,7 @@ export const IGNORE_FILE_GLOBS = [
   '.ci/pipeline-library/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -60,6 +61,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // filename must match upstream filenames from lodash
+  'packages/elastic-safer-lodash-set/**/*',
 
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
@@ -120,7 +124,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
   'src/legacy/core_plugins/tile_map/public/__tests__/shadedCircleMarkers.png',
   'src/legacy/core_plugins/tile_map/public/__tests__/shadedGeohashGrid.png',
@@ -173,12 +176,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

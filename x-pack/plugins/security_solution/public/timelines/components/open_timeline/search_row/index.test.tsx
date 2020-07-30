@@ -10,6 +10,8 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
+
 import { SearchRow } from '.';
 
 import * as i18n from '../translations';
@@ -25,7 +27,7 @@ describe('SearchRow', () => {
           onQueryChange={jest.fn()}
           onToggleOnlyFavorites={jest.fn()}
           query=""
-          totalSearchResultsCount={0}
+          timelineType={TimelineType.default}
         />
       </ThemeProvider>
     );
@@ -45,7 +47,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            totalSearchResultsCount={0}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -65,7 +67,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={onToggleOnlyFavorites}
             query=""
-            totalSearchResultsCount={0}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -83,7 +85,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            totalSearchResultsCount={0}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -104,7 +106,7 @@ describe('SearchRow', () => {
             onQueryChange={jest.fn()}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            totalSearchResultsCount={0}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
@@ -129,14 +131,14 @@ describe('SearchRow', () => {
             onQueryChange={onQueryChange}
             onToggleOnlyFavorites={jest.fn()}
             query=""
-            totalSearchResultsCount={32}
+            timelineType={TimelineType.default}
           />
         </ThemeProvider>
       );
 
       wrapper
         .find('[data-test-subj="search-bar"] input')
-        .simulate('keyup', { keyCode: 13, target: { value: 'abcd' } });
+        .simulate('keyup', { key: 'Enter', target: { value: 'abcd' } });
 
       expect(onQueryChange).toHaveBeenCalled();
     });

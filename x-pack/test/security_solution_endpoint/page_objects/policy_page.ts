@@ -70,6 +70,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Policy Details Page Cancel Button
+     */
+    async findCancelButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('policyDetailsCancelButton');
+    },
+
+    /**
      * ensures that the Details Page is the currently display view
      */
     async ensureIsOnDetailsPage() {

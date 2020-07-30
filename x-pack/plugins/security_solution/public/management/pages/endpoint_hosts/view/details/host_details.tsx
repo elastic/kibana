@@ -26,10 +26,11 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getEndpointDetailsPath, getPolicyDetailPath } from '../../../../common/routing';
+import { getHostDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
+import { HostPolicyLink } from '../components/host_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -61,7 +62,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const policyStatus = useHostSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
 
   const detailsResultsUpper = useMemo(() => {
     return [
@@ -84,14 +85,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
-        getEndpointDetailsPath({
-          name: 'endpointPolicyResponse',
+        getHostDetailsPath({
+          name: 'hostPolicyResponse',
           ...currentUrlParams,
           selected_host: details.host.id,
         })
       ),
-      getEndpointDetailsPath({
-        name: 'endpointPolicyResponse',
+      getHostDetailsPath({
+        name: 'hostPolicyResponse',
         ...currentUrlParams,
         selected_host: details.host.id,
       }),
@@ -106,9 +107,9 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     path: agentDetailsWithFlyoutPath,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         {
-          path: getEndpointDetailsPath({ name: 'endpointDetails', selected_host: details.host.id }),
+          path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
         },
       ],
     },
@@ -116,37 +117,26 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
-  const [policyDetailsRoutePath, policyDetailsRouteUrl] = useMemo(() => {
-    return [
-      getPolicyDetailPath(details.Endpoint.policy.applied.id),
-      formatUrl(getPolicyDetailPath(details.Endpoint.policy.applied.id)),
-    ];
-  }, [details.Endpoint.policy.applied.id, formatUrl]);
-
-  const policyDetailsClickHandler = useNavigateByRouterEventHandler(policyDetailsRoutePath);
-
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
-          defaultMessage: 'Policy',
+          defaultMessage: 'Integration',
         }),
         description: (
           <>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiLink
+            <HostPolicyLink
+              policyId={details.Endpoint.policy.applied.id}
               data-test-subj="policyDetailsValue"
-              href={policyDetailsRouteUrl}
-              onClick={policyDetailsClickHandler}
             >
               {details.Endpoint.policy.applied.name}
-            </EuiLink>
+            </HostPolicyLink>
           </>
         ),
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Configuration response',
         }),
         description: (
           <EuiHealth
@@ -171,14 +161,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
     ];
-  }, [
-    details,
-    policyResponseUri,
-    policyStatus,
-    policyStatusClickHandler,
-    policyDetailsRouteUrl,
-    policyDetailsClickHandler,
-  ]);
+  }, [details, policyResponseUri, policyStatus, policyStatusClickHandler]);
   const detailsResultsLower = useMemo(() => {
     return [
       {
@@ -200,8 +183,8 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        title: i18n.translate('xpack.securitySolution.endpoint.host.details.endpointVersion', {
+          defaultMessage: 'Endpoint Version',
         }),
         description: details.agent.version,
       },
@@ -233,7 +216,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
             id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
-            defaultMessage="Reassign Policy"
+            defaultMessage="Reassign Configuration"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
         </LinkToApp>

@@ -112,7 +112,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     moveProcessor(processorSelector: string, dropZoneSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('click');
+        find(`${processorSelector}.moveItemButton`).simulate('change');
       });
       component.update();
       act(() => {
@@ -144,12 +144,13 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     startAndCancelMove(processorSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('click');
+        find(`${processorSelector}.moveItemButton`).simulate('change');
       });
       component.update();
       act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('change');
       });
+      component.update();
     },
 
     duplicateProcessor(processorSelector: string) {

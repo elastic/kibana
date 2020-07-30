@@ -63,7 +63,9 @@ export class FeatureTable extends Component<Props, State> {
   public render() {
     const { role, kibanaPrivileges } = this.props;
 
-    const featurePrivileges = kibanaPrivileges.getSecuredFeatures();
+    const featurePrivileges = kibanaPrivileges
+      .getSecuredFeatures()
+      .filter((feature) => feature.privileges != null || feature.reserved != null);
 
     const items: TableRow[] = featurePrivileges
       .sort((feature1, feature2) => {

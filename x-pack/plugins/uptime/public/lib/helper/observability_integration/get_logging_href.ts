@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary } from '../../../../common/runtime_types';
+import { MonitorSummary, Ping } from '../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
@@ -22,7 +22,7 @@ export const getLoggingContainerHref = (
       `/app/logs?logFilter=${encodeURI(`(expression:'container.id : ${ret}',kind:kuery)`)}`
     );
   };
-  return buildHref(summary.state.checks || [], 'container.id', getHref);
+  return buildHref(summary.state.summaryPings || [], (ping: Ping) => ping?.container?.id, getHref);
 };
 
 export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: string) => {
@@ -36,7 +36,11 @@ export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: stri
       `/app/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${ret}',kind:kuery)`)}`
     );
   };
-  return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
+  return buildHref(
+    summary.state.summaryPings || [],
+    (ping: Ping) => ping?.kubernetes?.pod?.uid,
+    getHref
+  );
 };
 
 export const getLoggingIpHref = (summary: MonitorSummary, basePath: string) => {
@@ -50,5 +54,5 @@ export const getLoggingIpHref = (summary: MonitorSummary, basePath: string) => {
       `/app/logs?logFilter=(expression:'${encodeURIComponent(`host.ip : ${ret}`)}',kind:kuery)`
     );
   };
-  return buildHref(summary.state.checks || [], 'monitor.ip', getHref);
+  return buildHref(summary.state.summaryPings || [], (ping: Ping) => ping?.monitor?.ip, getHref);
 };

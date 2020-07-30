@@ -13,6 +13,7 @@ export {
   useRefreshAnalyticsList,
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
+  UpdateDataFrameAnalyticsConfig,
   IndexName,
   IndexPattern,
   REFRESH_ANALYTICS_LIST_STATE,

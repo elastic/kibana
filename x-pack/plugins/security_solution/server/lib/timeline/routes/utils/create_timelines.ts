@@ -13,18 +13,21 @@ import { SavedTimeline, TimelineSavedObject } from '../../../../../common/types/
 import { SavedNote } from '../../../../../common/types/timeline/note';
 import { NoteResult, ResponseTimeline } from '../../../../graphql/types';
 
-export const CREATE_TIMELINE_ERROR_MESSAGE =
-  'UPDATE timeline with POST is not allowed, please use PATCH instead';
-export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
-  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
-
 export const saveTimelines = (
   frameworkRequest: FrameworkRequest,
   timeline: SavedTimeline,
-  timelineSavedObjectId: string | null = null,
-  timelineVersion: string | null = null
-): Promise<ResponseTimeline> =>
-  timelineLib.persistTimeline(frameworkRequest, timelineSavedObjectId, timelineVersion, timeline);
+  timelineSavedObjectId?: string | null,
+  timelineVersion?: string | null,
+  isImmutable?: boolean
+): Promise<ResponseTimeline> => {
+  return timelineLib.persistTimeline(
+    frameworkRequest,
+    timelineSavedObjectId ?? null,
+    timelineVersion ?? null,
+    timeline,
+    isImmutable
+  );
+};
 
 export const savePinnedEvents = (
   frameworkRequest: FrameworkRequest,
@@ -75,6 +78,7 @@ interface CreateTimelineProps {
   pinnedEventIds?: string[] | null;
   notes?: NoteResult[];
   existingNoteIds?: string[];
+  isImmutable?: boolean;
 }
 
 export const createTimelines = async ({
@@ -85,12 +89,14 @@ export const createTimelines = async ({
   pinnedEventIds = null,
   notes = [],
   existingNoteIds = [],
+  isImmutable,
 }: CreateTimelineProps): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
     timeline,
     timelineSavedObjectId,
-    timelineVersion
+    timelineVersion,
+    isImmutable
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
   const newTimelineVersion = responseTimeline.timeline.version;

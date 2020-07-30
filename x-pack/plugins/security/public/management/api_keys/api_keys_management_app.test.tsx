@@ -7,7 +7,6 @@
 jest.mock('./api_keys_grid', () => ({
   APIKeysGridPage: (props: any) => `Page: ${JSON.stringify(props)}`,
 }));
-import { ScopedHistory } from 'src/core/public';
 import { apiKeysManagementApp } from './api_keys_management_app';
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 
@@ -37,7 +36,7 @@ describe('apiKeysManagementApp', () => {
         basePath: '/some-base-path',
         element: container,
         setBreadcrumbs,
-        history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+        history: scopedHistoryMock.create(),
       });
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);

@@ -8,18 +8,28 @@ import {
   LegacyTemplateSerialized,
   TemplateSerialized,
   TemplateListItem,
+  TemplateType,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf, _meta } = templateDeserialized;
+  const {
+    version,
+    priority,
+    indexPatterns,
+    template,
+    composedOf,
+    dataStream,
+    _meta,
+  } = templateDeserialized;
 
   return {
     version,
     priority,
     template,
     index_patterns: indexPatterns,
+    data_stream: dataStream,
     composed_of: composedOf,
     _meta,
   };
@@ -27,7 +37,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
 
 export function deserializeTemplate(
   templateEs: TemplateSerialized & { name: string },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateDeserialized {
   const {
     name,
@@ -37,8 +47,18 @@ export function deserializeTemplate(
     priority,
     _meta,
     composed_of: composedOf,
+    data_stream: dataStream,
   } = templateEs;
   const { settings } = template;
+
+  let type: TemplateType = 'default';
+  if (Boolean(cloudManagedTemplatePrefix && name.startsWith(cloudManagedTemplatePrefix))) {
+    type = 'cloudManaged';
+  } else if (name.startsWith('.')) {
+    type = 'system';
+  } else if (Boolean(_meta?.managed === true)) {
+    type = 'managed';
+  }
 
   const deserializedTemplate: TemplateDeserialized = {
     name,
@@ -48,9 +68,11 @@ export function deserializeTemplate(
     template,
     ilmPolicy: settings?.index?.lifecycle,
     composedOf,
+    dataStream,
     _meta,
     _kbnMeta: {
-      isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
+      type,
+      hasDatastream: Boolean(dataStream),
     },
   };
 
@@ -59,13 +81,13 @@ export function deserializeTemplate(
 
 export function deserializeTemplateList(
   indexTemplates: Array<{ name: string; index_template: TemplateSerialized }>,
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -87,7 +109,7 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
     version,
     order,
     indexPatterns,
-    template: { settings, aliases, mappings },
+    template: { settings, aliases, mappings } = {},
   } = template;
 
   return {
@@ -102,13 +124,13 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
 
 export function deserializeLegacyTemplate(
   templateEs: LegacyTemplateSerialized & { name: string },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
   const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    managedTemplatePrefix
+    cloudManagedTemplatePrefix
   );
 
   return {
@@ -123,13 +145,13 @@ export function deserializeLegacyTemplate(
 
 export function deserializeLegacyTemplateList(
   indexTemplatesByName: { [key: string]: LegacyTemplateSerialized },
-  managedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
       template: { mappings, settings, aliases },
       ...deserializedTemplate
-    } = deserializeLegacyTemplate({ name, ...templateSerialized }, managedTemplatePrefix);
+    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

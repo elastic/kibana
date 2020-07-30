@@ -31,7 +31,6 @@ run(
       'ignore-incompatible': ignoreIncompatible = false,
       'ignore-missing': ignoreMissing = false,
       'ignore-unused': ignoreUnused = false,
-      'ignore-malformed': ignoreMalformed = false,
       'include-config': includeConfig,
       path,
       source,
@@ -67,13 +66,12 @@ run(
       typeof ignoreIncompatible !== 'boolean' ||
       typeof ignoreUnused !== 'boolean' ||
       typeof ignoreMissing !== 'boolean' ||
-      typeof ignoreMalformed !== 'boolean' ||
       typeof dryRun !== 'boolean'
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} --ignore-incompatible, --ignore-unused, --ignore-malformed, --ignore-missing, and --dry-run can't have values`
+        )} --ignore-incompatible, --ignore-unused, --ignore-missing, and --dry-run can't have values`
       );
     }
 
@@ -99,7 +97,6 @@ run(
             ignoreIncompatible,
             ignoreUnused,
             ignoreMissing,
-            ignoreMalformed,
             config,
             log,
           });
@@ -111,6 +108,7 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
+      process.exitCode = 0;
     } catch (error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
@@ -120,6 +118,7 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {

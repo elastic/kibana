@@ -52,6 +52,7 @@ describe('delete_list_item_by_value', () => {
         },
       },
       index: '.items',
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
   });

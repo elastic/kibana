@@ -18,25 +18,15 @@
  */
 
 import { dropRight, last } from 'lodash';
-import { getTopHitMetricAgg, TopHitMetricAggDependencies } from './top_hit';
+import { getTopHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { InternalStartServices } from '../../../types';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
   let aggConfig: IMetricAggConfig;
-  const aggTypesDependencies: TopHitMetricAggDependencies = {
-    getInternalStartServices: () =>
-      (({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      } as unknown) as InternalStartServices),
-  };
 
   const init = ({
     fieldName = 'field',
@@ -46,7 +36,7 @@ describe('Top hit metric', () => {
     fieldType = KBN_FIELD_TYPES.NUMBER,
     size = 1,
   }: any) => {
-    const typesRegistry = mockAggTypesRegistry([getTopHitMetricAgg(aggTypesDependencies)]);
+    const typesRegistry = mockAggTypesRegistry([getTopHitMetricAgg()]);
     const field = {
       name: fieldName,
       displayName: fieldName,
@@ -101,7 +91,7 @@ describe('Top hit metric', () => {
 
   it('should return a label prefixed with Last if sorting in descending order', () => {
     init({ fieldName: 'bytes' });
-    expect(getTopHitMetricAgg(aggTypesDependencies).makeLabel(aggConfig)).toEqual('Last bytes');
+    expect(getTopHitMetricAgg().makeLabel(aggConfig)).toEqual('Last bytes');
   });
 
   it('should return a label prefixed with First if sorting in ascending order', () => {
@@ -109,7 +99,7 @@ describe('Top hit metric', () => {
       fieldName: 'bytes',
       sortOrder: 'asc',
     });
-    expect(getTopHitMetricAgg(aggTypesDependencies).makeLabel(aggConfig)).toEqual('First bytes');
+    expect(getTopHitMetricAgg().makeLabel(aggConfig)).toEqual('First bytes');
   });
 
   it('should request the _source field', () => {
@@ -121,9 +111,7 @@ describe('Top hit metric', () => {
   it('requests both source and docvalues_fields for non-text aggregatable fields', () => {
     init({ fieldName: 'bytes', readFromDocValues: true });
     expect(aggDsl.top_hits._source).toBe('bytes');
-    expect(aggDsl.top_hits.docvalue_fields).toEqual([
-      { field: 'bytes', format: 'use_field_mapping' },
-    ]);
+    expect(aggDsl.top_hits.docvalue_fields).toEqual([{ field: 'bytes' }]);
   });
 
   it('requests both source and docvalues_fields for date aggregatable fields', () => {
@@ -150,7 +138,7 @@ describe('Top hit metric', () => {
       };
 
       init({ fieldName: '@tags' });
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toBe(null);
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toBe(null);
     });
     //
     it('should return undefined if the field does not appear in the source', () => {
@@ -169,7 +157,7 @@ describe('Top hit metric', () => {
       };
 
       init({ fieldName: '@tags' });
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toBe(undefined);
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toBe(undefined);
     });
 
     it('should return the field value from the top hit', () => {
@@ -188,7 +176,7 @@ describe('Top hit metric', () => {
       };
 
       init({ fieldName: '@tags' });
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toBe('aaa');
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toBe('aaa');
     });
 
     it('should return the object if the field value is an object', () => {
@@ -210,7 +198,7 @@ describe('Top hit metric', () => {
 
       init({ fieldName: '@tags' });
 
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toEqual({
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual({
         label: 'aaa',
       });
     });
@@ -231,10 +219,7 @@ describe('Top hit metric', () => {
       };
 
       init({ fieldName: '@tags' });
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toEqual([
-        'aaa',
-        'bbb',
-      ]);
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual(['aaa', 'bbb']);
     });
 
     it('should return undefined if the field is not in the source nor in the doc_values field', () => {
@@ -256,7 +241,7 @@ describe('Top hit metric', () => {
       };
 
       init({ fieldName: 'machine.os.raw', readFromDocValues: true });
-      expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toBe(undefined);
+      expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toBe(undefined);
     });
 
     describe('Multivalued field and first/last X docs', () => {
@@ -265,9 +250,7 @@ describe('Top hit metric', () => {
           fieldName: 'bytes',
           size: 2,
         });
-        expect(getTopHitMetricAgg(aggTypesDependencies).makeLabel(aggConfig)).toEqual(
-          'Last 2 bytes'
-        );
+        expect(getTopHitMetricAgg().makeLabel(aggConfig)).toEqual('Last 2 bytes');
       });
 
       it('should return a label prefixed with First X docs if sorting in ascending order', () => {
@@ -276,9 +259,7 @@ describe('Top hit metric', () => {
           size: 2,
           sortOrder: 'asc',
         });
-        expect(getTopHitMetricAgg(aggTypesDependencies).makeLabel(aggConfig)).toEqual(
-          'First 2 bytes'
-        );
+        expect(getTopHitMetricAgg().makeLabel(aggConfig)).toEqual('First 2 bytes');
       });
 
       [
@@ -353,9 +334,7 @@ describe('Top hit metric', () => {
           };
 
           init({ fieldName: 'bytes', aggregate: agg.type });
-          expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toEqual(
-            agg.result
-          );
+          expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual(agg.result);
         });
 
         it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, () => {
@@ -379,9 +358,7 @@ describe('Top hit metric', () => {
           };
 
           init({ fieldName: 'bytes', aggregate: agg.type });
-          expect(getTopHitMetricAgg(aggTypesDependencies).getValue(aggConfig, bucket)).toEqual(
-            agg.result
-          );
+          expect(getTopHitMetricAgg().getValue(aggConfig, bucket)).toEqual(agg.result);
         });
       });
     });

@@ -23,19 +23,50 @@ import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
-import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
+import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
 import { IndexPattern, IIndexPatternFieldList } from '../../index_patterns';
-import { stubIndexPatternWithFields } from '../../../public/stubs';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
+  const fields = [
+    {
+      name: '@timestamp',
+      type: 'date',
+      aggregatable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+    {
+      name: 'bytes',
+      type: 'number',
+      aggregatable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+    {
+      name: 'machine.os.keyword',
+      type: 'string',
+      aggregatable: true,
+      format: {
+        toJSON: () => ({}),
+      },
+    },
+  ];
 
   beforeEach(() => {
     jest.restoreAllMocks();
-    mockDataServices();
-    indexPattern = stubIndexPatternWithFields as IndexPattern;
+    indexPattern = {
+      id: '1234',
+      title: 'logstash-*',
+      fields: ({
+        getByName: (name: string) => fields.find((f) => f.name === name),
+        filter: () => fields,
+      } as unknown) as IndexPattern['fields'],
+    } as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -488,6 +519,9 @@ describe('AggConfig', () => {
             "enabled": Array [
               true,
             ],
+            "field": Array [
+              "machine.os.keyword",
+            ],
             "id": Array [
               "1",
             ],
@@ -547,6 +581,9 @@ describe('AggConfig', () => {
                 "arguments": Object {
                   "enabled": Array [
                     true,
+                  ],
+                  "field": Array [
+                    "bytes",
                   ],
                   "id": Array [
                     "1-orderAgg",

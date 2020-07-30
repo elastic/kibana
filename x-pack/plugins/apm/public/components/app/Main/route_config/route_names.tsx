@@ -28,4 +28,5 @@ export enum RouteName {
   LINK_TO_TRANSACTION_GROUP = 'link_to_transaction_group',
   CUSTOMIZE_UI = 'customize_ui',
   RUM_OVERVIEW = 'rum_overview',
+  ANOMALY_DETECTION = 'anomaly_detection',
 }

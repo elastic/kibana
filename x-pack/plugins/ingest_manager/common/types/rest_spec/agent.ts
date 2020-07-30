@@ -47,6 +47,7 @@ export interface PostAgentCheckinRequest {
     agentId: string;
   };
   body: {
+    status?: 'online' | 'error' | 'degraded';
     local_metadata?: Record<string, any>;
     events?: NewAgentEvent[];
   };
@@ -172,5 +173,6 @@ export interface GetAgentStatusResponse {
     online: number;
     error: number;
     offline: number;
+    other: number;
   };
 }

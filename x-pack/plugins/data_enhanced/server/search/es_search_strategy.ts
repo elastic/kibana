@@ -8,12 +8,14 @@ import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../src/core/server';
-import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
-  ISearch,
+  LegacyAPICaller,
+  SharedGlobalConfig,
+  RequestHandlerContext,
+  Logger,
+} from '../../../../../src/core/server';
+import {
   ISearchOptions,
-  ISearchCancel,
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
@@ -29,13 +31,15 @@ export interface AsyncSearchResponse<T> {
 }
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
-    context,
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger
+): ISearchStrategy => {
+  const search = async (
+    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
-    options
+    options?: ISearchOptions
   ) => {
+    logger.info(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
@@ -46,7 +50,8 @@ export const enhancedEsSearchStrategyProvider = (
       : asyncSearch(caller, { ...request, params }, options);
   };
 
-  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async (context, id) => {
+  const cancel = async (context: RequestHandlerContext, id: string) => {
+    logger.info(`cancel ${id}`);
     const method = 'DELETE';
     const path = encodeURI(`/_async_search/${id}`);
     await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
@@ -64,9 +69,10 @@ async function asyncSearch(
   options?: ISearchOptions
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    trackTotalHits: true, // Get the exact count of hits
     ...request.params,
   };
+
+  params.trackTotalHits = true; // Get the exact count of hits
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
@@ -75,7 +81,7 @@ async function asyncSearch(
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...queryParams });
+  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
@@ -97,7 +103,7 @@ async function rollupSearch(
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions
 ) {
-  const { body, index, ...params } = request.params;
+  const { body, index, ...params } = request.params!;
   const method = 'POST';
   const path = encodeURI(`/${index}/_rollup_search`);
   const query = toSnakeCase(params);

@@ -14,11 +14,11 @@ interface Props extends APMLinkExtendProps {
   transactionName: string;
 }
 
-export const TransactionDetailRedirectLink = ({
+export function TransactionDetailRedirectLink({
   serviceName,
   transactionName,
   ...rest
-}: Props) => {
+}: Props) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -41,4 +41,4 @@ export const TransactionDetailRedirectLink = ({
       {...rest}
     />
   );
-};
+}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
   htmlIdGenerator,
@@ -15,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
+import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
 import {
@@ -31,98 +33,65 @@ import { useResolverTheme } from '../assets';
 
 const StyledDescriptionList = styled(EuiDescriptionList)`
   &.euiDescriptionList.euiDescriptionList--column dt.euiDescriptionList__title.desc-title {
-    max-width: 8em;
+    max-width: 10em;
   }
 `;
 
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
- * Created, Pid, User/Domain, etc.
+ * Created, PID, User/Domain, etc.
  */
 export const ProcessDetails = memo(function ProcessDetails({
   processEvent,
-  isProcessTerminated,
-  isProcessOrigin,
   pushToQueryParams,
 }: {
   processEvent: ResolverEvent;
-  isProcessTerminated: boolean;
-  isProcessOrigin: boolean;
   pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
 }) {
   const processName = event.eventName(processEvent);
+  const entityId = event.entityId(processEvent);
+  const isProcessTerminated = useSelector(selectors.isProcessTerminated)(entityId);
   const processInfoEntry = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
     const dateTime = eventTime ? formatDate(eventTime) : '';
 
     const createdEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.created',
-        {
-          defaultMessage: 'Created',
-        }
-      ),
+      title: '@timestamp',
       description: dateTime,
     };
 
     const pathEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.path', {
-        defaultMessage: 'Path',
-      }),
+      title: 'process.executable',
       description: processPath(processEvent),
     };
 
     const pidEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.pid', {
-        defaultMessage: 'PID',
-      }),
+      title: 'process.pid',
       description: processPid(processEvent),
     };
 
     const userEntry = {
-      title: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.processDescList.user', {
-        defaultMessage: 'User',
-      }),
-      description: (userInfoForProcess(processEvent) as { name: string }).name,
+      title: 'user.name',
+      description: userInfoForProcess(processEvent)?.name,
     };
 
     const domainEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.domain',
-        {
-          defaultMessage: 'Domain',
-        }
-      ),
-      description: (userInfoForProcess(processEvent) as { domain: string }).domain,
+      title: 'user.domain',
+      description: userInfoForProcess(processEvent)?.domain,
     };
 
     const parentPidEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.parentPid',
-        {
-          defaultMessage: 'Parent PID',
-        }
-      ),
+      title: 'process.parent.pid',
       description: processParentPid(processEvent),
     };
 
     const md5Entry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.md5hash',
-        {
-          defaultMessage: 'MD5',
-        }
-      ),
+      title: 'process.hash.md5',
       description: md5HashForProcess(processEvent),
     };
 
     const commandLineEntry = {
-      title: i18n.translate(
-        'xpack.securitySolution.endpoint.resolver.panel.processDescList.commandLine',
-        {
-          defaultMessage: 'Command Line',
-        }
-      ),
+      title: 'process.args',
       description: argsForProcess(processEvent),
     };
 
@@ -182,8 +151,8 @@ export const ProcessDetails = memo(function ProcessDetails({
     if (!processEvent) {
       return { descriptionText: '' };
     }
-    return cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
-  }, [processEvent, cubeAssetsForNode, isProcessTerminated, isProcessOrigin]);
+    return cubeAssetsForNode(isProcessTerminated, false);
+  }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
   const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
@@ -192,10 +161,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h4 aria-describedby={titleId}>
-          <CubeForProcess
-            isProcessTerminated={isProcessTerminated}
-            isProcessOrigin={isProcessOrigin}
-          />
+          <CubeForProcess isProcessTerminated={isProcessTerminated} />
           {processName}
         </h4>
       </EuiTitle>

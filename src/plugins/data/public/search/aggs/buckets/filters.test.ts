@@ -18,13 +18,11 @@
  */
 
 import { Query } from '../../../../common';
-import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { getFiltersBucketAgg, FiltersBucketAggDependencies } from './filters';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { InternalStartServices } from '../../../types';
 
 describe('Filters Agg', () => {
   let aggTypesDependencies: FiltersBucketAggDependencies;
@@ -33,14 +31,7 @@ describe('Filters Agg', () => {
     jest.resetAllMocks();
     const { uiSettings } = coreMock.createSetup();
 
-    aggTypesDependencies = {
-      uiSettings,
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
-    };
+    aggTypesDependencies = { uiSettings };
   });
 
   describe('order agg editor UI', () => {

@@ -109,8 +109,10 @@ export async function transactionGroupsFetcher(
 
   delete projection.body.aggs;
 
-  // 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size
-  const size = bucketSize + 1;
+  // traces overview is hardcoded to 10000
+  // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
+  const expectedBucketSize = isTopTraces ? 10000 : bucketSize;
+  const size = isTopTraces ? 10000 : expectedBucketSize + 1;
 
   const request = mergeProjection(projection, {
     body: {
@@ -198,7 +200,7 @@ export async function transactionGroupsFetcher(
     ),
     // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
     // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
-    isAggregationAccurate: bucketSize >= itemsWithKeys.length,
+    isAggregationAccurate: expectedBucketSize >= itemsWithRelativeImpact.length,
     bucketSize,
   };
 }

@@ -21,7 +21,7 @@ import { createFilter } from './create_filter';
 import { AggConfigs, IAggConfig } from '../aggs';
 import { TabbedTable } from '../tabify';
 import { isRangeFilter, BytesFormat, FieldFormatsGetConfigFn } from '../../../common';
-import { mockDataServices, mockAggTypesRegistry } from '../aggs/test_helpers';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('createFilter', () => {
   let table: TabbedTable;
@@ -83,7 +83,6 @@ describe('createFilter', () => {
         },
       ],
     };
-    mockDataServices();
   });
 
   test('ignores event when cell value is not provided', async () => {

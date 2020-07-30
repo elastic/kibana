@@ -56,7 +56,7 @@ afterEach(() => {
 });
 
 it(`#setup returns exposed services`, () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
   const mockGetSpacesService = jest
     .fn()
     .mockReturnValue({ getSpaceId: jest.fn(), namespaceToSpaceId: jest.fn() });
@@ -119,7 +119,7 @@ describe('#start', () => {
   let licenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
   let mockLicense: jest.Mocked<SecurityLicense>;
   beforeEach(() => {
-    const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+    const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
     licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
     mockLicense = licenseMock.create();
@@ -221,7 +221,7 @@ describe('#start', () => {
 });
 
 it('#stop unsubscribes from license and ES updates.', () => {
-  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
 
   const licenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
   const mockLicense = licenseMock.create();

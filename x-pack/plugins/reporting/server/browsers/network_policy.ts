@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as _ from 'lodash';
+import { every } from 'lodash';
 import { parse } from 'url';
 
 interface NetworkPolicyRule {
@@ -22,7 +22,7 @@ const isHostMatch = (actualHost: string, ruleHost: string) => {
   const hostParts = actualHost.split('.').reverse();
   const ruleParts = ruleHost.split('.').reverse();
 
-  return _.every(ruleParts, (part, idx) => part === hostParts[idx]);
+  return every(ruleParts, (part, idx) => part === hostParts[idx]);
 };
 
 export const allowRequest = (url: string, rules: NetworkPolicyRule[]) => {

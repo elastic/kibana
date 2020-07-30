@@ -11,6 +11,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import '../../../../common/mock/match_media';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineResult } from '../types';
 import { TimelinesTableProps } from '.';

@@ -21,7 +21,7 @@ import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
-import { EuiTableFieldDataColumnType, keyCodes } from '@elastic/eui';
+import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
 
@@ -250,7 +250,7 @@ describe('Table', () => {
     );
 
     // Press the enter key
-    filterNameTableCell.find('EuiFieldText').simulate('keydown', { keyCode: keyCodes.ENTER });
+    filterNameTableCell.find('EuiFieldText').simulate('keydown', { key: keys.ENTER });
     expect(saveFilter).toBeCalled();
 
     // It should reset
@@ -289,7 +289,7 @@ describe('Table', () => {
     );
 
     // Press the ESCAPE key
-    filterNameTableCell.find('EuiFieldText').simulate('keydown', { keyCode: keyCodes.ESCAPE });
+    filterNameTableCell.find('EuiFieldText').simulate('keydown', { key: keys.ESCAPE });
     expect(saveFilter).not.toBeCalled();
 
     // It should reset

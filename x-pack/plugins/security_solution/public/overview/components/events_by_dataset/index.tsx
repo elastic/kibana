@@ -27,9 +27,9 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../../common/store';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
@@ -42,26 +42,17 @@ const DEFAULT_STACK_BY = 'event.dataset';
 
 const ID = 'eventsByDatasetOverview';
 
-interface Props {
+interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
-  deleteQuery?: ({ id }: { id: string }) => void;
   filters?: Filter[];
-  from: number;
   headerChildren?: React.ReactNode;
   indexPattern: IIndexPattern;
   indexToAdd?: string[] | null;
   onlyField?: string;
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
   showSpacer?: boolean;
   timelineId?: string;
-  to: number;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({

@@ -45,7 +45,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
     const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
     const { navigateToApp } = useKibana().services.application;
     const onOpenTimeline: OnOpenTimeline = useCallback(
-      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+      ({ duplicate, timelineId }) => {
         queryTimelineById({
           apolloClient,
           duplicate,

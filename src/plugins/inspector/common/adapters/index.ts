@@ -17,5 +17,12 @@
  * under the License.
  */
 
+export { Adapters } from './types';
 export { DataAdapter, FormattedData } from './data';
-export { RequestAdapter, RequestStatus } from './request';
+export {
+  RequestAdapter,
+  RequestStatistic,
+  RequestStatistics,
+  RequestStatus,
+  RequestResponder,
+} from './request';

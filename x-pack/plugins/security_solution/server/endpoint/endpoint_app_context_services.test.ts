@@ -8,11 +8,11 @@ import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 
 describe('test endpoint app context services', () => {
-  it('should throw error on getAgentService if start is not called', async () => {
+  it('should return undefined on getAgentService if dependencies are not enabled', async () => {
     const endpointAppContextService = new EndpointAppContextService();
-    expect(() => endpointAppContextService.getAgentService()).toThrow(Error);
+    expect(endpointAppContextService.getAgentService()).toEqual(undefined);
   });
-  it('should return undefined on getManifestManager if start is not called', async () => {
+  it('should return undefined on getManifestManager if dependencies are not enabled', async () => {
     const endpointAppContextService = new EndpointAppContextService();
     expect(endpointAppContextService.getManifestManager()).toEqual(undefined);
   });

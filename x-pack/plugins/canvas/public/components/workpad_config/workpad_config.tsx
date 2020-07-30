@@ -19,10 +19,13 @@ import {
   EuiToolTip,
   EuiTextArea,
   EuiAccordion,
-  EuiText,
   EuiButton,
 } from '@elastic/eui';
+
+import { VarConfig } from '../var_config';
+
 import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
+import { CanvasVariable } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
 
 const { WorkpadConfig: strings } = ComponentStrings;
@@ -34,14 +37,16 @@ interface Props {
   };
   name: string;
   css?: string;
+  variables: CanvasVariable[];
   setSize: ({ height, width }: { height: number; width: number }) => void;
   setName: (name: string) => void;
   setWorkpadCSS: (css: string) => void;
+  setWorkpadVariables: (vars: CanvasVariable[]) => void;
 }
 
 export const WorkpadConfig: FunctionComponent<Props> = (props) => {
   const [css, setCSS] = useState(props.css);
-  const { size, name, setSize, setName, setWorkpadCSS } = props;
+  const { size, name, setSize, setName, setWorkpadCSS, variables, setWorkpadVariables } = props;
   const rotate = () => setSize({ width: size.height, height: size.width });
 
   const badges = [
@@ -129,23 +134,25 @@ export const WorkpadConfig: FunctionComponent<Props> = (props) => {
       </div>
 
       <EuiSpacer size="m" />
-      <div className="canvasArg--expandable">
+
+      <VarConfig variables={variables} setVariables={setWorkpadVariables} />
+
+      <div className="canvasSidebar__expandable">
         <EuiAccordion
           id="accordion-global-css"
-          className="canvasArg__accordion"
+          className="canvasSidebar__accordion"
+          style={{ marginBottom: 0 }}
           buttonContent={
             <EuiToolTip
               content={strings.getGlobalCSSTooltip()}
               position="left"
               className="canvasArg__tooltip"
             >
-              <EuiText size="s" color="subdued">
-                {strings.getGlobalCSSLabel()}
-              </EuiText>
+              <span>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
         >
-          <div className="canvasArg__content">
+          <div className="canvasSidebar__accordionContent">
             <EuiTextArea
               aria-label={strings.getGlobalCSSTooltip()}
               value={css}
@@ -169,7 +176,9 @@ WorkpadConfig.propTypes = {
   size: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   css: PropTypes.string,
+  variables: PropTypes.array,
   setSize: PropTypes.func.isRequired,
   setName: PropTypes.func.isRequired,
   setWorkpadCSS: PropTypes.func.isRequired,
+  setWorkpadVariables: PropTypes.func.isRequired,
 };

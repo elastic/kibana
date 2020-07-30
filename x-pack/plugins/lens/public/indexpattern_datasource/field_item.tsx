@@ -198,10 +198,12 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               className={`lnsFieldItem__info ${infoIsOpen ? 'lnsFieldItem__info-isOpen' : ''}`}
               data-test-subj={`lnsFieldListPanelField-${field.name}`}
               onClick={() => {
-                togglePopover();
+                if (exists) {
+                  togglePopover();
+                }
               }}
               onKeyPress={(event) => {
-                if (event.key === 'ENTER') {
+                if (exists && event.key === 'ENTER') {
                   togglePopover();
                 }
               }}

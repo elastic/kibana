@@ -98,6 +98,7 @@ Object {
       "environments": Object {
         "terms": Object {
           "field": "service.environment",
+          "missing": undefined,
           "size": 100,
         },
       },

@@ -29,11 +29,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
     it('should return true when true', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
-        status: {
-          indexFields: [],
-          logIndicesExist: false,
-          metricIndicesExist: true,
-        },
+        hasData: true,
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
@@ -43,11 +39,7 @@ describe('Metrics UI Observability Homepage Functions', () => {
     it('should return false when false', async () => {
       const { core, mockedGetStartServices } = setup();
       core.http.get.mockResolvedValue({
-        status: {
-          indexFields: [],
-          logIndicesExist: false,
-          metricIndicesExist: false,
-        },
+        hasData: false,
       });
       const hasData = createMetricsHasData(mockedGetStartServices);
       const response = await hasData();
@@ -61,12 +53,18 @@ describe('Metrics UI Observability Homepage Functions', () => {
       const { core, mockedGetStartServices } = setup();
       core.http.post.mockResolvedValue(FAKE_SNAPSHOT_RESPONSE);
       const fetchData = createMetricsFetchData(mockedGetStartServices);
-      const endTime = moment();
+      const endTime = moment('2020-07-02T13:25:11.629Z');
       const startTime = endTime.clone().subtract(1, 'h');
       const bucketSize = '300s';
       const response = await fetchData({
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        absoluteTime: {
+          start: startTime.valueOf(),
+          end: endTime.valueOf(),
+        },
+        relativeTime: {
+          start: 'now-15m',
+          end: 'now',
+        },
         bucketSize,
       });
       expect(core.http.post).toHaveBeenCalledTimes(1);
@@ -76,6 +74,8 @@ describe('Metrics UI Observability Homepage Functions', () => {
           metrics: [{ type: 'cpu' }, { type: 'memory' }, { type: 'rx' }, { type: 'tx' }],
           groupBy: [],
           nodeType: 'host',
+          includeTimeseries: true,
+          overrideCompositeSize: 5,
           timerange: {
             from: startTime.valueOf(),
             to: endTime.valueOf(),

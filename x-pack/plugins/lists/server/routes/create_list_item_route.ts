@@ -17,7 +17,7 @@ export const createListItemRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_ITEM_URL,
       validate: {
@@ -36,26 +36,27 @@ export const createListItemRoute = (router: IRouter): void => {
             statusCode: 404,
           });
         } else {
-          const listItem = await lists.getListItemByValue({ listId, type: list.type, value });
-          if (listItem.length !== 0) {
-            return siemResponse.error({
-              body: `list_id: "${listId}" already contains the given value: ${value}`,
-              statusCode: 409,
-            });
-          } else {
-            const createdListItem = await lists.createListItem({
-              id,
-              listId,
-              meta,
-              type: list.type,
-              value,
-            });
+          const createdListItem = await lists.createListItem({
+            deserializer: list.deserializer,
+            id,
+            listId,
+            meta,
+            serializer: list.serializer,
+            type: list.type,
+            value,
+          });
+          if (createdListItem != null) {
             const [validated, errors] = validate(createdListItem, listItemSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
               return response.ok({ body: validated ?? {} });
             }
+          } else {
+            return siemResponse.error({
+              body: 'list item invalid',
+              statusCode: 400,
+            });
           }
         }
       } catch (err) {

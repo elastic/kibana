@@ -5,9 +5,9 @@
  */
 
 export function sanitizeName(name) {
-  // blacklisted characters
-  const blacklist = ['(', ')'];
-  const pattern = blacklist.map((v) => escapeRegExp(v)).join('|');
+  // invalid characters
+  const invalid = ['(', ')'];
+  const pattern = invalid.map((v) => escapeRegExp(v)).join('|');
   const regex = new RegExp(pattern, 'g');
   return name.replace(regex, '_');
 }

@@ -148,7 +148,7 @@ export const schema = Joi.object()
 
     browser: Joi.object()
       .keys({
-        type: Joi.string().valid('chrome', 'firefox', 'ie', 'msedge').default('chrome'),
+        type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
         acceptInsecureCerts: Joi.boolean().default(false),

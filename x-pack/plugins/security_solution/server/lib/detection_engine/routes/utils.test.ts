@@ -21,17 +21,8 @@ import {
   SiemResponseFactory,
 } from './utils';
 import { responseMock } from './__mocks__';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
 
 describe('utils', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
       const boom = new Boom('some boom message');

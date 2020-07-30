@@ -33,7 +33,7 @@
 
 import angular from 'angular';
 import { uiModules } from '../modules';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 
 let aceKeyboardModeId = 0;
 
@@ -72,7 +72,7 @@ uiModules
       }
 
       hint.keydown((ev) => {
-        if (ev.keyCode === keyCodes.ENTER) {
+        if (ev.key === keys.ENTER) {
           ev.preventDefault();
           startEditing();
         }
@@ -103,7 +103,7 @@ uiModules
       );
 
       uiAceTextbox.keydown((ev) => {
-        if (ev.keyCode === keyCodes.ESCAPE) {
+        if (ev.key === keys.ESCAPE) {
           // If the autocompletion context menu is open then we want to let ESC close it but
           // **not** exit out of editing mode.
           if (!isAutoCompleterOpen) {

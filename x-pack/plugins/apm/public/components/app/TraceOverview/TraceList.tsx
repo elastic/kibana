@@ -37,7 +37,7 @@ const traceListColumns: Array<ITableColumn<TransactionGroup>> = [
     width: '40%',
     sortable: true,
     render: (_: string, { serviceName, transactionName }: TransactionGroup) => (
-      <EuiToolTip id="trace-transaction-link-tooltip" content={transactionName}>
+      <EuiToolTip content={transactionName}>
         <StyledTransactionLink
           serviceName={serviceName}
           transactionName={transactionName}

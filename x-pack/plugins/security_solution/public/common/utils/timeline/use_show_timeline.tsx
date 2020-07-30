@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useRouteSpy } from '../route/use_route_spy';
 
-const hideTimelineForRoutes = [`/cases/configure`, '/management'];
+const hideTimelineForRoutes = [`/cases/configure`, '/administration'];
 
 export const useShowTimeline = () => {
   const [{ pageName, pathName }] = useRouteSpy();

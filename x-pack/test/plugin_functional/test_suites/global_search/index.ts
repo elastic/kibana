@@ -10,5 +10,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('GlobalSearch API', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./global_search_api'));
+    loadTestFile(require.resolve('./global_search_providers'));
   });
 }

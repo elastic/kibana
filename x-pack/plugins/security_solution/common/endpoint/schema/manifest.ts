@@ -7,34 +7,70 @@
 import * as t from 'io-ts';
 import {
   compressionAlgorithm,
+  compressionAlgorithmDispatch,
   encryptionAlgorithm,
   identifier,
   manifestSchemaVersion,
-  manifestVersion,
   relativeUrl,
   sha256,
+  semanticVersion,
   size,
 } from './common';
 
-export const manifestEntrySchema = t.exact(
+export const manifestEntryBaseSchema = t.exact(
   t.type({
     relative_url: relativeUrl,
-    precompress_sha256: sha256,
-    precompress_size: size,
-    postcompress_sha256: sha256,
-    postcompress_size: size,
-    compression_algorithm: compressionAlgorithm,
+    decoded_sha256: sha256,
+    decoded_size: size,
+    encoded_sha256: sha256,
+    encoded_size: size,
     encryption_algorithm: encryptionAlgorithm,
   })
 );
 
-export const manifestSchema = t.exact(
+export const manifestEntrySchema = t.intersection([
+  manifestEntryBaseSchema,
+  t.exact(
+    t.type({
+      compression_algorithm: compressionAlgorithm,
+    })
+  ),
+]);
+export type ManifestEntrySchema = t.TypeOf<typeof manifestEntrySchema>;
+
+export const manifestEntryDispatchSchema = t.intersection([
+  manifestEntryBaseSchema,
+  t.exact(
+    t.type({
+      compression_algorithm: compressionAlgorithmDispatch,
+    })
+  ),
+]);
+export type ManifestEntryDispatchSchema = t.TypeOf<typeof manifestEntryDispatchSchema>;
+
+export const manifestBaseSchema = t.exact(
   t.type({
-    manifest_version: manifestVersion,
+    manifest_version: semanticVersion,
     schema_version: manifestSchemaVersion,
-    artifacts: t.record(identifier, manifestEntrySchema),
   })
 );
 
-export type ManifestEntrySchema = t.TypeOf<typeof manifestEntrySchema>;
+export const manifestSchema = t.intersection([
+  manifestBaseSchema,
+  t.exact(
+    t.type({
+      artifacts: t.record(identifier, manifestEntrySchema),
+    })
+  ),
+]);
 export type ManifestSchema = t.TypeOf<typeof manifestSchema>;
+
+export const manifestDispatchSchema = t.intersection([
+  manifestBaseSchema,
+  t.exact(
+    t.type({
+      artifacts: t.record(identifier, manifestEntryDispatchSchema),
+    })
+  ),
+]);
+export type ManifestDispatchSchema = t.TypeOf<typeof manifestDispatchSchema>;

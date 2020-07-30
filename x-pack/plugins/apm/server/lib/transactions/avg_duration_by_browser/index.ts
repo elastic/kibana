@@ -17,6 +17,7 @@ export interface Options {
   serviceName: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
   useAggregatedTransactions: boolean;
+  transactionName?: string;
 }
 
 export type AvgDurationByBrowserAPIResponse = Array<{

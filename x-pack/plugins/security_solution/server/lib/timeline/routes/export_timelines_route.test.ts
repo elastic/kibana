@@ -22,6 +22,9 @@ import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { convertSavedObjectToSavedNote } from '../../note/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from '../convert_saved_object_to_savedtimeline';
+import { mockGetCurrentUser } from './__mocks__/import_timelines';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
+
 jest.mock('../convert_saved_object_to_savedtimeline', () => {
   return {
     convertSavedObjectToSavedTimeline: jest.fn(),
@@ -31,22 +34,30 @@ jest.mock('../convert_saved_object_to_savedtimeline', () => {
 jest.mock('../../note/saved_object', () => {
   return {
     convertSavedObjectToSavedNote: jest.fn(),
+    getNotesByTimelineId: jest.fn().mockReturnValue([]),
   };
 });
 
 jest.mock('../../pinned_event/saved_object', () => {
   return {
     convertSavedObjectToSavedPinnedEvent: jest.fn(),
+    getAllPinnedEventsByTimelineId: jest.fn().mockReturnValue([]),
   };
 });
 describe('export timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-
+    securitySetup = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+      },
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
     clients.savedObjectsClient.bulkGet.mockResolvedValue(mockTimelinesSavedObjects());
 
     ((convertSavedObjectToSavedTimeline as unknown) as jest.Mock).mockReturnValue(mockTimelines());
@@ -54,7 +65,7 @@ describe('export timelines', () => {
     ((convertSavedObjectToSavedPinnedEvent as unknown) as jest.Mock).mockReturnValue(
       mockPinnedEvents()
     );
-    exportTimelinesRoute(server.router, createMockConfig());
+    exportTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes', () => {
@@ -85,7 +96,7 @@ describe('export timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest.mock.calls[0][0]).toEqual(
-        'Invalid value "undefined" supplied to "ids"'
+        'Invalid value "undefined" supplied to "file_name"'
       );
     });
 
@@ -93,12 +104,13 @@ describe('export timelines', () => {
       const request = requestMock.create({
         method: 'get',
         path: TIMELINE_EXPORT_URL,
-        body: { id: 'someId' },
+        query: { file_name: 'test.ndjson' },
+        body: { ids: 'someId' },
       });
       const result = server.validate(request);
 
-      expect(result.badRequest.mock.calls[1][0]).toEqual(
-        'Invalid value "undefined" supplied to "file_name"'
+      expect(result.badRequest.mock.calls[0][0]).toEqual(
+        'Invalid value "someId" supplied to "ids",Invalid value "someId" supplied to "ids",Invalid value "{"ids":"someId"}" supplied to "(Partial<{ ids: (Array<string> | null) }> | null)"'
       );
     });
   });

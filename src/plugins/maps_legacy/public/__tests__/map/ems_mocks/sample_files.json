@@ -407,6 +407,48 @@
       }
     },
     {
+      "layer_id": "world_countries_with_compromised_attribution",
+      "created_at": "2017-04-26T17:12:15.978370",
+      "attribution": [
+        {
+          "label": {
+            "en": "<div onclick='alert(1')>Made with NaturalEarth</div>"
+          },
+          "url": {
+            "en": "http://www.naturalearthdata.com/about/terms-of-use"
+          }
+        },
+        {
+          "label": {
+            "en": "Elastic Maps Service"
+          },
+          "url": {
+            "en": "javascript:alert('foobar')"
+          }
+        }
+      ],
+      "formats": [
+        {
+          "type": "geojson",
+          "url": "/files/world_countries_v1.geo.json",
+          "legacy_default": true
+        }
+      ],
+      "fields": [
+        {
+          "type": "id",
+          "id": "iso2",
+          "label": {
+            "en": "ISO 3166-1 alpha-2 code"
+          }
+        }
+      ],
+      "legacy_ids": [],
+      "layer_name": {
+        "en": "World Countries (compromised)"
+      }
+    },
+    {
       "layer_id": "australia_states",
       "created_at": "2018-06-27T23:47:32.202380",
       "attribution": [

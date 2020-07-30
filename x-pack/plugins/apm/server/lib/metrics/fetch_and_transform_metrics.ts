@@ -25,7 +25,7 @@ type MetricsAggregationMap = Unionize<{
   avg: AggregationOptionsByType['avg'];
 }>;
 
-type Aggs = Record<string, MetricsAggregationMap>;
+type MetricAggs = Record<string, MetricsAggregationMap>;
 
 export type GenericMetricsRequest = Overwrite<
   APMEventESSearchRequest,
@@ -34,9 +34,9 @@ export type GenericMetricsRequest = Overwrite<
       aggs: {
         timeseriesData: {
           date_histogram: AggregationOptionsByType['date_histogram'];
-          aggs: Record<string, MetricsAggregationMap>;
+          aggs: MetricAggs;
         };
-      } & Record<string, MetricsAggregationMap>;
+      } & MetricAggs;
     };
   }
 >;
@@ -50,7 +50,7 @@ interface Filter {
   };
 }
 
-export async function fetchAndTransformMetrics<T extends Aggs>({
+export async function fetchAndTransformMetrics<T extends MetricAggs>({
   setup,
   serviceName,
   serviceNodeName,

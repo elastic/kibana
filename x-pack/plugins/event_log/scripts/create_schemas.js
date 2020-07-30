@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { set } = require('@elastic/safer-lodash-set');
 const lodash = require('lodash');
 
 const LineWriter = require('./lib/line_writer');
@@ -49,7 +50,7 @@ function getEventLogMappings(ecsSchema, exportedProperties) {
   // copy the leaf values of the properties
   for (const prop of leafProperties) {
     const value = lodash.get(ecsSchema.mappings.properties, prop);
-    lodash.set(result.mappings.properties, prop, value);
+    set(result.mappings.properties, prop, value);
   }
 
   // set the non-leaf values as appropriate
@@ -118,7 +119,7 @@ function augmentMappings(mappings, multiValuedProperties) {
     const metaPropName = `${fullProp}.meta`;
     const meta = lodash.get(mappings.properties, metaPropName) || {};
     meta.isArray = 'true';
-    lodash.set(mappings.properties, metaPropName, meta);
+    set(mappings.properties, metaPropName, meta);
   }
 }
 

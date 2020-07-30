@@ -10,6 +10,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   USER_AGENT_NAME,
+  TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -25,8 +26,12 @@ export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
   const { end, apmEventClient, start, uiFiltersES } = options.setup;
-  const { serviceName, useAggregatedTransactions } = options;
+  const { serviceName, useAggregatedTransactions, transactionName } = options;
   const { intervalString } = getBucketSize(start, end, 'auto');
+
+  const transactionNameFilter = transactionName
+    ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
+    : [];
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -36,6 +41,7 @@ export function fetcher(options: Options) {
       useAggregatedTransactions
     ),
     ...uiFiltersES,
+    ...transactionNameFilter,
   ];
 
   const params = {

@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { fetchExceptionListById, fetchExceptionListItemsByListId } from '../api';
 import { ExceptionIdentifiers, ExceptionList, Pagination, UseExceptionListProps } from '../types';
-import { ExceptionListItemSchema } from '../../../common/schemas';
+import { ExceptionListItemSchema, NamespaceType } from '../../../common/schemas';
 
 type Func = () => void;
 export type ReturnExceptionListAndItems = [
@@ -73,7 +73,13 @@ export const useExceptionList = ({
         let exceptions: ExceptionListItemSchema[] = [];
         let exceptionListsReturned: ExceptionList[] = [];
 
-        const fetchData = async ({ id, namespaceType }: ExceptionIdentifiers): Promise<void> => {
+        const fetchData = async ({
+          id,
+          namespaceType,
+        }: {
+          id: string;
+          namespaceType: NamespaceType;
+        }): Promise<void> => {
           try {
             setLoading(true);
 

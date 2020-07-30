@@ -45,7 +45,7 @@ export function createConfig$(
       // kibanaServer.hostname, default to server.host, don't allow "0"
       let kibanaServerHostname = reportingServer.hostname
         ? reportingServer.hostname
-        : serverInfo.host;
+        : serverInfo.hostname;
       if (kibanaServerHostname === '0') {
         logger.warn(
           i18n.translate('xpack.reporting.serverConfig.invalidServerHostname', {

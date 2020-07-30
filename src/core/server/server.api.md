@@ -4,6 +4,7 @@
 
 ```ts
 
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
@@ -21,6 +22,7 @@ import { CatTasksParams } from 'elasticsearch';
 import { CatThreadPoolParams } from 'elasticsearch';
 import { ClearScrollParams } from 'elasticsearch';
 import { Client } from 'elasticsearch';
+import { ClientOptions } from '@elastic/elasticsearch';
 import { ClusterAllocationExplainParams } from 'elasticsearch';
 import { ClusterGetSettingsParams } from 'elasticsearch';
 import { ClusterHealthParams } from 'elasticsearch';
@@ -43,7 +45,7 @@ import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
 import { GenericParams } from 'elasticsearch';
 import { GetParams } from 'elasticsearch';
-import { GetResponse } from 'elasticsearch';
+import { GetResponse as GetResponse_2 } from 'elasticsearch';
 import { GetScriptParams } from 'elasticsearch';
 import { GetSourceParams } from 'elasticsearch';
 import { GetTemplateParams } from 'elasticsearch';
@@ -90,6 +92,7 @@ import { IngestDeletePipelineParams } from 'elasticsearch';
 import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
+import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
@@ -118,7 +121,7 @@ import { ResponseToolkit } from 'hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import { SearchResponse as SearchResponse_2 } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { Server } from 'hapi';
@@ -138,6 +141,9 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
@@ -169,6 +175,38 @@ export interface AssistantAPIClientParams extends GenericParams {
     // (undocumented)
     path: '/_migration/assistance';
 }
+
+// @public
+export interface AuditableEvent {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface Auditor {
+    add(event: AuditableEvent): void;
+    withAuditScope(name: string): void;
+}
+
+// @public
+export interface AuditorFactory {
+    // (undocumented)
+    asScoped(request: KibanaRequest): Auditor;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface AuditTrailSetup {
+    register(auditor: AuditorFactory): void;
+}
+
+// Warning: (ae-missing-release-tag) "AuditTrailStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type AuditTrailStart = AuditorFactory;
 
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
@@ -440,6 +478,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
+    auditTrail: AuditTrailSetup;
+    // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
@@ -466,6 +506,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 // @public
 export interface CoreStart {
     // (undocumented)
+    auditTrail: AuditTrailStart;
+    // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
@@ -488,6 +530,14 @@ export interface CoreStatus {
     elasticsearch: ServiceStatus;
     // (undocumented)
     savedObjects: ServiceStatus;
+}
+
+// @public (undocumented)
+export interface CountResponse {
+    // (undocumented)
+    count: number;
+    // (undocumented)
+    _shards: ShardsInfo;
 }
 
 // @public
@@ -525,6 +575,12 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         euiIconType: string;
         order: number;
     };
+    enterpriseSearch: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
+    };
     observability: {
         id: string;
         label: string;
@@ -543,6 +599,28 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
         order: number;
     };
 }>;
+
+// @public (undocumented)
+export interface DeleteDocumentResponse {
+    // (undocumented)
+    error?: {
+        type: string;
+    };
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    result: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
 
 // @public (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
@@ -590,8 +668,16 @@ export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
     readonly id: PluginName;
     readonly optionalPlugins: readonly PluginName[];
+    readonly requiredBundles: readonly PluginName[];
     readonly requiredPlugins: readonly PluginName[];
 }
+
+// @public
+export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'> & {
+    transport: {
+        request(params: TransportRequestParams, options?: TransportRequestOptions): TransportRequestPromise<ApiResponse>;
+    };
+};
 
 // @public
 export class ElasticsearchConfig {
@@ -660,6 +746,16 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+// @public (undocumented)
+export interface Explanation {
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    details: Explanation[];
+    // (undocumented)
+    value: number;
+}
+
 // @public
 export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
@@ -686,6 +782,28 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
 export function getFlattenedObject(rootValue: Record<string, any>): {
     [key: string]: any;
 };
+
+// @public (undocumented)
+export interface GetResponse<T> {
+    // (undocumented)
+    found: boolean;
+    // (undocumented)
+    _id: string;
+    // (undocumented)
+    _index: string;
+    // (undocumented)
+    _primary_term: number;
+    // (undocumented)
+    _routing?: string;
+    // (undocumented)
+    _seq_no: number;
+    // (undocumented)
+    _source: T;
+    // (undocumented)
+    _type: string;
+    // (undocumented)
+    _version: number;
+}
 
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
@@ -744,7 +862,7 @@ export type HttpResponsePayload = undefined | string | Record<string, any> | Buf
 
 // @public (undocumented)
 export interface HttpServerInfo {
-    host: string;
+    hostname: string;
     name: string;
     port: number;
     protocol: 'http' | 'https' | 'socket';
@@ -763,6 +881,7 @@ export interface HttpServiceSetup {
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
+    registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 }
 
@@ -992,7 +1111,7 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'fieldStats', params: FieldStatsParams, options?: LegacyCallAPIOptions): ReturnType<Client['fieldStats']>;
     // (undocumented)
-    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse<T>>;
+    <T>(endpoint: 'get', params: GetParams, options?: LegacyCallAPIOptions): Promise<GetResponse_2<T>>;
     // (undocumented)
     (endpoint: 'getScript', params: GetScriptParams, options?: LegacyCallAPIOptions): ReturnType<Client['getScript']>;
     // (undocumented)
@@ -1024,9 +1143,9 @@ export interface LegacyAPICaller {
     // (undocumented)
     (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: LegacyCallAPIOptions): ReturnType<Client['renderSearchTemplate']>;
     // (undocumented)
-    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'scroll', params: ScrollParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
-    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse<T>>;
+    <T>(endpoint: 'search', params: SearchParams, options?: LegacyCallAPIOptions): Promise<SearchResponse_2<T>>;
     // (undocumented)
     (endpoint: 'searchShards', params: SearchShardsParams, options?: LegacyCallAPIOptions): ReturnType<Client['searchShards']>;
     // (undocumented)
@@ -1221,7 +1340,7 @@ export interface LegacyCallAPIOptions {
 //
 // @public (undocumented)
 export class LegacyClusterClient implements ILegacyClusterClient {
-    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
+    constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuditorFactory: () => AuditorFactory, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
     callAsInternalUser: LegacyAPICaller;
     close(): void;
@@ -1286,7 +1405,7 @@ export interface LegacyRequest extends Request {
 //
 // @public (undocumented)
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
-    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
+    constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined, auditor?: Auditor | undefined);
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
@@ -1488,7 +1607,6 @@ export type OnPreAuthHandler = (request: KibanaRequest, response: LifecycleRespo
 // @public
 export interface OnPreAuthToolkit {
     next: () => OnPreAuthResult;
-    rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
 // @public
@@ -1510,6 +1628,17 @@ export interface OnPreResponseInfo {
 // @public
 export interface OnPreResponseToolkit {
     next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreRoutingResult" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type OnPreRoutingHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreRoutingToolkit) => OnPreRoutingResult | KibanaResponse | Promise<OnPreRoutingResult | KibanaResponse>;
+
+// @public
+export interface OnPreRoutingToolkit {
+    next: () => OnPreRoutingResult;
+    rewriteUrl: (url: string) => OnPreRoutingResult;
 }
 
 // @public
@@ -1637,6 +1766,7 @@ export interface PluginManifest {
     readonly id: PluginName;
     readonly kibanaVersion: string;
     readonly optionalPlugins: readonly PluginName[];
+    readonly requiredBundles: readonly string[];
     readonly requiredPlugins: readonly PluginName[];
     readonly server: boolean;
     readonly ui: boolean;
@@ -1689,6 +1819,7 @@ export interface RequestHandlerContext {
         uiSettings: {
             client: IUiSettingsClient;
         };
+        auditor: Auditor;
     };
 }
 
@@ -1728,6 +1859,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     authRequired?: boolean | 'optional';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
+    timeout?: number;
     xsrfRequired?: Method extends 'get' ? never : boolean;
 }
 
@@ -1980,6 +2112,9 @@ export interface SavedObjectsClientWrapperOptions {
 export interface SavedObjectsComplexFieldMapping {
     // (undocumented)
     doc_values?: boolean;
+    dynamic?: false | 'strict';
+    // (undocumented)
+    enabled?: boolean;
     // (undocumented)
     properties: SavedObjectsMappingProperties;
     // (undocumented)
@@ -1990,8 +2125,6 @@ export interface SavedObjectsComplexFieldMapping {
 export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     doc_values?: boolean;
-    // (undocumented)
-    enabled?: boolean;
     // (undocumented)
     fields?: {
         [subfield: string]: {
@@ -2019,7 +2152,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-    refresh?: MutatingOperationRefreshSetting;
+    refresh?: boolean;
 }
 
 // @public (undocumented)
@@ -2113,7 +2246,7 @@ export interface SavedObjectsExportResultDetails {
 export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjectsComplexFieldMapping;
 
 // @public (undocumented)
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
     // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
@@ -2124,6 +2257,8 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
         type: string;
         id: string;
     };
+    // (undocumented)
+    namespaces?: string[];
     // (undocumented)
     page?: number;
     // (undocumented)
@@ -2331,12 +2466,12 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: LegacyAPICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespaces, type, filter, preference, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
         id: string;
@@ -2347,7 +2482,7 @@ export class SavedObjectsRepository {
         attributes: any;
     }>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
-    }
+}
 
 // @public
 export interface SavedObjectsRepositoryFactory {
@@ -2487,6 +2622,39 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
 
+// @public (undocumented)
+export interface SearchResponse<T = unknown> {
+    // (undocumented)
+    aggregations?: any;
+    // (undocumented)
+    hits: {
+        total: number;
+        max_score: number;
+        hits: Array<{
+            _index: string;
+            _type: string;
+            _id: string;
+            _score: number;
+            _source: T;
+            _version?: number;
+            _explanation?: Explanation;
+            fields?: any;
+            highlight?: any;
+            inner_hits?: any;
+            matched_queries?: string[];
+            sort?: string[];
+        }>;
+    };
+    // (undocumented)
+    _scroll_id?: string;
+    // (undocumented)
+    _shards: ShardsResponse;
+    // (undocumented)
+    timed_out: boolean;
+    // (undocumented)
+    took: number;
+}
+
 // @public
 export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
     detail?: string;
@@ -2545,6 +2713,30 @@ export interface SessionStorageCookieOptions<T> {
 export interface SessionStorageFactory<T> {
     // (undocumented)
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
+}
+
+// @public (undocumented)
+export interface ShardsInfo {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
+}
+
+// @public (undocumented)
+export interface ShardsResponse {
+    // (undocumented)
+    failed: number;
+    // (undocumented)
+    skipped: number;
+    // (undocumented)
+    successful: number;
+    // (undocumented)
+    total: number;
 }
 
 // @public (undocumented)
@@ -2657,8 +2849,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 // src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
 // src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:238:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:240:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:268:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

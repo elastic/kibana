@@ -18,6 +18,7 @@
  */
 
 import d3 from 'd3';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 
 const defaults = {
@@ -102,6 +103,6 @@ export class ChartGrid {
   }
 
   set(property, value) {
-    return _.set(this._values, property, value);
+    return set(this._values, property, value);
   }
 }

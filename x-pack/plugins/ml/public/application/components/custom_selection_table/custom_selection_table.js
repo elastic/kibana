@@ -45,6 +45,7 @@ function getError(error) {
 export function CustomSelectionTable({
   checkboxDisabledCheck,
   columns,
+  currentPage = 0,
   filterDefaultFields,
   filters,
   items,
@@ -52,6 +53,7 @@ export function CustomSelectionTable({
   onTableChange,
   radioDisabledCheck,
   selectedIds,
+  setCurrentPaginationData,
   singleSelection,
   sortableProperties,
   tableItemId = 'id',
@@ -80,7 +82,7 @@ export function CustomSelectionTable({
   }, [selectedIds]); // eslint-disable-line
 
   useEffect(() => {
-    const tablePager = new Pager(currentItems.length, itemsPerPage);
+    const tablePager = new Pager(currentItems.length, itemsPerPage, currentPage);
     setPagerSettings({
       itemsPerPage: itemsPerPage,
       firstItemIndex: tablePager.getFirstItemIndex(),
@@ -122,6 +124,13 @@ export function CustomSelectionTable({
         currentSelected = [...currentSelected, ...currentItemIds];
         currentSelected = [...new Set(currentSelected)];
       }
+    }
+
+    if (setCurrentPaginationData) {
+      setCurrentPaginationData({
+        pageIndex: pager.getCurrentPageIndex(),
+        itemsPerPage: pagerSettings.itemsPerPage,
+      });
     }
 
     onTableChange(currentSelected);
@@ -389,6 +398,7 @@ export function CustomSelectionTable({
 CustomSelectionTable.propTypes = {
   checkboxDisabledCheck: PropTypes.func,
   columns: PropTypes.array.isRequired,
+  currentPage: PropTypes.number,
   filterDefaultFields: PropTypes.array,
   filters: PropTypes.array,
   items: PropTypes.array.isRequired,
@@ -396,6 +406,7 @@ CustomSelectionTable.propTypes = {
   onTableChange: PropTypes.func.isRequired,
   radioDisabledCheck: PropTypes.func,
   selectedId: PropTypes.array,
+  setCurrentPaginationData: PropTypes.func,
   singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
   tableItemId: PropTypes.string,

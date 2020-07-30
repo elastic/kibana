@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
@@ -15,8 +15,9 @@ import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { GlobalTime } from '../../common/containers/global_time';
+import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useWithSource } from '../../common/containers/source';
+
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
@@ -29,6 +30,7 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
+import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const NO_FILTERS: Filter[] = [];
@@ -46,6 +48,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
     return [ENDPOINT_METADATA_INDEX];
   }, []);
 
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern } = useWithSource();
   const { indicesExist: metadataIndexExists } = useWithSource(
     'default',
@@ -59,21 +62,21 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   );
 
   const [dismissMessage, setDismissMessage] = useState<boolean>(hasDismissEndpointNoticeMessage);
-  const dismissEndpointNotice = () => {
+  const dismissEndpointNotice = useCallback(() => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
-  };
-
+  }, [addMessage]);
+  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
   return (
     <>
       {indicesExist ? (
         <StickyContainer>
-          <FiltersGlobal>
+          <FiltersGlobal globalFullScreen={false}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <WrapperPage>
-            {!dismissMessage && !metadataIndexExists && (
+            {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />
@@ -85,59 +88,55 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
               </SidebarFlexItem>
 
               <EuiFlexItem grow={true}>
-                <GlobalTime>
-                  {({ from, deleteQuery, setQuery, to }) => (
-                    <EuiFlexGroup direction="column" gutterSize="none">
-                      <EuiFlexItem grow={false}>
-                        <SignalsByCategory
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                        <EuiSpacer size="l" />
-                      </EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <SignalsByCategory
+                      filters={filters}
+                      from={from}
+                      indexPattern={indexPattern}
+                      query={query}
+                      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                    <EuiSpacer size="l" />
+                  </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <AlertsByCategory
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AlertsByCategory
+                      deleteQuery={deleteQuery}
+                      filters={filters}
+                      from={from}
+                      indexPattern={indexPattern}
+                      query={query}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                  </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <EventsByDataset
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EventsByDataset
+                      deleteQuery={deleteQuery}
+                      filters={filters}
+                      from={from}
+                      indexPattern={indexPattern}
+                      query={query}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                  </EuiFlexItem>
 
-                      <EuiFlexItem grow={false}>
-                        <EventCounts
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          query={query}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                </GlobalTime>
+                  <EuiFlexItem grow={false}>
+                    <EventCounts
+                      filters={filters}
+                      from={from}
+                      indexPattern={indexPattern}
+                      query={query}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </WrapperPage>

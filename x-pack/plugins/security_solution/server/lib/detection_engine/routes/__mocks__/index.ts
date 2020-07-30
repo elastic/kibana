@@ -25,4 +25,12 @@ export const createMockConfig = () => ({
     from: 'now-15m',
     to: 'now',
   },
+  packagerTaskInterval: '60s',
+  validateArtifactDownloads: true,
 });
+
+export const mockGetCurrentUser = {
+  user: {
+    username: 'mockUser',
+  },
+};

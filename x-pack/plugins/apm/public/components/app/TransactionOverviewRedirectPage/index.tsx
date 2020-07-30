@@ -19,7 +19,7 @@ const CentralizedContainer = styled.div`
   display: flex;
 `;
 
-export const TransactionOverviewRedirectPage = () => {
+export function TransactionOverviewRedirectPage() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end, rangeFrom, rangeTo } = urlParams;
 
@@ -67,4 +67,4 @@ export const TransactionOverviewRedirectPage = () => {
       />
     </CentralizedContainer>
   );
-};
+}

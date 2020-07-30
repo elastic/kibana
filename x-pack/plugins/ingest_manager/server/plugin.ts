@@ -14,6 +14,7 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
 } from 'kibana/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -33,6 +34,7 @@ import {
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
+  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
   registerPackageConfigRoutes,
   registerDataStreamRoutes,
@@ -62,6 +64,7 @@ import {
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
+import { registerIngestManagerUsageCollector } from './collectors/register';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -69,6 +72,7 @@ export interface IngestManagerSetupDeps {
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -81,6 +85,7 @@ export interface IngestManagerAppContext {
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
   kibanaVersion: string;
+  kibanaBranch: string;
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -141,6 +146,7 @@ export class IngestManagerPlugin
 
   private isProductionMode: boolean;
   private kibanaVersion: string;
+  private kibanaBranch: string;
   private httpSetup: HttpServiceSetup | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
@@ -148,6 +154,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
   }
 
@@ -198,6 +205,9 @@ export class IngestManagerPlugin
     const router = core.http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
+    // Register usage collection
+    registerIngestManagerUsageCollector(core, config, deps.usageCollection);
+
     // Always register app routes for permissions checking
     registerAppRoutes(router);
 
@@ -209,12 +219,9 @@ export class IngestManagerPlugin
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
+      registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.epm.enabled) {
-        registerEPMRoutes(router);
-      }
-
       if (config.fleet.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -225,6 +232,9 @@ export class IngestManagerPlugin
             );
           }
         } else {
+          // we currently only use this global interceptor if fleet is enabled
+          // since it would run this func on *every* req (other plugins, CSS, etc)
+          registerLimitedConcurrencyRoutes(core, config);
           registerAgentRoutes(router);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
@@ -250,6 +260,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,

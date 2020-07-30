@@ -175,7 +175,7 @@ exports[`ordinal Should render only single band of last color when delta is 0 1`
       key="0"
     >
       <Category
-        color="#072f6b"
+        color="#6092c0"
         isLinesOnly={false}
         isPointsOnly={true}
         label="100_format"
@@ -227,7 +227,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="0"
     >
       <Category
-        color="#ddeaf7"
+        color="#d9e3ef"
         isLinesOnly={false}
         isPointsOnly={true}
         label="13_format"
@@ -238,7 +238,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="1"
     >
       <Category
-        color="#c5daee"
+        color="#c5d5e7"
         isLinesOnly={false}
         isPointsOnly={true}
         label="25_format"
@@ -249,7 +249,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="2"
     >
       <Category
-        color="#9dc9e0"
+        color="#b2c7df"
         isLinesOnly={false}
         isPointsOnly={true}
         label="38_format"
@@ -260,7 +260,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="3"
     >
       <Category
-        color="#6aadd5"
+        color="#9eb9d8"
         isLinesOnly={false}
         isPointsOnly={true}
         label="50_format"
@@ -271,7 +271,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="4"
     >
       <Category
-        color="#4191c5"
+        color="#8bacd0"
         isLinesOnly={false}
         isPointsOnly={true}
         label="63_format"
@@ -282,7 +282,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="5"
     >
       <Category
-        color="#2070b4"
+        color="#769fc8"
         isLinesOnly={false}
         isPointsOnly={true}
         label="75_format"
@@ -293,7 +293,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="6"
     >
       <Category
-        color="#072f6b"
+        color="#6092c0"
         isLinesOnly={false}
         isPointsOnly={true}
         label="88_format"

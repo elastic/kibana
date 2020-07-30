@@ -38,7 +38,7 @@ import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getEndpointListPath } from '../../../../common/routing';
+import { getHostListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
@@ -118,18 +118,18 @@ const PolicyResponseFlyoutPanel = memo<{
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
-  const { formatUrl } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(
-        getEndpointListPath({
-          name: 'endpointList',
+        getHostListPath({
+          name: 'hostList',
           ...queryParams,
           selected_host: hostMeta.host.id,
         })
       ),
-      getEndpointListPath({
-        name: 'endpointList',
+      getHostListPath({
+        name: 'hostList',
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),
@@ -158,7 +158,7 @@ const PolicyResponseFlyoutPanel = memo<{
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.host.policyResponse.title"
-              defaultMessage="Policy Response"
+              defaultMessage="Configuration Response"
             />
           </h4>
         </EuiText>
@@ -167,7 +167,7 @@ const PolicyResponseFlyoutPanel = memo<{
             title={
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostDetails.noPolicyResponse"
-                defaultMessage="No policy response available"
+                defaultMessage="No configuration response available"
               />
             }
           />
