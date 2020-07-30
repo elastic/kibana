@@ -10,6 +10,7 @@ import {
   convertStringToBase64,
   getExistingPrepackagedTimelines,
   getAllTimeline,
+  AllTimelinesResponse,
 } from './saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId } from '../note/saved_object';
@@ -77,7 +78,7 @@ describe('saved_object', () => {
       await getExistingPrepackagedTimelines(mockRequest, contsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
-          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -89,7 +90,7 @@ describe('saved_object', () => {
       await getExistingPrepackagedTimelines(mockRequest, contsOnly);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
-          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         type: 'siem-ui-timeline',
       });
     });
@@ -103,7 +104,7 @@ describe('saved_object', () => {
       await getExistingPrepackagedTimelines(mockRequest, contsOnly, pageInfo);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
-          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         page: 1,
         perPage: 10,
         type: 'siem-ui-timeline',
@@ -114,8 +115,12 @@ describe('saved_object', () => {
   describe('getAllTimeline', () => {
     let mockFindSavedObject: jest.Mock;
     let mockRequest: FrameworkRequest;
-
-    beforeEach(() => {
+    const pageInfo = {
+      pageSize: 10,
+      pageIndex: 1,
+    };
+    let result = (null as unknown) as AllTimelinesResponse;
+    beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest
         .fn()
@@ -138,6 +143,8 @@ describe('saved_object', () => {
           },
         },
       } as unknown) as FrameworkRequest;
+
+      result = await getAllTimeline(mockRequest, false, pageInfo, null, null, null, null);
     });
 
     afterEach(() => {
@@ -147,11 +154,6 @@ describe('saved_object', () => {
     });
 
     test('should send correct options if no filters applys', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[0][0]).toEqual({
         filter: 'not siem-ui-timeline.attributes.status: draft',
         page: pageInfo.pageIndex,
@@ -165,11 +167,6 @@ describe('saved_object', () => {
     });
 
     test('should send correct options for counts of default timelines', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[1][0]).toEqual({
         filter:
           'not siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
@@ -180,11 +177,6 @@ describe('saved_object', () => {
     });
 
     test('should send correct options for counts of timeline templates', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[2][0]).toEqual({
         filter:
           'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft',
@@ -195,14 +187,9 @@ describe('saved_object', () => {
     });
 
     test('should send correct options for counts of Elastic prebuilt templates', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[3][0]).toEqual({
         filter:
-          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.createdBy: "Elastic"',
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and siem-ui-timeline.attributes.status: immutable',
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -210,14 +197,9 @@ describe('saved_object', () => {
     });
 
     test('should send correct options for counts of custom templates', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[4][0]).toEqual({
         filter:
-          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and not siem-ui-timeline.attributes.createdBy: "Elastic"',
+          'siem-ui-timeline.attributes.timelineType: template and not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
         page: 1,
         perPage: 1,
         type: 'siem-ui-timeline',
@@ -225,11 +207,6 @@ describe('saved_object', () => {
     });
 
     test('should send correct options for counts of favorite timeline', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
       expect(mockFindSavedObject.mock.calls[5][0]).toEqual({
         filter:
           'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
@@ -242,33 +219,16 @@ describe('saved_object', () => {
     });
 
     test('should call getNotesByTimelineId', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
-
       expect((getNotesByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(mockSavedObject.id);
     });
 
     test('should call getAllPinnedEventsByTimelineId', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      await getAllTimeline(mockRequest, false, pageInfo);
-
       expect((getAllPinnedEventsByTimelineId as jest.Mock).mock.calls[0][1]).toEqual(
         mockSavedObject.id
       );
     });
 
     test('should retuen correct result', async () => {
-      const pageInfo = {
-        pageSize: 10,
-        pageIndex: 1,
-      };
-      const result = await getAllTimeline(mockRequest, false, pageInfo);
       expect(result).toEqual({
         totalCount: 1,
         customTemplateTimelineCount: 0,

@@ -51,7 +51,6 @@ export const getTimelineRoute = (
             null,
             null,
             TimelineStatus.active,
-            null,
             null
           );
 
@@ -62,7 +61,6 @@ export const getTimelineRoute = (
             null,
             null,
             TimelineStatus.active,
-            null,
             null
           );
         }
