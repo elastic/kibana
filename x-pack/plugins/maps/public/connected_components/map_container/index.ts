@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
-import { GisMap as UnconnectedGisMap } from './view';
+import { MapContainer } from './map_container';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests, exitFullScreen } from '../../actions';
 import {
@@ -15,10 +16,10 @@ import {
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
-
+import { MapStoreState } from '../../reducers/store';
 import { getCoreChrome } from '../../kibana_services';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     areLayersLoaded: areLayersLoaded(state),
     flyoutDisplay: getFlyoutDisplay(state),
@@ -30,17 +31,16 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
+    triggerRefreshTimer: () => dispatch<any>(triggerRefreshTimer()),
     exitFullScreen: () => {
       dispatch(exitFullScreen());
       getCoreChrome().setIsVisible(true);
     },
-    cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
+    cancelAllInFlightRequests: () => dispatch<any>(cancelAllInFlightRequests()),
   };
 }
 
-const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(UnconnectedGisMap);
-export { connectedGisMap as GisMap }; // GisMap is pulled in by name by the Maps-app itself
-export default connectedGisMap; //lazy-loading in the embeddable requires default export
+const connected = connect(mapStateToProps, mapDispatchToProps)(MapContainer);
+export { connected as MapContainer };

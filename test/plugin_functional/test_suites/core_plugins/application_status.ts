@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import url from 'url';
+import Url from 'url';
 import expect from '@kbn/expect';
 import {
   AppNavLinkStatus,
@@ -28,7 +28,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
-  url.format({
+  Url.format({
     protocol: 'http:',
     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
     port: process.env.TEST_KIBANA_PORT || '5620',
@@ -115,7 +115,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/app_status/arbitrary/path'));
+      const currentUrl = await browser.getCurrentUrl();
+      expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {
