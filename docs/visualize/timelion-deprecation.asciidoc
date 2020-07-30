@@ -1,0 +1,9 @@
+[[timelion-deprecation]]
+== Timelion App Deprecation
+
+Timelion is a time series data visualizer that enables you to combine totally
+independent data sources within a single visualization. It's driven by a simple
+expression language you use to retrieve time series data, perform calculations
+to tease out the answers to complex questions, and visualize the results.
+
+For example, Timelion enables you to easily get the answers to questions like:
