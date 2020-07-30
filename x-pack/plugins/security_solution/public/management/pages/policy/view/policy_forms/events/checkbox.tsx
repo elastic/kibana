@@ -27,6 +27,7 @@ export const EventsCheckbox = React.memo(function ({
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const selected = getter(policyDetailsConfig);
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
+  const checkboxId = useMemo(() => htmlIdGenerator()(), []);
 
   const handleCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +43,7 @@ export const EventsCheckbox = React.memo(function ({
 
   return (
     <EuiCheckbox
-      id={useMemo(() => htmlIdGenerator()(), [])}
+      id={checkboxId}
       label={name}
       checked={selected}
       onChange={handleCheckboxChange}
