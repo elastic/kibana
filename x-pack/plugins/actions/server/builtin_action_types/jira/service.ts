@@ -6,15 +6,10 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
+import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 import { Logger } from '../../../../../../src/core/server';
-import {
-  JiraPublicConfigurationType,
-  JiraSecretConfigurationType,
-  CreateIncidentRequest,
-  UpdateIncidentRequest,
-  CreateCommentRequest,
-} from './types';
+import { JiraPublicConfigurationType, JiraSecretConfigurationType } from './types';
+import { Comment } from './case_types';
 
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
@@ -72,18 +67,26 @@ export const createExternalService = (
     }
   };
 
+  const findIncidents = async (params?: Record<string, string>) => {
+    return undefined;
+  };
+
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     // The response from Jira when creating an issue contains only the key and the id.
     // The function makes two calls when creating an issue. One to create the issue and one to get
     // the created issue with all the necessary fields.
     try {
-      const res = await request<CreateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         logger,
         method: 'post',
         data: {
-          fields: { ...incident, project: { key: projectKey }, issuetype: { name: 'Task' } },
+          fields: {
+            ...(incident as Record<string, unknown>),
+            project: { key: projectKey },
+            issuetype: { name: 'Task' },
+          },
         },
         proxySettings,
       });
@@ -105,16 +108,16 @@ export const createExternalService = (
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      await request<UpdateIncidentRequest>({
+      await request({
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
         logger,
-        data: { fields: { ...incident } },
+        data: { fields: { ...(incident as Record<string, unknown>) } },
         proxySettings,
       });
 
-      const updatedIncident = await getIncident(incidentId);
+      const updatedIncident = await getIncident(incidentId as string);
 
       return {
         title: updatedIncident.key,
@@ -132,19 +135,21 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
+  const createComment = async ({ incidentId, comment }: ExternalServiceParams) => {
+    const commentTyped = comment as Comment;
+
     try {
-      const res = await request<CreateCommentRequest>({
+      const res = await request({
         axios: axiosInstance,
         method: 'post',
-        url: getCommentsURL(incidentId),
+        url: getCommentsURL(incidentId as string),
         logger,
-        data: { body: comment.comment },
+        data: { body: commentTyped.comment },
         proxySettings,
       });
 
       return {
-        commentId: comment.commentId,
+        commentId: commentTyped.commentId,
         externalCommentId: res.data.id,
         pushedDate: new Date(res.data.created).toISOString(),
       };
@@ -158,10 +163,21 @@ export const createExternalService = (
     }
   };
 
+  const getCreateIssueMetadata = async () => {
+    return undefined;
+  };
+
+  const getCapabilities = async () => {
+    return undefined;
+  };
+
   return {
     getIncident,
     createIncident,
     updateIncident,
     createComment,
+    findIncidents,
+    getCreateIssueMetadata,
+    getCapabilities,
   };
 };
