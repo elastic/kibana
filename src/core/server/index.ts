@@ -110,6 +110,13 @@ export {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  SearchResponse,
+  CountResponse,
+  ShardsInfo,
+  ShardsResponse,
+  Explanation,
+  GetResponse,
+  DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
 export {
