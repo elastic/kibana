@@ -70,7 +70,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.agentEnrollment.cancelButtonLabel"
                 defaultMessage="Cancel"

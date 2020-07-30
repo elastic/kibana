@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import url from 'url';
+import Url from 'url';
 import expect from '@kbn/expect';
 import {
   AppNavLinkStatus,
@@ -28,7 +28,7 @@ import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
-  url.format({
+  Url.format({
     protocol: 'http:',
     hostname: process.env.TEST_KIBANA_HOST || 'localhost',
     port: process.env.TEST_KIBANA_PORT || '5620',
@@ -41,6 +41,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
@@ -50,15 +51,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     }, s);
   };
 
-  const navigateToApp = async (i: string) => {
+  const navigateToApp = async (id: string) => {
     return await browser.executeAsync(async (appId, cb) => {
       await window.__coreAppStatus.navigateToApp(appId);
       cb();
-    }, i);
+    }, id);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/65423
-  describe.skip('application status management', () => {
+  describe('application status management', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('app_status_start');
     });
@@ -101,19 +101,22 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('allows to change the defaultPath of an application', async () => {
-      let link = await appsMenu.getLink('App Status');
+      const link = await appsMenu.getLink('App Status');
       expect(link!.href).to.eql(getKibanaUrl('/app/app_status'));
 
       await setAppStatus({
         defaultPath: '/arbitrary/path',
       });
 
-      link = await appsMenu.getLink('App Status');
-      expect(link!.href).to.eql(getKibanaUrl('/app/app_status/arbitrary/path'));
+      await retry.waitFor('link url updated with "defaultPath"', async () => {
+        const updatedLink = await appsMenu.getLink('App Status');
+        return updatedLink?.href === getKibanaUrl('/app/app_status/arbitrary/path');
+      });
 
       await navigateToApp('app_status');
       expect(await testSubjects.exists('appStatusApp')).to.eql(true);
-      expect(await browser.getCurrentUrl()).to.eql(getKibanaUrl('/app/app_status/arbitrary/path'));
+      const currentUrl = await browser.getCurrentUrl();
+      expect(Url.parse(currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {

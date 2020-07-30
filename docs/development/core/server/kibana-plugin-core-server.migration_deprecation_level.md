@@ -4,6 +4,9 @@
 
 ## MIGRATION\_DEPRECATION\_LEVEL type
 
+> Warning: This API is now obsolete.
+> 
+> 
 
 <b>Signature:</b>
 
