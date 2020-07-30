@@ -127,10 +127,11 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await common.sleep(500);
 
       // set from time
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await retry.try(async () => {
+        await testSubjects.click('superDatePickerstartDatePopoverButton');
+      });
       await this.waitPanelIsGone(panel);
       panel = await this.getTimePickerPanel();
       await testSubjects.click('superDatePickerAbsoluteTab');

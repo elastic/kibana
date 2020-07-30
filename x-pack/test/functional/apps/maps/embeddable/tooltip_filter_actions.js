@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('dash for tooltip filter action test');
 
-      await PageObjects.maps.lockTooltipAtPosition(200, -200);
+      await PageObjects.maps.lockTooltipAtPosition(200, -150);
     });
 
     it('should display create filter button when tooltip is locked', async () => {
