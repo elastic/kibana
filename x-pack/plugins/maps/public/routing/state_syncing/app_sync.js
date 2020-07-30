@@ -15,6 +15,10 @@ export function startAppStateSyncing(appStateManager) {
   // sync app filters with app state container from data.query to state container
   const { query } = getData();
 
+  // Filter manager state persists across applications
+  // clear app state filters to prevent application filters from other applications being transfered to maps
+  query.filterManager.setAppFilters([]);
+
   const stateContainer = {
     get: () => ({
       query: appStateManager.getQuery(),
