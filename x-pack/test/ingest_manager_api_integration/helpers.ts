@@ -22,7 +22,7 @@ export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const server = dockerServers.get('registry');
   const log = getService('log');
 
-  beforeEach(function beforeSetupWithDockerRegistyry() {
+  beforeEach(function beforeSetupWithDockerRegistry() {
     if (!server.enabled) {
       warnAndSkipTest(this, log);
     }

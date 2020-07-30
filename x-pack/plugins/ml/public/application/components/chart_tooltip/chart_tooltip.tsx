@@ -29,7 +29,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
 
   useEffect(() => {
     const subscription = service.tooltipState$.subscribe((tooltipState) => {
-      if (refCallback.current) {
+      if (refCallback.current && typeof refCallback.current === 'function') {
         // update trigger
         refCallback.current(tooltipState.target);
       }

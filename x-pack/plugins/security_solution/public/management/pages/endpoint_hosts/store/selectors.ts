@@ -195,3 +195,17 @@ export const policyResponseStatus: (state: Immutable<HostState>) => string = cre
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
 );
+
+/**
+ * returns the list of known non-existing polices that may have been in the Host API response.
+ * @param state
+ */
+export const nonExistingPolicies: (
+  state: Immutable<HostState>
+) => Immutable<HostState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
+
+/**
+ * Return boolean that indicates whether hosts exist
+ * @param state
+ */
+export const hostsExist: (state: Immutable<HostState>) => boolean = (state) => state.hostsExist;

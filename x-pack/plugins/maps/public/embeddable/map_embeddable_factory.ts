@@ -48,7 +48,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const {
       addLayerWithoutDataSync,
       createMapStore,
-      getIndexPatternService,
+      getIndexPatternsFromIds,
       getQueryableUniqueIndexPatternIds,
     } = await lazyLoadMapModules();
     const store = createMapStore();
@@ -66,17 +66,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
-      try {
-        // @ts-ignore
-        return await getIndexPatternService().get(indexPatternId);
-      } catch (error) {
-        // Unable to load index pattern, better to not throw error so map embeddable can render
-        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
-        return null;
-      }
-    });
-    const indexPatterns = await Promise.all(promises);
+    const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
     return _.compact(indexPatterns) as IIndexPattern[];
   }
 

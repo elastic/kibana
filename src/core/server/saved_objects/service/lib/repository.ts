@@ -19,13 +19,16 @@
 
 import { omit } from 'lodash';
 import uuid from 'uuid';
-import { retryCallCluster } from '../../../elasticsearch/legacy';
-import { LegacyAPICaller } from '../../../elasticsearch/';
-
+import {
+  ElasticsearchClient,
+  DeleteDocumentResponse,
+  GetResponse,
+  SearchResponse,
+} from '../../../elasticsearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
-import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers, DecoratedError } from './errors';
 import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 import { KibanaMigrator } from '../../migrations';
@@ -33,6 +36,7 @@ import {
   SavedObjectsSerializer,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
 } from '../../serialization';
 import {
   SavedObjectsBulkCreateObject,
@@ -76,7 +80,7 @@ const isRight = (either: Either): either is Right => either.tag === 'Right';
 export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
-  callCluster: LegacyAPICaller;
+  client: ElasticsearchClient;
   typeRegistry: SavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: KibanaMigrator;
@@ -97,8 +101,8 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
  * @public
  */
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
+  /** The Elasticsearch supports only boolean flag for this operation */
+  refresh?: boolean;
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
@@ -119,7 +123,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: SavedObjectTypeRegistry;
   private _allowedTypes: string[];
-  private _unwrappedCallCluster: LegacyAPICaller;
+  private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
 
   /**
@@ -134,7 +138,7 @@ export class SavedObjectsRepository {
     migrator: KibanaMigrator,
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
-    callCluster: LegacyAPICaller,
+    client: ElasticsearchClient,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -159,7 +163,7 @@ export class SavedObjectsRepository {
       typeRegistry,
       serializer,
       allowedTypes,
-      callCluster: retryCallCluster(callCluster),
+      client,
     });
   }
 
@@ -167,7 +171,7 @@ export class SavedObjectsRepository {
     const {
       index,
       mappings,
-      callCluster,
+      client,
       typeRegistry,
       serializer,
       migrator,
@@ -185,15 +189,11 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._registry = typeRegistry;
+    this.client = createRepositoryEsClient(client);
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
     this._allowedTypes = allowedTypes;
-
-    this._unwrappedCallCluster = async (...args: Parameters<LegacyAPICaller>) => {
-      await migrator.runMigrations();
-      return callCluster(...args);
-    };
     this._serializer = serializer;
   }
 
@@ -258,17 +258,21 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const method = id && overwrite ? 'index' : 'create';
-    const response = await this._writeToCluster(method, {
+    const requestParams = {
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
       body: raw._source,
-    });
+    };
+
+    const { body } =
+      id && overwrite
+        ? await this.client.index(requestParams)
+        : await this.client.create(requestParams);
 
     return this._rawToSavedObject<T>({
       ...raw,
-      ...response,
+      ...body,
     });
   }
 
@@ -325,12 +329,14 @@ export class SavedObjectsRepository {
         _source: ['type', 'namespaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this._callCluster('mget', {
-          body: {
-            docs: bulkGetDocs,
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
           },
-          ignore: [404],
-        })
+          { ignore: [404] }
+        )
       : undefined;
 
     let bulkRequestIndexCounter = 0;
@@ -344,8 +350,8 @@ export class SavedObjectsRepository {
       let savedObjectNamespaces;
       const { esRequestIndex, object, method } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
-        const indexFound = bulkGetResponse.status !== 404;
-        const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+        const indexFound = bulkGetResponse?.statusCode !== 404;
+        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
         if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
           const { id, type } = object;
@@ -402,7 +408,7 @@ export class SavedObjectsRepository {
     });
 
     const bulkResponse = bulkCreateParams.length
-      ? await this._writeToCluster('bulk', {
+      ? await this.client.bulk({
           refresh,
           body: bulkCreateParams,
         })
@@ -416,7 +422,7 @@ export class SavedObjectsRepository {
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
-          bulkResponse.items[esRequestIndex]
+          bulkResponse?.body.items[esRequestIndex]
         )[0] as any;
 
         if (error) {
@@ -483,10 +489,14 @@ export class SavedObjectsRepository {
       _source: ['type', 'namespaces'],
     }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this._callCluster('mget', {
-          body: { docs: bulkGetDocs },
-          ignore: [404],
-        })
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
+          },
+          { ignore: [404] }
+        )
       : undefined;
 
     const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
@@ -497,7 +507,7 @@ export class SavedObjectsRepository {
       }
 
       const { type, id, esRequestIndex } = expectedResult.value;
-      const doc = bulkGetResponse.docs[esRequestIndex];
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
       if (doc.found) {
         errors.push({
           id,
@@ -550,18 +560,20 @@ export class SavedObjectsRepository {
           namespaces: remainingNamespaces,
         };
 
-        const updateResponse = await this._writeToCluster('update', {
-          id: rawId,
-          index: this.getIndexForType(type),
-          ...getExpectedVersionProperties(undefined, preflightResult),
-          refresh,
-          ignore: [404],
-          body: {
-            doc,
+        const { statusCode } = await this.client.update(
+          {
+            id: rawId,
+            index: this.getIndexForType(type),
+            ...getExpectedVersionProperties(undefined, preflightResult),
+            refresh,
+            body: {
+              doc,
+            },
           },
-        });
+          { ignore: [404] }
+        );
 
-        if (updateResponse.status === 404) {
+        if (statusCode === 404) {
           // see "404s from missing index" above
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
@@ -569,22 +581,23 @@ export class SavedObjectsRepository {
       }
     }
 
-    const deleteResponse = await this._writeToCluster('delete', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ...getExpectedVersionProperties(undefined, preflightResult),
-      refresh,
-      ignore: [404],
-    });
+    const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+      {
+        id: rawId,
+        index: this.getIndexForType(type),
+        ...getExpectedVersionProperties(undefined, preflightResult),
+        refresh,
+      },
+      { ignore: [404] }
+    );
 
-    const deleted = deleteResponse.result === 'deleted';
+    const deleted = body.result === 'deleted';
     if (deleted) {
       return {};
     }
 
-    const deleteDocNotFound = deleteResponse.result === 'not_found';
-    const deleteIndexNotFound =
-      deleteResponse.error && deleteResponse.error.type === 'index_not_found_exception';
+    const deleteDocNotFound = body.result === 'not_found';
+    const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -594,7 +607,7 @@ export class SavedObjectsRepository {
       `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
         type,
         id,
-        response: deleteResponse,
+        response: { body, statusCode },
       })}`
     );
   }
@@ -613,17 +626,16 @@ export class SavedObjectsRepository {
       throw new TypeError(`namespace is required, and must be a string`);
     }
 
-    const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
     const typesToUpdate = allTypes.filter((type) => !this._registry.isNamespaceAgnostic(type));
 
-    const updateOptions = {
-      index: this.getIndicesForTypes(typesToUpdate),
-      ignore: [404],
-      refresh,
-      body: {
-        script: {
-          source: `
+    const { body } = await this.client.updateByQuery(
+      {
+        index: this.getIndicesForTypes(typesToUpdate),
+        refresh: options.refresh,
+        body: {
+          script: {
+            source: `
               if (!ctx._source.containsKey('namespaces')) {
                 ctx.op = "delete";
               } else {
@@ -633,18 +645,20 @@ export class SavedObjectsRepository {
                 }
               }
             `,
-          lang: 'painless',
-          params: { namespace: getNamespaceString(namespace) },
+            lang: 'painless',
+            params: { namespace: getNamespaceString(namespace) },
+          },
+          conflicts: 'proceed',
+          ...getSearchDsl(this._mappings, this._registry, {
+            namespaces: namespace ? [namespace] : undefined,
+            type: typesToUpdate,
+          }),
         },
-        conflicts: 'proceed',
-        ...getSearchDsl(this._mappings, this._registry, {
-          namespaces: namespace ? [namespace] : undefined,
-          type: typesToUpdate,
-        }),
       },
-    };
+      { ignore: [404] }
+    );
 
-    return await this._writeToCluster('updateByQuery', updateOptions);
+    return body;
   }
 
   /**
@@ -724,7 +738,6 @@ export class SavedObjectsRepository {
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
-      ignore: [404],
       rest_total_hits_as_int: true,
       preference,
       body: {
@@ -744,9 +757,10 @@ export class SavedObjectsRepository {
       },
     };
 
-    const response = await this._callCluster('search', esOptions);
-
-    if (response.status === 404) {
+    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+      ignore: [404],
+    });
+    if (statusCode === 404) {
       // 404 is only possible here if the index is missing, which
       // we don't want to leak, see "404s from missing index" above
       return {
@@ -760,14 +774,14 @@ export class SavedObjectsRepository {
     return {
       page,
       per_page: perPage,
-      total: response.hits.total,
-      saved_objects: response.hits.hits.map(
+      total: body.hits.total,
+      saved_objects: body.hits.hits.map(
         (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
           score: (hit as any)._score,
         })
       ),
-    };
+    } as SavedObjectsFindResponse<T>;
   }
 
   /**
@@ -828,12 +842,14 @@ export class SavedObjectsRepository {
         _source: includedFields(type, fields),
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this._callCluster('mget', {
-          body: {
-            docs: bulkGetDocs,
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
           },
-          ignore: [404],
-        })
+          { ignore: [404] }
+        )
       : undefined;
 
     return {
@@ -843,7 +859,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, esRequestIndex } = expectedResult.value;
-        const doc = bulkGetResponse.docs[esRequestIndex];
+        const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
         if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
           return ({
@@ -894,24 +910,26 @@ export class SavedObjectsRepository {
 
     const { namespace } = options;
 
-    const response = await this._callCluster('get', {
-      id: this._serializer.generateRawId(namespace, type, id),
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
+    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+      {
+        id: this._serializer.generateRawId(namespace, type, id),
+        index: this.getIndexForType(type),
+      },
+      { ignore: [404] }
+    );
 
-    const docNotFound = response.found === false;
-    const indexNotFound = response.status === 404;
-    if (docNotFound || indexNotFound || !this.rawDocExistsInNamespace(response, namespace)) {
+    const docNotFound = body.found === false;
+    const indexNotFound = statusCode === 404;
+    if (docNotFound || indexNotFound || !this.rawDocExistsInNamespace(body, namespace)) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt } = response._source;
+    const { originId, updated_at: updatedAt } = body._source;
 
-    let namespaces = [];
+    let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = response._source.namespaces ?? [getNamespaceString(response._source.namespace)];
+      namespaces = body._source.namespaces ?? [getNamespaceString(body._source.namespace)];
     }
 
     return {
@@ -920,10 +938,10 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(response),
-      attributes: response._source[type],
-      references: response._source.references || [],
-      migrationVersion: response._source.migrationVersion,
+      version: encodeHitVersion(body),
+      attributes: body._source[type],
+      references: body._source.references || [],
+      migrationVersion: body._source.migrationVersion,
     };
   }
 
@@ -963,36 +981,38 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const updateResponse = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(namespace, type, id),
-      index: this.getIndexForType(type),
-      ...getExpectedVersionProperties(version, preflightResult),
-      refresh,
-      ignore: [404],
-      body: {
-        doc,
-      },
-      _sourceIncludes: ['namespace', 'namespaces', 'originId'],
-    });
+    const { body, statusCode } = await this.client.update(
+      {
+        id: this._serializer.generateRawId(namespace, type, id),
+        index: this.getIndexForType(type),
+        ...getExpectedVersionProperties(version, preflightResult),
+        refresh,
 
-    if (updateResponse.status === 404) {
+        body: {
+          doc,
+        },
+        _source_includes: ['namespace', 'namespaces', 'originId'],
+      },
+      { ignore: [404] }
+    );
+
+    if (statusCode === 404) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId } = updateResponse.get._source;
+    const { originId } = body.get._source;
     let namespaces = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = updateResponse.get._source.namespaces ?? [
-        getNamespaceString(updateResponse.get._source.namespace),
-      ];
+      namespaces = body.get._source.namespaces ?? [getNamespaceString(body.get._source.namespace)];
     }
 
     return {
       id,
       type,
       updated_at: time,
-      version: encodeHitVersion(updateResponse),
+      // @ts-expect-error update doesn't have _seq_no, _primary_term as Record<string, any> / any in LP
+      version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
       references,
@@ -1041,18 +1061,20 @@ export class SavedObjectsRepository {
       namespaces: existingNamespaces ? unique(existingNamespaces.concat(namespaces)) : namespaces,
     };
 
-    const updateResponse = await this._writeToCluster('update', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ...getExpectedVersionProperties(version, preflightResult),
-      refresh,
-      ignore: [404],
-      body: {
-        doc,
+    const { statusCode } = await this.client.update(
+      {
+        id: rawId,
+        index: this.getIndexForType(type),
+        ...getExpectedVersionProperties(version, preflightResult),
+        refresh,
+        body: {
+          doc,
+        },
       },
-    });
+      { ignore: [404] }
+    );
 
-    if (updateResponse.status === 404) {
+    if (statusCode === 404) {
       // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -1104,40 +1126,48 @@ export class SavedObjectsRepository {
         namespaces: remainingNamespaces,
       };
 
-      const updateResponse = await this._writeToCluster('update', {
-        id: rawId,
-        index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult),
-        refresh,
-        ignore: [404],
-        body: {
-          doc,
-        },
-      });
+      const { statusCode } = await this.client.update(
+        {
+          id: rawId,
+          index: this.getIndexForType(type),
+          ...getExpectedVersionProperties(undefined, preflightResult),
+          refresh,
 
-      if (updateResponse.status === 404) {
+          body: {
+            doc,
+          },
+        },
+        {
+          ignore: [404],
+        }
+      );
+
+      if (statusCode === 404) {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       return {};
     } else {
       // if there are no namespaces remaining, delete the saved object
-      const deleteResponse = await this._writeToCluster('delete', {
-        id: this._serializer.generateRawId(undefined, type, id),
-        index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult),
-        refresh,
-        ignore: [404],
-      });
+      const { body, statusCode } = await this.client.delete<DeleteDocumentResponse>(
+        {
+          id: this._serializer.generateRawId(undefined, type, id),
+          refresh,
+          ...getExpectedVersionProperties(undefined, preflightResult),
+          index: this.getIndexForType(type),
+        },
+        {
+          ignore: [404],
+        }
+      );
 
-      const deleted = deleteResponse.result === 'deleted';
+      const deleted = body.result === 'deleted';
       if (deleted) {
         return {};
       }
 
-      const deleteDocNotFound = deleteResponse.result === 'not_found';
-      const deleteIndexNotFound =
-        deleteResponse.error && deleteResponse.error.type === 'index_not_found_exception';
+      const deleteDocNotFound = body.result === 'not_found';
+      const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
       if (deleteDocNotFound || deleteIndexNotFound) {
         // see "404s from missing index" above
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -1147,7 +1177,7 @@ export class SavedObjectsRepository {
         `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
           type,
           id,
-          response: deleteResponse,
+          response: { body, statusCode },
         })}`
       );
     }
@@ -1214,12 +1244,16 @@ export class SavedObjectsRepository {
         _source: ['type', 'namespaces'],
       }));
     const bulkGetResponse = bulkGetDocs.length
-      ? await this._callCluster('mget', {
-          body: {
-            docs: bulkGetDocs,
+      ? await this.client.mget(
+          {
+            body: {
+              docs: bulkGetDocs,
+            },
           },
-          ignore: [404],
-        })
+          {
+            ignore: [404],
+          }
+        )
       : undefined;
 
     let bulkUpdateRequestIndexCounter = 0;
@@ -1234,8 +1268,8 @@ export class SavedObjectsRepository {
         let namespaces;
         let versionProperties;
         if (esRequestIndex !== undefined) {
-          const indexFound = bulkGetResponse.status !== 404;
-          const actualResult = indexFound ? bulkGetResponse.docs[esRequestIndex] : undefined;
+          const indexFound = bulkGetResponse?.statusCode !== 404;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
           if (!docFound || !this.rawDocExistsInNamespace(actualResult, namespace)) {
             return {
@@ -1283,12 +1317,12 @@ export class SavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
     const bulkUpdateResponse = bulkUpdateParams.length
-      ? await this._writeToCluster('bulk', {
+      ? await this.client.bulk({
           refresh,
           body: bulkUpdateParams,
-          _sourceIncludes: ['originId'],
+          _source_includes: ['originId'],
         })
-      : {};
+      : undefined;
 
     return {
       saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
@@ -1297,7 +1331,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse.items[esRequestIndex];
+        const response = bulkUpdateResponse?.body.items[esRequestIndex];
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
@@ -1378,11 +1412,11 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const response = await this._writeToCluster('update', {
+    const { body } = await this.client.update({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
-      _source: true,
+      _source: 'true',
       body: {
         script: {
           source: `
@@ -1406,33 +1440,18 @@ export class SavedObjectsRepository {
       },
     });
 
-    const { originId } = response.get._source;
+    const { originId } = body.get._source;
     return {
       id,
       type,
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       ...(originId && { originId }),
       updated_at: time,
-      references: response.get._source.references,
-      version: encodeHitVersion(response),
-      attributes: response.get._source[type],
+      references: body.get._source.references,
+      // @ts-expect-error
+      version: encodeHitVersion(body),
+      attributes: body.get._source[type],
     };
-  }
-
-  private async _writeToCluster(...args: Parameters<LegacyAPICaller>) {
-    try {
-      return await this._callCluster(...args);
-    } catch (err) {
-      throw decorateEsError(err);
-    }
-  }
-
-  private async _callCluster(...args: Parameters<LegacyAPICaller>) {
-    try {
-      return await this._unwrappedCallCluster(...args);
-    } catch (err) {
-      throw decorateEsError(err);
-    }
   }
 
   /**
@@ -1506,19 +1525,23 @@ export class SavedObjectsRepository {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
 
-    const response = await this._callCluster('get', {
-      id: this._serializer.generateRawId(undefined, type, id),
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
+    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+      {
+        id: this._serializer.generateRawId(undefined, type, id),
+        index: this.getIndexForType(type),
+      },
+      {
+        ignore: [404],
+      }
+    );
 
-    const indexFound = response.status !== 404;
-    const docFound = indexFound && response.found === true;
+    const indexFound = statusCode !== 404;
+    const docFound = indexFound && body.found === true;
     if (docFound) {
-      if (!this.rawDocExistsInNamespace(response, namespace)) {
+      if (!this.rawDocExistsInNamespace(body, namespace)) {
         throw SavedObjectsErrorHelpers.createConflictError(type, id);
       }
-      return getSavedObjectNamespaces(namespace, response);
+      return getSavedObjectNamespaces(namespace, body);
     }
     return getSavedObjectNamespaces(namespace);
   }
@@ -1539,18 +1562,20 @@ export class SavedObjectsRepository {
     }
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
-    const response = await this._callCluster('get', {
-      id: rawId,
-      index: this.getIndexForType(type),
-      ignore: [404],
-    });
+    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+      {
+        id: rawId,
+        index: this.getIndexForType(type),
+      },
+      { ignore: [404] }
+    );
 
-    const indexFound = response.status !== 404;
-    const docFound = indexFound && response.found === true;
-    if (!docFound || !this.rawDocExistsInNamespace(response, namespace)) {
+    const indexFound = statusCode !== 404;
+    const docFound = indexFound && body.found === true;
+    if (!docFound || !this.rawDocExistsInNamespace(body, namespace)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    return response as SavedObjectsRawDoc;
+    return body as SavedObjectsRawDoc;
   }
 }
 

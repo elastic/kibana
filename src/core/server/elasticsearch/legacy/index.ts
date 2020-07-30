@@ -23,6 +23,5 @@ export {
 } from './cluster_client';
 export { ILegacyScopedClusterClient, LegacyScopedClusterClient } from './scoped_cluster_client';
 export { LegacyElasticsearchClientConfig } from './elasticsearch_client_config';
-export { retryCallCluster, migrationsRetryCallCluster } from './retry_call_cluster';
 export { LegacyElasticsearchError, LegacyElasticsearchErrorHelpers } from './errors';
 export * from './api_types';
