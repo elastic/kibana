@@ -101,6 +101,7 @@ describe('requestOpaqueId', () => {
     expect(() => {
       config.schema.validate({
         requestOpaqueId: {
+          allowFromAnyIp: true,
           ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
         },
       });

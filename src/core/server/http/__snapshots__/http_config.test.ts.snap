@@ -40,7 +40,7 @@ Object {
   "name": "kibana-hostname",
   "port": 5601,
   "requestOpaqueId": Object {
-    "allowFromAnyIp": true,
+    "allowFromAnyIp": false,
     "ipAllowlist": Array [],
   },
   "rewriteBasePath": false,

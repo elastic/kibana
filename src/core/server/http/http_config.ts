@@ -89,7 +89,7 @@ export const config = {
       }),
       requestOpaqueId: schema.object(
         {
-          allowFromAnyIp: schema.boolean({ defaultValue: true }),
+          allowFromAnyIp: schema.boolean({ defaultValue: false }),
           ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
         },
         {
