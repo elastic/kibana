@@ -65,6 +65,7 @@ import {
   ACTION_REPLACE_PANEL,
   ClonePanelAction,
   ClonePanelActionContext,
+  createDashboardContainerByValueRenderer,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
@@ -77,17 +78,17 @@ import {
 import {
   createDashboardUrlGenerator,
   DASHBOARD_APP_URL_GENERATOR,
-  DashboardAppLinkGeneratorState,
+  DashboardUrlGeneratorState,
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
-import { createDashboardContainerByValueRenderer } from './application';
+import { UrlGeneratorState } from '../../share/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
-    [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
+    [DASHBOARD_APP_URL_GENERATOR]: UrlGeneratorState<DashboardUrlGeneratorState>;
   }
 }
 
