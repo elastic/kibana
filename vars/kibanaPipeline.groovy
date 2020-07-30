@@ -10,29 +10,31 @@ def withPostBuildReporting(Closure closure) {
       publishJunit()
     }
 
-    def parallelWorkspace = "${env.WORKSPACE}/parallel"
-    if (fileExists(parallelWorkspace)) {
-      dir(parallelWorkspace) {
-        def workspaceTasks = [:]
+    catchErrors {
+      def parallelWorkspace = "${env.WORKSPACE}/parallel"
+      if (fileExists(parallelWorkspace)) {
+        dir(parallelWorkspace) {
+          def workspaceTasks = [:]
 
-        // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
-        findFiles(glob: '*/kibana/package.json')
-          .collect {
-            // get the paths to the kibana directories for the parallel workspaces
-            return it.path.tokenize('/').dropRight(1).join('/')
-          }
-          .each { workspaceDir ->
-            workspaceTasks[workspaceDir] = {
-              dir(workspaceDir) {
-                catchErrors {
-                  runbld.junit()
+          // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
+          findFiles(glob: '*/kibana/package.json')
+            .collect {
+              // get the paths to the kibana directories for the parallel workspaces
+              return it.path.tokenize('/').dropRight(1).join('/')
+            }
+            .each { workspaceDir ->
+              workspaceTasks[workspaceDir] = {
+                dir(workspaceDir) {
+                  catchErrors {
+                    runbld.junit()
+                  }
                 }
               }
             }
-          }
 
-        if (workspaceTasks) {
-          parallel(workspaceTasks)
+          if (workspaceTasks) {
+            parallel(workspaceTasks)
+          }
         }
       }
     }
