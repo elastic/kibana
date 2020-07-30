@@ -68,7 +68,7 @@ export class UptimePlugin
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: 'observability',
-        order: 300,
+        order: 230,
       });
     }
 

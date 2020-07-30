@@ -113,7 +113,7 @@ export class IngestManagerPlugin
         homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
         path: BASE_PATH,
         category: FeatureCatalogueCategory.ADMIN,
-        order: 200,
+        order: 510,
       });
     }
 

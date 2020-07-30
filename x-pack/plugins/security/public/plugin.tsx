@@ -126,7 +126,7 @@ export class SecurityPlugin
         path: '/app/management/security/users',
         homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
         category: FeatureCatalogueCategory.ADMIN,
-        order: 100,
+        order: 600,
       });
     }
 

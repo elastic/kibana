@@ -101,7 +101,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: APP_ID,
-        order: 100,
+        order: 310,
       });
 
       plugins.home.featureCatalogue.register({
@@ -117,7 +117,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: APP_ID,
-        order: 200,
+        order: 320,
       });
 
       plugins.home.featureCatalogue.register({
@@ -133,7 +133,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: APP_ID,
-        order: 300,
+        order: 330,
       });
     }
 

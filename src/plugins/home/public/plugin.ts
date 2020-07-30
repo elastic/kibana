@@ -131,7 +131,7 @@ export class HomePublicPlugin
       homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
       path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
       category: FeatureCatalogueCategory.DATA,
-      order: 100,
+      order: 500,
     });
 
     featureCatalogue.register({
@@ -140,13 +140,13 @@ export class HomePublicPlugin
         defaultMessage: 'Kibana',
       }),
       description: i18n.translate('home.kibana.featureCatalogueDescription', {
-        defaultMessage: 'Visualize & Analyze',
+        defaultMessage: 'Visualize & analyze',
       }),
       icon: 'logoKibana',
       homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       path: '/app/dashboards',
       category: FeatureCatalogueCategory.SOLUTION,
-      order: 100,
+      order: 400,
     });
 
     return {

@@ -96,7 +96,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: FeatureCatalogueCategory.DATA,
       homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       solution: 'enterpriseSearch',
-      order: 100,
+      order: 110,
     });
 
     plugins.home.featureCatalogue.register({
@@ -108,7 +108,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: FeatureCatalogueCategory.DATA,
       homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       solution: 'enterpriseSearch',
-      order: 200,
+      order: 120,
     });
 
     plugins.home.featureCatalogue.register({
@@ -120,7 +120,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: FeatureCatalogueCategory.DATA,
       homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       solution: 'enterpriseSearch',
-      order: 300,
+      order: 130,
     });
   }
 

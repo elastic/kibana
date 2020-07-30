@@ -21,5 +21,5 @@ export const featureCatalogueEntry = {
   homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
   category: FeatureCatalogueCategory.DATA,
   solution: 'observability',
-  order: 200,
+  order: 220,
 };

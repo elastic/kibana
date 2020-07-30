@@ -66,7 +66,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.SOLUTION,
         solution: 'observability',
-        order: 100,
+        order: 200,
       });
     }
 

@@ -25,7 +25,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
     homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
     category: FeatureCatalogueCategory.DATA,
     solution: 'observability',
-    order: 100,
+    order: 210,
   });
 
   homePlugin.featureCatalogue.register({

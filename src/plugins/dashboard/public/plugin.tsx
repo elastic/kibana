@@ -357,7 +357,7 @@ export class DashboardPlugin
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: 'kibana',
-        order: 100,
+        order: 410,
       });
     }
   }
