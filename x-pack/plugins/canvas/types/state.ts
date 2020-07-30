@@ -52,7 +52,10 @@ type ExpressionType =
   | KibanaDatatable
   | PointSeries
   | Style
-  | Range;
+  | Range
+  | number
+  | boolean
+  | string;
 
 interface ExpressionRenderable {
   state: 'ready' | 'pending';
@@ -60,9 +63,9 @@ interface ExpressionRenderable {
   error: null;
 }
 
-export interface ExpressionContext {
+export interface ExpressionContext<ValueType = ExpressionType> {
   state: 'ready' | 'pending';
-  value: ExpressionType;
+  value: ValueType;
   error: null;
 }
 

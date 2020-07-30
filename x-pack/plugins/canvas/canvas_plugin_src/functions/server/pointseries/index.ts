@@ -219,3 +219,10 @@ export function pointseries(): ExpressionFunctionDefinition<
     },
   };
 }
+
+export type PointSeriesDefinition = ExpressionFunctionDefinition<
+  'pointseries',
+  Datatable,
+  Arguments,
+  PointSeries
+>;

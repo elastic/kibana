@@ -6,6 +6,7 @@
 import {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
+  ArgumentTypeDefinitionFactory,
   RendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';
@@ -18,10 +19,10 @@ export interface CanvasApi {
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
   addFunctions: AddToRegistry<() => AnyExpressionFunctionDefinition>;
-  addModelUIs: AddToRegistry<any>;
+  addModelUIs: AddToRegistry<ArgumentTypeDefinitionFactory<AnyExpressionFunctionDefinition>>;
   addRenderers: AddToRegistry<RendererFactory>;
   addTagUIs: AddToRegistry<any>;
-  addTransformUIs: AddToRegistry<any>;
+  addTransformUIs: AddToRegistry<ArgumentTypeDefinitionFactory<AnyExpressionFunctionDefinition>>;
   addTransitions: AddToRegistry<any>;
   addTypes: AddToRegistry<() => AnyExpressionTypeDefinition>;
   addViewUIs: AddToRegistry<any>;
@@ -29,9 +30,9 @@ export interface CanvasApi {
 
 export interface SetupRegistries {
   elements: ElementFactory[];
-  transformUIs: any[];
+  transformUIs: Array<ArgumentTypeDefinitionFactory<AnyExpressionFunctionDefinition>>;
   datasourceUIs: any[];
-  modelUIs: any[];
+  modelUIs: Array<ArgumentTypeDefinitionFactory<AnyExpressionFunctionDefinition>>;
   viewUIs: any[];
   argumentUIs: any[];
   tagUIs: any[];

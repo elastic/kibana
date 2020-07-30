@@ -19,7 +19,6 @@ import { initializeElements } from './elements';
 import { transformSpecs } from './uis/transforms';
 // @ts-expect-error untyped local
 import { datasourceSpecs } from './uis/datasources';
-// @ts-expect-error untyped local
 import { modelSpecs } from './uis/models';
 import { initializeViews } from './uis/views';
 import { initializeArgs } from './uis/arguments';

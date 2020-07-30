@@ -7,10 +7,12 @@
 import { get } from 'lodash';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ModelStrings } from '../../../i18n';
+import { PointSeriesDefinition } from '../../functions/server/pointseries';
+import { ArgumentTypeDefinitionFactory } from '../../../types';
 
 const { PointSeries: strings } = ModelStrings;
 
-export const pointseries = () => ({
+export const pointseries: ArgumentTypeDefinitionFactory<PointSeriesDefinition> = () => ({
   name: 'pointseries',
   displayName: strings.getDisplayName(),
   args: [
@@ -45,10 +47,4 @@ export const pointseries = () => ({
       argType: 'datacolumn',
     },
   ],
-  resolve({ context }) {
-    if (getState(context) !== 'ready') {
-      return { columns: [] };
-    }
-    return { columns: get(getValue(context), 'columns', []) };
-  },
 });

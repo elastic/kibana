@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformFactory } from '../../../types/transforms';
-import { Arguments } from '../../functions/common/formatnumber';
+import { ArgumentTypeDefinitionFactory } from '../../../types';
+import { formatnumber as FormatNumberFunctionDefinitionFactory } from '../../functions/common/formatnumber';
 import { TransformStrings } from '../../../i18n';
 
 const { FormatNumber: strings } = TransformStrings;
 
-export const formatnumber: TransformFactory<Arguments> = () => ({
+export const formatnumber: ArgumentTypeDefinitionFactory<ReturnType<
+  typeof FormatNumberFunctionDefinitionFactory
+>> = () => ({
   name: 'formatnumber',
   displayName: strings.getDisplayName(),
   args: [

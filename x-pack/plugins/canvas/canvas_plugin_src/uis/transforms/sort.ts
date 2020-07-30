@@ -5,12 +5,16 @@
  */
 
 import { get } from 'lodash';
+import { ArgumentTypeDefinitionFactory } from '../../../types';
+import { sort as SortFunctionDefinitionFactory } from '../../functions/common/sort';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { TransformStrings } from '../../../i18n';
 
 const { Sort: strings } = TransformStrings;
 
-export const sort = () => ({
+export const sort: ArgumentTypeDefinitionFactory<ReturnType<
+  typeof SortFunctionDefinitionFactory
+>> = () => ({
   name: 'sort',
   displayName: strings.getDisplayName(),
   args: [

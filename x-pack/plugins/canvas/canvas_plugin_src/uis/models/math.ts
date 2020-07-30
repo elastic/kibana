@@ -3,14 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { get } from 'lodash';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { getState } from '../../../public/lib/resolved_arg';
 import { ModelStrings } from '../../../i18n';
+import { ArgumentTypeDefinitionFactory, Datatable } from '../../../types';
+import { math as mathExpressionFunctionFactory } from '../../functions/common/math';
 
 const { Math: strings } = ModelStrings;
 
-export const math = () => ({
+const isDatatable = (maybeDatatable: any): maybeDatatable is Datatable => {
+  return maybeDatatable.type && maybeDatatable.type === 'datatable';
+};
+
+export const math: ArgumentTypeDefinitionFactory<ReturnType<
+  typeof mathExpressionFunctionFactory
+>> = () => ({
   name: 'math',
   displayName: strings.getDisplayName(),
   args: [
@@ -25,9 +31,10 @@ export const math = () => ({
     },
   ],
   resolve({ context }) {
-    if (getState(context) !== 'ready') {
+    if (getState(context) !== 'ready' || !isDatatable(context.value)) {
       return { columns: [] };
     }
-    return { columns: get(getValue(context), 'columns', []) };
+
+    return { columns: context.value.columns };
   },
 });

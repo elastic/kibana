@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TransformFactory } from '../../../types/transforms';
-import { Arguments } from '../../functions/common/formatdate';
+import { ArgumentTypeDefinitionFactory } from '../../../types';
 import { TransformStrings } from '../../../i18n';
+import { formatdate as formatdateFunctionDefinitionFactory } from '../../functions/common/formatdate';
 
 const { FormatDate: strings } = TransformStrings;
 
-export const formatdate: TransformFactory<Arguments> = () => ({
+export const formatdate: ArgumentTypeDefinitionFactory<ReturnType<
+  typeof formatdateFunctionDefinitionFactory
+>> = () => ({
   name: 'formatdate',
   displayName: strings.getDisplayName(),
   args: [
