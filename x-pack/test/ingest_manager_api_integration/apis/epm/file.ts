@@ -40,43 +40,40 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // skipping because the content-type returned by the registry is application/json
-    it.skip('fetches a .json kibana visualization file', async function () {
+    it('fetches a .json kibana visualization file', async function () {
       if (server.enabled) {
         await supertest
           .get(
             '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/visualization/sample_visualization.json'
           )
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
+          .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
       }
     });
 
-    // skipping because the content-type returned by the registry is application/json
-    it.skip('fetches a .json kibana dashboard file', async function () {
+    it('fetches a .json kibana dashboard file', async function () {
       if (server.enabled) {
         await supertest
           .get(
             '/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/dashboard/sample_dashboard.json'
           )
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
+          .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
       }
     });
 
-    // skipping because the content-type returned by the registry is application/json
-    it.skip('fetches a .json search file', async function () {
+    it('fetches a .json search file', async function () {
       if (server.enabled) {
         await supertest
           .get('/api/ingest_manager/epm/packages/filetest/0.1.0/kibana/search/sample_search.json')
           .set('kbn-xsrf', 'xxx')
-          .expect('Content-Type', 'text/plain; charset=utf-8')
+          .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       } else {
         warnAndSkipTest(this, log);
