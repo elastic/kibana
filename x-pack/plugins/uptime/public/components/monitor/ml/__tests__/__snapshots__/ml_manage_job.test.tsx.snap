@@ -20,9 +20,7 @@ exports[`Manage ML Job renders without errors 1`] = `
         />
         <span
           class="euiButton__text"
-        >
-          Anomaly detection
-        </span>
+        />
       </span>
     </button>
   </div>

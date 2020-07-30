@@ -62,7 +62,11 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       isLoading={isMLJobCreating || isMLJobLoading}
       size="s"
     >
-      {hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION}
+      {isMLJobCreating || isMLJobLoading
+        ? ''
+        : hasMLJob
+        ? labels.ANOMALY_DETECTION
+        : labels.ENABLE_ANOMALY_DETECTION}
     </EuiButton>
   );
 
@@ -79,7 +83,6 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
             monitorId,
             dateRange: { from: dateRangeStart, to: dateRangeEnd },
           }),
-          target: '_blank',
         },
         {
           name: anomalyAlert ? labels.DISABLE_ANOMALY_ALERT : labels.ENABLE_ANOMALY_ALERT,

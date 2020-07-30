@@ -20,9 +20,7 @@ exports[`ML Integrations renders without errors 1`] = `
         />
         <span
           class="euiButton__text"
-        >
-          Enable anomaly detection
-        </span>
+        />
       </span>
     </button>
   </div>
