@@ -31,5 +31,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./artifacts'));
+    loadTestFile(require.resolve('./package'));
   });
 }
