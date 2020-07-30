@@ -112,8 +112,10 @@ function buildQueryBody(
     },
   };
 
-  if (typeof request?.body?.filter === 'string') {
-    const kqlQuery = esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
+  if (request?.body?.filters?.kql) {
+    const kqlQuery = esKuery.toElasticsearchQuery(
+      esKuery.fromKueryExpression(request.body.filters.kql)
+    );
     const q = [];
     if (filterUnenrolledAgents || filterStatusAgents) {
       q.push(idFilter);

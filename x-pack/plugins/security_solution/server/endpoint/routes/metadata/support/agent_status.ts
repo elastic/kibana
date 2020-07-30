@@ -9,32 +9,21 @@ import { AgentService } from '../../../../../../ingest_manager/server';
 import { AgentStatusKueryHelper } from '../../../../../../ingest_manager/common/services';
 import { Agent } from '../../../../../../ingest_manager/common/types/models';
 
+const STATUS_QUERY_MAP = new Map([
+  ['online', AgentStatusKueryHelper.buildKueryForOnlineAgents()],
+  ['enrolling', AgentStatusKueryHelper.buildKueryForEnrollingAgents()],
+  ['offline', AgentStatusKueryHelper.buildKueryForOfflineAgents()],
+  ['error', AgentStatusKueryHelper.buildKueryForErrorAgents()],
+  ['unenrolling', AgentStatusKueryHelper.buildKueryForUnenrollingAgents()],
+]);
+
 export async function findAgentIDsByStatus(
   agentService: AgentService,
   soClient: SavedObjectsClientContract,
   status: string[],
   pageSize: number = 1000
-): Promise<string[] | undefined> {
-  const helpers = status.map((s) => {
-    switch (s) {
-      case 'online':
-        return AgentStatusKueryHelper.buildKueryForOnlineAgents();
-      case 'enrolling':
-        return AgentStatusKueryHelper.buildKueryForEnrollingAgents();
-      case 'offline':
-        return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-      case 'error':
-        return AgentStatusKueryHelper.buildKueryForErrorAgents();
-      case 'unenrolling':
-        return AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
-    }
-    return 'INVALID';
-  });
-
-  if (helpers.indexOf('INVALID') !== -1) {
-    return undefined;
-  }
-
+): Promise<string[]> {
+  const helpers = status.map((s) => STATUS_QUERY_MAP.get(s));
   const searchOptions = (pageNum: number) => {
     return {
       page: pageNum,

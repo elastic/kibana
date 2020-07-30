@@ -20,11 +20,6 @@ describe('test filtering endpoint hosts by agent status', () => {
     mockAgentService = createMockAgentService();
   });
 
-  it('will reject invalid statuses', async () => {
-    const result = await findAgentIDsByStatus(mockAgentService, mockSavedObjectClient, ['foobar']);
-    expect(result).toBeUndefined();
-  });
-
   it('will accept a valid status condition', async () => {
     mockAgentService.listAgents.mockImplementationOnce(() =>
       Promise.resolve({

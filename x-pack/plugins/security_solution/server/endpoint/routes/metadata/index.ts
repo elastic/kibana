@@ -53,6 +53,22 @@ const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
+/* Filters that can be applied to the endpoint fetch route */
+export const endpointFilters = schema.object({
+  kql: schema.nullable(schema.string()),
+  host_status: schema.nullable(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('online'),
+        schema.literal('offline'),
+        schema.literal('error'),
+        schema.literal('enrolling'),
+        schema.literal('unenrolling'),
+      ])
+    )
+  ),
+});
+
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const logger = getLogger(endpointAppContext);
   router.post(
@@ -77,14 +93,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
                 ])
               )
             ),
-            /**
-             * filter to be applied, it could be a kql expression or discrete filter to be implemented
-             */
-            filter: schema.nullable(schema.oneOf([schema.string()])),
-            /**
-             * filtering specifically by agent_status
-             */
-            agent_status: schema.nullable(schema.arrayOf(schema.string())),
+            filters: endpointFilters,
           })
         ),
       },
@@ -108,16 +117,13 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
-        const statusIDs = req.body?.agent_status?.length
+        const statusIDs = req.body?.filters?.host_status?.length
           ? await findAgentIDsByStatus(
               agentService,
               context.core.savedObjects.client,
-              req.body?.agent_status
+              req.body?.filters?.host_status
             )
           : null;
-        if (statusIDs === undefined) {
-          return res.badRequest({ body: 'invalid status' });
-        }
 
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
