@@ -63,8 +63,8 @@ export interface ExternalService {
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
-  getCreateIssueMetadata: () => Promise<ExternalServiceParams | undefined>;
-  getCapabilities: () => Promise<ExternalServiceParams | undefined>;
+  getCreateIssueMetadata: () => Promise<ExternalServiceParams>;
+  getCapabilities: () => Promise<ExternalServiceParams>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
@@ -106,18 +106,23 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
 
-export interface CreateIssueMetadataHandlerArgs extends ExternalServiceApiHandlerArgs {
+export interface CreateIssueMetadataHandlerArgs {
+  externalService: ExternalService;
   params: ExecutorSubActionCreateIssueMetadataParams;
 }
 
-export interface GetCapabilitiesHandlerArgs extends ExternalServiceApiHandlerArgs {
+export interface GetCapabilitiesHandlerArgs {
+  externalService: ExternalService;
   params: ExecutorSubActionGetCapabilitiesParams;
 }
+
+export type GetCreateIssueMetadataResponse = Record<string, unknown>;
 
 export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
-  getCreateIssueMetadata: (args: CreateIssueMetadataHandlerArgs) => Promise<void>;
-  getCapabilities: (args: GetCapabilitiesHandlerArgs) => Promise<void>;
+  getCreateIssueMetadata: (
+    args: CreateIssueMetadataHandlerArgs
+  ) => Promise<GetCreateIssueMetadataResponse>;
 }

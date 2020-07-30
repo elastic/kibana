@@ -17,6 +17,7 @@ import { ProxySettings } from '../../types';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
+const CAPABILITIES_URL = `rest/capabilities`;
 const INCIDENT_URL = `issue`;
 const COMMENT_URL = `comment`;
 
@@ -35,7 +36,9 @@ export const createExternalService = (
   }
 
   const incidentUrl = `${url}/${BASE_URL}/${INCIDENT_URL}`;
+  const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/${COMMENT_URL}`;
+  const createIssueMetadataUrl = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
@@ -164,11 +167,65 @@ export const createExternalService = (
   };
 
   const getCreateIssueMetadata = async () => {
-    return undefined;
+    try {
+      const capabilitiesResponse = await getCapabilities();
+
+      const capabilities = Object.keys(capabilitiesResponse?.capabilities ?? []);
+      const supportsNewAPI = createMetaCapabilities.every((c) => capabilities.includes(c));
+
+      if (!supportsNewAPI) {
+        const res = await request({
+          axios: axiosInstance,
+          method: 'get',
+          url: createIssueMetadataUrl,
+        });
+
+        const issueTypes = res.data.projects[0].issuetypes;
+        const metadata = issueTypes.reduce((acc, currentIssueType) => {
+          const fields = Object.keys(currentIssueType.fields).reduce((fieldsAcc, fieldKey) => {
+            return {
+              ...fieldsAcc,
+              [fieldKey]: {
+                allowedValues: currentIssueType.fields[fieldKey].allowedValues ?? [],
+                defaultValue: currentIssueType.fields[fieldKey].defaultValue ?? {},
+              },
+            };
+          }, {});
+
+          return {
+            ...acc,
+            [currentIssueType.id]: {
+              name: currentIssueType.name,
+              fields,
+            },
+          };
+        }, {});
+
+        return { issueTypes: metadata };
+      }
+
+      return { issueTypes: [] };
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get create issue metadata. Error: ${error.message}`)
+      );
+    }
   };
 
   const getCapabilities = async () => {
-    return undefined;
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        method: 'get',
+        url: capabilitiesUrl,
+      });
+
+      return { ...res.data };
+    } catch (error) {
+      throw new Error(
+        getErrorMessage(i18n.NAME, `Unable to get capabilities. Error: ${error.message}`)
+      );
+    }
   };
 
   return {

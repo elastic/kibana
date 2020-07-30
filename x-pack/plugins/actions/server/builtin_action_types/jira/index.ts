@@ -17,7 +17,12 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../../types';
 import { createExternalService } from './service';
 import { api } from './api';
-import { ExecutorParams, ExecutorSubActionPushParams } from './types';
+import {
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+  ExecutorSubActionCreateIssueMetadataParams,
+  GetCreateIssueMetadataResponse,
+} from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
@@ -29,6 +34,8 @@ interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
+
+const supportedSubActions: string[] = ['pushToService', 'getCreateIssueMetadata'];
 
 // action type definition
 export function getActionType(params: GetActionTypeParams): ActionType {
@@ -57,7 +64,7 @@ async function executor(
 ): Promise<ActionTypeExecutorResult> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
-  let data: PushToServiceResponse | null = null;
+  let data: PushToServiceResponse | GetCreateIssueMetadataResponse | null = null;
 
   const externalService = createExternalService({
     config,
@@ -70,7 +77,7 @@ async function executor(
     throw new Error(errorMessage);
   }
 
-  if (subAction !== 'pushToService') {
+  if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
@@ -95,6 +102,14 @@ async function executor(
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'getCreateIssueMetadata') {
+    const getCreateIssueMetadataParams = subActionParams as ExecutorSubActionCreateIssueMetadataParams;
+    data = await api.getCreateIssueMetadata({
+      externalService,
+      params: getCreateIssueMetadataParams,
+    });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

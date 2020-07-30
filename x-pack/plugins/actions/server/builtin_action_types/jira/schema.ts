@@ -33,7 +33,6 @@ export const ExecutorSubActionSchema = schema.oneOf([
   schema.literal('pushToService'),
   schema.literal('handshake'),
   schema.literal('getCreateIssueMetadata'),
-  schema.literal('getCapabilities'),
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -74,9 +73,5 @@ export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal('getCreateIssueMetadata'),
     subActionParams: ExecutorSubActionCreateIssueMetadataParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getCapabilities'),
-    subActionParams: ExecutorSubActionGetCapabilitiesParamsSchema,
   }),
 ]);

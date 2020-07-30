@@ -11,7 +11,6 @@ import {
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
   CreateIssueMetadataHandlerArgs,
-  GetCapabilitiesHandlerArgs,
   ExternalServiceApi,
 } from './types';
 
@@ -34,15 +33,11 @@ const getIncidentHandler = async ({
 
 const getCreateIssueMetadataHandler = async ({
   externalService,
-  mapping,
   params,
-}: CreateIssueMetadataHandlerArgs) => {};
-
-const getCapabilitiesHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: GetCapabilitiesHandlerArgs) => {};
+}: CreateIssueMetadataHandlerArgs) => {
+  const res = await externalService.getCreateIssueMetadata();
+  return res;
+};
 
 const pushToServiceHandler = async ({
   externalService,
@@ -178,5 +173,4 @@ export const api: ExternalServiceApi = {
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
   getCreateIssueMetadata: getCreateIssueMetadataHandler,
-  getCapabilities: getCapabilitiesHandler,
 };
