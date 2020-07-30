@@ -52,6 +52,7 @@ function mockProps() {
     helpSupportUrl$: new BehaviorSubject(''),
     legacyMode: false,
     navControlsLeft$: new BehaviorSubject([]),
+    navControlsCenter$: new BehaviorSubject([]),
     navControlsRight$: new BehaviorSubject([]),
     basePath: http.basePath,
     isLocked$: new BehaviorSubject(false),

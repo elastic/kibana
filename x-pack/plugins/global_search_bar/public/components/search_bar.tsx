@@ -36,6 +36,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
     (term: string) => {
       const arr: GlobalSearchResult[] = [];
       setLoadingState(true);
+      // @ts-ignore this is a bug, TODO, {} should be optional
       globalSearch.find(term, {}).subscribe({
         next: ({ results }) => {
           arr.push(...results);
