@@ -23,15 +23,23 @@ import {
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
+import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
 
-export interface AsyncSearchResponse<T> {
+interface AsyncSearchResponse<T> {
   id: string;
   is_partial: boolean;
   is_running: boolean;
   response: SearchResponse<T>;
 }
 
-export function isAsyncSearchResponse<T>(response: any): response is AsyncSearchResponse<T> {
+interface EnhancedEsSearchResponse<T> extends IEsSearchResponse<T> {
+  is_partial: boolean;
+  is_running: boolean;
+}
+
+function isEnhancedEsSearchResponse<T>(
+  response: IEsSearchResponse<T>
+): response is EnhancedEsSearchResponse<T> {
   return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
 }
 
@@ -59,7 +67,8 @@ export const enhancedEsSearchStrategyProvider = (
 
       if (
         usage &&
-        (!isAsyncSearchResponse<any>(response) || (!response.is_partial && !response.is_running))
+        (!isEnhancedEsSearchResponse<any>(response) ||
+          (!response.is_partial && !response.is_running))
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }
