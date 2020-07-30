@@ -14,7 +14,6 @@ import {
   getToasts,
   getCoreI18n,
   getData,
-  getUiSettings,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModal,
@@ -30,32 +29,27 @@ export function MapsTopNavMenu({
   onQuerySaved,
   onSavedQueryUpdated,
   savedQuery,
-  time,
+  timeFilters,
   refreshConfig,
-  setRefreshConfig,
-  setRefreshStoreConfig,
+  onRefreshConfigChange,
   indexPatterns,
-  updateFiltersAndDispatch,
+  onFiltersChange,
   isSaveDisabled,
   closeFlyout,
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  syncAppAndGlobalState,
   setBreadcrumbs,
   isOpenSettingsDisabled,
 }) {
   const { TopNavMenu } = getNavigation().ui;
-  const { filterManager } = getData().query;
+  const { filterManager, queryString } = getData().query;
   const showSaveQuery = getMapsCapabilities().saveQuery;
   const onClearSavedQuery = () => {
     onQuerySaved(undefined);
     onQueryChange({
       filters: filterManager.getGlobalFilters(),
-      query: {
-        query: '',
-        language: getUiSettings().get('search:queryLanguage'),
-      },
+      query: queryString.getDefaultQuery(),
     });
   };
 
@@ -79,31 +73,20 @@ export function MapsTopNavMenu({
     });
   };
 
-  const onRefreshChange = function ({ isPaused, refreshInterval }) {
-    const newRefreshConfig = {
-      isPaused,
-      interval: isNaN(refreshInterval) ? refreshConfig.interval : refreshInterval,
-    };
-    setRefreshConfig(newRefreshConfig, () => {
-      setRefreshStoreConfig(newRefreshConfig);
-      syncAppAndGlobalState();
-    });
-  };
-
   return (
     <TopNavMenu
       appName="maps"
       config={config}
-      indexPatterns={indexPatterns || []}
+      indexPatterns={indexPatterns}
       filters={filterManager.getFilters()}
       query={query}
       onQuerySubmit={submitQuery}
-      onFiltersUpdated={updateFiltersAndDispatch}
-      dateRangeFrom={time.from}
-      dateRangeTo={time.to}
+      onFiltersUpdated={onFiltersChange}
+      dateRangeFrom={timeFilters.from}
+      dateRangeTo={timeFilters.to}
       isRefreshPaused={refreshConfig.isPaused}
       refreshInterval={refreshConfig.interval}
-      onRefreshChange={onRefreshChange}
+      onRefreshChange={onRefreshConfigChange}
       showSearchBar={true}
       showFilterBar={true}
       showDatePicker={true}

@@ -15,7 +15,6 @@ import {
   HttpServiceSetup,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import packageJSON from '../../../../package.json';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -155,7 +154,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
-    this.kibanaBranch = packageJSON.branch;
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
   }
 
