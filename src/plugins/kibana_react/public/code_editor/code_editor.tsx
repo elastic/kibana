@@ -154,6 +154,32 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    editor.addCommand(
+      monaco.KeyCode.Escape,
+      () => {
+        editor.trigger('Change tab focus mode', 'editor.action.toggleTabFocusMode');
+
+        const { tabFocusMode } = this._editor.getConfiguration();
+        const ariaLabel = this.props.options && this.props.options.ariaLabel;
+        const extraEditorClassName =
+          this.props.options && this.props.options.extraEditorClassName
+            ? this.props.options.extraEditorClassName
+            : '';
+
+        const ariaTabLabel = tabFocusMode
+          ? 'Tab moves focus. To toggle tab mode, press escape'
+          : 'Tab currently adds tab character. To change tab mode, press escape.';
+
+        editor.updateOptions({
+          extraEditorClassName: `${extraEditorClassName} ${
+            tabFocusMode ? 'monacoEditor--tabMode' : ''
+          }`,
+          ariaLabel: ariaLabel ? `${ariaLabel}. ${ariaTabLabel}` : ariaTabLabel,
+        });
+      },
+      '!suggestWidgetVisible'
+    );
+
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
     }
