@@ -48,6 +48,7 @@ export class SuggestionsComponent extends Component<Props> {
       const suggestionsListOffsetBottom = 20;
       const suggestionsListHeight = kbnTypeaheadDiv.clientHeight;
 
+      // reflects if the suggestions list has enough space below to be opened down
       const isSuggestionsListFittable =
         documentHeight -
           (suggestionsListHeight +
