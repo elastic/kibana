@@ -14,7 +14,7 @@ exports[`Transform: Transform List Actions <DeleteAction /> Minimal initializati
     iconType="trash"
     isDisabled={true}
     onClick={[Function]}
-    size="s"
+    size="xs"
   >
     Delete
   </EuiButtonEmpty>
