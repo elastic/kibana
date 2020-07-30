@@ -252,14 +252,14 @@ export class Simulator {
   }
 
   /**
-   * The element where nodes get drawn.
+   * The outer panel container.
    */
   public panelElement(): ReactWrapper {
     return this.findInDOM('[data-test-subj="resolver:side-panel"]');
   }
 
   /**
-   * The element where nodes get drawn.
+   * The panel content element (which may include tables, lists, other data depending on the view).
    */
   public panelContentElement(): ReactWrapper {
     return this.findInDOM('[data-test-subj^="resolver:panel:"]');
