@@ -22,6 +22,10 @@ describe('DraggableWrapper', () => {
   const message = 'draggable wrapper content';
   const mount = useMountAppended();
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
@@ -77,6 +81,8 @@ describe('DraggableWrapper', () => {
       );
 
       wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+      wrapper.update();
+      jest.runAllTimers();
       wrapper.update();
       expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
     });

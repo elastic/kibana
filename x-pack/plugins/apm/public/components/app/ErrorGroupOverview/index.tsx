@@ -22,7 +22,7 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
-const ErrorGroupOverview: React.FC = () => {
+function ErrorGroupOverview() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
@@ -123,6 +123,6 @@ const ErrorGroupOverview: React.FC = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}
 
 export { ErrorGroupOverview };

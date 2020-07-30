@@ -40,6 +40,8 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -48,8 +50,9 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
       url.searchParams.set('experimental', params.experimental.toString());
     }
   }
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
-  if (kibanaVersion) {
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
 
@@ -58,11 +61,14 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be 8.0.0-SNAPSHOT
-  if (kibanaVersion) {
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
   const res = await fetchUrl(url.toString());
