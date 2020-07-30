@@ -40,6 +40,7 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichNewExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
+  lowercaseHashValues,
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
@@ -67,7 +68,8 @@ export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => css`
-    width: ${theme.eui.euiBreakpoints.m};
+    width: ${theme.eui.euiBreakpoints.l};
+    max-width: ${theme.eui.euiBreakpoints.l};
   `}
 `;
 
@@ -233,7 +235,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const retrieveAlertOsTypes = useCallback(() => {
-    const osDefaults = ['windows', 'macos', 'linux'];
+    const osDefaults = ['windows', 'macos'];
     if (alertData) {
       const osTypes = getMappedNonEcsValue({
         data: alertData.nonEcsData,
@@ -255,7 +257,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       const osTypes = retrieveAlertOsTypes();
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
@@ -285,7 +287,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{i18n.ADD_EXCEPTION}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
+          </EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -330,13 +334,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
                 <EuiSpacer />
 
-                {exceptionListType === 'endpoint' && (
-                  <>
-                    <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
-                    <EuiSpacer />
-                  </>
-                )}
-
                 <AddExceptionComments
                   newCommentValue={comment}
                   newCommentOnChange={onCommentChange}
@@ -367,6 +364,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                     disabled={shouldDisableBulkClose}
                   />
                 </EuiFormRow>
+                {exceptionListType === 'endpoint' && (
+                  <>
+                    <EuiSpacer />
+                    <EuiText color="subdued" size="s">
+                      {i18n.ENDPOINT_QUARANTINE_TEXT}
+                    </EuiText>
+                  </>
+                )}
               </ModalBodySection>
             </>
           )}
