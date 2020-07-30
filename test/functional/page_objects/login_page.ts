@@ -50,7 +50,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
     async login(user: string, pwd: string) {
       if (
         process.env.VM === 'ubuntu18_deb_oidc' ||
-        process.env.VM === 'ubuntu16_deb_desktop_saml'
+        process.env.VM === 'ubuntu18_deb_saml'
       ) {
         await samlLogin(user, pwd);
         return;
