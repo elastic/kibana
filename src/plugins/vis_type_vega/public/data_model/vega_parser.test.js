@@ -87,7 +87,7 @@ describe('VegaParser._resolveEsQueries', () => {
   let searchApiStub;
   const data = [
     {
-      id: 0,
+      name: 'requestId',
       rawResponse: [42],
     },
   ];
@@ -119,16 +119,25 @@ describe('VegaParser._resolveEsQueries', () => {
   test('no data', check({}, {}));
   test('no data2', check({ a: 1 }, { a: 1 }));
   test('non-es data', check({ data: { a: 10 } }, { data: { a: 10 } }));
-  test('es', check({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
+  test(
+    'es',
+    check(
+      { data: { name: 'requestId', url: { index: 'a' }, x: 1 } },
+      { data: { name: 'requestId', values: [42], x: 1 } }
+    )
+  );
   test(
     'es 2',
-    check({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } })
+    check(
+      { data: { name: 'requestId', url: { '%type%': 'elasticsearch', index: 'a' } } },
+      { data: { name: 'requestId', values: [42] } }
+    )
   );
   test(
     'es arr',
     check(
-      { arr: [{ data: { url: { index: 'a' }, x: 1 } }] },
-      { arr: [{ data: { values: [42], x: 1 } }] }
+      { arr: [{ data: { name: 'requestId', url: { index: 'a' }, x: 1 } }] },
+      { arr: [{ data: { name: 'requestId', values: [42], x: 1 } }] }
     )
   );
   test(

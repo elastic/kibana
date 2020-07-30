@@ -16,12 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
 import fs from 'fs';
-import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
@@ -42,7 +41,6 @@ export default async function ({ readConfigFile }) {
     ],
     services: {
       ...functionalConfig.get('services'),
-      ...services,
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
