@@ -244,12 +244,12 @@ export const getTopNavConfig = (
                 if (!originatingApp) {
                   return;
                 }
-                const input = {
+                const visByValue = {
                   ...vis.serialize(),
                   id: uuid.v4(),
                 };
                 embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
+                  state: { input: { savedVis: visByValue }, type: VISUALIZE_EMBEDDABLE_TYPE },
                 });
               };
 
