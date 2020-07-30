@@ -223,5 +223,6 @@ export const AlertsUtilityBar = React.memo(
     prevProps.areEventsLoading === nextProps.areEventsLoading &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.totalCount === nextProps.totalCount &&
-    prevProps.showClearSelection === nextProps.showClearSelection
+    prevProps.showClearSelection === nextProps.showClearSelection &&
+    prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts
 );
