@@ -13,7 +13,6 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { ManagementSetup } from 'src/plugins/management/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorState } from 'src/plugins/share/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -35,7 +34,7 @@ import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actio
 import { registerMlUiActions } from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { registerUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
-import { isMlEnabled, isFullLicense } from '../common/license';
+import { MlCapabilities } from '../common/types/capabilities';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -110,14 +109,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe((license) => {
-      if (isMlEnabled(license)) {
+    core.getStartServices().then(([coreStart]) => {
+      const mlCaps = coreStart.application.capabilities.ml as MlCapabilities;
+      if (mlCaps.canAccessML) {
         // add ML to home page
         registerFeature(pluginsSetup.home);
 
-        // register various ML plugin features which require a full license
-        if (isFullLicense(license)) {
+        if (mlCaps.canAccessMLFull) {
           registerManagementSection(pluginsSetup.management, core);
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
@@ -130,6 +128,26 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         }));
       }
     });
+    // const licensing = pluginsSetup.licensing.license$.pipe(take(1));
+    // licensing.subscribe((license) => {
+    //   if (isMlEnabled(license)) {
+    //     // add ML to home page
+    //     registerFeature(pluginsSetup.home);
+
+    //     // register various ML plugin features which require a full license
+    //     if (isFullLicense(license)) {
+    //       registerManagementSection(pluginsSetup.management, core);
+    //       registerEmbeddables(pluginsSetup.embeddable, core);
+    //       registerMlUiActions(pluginsSetup.uiActions, core);
+    //       registerUrlGenerator(pluginsSetup.share, core);
+    //     }
+    //   } else {
+    //     // if ml is disabled in elasticsearch, disable ML in kibana
+    //     this.appUpdater.next(() => ({
+    //       status: AppStatus.inaccessible,
+    //     }));
+    //   }
+    // });
 
     return {};
   }

@@ -13,6 +13,7 @@ export const apmUserMlCapabilities = {
 
 export const userMlCapabilities = {
   canAccessML: false,
+  canAccessMLFull: false,
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
