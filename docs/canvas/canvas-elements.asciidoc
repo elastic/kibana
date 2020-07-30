@@ -1,77 +1,59 @@
 [role="xpack"]
-[[add-canvas-elements]]
-=== Add elements
+[[format-workpads]]
+== Format workpads and elements
 
-Create a story about your data by adding elements to your workpad that include images, text, charts, and more. You can create your own elements and connect them to your data sources, add saved objects, and add your own images.
-
-[float]
-[[create-canvas-element]]
-==== Create an element
-
-Choose the type of element you want to use, then connect it to your own data.
-
-. Click *Add element*, then select the element you want to use.
-+
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
-
-. To familiarize yourself with the element, use the preconfigured data demo data.
-+
-By default, most of the elements you create use demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
-
-. To connect the element to your data, select *Data*, then select one of the following data sources:
-
-* *{es} SQL* &mdash; Access your data in {es} using SQL syntax. For information about SQL syntax, refer to {ref}/sql-spec.html[SQL language].
-
-* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
-
-* *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
-
-Each element can display a different data source. Pages and workpads often contain multiple data sources.
+Format your workpads to create the look and feel that you want. With the formatting options, you can apply format settings to the entire workpad, or for individual elements.
 
 [float]
-[[canvas-add-object]]
-==== Add a saved object
-
-Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
-
-. Click *Add element > Add from Visualize Library*.
-
-. Select the saved object you want to add.
-+
-[role="screenshot"]
-image::images/canvas-map-embed.gif[]
-
-. To use the customization options, click the panel menu, then select one of the following options:
-
-* *Edit map* &mdash; Opens <<maps,Maps>> or <<visualize,Visualize>> so that you can edit the original saved object.
-
-* *Edit panel title* &mdash; Adds a title to the saved object.
-
-* *Customize time range* &mdash; Exposes a time filter dedicated to the saved object.
-
-* *Inspect* &mdash; Allows you to drill down into the element data.
+[[]]
+=== Format at the workpad level
 
 [float]
-[[canvas-add-image]]
-==== Add your own image
+[[create-variables]]
+==== Create variables
 
-To personalize your workpad, add your own logos and graphics.
+If you find yourself frequently using copy and paste, you can create variables to easily reuse strings and patterns. For example, when you clone a large workpad and need to connect your elements to a new index, use variables to update 
+groups of elements instead of updating them separately.
 
-. Click *Add element > Manage assets*.
+Click *Add a variable*, enter the variables options, then click *Save changes*. Copy the variable syntax, open the expression editor, then enter the paste the syntax.
 
-. On the *Manage workpad assets* window, drag and drop your images.
+For example:
 
-. To add the image to the workpad, click the *Create image element* icon.
-+
+[float]
+[[apply-changes-across-the-entire-workpad]]
+==== Apply changes across the entire workpad
+
+Use the *Global CSS overrides* to apply changes to the entire workpad.
+
+In the *Global CSS overrides* editor, enter your stylesheet changes, then click *Apply stylesheet*.
+
+For example, to change the background on every page, enter:
+[source,text]
+--------------------------------------------------
+.canvasPage {
+background-color: #3990e6;
+}
+--------------------------------------------------
+
+[float]
+[[]]
+=== Format at the element level
+
+[float]
+[[clone-elements]]
+==== Clone elements
+To use an element with the same functionality and appearance in multiple places, clone the element.
+
+Select the element, then click *Edit > Clone*. 
+
 [role="screenshot"]
-image::images/canvas-add-image.gif[]
+image::images/example.png[]
 
 [float]
 [[move-canvas-elements]]
 ==== Organize elements
 
-Move and resize your elements to meet your design needs.
+Canvas provides you with many options to move, format, and arrange the elements on your workpad.
 
 * To move, click and hold the element, then drag to the new location.
 
@@ -80,12 +62,6 @@ Move and resize your elements to meet your design needs.
 * To move by 10 pixels, select the element, then use your arrow keys.
 
 * To resize, click and drag the resize handles to the new dimensions.
-
-[float]
-[[format-canvas-elements]]
-==== Format elements
-
-For consistency and readability across your workpad pages, align, distribute, and reorder elements.
 
 To align two or more elements:
 
@@ -137,21 +113,6 @@ text.align: center;
 --------------------------------------------------
 
 . Click *Apply stylesheet*.
-
-[float]
-[[save-elements]]
-==== Save elements
-
-To use the elements across all workpads, save the elements.
-
-When you're ready to save your element, select the element, then click *Edit > Save as new element*.
-
-[role="screenshot"]
-image::images/canvas_save_element.png[]
-
-To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
-
-To access your saved elements, click *Add element > My elements*.
 
 [float]
 [[delete-elements]]
