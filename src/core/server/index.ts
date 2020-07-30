@@ -44,7 +44,7 @@ import {
   ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
-  IClusterClient,
+  IScopedClusterClient,
 } from './elasticsearch';
 
 import { HttpServiceSetup, HttpServiceStart } from './http';
@@ -389,7 +389,7 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
-      client: IClusterClient;
+      client: IScopedClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
       };
