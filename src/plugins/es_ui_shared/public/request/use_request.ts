@@ -130,6 +130,7 @@ export const useRequest = <D = any, E = Error>(
 
     // Clean up timeout and mark inflight requests as stale if the poll interval changes.
     return () => {
+      /* eslint-disable-next-line react-hooks/exhaustive-deps */
       isOutdatedRequest = true;
       if (pollIntervalIdRef.current) {
         clearTimeout(pollIntervalIdRef.current);
