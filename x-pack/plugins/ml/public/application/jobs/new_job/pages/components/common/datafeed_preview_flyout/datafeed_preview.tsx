@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,26 +23,17 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_u
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
-}> = ({ combinedJob }) => {
-  const [editorHeight] = useState(`${window.innerHeight - 230}px`);
+  heightOffset?: number;
+}> = ({ combinedJob, heightOffset = 0 }) => {
+  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
+    heightOffset,
+  ]);
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
   const [outOfDate, setOutOfDate] = useState(false);
   const [combinedJobString, setCombinedJobString] = useState('');
 
-  // useEffect(() => {
-  //   try {
-  //     if (combinedJob !== null) {
-  //       setCombinedJobString(JSON.stringify(combinedJob));
-  //     }
-  //   } catch (error) {
-  //     // fail
-  //   }
-  //   loadDataPreview();
-  // }, []);
-
   useEffect(() => {
-    // loadDataPreview();
     try {
       if (combinedJob !== null) {
         if (combinedJobString === '') {
@@ -53,7 +44,7 @@ export const DatafeedPreview: FC<{
         }
       }
     } catch (error) {
-      // fail
+      // fail silently
     }
   }, [combinedJob]);
 

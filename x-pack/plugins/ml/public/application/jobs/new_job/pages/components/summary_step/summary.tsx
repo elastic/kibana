@@ -22,8 +22,6 @@ import { JobCreatorContext } from '../job_creator_context';
 import { JobRunner } from '../../../common/job_runner';
 import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
@@ -51,13 +49,14 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const [jobRunner, setJobRunner] = useState<JobRunner | null>(null);
 
   const isAdvanced = isAdvancedJobCreator(jobCreator);
+  const jsonEditorMode = isAdvanced ? EDITOR_MODE.EDITABLE : EDITOR_MODE.READONLY;
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
   }, []);
 
   async function start() {
-    if (jobCreator.type === JOB_TYPE.ADVANCED) {
+    if (isAdvanced) {
       await startAdvanced();
     } else {
       await startInline();
@@ -173,15 +172,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 <EuiFlexItem grow={false}>
                   <JsonEditorFlyout
                     isDisabled={progress > 0}
-                    jobEditorMode={EDITOR_MODE.EDITABLE}
-                    datafeedEditorMode={EDITOR_MODE.EDITABLE}
+                    jobEditorMode={jsonEditorMode}
+                    datafeedEditorMode={jsonEditorMode}
                   />
                 </EuiFlexItem>
-                {jobCreator.type === JOB_TYPE.ADVANCED ? (
-                  <EuiFlexItem grow={false}>
-                    <DatafeedPreviewFlyout isDisabled={false} />
-                  </EuiFlexItem>
-                ) : (
+                {isAdvanced === false && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty onClick={convertToAdvanced}>
                       <FormattedMessage

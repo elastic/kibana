@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState, useContext, useEffect } from 'react';
+import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -31,6 +31,7 @@ export enum EDITOR_MODE {
   READONLY,
   EDITABLE,
 }
+const WARNING_CALLOUT_OFFSET = 100;
 interface Props {
   isDisabled: boolean;
   jobEditorMode: EDITOR_MODE;
@@ -58,18 +59,17 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       // when the flyout opens, update the JSON
       setJobConfigString(jobCreator.formattedJobJson);
       setDatafeedConfigString(jobCreator.formattedDatafeedJson);
-      setShowChangedIndicesWarning(false);
-
-      setTempCombinedJob(null);
       setTempCombinedJob({
-        ...JSON.parse(jobConfigString),
-        datafeed_config: JSON.parse(datafeedConfigString),
+        ...JSON.parse(jobCreator.formattedJobJson),
+        datafeed_config: JSON.parse(jobCreator.formattedDatafeedJson),
       });
+
+      setShowChangedIndicesWarning(false);
     }
   }, [showJsonFlyout]);
 
-  const editJsonMode = datafeedEditorMode === EDITOR_MODE.HIDDEN;
-  const flyOutSize = editJsonMode ? 'm' : 'l';
+  const editJsonMode =
+    jobEditorMode === EDITOR_MODE.EDITABLE || datafeedEditorMode === EDITOR_MODE.EDITABLE;
   const readOnlyMode =
     jobEditorMode === EDITOR_MODE.READONLY && datafeedEditorMode === EDITOR_MODE.READONLY;
 
@@ -134,7 +134,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       />
 
       {showJsonFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={flyOutSize}>
+        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={'l'}>
           <EuiFlyoutBody>
             <EuiFlexGroup>
               {jobEditorMode !== EDITOR_MODE.HIDDEN && (
@@ -145,6 +145,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     defaultMessage: 'Job configuration JSON',
                   })}
                   value={jobConfigString}
+                  heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                 />
               )}
               {datafeedEditorMode !== EDITOR_MODE.HIDDEN && (
@@ -156,10 +157,14 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                       defaultMessage: 'Datafeed configuration JSON',
                     })}
                     value={datafeedConfigString}
+                    heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
                   />
                   {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
                     <EuiFlexItem>
-                      <DatafeedPreview combinedJob={tempCombinedJob} />
+                      <DatafeedPreview
+                        combinedJob={tempCombinedJob}
+                        heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                      />
                     </EuiFlexItem>
                   )}
                 </>
@@ -245,8 +250,11 @@ const Contents: FC<{
   value: string;
   editJson: boolean;
   onChange(s: string): void;
-}> = ({ title, value, editJson, onChange }) => {
-  const [editorHeight] = useState(`${window.innerHeight - 230}px`);
+  heightOffset?: number;
+}> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
+  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
+    heightOffset,
+  ]);
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
