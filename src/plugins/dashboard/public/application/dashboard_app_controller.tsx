@@ -57,7 +57,6 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
