@@ -1186,9 +1186,11 @@ response type definitions from the Legacy Elasticsearch library until https://gi
 ```ts
 // platform provides a few typings for internal purposes
 import { SearchResponse } from 'src/core/server';
-const { body } = await client.search<SearchResponse<any>>(...)
+type SearchSource = {...};
+type SearchBody = SearchResponse<SearchSource>;
+const { body } = await client.search<SearchBody>(...);
 interface Info {...}
-const { body } = await client.info<Info>(...)
+const { body } = await client.info<Info>(...);
 ```
 
 - Functional tests are subject to migration to the new client as well.
