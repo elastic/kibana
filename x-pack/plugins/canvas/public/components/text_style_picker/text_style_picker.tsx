@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { FontValue } from 'src/plugins/expressions';
@@ -15,7 +15,7 @@ import { fontSizes } from './font_sizes';
 
 const { TextStylePicker: strings } = ComponentStrings;
 
-interface BaseProps {
+export interface StyleProps {
   family?: FontValue;
   size?: number;
   align?: 'left' | 'center' | 'right';
@@ -25,9 +25,9 @@ interface BaseProps {
   italic?: boolean;
 }
 
-interface Props extends BaseProps {
+export interface Props extends StyleProps {
   colors?: string[];
-  onChange: (props: BaseProps) => void;
+  onChange: (style: StyleProps) => void;
 }
 
 type StyleType = 'bold' | 'italic' | 'underline';
@@ -68,20 +68,26 @@ const styleButtons = [
   },
 ];
 
-export const TextStylePicker: FC<Props> = (props) => {
-  const [style, setStyle] = useState<Props>(props);
-
-  const {
-    align = 'left',
+export const TextStylePicker: FC<Props> = ({
+  align = 'left',
+  color,
+  colors,
+  family,
+  italic = false,
+  onChange,
+  size = 14,
+  underline = false,
+  weight = 'normal',
+}) => {
+  const [style, setStyle] = useState<StyleProps>({
+    align,
     color,
-    colors,
     family,
-    italic = false,
-    onChange,
-    size = 14,
-    underline = false,
-    weight = 'normal',
-  } = style;
+    italic,
+    size,
+    underline,
+    weight,
+  });
 
   const stylesSelectedMap: Record<StyleType, boolean> = {
     ['bold']: weight === 'bold',
@@ -94,10 +100,10 @@ export const TextStylePicker: FC<Props> = (props) => {
     fontSizes.sort((a, b) => a - b);
   }
 
-  useEffect(() => onChange(style), [onChange, style]);
-
-  const doChange = (propName: keyof Props, value: string | boolean | number) => {
-    setStyle({ ...style, [propName]: value });
+  const doChange = (propName: keyof StyleProps, value: string | boolean | number) => {
+    const newStyle = { ...style, [propName]: value };
+    setStyle(newStyle);
+    onChange(newStyle);
   };
 
   const onStyleChange = (optionId: string) => {
