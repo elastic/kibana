@@ -61,13 +61,25 @@ export const AgentEventSchema = schema.object({
   id: schema.string(),
 });
 
-export const NewAgentActionSchema = schema.object({
-  type: schema.oneOf([
-    schema.literal('CONFIG_CHANGE'),
-    schema.literal('DATA_DUMP'),
-    schema.literal('RESUME'),
-    schema.literal('PAUSE'),
-  ]),
-  data: schema.maybe(schema.any()),
-  sent_at: schema.maybe(schema.string()),
-});
+export const NewAgentActionSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal('CONFIG_CHANGE'),
+    // TODO Maybe we can do better
+    data: schema.maybe(schema.any()),
+    sent_at: schema.maybe(schema.string()),
+  }),
+  schema.object({
+    type: schema.literal('UNENROLL'),
+    // TODO Maybe we can do better
+    data: schema.maybe(schema.any()),
+    sent_at: schema.maybe(schema.string()),
+  }),
+  schema.object({
+    type: schema.literal('UPGRADE'),
+    data: schema.object({
+      version: schema.string(),
+      source_uri: schema.string(),
+    }),
+    sent_at: schema.maybe(schema.string()),
+  }),
+]);

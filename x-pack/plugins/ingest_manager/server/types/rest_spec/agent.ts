@@ -61,9 +61,7 @@ export const PostAgentAcksRequestSchema = {
 };
 
 export const PostNewAgentActionRequestSchema = {
-  body: schema.object({
-    action: NewAgentActionSchema,
-  }),
+  body: NewAgentActionSchema,
   params: schema.object({
     agentId: schema.string(),
   }),

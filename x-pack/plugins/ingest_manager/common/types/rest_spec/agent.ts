@@ -91,9 +91,7 @@ export interface PostAgentAcksResponse {
 }
 
 export interface PostNewAgentActionRequest {
-  body: {
-    action: NewAgentAction;
-  };
+  body: NewAgentAction;
   params: {
     agentId: string;
   };

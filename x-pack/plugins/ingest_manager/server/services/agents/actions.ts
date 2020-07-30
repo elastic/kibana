@@ -91,6 +91,6 @@ export interface ActionsService {
 
   createAgentAction: (
     soClient: SavedObjectsClientContract,
-    newAgentAction: AgentActionSOAttributes
+    newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
 }

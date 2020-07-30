@@ -52,11 +52,9 @@ describe('test actions handlers', () => {
   it('should succeed on valid new agent action', async () => {
     const postNewAgentActionRequest: PostNewAgentActionRequest = {
       body: {
-        action: {
-          type: 'CONFIG_CHANGE',
-          data: 'data',
-          sent_at: '2020-03-14T19:45:02.620Z',
-        },
+        type: 'CONFIG_CHANGE',
+        data: { id: 'fake-config', inputs: [], outputs: {} },
+        sent_at: '2020-03-14T19:45:02.620Z',
       },
       params: {
         agentId: 'id',

@@ -5,6 +5,7 @@
  */
 
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
+import { FullAgentConfig } from './agent_config';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
@@ -21,18 +22,33 @@ export type AgentStatus =
   | 'unenrolling'
   | 'degraded';
 
-export type AgentActionType = 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE' | 'UNENROLL';
-export interface NewAgentAction {
-  type: AgentActionType;
-  data?: any;
-  sent_at?: string;
-}
+export type AgentActionType = 'CONFIG_CHANGE' | 'UNENROLL' | 'UPGRADE';
 
-export interface AgentAction extends NewAgentAction {
+export type NewAgentAction =
+  | {
+      type: 'CONFIG_CHANGE';
+      data: FullAgentConfig;
+      sent_at?: string;
+    }
+  | {
+      type: 'UNENROLL';
+      sent_at?: string;
+    }
+  | {
+      type: 'UPGRADE';
+      data: {
+        version: string;
+        source_uri: string;
+      };
+      sent_at?: string;
+    };
+
+export type AgentAction = NewAgentAction & {
   id: string;
+  data?: any;
   agent_id: string;
   created_at: string;
-}
+};
 
 export interface AgentActionSOAttributes {
   type: AgentActionType;
