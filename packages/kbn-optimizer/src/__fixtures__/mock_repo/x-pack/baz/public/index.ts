@@ -17,6 +17,5 @@
  * under the License.
  */
 
-module.exports = {
-  plugins: [require('autoprefixer')()],
-};
+// eslint-disable-next-line no-console
+console.log('plugin in an x-pack dir');
