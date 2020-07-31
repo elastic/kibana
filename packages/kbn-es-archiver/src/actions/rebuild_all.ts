@@ -23,7 +23,7 @@ import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { createPromiseFromStreams } from '../lib/streams';
+import { createPromiseFromStreams, createMapStream } from '../lib/streams';
 import {
   prioritizeMappings,
   readDirectory,
@@ -37,6 +37,11 @@ async function isDirectory(path: string): Promise<boolean> {
   return stats.isDirectory();
 }
 
+const esMappings = require('/Users/chris/Desktop/mappings/monitoring-es-*.json');
+const kibanaMappings = require('/Users/chris/Desktop/mappings/monitoring-kibana-*.json');
+const logstashMappings = require('/Users/chris/Desktop/mappings/monitoring-logstash-*.json');
+const beatsMappings = require('/Users/chris/Desktop/mappings/monitoring-beats-*.json');
+
 export async function rebuildAllAction({
   dataDir,
   log,
@@ -46,7 +51,10 @@ export async function rebuildAllAction({
   log: ToolingLog;
   rootDir?: string;
 }) {
-  const childNames = prioritizeMappings(await readDirectory(dataDir));
+  let childNames = prioritizeMappings(await readDirectory(dataDir));
+  if (dataDir === '/Users/chris/dev/repos/kibana/x-pack/test/functional/es_archives') {
+    childNames = ['monitoring']
+  }
   for (const childName of childNames) {
     const childPath = resolve(dataDir, childName);
 
@@ -67,7 +75,34 @@ export async function rebuildAllAction({
     await createPromiseFromStreams([
       createReadStream(childPath) as Readable,
       ...createParseArchiveStreams({ gzip }),
+      createMapStream<any>((item) => {
+        if (
+          item &&
+          item.type === 'index' &&
+          item.value.index &&
+          item.value.index.includes('monitoring')
+        ) {
+          let mapping = null;
+          if (item.value.index.includes('-es-')) {
+            mapping = esMappings;
+          } else if (item.value.index.includes('-kibana-')) {
+            mapping = kibanaMappings;
+          } else if (item.value.index.includes('-logstash-')) {
+            mapping = logstashMappings;
+          } else if (item.value.index.includes('-beats-')) {
+            mapping = beatsMappings;
+          }
+          if (mapping) {
+            log.info(`Updated for ${item.value.index}`);
+            item.value.mappings.properties = mapping.properties;
+          } else {
+            log.info(`MISSING for ${item.value.index}`);
+          }
+        }
+        return item;
+      }),
       ...createFormatArchiveStreams({ gzip }),
+
       createWriteStream(tempFile),
     ] as [Readable, ...Writable[]]);
 

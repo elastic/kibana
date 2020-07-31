@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import fs from 'fs';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { has, get } from 'lodash';
+import { has, get, setWith } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 import {
   Logger,
@@ -62,6 +63,210 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
     statusCode: boom.output.statusCode,
   };
 };
+
+let fieldCount = 0;
+
+function setOnFields(fields, field, existingMappings) {
+  // Ensure we properly nest the field
+  let updatedField = field;
+  const fieldSplit = field.split('.');
+  if (fieldSplit.length > 1) {
+    updatedField = fieldSplit.slice(1).reduce((accum, part) => {
+      return `${accum}.properties.${part}`;
+    }, fieldSplit[0]);
+  }
+
+  const existing = get(existingMappings.properties, updatedField);
+  if (existing) {
+    console.log(`Setting '${updatedField}'`);
+    fieldCount++;
+    setWith(fields, updatedField, existing.type ? existing : { type: 'object' }, Object);
+  } else {
+    console.log(`Not setting '${updatedField}' because not found in mappings`);
+  }
+  // console.log({ field, updatedField, value })
+
+}
+
+function setFieldsFromBoolInner(clause, fields, existingMappings) {
+  let field = null;
+  if (clause.term) {
+    field = Object.keys(clause.term)[0];
+  } else if (clause.range) {
+    field = Object.keys(clause.range)[0];
+  }
+
+  if (field) {
+    setOnFields(fields, field, existingMappings);
+  }
+}
+
+function setFieldsFromAggInner(agg, fields, existingMappings) {
+  const field = agg.field;
+  if (field) {
+    setOnFields(fields, field, existingMappings);
+  }
+}
+
+function setFieldsFromBool(bool, fields, existingMappings) {
+  if (!bool) {
+    return;
+  }
+
+  if (bool.filter) {
+    for (const filter of bool.filter) {
+      if (filter.bool) {
+        setFieldsFromBool(filter.bool, fields, existingMappings);
+      } else if (filter.should) {
+        if (Array.isArray(filter.should)) {
+          filter.should.forEach((clause) =>
+            setFieldsFromBoolInner(clause, fields, existingMappings)
+          );
+        } else {
+          setFieldsFromBoolInner(filter.should, fields, existingMappings);
+        }
+      } else if (filter.must) {
+        if (Array.isArray(filter.must)) {
+          filter.must.forEach((clause) => setFieldsFromBoolInner(clause, fields, existingMappings));
+        } else {
+          setFieldsFromBoolInner(filter.must, fields, existingMappings);
+        }
+      } else if (filter.must_not) {
+        if (Array.isArray(filter.must_not)) {
+          filter.must_not.forEach((clause) =>
+            setFieldsFromBoolInner(clause, fields, existingMappings)
+          );
+        } else {
+          setFieldsFromBoolInner(filter.must_not, fields, existingMappings);
+        }
+      } else {
+        setFieldsFromBoolInner(filter, fields, existingMappings);
+      }
+    }
+  }
+
+  if (bool.should) {
+    if (Array.isArray(bool.should)) {
+      bool.should.forEach((clause) => setFieldsFromBoolInner(clause, fields, existingMappings));
+    } else {
+      setFieldsFromBoolInner(bool.should, fields, existingMappings);
+    }
+  } else if (bool.must) {
+    if (Array.isArray(bool.must)) {
+      bool.must.forEach((clause) => setFieldsFromBoolInner(clause, fields, existingMappings));
+    } else {
+      setFieldsFromBoolInner(bool.must, fields, existingMappings);
+    }
+  } else if (bool.must_not) {
+    if (Array.isArray(bool.must_not)) {
+      bool.must_not.forEach((clause) => setFieldsFromBoolInner(clause, fields, existingMappings));
+    } else {
+      setFieldsFromBoolInner(bool.must_not, fields, existingMappings);
+    }
+  }
+}
+
+function setFieldsFromAggs(aggs, fields, existingMappings) {
+  const list = Object.values(aggs);
+  for (const agg of list) {
+    const keys = Object.keys(agg);
+
+    if (agg.aggs) {
+      setFieldsFromAggs(agg.aggs, fields, existingMappings);
+    }
+
+    if (agg.range) {
+      const rangeField = Object.keys(agg.range)[0];
+      setOnFields(fields, rangeField, existingMappings);
+    } else {
+      for (const key of keys) {
+        if (key !== 'aggs' && key !== 'range') {
+          setFieldsFromAggInner(agg[key], fields, existingMappings);
+        }
+      }
+    }
+  }
+}
+
+async function logUsedFields(params, callAsCurrentUser) {
+  if (!params || !params.index) {
+    return;
+  }
+  // return;
+
+  // console.log(JSON.stringify(params, null, 2));
+
+  let index = null;
+  if (params.index.includes('-es-')) {
+    index = 'monitoring-es-*';
+  } else if (params.index.includes('-kibana-')) {
+    index = 'monitoring-kibana-*';
+  } else if (params.index.includes('-beats-')) {
+    index = 'monitoring-beats-*';
+  } else if (params.index.includes('-logstash-')) {
+    index = 'monitoring-logstash-*';
+  }
+
+  if (index === null) {
+    return;
+  }
+
+  fieldCount = 0;
+
+  // Get current mappings
+  const mappingsResult = await callAsCurrentUser('transport.request', {
+    method: 'GET',
+    path: `.${index}/_mapping`,
+  });
+  const results = Object.values(mappingsResult);
+  if (!results || results.length === 0) {
+    return;
+  }
+  const { mappings } = Object.values(mappingsResult)[0];
+
+  const file = `/Users/chris/Desktop/mappings/${index}.json`;
+  let mapping = { properties: {} };
+  try {
+    mapping = JSON.parse(fs.readFileSync(file));
+  } catch (err) {}
+
+  // Get off filter path
+  // if (params.filterPath) {
+  //   const filterPathPrefix = 'hits.hits._source.';
+  //   for (const filterPath of params.filterPath) {
+  //     if (filterPath.startsWith(filterPathPrefix)) {
+  //       const filterPathField = filterPath.substring(filterPathPrefix.length);
+  //       setOnFields(mapping.properties, filterPathField, mappings);
+  //     }
+  //   }
+  // }
+
+  if (params.body.sort) {
+    console.log('found sort', params.body.sort);
+    if (Array.isArray(params.body.sort)) {
+      for (const sort of params.body.sort) {
+        console.log('keys1', sort, Object.keys(sort));
+        setOnFields(mapping.properties, Object.keys(sort)[0], mappings);
+      }
+    } else {
+      console.log('keys2', params.body.sort, Object.keys(params.body.sort));
+      setOnFields(mapping.properties, Object.keys(params.body.sort)[0], mappings);
+    }
+  }
+
+  if (params.body) {
+    if (params.body.query) {
+      if (params.body.query.bool) {
+        setFieldsFromBool(params.body.query.bool, mapping.properties, mappings);
+      }
+    }
+    if (params.body.aggs) {
+      setFieldsFromAggs(params.body.aggs, mapping.properties, mappings);
+    }
+  }
+
+  fs.writeFileSync(file, JSON.stringify(mapping, null, 2));
+}
 
 export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
@@ -337,7 +542,9 @@ export class Plugin {
                     callWithRequest: async (_req: any, endpoint: string, params: any) => {
                       const client =
                         name === 'monitoring' ? cluster : this.legacyShimDependencies.esDataClient;
-                      return client.asScoped(req).callAsCurrentUser(endpoint, params);
+                      const callAsCurrentUser = client.asScoped(req).callAsCurrentUser;
+                      // await logUsedFields(params, callAsCurrentUser);
+                      return callAsCurrentUser(endpoint, params);
                     },
                   }),
                 },
