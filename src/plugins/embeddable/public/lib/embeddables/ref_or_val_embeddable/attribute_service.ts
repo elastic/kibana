@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import { SavedObjectsClientContract } from '../../../../../../core/public';
 import {
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   EmbeddableInput,
   IEmbeddable,
-} from '.';
-import { SimpleSavedObject } from '../../../../../core/public';
+} from '../';
+import { SimpleSavedObject } from '../../../../../../core/public';
 
 export class AttributeService<
   SavedObjectAttributes,

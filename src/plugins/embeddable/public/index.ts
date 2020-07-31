@@ -75,6 +75,8 @@ export {
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

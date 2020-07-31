@@ -30,6 +30,7 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   AttributeService,
+  ReferenceOrValueEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
 import { DOC_TYPE, Document } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -71,7 +72,8 @@ export interface LensEmbeddableDeps {
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
 }
 
-export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
+export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
   type = DOC_TYPE;
 
   private expressionRenderer: ReactExpressionRendererType;
@@ -201,17 +203,6 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     }
   };
 
-  destroy() {
-    super.destroy();
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    this.autoRefreshFetchSubscription.unsubscribe();
-  }
-
   async reload() {
     const currentTime = Date.now();
     if (this.currentContext.lastReloadRequestTime !== currentTime) {
@@ -261,5 +252,48 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
+  }
+
+  public inputIsRefType = (
+    input: LensByValueInput | LensByReferenceInput
+  ): input is LensByReferenceInput => {
+    return Boolean((input as LensByReferenceInput).savedObjectId);
+  };
+
+  public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
+    if (this.inputIsRefType(this.input)) {
+      return this.input;
+    }
+    const wrappedInput = (await this.deps.attributeService.wrapAttributes(
+      this.input.attributes,
+      true
+    )) as Pick<LensByReferenceInput, 'savedObjectId'>;
+    return {
+      id: this.input.id,
+      ...wrappedInput,
+    };
+  };
+
+  public getInputAsValueType = async (): Promise<LensByValueInput> => {
+    if (!this.inputIsRefType(this.input)) {
+      return this.input;
+    }
+    const attributes = await this.deps.attributeService.unwrapAttributes(this.input);
+    return {
+      ...this.input,
+      savedObjectId: undefined,
+      attributes,
+    };
+  };
+
+  destroy() {
+    super.destroy();
+    if (this.domNode) {
+      unmountComponentAtNode(this.domNode);
+    }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }

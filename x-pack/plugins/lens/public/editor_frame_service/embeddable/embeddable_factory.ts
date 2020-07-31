@@ -16,6 +16,7 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableStart,
+  AttributeService,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   Embeddable,
@@ -47,6 +48,12 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     type: DOC_TYPE,
     getIconForSavedObject: () => 'lensApp',
   };
+
+  attributeService?: AttributeService<
+    LensSavedObjectAttributes,
+    LensByValueInput,
+    LensByReferenceInput
+  >;
 
   constructor(private getStartServices: () => Promise<StartServices>) {}
 
@@ -82,13 +89,16 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       indexPatternService,
       embeddable,
     } = await this.getStartServices();
+    if (!this.attributeService) {
+      this.attributeService = embeddable!.getAttributeService<
+        LensSavedObjectAttributes,
+        LensByValueInput,
+        LensByReferenceInput
+      >(this.type);
+    }
     return new Embeddable(
       {
-        attributeService: embeddable!.getAttributeService<
-          LensSavedObjectAttributes,
-          LensByValueInput,
-          LensByReferenceInput
-        >(this.type),
+        attributeService: this.attributeService!,
         indexPatternService,
         timefilter,
         expressionRenderer,
