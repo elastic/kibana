@@ -185,7 +185,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
   const preFillAlertCriteria = useCallback(() => {
     const md = alertsContext.metadata;
-    if (md && md.currentOptions?.metrics) {
+    if (md?.currentOptions?.metrics?.length) {
       setAlertParams(
         'criteria',
         md.currentOptions.metrics.map((metric) => ({
@@ -249,7 +249,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
-  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [alertsContext.metadata, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
