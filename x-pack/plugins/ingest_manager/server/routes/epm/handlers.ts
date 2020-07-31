@@ -5,6 +5,7 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'src/core/server';
+import { appContextService } from '../../services';
 import {
   GetInfoResponse,
   InstallPackageResponse,
@@ -14,6 +15,7 @@ import {
   GetLimitedPackagesResponse,
 } from '../../../common';
 import {
+  GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
@@ -28,11 +30,15 @@ import {
   installPackage,
   removeInstallation,
   getLimitedPackages,
+  getInstallationObject,
 } from '../../services/epm/packages';
 
-export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
+export const getCategoriesHandler: RequestHandler<
+  undefined,
+  TypeOf<typeof GetCategoriesRequestSchema.query>
+> = async (context, request, response) => {
   try {
-    const res = await getCategories();
+    const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
       response: res,
       success: true,
@@ -54,7 +60,7 @@ export const getListHandler: RequestHandler<
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackages({
       savedObjectsClient,
-      category: request.query.category,
+      ...request.query,
     });
     const body: GetPackagesResponse = {
       response: res,
@@ -142,10 +148,12 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
 export const installPackageHandler: RequestHandler<TypeOf<
   typeof InstallPackageRequestSchema.params
 >> = async (context, request, response) => {
+  const logger = appContextService.getLogger();
+  const savedObjectsClient = context.core.savedObjects.client;
+  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const { pkgkey } = request.params;
+  const [pkgName, pkgVersion] = pkgkey.split('-');
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
@@ -157,6 +165,17 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    try {
+      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+      const isUpdate = installedPkg && installedPkg.attributes.version < pkgVersion ? true : false;
+      // if this is a failed install, remove any assets installed
+      if (!isUpdate) {
+        await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+      }
+    } catch (error) {
+      logger.error(`could not remove assets from failed installation attempt for ${pkgkey}`);
+    }
+
     if (e.isBoom) {
       return response.customError({
         statusCode: e.output.statusCode,

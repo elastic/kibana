@@ -4,7 +4,8 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["embeddable"],
+  "requiredPlugins": ["embeddable", "uiActions"],
   "optionalPlugins": [],
-  "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"]
+  "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
+  "requiredBundles": ["kibanaReact"]
 }

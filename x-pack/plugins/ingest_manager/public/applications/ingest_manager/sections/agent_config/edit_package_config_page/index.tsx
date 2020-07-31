@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButton,
-  EuiSteps,
   EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
@@ -160,38 +159,45 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   const [validationResults, setValidationResults] = useState<PackageConfigValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
+  // Update package config validation
+  const updatePackageConfigValidation = useCallback(
+    (newPackageConfig?: UpdatePackageConfig) => {
+      if (packageInfo) {
+        const newValidationResult = validatePackageConfig(
+          newPackageConfig || packageConfig,
+          packageInfo
+        );
+        setValidationResults(newValidationResult);
+        // eslint-disable-next-line no-console
+        console.debug('Package config validation results', newValidationResult);
+
+        return newValidationResult;
+      }
+    },
+    [packageConfig, packageInfo]
+  );
+
   // Update package config method
-  const updatePackageConfig = (updatedFields: Partial<UpdatePackageConfig>) => {
-    const newPackageConfig = {
-      ...packageConfig,
-      ...updatedFields,
-    };
-    setPackageConfig(newPackageConfig);
+  const updatePackageConfig = useCallback(
+    (updatedFields: Partial<UpdatePackageConfig>) => {
+      const newPackageConfig = {
+        ...packageConfig,
+        ...updatedFields,
+      };
+      setPackageConfig(newPackageConfig);
 
-    // eslint-disable-next-line no-console
-    console.debug('Package config updated', newPackageConfig);
-    const newValidationResults = updatePackageConfigValidation(newPackageConfig);
-    const hasValidationErrors = newValidationResults
-      ? validationHasErrors(newValidationResults)
-      : false;
-    if (!hasValidationErrors) {
-      setFormState('VALID');
-    }
-  };
-
-  const updatePackageConfigValidation = (newPackageConfig?: UpdatePackageConfig) => {
-    if (packageInfo) {
-      const newValidationResult = validatePackageConfig(
-        newPackageConfig || packageConfig,
-        packageInfo
-      );
-      setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
-      console.debug('Package config validation results', newValidationResult);
-
-      return newValidationResult;
-    }
-  };
+      console.debug('Package config updated', newPackageConfig);
+      const newValidationResults = updatePackageConfigValidation(newPackageConfig);
+      const hasValidationErrors = newValidationResults
+        ? validationHasErrors(newValidationResults)
+        : false;
+      if (!hasValidationErrors) {
+        setFormState('VALID');
+      }
+    },
+    [packageConfig, updatePackageConfigValidation]
+  );
 
   // Cancel url
   const cancelUrl = getHref('configuration_details', { configId });
@@ -271,6 +277,40 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     packageInfo,
   };
 
+  const configurePackage = useMemo(
+    () =>
+      agentConfig && packageInfo ? (
+        <>
+          <StepDefinePackageConfig
+            agentConfig={agentConfig}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+          />
+
+          <StepConfigurePackage
+            from={'edit'}
+            packageInfo={packageInfo}
+            packageConfig={packageConfig}
+            packageConfigId={packageConfigId}
+            updatePackageConfig={updatePackageConfig}
+            validationResults={validationResults!}
+            submitAttempted={formState === 'INVALID'}
+          />
+        </>
+      ) : null,
+    [
+      agentConfig,
+      formState,
+      packageConfig,
+      packageConfigId,
+      packageInfo,
+      updatePackageConfig,
+      validationResults,
+    ]
+  );
+
   return (
     <CreatePackageConfigPageLayout {...layoutProps} data-test-subj="editPackageConfig">
       {isLoadingData ? (
@@ -301,46 +341,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
               onCancel={() => setFormState('VALID')}
             />
           )}
-          <EuiSteps
-            steps={[
-              {
-                title: i18n.translate(
-                  'xpack.ingestManager.editPackageConfig.stepDefinePackageConfigTitle',
-                  {
-                    defaultMessage: 'Define your integration',
-                  }
-                ),
-                children: (
-                  <StepDefinePackageConfig
-                    agentConfig={agentConfig}
-                    packageInfo={packageInfo}
-                    packageConfig={packageConfig}
-                    updatePackageConfig={updatePackageConfig}
-                    validationResults={validationResults!}
-                  />
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.ingestManager.editPackageConfig.stepConfigurePackageConfigTitle',
-                  {
-                    defaultMessage: 'Select the data you want to collect',
-                  }
-                ),
-                children: (
-                  <StepConfigurePackage
-                    from={'edit'}
-                    packageInfo={packageInfo}
-                    packageConfig={packageConfig}
-                    packageConfigId={packageConfigId}
-                    updatePackageConfig={updatePackageConfig}
-                    validationResults={validationResults!}
-                    submitAttempted={formState === 'INVALID'}
-                  />
-                ),
-              },
-            ]}
-          />
+          {configurePackage}
           <EuiSpacer size="l" />
           {/* TODO #64541 - Remove classes */}
           <EuiBottomBar
@@ -352,29 +353,41 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
                 : undefined
             }
           >
-            <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                {agentConfig && packageInfo && formState === 'INVALID' ? (
                   <FormattedMessage
-                    id="xpack.ingestManager.editPackageConfig.cancelButton"
-                    defaultMessage="Cancel"
+                    id="xpack.ingestManager.createPackageConfig.errorOnSaveText"
+                    defaultMessage="Your integration configuration has errors. Please fix them before saving."
                   />
-                </EuiButtonEmpty>
+                ) : null}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={onSubmit}
-                  isLoading={formState === 'LOADING'}
-                  disabled={formState !== 'VALID'}
-                  iconType="save"
-                  color="primary"
-                  fill
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.editPackageConfig.saveButton"
-                    defaultMessage="Save integration"
-                  />
-                </EuiButton>
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                      <FormattedMessage
+                        id="xpack.ingestManager.editPackageConfig.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={onSubmit}
+                      isLoading={formState === 'LOADING'}
+                      disabled={formState !== 'VALID'}
+                      iconType="save"
+                      color="primary"
+                      fill
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestManager.editPackageConfig.saveButton"
+                        defaultMessage="Save integration"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiBottomBar>

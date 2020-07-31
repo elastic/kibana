@@ -1556,6 +1556,73 @@ describe('xy_expression', () => {
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
     });
 
+    test('it should always show legend if showSingleSeries is set', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            legend: { ...args.legend, isVisible: true, showSingleSeries: true },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it not show legend if isVisible is set to false', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, isVisible: false },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it should show legend on right side', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, position: 'top' },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+    });
+
     test('it should apply the fitting function to all non-bar series', () => {
       const data: LensMultiTable = {
         type: 'lens_multitable',

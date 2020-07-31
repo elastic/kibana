@@ -9,14 +9,14 @@ import { useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { HostState } from '../types';
 import {
-  MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
+  MANAGEMENT_STORE_HOSTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
 import { State } from '../../../../common/store';
 export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE] as HostState
+      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_HOSTS_NAMESPACE] as HostState
     );
   });
 }

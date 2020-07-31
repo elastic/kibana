@@ -2,10 +2,15 @@
 
 exports[`Header should render a different name, prompt, and beta tag if provided 1`] = `
 <Header
+  docLinks={
+    Object {
+      "links": Object {
+        "indexPatterns": Object {},
+      },
+    }
+  }
   indexPatternName="test index pattern"
   isBeta={true}
-  isIncludingSystemIndices={false}
-  onChangeIncludingSystemIndices={[Function]}
   prompt={
     <div>
       Test prompt
@@ -31,50 +36,6 @@ exports[`Header should render a different name, prompt, and beta tag if provided
         </EuiBetaBadge>
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiText
-              size="s"
-            >
-              <div
-                className="euiText euiText--small"
-              >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
-              </div>
-            </EuiText>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
     <EuiSpacer
       size="s"
     >
@@ -82,9 +43,83 @@ exports[`Header should render a different name, prompt, and beta tag if provided
         className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
-    <div>
-      Test prompt
-    </div>
+    <EuiText>
+      <div
+        className="euiText euiText--medium"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+            id="indexPatternManagement.createIndexPattern.description"
+            values={
+              Object {
+                "multiple": <strong>
+                  multiple
+                </strong>,
+                "single": <EuiCode>
+                  filebeat-4-3-22
+                </EuiCode>,
+                "star": <EuiCode>
+                  filebeat-*
+                </EuiCode>,
+              }
+            }
+          >
+            <span>
+              An index pattern can match a single source, for example, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-4-3-22
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              , or 
+              <strong>
+                multiple
+              </strong>
+               data sources, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-*
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              .
+            </span>
+          </FormattedMessage>
+          <br />
+          <EuiLink
+            external={true}
+            target="_blank"
+          >
+            <button
+              className="euiLink euiLink--primary"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Read documentation"
+                id="indexPatternManagement.createIndexPattern.documentation"
+                values={Object {}}
+              >
+                <span>
+                  Read documentation
+                </span>
+              </FormattedMessage>
+            </button>
+          </EuiLink>
+        </p>
+      </div>
+    </EuiText>
     <EuiSpacer
       size="m"
     >
@@ -92,15 +127,23 @@ exports[`Header should render a different name, prompt, and beta tag if provided
         className="euiSpacer euiSpacer--m"
       />
     </EuiSpacer>
+    <div>
+      Test prompt
+    </div>
   </div>
 </Header>
 `;
 
 exports[`Header should render normally 1`] = `
 <Header
+  docLinks={
+    Object {
+      "links": Object {
+        "indexPatterns": Object {},
+      },
+    }
+  }
   indexPatternName="test index pattern"
-  isIncludingSystemIndices={true}
-  onChangeIncludingSystemIndices={[Function]}
 >
   <div>
     <EuiTitle>
@@ -110,66 +153,104 @@ exports[`Header should render normally 1`] = `
         Create test index pattern
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiText
-              size="s"
-            >
-              <div
-                className="euiText euiText--small"
-              >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
-              </div>
-            </EuiText>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
     <EuiSpacer
-      size="m"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
+    <EuiText>
+      <div
+        className="euiText euiText--medium"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+            id="indexPatternManagement.createIndexPattern.description"
+            values={
+              Object {
+                "multiple": <strong>
+                  multiple
+                </strong>,
+                "single": <EuiCode>
+                  filebeat-4-3-22
+                </EuiCode>,
+                "star": <EuiCode>
+                  filebeat-*
+                </EuiCode>,
+              }
+            }
+          >
+            <span>
+              An index pattern can match a single source, for example, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-4-3-22
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              , or 
+              <strong>
+                multiple
+              </strong>
+               data sources, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-*
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              .
+            </span>
+          </FormattedMessage>
+          <br />
+          <EuiLink
+            external={true}
+            target="_blank"
+          >
+            <button
+              className="euiLink euiLink--primary"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Read documentation"
+                id="indexPatternManagement.createIndexPattern.documentation"
+                values={Object {}}
+              >
+                <span>
+                  Read documentation
+                </span>
+              </FormattedMessage>
+            </button>
+          </EuiLink>
+        </p>
+      </div>
+    </EuiText>
   </div>
 </Header>
 `;
 
 exports[`Header should render without including system indices 1`] = `
 <Header
+  docLinks={
+    Object {
+      "links": Object {
+        "indexPatterns": Object {},
+      },
+    }
+  }
   indexPatternName="test index pattern"
-  isIncludingSystemIndices={false}
-  onChangeIncludingSystemIndices={[Function]}
 >
   <div>
     <EuiTitle>
@@ -179,57 +260,90 @@ exports[`Header should render without including system indices 1`] = `
         Create test index pattern
       </h1>
     </EuiTitle>
-    <EuiFlexGroup
-      alignItems="flexEnd"
-      justifyContent="spaceBetween"
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiText
-              size="s"
-            >
-              <div
-                className="euiText euiText--small"
-              >
-                <p>
-                  <EuiTextColor
-                    color="subdued"
-                  >
-                    <span
-                      className="euiTextColor euiTextColor--subdued"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-                        id="indexPatternManagement.createIndexPatternLabel"
-                        values={Object {}}
-                      >
-                        <span>
-                          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-                        </span>
-                      </FormattedMessage>
-                    </span>
-                  </EuiTextColor>
-                </p>
-              </div>
-            </EuiText>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
     <EuiSpacer
-      size="m"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
+    <EuiText>
+      <div
+        className="euiText euiText--medium"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+            id="indexPatternManagement.createIndexPattern.description"
+            values={
+              Object {
+                "multiple": <strong>
+                  multiple
+                </strong>,
+                "single": <EuiCode>
+                  filebeat-4-3-22
+                </EuiCode>,
+                "star": <EuiCode>
+                  filebeat-*
+                </EuiCode>,
+              }
+            }
+          >
+            <span>
+              An index pattern can match a single source, for example, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-4-3-22
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              , or 
+              <strong>
+                multiple
+              </strong>
+               data sources, 
+              <EuiCode>
+                <EuiCodeBlockImpl
+                  inline={true}
+                >
+                  <span>
+                    <code>
+                      filebeat-*
+                    </code>
+                  </span>
+                </EuiCodeBlockImpl>
+              </EuiCode>
+              .
+            </span>
+          </FormattedMessage>
+          <br />
+          <EuiLink
+            external={true}
+            target="_blank"
+          >
+            <button
+              className="euiLink euiLink--primary"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Read documentation"
+                id="indexPatternManagement.createIndexPattern.documentation"
+                values={Object {}}
+              >
+                <span>
+                  Read documentation
+                </span>
+              </FormattedMessage>
+            </button>
+          </EuiLink>
+        </p>
+      </div>
+    </EuiText>
   </div>
 </Header>
 `;

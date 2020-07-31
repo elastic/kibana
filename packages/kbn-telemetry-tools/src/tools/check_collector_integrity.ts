@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
+import { reduce } from 'lodash';
 import { difference, flattenKeys, pickDeep } from './utils';
 import { ParsedUsageCollection } from './ts_parser';
 import { generateMapping, compatibleSchemaTypes } from './manage_schema';
@@ -44,7 +44,7 @@ export function checkCompatibleTypeDescriptor(
       const typeDescriptorTypes = flattenKeys(
         pickDeep(collectorDetails.fetch.typeDescriptor, 'kind')
       );
-      const typeDescriptorKinds = _.reduce(
+      const typeDescriptorKinds = reduce(
         typeDescriptorTypes,
         (acc: any, type: number, key: string) => {
           try {
@@ -58,7 +58,7 @@ export function checkCompatibleTypeDescriptor(
       );
 
       const schemaTypes = flattenKeys(pickDeep(collectorDetails.schema.value, 'type'));
-      const transformedMappingKinds = _.reduce(
+      const transformedMappingKinds = reduce(
         schemaTypes,
         (acc: any, type: string, key: string) => {
           try {

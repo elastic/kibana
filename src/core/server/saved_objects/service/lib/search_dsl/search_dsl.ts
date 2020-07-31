@@ -33,7 +33,7 @@ interface GetSearchDslOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
-  namespace?: string;
+  namespaces?: string[];
   hasReference?: {
     type: string;
     id: string;
@@ -53,7 +53,7 @@ export function getSearchDsl(
     searchFields,
     sortField,
     sortOrder,
-    namespace,
+    namespaces,
     hasReference,
     kueryNode,
   } = options;
@@ -70,7 +70,7 @@ export function getSearchDsl(
     ...getQueryParams({
       mappings,
       registry,
-      namespace,
+      namespaces,
       type,
       search,
       searchFields,

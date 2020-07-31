@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { deflateSync, inflateSync } from 'zlib';
+import LRU from 'lru-cache';
 import {
   ILegacyClusterClient,
   IRouter,
@@ -21,7 +23,6 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from 'src/core/server/mocks';
-import { ExceptionsCache } from '../../lib/artifacts/cache';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -29,11 +30,24 @@ import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { WrappedTranslatedExceptionList } from '../../schemas/artifacts/lists';
 
-const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-1.0.0`;
+const mockArtifactName = `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-windows-v1`;
 const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
-  exceptions_list: [
+  entries: [
     {
+      type: 'simple',
       entries: [
+        {
+          entries: [
+            {
+              field: 'some.not.nested.field',
+              operator: 'included',
+              type: 'exact_cased',
+              value: 'some value',
+            },
+          ],
+          field: 'some.field',
+          type: 'nested',
+        },
         {
           field: 'some.not.nested.field',
           operator: 'included',
@@ -41,14 +55,17 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
           value: 'some value',
         },
       ],
-      field: 'some.field',
-      type: 'nested',
     },
     {
-      field: 'some.not.nested.field',
-      operator: 'included',
-      type: 'exact_cased',
-      value: 'some value',
+      type: 'simple',
+      entries: [
+        {
+          field: 'some.other.not.nested.field',
+          operator: 'included',
+          type: 'exact_cased',
+          value: 'some other value',
+        },
+      ],
     },
   ],
 };
@@ -77,11 +94,10 @@ describe('test alerts route', () => {
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-  // @ts-ignore
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
   let endpointAppContextService: EndpointAppContextService;
-  let cache: ExceptionsCache;
+  let cache: LRU<string, Buffer>;
   let ingestSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -92,14 +108,15 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
-    cache = new ExceptionsCache(5);
+    cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
     const startContract = createMockEndpointAppContextServiceStartContract();
 
     // The authentication with the Fleet Plugin needs a separate scoped SO Client
     ingestSavedObjectClient = savedObjectsClientMock.create();
     ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
-    // @ts-ignore
-    startContract.savedObjectsStart.getScopedClient.mockReturnValue(ingestSavedObjectClient);
+    (startContract.savedObjectsStart.getScopedClient as jest.Mock).mockReturnValue(
+      ingestSavedObjectClient
+    );
     endpointAppContextService.start(startContract);
 
     registerDownloadExceptionListRoute(
@@ -130,11 +147,11 @@ describe('test alerts route', () => {
       references: [],
       attributes: {
         identifier: mockArtifactName,
-        schemaVersion: '1.0.0',
+        schemaVersion: 'v1',
         sha256: '123456',
         encoding: 'application/json',
         created: Date.now(),
-        body: Buffer.from(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
+        body: deflateSync(JSON.stringify(expectedEndpointExceptions)).toString('base64'),
         size: 100,
       },
     };
@@ -146,6 +163,8 @@ describe('test alerts route', () => {
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
+
+    expect(routeConfig.options).toEqual({ tags: ['endpoint:limited-concurrency'] });
 
     await routeHandler(
       ({
@@ -160,14 +179,16 @@ describe('test alerts route', () => {
     );
 
     const expectedHeaders = {
-      'content-encoding': 'application/json',
-      'content-disposition': `attachment; filename=${mockArtifactName}.json`,
+      'content-encoding': 'identity',
+      'content-disposition': `attachment; filename=${mockArtifactName}.zz`,
     };
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]?.headers).toEqual(expectedHeaders);
-    const artifact = mockResponse.ok.mock.calls[0][0]?.body;
-    expect(artifact).toEqual(Buffer.from(mockArtifact.attributes.body, 'base64').toString());
+    const artifact = inflateSync(mockResponse.ok.mock.calls[0][0]?.body as Buffer).toString();
+    expect(artifact).toEqual(
+      inflateSync(Buffer.from(mockArtifact.attributes.body, 'base64')).toString()
+    );
   });
 
   it('should handle fetching a non-existent artifact', async () => {
@@ -217,7 +238,7 @@ describe('test alerts route', () => {
     // Add to the download cache
     const mockArtifact = expectedEndpointExceptions;
     const cacheKey = `${mockArtifactName}-${mockSha}`;
-    cache.set(cacheKey, JSON.stringify(mockArtifact));
+    cache.set(cacheKey, Buffer.from(JSON.stringify(mockArtifact))); // TODO: add compression here
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')

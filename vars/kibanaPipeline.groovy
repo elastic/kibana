@@ -16,34 +16,29 @@ def withPostBuildReporting(Closure closure) {
   }
 }
 
-def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
-  // This can go away once everything that uses the deprecated workers.parallelProcesses() is moved to task queue
-  def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
-
-  def kibanaPort = "61${parallelId}1"
-  def esPort = "61${parallelId}2"
-  def esTransportPort = "61${parallelId}3"
-  def ingestManagementPackageRegistryPort = "61${parallelId}4"
-
-  withEnv([
-    "CI_GROUP=${parallelId}",
-    "REMOVE_KIBANA_INSTALL_DIR=1",
-    "CI_PARALLEL_PROCESS_NUMBER=${parallelId}",
-    "TEST_KIBANA_HOST=localhost",
-    "TEST_KIBANA_PORT=${kibanaPort}",
-    "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
-    "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
-    "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
-    "KBN_NP_PLUGINS_BUILT=true",
-    "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
-  ] + additionalEnvs) {
-    closure()
-  }
-}
-
 def functionalTestProcess(String name, Closure closure) {
-  return {
-    withFunctionalTestEnv(["JOB=${name}"], closure)
+  return { processNumber ->
+    def kibanaPort = "61${processNumber}1"
+    def esPort = "61${processNumber}2"
+    def esTransportPort = "61${processNumber}3"
+    def ingestManagementPackageRegistryPort = "61${processNumber}4"
+
+    withEnv([
+      "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
+      "TEST_KIBANA_HOST=localhost",
+      "TEST_KIBANA_PORT=${kibanaPort}",
+      "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
+      "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
+      "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+      "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
+      "IS_PIPELINE_JOB=1",
+      "JOB=${name}",
+      "KBN_NP_PLUGINS_BUILT=true",
+    ]) {
+      githubPr.sendCommentOnError {
+        closure()
+      }
+    }
   }
 }
 
@@ -107,17 +102,11 @@ def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
-    'target/test-metrics/*',
     'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
-    'target/test-suites-ci-plan.json',
-    'test/**/screenshots/session/*.png',
-    'test/**/screenshots/failure/*.png',
-    'test/**/screenshots/diff/*.png',
+    'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
-    'x-pack/test/**/screenshots/session/*.png',
-    'x-pack/test/**/screenshots/failure/*.png',
-    'x-pack/test/**/screenshots/diff/*.png',
+    'x-pack/test/**/screenshots/**/*.png',
     'x-pack/test/functional/failure_debug/html/*.html',
     'x-pack/test/functional/apps/reporting/reports/session/*.pdf',
   ]
@@ -132,12 +121,6 @@ def withGcsArtifactUpload(workerName, closure) {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
         }
-
-        dir(env.WORKSPACE) {
-          ARTIFACT_PATTERNS.each { pattern ->
-            uploadGcsArtifact(uploadPrefix, "parallel/*/kibana/${pattern}")
-          }
-        }
       }
     }
   })
@@ -150,11 +133,6 @@ def withGcsArtifactUpload(workerName, closure) {
 
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-
-  // junit() is weird about paths for security reasons, so we need to actually change to an upper directory first
-  dir(env.WORKSPACE) {
-    junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
-  }
 }
 
 def sendMail() {
@@ -204,28 +182,30 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  retryWithDelay(2, 15) {
-    try {
-      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-    } catch (ex) {
+  githubPr.sendCommentOnError {
+    retryWithDelay(2, 15) {
       try {
-        // Setup expects this directory to be missing, so we need to remove it before we do a retry
-        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
-      } finally {
-        throw ex
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
       }
     }
   }
 }
 
-def buildOss(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+def buildOss() {
+  githubPr.sendCommentOnError {
     runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
   }
 }
 
-def buildXpack(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+def buildXpack() {
+  githubPr.sendCommentOnError {
     runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
   }
 }
@@ -237,7 +217,7 @@ def runErrorReporter() {
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} target/junit/**/*.xml
     """,
     "Report failed tests, if necessary"
   )
@@ -276,100 +256,6 @@ def call(Map params = [:], Closure closure) {
   }
 }
 
-// Creates a task queue using withTaskQueue, and copies the bootstrapped kibana repo into each process's workspace
-// Note that node_modules are mostly symlinked to save time/space. See test/scripts/jenkins_setup_parallel_workspace.sh
-def withCiTaskQueue(Map options = [:], Closure closure) {
-  def setupClosure = {
-    // This can't use runbld, because it expects the source to be there, which isn't yet
-    bash("${env.WORKSPACE}/kibana/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
-  }
-
-  def config = [parallel: 24, setup: setupClosure] + options
-
-  withTaskQueue(config) {
-    closure.call()
-  }
-}
-
-def scriptTask(description, script) {
-  return {
-    withFunctionalTestEnv {
-      runbld(script, description)
-    }
-  }
-}
-
-def scriptTaskDocker(description, script) {
-  return {
-    withDocker(scriptTask(description, script))
-  }
-}
-
-def buildDocker() {
-  sh(
-    script: """
-      cp /usr/local/bin/runbld .ci/
-      cp /usr/local/bin/bash_standard_lib.sh .ci/
-      cd .ci
-      docker build -t kibana-ci -f ./Dockerfile .
-    """,
-    label: 'Build CI Docker image'
-  )
-}
-
-def withDocker(Closure closure) {
-  docker
-    .image('kibana-ci')
-    .inside(
-      "-v /etc/runbld:/etc/runbld:ro -v '${env.JENKINS_HOME}:${env.JENKINS_HOME}' -v '/dev/shm/workspace:/dev/shm/workspace' --shm-size 2GB --cpus 4",
-      closure
-    )
-}
-
-def buildOssPlugins() {
-  runbld('./test/scripts/jenkins_build_plugins.sh', 'Build OSS Plugins')
-}
-
-def buildXpackPlugins() {
-  runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
-}
-
-def withTasks(Map params = [worker: [:]], Closure closure) {
-  catchErrors {
-    def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
-
-    workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
-        parallel([
-          docker: {
-            retry(2) {
-              buildDocker()
-            }
-          },
-
-          // There are integration tests etc that require the plugins to be built first, so let's go ahead and build them before set up the parallel workspaces
-          ossPlugins: { buildOssPlugins() },
-          xpackPlugins: { buildXpackPlugins() },
-        ])
-
-        catchErrors {
-          closure()
-        }
-      }
-    }
-  }
-}
-
-def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
-}
-
 def pipelineLibraryTests() {
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
@@ -379,5 +265,6 @@ def pipelineLibraryTests() {
     }
   }
 }
+
 
 return this

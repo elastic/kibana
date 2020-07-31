@@ -28,7 +28,7 @@ import {
 import {
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/create_timelines';
+} from './utils/failure_cases';
 
 describe('create timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -167,8 +167,8 @@ describe('create timelines', () => {
     });
   });
 
-  describe('Manipulate template timeline', () => {
-    describe('Create a new template timeline', () => {
+  describe('Manipulate timeline template', () => {
+    describe('Create a new timeline template', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
@@ -199,19 +199,19 @@ describe('create timelines', () => {
         await server.inject(mockRequest, context);
       });
 
-      test('should Create a new template timeline savedObject', async () => {
+      test('should Create a new timeline template savedObject', async () => {
         expect(mockPersistTimeline).toHaveBeenCalled();
       });
 
-      test('should Create a new template timeline savedObject without timelineId', async () => {
+      test('should Create a new timeline template savedObject without timelineId', async () => {
         expect(mockPersistTimeline.mock.calls[0][1]).toBeNull();
       });
 
-      test('should Create a new template timeline savedObject without template timeline version', async () => {
+      test('should Create a new timeline template savedObject without timeline template version', async () => {
         expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
       });
 
-      test('should Create a new template timeline savedObject witn given template timeline', async () => {
+      test('should Create a new timeline template savedObject witn given timeline template', async () => {
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual(
           createTemplateTimelineWithTimelineId.timeline
         );
@@ -234,7 +234,7 @@ describe('create timelines', () => {
       });
     });
 
-    describe('Create a template timeline already exist', () => {
+    describe('Create a timeline template already exist', () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {

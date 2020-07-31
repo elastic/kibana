@@ -31,11 +31,13 @@ import {
 
 export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
+  const moduleName = 'auditbeat';
   return {
     id: 'auditbeat',
     name: i18n.translate('home.tutorials.auditbeat.nameTitle', {
       defaultMessage: 'Auditbeat',
     }),
+    moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.auditbeat.shortDescription', {
       defaultMessage: 'Collect audit data from your hosts.',

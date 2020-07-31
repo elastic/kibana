@@ -5,8 +5,11 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { ArtifactConstants } from '../../lib/artifacts';
-import { InternalArtifactSchema } from '../../schemas/artifacts';
+import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
+import {
+  InternalArtifactCompleteSchema,
+  InternalArtifactCreateSchema,
+} from '../../schemas/artifacts';
 
 export class ArtifactClient {
   private savedObjectsClient: SavedObjectsClientContract;
@@ -15,24 +18,23 @@ export class ArtifactClient {
     this.savedObjectsClient = savedObjectsClient;
   }
 
-  public getArtifactId(artifact: InternalArtifactSchema) {
-    return `${artifact.identifier}-${artifact.compressedSha256}`;
-  }
-
-  public async getArtifact(id: string): Promise<SavedObject<InternalArtifactSchema>> {
-    return this.savedObjectsClient.get<InternalArtifactSchema>(
+  public async getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>> {
+    return this.savedObjectsClient.get<InternalArtifactCompleteSchema>(
       ArtifactConstants.SAVED_OBJECT_TYPE,
       id
     );
   }
 
   public async createArtifact(
-    artifact: InternalArtifactSchema
-  ): Promise<SavedObject<InternalArtifactSchema>> {
-    return this.savedObjectsClient.create<InternalArtifactSchema>(
+    artifact: InternalArtifactCompleteSchema
+  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
+    return this.savedObjectsClient.create<InternalArtifactCreateSchema>(
       ArtifactConstants.SAVED_OBJECT_TYPE,
-      artifact,
-      { id: this.getArtifactId(artifact) }
+      {
+        ...artifact,
+        created: Date.now(),
+      },
+      { id: getArtifactId(artifact) }
     );
   }
 

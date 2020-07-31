@@ -12,6 +12,7 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -31,7 +32,6 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -47,8 +47,9 @@ describe('test endpoint route', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockAgentService: ReturnType<
-    typeof createMockEndpointAppContextServiceStartContract
+  // tests assume that ingestManager is enabled, and thus agentService is available
+  let mockAgentService: Required<
+    ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
   let endpointAppContextService: EndpointAppContextService;
   const noUnenrolledAgent = {
@@ -70,7 +71,7 @@ describe('test endpoint route', () => {
     endpointAppContextService = new EndpointAppContextService();
     const startContract = createMockEndpointAppContextServiceStartContract();
     endpointAppContextService.start(startContract);
-    mockAgentService = startContract.agentService;
+    mockAgentService = startContract.agentService!;
 
     registerEndpointRoutes(routerMock, {
       logFactory: loggingSystemMock.create(),
@@ -97,7 +98,7 @@ describe('test endpoint route', () => {
     );
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -137,9 +138,18 @@ describe('test endpoint route', () => {
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      match_all: {},
+      bool: {
+        must_not: {
+          terms: {
+            'elastic.agent.id': [
+              '00000000-0000-0000-0000-000000000000',
+              '11111111-1111-1111-1111-111111111111',
+            ],
+          },
+        },
+      },
     });
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -186,8 +196,19 @@ describe('test endpoint route', () => {
           {
             bool: {
               must_not: {
+                terms: {
+                  'elastic.agent.id': [
+                    '00000000-0000-0000-0000-000000000000',
+                    '11111111-1111-1111-1111-111111111111',
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              must_not: {
                 bool: {
-                  minimum_should_match: 1,
                   should: [
                     {
                       match: {
@@ -195,6 +216,7 @@ describe('test endpoint route', () => {
                       },
                     },
                   ],
+                  minimum_should_match: 1,
                 },
               },
             },
@@ -202,7 +224,7 @@ describe('test endpoint route', () => {
         ],
       },
     });
-    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
     const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as HostResultList;
     expect(endpointResultList.hosts.length).toEqual(1);
@@ -234,7 +256,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.notFound).toBeCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
       expect(message).toEqual('Endpoint Not Found');
@@ -263,7 +288,10 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
@@ -278,11 +306,11 @@ describe('test endpoint route', () => {
       });
 
       mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockAgentService.getAgent = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
@@ -298,13 +326,16 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should return a single endpoint with status error when status is not offline or online', async () => {
+    it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -328,13 +359,16 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(routeConfig.options).toEqual({ authRequired: true });
+      expect(routeConfig.options).toEqual({
+        authRequired: true,
+        tags: ['access:securitySolution'],
+      });
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should throw error when endpoint egent is not active', async () => {
+    it('should throw error when endpoint agent is not active', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({

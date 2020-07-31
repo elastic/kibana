@@ -162,7 +162,10 @@ describe('API Keys', () => {
   describe('grantAsInternalUser()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
-      const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest());
+      const result = await apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
+        name: 'test_api_key',
+        role_descriptors: {},
+      });
       expect(result).toBeNull();
 
       expect(mockClusterClient.callAsInternalUser).not.toHaveBeenCalled();
@@ -174,21 +177,33 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
         api_key: 'abc123',
+        expires: '1d',
       });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
           headers: {
             authorization: `Basic ${encodeToBase64('foo:bar')}`,
           },
-        })
+        }),
+        {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
+        }
       );
       expect(result).toEqual({
         api_key: 'abc123',
         id: '123',
         name: 'key-name',
+        expires: '1d',
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
         body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
           grant_type: 'password',
           username: 'foo',
           password: 'bar',
@@ -208,7 +223,12 @@ describe('API Keys', () => {
           headers: {
             authorization: `Bearer foo-access-token`,
           },
-        })
+        }),
+        {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
+        }
       );
       expect(result).toEqual({
         api_key: 'abc123',
@@ -217,6 +237,11 @@ describe('API Keys', () => {
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.grantAPIKey', {
         body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
           grant_type: 'access_token',
           access_token: 'foo-access-token',
         },
@@ -231,7 +256,12 @@ describe('API Keys', () => {
             headers: {
               authorization: `Digest username="foo"`,
             },
-          })
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          }
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unsupported scheme \\"Digest\\" for granting API Key"`

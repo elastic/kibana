@@ -132,7 +132,8 @@ const StatefulTopNComponent: React.FC<Props> = ({
       }
       data-test-subj="top-n"
       defaultView={
-        timelineId === TimelineId.alertsPage || timelineId === TimelineId.alertsRulesDetailsPage
+        timelineId === TimelineId.detectionsPage ||
+        timelineId === TimelineId.detectionsRulesDetailsPage
           ? 'alert'
           : options[0].value
       }

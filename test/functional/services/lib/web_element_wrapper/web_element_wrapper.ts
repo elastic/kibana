@@ -47,7 +47,6 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 export class WebElementWrapper {
   private By = By;
   private Keys = Key;
-  public isW3CEnabled: boolean = (this.driver as any).executor_.w3c === true;
   public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
@@ -141,7 +140,7 @@ export class WebElementWrapper {
   }
 
   private getActions() {
-    return this.isW3CEnabled ? this.driver.actions() : this.driver.actions({ bridge: true });
+    return this.driver.actions();
   }
 
   /**
@@ -233,9 +232,6 @@ export class WebElementWrapper {
    * @default { withJS: false }
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
-    if (this.browserType === Browsers.InternetExplorer) {
-      return this.clearValueWithKeyboard();
-    }
     await this.retryCall(async function clearValue(wrapper) {
       if (wrapper.isChromium || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
@@ -252,16 +248,6 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
-    if (this.browserType === Browsers.InternetExplorer) {
-      const value = await this.getAttribute('value');
-      // For IE testing, the text field gets clicked in the middle so
-      // first go HOME and then DELETE all chars
-      await this.pressKeys(this.Keys.HOME);
-      for (let i = 0; i <= value.length; i++) {
-        await this.pressKeys(this.Keys.DELETE);
-      }
-      return;
-    }
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -429,19 +415,11 @@ export class WebElementWrapper {
   public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .perform();
     });
   }
 
@@ -456,21 +434,12 @@ export class WebElementWrapper {
   public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper.getActions().move({ x: 0, y: 0 }).perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .click()
+        .perform();
     });
   }
 

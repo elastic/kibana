@@ -13,7 +13,14 @@ export class NavLinksBuilder {
       ...features,
       // management isn't a first-class "feature", but it makes our life easier here to pretend like it is
       management: {
-        navLinkId: 'kibana:stack_management',
+        app: ['kibana:stack_management'],
+      },
+      // TODO: Temp until navLinkIds fix is merged in
+      appSearch: {
+        app: ['appSearch', 'workplaceSearch'],
+      },
+      kibana: {
+        app: ['kibana'],
       },
     };
   }
@@ -34,9 +41,9 @@ export class NavLinksBuilder {
   private build(callback: buildCallback): Record<string, boolean> {
     const navLinks = {} as Record<string, boolean>;
     for (const [featureId, feature] of Object.entries(this.features)) {
-      if (feature.navLinkId) {
-        navLinks[feature.navLinkId] = callback(featureId);
-      }
+      feature.app.forEach((app) => {
+        navLinks[app] = callback(featureId);
+      });
     }
 
     return navLinks;

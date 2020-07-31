@@ -10,37 +10,21 @@ import { ResolverUIState } from '../../types';
 /**
  * id of the "current" tree node (fake-focused)
  */
-export const activeDescendantId = createSelector(
+export const ariaActiveDescendant = createSelector(
   (uiState: ResolverUIState) => uiState,
   /* eslint-disable no-shadow */
-  ({ activeDescendantId }) => {
-    return activeDescendantId;
+  ({ ariaActiveDescendant }) => {
+    return ariaActiveDescendant;
   }
 );
 
 /**
  * id of the currently "selected" tree node
  */
-export const selectedDescendantId = createSelector(
+export const selectedNode = createSelector(
   (uiState: ResolverUIState) => uiState,
   /* eslint-disable no-shadow */
-  ({ selectedDescendantId }) => {
-    return selectedDescendantId;
+  ({ selectedNode }: ResolverUIState) => {
+    return selectedNode;
   }
 );
-
-/**
- * id of the currently "selected" tree node
- */
-export const selectedDescendantProcessId = createSelector(
-  (uiState: ResolverUIState) => uiState,
-  /* eslint-disable no-shadow */
-  ({ processEntityIdOfSelectedDescendant }: ResolverUIState) => {
-    return processEntityIdOfSelectedDescendant;
-  }
-);
-
-// Select the current panel to be displayed
-export const currentPanelView = (uiState: ResolverUIState) => {
-  return uiState.panelToDisplay;
-};

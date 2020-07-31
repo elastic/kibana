@@ -36,6 +36,7 @@ export function nginxMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.nginxMetrics.nameTitle', {
       defaultMessage: 'Nginx metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.nginxMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Nginx HTTP server.',

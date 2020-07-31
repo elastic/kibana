@@ -19,6 +19,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ILegacyClusterClient, ILegacyCustomClusterClient } from './legacy';
+import {
+  elasticsearchClientMock,
+  ClusterClientMock,
+  CustomClusterClientMock,
+} from './client/mocks';
+import { ElasticsearchClientConfig } from './client';
 import { legacyClientMock } from './legacy/mocks';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
@@ -32,6 +38,13 @@ interface MockedElasticSearchServiceSetup {
     client: jest.Mocked<ILegacyClusterClient>;
   };
 }
+
+type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
+  client: ClusterClientMock;
+  createClient: jest.MockedFunction<
+    (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
+  >;
+};
 
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
@@ -47,10 +60,10 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup;
-
 const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
+    client: elasticsearchClientMock.createClusterClient(),
+    createClient: jest.fn(),
     legacy: {
       createClient: jest.fn(),
       client: legacyClientMock.createClusterClient(),
@@ -60,9 +73,13 @@ const createStartContractMock = () => {
   startContract.legacy.client.asScoped.mockReturnValue(
     legacyClientMock.createScopedClusterClient()
   );
-
+  startContract.createClient.mockImplementation(() =>
+    elasticsearchClientMock.createCustomClusterClient()
+  );
   return startContract;
 };
+
+const createInternalStartContractMock = createStartContractMock;
 
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<
   InternalElasticsearchServiceSetup & {
@@ -100,7 +117,7 @@ const createMock = () => {
     stop: jest.fn(),
   };
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
-  mocked.start.mockResolvedValueOnce(createStartContractMock());
+  mocked.start.mockResolvedValueOnce(createInternalStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -109,9 +126,12 @@ export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
   createSetup: createSetupContractMock,
+  createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
   createLegacyClusterClient: legacyClientMock.createClusterClient,
   createLegacyCustomClusterClient: legacyClientMock.createCustomClusterClient,
   createLegacyScopedClusterClient: legacyClientMock.createScopedClusterClient,
   createLegacyElasticsearchClient: legacyClientMock.createElasticsearchClient,
+
+  ...elasticsearchClientMock,
 };

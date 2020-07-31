@@ -8,14 +8,15 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiTitle, EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { reactRouterNavigate, extractQueryParams } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { decodePathFromReactRouter } from '../../../services/routing';
+import { encodePathForReactRouter, decodePathFromReactRouter } from '../../../services/routing';
+import { documentationService } from '../../../services/documentation';
 import { Section } from '../../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
@@ -79,7 +80,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsDescription"
-              defaultMessage="Data streams represent collections of time series indices."
+              defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
             {ingestManager ? (
@@ -134,14 +135,25 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <>
         {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-              defaultMessage="Data streams represent the latest data in a rollover series."
-            />
-          </EuiText>
-        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
+            defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink
+                  href={documentationService.getDataStreamsDocumentationLink()}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
+                    defaultMessage: 'Learn more.',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
 
         <EuiSpacer size="l" />
 
@@ -170,6 +182,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       {dataStreamName && (
         <DataStreamDetailPanel
           dataStreamName={decodePathFromReactRouter(dataStreamName)}
+          backingIndicesLink={reactRouterNavigate(history, {
+            pathname: '/indices',
+            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
+              dataStreamName
+            )}`,
+          })}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

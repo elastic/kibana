@@ -19,6 +19,7 @@ export {
   useAuthorizationContext,
   NotAuthorizedSection,
   Forms,
+  GlobalFlyout,
 } from '../../../../../../../src/plugins/es_ui_shared/public';
 
 export {
@@ -62,3 +63,5 @@ export {
 } from '../../../../common';
 
 export { serializeComponentTemplate } from '../../../../common/lib';
+
+export { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';

@@ -36,7 +36,6 @@ run(
   async ({
     flags: {
       'ignore-incompatible': ignoreIncompatible,
-      'ignore-malformed': ignoreMalformed,
       'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
@@ -49,13 +48,12 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMalformed !== undefined ||
         ignoreMissing !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-malformed, --ignore-unused or --ignore-missing is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing is allowed when --fix is set.`
       );
     }
 
@@ -101,7 +99,6 @@ run(
               checkCompatibility(
                 config,
                 {
-                  ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,
                   ignoreUnused: !!ignoreUnused,
                   ignoreMissing: !!ignoreMissing,

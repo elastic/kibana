@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize } from 'utility-types';
+import { Unionize, UnionToIntersection } from 'utility-types';
 
 type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
@@ -150,6 +150,7 @@ export interface AggregationOptionsByType {
     field: string;
     values: string[];
     keyed?: boolean;
+    hdr?: { number_of_significant_value_digits: number };
   };
 }
 
@@ -287,10 +288,13 @@ interface AggregationResponsePart<
       }
     | undefined;
   composite: {
-    after_key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+    after_key: Record<
+      GetCompositeKeys<TAggregationOptionsMap>,
+      string | number
+    >;
     buckets: Array<
       {
-        key: Record<GetCompositeKeys<TAggregationOptionsMap>, number>;
+        key: Record<GetCompositeKeys<TAggregationOptionsMap>, string | number>;
         doc_count: number;
       } & BucketSubAggregationResponse<
         TAggregationOptionsMap['aggs'],
@@ -336,6 +340,15 @@ interface AggregationResponsePart<
 //   keyof AggregationResponsePart<{}, unknown>
 // >;
 
+// ensures aggregations work with requests where aggregation options are a union type,
+// e.g. { transaction_groups: { composite: any } | { terms: any } }.
+// Union keys are not included in keyof. The type will fall back to keyof T if
+// UnionToIntersection fails, which happens when there are conflicts between the union
+// types, e.g. { foo: string; bar?: undefined } | { foo?: undefined; bar: string };
+export type ValidAggregationKeysOf<
+  T extends Record<string, any>
+> = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+
 export type AggregationResponseMap<
   TAggregationInputMap extends AggregationInputMap | undefined,
   TDocument
@@ -344,6 +357,6 @@ export type AggregationResponseMap<
       [TName in keyof TAggregationInputMap]: AggregationResponsePart<
         TAggregationInputMap[TName],
         TDocument
-      >[AggregationType & keyof TAggregationInputMap[TName]];
+      >[AggregationType & ValidAggregationKeysOf<TAggregationInputMap[TName]>];
     }
   : undefined;

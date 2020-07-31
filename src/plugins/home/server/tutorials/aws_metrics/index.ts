@@ -36,6 +36,7 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     name: i18n.translate('home.tutorials.awsMetrics.nameTitle', {
       defaultMessage: 'AWS metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.awsMetrics.shortDescription', {
       defaultMessage:

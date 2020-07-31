@@ -12,12 +12,16 @@ import {
   created_at,
   created_by,
   description,
+  deserializerOrUndefined,
+  immutable,
   metaOrUndefined,
   name,
+  serializerOrUndefined,
   tie_breaker_id,
   type,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
 export const indexEsListSchema = t.exact(
@@ -25,13 +29,17 @@ export const indexEsListSchema = t.exact(
     created_at,
     created_by,
     description,
+    deserializer: deserializerOrUndefined,
+    immutable,
     meta: metaOrUndefined,
     name,
+    serializer: serializerOrUndefined,
     tie_breaker_id,
     type,
     updated_at,
     updated_by,
+    version,
   })
 );
 
-export type IndexEsListSchema = t.TypeOf<typeof indexEsListSchema>;
+export type IndexEsListSchema = t.OutputOf<typeof indexEsListSchema>;

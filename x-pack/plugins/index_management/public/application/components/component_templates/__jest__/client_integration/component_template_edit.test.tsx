@@ -52,7 +52,7 @@ describe('<ComponentTemplateEdit />', () => {
     template: {
       settings: { number_of_shards: 1 },
     },
-    _kbnMeta: { usedBy: [] },
+    _kbnMeta: { usedBy: [], isManaged: false },
   };
 
   beforeEach(async () => {
@@ -109,11 +109,6 @@ describe('<ComponentTemplateEdit />', () => {
         ...COMPONENT_TEMPLATE_TO_EDIT,
         template: {
           ...COMPONENT_TEMPLATE_TO_EDIT.template,
-          mappings: {
-            _meta: {},
-            _source: {},
-            properties: {},
-          },
         },
       };
 

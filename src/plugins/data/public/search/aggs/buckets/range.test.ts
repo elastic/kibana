@@ -19,10 +19,10 @@
 
 import { getRangeBucketAgg, RangeBucketAggDependencies } from './range';
 import { AggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, NumberFormat } from '../../../../common';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { InternalStartServices } from '../../../types';
 
 describe('Range Agg', () => {
@@ -32,11 +32,9 @@ describe('Range Agg', () => {
     aggTypesDependencies = {
       getInternalStartServices: () =>
         (({
-          notifications: notificationServiceMock.createStartContract(),
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
         } as unknown) as InternalStartServices),
     };
-
-    mockDataServices();
   });
 
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;

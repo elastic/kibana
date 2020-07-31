@@ -48,7 +48,7 @@ export const getAgentHandler: RequestHandler<TypeOf<
 
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+    if (soClient.errors.isNotFoundError(e)) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
       });
@@ -178,8 +178,11 @@ export const postAgentCheckinHandler: RequestHandler<
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
-      request.body.events || [],
-      request.body.local_metadata,
+      {
+        events: request.body.events || [],
+        localMetadata: request.body.local_metadata,
+        status: request.body.status,
+      },
       { signal }
     );
     const body: PostAgentCheckinResponse = {

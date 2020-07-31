@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getIndices response object to item array 1`] = `
+Array [
+  Object {
+    "item": Object {
+      "attributes": Array [
+        "frozen",
+      ],
+      "name": "frozen_index",
+    },
+    "name": "frozen_index",
+    "tags": Array [
+      Object {
+        "color": "default",
+        "key": "index",
+        "name": "Index",
+      },
+      Object {
+        "color": "danger",
+        "key": "frozen",
+        "name": "Frozen",
+      },
+    ],
+  },
+  Object {
+    "item": Object {
+      "indices": Array [],
+      "name": "test_alias",
+    },
+    "name": "test_alias",
+    "tags": Array [
+      Object {
+        "color": "default",
+        "key": "alias",
+        "name": "Alias",
+      },
+    ],
+  },
+  Object {
+    "item": Object {
+      "backing_indices": Array [],
+      "name": "test_data_stream",
+      "timestamp_field": "test_timestamp_field",
+    },
+    "name": "test_data_stream",
+    "tags": Array [
+      Object {
+        "color": "primary",
+        "key": "data_stream",
+        "name": "Data stream",
+      },
+    ],
+  },
+  Object {
+    "item": Object {
+      "name": "test_index",
+    },
+    "name": "test_index",
+    "tags": Array [
+      Object {
+        "color": "default",
+        "key": "index",
+        "name": "Index",
+      },
+    ],
+  },
+]
+`;

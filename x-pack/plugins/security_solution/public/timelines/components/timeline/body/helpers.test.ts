@@ -6,7 +6,13 @@
 
 import { Ecs } from '../../../../graphql/types';
 
-import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
+import {
+  eventHasNotes,
+  eventIsPinned,
+  getPinTooltip,
+  stringifyEvent,
+  isInvestigateInResolverActionEnabled,
+} from './helpers';
 import { TimelineType } from '../../../../../common/types/timeline';
 
 describe('helpers', () => {
@@ -223,7 +229,7 @@ describe('helpers', () => {
           eventHasNotes: false,
           timelineType: TimelineType.template,
         })
-      ).toEqual('This event cannot be pinned because it is filtered by a timeline template');
+      ).toEqual('This event may not be pinned while editing a template timeline');
     });
   });
 
@@ -240,6 +246,56 @@ describe('helpers', () => {
       const pinnedEventIds = { 'thumb-tack': true };
 
       expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(false);
+    });
+  });
+
+  describe('isInvestigateInResolverActionEnabled', () => {
+    it('returns false if agent.type does not equal endpoint', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['blah'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if agent.type does not have endpoint in first array index', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['blah', 'endpoint'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if process.entity_id is not defined', () => {
+      const data: Ecs = { _id: '1', agent: { type: ['endpoint'] } };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns true if agent.type has endpoint in first array index', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: ['5'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+    });
+
+    it('returns false if multiple entity_ids', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: ['5', '10'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns false if entity_id is an empty string', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['endpoint', 'blah'] },
+        process: { entity_id: [''] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
   });
 });

@@ -11,32 +11,32 @@ import { calendarSchema, calendarIdSchema, calendarIdsSchema } from './schemas/c
 import { CalendarManager, Calendar, FormCalendar } from '../models/calendar';
 
 function getAllCalendars(context: RequestHandlerContext) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.getAllCalendars();
 }
 
 function getCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.getCalendar(calendarId);
 }
 
 function newCalendar(context: RequestHandlerContext, calendar: FormCalendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.newCalendar(calendar);
 }
 
 function updateCalendar(context: RequestHandlerContext, calendarId: string, calendar: Calendar) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.updateCalendar(calendarId, calendar);
 }
 
 function deleteCalendar(context: RequestHandlerContext, calendarId: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.deleteCalendar(calendarId);
 }
 
 function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) {
-  const cal = new CalendarManager(context.ml!.mlClient.callAsCurrentUser);
+  const cal = new CalendarManager(context.ml!.mlClient);
   return cal.getCalendarsByIds(calendarIds);
 }
 

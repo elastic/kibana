@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { LegacyScopedClusterClient } from 'src/core/server';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { setupMockEsCompositeQuery } from './helper';
 
-interface BucketItemCriteria {
+export interface BucketItemCriteria {
   monitor_id: string;
   status: string;
   location: string;
@@ -27,11 +26,6 @@ interface BucketItem {
   doc_count: number;
 }
 
-interface MultiPageCriteria {
-  after_key?: BucketKey;
-  bucketCriteria: BucketItemCriteria[];
-}
-
 const genBucketItem = ({
   monitor_id,
   status,
@@ -46,30 +40,12 @@ const genBucketItem = ({
   doc_count,
 });
 
-type MockCallES = (method: any, params: any) => Promise<any>;
-
-const setupMock = (
-  criteria: MultiPageCriteria[]
-): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createLegacyScopedClusterClient();
-
-  criteria.forEach(({ after_key, bucketCriteria }) => {
-    const mockResponse = {
-      aggregations: {
-        monitors: {
-          after_key,
-          buckets: bucketCriteria.map((item) => genBucketItem(item)),
-        },
-      },
-    };
-    esMock.callAsCurrentUser.mockResolvedValueOnce(mockResponse);
-  });
-  return [(method: any, params: any) => esMock.callAsCurrentUser(method, params), esMock];
-};
-
 describe('getMonitorStatus', () => {
   it('applies bool filters to params', async () => {
-    const [callES, esMock] = setupMock([]);
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
     const exampleFilter = `{
       "bool": {
         "should": [
@@ -203,7 +179,10 @@ describe('getMonitorStatus', () => {
   });
 
   it('applies locations to params', async () => {
-    const [callES, esMock] = setupMock([]);
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
     await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -294,30 +273,33 @@ describe('getMonitorStatus', () => {
   });
 
   it('fetches single page of results', async () => {
-    const [callES, esMock] = setupMock([
-      {
-        bucketCriteria: [
-          {
-            monitor_id: 'foo',
-            status: 'down',
-            location: 'fairbanks',
-            doc_count: 43,
-          },
-          {
-            monitor_id: 'bar',
-            status: 'down',
-            location: 'harrisburg',
-            doc_count: 53,
-          },
-          {
-            monitor_id: 'foo',
-            status: 'down',
-            location: 'harrisburg',
-            doc_count: 44,
-          },
-        ],
-      },
-    ]);
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [
+        {
+          bucketCriteria: [
+            {
+              monitor_id: 'foo',
+              status: 'down',
+              location: 'fairbanks',
+              doc_count: 43,
+            },
+            {
+              monitor_id: 'bar',
+              status: 'down',
+              location: 'harrisburg',
+              doc_count: 53,
+            },
+            {
+              monitor_id: 'foo',
+              status: 'down',
+              location: 'harrisburg',
+              doc_count: 44,
+            },
+          ],
+        },
+      ],
+      genBucketItem
+    );
     const clientParameters = {
       filters: undefined,
       locations: [],
@@ -418,7 +400,7 @@ describe('getMonitorStatus', () => {
     `);
   });
 
-  it('fetches multiple pages of results in the thing', async () => {
+  it('fetches multiple pages of ES results', async () => {
     const criteria = [
       {
         after_key: {
@@ -491,7 +473,10 @@ describe('getMonitorStatus', () => {
         ],
       },
     ];
-    const [callES] = setupMock(criteria);
+    const [callES] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      criteria,
+      genBucketItem
+    );
     const result = await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,

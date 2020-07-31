@@ -16,6 +16,7 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow'));
     loadTestFile(require.resolve('./builtin_action_types/jira'));
+    loadTestFile(require.resolve('./builtin_action_types/resilient'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
     loadTestFile(require.resolve('./create'));

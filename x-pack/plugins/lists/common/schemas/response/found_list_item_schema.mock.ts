@@ -8,9 +8,9 @@ import { FoundListItemSchema } from './found_list_item_schema';
 import { getListItemResponseMock } from './list_item_schema.mock';
 
 export const getFoundListItemSchemaMock = (): FoundListItemSchema => ({
-  cursor: '123',
+  cursor: 'WzI1LFsiNmE3NmI2OWQtODBkZi00YWIyLThjM2UtODVmNDY2YjA2YTBlIl1d',
   data: [getListItemResponseMock()],
   page: 1,
-  per_page: 1,
+  per_page: 25,
   total: 1,
 });

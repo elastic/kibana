@@ -62,11 +62,11 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.searchService = new SearchService(initializerContext);
+    this.logger = initializerContext.logger.get('data');
+    this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
     this.autocompleteService = new AutocompleteService(initializerContext);
-    this.logger = initializerContext.logger.get('data');
   }
 
   public setup(
@@ -82,7 +82,7 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     core.uiSettings.register(getUiSettings());
 
     return {
-      search: this.searchService.setup(core),
+      search: this.searchService.setup(core, { usageCollection }),
       fieldFormats: this.fieldFormats.setup(),
     };
   }

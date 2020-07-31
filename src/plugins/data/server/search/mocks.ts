@@ -26,5 +26,6 @@ export function createSearchSetupMock() {
 export function createSearchStartMock() {
   return {
     getSearchStrategy: jest.fn(),
+    search: jest.fn(),
   };
 }

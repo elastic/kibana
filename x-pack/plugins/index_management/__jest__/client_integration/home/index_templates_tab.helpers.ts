@@ -40,10 +40,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   /**
    * User Actions
    */
-  const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
-    const tabs = ['summary', 'settings', 'mappings', 'aliases'];
+  const selectDetailsTab = async (
+    tab: 'summary' | 'settings' | 'mappings' | 'aliases' | 'preview'
+  ) => {
+    const tabs = ['summary', 'settings', 'mappings', 'aliases', 'preview'];
 
-    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+    testBed.component.update();
   };
 
   const clickReloadButton = () => {
@@ -95,9 +100,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'composable' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['composable', 'system'];
+    const views = ['managed', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {

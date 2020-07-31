@@ -37,4 +37,23 @@ export const graphMigrations = {
     });
     return doc;
   },
+  '7.10.0': (doc: SavedObjectUnsanitizedDoc<any>) => {
+    const wsState = get(doc, 'attributes.wsState');
+    if (typeof wsState !== 'string') {
+      return doc;
+    }
+    let state;
+    try {
+      state = JSON.parse(JSON.parse(wsState));
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+      return doc;
+    }
+    if (state.blacklist) {
+      state.blocklist = state.blacklist;
+      delete state.blacklist;
+    }
+    doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
+    return doc;
+  },
 };

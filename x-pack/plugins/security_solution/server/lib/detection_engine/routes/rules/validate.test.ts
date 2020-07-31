@@ -12,7 +12,6 @@ import {
 import { getResult } from '../__mocks__/request_responses';
 import { FindResult } from '../../../../../../alerts/server';
 import { BulkError } from '../utils';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 
@@ -84,14 +83,6 @@ export const ruleOutput: RulesSchema = {
 };
 
 describe('validate', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getResult();

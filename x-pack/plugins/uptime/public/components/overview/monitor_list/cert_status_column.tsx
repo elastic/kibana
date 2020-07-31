@@ -8,13 +8,13 @@ import React from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import { Cert, Tls } from '../../../../common/runtime_types';
+import { X509Expiry } from '../../../../common/runtime_types';
 import { useCertStatus } from '../../../hooks';
 import { EXPIRED, EXPIRES, EXPIRES_SOON } from '../../certificates/translations';
 import { CERT_STATUS } from '../../../../common/constants';
 
 interface Props {
-  cert: Cert | Tls;
+  expiry: X509Expiry;
   boldStyle?: boolean;
 }
 
@@ -31,14 +31,15 @@ const H4Text = styled.h4`
   }
 `;
 
-export const CertStatusColumn: React.FC<Props> = ({ cert, boldStyle = false }) => {
-  const certStatus = useCertStatus(cert?.not_after);
+export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false }) => {
+  const notAfter = expiry?.not_after;
+  const certStatus = useCertStatus(notAfter);
 
-  const relativeDate = moment(cert?.not_after).fromNow();
+  const relativeDate = moment(notAfter).fromNow();
 
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
     return (
-      <EuiToolTip content={moment(cert?.not_after).format('L LT')}>
+      <EuiToolTip content={moment(notAfter).format('L LT')}>
         <EuiText size="s">
           <EuiIcon color={color} type="lock" size="s" />
           {boldStyle ? (

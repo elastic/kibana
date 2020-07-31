@@ -21,9 +21,11 @@ import {
 export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions => ({
   callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
+  deserializer: undefined,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
+  serializer: undefined,
   tieBreaker: TIE_BREAKERS,
   type: TYPE,
   user: USER,

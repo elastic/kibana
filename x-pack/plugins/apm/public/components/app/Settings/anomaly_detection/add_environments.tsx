@@ -17,24 +17,28 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 
 interface Props {
   currentEnvironments: string[];
   onCreateJobSuccess: () => void;
   onCancel: () => void;
 }
-export const AddEnvironments = ({
+export function AddEnvironments({
   currentEnvironments,
   onCreateJobSuccess,
   onCancel,
-}: Props) => {
-  const { toasts } = useApmPluginContext().core.notifications;
+}: Props) {
+  const { notifications, application } = useApmPluginContext().core;
+  const canCreateJob = !!application.capabilities.ml.canCreateJob;
+  const { toasts } = notifications;
   const { data = [], status } = useFetcher(
     (callApmApi) =>
       callApmApi({
@@ -45,14 +49,27 @@ export const AddEnvironments = ({
   );
 
   const environmentOptions = data.map((env) => ({
-    label: env === ENVIRONMENT_NOT_DEFINED ? NOT_DEFINED_OPTION_LABEL : env,
+    label: getEnvironmentLabel(env),
     value: env,
     disabled: currentEnvironments.includes(env),
   }));
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const [selectedOptions, setSelected] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+
+  if (!canCreateJob) {
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="alert"
+          body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
+        />
+      </EuiPanel>
+    );
+  }
 
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
@@ -127,9 +144,12 @@ export const AddEnvironments = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            isLoading={isSaving}
+            isDisabled={isSaving || selectedOptions.length === 0}
             fill
-            disabled={selectedOptions.length === 0}
             onClick={async () => {
+              setIsSaving(true);
+
               const selectedEnvironments = selectedOptions.map(
                 ({ value }) => value as string
               );
@@ -140,6 +160,7 @@ export const AddEnvironments = ({
               if (success) {
                 onCreateJobSuccess();
               }
+              setIsSaving(false);
             }}
           >
             {i18n.translate(
@@ -154,11 +175,4 @@ export const AddEnvironments = ({
       <EuiSpacer size="l" />
     </EuiPanel>
   );
-};
-
-const NOT_DEFINED_OPTION_LABEL = i18n.translate(
-  'xpack.apm.filter.environment.notDefinedLabel',
-  {
-    defaultMessage: 'Not defined',
-  }
-);
+}

@@ -6,13 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_GRAPH_TITLE = i18n.translate(
-  'xpack.securitySolution.overview.alertsGraphTitle',
-  {
-    defaultMessage: 'External alert count',
-  }
-);
-
 export const EVENTS = i18n.translate('xpack.securitySolution.overview.eventsTitle', {
   defaultMessage: 'Event count',
 });
@@ -47,7 +40,7 @@ export const RECENT_TIMELINES = i18n.translate(
 );
 
 export const ALERT_COUNT = i18n.translate('xpack.securitySolution.overview.signalCountTitle', {
-  defaultMessage: 'Alert count',
+  defaultMessage: 'Detection alert trend',
 });
 
 export const TOP = (fieldName: string) =>

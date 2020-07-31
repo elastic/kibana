@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
 interface Props {
@@ -34,12 +34,12 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.home.componentTemplates.emptyPromptDescription"
-            defaultMessage="For example, you might create a component template that defines index settings that can be reused across index templates."
+            defaultMessage="For example, you can create a component template for index settings that can be reused across index templates."
           />
           <br />
           <EuiLink href={documentation.componentTemplates} target="_blank" external>
             {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink', {
-              defaultMessage: 'Learn more',
+              defaultMessage: 'Learn more.',
             })}
           </EuiLink>
         </p>

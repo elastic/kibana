@@ -33,7 +33,6 @@ import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
-import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
   display: inline-block;
@@ -119,7 +118,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
-  const { timelineStatus, templateTimelineType } = useTimelineStatus({ timelineType });
 
   const onSearchTimeline = useCallback((val) => {
     setSearchTimelineValue(val);
@@ -167,7 +165,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'none'}`} color="primary" />
+          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column">
@@ -263,19 +261,10 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
-      status: timelineStatus,
+      status: null,
       timelineType,
-      templateTimelineType,
     });
-  }, [
-    fetchAllTimeline,
-    onlyFavorites,
-    pageSize,
-    searchTimelineValue,
-    timelineType,
-    timelineStatus,
-    templateTimelineType,
-  ]);
+  }, [fetchAllTimeline, onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

@@ -26,6 +26,7 @@ import {
   ILegacyClusterClient,
   ILegacyCustomClusterClient,
 } from './legacy';
+import { IClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus } from '../status';
 
@@ -80,10 +81,51 @@ export interface ElasticsearchServiceSetup {
   };
 }
 
+/** @internal */
+export interface InternalElasticsearchServiceSetup {
+  // Required for the BWC with the legacy Kibana only.
+  readonly legacy: ElasticsearchServiceSetup['legacy'] & {
+    readonly config$: Observable<ElasticsearchConfig>;
+  };
+  esNodesCompatibility$: Observable<NodesVersionCompatibility>;
+  status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+}
+
 /**
  * @public
  */
 export interface ElasticsearchServiceStart {
+  /**
+   * A pre-configured {@link IClusterClient | Elasticsearch client}
+   *
+   * @example
+   * ```js
+   * const client = core.elasticsearch.client;
+   * ```
+   */
+  readonly client: IClusterClient;
+  /**
+   * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
+   *
+   * @param type Unique identifier of the client
+   * @param clientConfig A config consists of Elasticsearch JS client options and
+   * valid sub-set of Elasticsearch service config.
+   * We fill all the missing properties in the `clientConfig` using the default
+   * Elasticsearch config so that we don't depend on default values set and
+   * controlled by underlying Elasticsearch JS client.
+   * We don't run validation against the passed config and expect it to be valid.
+   *
+   * @example
+   * ```js
+   * const client = elasticsearch.createClient('my-app-name', config);
+   * const data = await client.asInternalUser.search();
+   * ```
+   */
+  readonly createClient: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+
   /**
    * @deprecated
    * Provided for the backward compatibility.
@@ -103,7 +145,7 @@ export interface ElasticsearchServiceStart {
      *
      * @example
      * ```js
-     * const client = elasticsearch.createCluster('my-app-name', config);
+     * const client = elasticsearch.legacy.createClient('my-app-name', config);
      * const data = await client.callAsInternalUser();
      * ```
      */
@@ -113,27 +155,21 @@ export interface ElasticsearchServiceStart {
     ) => ILegacyCustomClusterClient;
 
     /**
-     * A pre-configured Elasticsearch client. All Elasticsearch config value changes are processed under the hood.
-     * See {@link ILegacyClusterClient}.
+     * A pre-configured {@link ILegacyClusterClient | legacy Elasticsearch client}.
      *
      * @example
      * ```js
-     * const client = core.elasticsearch.client;
+     * const client = core.elasticsearch.legacy.client;
      * ```
      */
     readonly client: ILegacyClusterClient;
   };
 }
 
-/** @internal */
-export interface InternalElasticsearchServiceSetup {
-  // Required for the BWC with the legacy Kibana only.
-  readonly legacy: ElasticsearchServiceSetup['legacy'] & {
-    readonly config$: Observable<ElasticsearchConfig>;
-  };
-  esNodesCompatibility$: Observable<NodesVersionCompatibility>;
-  status$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
-}
+/**
+ * @internal
+ */
+export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
 
 /** @public */
 export interface ElasticsearchStatusMeta {

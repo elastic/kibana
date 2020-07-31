@@ -15,7 +15,7 @@ import {
   HostPolicyResponseActionStatus,
 } from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
-import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
+import { MANAGEMENT_ROUTING_HOSTS_PATH } from '../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -114,7 +114,7 @@ export const policyResponseError = (state: Immutable<HostState>) => state.policy
 export const isOnHostPage = (state: Immutable<HostState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+      path: MANAGEMENT_ROUTING_HOSTS_PATH,
       exact: true,
     }) !== null
   );
@@ -195,3 +195,17 @@ export const policyResponseStatus: (state: Immutable<HostState>) => string = cre
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
 );
+
+/**
+ * returns the list of known non-existing polices that may have been in the Host API response.
+ * @param state
+ */
+export const nonExistingPolicies: (
+  state: Immutable<HostState>
+) => Immutable<HostState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
+
+/**
+ * Return boolean that indicates whether hosts exist
+ * @param state
+ */
+export const hostsExist: (state: Immutable<HostState>) => boolean = (state) => state.hostsExist;

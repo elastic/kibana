@@ -42,8 +42,22 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     callCluster: CallESAsCurrentUser,
     packageConfig: NewPackageConfig,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options?: { id?: string; user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig> {
+    // Check that its agent config does not have a package config with the same name
+    const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
+    if (!parentAgentConfig) {
+      throw new Error('Agent config not found');
+    } else {
+      if (
+        (parentAgentConfig.package_configs as PackageConfig[]).find(
+          (siblingPackageConfig) => siblingPackageConfig.name === packageConfig.name
+        )
+      ) {
+        throw new Error('There is already a package with the same name on this agent config');
+      }
+    }
+
     // Make sure the associated package is installed
     if (packageConfig.package?.name) {
       const [, pkgInfo] = await Promise.all([
@@ -90,6 +104,7 @@ class PackageConfigService {
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(soClient, packageConfig.config_id, [newSo.id], {
       user: options?.user,
+      bumpRevision: options?.bumpConfigRevision ?? true,
     });
 
     return {
@@ -103,10 +118,10 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     packageConfigs: NewPackageConfig[],
     configId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
-    const { saved_objects: newSos } = await soClient.bulkCreate<PackageConfigSOAttributes>(
+    const { saved_objects } = await soClient.bulkCreate<PackageConfigSOAttributes>(
       packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
@@ -121,6 +136,9 @@ class PackageConfigService {
       }))
     );
 
+    // Filter out invalid SOs
+    const newSos = saved_objects.filter((so) => !so.error && so.attributes);
+
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(
       soClient,
@@ -128,6 +146,7 @@ class PackageConfigService {
       newSos.map((newSo) => newSo.id),
       {
         user: options?.user,
+        bumpRevision: options?.bumpConfigRevision ?? true,
       }
     );
 
@@ -223,6 +242,21 @@ class PackageConfigService {
 
     if (!oldPackageConfig) {
       throw new Error('Package config not found');
+    }
+
+    // Check that its agent config does not have a package config with the same name
+    const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
+    if (!parentAgentConfig) {
+      throw new Error('Agent config not found');
+    } else {
+      if (
+        (parentAgentConfig.package_configs as PackageConfig[]).find(
+          (siblingPackageConfig) =>
+            siblingPackageConfig.id !== id && siblingPackageConfig.name === packageConfig.name
+        )
+      ) {
+        throw new Error('There is already a package with the same name on this agent config');
+      }
     }
 
     await soClient.update<PackageConfigSOAttributes>(

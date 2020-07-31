@@ -173,7 +173,9 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle>
+                    <EuiTitle
+                      size="m"
+                    >
                       <h2
                         className="euiTitle euiTitle--medium"
                         data-test-subj="apiKeysPermissionDeniedMessage"

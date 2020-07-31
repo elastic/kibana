@@ -8,16 +8,26 @@ import seedrandom from 'seedrandom';
 import {
   AlertEvent,
   EndpointEvent,
+  EndpointStatus,
   Host,
   HostMetadata,
-  OSFields,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
+  OSFields,
   PolicyData,
-  EndpointStatus,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 import { parentEntityId } from './models/event';
+import {
+  GetAgentConfigsResponseItem,
+  GetPackagesResponse,
+} from '../../../ingest_manager/common/types/rest_spec';
+import {
+  AgentConfigStatus,
+  EsAssetReference,
+  InstallationStatus,
+  KibanaAssetReference,
+} from '../../../ingest_manager/common/types/models';
 
 export type Event = AlertEvent | EndpointEvent;
 /**
@@ -35,7 +45,7 @@ interface EventOptions {
   timestamp?: number;
   entityID?: string;
   parentEntityID?: string;
-  eventType?: string;
+  eventType?: string | string[];
   eventCategory?: string | string[];
   processName?: string;
   ancestry?: string[];
@@ -572,9 +582,9 @@ export class EndpointDocGenerator {
       },
       ...detailRecordForEventType,
       event: {
-        category: options.eventCategory ? options.eventCategory : 'process',
+        category: options.eventCategory ? options.eventCategory : ['process'],
         kind: 'event',
-        type: options.eventType ? options.eventType : 'start',
+        type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
       },
       host: this.commonInfo.host,
@@ -633,7 +643,12 @@ export class EndpointDocGenerator {
 
       // place the event in the right array depending on its category
       if (event.event.kind === 'event') {
-        if (event.event.category === 'process') {
+        if (
+          (Array.isArray(event.event.category) &&
+            event.event.category.length === 1 &&
+            event.event.category[0] === 'process') ||
+          event.event.category === 'process'
+        ) {
           node.lifecycle.push(event);
         } else {
           node.relatedEvents.push(event);
@@ -812,8 +827,8 @@ export class EndpointDocGenerator {
           timestamp: timestamp + termProcessDuration * 1000,
           entityID: root.process.entity_id,
           parentEntityID: root.process.parent?.entity_id,
-          eventCategory: 'process',
-          eventType: 'end',
+          eventCategory: ['process'],
+          eventType: ['end'],
         })
       );
     }
@@ -823,7 +838,7 @@ export class EndpointDocGenerator {
         timestamp,
         parentEntityID: ancestor.process.entity_id,
         // add the parent to the ancestry array
-        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext.ancestry ?? [])],
+        ancestry: [ancestor.process.entity_id, ...(ancestor.process.Ext?.ancestry ?? [])],
         ancestryArrayLimit: opts.ancestryArraySize,
         parentPid: ancestor.process.pid,
         pid: this.randomN(5000),
@@ -838,9 +853,9 @@ export class EndpointDocGenerator {
             timestamp: timestamp + termProcessDuration * 1000,
             entityID: ancestor.process.entity_id,
             parentEntityID: ancestor.process.parent?.entity_id,
-            eventCategory: 'process',
-            eventType: 'end',
-            ancestry: ancestor.process.Ext.ancestry,
+            eventCategory: ['process'],
+            eventType: ['end'],
+            ancestry: ancestor.process.Ext?.ancestry,
             ancestryArrayLimit: opts.ancestryArraySize,
           })
         );
@@ -864,7 +879,7 @@ export class EndpointDocGenerator {
         timestamp,
         ancestor.process.entity_id,
         ancestor.process.parent?.entity_id,
-        ancestor.process.Ext.ancestry
+        ancestor.process.Ext?.ancestry
       )
     );
     return events;
@@ -914,7 +929,7 @@ export class EndpointDocGenerator {
         parentEntityID: currentState.event.process.entity_id,
         ancestry: [
           currentState.event.process.entity_id,
-          ...(currentState.event.process.Ext.ancestry ?? []),
+          ...(currentState.event.process.Ext?.ancestry ?? []),
         ],
         ancestryArrayLimit: opts.ancestryArraySize,
       });
@@ -936,9 +951,9 @@ export class EndpointDocGenerator {
           timestamp: timestamp + processDuration * 1000,
           entityID: child.process.entity_id,
           parentEntityID: child.process.parent?.entity_id,
-          eventCategory: 'process',
-          eventType: 'end',
-          ancestry: child.process.Ext.ancestry,
+          eventCategory: ['process'],
+          eventType: ['end'],
+          ancestry: child.process.Ext?.ancestry,
           ancestryArrayLimit: opts.ancestryArraySize,
         });
       }
@@ -984,7 +999,7 @@ export class EndpointDocGenerator {
           parentEntityID: node.process.parent?.entity_id,
           eventCategory: eventInfo.category,
           eventType: eventInfo.creationType,
-          ancestry: node.process.Ext.ancestry,
+          ancestry: node.process.Ext?.ancestry,
         });
       }
     }
@@ -1007,7 +1022,7 @@ export class EndpointDocGenerator {
         ts,
         node.process.entity_id,
         node.process.parent?.entity_id,
-        node.process.Ext.ancestry
+        node.process.Ext?.ancestry
       );
     }
   }
@@ -1036,8 +1051,8 @@ export class EndpointDocGenerator {
           config: {
             artifact_manifest: {
               value: {
-                manifest_version: 'v0',
-                schema_version: '1.0.0',
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
                 artifacts: {},
               },
             },
@@ -1054,6 +1069,97 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
+    };
+  }
+
+  /**
+   * Generate an Agent Configuration (ingest)
+   */
+  public generateAgentConfig(): GetAgentConfigsResponseItem {
+    return {
+      id: this.seededUUIDv4(),
+      name: 'Agent Config',
+      status: AgentConfigStatus.Active,
+      description: 'Some description',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      revision: 2,
+      updated_at: '2020-07-22T16:36:49.196Z',
+      updated_by: 'elastic',
+      package_configs: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
+      agents: 0,
+    };
+  }
+
+  /**
+   * Generate an EPM Package for Endpoint
+   */
+  public generateEpmPackage(): GetPackagesResponse['response'][0] {
+    return {
+      name: 'endpoint',
+      title: 'Elastic Endpoint',
+      version: '0.5.0',
+      description: 'This is the Elastic Endpoint package.',
+      type: 'solution',
+      download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
+      path: '/package/endpoint/0.5.0',
+      icons: [
+        {
+          src: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          size: '16x16',
+          type: 'image/svg+xml',
+        },
+      ],
+      status: 'installed' as InstallationStatus,
+      savedObject: {
+        type: 'epm-packages',
+        id: 'endpoint',
+        attributes: {
+          installed_kibana: [
+            { id: '826759f0-7074-11ea-9bc8-6b38f4d29a16', type: 'dashboard' },
+            { id: '1cfceda0-728b-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '1e525190-7074-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '55387750-729c-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '92b1edc0-706a-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: 'a3a3bd10-706b-11ea-9bc8-6b38f4d29a16', type: 'map' },
+          ] as KibanaAssetReference[],
+          installed_es: [
+            { id: 'logs-endpoint.alerts', type: 'index_template' },
+            { id: 'events-endpoint', type: 'index_template' },
+            { id: 'logs-endpoint.events.file', type: 'index_template' },
+            { id: 'logs-endpoint.events.library', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata_mirror', type: 'index_template' },
+            { id: 'logs-endpoint.events.network', type: 'index_template' },
+            { id: 'metrics-endpoint.policy', type: 'index_template' },
+            { id: 'logs-endpoint.events.process', type: 'index_template' },
+            { id: 'logs-endpoint.events.registry', type: 'index_template' },
+            { id: 'logs-endpoint.events.security', type: 'index_template' },
+            { id: 'metrics-endpoint.telemetry', type: 'index_template' },
+          ] as EsAssetReference[],
+          es_index_patterns: {
+            alerts: 'logs-endpoint.alerts-*',
+            events: 'events-endpoint-*',
+            file: 'logs-endpoint.events.file-*',
+            library: 'logs-endpoint.events.library-*',
+            metadata: 'metrics-endpoint.metadata-*',
+            metadata_mirror: 'metrics-endpoint.metadata_mirror-*',
+            network: 'logs-endpoint.events.network-*',
+            policy: 'metrics-endpoint.policy-*',
+            process: 'logs-endpoint.events.process-*',
+            registry: 'logs-endpoint.events.registry-*',
+            security: 'logs-endpoint.events.security-*',
+            telemetry: 'metrics-endpoint.telemetry-*',
+          },
+          name: 'endpoint',
+          version: '0.5.0',
+          internal: false,
+          removable: false,
+        },
+        references: [],
+        updated_at: '2020-06-24T14:41:23.098Z',
+        version: 'Wzc0LDFd',
+      },
     };
   }
 

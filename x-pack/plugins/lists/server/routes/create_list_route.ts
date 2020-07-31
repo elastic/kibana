@@ -8,8 +8,8 @@ import { IRouter } from 'kibana/server';
 
 import { LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
-import { createListSchema, listSchema } from '../../common/schemas';
+import { validate } from '../../common/shared_imports';
+import { CreateListSchemaDecoded, createListSchema, listSchema } from '../../common/schemas';
 
 import { getListClient } from '.';
 
@@ -17,17 +17,28 @@ export const createListRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: LIST_URL,
       validate: {
-        body: buildRouteValidation(createListSchema),
+        body: buildRouteValidation<typeof createListSchema, CreateListSchemaDecoded>(
+          createListSchema
+        ),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, description, id, type, meta } = request.body;
+        const {
+          name,
+          description,
+          deserializer,
+          id,
+          serializer,
+          type,
+          meta,
+          version,
+        } = request.body;
         const lists = getListClient(context);
         const listExists = await lists.getListIndexExists();
         if (!listExists) {
@@ -45,7 +56,17 @@ export const createListRoute = (router: IRouter): void => {
               });
             }
           }
-          const list = await lists.createList({ description, id, meta, name, type });
+          const list = await lists.createList({
+            description,
+            deserializer,
+            id,
+            immutable: false,
+            meta,
+            name,
+            serializer,
+            type,
+            version,
+          });
           const [validated, errors] = validate(list, listSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });

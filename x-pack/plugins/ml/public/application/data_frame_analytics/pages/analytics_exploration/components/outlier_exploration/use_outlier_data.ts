@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import {
   useColorRange,
@@ -16,7 +18,7 @@ import {
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
-  fetchChartsData,
+  getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
@@ -24,7 +26,6 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
@@ -79,14 +80,25 @@ export const useOutlierData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
+  const dataLoader = useMemo(
+    () =>
+      indexPattern !== undefined
+        ? new DataLoader(indexPattern, getToastNotifications())
+        : undefined,
+    [indexPattern]
+  );
+
   const fetchColumnChartsData = async function () {
     try {
-      if (jobConfig !== undefined) {
-        const columnChartsData = await fetchChartsData(
-          jobConfig.dest.index,
-          ml.esSearch,
-          searchQuery,
-          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      if (jobConfig !== undefined && dataLoader !== undefined) {
+        const columnChartsData = await dataLoader.loadFieldHistograms(
+          columns
+            .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+            .map((cT) => ({
+              fieldName: cT.id,
+              type: getFieldType(cT.schema),
+            })),
+          searchQuery
         );
         dataGrid.setColumnCharts(columnChartsData);
       }

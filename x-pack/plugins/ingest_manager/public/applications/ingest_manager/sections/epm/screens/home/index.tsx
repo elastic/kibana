@@ -61,7 +61,9 @@ export function EPMHomePage() {
 
 function InstalledPackages() {
   useBreadcrumbs('integrations_installed');
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+    experimental: true,
+  });
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
@@ -118,7 +120,8 @@ function AvailablePackages() {
   const queryParams = new URLSearchParams(useLocation().search);
   const initialCategory = queryParams.get('category') || '';
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
-  const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
+  const { data: allPackagesRes, isLoading: isLoadingAllPackages } = useGetPackages();
+  const { data: categoryPackagesRes, isLoading: isLoadingCategoryPackages } = useGetPackages({
     category: selectedCategory,
   });
   const { data: categoriesRes, isLoading: isLoadingCategories } = useGetCategories();
@@ -126,7 +129,7 @@ function AvailablePackages() {
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
-    defaultMessage: 'All integrations',
+    defaultMessage: 'Browse by category',
   });
 
   const categories = [
@@ -135,13 +138,13 @@ function AvailablePackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allPackagesRes?.response?.length || 0,
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
   const controls = categories ? (
     <CategoryFacets
-      isLoading={isLoadingCategories}
+      isLoading={isLoadingCategories || isLoadingAllPackages}
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => {
@@ -156,7 +159,7 @@ function AvailablePackages() {
 
   return (
     <PackageListGrid
-      isLoading={isLoadingPackages}
+      isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
       list={packages}

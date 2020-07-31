@@ -2,55 +2,33 @@
 
 exports[`TimeField should render a loading state 1`] = `
 <EuiForm>
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Select a primary time field for use with the global time filter."
+        id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <div>
-        <p>
-          <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-            values={Object {}}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
-            values={Object {}}
-          />
-        </p>
-      </div>
-    }
     label={
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiLoadingSpinner
-            size="s"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <FormattedMessage
+        defaultMessage="Time field"
+        id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiLoadingSpinner
+        size="s"
+      />
     }
     labelType="label"
   >
@@ -73,62 +51,43 @@ exports[`TimeField should render a loading state 1`] = `
 
 exports[`TimeField should render a selected time field 1`] = `
 <EuiForm>
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Select a primary time field for use with the global time filter."
+        id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <div>
-        <p>
-          <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-            values={Object {}}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
-            values={Object {}}
-          />
-        </p>
-      </div>
-    }
     label={
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
+      <FormattedMessage
+        defaultMessage="Time field"
+        id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiText
+        size="xs"
       >
-        <EuiFlexItem
-          grow={false}
+        <EuiLink
+          onClick={[Function]}
         >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiLink
-            className="timeFieldRefreshButton"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Refresh"
-              id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
-              values={Object {}}
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <FormattedMessage
+            defaultMessage="Refresh"
+            id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
+            values={Object {}}
+          />
+        </EuiLink>
+      </EuiText>
     }
     labelType="label"
   >
@@ -154,62 +113,43 @@ exports[`TimeField should render a selected time field 1`] = `
 
 exports[`TimeField should render normally 1`] = `
 <EuiForm>
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Select a primary time field for use with the global time filter."
+        id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer />
   <EuiFormRow
     describedByIds={Array []}
     display="row"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <div>
-        <p>
-          <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-            values={Object {}}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
-            values={Object {}}
-          />
-        </p>
-      </div>
-    }
     label={
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
+      <FormattedMessage
+        defaultMessage="Time field"
+        id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiText
+        size="xs"
       >
-        <EuiFlexItem
-          grow={false}
+        <EuiLink
+          onClick={[Function]}
         >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiLink
-            className="timeFieldRefreshButton"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Refresh"
-              id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
-              values={Object {}}
-            />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <FormattedMessage
+            defaultMessage="Refresh"
+            id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
+            values={Object {}}
+          />
+        </EuiLink>
+      </EuiText>
     }
     labelType="label"
   >

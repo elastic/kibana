@@ -22,6 +22,8 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');
 
 describe('ExceptionsViewer', () => {
+  const ruleName = 'test rule';
+
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -65,9 +67,12 @@ describe('ExceptionsViewer', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
           ruleId={'123'}
+          ruleIndices={['filebeat-*']}
+          ruleName={ruleName}
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },
@@ -85,7 +90,9 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
+          ruleName={ruleName}
           exceptionListsMeta={[]}
           availableListTypes={[ExceptionListTypeEnum.DETECTION]}
           commentsAccordionId="commentsAccordion"
@@ -112,10 +119,13 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
+          ruleName={ruleName}
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },

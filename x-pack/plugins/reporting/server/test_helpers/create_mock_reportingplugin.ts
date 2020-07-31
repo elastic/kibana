@@ -22,6 +22,7 @@ import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStartDeps } from '../types';
 import { ReportingStore } from '../lib';
 import { createMockLevelLogger } from './create_mock_levellogger';
+import { Report } from '../lib/store';
 
 (initializeBrowserDriverFactory as jest.Mock<
   Promise<HeadlessChromiumDriverFactory>
@@ -47,7 +48,7 @@ const createMockPluginStart = (
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    enqueueJob: startMock.enqueueJob,
+    enqueueJob: startMock.enqueueJob || jest.fn().mockResolvedValue(new Report({} as any)),
     esqueue: startMock.esqueue,
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },

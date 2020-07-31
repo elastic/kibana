@@ -17,4 +17,9 @@
  * under the License.
  */
 
-export { setSVGElementGetBBox, setHTMLElementOffset } from './helpers';
+export {
+  setSVGElementGetBBox,
+  setHTMLElementOffset,
+  setHTMLElementClientSizes,
+  setSVGElementGetComputedTextLength,
+} from './helpers';

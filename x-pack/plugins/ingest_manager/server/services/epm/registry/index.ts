@@ -21,11 +21,17 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
+import { appContextService } from '../..';
 
 export { ArchiveEntry } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
+  experimental?: boolean;
+}
+
+export interface CategoriesParams {
+  experimental?: boolean;
 }
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
@@ -34,19 +40,37 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  if (params && params.category) {
-    url.searchParams.set('category', params.category);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
+  if (params) {
+    if (params.category) {
+      url.searchParams.set('category', params.category);
+    }
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
+  }
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
   }
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(
-  packageName: string,
-  internal: boolean = true
-): Promise<RegistrySearchResult> {
+export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
-  const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
+  const url = new URL(
+    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
+  );
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
@@ -66,9 +90,16 @@ export async function fetchFile(filePath: string): Promise<Response> {
   return getResponse(`${registryUrl}${filePath}`);
 }
 
-export async function fetchCategories(): Promise<CategorySummaryList> {
+export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
-  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
+  const url = new URL(`${registryUrl}/categories`);
+  if (params) {
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
+  }
+
+  return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function getArchiveInfo(

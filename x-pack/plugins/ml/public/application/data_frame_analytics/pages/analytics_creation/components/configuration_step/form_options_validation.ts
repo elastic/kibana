@@ -12,9 +12,6 @@ import { BASIC_NUMERICAL_TYPES, EXTENDED_NUMERICAL_TYPES } from '../../../../com
 
 export const CATEGORICAL_TYPES = new Set(['ip', 'keyword']);
 
-// List of system fields we want to ignore for the numeric field check.
-export const OMIT_FIELDS: string[] = ['_source', '_type', '_index', '_id', '_version', '_score'];
-
 // Regression supports numeric fields. Classification supports categorical, numeric, and boolean.
 export const shouldAddAsDepVarOption = (field: Field, jobType: AnalyticsJobType) => {
   if (field.id === EVENT_RATE_FIELD_ID) return false;
