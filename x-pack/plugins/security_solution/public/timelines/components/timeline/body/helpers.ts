@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get, isEmpty, noop } from 'lodash/fp';
+
+import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
 import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
@@ -65,11 +66,16 @@ export const getPinOnClick = ({
   onPinEvent,
   onUnPinEvent,
   isEventPinned,
-}: GetPinOnClickParams): (() => void) => {
+}: GetPinOnClickParams) => {
   if (!allowUnpinning) {
-    return noop;
+    return;
   }
-  return isEventPinned ? onUnPinEvent(eventId) : onPinEvent(eventId);
+
+  if (isEventPinned) {
+    onUnPinEvent(eventId);
+  } else {
+    onPinEvent(eventId);
+  }
 };
 
 /**
