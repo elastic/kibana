@@ -54,7 +54,9 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
 }) => {
   const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
 
-  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string>(null);
+  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
+    null
+  );
 
   if (isLoading) {
     return (
