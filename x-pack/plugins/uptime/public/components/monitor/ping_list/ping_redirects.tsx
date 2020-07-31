@@ -7,7 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiIcon, EuiLink, EuiListGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItemProps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 const ListGroup = styled(EuiListGroup)`
@@ -28,7 +28,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
 
   const list = monitorStatus?.http?.response?.redirects;
 
-  const listOfRedirects = [
+  const listOfRedirects: EuiListGroupItemProps[] = [
     {
       label: monitorUrl,
       href: monitorUrl,
