@@ -194,7 +194,8 @@ export const createExternalService = (
 
           return {
             ...acc,
-            [currentIssueType.id]: {
+            [currentIssueType.name]: {
+              id: currentIssueType.id,
               name: currentIssueType.name,
               fields,
             },
