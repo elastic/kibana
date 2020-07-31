@@ -8,16 +8,14 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
   TRANSACTION_NAME,
-} from '../elasticsearch_fieldnames';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../utils/range_filter';
+} from '../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../common/utils/range_filter';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getTransactionsProjection({
   setup,
@@ -30,7 +28,7 @@ export function getTransactionsProjection({
   transactionName?: string;
   transactionType?: string;
 }) {
-  const { start, end, uiFiltersES, indices } = setup;
+  const { start, end, uiFiltersES } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -45,7 +43,6 @@ export function getTransactionsProjection({
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
-      { term: { [PROCESSOR_EVENT]: 'transaction' } },
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,
@@ -54,7 +51,9 @@ export function getTransactionsProjection({
   };
 
   return {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction as const],
+    },
     body: {
       query: {
         bool,
