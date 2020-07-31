@@ -89,7 +89,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.name: "hello world"',
+          filter: 'alert.attributes.name: hello world',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -200,29 +200,6 @@ describe('Detections Rules API', () => {
       expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
     });
 
-    test('query KQL parses without errors when filter contains characters such as left parenthesis (', async () => {
-      await fetchRules({
-        filterOptions: {
-          filter: '(',
-          sortField: 'enabled',
-          sortOrder: 'desc',
-          showCustomRules: true,
-          showElasticRules: true,
-          tags: [],
-        },
-        signal: abortCtrl.signal,
-      });
-      const [
-        [
-          ,
-          {
-            query: { filter },
-          },
-        ],
-      ] = fetchMock.mock.calls;
-      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
-    });
-
     test('query KQL parses without errors when filter contains characters such as double quotes', async () => {
       await fetchRules({
         filterOptions: {
@@ -285,7 +262,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.name: "ruleName" AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
+            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',

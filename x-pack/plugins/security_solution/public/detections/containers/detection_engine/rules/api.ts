@@ -90,9 +90,7 @@ export const fetchRules = async ({
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filters = [
-    ...(filterOptions.filter.length
-      ? [`alert.attributes.name: "${filterOptions.filter.replace(/"/g, '')}"`]
-      : []),
+    ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
     ...(filterOptions.showCustomRules
       ? [`alert.attributes.tags: "__internal_immutable:false"`]
       : []),
