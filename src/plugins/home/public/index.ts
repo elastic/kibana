@@ -28,6 +28,7 @@ export {
 } from './plugin';
 export {
   FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
   FeatureCatalogueCategory,
   FeatureCatalogueHomePageSection,
   Environment,

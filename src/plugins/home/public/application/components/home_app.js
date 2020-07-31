@@ -38,7 +38,7 @@ const RedirectToDefaultApp = () => {
   return null;
 };
 
-export function HomeApp({ directories }) {
+export function HomeApp({ directories, solutions }) {
   const {
     savedObjectsClient,
     getBasePath,
@@ -85,6 +85,7 @@ export function HomeApp({ directories }) {
             <Home
               addBasePath={addBasePath}
               directories={directories}
+              solutions={solutions}
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
@@ -109,6 +110,16 @@ HomeApp.propTypes = {
       homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
       solution: PropTypes.string,
+      order: PropTypes.number,
+    })
+  ),
+  solutions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
       order: PropTypes.number,
     })
   ),

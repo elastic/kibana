@@ -25,7 +25,6 @@ export enum FeatureCatalogueCategory {
   ADMIN = 'admin',
   DATA = 'data',
   OTHER = 'other',
-  SOLUTION = 'solution',
 }
 
 /** @public */
@@ -53,15 +52,32 @@ export interface FeatureCatalogueEntry {
   homePageSection?: FeatureCatalogueHomePageSection;
   /** An ordinal used to sort features relative to one another for display on the home page */
   readonly order?: number;
-  /** The solution id this app should be displayed under */
+  /** The id of a registered solution this app should be displayed under in the solution section of the home page*/
   readonly solution?: string;
-  /** Images to be displayed around the solution's title  */
-  readonly solutionImages?: JSX.Element[];
+}
+
+/** @public */
+export interface FeatureCatalogueSolution {
+  /** Unique string identifier for this feature. */
+  readonly id: string;
+  /** Title of feature displayed to the user. */
+  readonly title: string;
+  /** One-line description of feature displayed to the user. */
+  readonly description: string;
+  /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
+  readonly icon: IconType;
+  /** URL path to link to this future. Should not include the basePath. */
+  readonly path: string;
+  /** An ordinal used to sort features relative to one another for display on the home page */
+  readonly order?: number;
+  /** The class to be applied to the solution card. */
+  readonly className?: string;
 }
 
 export class FeatureCatalogueRegistry {
   private capabilities: Capabilities | null = null;
   private readonly features = new Map<string, FeatureCatalogueEntry>();
+  private readonly solutions = new Map<string, FeatureCatalogueSolution>();
 
   public setup() {
     return {
@@ -73,6 +89,15 @@ export class FeatureCatalogueRegistry {
         }
 
         this.features.set(feature.id, feature);
+      },
+      registerSolution: (solution: FeatureCatalogueSolution) => {
+        if (this.features.has(solution.id)) {
+          throw new Error(
+            `Feature with id [${solution.id}] has already been registered. Use a unique id.`
+          );
+        }
+
+        this.solutions.set(solution.id, solution);
       },
     };
   }
@@ -105,6 +130,16 @@ export class FeatureCatalogueRegistry {
     const capabilities = this.capabilities;
     return [...this.features.values()]
       .filter((entry) => capabilities.catalogue[entry.id] !== false)
+      .sort(compareByKey('title'));
+  }
+
+  public getSolutions(): readonly FeatureCatalogueSolution[] {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return [...this.solutions.values()]
+      .filter((solution) => capabilities.catalogue[solution.id] !== false)
       .sort(compareByKey('title'));
   }
 }

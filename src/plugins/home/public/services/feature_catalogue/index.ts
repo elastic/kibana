@@ -21,6 +21,7 @@ export {
   FeatureCatalogueCategory,
   FeatureCatalogueHomePageSection,
   FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
 } from './feature_catalogue_registry';

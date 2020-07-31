@@ -27,11 +27,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { SolutionTitle } from './solution_title';
-import { FeatureCatalogueEntry } from '../../../';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { FeatureCatalogueCategory, FeatureCatalogueHomePageSection } from '../../../services';
 
-// TODO: Bolding the first word/verb won't look write in other languages
 const getDescriptionText = ({ description }: FeatureCatalogueEntry): JSX.Element => (
   <EuiText size="s" key={`${description}`}>
     <p>{description}</p>
@@ -58,37 +57,29 @@ const getAppDescriptions = (apps: FeatureCatalogueEntry[]) =>
     .reduce<JSX.Element[]>(addSpacersBetweenElementsReducer, []);
 
 const sortByOrder = (
-  { order: orderA = 0 }: FeatureCatalogueEntry,
-  { order: orderB = 0 }: FeatureCatalogueEntry
+  { order: orderA = 0 }: FeatureCatalogueEntry | FeatureCatalogueSolution,
+  { order: orderB = 0 }: FeatureCatalogueEntry | FeatureCatalogueSolution
 ) => orderA - orderB;
 
 interface Props {
-  addBasePath: (path: string) => string;
   directories: FeatureCatalogueEntry[];
+  solutions: FeatureCatalogueSolution[];
 }
 
-export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
+export const SolutionsPanel: FC<Props> = ({ directories, solutions }) => {
   const findDirectoriesBySolution = (solutionId: string): FeatureCatalogueEntry[] =>
     directories.filter(
       (directory) =>
-        directory.category !== FeatureCatalogueCategory.SOLUTION &&
         directory.homePageSection === FeatureCatalogueHomePageSection.SOLUTION_PANEL &&
         directory.solution === solutionId
     );
 
+  const kibana = solutions.find(({ id }) => id === 'kibana');
+
   // Find non-Kibana solutions
-  const solutions = directories
-    .filter(
-      (directory) =>
-        directory.category === FeatureCatalogueCategory.SOLUTION &&
-        directory.homePageSection === FeatureCatalogueHomePageSection.SOLUTION_PANEL &&
-        directory.id !== 'kibana'
-    )
-    .sort(sortByOrder);
+  solutions = solutions.sort(sortByOrder).filter(({ id }) => id !== 'kibana');
 
-  const kibana = directories.find(({ id }) => id === 'kibana');
-
-  const renderSolutionCard = (solution: FeatureCatalogueEntry) => {
+  const renderSolutionCard = (solution: FeatureCatalogueSolution) => {
     const solutionApps = findDirectoriesBySolution(solution.id);
 
     return solutionApps.length ? (
@@ -96,7 +87,7 @@ export const SolutionsPanel: FC<Props> = ({ addBasePath, directories }) => {
         key={solution.id}
         className={`homSolutionsSection__container ${
           solution.id === 'kibana' ? 'homSolutionsSection__single' : ''
-        }`}
+        } ${solution.className}`}
         grow={1}
       >
         <EuiPanel
