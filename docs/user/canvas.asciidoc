@@ -18,7 +18,7 @@ With Canvas, you can:
 * Focus the data you want to display with filters.
 
 [role="screenshot"]
-image::images/canvas-gs-example.png[]
+image::images/canvas-gs-example.png[Getting started example]
 
 For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
 
@@ -158,7 +158,7 @@ To personalize your workpad, add your own logos and graphics.
 . To add the image to the workpad, click the *Create image element* icon.
 +
 [role="screenshot"]
-image::images/canvas-add-image.gif[]
+image::images/canvas-add-image.gif[Add image to Canvas]
 
 [float]
 [[add-more-pages]]
