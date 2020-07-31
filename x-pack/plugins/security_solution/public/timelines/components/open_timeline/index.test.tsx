@@ -16,7 +16,7 @@ import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_resu
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 
 import { NotePreviews } from './note_previews';
-import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 
 import { StatefulOpenTimeline } from '.';
 
@@ -24,7 +24,6 @@ import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
 import { useParams } from 'react-router-dom';
 import { TimelineType } from '../../../../common/types/timeline';
-import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
