@@ -50,7 +50,7 @@ describe('usingPrivileges', () => {
           new Feature({
             id: 'fooFeature',
             name: 'Foo Feature',
-            app: ['fooApp'],
+            app: ['fooApp', 'foo'],
             navLinkId: 'foo',
             privileges: null,
           }),
@@ -126,7 +126,7 @@ describe('usingPrivileges', () => {
           new Feature({
             id: 'fooFeature',
             name: 'Foo Feature',
-            app: [],
+            app: ['foo'],
             navLinkId: 'foo',
             privileges: null,
           }),
@@ -259,7 +259,7 @@ describe('usingPrivileges', () => {
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
-          app: [],
+          app: ['bar'],
           privileges: null,
         }),
       ],
@@ -409,7 +409,7 @@ describe('all', () => {
         new Feature({
           id: 'fooFeature',
           name: 'Foo Feature',
-          app: [],
+          app: ['foo'],
           navLinkId: 'foo',
           privileges: null,
         }),

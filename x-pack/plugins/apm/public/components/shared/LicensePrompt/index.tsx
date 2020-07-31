@@ -16,8 +16,7 @@ interface Props {
 
 export const LicensePrompt = ({ text, showBetaBadge = false }: Props) => {
   const licensePageUrl = useKibanaUrl(
-    '/app/kibana',
-    '/management/stack/license_management/home'
+    '/app/management/stack/license_management'
   );
 
   const renderLicenseBody = (

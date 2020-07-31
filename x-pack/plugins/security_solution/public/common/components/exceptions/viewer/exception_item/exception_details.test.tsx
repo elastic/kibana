@@ -12,7 +12,7 @@ import moment from 'moment-timezone';
 
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comments.mock';
+import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {
@@ -211,7 +211,7 @@ describe('ExceptionDetails', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Comment');
+    expect(wrapper.find('EuiDescriptionListTitle').at(3).text()).toEqual('Description');
     expect(wrapper.find('EuiDescriptionListDescription').at(3).text()).toEqual('some description');
   });
 });

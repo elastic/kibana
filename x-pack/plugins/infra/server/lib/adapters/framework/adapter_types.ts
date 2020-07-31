@@ -38,6 +38,7 @@ export interface CallWithRequestParams extends GenericParams {
   fields?: string | string[];
   path?: string;
   query?: string | object;
+  track_total_hits?: boolean | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

@@ -36,7 +36,7 @@ import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/
 import { useUserInfo } from '../../components/user_info';
 import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
-import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
@@ -51,10 +51,15 @@ import {
   MIN_EVENTS_VIEWER_BODY_HEIGHT,
 } from '../../../timelines/components/timeline/body/helpers';
 import { footerHeight } from '../../../timelines/components/timeline/footer';
+import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
@@ -139,7 +144,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-        <DetectionEngineNoIndex />
+        <DetectionEngineNoIndex
+          needsSignalsIndex={isSignalIndexExists === false}
+          needsListsIndex={needsListsConfiguration}
+        />
       </WrapperPage>
     );
   }
@@ -151,7 +159,10 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {indicesExist ? (
         <StickyContainer>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal>
+          <FiltersGlobal
+            globalFullScreen={globalFullScreen}
+            show={showGlobalFilters({ globalFullScreen, graphEventId })}
+          >
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -232,13 +243,19 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };

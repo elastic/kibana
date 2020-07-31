@@ -11,10 +11,6 @@ import {
 } from '../sections/create_transform/components/step_define/common/filter_agg/components';
 
 describe('getAggConfigFromEsAgg', () => {
-  test('should throw an error for unsupported agg', () => {
-    expect(() => getAggConfigFromEsAgg({ terms: {} }, 'test')).toThrowError();
-  });
-
   test('should return a common config if the agg does not have a custom config defined', () => {
     expect(getAggConfigFromEsAgg({ avg: { field: 'region' } }, 'test_1')).toEqual({
       agg: 'avg',

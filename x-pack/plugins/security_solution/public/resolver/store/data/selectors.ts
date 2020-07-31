@@ -30,8 +30,9 @@ import {
   ResolverRelatedEvents,
 } from '../../../../common/endpoint/types';
 import * as resolverTreeModel from '../../models/resolver_tree';
-import { isometricTaxiLayout } from '../../models/indexed_process_tree/isometric_taxi_layout';
+import * as isometricTaxiLayoutModel from '../../models/indexed_process_tree/isometric_taxi_layout';
 import { allEventCategories } from '../../../../common/endpoint/models/event';
+import * as vector2 from '../../models/vector2';
 
 /**
  * If there is currently a request.
@@ -71,6 +72,21 @@ const resolverTreeResponse = (state: DataState): ResolverTree | undefined => {
 };
 
 /**
+ * the node ID of the node representing the databaseDocumentID.
+ * NB: this could be stale if the last response is stale
+ */
+export const originID: (state: DataState) => string | undefined = createSelector(
+  resolverTreeResponse,
+  function (resolverTree?) {
+    if (resolverTree) {
+      // This holds the entityID (aka nodeID) of the node related to the last fetched `_id`
+      return resolverTree.entityID;
+    }
+    return undefined;
+  }
+);
+
+/**
  * Process events that will be displayed as terminated.
  */
 export const terminatedProcesses = createSelector(resolverTreeResponse, function (
@@ -90,11 +106,32 @@ export const terminatedProcesses = createSelector(resolverTreeResponse, function
 });
 
 /**
+ * A function that given an entity id returns a boolean indicating if the id is in the set of terminated processes.
+ */
+export const isProcessTerminated = createSelector(terminatedProcesses, function (
+  /* eslint-disable no-shadow */
+  terminatedProcesses
+  /* eslint-enable no-shadow */
+) {
+  return (entityId: string) => {
+    return terminatedProcesses.has(entityId);
+  };
+});
+
+/**
  * Process events that will be graphed.
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {
+  // Keep track of the last process event (in array order) for each entity ID
+  const events: Map<string, ResolverEvent> = new Map();
   if (tree) {
-    return resolverTreeModel.lifecycleEvents(tree).filter(isGraphableProcess);
+    for (const event of resolverTreeModel.lifecycleEvents(tree)) {
+      if (isGraphableProcess(event)) {
+        const entityID = uniquePidForProcess(event);
+        events.set(entityID, event);
+      }
+    }
+    return [...events.values()];
   } else {
     return [];
   }
@@ -317,13 +354,45 @@ export function databaseDocumentIDToFetch(state: DataState): string | null {
   }
 }
 
-export const layout = createSelector(tree, function processNodePositionsAndEdgeLineSegments(
-  /* eslint-disable no-shadow */
-  indexedProcessTree
-  /* eslint-enable no-shadow */
-) {
-  return isometricTaxiLayout(indexedProcessTree);
-});
+export const layout = createSelector(
+  tree,
+  originID,
+  function processNodePositionsAndEdgeLineSegments(
+    /* eslint-disable no-shadow */
+    indexedProcessTree,
+    originID
+    /* eslint-enable no-shadow */
+  ) {
+    // use the isometric taxi layout as a base
+    const taxiLayout = isometricTaxiLayoutModel.isometricTaxiLayoutFactory(indexedProcessTree);
+
+    if (!originID) {
+      // no data has loaded.
+      return taxiLayout;
+    }
+
+    // find the origin node
+    const originNode = indexedProcessTreeModel.processEvent(indexedProcessTree, originID);
+
+    if (originNode === null) {
+      // If a tree is returned that has no process events for the origin, this can happen.
+      return taxiLayout;
+    }
+
+    // Find the position of the origin, we'll center the map on it intrinsically
+    const originPosition = isometricTaxiLayoutModel.nodePosition(taxiLayout, originNode);
+    // adjust the position of everything so that the origin node is at `(0, 0)`
+
+    if (originPosition === undefined) {
+      // not sure how this could happen.
+      return taxiLayout;
+    }
+
+    // Take the origin position, and multipy it by -1, then move the layout by that amount.
+    // This should center the layout around the origin.
+    return isometricTaxiLayoutModel.translated(taxiLayout, vector2.scale(originPosition, -1));
+  }
+);
 
 /**
  * Given a nodeID (aka entity_id) get the indexed process event.
