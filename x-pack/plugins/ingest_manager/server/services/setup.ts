@@ -40,6 +40,7 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  console.log('setupIngestManager');
   // installation in progress
   if (setupIngestStatus) {
     await setupIngestStatus;
@@ -50,7 +51,11 @@ export async function setupIngestManager(
       onSetupReject = rej;
     });
   }
+
   try {
+    console.log(
+      'setupIngestManager try/catch await Promise.all default packages, output, agent config, etc'
+    );
     const [installedPackages, defaultOutput, config] = await Promise.all([
       // packages installed by default
       ensureInstalledDefaultPackages(soClient, callCluster),
@@ -84,7 +89,7 @@ export async function setupIngestManager(
         return Promise.reject(e);
       }),
     ]);
-
+    console.log('setupIngestManager try/catch after await Promise.all');
     // ensure default packages are added to the default conifg
     const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
     if (!configWithPackageConfigs) {
@@ -122,8 +127,10 @@ export async function setupIngestManager(
     }
 
     // if everything works, resolve/succeed
+    console.log('setupIngestManager call onSetupResolve');
     onSetupResolve();
   } catch (error) {
+    console.log('setupIngestManager catch & call onSetupReject', error);
     // if anything errors, reject/fail
     onSetupReject(error);
   }

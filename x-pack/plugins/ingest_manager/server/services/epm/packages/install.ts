@@ -35,13 +35,17 @@ export async function installLatestPackage(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
+    console.log('installLatestPackage try/catch', pkgName);
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+    console.log('installLatestPackage success', pkgName, 'latestPackage', latestPackage);
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPackage.name,
       version: latestPackage.version,
     });
+    console.log('before return installPackage', pkgkey);
     return installPackage({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
+    console.log('installLatestPackage catch', err);
     throw err;
   }
 }
@@ -60,7 +64,7 @@ export async function ensureInstalledDefaultPackages(
     });
     installations.push(installation);
   }
-
+  console.log('ensureInstalledDefaultPackages return', installations.length);
   return Promise.all(installations);
 }
 

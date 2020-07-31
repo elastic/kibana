@@ -84,13 +84,17 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
   const logger = appContextService.getLogger();
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, callCluster);
+    console.log('handler try await setupIngestManager');
+    const res = await setupIngestManager(soClient, callCluster);
+    console.log('ingestManagerSetupHandler await success', res);
     return response.ok({
       body,
     });
   } catch (e) {
+    console.log('handler catch', e);
     if (e instanceof IngestManagerError) {
       logger.error(e.message);
+      console.log('exit A');
       return response.customError({
         statusCode: getHTTPResponseCode(e),
         body: { message: e.message },
@@ -98,6 +102,7 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
     }
     if (e.isBoom) {
       logger.error(e.output.payload.message);
+      console.log('exit B');
       return response.customError({
         statusCode: e.output.statusCode,
         body: { message: e.output.payload.message },
@@ -105,6 +110,7 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
     }
     logger.error(e.message);
     logger.error(e.stack);
+    console.log('exit C');
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

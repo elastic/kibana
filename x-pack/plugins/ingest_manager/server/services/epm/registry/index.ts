@@ -71,7 +71,9 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   if (kibanaVersion && kibanaBranch !== 'master') {
     url.searchParams.set('kibana.version', kibanaVersion);
   }
+  console.log('fetchFindLatestPackage try', packageName, 'calls fetchUrl', url.toString());
   const res = await fetchUrl(url.toString());
+  console.log('fetchUrl worked', url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {
     return searchResults[0];
