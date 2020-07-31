@@ -8,6 +8,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { decode } from 'rison-node';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -16,6 +17,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
+import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -49,6 +51,8 @@ export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined
 );
+
+export const patterns = (state: Immutable<HostState>) => state.patterns;
 
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
@@ -135,6 +139,7 @@ export const uiQueryParams: (
         'page_size',
         'page_index',
         'show',
+        'admin_query',
       ];
 
       for (const key of keys) {
@@ -210,3 +215,13 @@ export const nonExistingPolicies: (
  */
 export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (state) =>
   state.endpointsExist;
+
+/**
+ * Returns query text from query bar
+ */
+export const searchBarQuery: (state: Immutable<HostState>) => Query = createSelector(
+  uiQueryParams,
+  ({ admin_query: adminQuery }) => {
+    return adminQuery ? (decode(adminQuery) as Query) : { query: '', language: 'kuery' };
+  }
+);

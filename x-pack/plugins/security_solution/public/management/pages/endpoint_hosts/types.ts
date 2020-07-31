@@ -54,6 +54,10 @@ export interface EndpointState {
   nonExistingPolicies: Record<string, boolean>;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
+  /** index patterns for query bar */
+  patterns: string[];
+  /** query from search bar */
+  searchBarQuery: string;
 }
 
 /**
@@ -68,4 +72,6 @@ export interface EndpointIndexUIQueryParams {
   page_index?: string;
   /** show the policy response or host details */
   show?: 'policy_response' | 'details';
+  /** Query text from search bar*/
+  admin_query?: string;
 }

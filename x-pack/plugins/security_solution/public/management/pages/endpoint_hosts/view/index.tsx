@@ -50,6 +50,7 @@ import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/rou
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
+import { AdminSearchBar } from '../../../components/search_bar';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -412,6 +413,7 @@ export const EndpointList = () => {
       }
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
+      <AdminSearchBar />
       {listData && listData.length > 0 && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">

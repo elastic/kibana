@@ -23,8 +23,22 @@ import {
   sendGetAgentConfigList,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { metadataIndexPattern } from '../../../../../common/endpoint/constants';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
-export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
+export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
+  coreStart,
+  depsStart
+) => {
+  async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
+    const { indexPatterns } = depsStart.data;
+    const fields = await indexPatterns.getFieldsForWildcard({ pattern: metadataIndexPattern });
+    const indexPattern: IIndexPattern = {
+      title: metadataIndexPattern,
+      fields,
+    };
+    return [indexPattern];
+  }
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -53,6 +67,22 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       let endpointResponse;
 
       try {
+        // get index pattern and fields for search bar
+        fetchIndexPatterns()
+          .then((patterns) => {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: patterns,
+            });
+          })
+          .catch((error) => {
+            // what to do with error??
+            dispatch({
+              type: 'serverFailedToReturnMetadataPatterns',
+              payload: error,
+            });
+          });
+
         endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],

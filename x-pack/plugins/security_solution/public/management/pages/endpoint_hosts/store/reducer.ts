@@ -67,6 +67,12 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         ...action.payload,
       },
     };
+  } else if (action.type === 'serverReturnedMetadataPatterns') {
+    // handle error case
+    return {
+      ...state,
+      patterns: action.payload,
+    };
   } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
