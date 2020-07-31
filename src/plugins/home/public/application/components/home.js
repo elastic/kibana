@@ -19,13 +19,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Synopsis } from './synopsis';
-import { ChangeHomeRoute } from './change_home_route';
-import { SolutionsPanel } from './solutions_panel';
-import { ManageData } from './manage_data';
-import { AddData } from './add_data';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonEmpty,
   EuiTitle,
@@ -34,12 +28,16 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueHomePageSection } from '../../services';
 import { getServices } from '../kibana_services';
-import { Welcome } from './welcome';
+import { AddData } from './add_data';
 import { createAppNavigationHandler } from './app_navigation_handler';
+import { ChangeHomeRoute } from './change_home_route';
+import { ManageData } from './manage_data';
+import { SolutionsSection } from './solutions_section';
+import { Synopsis } from './synopsis';
+import { Welcome } from './welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -191,7 +189,7 @@ export class Home extends Component {
                         iconType="gear"
                       >
                         {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
-                          defaultMessage: 'Manage stack',
+                          defaultMessage: 'Manage',
                         })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
@@ -215,7 +213,7 @@ export class Home extends Component {
         </div>
         <div className="homPageMainContainer">
           <main className="homPageMain" data-test-subj="homeApp">
-            <SolutionsPanel
+            <SolutionsSection
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}

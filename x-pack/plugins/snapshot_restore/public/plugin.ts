@@ -75,7 +75,7 @@ export class SnapshotRestoreUIPlugin {
         path: '/app/management/data/snapshot_restore',
         homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
         category: FeatureCatalogueCategory.ADMIN,
-        order: 300,
+        order: 630,
       });
     }
   }
