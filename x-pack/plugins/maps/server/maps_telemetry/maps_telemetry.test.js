@@ -14,7 +14,7 @@ import {
 
 describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
-    const result = buildMapsSavedObjectsTelemetry([], []);
+    const result = buildMapsSavedObjectsTelemetry([]);
 
     expect(result).toMatchObject({
       attributesPerMap: {
@@ -37,7 +37,7 @@ describe('buildMapsSavedObjectsTelemetry', () => {
 
   test('returns expected telemetry data from saved objects', async () => {
     const layerLists = getLayerLists(mapSavedObjects);
-    const result = buildMapsSavedObjectsTelemetry(mapSavedObjects, layerLists);
+    const result = buildMapsSavedObjectsTelemetry(layerLists);
 
     expect(result).toMatchObject({
       attributesPerMap: {
