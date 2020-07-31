@@ -487,7 +487,12 @@ export default function ({ getService }) {
         expect(
           docs.filter((taskDoc) => taskDoc._source.taskId === longRunningTask.id).length
         ).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('running');
       });
+
+      await delay(1000);
 
       // first runNow should fail
       const failedRunNowResult = await runTaskNow({
@@ -504,7 +509,12 @@ export default function ({ getService }) {
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('idle');
       });
+
+      await delay(1000);
 
       // second runNow should be successful
       const successfulRunNowResult = runTaskNow({
