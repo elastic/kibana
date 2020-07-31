@@ -15,7 +15,7 @@ export interface JiraActionParams {
     savedObjectId: string;
     title: string;
     description: string;
-    comments: string;
+    comments: Array<{ commentId: string; comment: string }>;
     externalId: string | null;
     issueType: string;
     priority: string;

@@ -13,7 +13,7 @@ export async function getCreateIssueMetadata({
 }: {
   http: HttpSetup;
   connectorId: string;
-}): Promise<Record<string, unknown>> {
+}): Promise<Record<string, any>> {
   return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'getCreateIssueMetadata', subActionParams: {} },

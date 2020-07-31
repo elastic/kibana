@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { ActionParamsProps } from '../../../../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { JiraActionParams } from './types';
-import { getCreateIssueMetadata } from './api';
+import { useCreateIssueMetadata } from './use_create_issue_metadata';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionParams,
@@ -31,56 +31,24 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   const { http } = useAppDependencies();
   const { title, description, comments, issueType, priority, labels, savedObjectId } =
     actionParams.subActionParams || {};
+  const {
+    issueTypes,
+    issueTypesSelectOptions,
+    prioritiesSelectOptions,
+    hasDescription,
+    hasLabels,
+  } = useCreateIssueMetadata({
+    http,
+    actionConnector,
+    selectedIssueType: issueType,
+  });
 
-  const selectOptions = [
-    {
-      value: '1',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectHighOptionLabel',
-        {
-          defaultMessage: 'High',
-        }
-      ),
-    },
-    {
-      value: '2',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectMediumOptionLabel',
-        {
-          defaultMessage: 'Medium',
-        }
-      ),
-    },
-    {
-      value: '3',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectLawOptionLabel',
-        {
-          defaultMessage: 'Low',
-        }
-      ),
-    },
-  ];
+  const labelOptions = labels ? labels.map((label: string) => ({ label })) : [];
 
   const editSubActionProperty = (key: string, value: {}) => {
     const newProps = { ...actionParams.subActionParams, [key]: value };
     editAction('subActionParams', newProps, index);
   };
-
-  useEffect(() => {
-    let cancel = false;
-    const fetchData = async () => {
-      const createIssueMetadata = await getCreateIssueMetadata({
-        http,
-        connectorId: actionConnector.id,
-      });
-      console.log('createIssueMetadata', createIssueMetadata);
-    };
-    fetchData();
-    return () => {
-      cancel = true;
-    };
-  }, [http, actionConnector]);
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -89,17 +57,27 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     if (!savedObjectId && messageVariables?.find((variable) => variable.name === 'alertId')) {
       editSubActionProperty('savedObjectId', '{{alertId}}');
     }
-    if (!issueType) {
-      editSubActionProperty('issueType', '3');
+    if (!issueType && issueTypesSelectOptions.length > 0) {
+      editSubActionProperty('issueType', issueTypesSelectOptions[0].value as string);
     }
-    if (!priority) {
-      editSubActionProperty('priority', '3');
+    if (!priority && prioritiesSelectOptions.length > 0) {
+      editSubActionProperty('priority', prioritiesSelectOptions[0].value as string);
     }
-    if (!labels) {
-      editSubActionProperty('labels', '3');
+    if (!labels && hasLabels) {
+      editSubActionProperty('labels', []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, description, comments, issueType, priority, labels]);
+  }, [
+    title,
+    description,
+    comments,
+    issueType,
+    priority,
+    labels,
+    issueTypes,
+    issueTypesSelectOptions,
+    prioritiesSelectOptions,
+  ]);
 
   return (
     <Fragment>
@@ -119,7 +97,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <EuiSelect
           fullWidth
           data-test-subj="issueTypeSelect"
-          options={selectOptions}
+          options={issueTypesSelectOptions}
           value={issueType}
           onChange={(e) => {
             editSubActionProperty('issueType', e.target.value);
@@ -127,51 +105,76 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
-              {
-                defaultMessage: 'Priority',
-              }
-            )}
-          >
-            <EuiSelect
+      {prioritiesSelectOptions.length > 0 && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
               fullWidth
-              data-test-subj="prioritySelect"
-              options={selectOptions}
-              value={priority}
-              onChange={(e) => {
-                editSubActionProperty('priority', e.target.value);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
-              {
-                defaultMessage: 'Labels',
-              }
-            )}
-          >
-            <EuiSelect
-              fullWidth
-              data-test-subj="labelsSelect"
-              options={selectOptions}
-              value={labels}
-              onChange={(e) => {
-                editSubActionProperty('labels', e.target.value);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              label={i18n.translate(
+                'xpack.triggersActionsUI.components.builtinActionTypes.jira.severitySelectFieldLabel',
+                {
+                  defaultMessage: 'Priority',
+                }
+              )}
+            >
+              <EuiSelect
+                fullWidth
+                data-test-subj="prioritySelect"
+                options={prioritiesSelectOptions}
+                value={priority}
+                onChange={(e) => {
+                  editSubActionProperty('priority', e.target.value);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
+      {hasLabels && (
+        <>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.jira.impactSelectFieldLabel',
+                  {
+                    defaultMessage: 'Labels',
+                  }
+                )}
+              >
+                <EuiComboBox
+                  noSuggestions
+                  fullWidth
+                  selectedOptions={labelOptions}
+                  onCreateOption={(searchValue: string) => {
+                    const newOptions = [...labelOptions, { label: searchValue }];
+                    editSubActionProperty(
+                      'labels',
+                      newOptions.map((newOption) => newOption.label)
+                    );
+                  }}
+                  onChange={(selectedOptions: Array<{ label: string }>) => {
+                    editSubActionProperty(
+                      'labels',
+                      selectedOptions.map((selectedOption) => selectedOption.label)
+                    );
+                  }}
+                  onBlur={() => {
+                    if (!labels) {
+                      editSubActionProperty('labels', []);
+                    }
+                  }}
+                  isClearable={true}
+                  data-test-subj="labelsComboBox"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFormRow
         fullWidth
         error={errors.title}
@@ -192,26 +195,30 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           errors={errors.title as string[]}
         />
       </EuiFormRow>
+      {hasDescription && (
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editSubActionProperty}
+          messageVariables={messageVariables}
+          paramsProperty={'description'}
+          inputTargetValue={description}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
+            {
+              defaultMessage: 'Description (optional)',
+            }
+          )}
+          errors={errors.description as string[]}
+        />
+      )}
       <TextAreaWithMessageVariables
         index={index}
-        editAction={editSubActionProperty}
-        messageVariables={messageVariables}
-        paramsProperty={'description'}
-        inputTargetValue={description}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.jira.descriptionTextAreaFieldLabel',
-          {
-            defaultMessage: 'Description (optional)',
-          }
-        )}
-        errors={errors.description as string[]}
-      />
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubActionProperty}
+        editAction={(key, value) => {
+          editSubActionProperty(key, [{ commentId: '1', comment: value }]);
+        }}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
-        inputTargetValue={comments}
+        inputTargetValue={comments[0].comment}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
           {
