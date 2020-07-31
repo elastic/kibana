@@ -13,7 +13,7 @@ import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import {
   CreateAnalyticsFormProps,
   DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
@@ -350,11 +350,11 @@ export function getCloneAction(createAnalyticsForm: CreateAnalyticsFormProps) {
 export const useNavigateToWizardWithClonedJob = () => {
   const {
     services: {
-      application: { navigateToUrl },
       notifications: { toasts },
       savedObjects,
     },
   } = useMlKibana();
+  const navigateToPath = useNavigateToPath();
 
   const savedObjectsClient = savedObjects.client;
 
@@ -395,8 +395,8 @@ export const useNavigateToWizardWithClonedJob = () => {
     }
 
     if (sourceIndexId) {
-      await navigateToUrl(
-        `ml#/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
+      await navigateToPath(
+        `/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
           item.config.id
         }`
       );
