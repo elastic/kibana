@@ -111,11 +111,15 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     core.getStartServices().then(([coreStart]) => {
       const mlCaps = coreStart.application.capabilities.ml as MlCapabilities;
+      // check to see if ML is enabled
+      // this includes whether ML has been disabled in elasticsearch,
+      // in the current space or whether the user has permission to use ML.
       if (mlCaps.canAccessML) {
         // add ML to home page
         registerFeature(pluginsSetup.home);
 
         if (mlCaps.canAccessMLFull) {
+          // register various ML plugin features which require a full license
           registerManagementSection(pluginsSetup.management, core);
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
@@ -128,26 +132,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         }));
       }
     });
-    // const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    // licensing.subscribe((license) => {
-    //   if (isMlEnabled(license)) {
-    //     // add ML to home page
-    //     registerFeature(pluginsSetup.home);
-
-    //     // register various ML plugin features which require a full license
-    //     if (isFullLicense(license)) {
-    //       registerManagementSection(pluginsSetup.management, core);
-    //       registerEmbeddables(pluginsSetup.embeddable, core);
-    //       registerMlUiActions(pluginsSetup.uiActions, core);
-    //       registerUrlGenerator(pluginsSetup.share, core);
-    //     }
-    //   } else {
-    //     // if ml is disabled in elasticsearch, disable ML in kibana
-    //     this.appUpdater.next(() => ({
-    //       status: AppStatus.inaccessible,
-    //     }));
-    //   }
-    // });
 
     return {};
   }
