@@ -9,13 +9,35 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { ExceptionListItemComponent } from './builder_exception_item';
+import { useKibana } from '../../../../common/lib/kibana';
 import { fields } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
+import { ExceptionListItemComponent } from './builder_exception_item';
+
+jest.mock('../../../../common/lib/kibana');
+
 describe('ExceptionListItemComponent', () => {
+  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+
+  beforeAll(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: {
+          autocomplete: {
+            getValueSuggestions: getValueSuggestionsMock,
+          },
+        },
+      },
+    });
+  });
+
+  afterEach(() => {
+    getValueSuggestionsMock.mockClear();
+  });
+
   describe('and badge logic', () => {
     test('it renders "and" badge with extra top padding for the first exception item when "andLogicIncluded" is "true"', () => {
       const exceptionItem = {
