@@ -10,28 +10,11 @@ NOTE:
 
 ////
 
-[[code-exploration]]
-== Exploring Kibana code
-
-The goals of our folder heirarchy are:
-
-- Easy for developers to know where to add new services, plugins and applications.
-- Easy for developers to know where to find the code from services, plugins and applications.
-- Easy to browse and understand our folder structure.
-
-To that aim, we strive to:
-
-- Avoid too many files in any given folder.
-- Choose clear, unambigious folder names.
-- Organize by domain.
-- Every folder should contain a README that describes the contents of that folder.
+[[plugin-list]]
+== List of {kib} plugins
 
 [discrete]
-[[kibana-services-applications]]
-=== Services and Applications
-
-[discrete]
-==== src/plugins
+=== src/plugins
 
 - {kib-repo}blob/{branch}/src/plugins/advanced_settings[advancedSettings]
 
@@ -60,7 +43,10 @@ WARNING: Missing README.
 
 - <<kibana-dashboard-plugin>>
 
-Registers the dashboard application.
+Dashboard plugin
+
+- Registers the dashboard application.
+- Adds a dashboard embeddable that can be used in other applications.
 
 
 - {kib-repo}blob/{branch}/src/plugins/data/README.md[data]
@@ -278,7 +264,7 @@ WARNING: Missing README.
 
 
 [discrete]
-==== x-pack/plugins
+=== x-pack/plugins
 
 - {kib-repo}blob/{branch}/x-pack/plugins/actions/README.md[actions]
 
@@ -362,8 +348,12 @@ WARNING: Missing README.
 
 - <<enhanced-embeddables-plugin>>
 
+Enhanced embeddables plugin
+
 Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
+
+
 
 
 - {kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]

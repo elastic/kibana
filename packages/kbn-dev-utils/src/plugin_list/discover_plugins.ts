@@ -20,7 +20,6 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import Asciidoc from 'asciidoctor';
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
 
@@ -57,17 +56,17 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         const readmePath = Path.resolve(directory, readmeAsciidocName);
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
 
-        const asciidoc = Asciidoc().loadFile(relativeReadmePath);
+        const readmeText = Fs.readFileSync(relativeReadmePath).toString();
+        // First group is to grab the anchor - \[\[(.*)\]\]
+        // Tecond group, (== ), removes the equals from the header
+        // Third group could perhaps be done better, but is essentially:
+        // If there is a sub heading after the intro, match the intro and stop - (([\s\S]*?)(?=\=\=\=|\[\[)))
+        // If there is not a sub heading after the intro, match the intro - ([\s\S]*)
+        const matchAnchorAndIntro = /\[\[(.*)\]\]\n(== )(((([\s\S]*?)(?=\=\=\=|\[\[)))|([\s\S]*))/gm;
 
-        const parsed = asciidoc.getContent();
-        const $ = cheerio.load(parsed);
-
-        const firstParagraph = $('p')[0];
-        if (firstParagraph) {
-          readmeSnippet = $(firstParagraph).text();
-        }
-
-        readmeAsciidocAnchor = $('h2')[0].attribs.id;
+        const matches = matchAnchorAndIntro.exec(readmeText);
+        readmeSnippet = matches && matches.length >= 4 ? matches[3].toString() : undefined;
+        readmeAsciidocAnchor = matches && matches.length >= 2 ? matches[1].toString() : undefined;
       } else if (readmeName) {
         const readmePath = Path.resolve(directory, readmeName);
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);

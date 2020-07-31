@@ -12,6 +12,7 @@ running in no time. If you have any problems, file an issue in the https://githu
 * <<external-plugin-development>>
 * <<kibana-architecture>>
 * <<advanced>>
+* <<plugin-list>>
 
 --
 
@@ -26,4 +27,6 @@ include::contributing/index.asciidoc[]
 include::plugin/index.asciidoc[]
 
 include::advanced/index.asciidoc[]
+
+include::plugin-list.asciidoc[]
 

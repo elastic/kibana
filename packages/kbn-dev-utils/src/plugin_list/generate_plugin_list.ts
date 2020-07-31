@@ -62,32 +62,15 @@ NOTE:
 
 ////
 
-[[code-exploration]]
-== Exploring Kibana code
-
-The goals of our folder heirarchy are:
-
-- Easy for developers to know where to add new services, plugins and applications.
-- Easy for developers to know where to find the code from services, plugins and applications.
-- Easy to browse and understand our folder structure.
-
-To that aim, we strive to:
-
-- Avoid too many files in any given folder.
-- Choose clear, unambigious folder names.
-- Organize by domain.
-- Every folder should contain a README that describes the contents of that folder.
+[[plugin-list]]
+== List of {kib} plugins
 
 [discrete]
-[[kibana-services-applications]]
-=== Services and Applications
-
-[discrete]
-==== src/plugins
+=== src/plugins
 ${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
 
 [discrete]
-==== x-pack/plugins
+=== x-pack/plugins
 ${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
 
 ${Array.from(includes).join('\n')}

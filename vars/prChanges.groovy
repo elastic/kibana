@@ -21,7 +21,7 @@ def getSkippablePaths() {
 def getNotSkippablePaths() {
   return [
     // this file is auto-generated and changes to it need to be validated with CI
-    /^docs\/developer\/architecture\/code-exploration.asciidoc$/,
+    /^docs\/developer\/plugin-list.asciidoc$/,
   ]
 }
 
