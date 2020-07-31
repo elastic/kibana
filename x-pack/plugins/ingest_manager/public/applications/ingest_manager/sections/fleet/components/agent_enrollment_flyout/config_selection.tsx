@@ -64,6 +64,14 @@ export const EnrollmentStepAgentConfig: React.FC<Props> = (props) => {
   useEffect(
     function useDefaultConfigEffect() {
       if (agentConfigs && agentConfigs.length && !selectedState.agentConfigId) {
+        if (agentConfigs.length === 1) {
+          setSelectedState({
+            ...selectedState,
+            agentConfigId: agentConfigs[0].id,
+          });
+          return;
+        }
+
         const defaultConfig = agentConfigs.find((config) => config.is_default);
         if (defaultConfig) {
           setSelectedState({
