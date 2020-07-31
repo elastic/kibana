@@ -272,6 +272,9 @@ export class ClusterManager {
       fromRoot('x-pack/plugins/security_solution/scripts'),
       fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
       'plugins/java_languageserver',
+      fromRoot(
+        'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf'
+      ),
     ];
 
     this.watcher = chokidar.watch(watchPaths, {
