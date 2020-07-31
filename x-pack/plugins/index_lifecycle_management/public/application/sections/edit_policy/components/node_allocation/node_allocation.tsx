@@ -55,6 +55,11 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
 }) => {
   const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
 
+<<<<<<< HEAD
+=======
+  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string>(null);
+
+>>>>>>> [ILM] Fix useState declaration
   if (isLoading) {
     return (
       <Fragment>
