@@ -20,7 +20,6 @@ import {
   getPrePackagedRulesStatus,
 } from './api';
 import { ruleMock, rulesMock } from './mock';
-import { buildQueryFromKuery } from 'src/plugins/data/common/es_query/es_query/from_kuery';
 import { buildEsQuery } from 'src/plugins/data/common';
 
 const abortCtrl = new AbortController();
