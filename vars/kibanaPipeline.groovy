@@ -43,11 +43,12 @@ def withPostBuildReporting(Closure closure) {
 }
 
 def getParallelWorkspaces() {
+  def workspaces = []
   def parallelWorkspace = "${env.WORKSPACE}/parallel"
   if (fileExists(parallelWorkspace)) {
     dir(parallelWorkspace) {
       // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
-      return findFiles(glob: '*/kibana/package.json')
+      workspaces = findFiles(glob: '*/kibana/package.json')
         .collect {
           // get the paths to the kibana directories for the parallel workspaces
             return it.path.tokenize('/').dropRight(1).join('/')
@@ -55,7 +56,7 @@ def getParallelWorkspaces() {
     }
   }
 
-  return []
+  return workspaces
 }
 
 def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
