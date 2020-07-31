@@ -145,7 +145,6 @@ export class HomePublicPlugin
       icon: 'logoKibana',
       path: '/app/dashboards',
       order: 400,
-      className: 'homSolutionPanel--kibana',
     });
 
     return {
