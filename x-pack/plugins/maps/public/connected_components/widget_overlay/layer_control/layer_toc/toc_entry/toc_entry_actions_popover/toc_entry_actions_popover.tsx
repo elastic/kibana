@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 
 interface Props {
-  cloneLayer: (layerId: string) => void;
-  displayName: string;
+  cloneLayer: () => void;
+  displayName: string | null;
   editLayer: () => void;
   escapedDisplayName: string;
   fitToBounds: (layerId: string) => void;
-  isEditButtonDisabled: boolean;
+  areOpenPanelButtonsDisabled: boolean;
   isReadOnly: boolean;
   isUsingSearch: boolean;
   layer: ILayer;
@@ -65,22 +65,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       isPopoverOpen: false,
     }));
   };
-
-  _cloneLayer() {
-    this.props.cloneLayer(this.props.layer.getId());
-  }
-
-  _fitToBounds() {
-    this.props.fitToBounds(this.props.layer.getId());
-  }
-
-  _removeLayer() {
-    this.props.removeLayer(this.props.layer.getId());
-  }
-
-  _toggleVisible() {
-    this.props.toggleVisible(this.props.layer.getId());
-  }
 
   _renderPopoverToggleButton() {
     const { icon, tooltipContent, footnotes } = this.props.layer.getIconAndTooltipContent(
@@ -147,7 +131,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         disabled: !this.state.supportsFitToBounds,
         onClick: () => {
           this._closePopover();
-          this._fitToBounds();
+          this.props.fitToBounds(this.props.layer.getId());
         },
       },
       {
@@ -163,14 +147,14 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this._toggleVisible();
+          this.props.toggleVisible(this.props.layer.getId());
         },
       },
     ];
 
     if (!this.props.isReadOnly) {
       actionItems.push({
-        disabled: this.props.isEditButtonDisabled,
+        disabled: this.props.areOpenPanelButtonsDisabled,
         name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
           defaultMessage: 'Edit layer',
         }),
@@ -183,6 +167,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         },
       });
       actionItems.push({
+        disabled: this.props.areOpenPanelButtonsDisabled,
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
         }),
@@ -191,7 +176,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
           this._closePopover();
-          this._cloneLayer();
+          this.props.cloneLayer();
         },
       });
       actionItems.push({
@@ -203,7 +188,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         'data-test-subj': 'removeLayerButton',
         onClick: () => {
           this._closePopover();
-          this._removeLayer();
+          this.props.removeLayer(this.props.layer.getId());
         },
       });
     }

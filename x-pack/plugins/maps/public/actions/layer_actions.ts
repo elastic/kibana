@@ -50,9 +50,9 @@ export function trackCurrentLayerState(layerId: string) {
 }
 
 export function rollbackToTrackedLayerStateForSelectedLayer() {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layerId = getSelectedLayerId(getState());
-    await dispatch({
+    dispatch({
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
       layerId,
     });
@@ -103,6 +103,8 @@ export function cloneLayer(layerId: string) {
 
     const clonedDescriptor = await layer.cloneDescriptor();
     dispatch<any>(addLayer(clonedDescriptor));
+    dispatch<any>(setSelectedLayer(clonedDescriptor.id));
+    dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
   };
 }
 
@@ -208,10 +210,10 @@ export function toggleLayerVisible(layerId: string) {
 }
 
 export function setSelectedLayer(layerId: string | null) {
-  return async (dispatch: Dispatch, getState: () => MapStoreState) => {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const oldSelectedLayer = getSelectedLayerId(getState());
     if (oldSelectedLayer) {
-      await dispatch<any>(rollbackToTrackedLayerStateForSelectedLayer());
+      dispatch<any>(rollbackToTrackedLayerStateForSelectedLayer());
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
@@ -350,7 +352,7 @@ export function removeLayer(layerId: string | null) {
     const selectedLayerId = getSelectedLayerId(state);
     if (layerId === selectedLayerId) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      await dispatch<any>(setSelectedLayer(null));
+      dispatch<any>(setSelectedLayer(null));
     }
     dispatch<any>(removeLayerFromLayerList(layerId));
   };

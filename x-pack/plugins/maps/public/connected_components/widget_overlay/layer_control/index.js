@@ -27,8 +27,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    showAddLayerWizard: async () => {
-      await dispatch(setSelectedLayer(null));
+    showAddLayerWizard: () => {
+      dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
     },
     closeLayerTOC: () => {

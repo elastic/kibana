@@ -90,6 +90,7 @@ export interface ILayer {
   supportsLabelsOnTop: () => boolean;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
+  hasLegendDetails(): Promise<boolean>;
 }
 export type Footnote = {
   icon: ReactElement<any>;

@@ -7,12 +7,7 @@
 import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../../../../reducers/store';
-import {
-  fitToLayerExtent,
-  toggleLayerVisible,
-  cloneLayer,
-  removeLayer,
-} from '../../../../../../actions';
+import { fitToLayerExtent, toggleLayerVisible, removeLayer } from '../../../../../../actions';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
@@ -27,9 +22,6 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    cloneLayer: (layerId: string) => {
-      dispatch<any>(cloneLayer(layerId));
-    },
     fitToBounds: (layerId: string) => {
       dispatch<any>(fitToLayerExtent(layerId));
     },

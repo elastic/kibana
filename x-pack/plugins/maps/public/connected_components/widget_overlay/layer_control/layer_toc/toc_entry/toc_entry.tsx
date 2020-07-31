@@ -4,22 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 
 import { EuiIcon, EuiOverlayMask, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
-import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
+import { ILayer } from '../../../../../classes/layers/layer';
 
-function escapeLayerName(name) {
+function escapeLayerName(name: string | null) {
   return name ? name.split(' ').join('_') : '';
 }
 
-export class TOCEntry extends React.Component {
-  state = {
+export enum MODAL_ACTION {
+  OPEN_LAYER_PANEL = 'OPEN_LAYER_PANEL',
+  CLONE_LAYER_PANEL = 'CLONE_LAYER_PANEL',
+}
+
+interface Props {
+  layer: ILayer;
+  dragHandleProps: unknown;
+  isDragging: boolean;
+  isDraggingOver: boolean;
+  isReadOnly: boolean;
+  zoom: number;
+  selectedLayer?: ILayer;
+  hasDirtyState: boolean;
+  isLegendDetailsOpen: boolean;
+  areOpenPanelButtonsDisabled: boolean;
+  openLayerPanel: (layerId: string) => void;
+  cloneLayer: (layerId: string) => void;
+  hideTOCDetails: (layerId: string) => void;
+  showTOCDetails: (layerId: string) => void;
+}
+
+interface State {
+  displayName: string | null;
+  hasLegendDetails: boolean;
+  showModal: boolean;
+  modalAction: MODAL_ACTION | null;
+}
+
+export class TOCEntry extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  state: State = {
     displayName: null,
     hasLegendDetails: false,
-    shouldShowModal: false,
+    showModal: false,
+    modalAction: null,
   };
 
   componentDidMount() {
@@ -66,15 +100,15 @@ export class TOCEntry extends React.Component {
     }
   }
 
-  _openLayerPanelWithCheck = () => {
-    const { selectedLayer, hasDirtyStateSelector } = this.props;
-    if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
+  _openLayerPanelWithDirtyCheck = () => {
+    if (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()) {
       return;
     }
 
-    if (hasDirtyStateSelector) {
+    if (this.props.hasDirtyState) {
       this.setState({
-        shouldShowModal: true,
+        showModal: true,
+        modalAction: MODAL_ACTION.OPEN_LAYER_PANEL,
       });
       return;
     }
@@ -82,35 +116,68 @@ export class TOCEntry extends React.Component {
     this.props.openLayerPanel(this.props.layer.getId());
   };
 
+  _cloneLayerWithDirtyCheck = () => {
+    if (this.props.hasDirtyState) {
+      this.setState({
+        showModal: true,
+        modalAction: MODAL_ACTION.CLONE_LAYER_PANEL,
+      });
+      return;
+    }
+
+    this.props.cloneLayer(this.props.layer.getId());
+  };
+
   _renderCancelModal() {
-    if (!this.state.shouldShowModal) {
+    if (!this.state.showModal) {
       return null;
     }
 
     const closeModal = () => {
       this.setState({
-        shouldShowModal: false,
+        showModal: false,
+        modalAction: null,
       });
     };
 
     const openPanel = () => {
+      if (this.state.modalAction === MODAL_ACTION.OPEN_LAYER_PANEL) {
+        this.props.openLayerPanel(this.props.layer.getId());
+      } else if (this.state.modalAction === MODAL_ACTION.CLONE_LAYER_PANEL) {
+        this.props.cloneLayer(this.props.layer.getId());
+      }
       closeModal();
-      this.props.openLayerPanel(this.props.layer.getId());
     };
 
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Discard changes"
+          title={i18n.translate('xpack.maps.layerControl.tocEntry.modalTitle', {
+            defaultMessage: 'Discard changes',
+          })}
           onCancel={closeModal}
           onConfirm={openPanel}
-          cancelButtonText="Do not proceed"
-          confirmButtonText="Proceed and discard changes"
+          cancelButtonText={i18n.translate('xpack.maps.layerControl.tocEntry.modalCancelTitle', {
+            defaultMessage: 'Do not proceed',
+          })}
+          confirmButtonText={i18n.translate('xpack.maps.layerControl.tocEntry.modalConfirmTitle', {
+            defaultMessage: 'Proceed and discard changes',
+          })}
           buttonColor="danger"
           defaultFocusedButton="cancel"
         >
-          <p>There are unsaved changes to your layer.</p>
-          <p>Are you sure you want to proceed?</p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.layerControl.tocEntry.modelTextP1"
+              defaultMessage="Your layer has unsaved changes."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.maps.layerControl.tocEntry.modelTextP2"
+              defaultMessage="Are you sure you want to proceed?"
+            />
+          </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -124,7 +191,7 @@ export class TOCEntry extends React.Component {
     return (
       <div className="mapTocEntry__layerIcons">
         <EuiButtonIcon
-          isDisabled={this.props.isEditButtonDisabled}
+          isDisabled={this.props.areOpenPanelButtonsDisabled}
           iconType="pencil"
           aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
             defaultMessage: 'Edit layer',
@@ -132,7 +199,7 @@ export class TOCEntry extends React.Component {
           title={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonTitle', {
             defaultMessage: 'Edit layer',
           })}
-          onClick={this._openLayerPanelWithCheck}
+          onClick={this._openLayerPanelWithDirtyCheck}
         />
 
         <EuiButtonIcon
@@ -205,8 +272,9 @@ export class TOCEntry extends React.Component {
           layer={layer}
           displayName={this.state.displayName}
           escapedDisplayName={escapeLayerName(this.state.displayName)}
-          editLayer={this._openLayerPanelWithCheck}
-          isEditButtonDisabled={this.props.isEditButtonDisabled}
+          editLayer={this._openLayerPanelWithDirtyCheck}
+          cloneLayer={this._cloneLayerWithDirtyCheck}
+          areOpenPanelButtonsDisabled={this.props.areOpenPanelButtonsDisabled}
         />
 
         {this._renderLayerIcons()}

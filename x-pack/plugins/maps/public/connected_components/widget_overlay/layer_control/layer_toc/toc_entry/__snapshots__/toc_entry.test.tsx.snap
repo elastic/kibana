@@ -10,6 +10,8 @@ exports[`TOCEntry is rendered 1`] = `
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
+      areOpenPanelButtonsDisabled={false}
+      cloneLayer={[Function]}
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
@@ -32,6 +34,7 @@ exports[`TOCEntry is rendered 1`] = `
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         title="Edit layer"
       />
@@ -73,6 +76,8 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
+      areOpenPanelButtonsDisabled={false}
+      cloneLayer={[Function]}
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
@@ -95,6 +100,7 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         title="Edit layer"
       />
@@ -136,6 +142,8 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
+      areOpenPanelButtonsDisabled={false}
+      cloneLayer={[Function]}
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
@@ -158,6 +166,7 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         title="Edit layer"
       />
@@ -199,6 +208,8 @@ exports[`TOCEntry props isReadOnly 1`] = `
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
+      areOpenPanelButtonsDisabled={false}
+      cloneLayer={[Function]}
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
@@ -245,6 +256,8 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
     className="mapTocEntry-visible"
   >
     <Connect(TOCEntryActionsPopover)
+      areOpenPanelButtonsDisabled={false}
+      cloneLayer={[Function]}
       displayName="layer 1"
       editLayer={[Function]}
       escapedDisplayName="layer_1"
@@ -267,6 +280,7 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       <EuiButtonIcon
         aria-label="Edit layer"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         title="Edit layer"
       />

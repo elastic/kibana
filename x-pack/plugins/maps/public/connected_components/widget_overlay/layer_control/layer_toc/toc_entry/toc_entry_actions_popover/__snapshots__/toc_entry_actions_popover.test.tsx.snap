@@ -101,6 +101,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
             },
             Object {
               "data-test-subj": "cloneLayerButton",
+              "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="copy"
@@ -229,6 +230,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
             },
             Object {
               "data-test-subj": "cloneLayerButton",
+              "disabled": false,
               "icon": <EuiIcon
                 size="m"
                 type="copy"

@@ -61,7 +61,7 @@ const defaultProps = {
   editLayer: () => {},
   escapedDisplayName: 'layer1',
   fitToBounds: () => {},
-  isEditButtonDisabled: false,
+  areOpenPanelButtonsDisabled: false,
   isReadOnly: false,
   isUsingSearch: true,
   layer: new LayerMock(),
