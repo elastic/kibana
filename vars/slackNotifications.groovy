@@ -161,9 +161,8 @@ def sendFailedBuild(Map params = [:]) {
   def channel = config.channel
   def timestamp = null
 
-  if (buildState.get('SLACK_NOTIFICATION_RESPONSE')) {
-    def previousResp = buildState.get('SLACK_NOTIFICATION_RESPONSE')
-
+  def previousResp = buildState.get('SLACK_NOTIFICATION_RESPONSE')
+  if (previousResp) {
     // When using `timestamp` to update a previous message, you have to use the channel ID from the previous response
     channel = previousResp.channelId
     timestamp = previousResp.ts
