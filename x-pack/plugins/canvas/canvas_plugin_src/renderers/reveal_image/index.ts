@@ -7,10 +7,12 @@
 import { elasticOutline } from '../../lib/elastic_outline';
 import { isValidUrl } from '../../../common/lib/url';
 import { RendererStrings } from '../../../i18n';
+import { RendererFactory } from '../../../types';
+import { Output as Arguments } from '../../functions/common/revealImage';
 
 const { revealImage: strings } = RendererStrings;
 
-export const revealImage = () => ({
+export const revealImage: RendererFactory<Arguments> = () => ({
   name: 'revealImage',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -23,16 +25,17 @@ export const revealImage = () => ({
     domNode.className = 'revealImage';
 
     // set up the overlay image
-    img.onload = function () {
+    function onLoad() {
       setSize();
       finish();
-    };
+    }
+    img.onload = onLoad;
 
     img.className = 'revealImage__image';
     img.style.clipPath = getClipPath(config.percent, config.origin);
-    img.style['-webkit-clip-path'] = getClipPath(config.percent, config.origin);
+    img.style.setProperty('-webkit-clip-path', getClipPath(config.percent, config.origin));
     img.src = isValidUrl(config.image) ? config.image : elasticOutline;
-    handlers.onResize(img.onload);
+    handlers.onResize(onLoad);
 
     // set up the underlay, "empty" image
     aligner.className = 'revealImageAligner';
@@ -52,9 +55,9 @@ export const revealImage = () => ({
       handlers.done();
     }
 
-    function getClipPath(percent, origin = 'bottom') {
-      const directions = { bottom: 0, left: 1, top: 2, right: 3 };
-      const values = [0, 0, 0, 0];
+    function getClipPath(percent: number, origin = 'bottom') {
+      const directions: Record<string, number> = { bottom: 0, left: 1, top: 2, right: 3 };
+      const values: Array<number | string> = [0, 0, 0, 0];
       values[directions[origin]] = `${100 - percent * 100}%`;
       return `inset(${values.join(' ')})`;
     }

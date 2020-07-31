@@ -6,22 +6,26 @@
 
 import { RendererStrings } from '../../../i18n';
 import { shapes } from './shapes';
+import { RendererFactory } from '../../../types';
+import { Output } from '../../functions/common/shape';
 
 const { shape: strings } = RendererStrings;
 
-export const shape = () => ({
+export const shape: RendererFactory<Output> = () => ({
   name: 'shape',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const { shape, fill, border, borderWidth, maintainAspect } = config;
-    const parser = new DOMParser();
-    const [shapeSvg] = parser
-      .parseFromString(shapes[shape], 'image/svg+xml')
-      .getElementsByTagName('svg');
+    const { shape: shapeType, fill, border, borderWidth, maintainAspect } = config;
 
-    const shapeContent = shapeSvg.firstElementChild;
+    const parser = new DOMParser();
+    const shapeSvg = parser
+      .parseFromString(shapes[shapeType], 'image/svg+xml')
+      .getElementsByTagName('svg')
+      .item(0)!;
+
+    const shapeContent = shapeSvg.firstElementChild!;
 
     if (fill) {
       shapeContent.setAttribute('fill', fill);
@@ -30,15 +34,15 @@ export const shape = () => ({
       shapeContent.setAttribute('stroke', border);
     }
     const strokeWidth = Math.max(borderWidth, 0);
-    shapeContent.setAttribute('stroke-width', strokeWidth);
-    shapeContent.setAttribute('stroke-miterlimit', 999);
+    shapeContent.setAttribute('stroke-width', String(strokeWidth));
+    shapeContent.setAttribute('stroke-miterlimit', '999');
     shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
     shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYMid meet' : 'none');
     shapeSvg.setAttribute('overflow', 'visible');
 
     const initialViewBox = shapeSvg
-      .getAttribute('viewBox')
+      .getAttribute('viewBox')!
       .split(' ')
       .map((v) => parseInt(v, 10));
 
@@ -66,8 +70,8 @@ export const shape = () => ({
         shapeHeight = 0;
       }
 
-      shapeSvg.setAttribute('width', width);
-      shapeSvg.setAttribute('height', height);
+      shapeSvg.setAttribute('width', String(width));
+      shapeSvg.setAttribute('height', String(height));
       shapeSvg.setAttribute('viewBox', [minX, minY, shapeWidth, shapeHeight].join(' '));
 
       const oldShape = domNode.firstElementChild;
@@ -75,7 +79,7 @@ export const shape = () => ({
         domNode.removeChild(oldShape);
       }
 
-      domNode.style.lineHeight = 0;
+      domNode.style.lineHeight = '0';
       domNode.appendChild(shapeSvg);
     };
 

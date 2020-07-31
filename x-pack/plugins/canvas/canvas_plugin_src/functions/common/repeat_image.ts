@@ -19,6 +19,14 @@ interface Arguments {
   emptyImage: string | null;
 }
 
+export interface Return {
+  count: number;
+  image: string;
+  size: number;
+  max: number;
+  emptyImage: string | null;
+}
+
 export function repeatImage(): ExpressionFunctionDefinition<
   'repeatImage',
   number,

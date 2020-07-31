@@ -6,13 +6,14 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get } from 'lodash';
 import { Datatable } from '../../public/components/datatable';
+import { Return as Arguments } from '../functions/common/table';
 import { RendererStrings } from '../../i18n';
+import { RendererFactory } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
 
-export const table = () => ({
+export const table: RendererFactory<Arguments> = () => ({
   name: 'table',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -20,7 +21,7 @@ export const table = () => ({
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font, showHeader } = config;
     ReactDOM.render(
-      <div style={{ ...get(font, 'spec'), height: '100%' }}>
+      <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
         <Datatable
           datatable={datatable}
           perPage={perPage}

@@ -22,7 +22,7 @@ interface Arguments {
   mode: ImageMode | null;
 }
 
-interface Return {
+export interface Return {
   type: 'image';
   mode: string;
   dataurl: string;

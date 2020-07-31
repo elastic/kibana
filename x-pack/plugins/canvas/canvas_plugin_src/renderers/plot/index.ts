@@ -10,12 +10,15 @@ import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
+import { RendererFactory, RendererSpec } from '../../../types';
+// @ts-expect-error Not going to convert
 import { size } from './plugins/size';
+// @ts-expect-error Not going to convert
 import { text } from './plugins/text';
 
 const { plot: strings } = RendererStrings;
 
-const render = (domNode, config, handlers) => {
+const render: RendererSpec<any>['render'] = (domNode, config, handlers) => {
   // TODO: OH NOES
   if (!includes($.plot.plugins, size)) {
     $.plot.plugins.push(size);
@@ -24,14 +27,14 @@ const render = (domNode, config, handlers) => {
     $.plot.plugins.push(text);
   }
 
-  let plot;
+  let plot: jquery.flot.plot;
   function draw() {
     if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {
       return;
     }
 
     if (config.font) {
-      const legendFormatter = (label) => {
+      const legendFormatter = (label: string) => {
         const labelSpan = document.createElement('span');
         Object.assign(labelSpan.style, config.font.spec);
         labelSpan.textContent = label;
@@ -67,9 +70,10 @@ const render = (domNode, config, handlers) => {
   return handlers.done();
 };
 
-export const plot = () => ({
+export const plot: RendererFactory<any> = () => ({
   name: 'plot',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
+  reuseDomNode: false,
   render,
 });
