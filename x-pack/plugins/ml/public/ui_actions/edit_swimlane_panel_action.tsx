@@ -10,7 +10,6 @@ import {
   AnomalySwimlaneEmbeddable,
   EditSwimlanePanelContext,
 } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
 
@@ -35,6 +34,10 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
       const [coreStart] = await getStartServices();
 
       try {
+        const { resolveAnomalySwimlaneUserInput } = await import(
+          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+        );
+
         const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
         embeddable.updateInput(result);
       } catch (e) {
