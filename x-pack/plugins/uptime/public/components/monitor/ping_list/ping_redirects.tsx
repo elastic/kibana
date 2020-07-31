@@ -39,10 +39,10 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         color: 'subdued',
         iconType: 'popout',
         iconSize: 's',
-        'aria-label': 'Favorite link1',
         alwaysShow: true,
-        href: monitorUrl,
-        target: '_blank',
+        'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
+          defaultMessage: 'Link will open in new window.',
+        }),
       },
     },
   ];
@@ -58,10 +58,10 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         color: 'subdued',
         iconType: 'popout',
         iconSize: 's',
-        'aria-label': 'Favorite link1',
+        'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
+          defaultMessage: 'Link will open in new window.',
+        }),
         alwaysShow: true,
-        href: url,
-        target: '_blank',
       },
     });
   });
