@@ -2,8 +2,15 @@ def withPostBuildReporting(Closure closure) {
   try {
     closure()
   } finally {
+    def parallelWorkspaces = []
+    try {
+      parallelWorkspaces = getParallelWorkspaces()
+    } catch(ex) {
+      print ex
+    }
+
     catchErrors {
-      runErrorReporter()
+      runErrorReporter([pwd()] + parallelWorkspaces)
     }
 
     catchErrors {
@@ -16,21 +23,15 @@ def withPostBuildReporting(Closure closure) {
         dir(parallelWorkspace) {
           def workspaceTasks = [:]
 
-          // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
-          findFiles(glob: '*/kibana/package.json')
-            .collect {
-              // get the paths to the kibana directories for the parallel workspaces
-              return it.path.tokenize('/').dropRight(1).join('/')
-            }
-            .each { workspaceDir ->
-              workspaceTasks[workspaceDir] = {
-                dir(workspaceDir) {
-                  catchErrors {
-                    runbld.junit()
-                  }
+          parallelWorkspaces.each { workspaceDir ->
+            workspaceTasks[workspaceDir] = {
+              dir(workspaceDir) {
+                catchErrors {
+                  runbld.junit()
                 }
               }
             }
+          }
 
           if (workspaceTasks) {
             parallel(workspaceTasks)
@@ -39,6 +40,22 @@ def withPostBuildReporting(Closure closure) {
       }
     }
   }
+}
+
+def getParallelWorkspaces() {
+  def parallelWorkspace = "${env.WORKSPACE}/parallel"
+  if (fileExists(parallelWorkspace)) {
+    dir(parallelWorkspace) {
+      // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
+      return findFiles(glob: '*/kibana/package.json')
+        .collect {
+          // get the paths to the kibana directories for the parallel workspaces
+            return it.path.tokenize('/').dropRight(1).join('/')
+        }
+    }
+  }
+
+  return []
 }
 
 def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
@@ -263,13 +280,19 @@ def buildXpack(maxWorkers = '') {
 }
 
 def runErrorReporter() {
+  return runErrorReporter([pwd()])
+}
+
+def runErrorReporter(workspaces) {
   def status = buildUtils.getBuildStatus()
   def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
+  def globs = workspaces.collect { "'${it}/target/junit/**/*.xml'" }.join(" ")
 
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun} 'target/junit/**/*.xml' '../parallel/*/kibana/target/junit/**/*.xml'
+      node scripts/report_failed_tests ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )
