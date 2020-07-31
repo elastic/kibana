@@ -34,3 +34,19 @@ To get a closer look at a portion of your workpad, use the zoom options.
 +
 [role="screenshot"]
 image::images/canvas-zoom-controls.png[Zoom controls]
+
+
+[float]
+[[configure-auto-refresh-interval]]
+=== Change the auto-refresh interval
+
+Change how often the data refreshes on your workpad.
+
+. Click *View > Auto refresh settings*.
+
+. Select the interval you want to use, or *Set a custom interval*.
++
+[role="screenshot"]
+image::images/canvas-refresh-interval.png[Element data refresh interval]
++
+To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].

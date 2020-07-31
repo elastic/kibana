@@ -120,22 +120,7 @@ image::images/canvas_save_element.png[]
 
 To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
 
-To access your saved elements, click *Add element > My elements*.
-
-[float]
-[[configure-auto-refresh-interval]]
-=== Change the auto-refresh interval
-
-Change how often the data refreshes on your workpad.
-
-. Click *View > Auto refresh settings*.
-
-. Select the interval you want to use, or *Set a custom interval*.
-+
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
-+
-To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].
+Elements are saved in *Add element > My elements*.
 
 [float]
 [[add-existing-visuualizations]]
@@ -179,7 +164,7 @@ image::images/canvas-add-image.gif[]
 [[add-more-pages]]
 == Add pages
 
-Organize your ideas onto separate pages by adding more pages.
+Organize and separate your ideas by adding more pages.
 
 . Click *Page 1*, then click *+*.
 
@@ -190,13 +175,11 @@ image::images/canvas-add-pages.gif[Add pages]
 
 --
 
-include::{kib-repo-dir}/canvas/canvas-workpad.asciidoc[]
-
 include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
 
-include::{kib-repo-dir}/canavs/canvas-present-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
 
-include::{kib-repo-dir}/canavs/canvas-share-workpad.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
 
