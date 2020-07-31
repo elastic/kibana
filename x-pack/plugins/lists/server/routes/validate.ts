@@ -8,7 +8,7 @@ import { ExceptionListClient } from '../services/exception_lists/exception_list_
 import { MAX_EXCEPTION_LIST_SIZE } from '../../common/constants';
 import { foundExceptionListItemSchema } from '../../common/schemas';
 import { NamespaceType } from '../../common/schemas/types';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 
 export const validateExceptionListSize = async (
   exceptionLists: ExceptionListClient,
