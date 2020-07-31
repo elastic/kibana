@@ -40,7 +40,7 @@ export class FeaturesService {
       (acc: Features, feature: any) => ({
         ...acc,
         [feature.id]: {
-          navLinkId: feature.navLinkId,
+          app: feature.app,
         },
       }),
       {}

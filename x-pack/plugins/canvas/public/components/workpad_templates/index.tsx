@@ -10,12 +10,11 @@ import { RouterContext } from '../router';
 import { ComponentStrings } from '../../../i18n/components';
 // @ts-expect-error
 import * as workpadService from '../../lib/workpad_service';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WorkpadTemplates as Component } from './workpad_templates';
 import { CanvasTemplate } from '../../../types';
-import { UseKibanaProps } from '../../';
 import { list } from '../../lib/template_service';
 import { applyTemplateStrings } from '../../../i18n/templates/apply_strings';
+import { useNotifyService } from '../../services';
 
 interface WorkpadTemplatesProps {
   onClose: () => void;
@@ -33,7 +32,7 @@ export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onC
   const [creatingFromTemplateName, setCreatingFromTemplateName] = useState<string | undefined>(
     undefined
   );
-  const kibana = useKibana<UseKibanaProps>();
+  const { error } = useNotifyService();
 
   useEffect(() => {
     if (!templates) {
@@ -60,9 +59,9 @@ export const WorkpadTemplates: FunctionComponent<WorkpadTemplatesProps> = ({ onC
       if (router) {
         router.navigateTo('loadWorkpad', { id: result.data.id, page: 1 });
       }
-    } catch (error) {
+    } catch (e) {
       setCreatingFromTemplateName(undefined);
-      kibana.services.canvas.notify.error(error, {
+      error(e, {
         title: `Couldn't create workpad from template`,
       });
     }

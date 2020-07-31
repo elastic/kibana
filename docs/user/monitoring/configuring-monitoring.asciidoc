@@ -1,6 +1,6 @@
 [role="xpack"]
 [[configuring-monitoring]]
-== Configure monitoring in {kib}
+= Configure monitoring in {kib}
 ++++
 <titleabbrev>Configure monitoring</titleabbrev>
 ++++
@@ -16,7 +16,3 @@ You can also use {kib} to
 
 To learn about monitoring in general, see
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
-
-include::monitoring-metricbeat.asciidoc[]
-include::viewing-metrics.asciidoc[]
-include::monitoring-kibana.asciidoc[]

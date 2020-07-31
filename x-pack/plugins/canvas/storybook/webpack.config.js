@@ -77,7 +77,9 @@ module.exports = async ({ config }) => {
       {
         loader: 'postcss-loader',
         options: {
-          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+          config: {
+            path: require.resolve('@kbn/optimizer/postcss.config.js'),
+          },
         },
       },
       {
@@ -114,7 +116,9 @@ module.exports = async ({ config }) => {
       {
         loader: 'postcss-loader',
         options: {
-          path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+          config: {
+            path: require.resolve('@kbn/optimizer/postcss.config.js'),
+          },
         },
       },
       {

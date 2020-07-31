@@ -38,14 +38,14 @@ function calculatetBucketSize({ start, end }: { start?: number; end?: number }) 
   }
 }
 
-export const OverviewPage = ({ routeParams }: Props) => {
+export function OverviewPage({ routeParams }: Props) {
   const { core } = usePluginContext();
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
-  }, []);
+  }, [core]);
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), []);
+  const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const theme = useContext(ThemeContext);
   const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
@@ -206,4 +206,4 @@ export const OverviewPage = ({ routeParams }: Props) => {
       </EuiFlexGroup>
     </WithHeaderLayout>
   );
-};
+}

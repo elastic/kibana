@@ -9,17 +9,41 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { ExceptionListItemComponent } from './builder_exception_item';
+import { useKibana } from '../../../../common/lib/kibana';
 import { fields } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
+import { ExceptionListItemComponent } from './builder_exception_item';
+
+jest.mock('../../../../common/lib/kibana');
+
 describe('ExceptionListItemComponent', () => {
+  const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
+
+  beforeAll(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: {
+          autocomplete: {
+            getValueSuggestions: getValueSuggestionsMock,
+          },
+        },
+      },
+    });
+  });
+
+  afterEach(() => {
+    getValueSuggestionsMock.mockClear();
+  });
+
   describe('and badge logic', () => {
     test('it renders "and" badge with extra top padding for the first exception item when "andLogicIncluded" is "true"', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
-      exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
+      const exceptionItem = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [getEntryMatchMock(), getEntryMatchMock()],
+      };
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <ExceptionListItemComponent
@@ -31,9 +55,10 @@ describe('ExceptionListItemComponent', () => {
               title: 'logstash-*',
               fields,
             }}
-            isLoading={false}
             andLogicIncluded={true}
             isOnlyItem={false}
+            listType="detection"
+            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -46,7 +71,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders "and" badge when more than one exception item entry exists and it is not the first exception item', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -59,9 +84,10 @@ describe('ExceptionListItemComponent', () => {
               title: 'logstash-*',
               fields,
             }}
-            isLoading={false}
             andLogicIncluded={true}
             isOnlyItem={false}
+            listType="detection"
+            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -72,7 +98,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders indented "and" badge when "andLogicIncluded" is "true" and only one entry exists', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -85,9 +111,10 @@ describe('ExceptionListItemComponent', () => {
               title: 'logstash-*',
               fields,
             }}
-            isLoading={false}
             andLogicIncluded={true}
             isOnlyItem={false}
+            listType="detection"
+            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -100,7 +127,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders no "and" badge when "andLogicIncluded" is "false"', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -113,9 +140,10 @@ describe('ExceptionListItemComponent', () => {
               title: 'logstash-*',
               fields,
             }}
-            isLoading={false}
             andLogicIncluded={false}
             isOnlyItem={false}
+            listType="detection"
+            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -134,8 +162,10 @@ describe('ExceptionListItemComponent', () => {
 
   describe('delete button logic', () => {
     test('it renders delete button disabled when it is only entry left in builder', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
-      exceptionItem.entries = [getEntryMatchMock()];
+      const exceptionItem = {
+        ...getExceptionListItemSchemaMock(),
+        entries: [{ ...getEntryMatchMock(), field: '' }],
+      };
       const wrapper = mount(
         <ExceptionListItemComponent
           exceptionItem={exceptionItem}
@@ -146,9 +176,10 @@ describe('ExceptionListItemComponent', () => {
             title: 'logstash-*',
             fields,
           }}
-          isLoading={false}
           andLogicIncluded={false}
           isOnlyItem={true}
+          listType="detection"
+          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -160,7 +191,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it does not render delete button disabled when it is not the only entry left in builder', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock()];
 
       const wrapper = mount(
@@ -173,9 +204,10 @@ describe('ExceptionListItemComponent', () => {
             title: 'logstash-*',
             fields,
           }}
-          isLoading={false}
           andLogicIncluded={false}
           isOnlyItem={false}
+          listType="detection"
+          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -187,7 +219,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it does not render delete button disabled when "exceptionItemIndex" is not "0"', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <ExceptionListItemComponent
@@ -199,11 +231,12 @@ describe('ExceptionListItemComponent', () => {
             title: 'logstash-*',
             fields,
           }}
-          isLoading={false}
           andLogicIncluded={false}
           // if exceptionItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
           isOnlyItem={true}
+          listType="detection"
+          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -215,7 +248,7 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it does not render delete button disabled when more than one entry exists', () => {
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
         <ExceptionListItemComponent
@@ -227,9 +260,10 @@ describe('ExceptionListItemComponent', () => {
             title: 'logstash-*',
             fields,
           }}
-          isLoading={false}
           andLogicIncluded={false}
           isOnlyItem={true}
+          listType="detection"
+          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -243,7 +277,7 @@ describe('ExceptionListItemComponent', () => {
 
     test('it invokes "onChangeExceptionItem" when delete button clicked', () => {
       const mockOnDeleteExceptionItem = jest.fn();
-      const exceptionItem = getExceptionListItemSchemaMock();
+      const exceptionItem = { ...getExceptionListItemSchemaMock() };
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchAnyMock()];
       const wrapper = mount(
         <ExceptionListItemComponent
@@ -255,9 +289,10 @@ describe('ExceptionListItemComponent', () => {
             title: 'logstash-*',
             fields,
           }}
-          isLoading={false}
           andLogicIncluded={false}
           isOnlyItem={true}
+          listType="detection"
+          addNested={false}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           onChangeExceptionItem={jest.fn()}
         />
