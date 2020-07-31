@@ -178,7 +178,12 @@ export class KibanaRequest<
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
-    this.id = (request.app as KibanaRequestState).requestId;
+    // The `requestId` property will not be populated for requests that are 'faked' by internal systems that leverage
+    // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
+    // In these cases, the id defaults to `internal`.
+    // This should be solved as part of https://github.com/elastic/kibana/issues/39430.
+    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? 'internal';
+
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
     this.isSystemRequest =
