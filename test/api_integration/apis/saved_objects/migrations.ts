@@ -320,8 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { body } = await esClient.cat.indices({ index: '.migration-c*', format: 'json' });
       // It only created the original and the dest
-      const indices = body.map((entry) => entry.index).sort();
-      assert.deepEqual(indices, ['.migration-c_1', '.migration-c_2']);
+      expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
 
       // The docs in the original index are unchanged
       expect(await fetchDocs(esClient, `${index}_1`)).to.eql([
