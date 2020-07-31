@@ -41,12 +41,17 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
+  setApplication,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import {
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  VisualizeGeoFieldContext,
+} from '../../../../src/plugins/ui_actions/public';
 import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
@@ -56,6 +61,7 @@ import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
+import { visualizeGeoFieldAction, ACTION_VISUALIZE_GEO_FIELD } from './actions';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -66,6 +72,12 @@ export interface MapsPluginSetupDependencies {
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_VISUALIZE_GEO_FIELD]: VisualizeGeoFieldContext;
+  }
+}
 
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
@@ -96,6 +108,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
     });
   }
 
+  plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
+
   setInspector(inspector);
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
@@ -113,6 +127,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
+  setApplication(core.application);
 };
 
 /**

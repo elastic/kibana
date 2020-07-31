@@ -5,6 +5,7 @@
  */
 
 export * from './ui_actions';
+export * from './visualize_geo_field_action';
 
 export * from './map_actions';
 export * from './map_action_constants';

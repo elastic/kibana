@@ -43,13 +43,13 @@ import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
-import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
-import { setUISettings, setApplication, setIndexPatterns } from './services';
 import {
-  visualizeFieldAction,
+  UiActionsStart,
+  VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
-  ACTION_VISUALIZE_FIELD,
-} from './actions/visualize_field_action';
+} from '../../ui_actions/public';
+import { setUISettings, setApplication, setIndexPatterns } from './services';
+import { visualizeFieldAction, ACTION_VISUALIZE_FIELD } from './actions/visualize_field_action';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;

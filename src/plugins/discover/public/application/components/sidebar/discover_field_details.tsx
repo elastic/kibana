@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VISUALIZE_FIELD_TRIGGER } from '../../../../../ui_actions/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
+import { triggerVisualizeActions, isFieldVisualizable } from './lib/get_visualize_trigger';
 import { Bucket, FieldDetails } from './types';
-import { getServices, getUiActions } from '../../../kibana_services';
+import { getServices } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
@@ -40,6 +40,16 @@ export function DiscoverFieldDetails({
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
+  const [showVisualizeLink, setShowVisualizeLink] = useState<boolean | undefined>(false);
+
+  isFieldVisualizable(field, indexPattern.id, details.columns).then(
+    (v) => {
+      setShowVisualizeLink(v);
+    },
+    () => {
+      setShowVisualizeLink(false);
+    }
+  );
 
   return (
     <div className="dscFieldDetails">
@@ -77,17 +87,14 @@ export function DiscoverFieldDetails({
         </div>
       )}
 
-      {details.visualizeUrl && (
+      {showVisualizeLink && (
         <>
           <EuiLink
             onClick={() => {
               // getServices().core.application.navigateToApp(details.visualizeUrl.app, {
               //   path: details.visualizeUrl.path,
               // });
-              getUiActions().executeTriggerActions(VISUALIZE_FIELD_TRIGGER, {
-                indexPatternId: indexPattern.id,
-                fieldName: field.name,
-              });
+              triggerVisualizeActions(field, indexPattern.id, details.columns);
             }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
             data-test-subj={`fieldVisualize-${field.name}`}

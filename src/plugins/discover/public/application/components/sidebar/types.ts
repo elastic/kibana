@@ -27,6 +27,7 @@ export interface FieldDetails {
   exists: number;
   total: boolean;
   buckets: Bucket[];
+  columns: string[];
   visualizeUrl: {
     app: string;
     path: string;

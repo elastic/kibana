@@ -24,11 +24,6 @@ import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
 
-export interface VisualizeFieldContext {
-  fieldName: string;
-  indexPatternId: string;
-}
-
 export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>({
   type: ACTION_VISUALIZE_FIELD,
   getDisplayName: () => 'Visualize Field',

@@ -24,6 +24,7 @@ import {
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
+  VISUALIZE_GEO_FIELD_TRIGGER,
 } from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 import type { ApplyGlobalFilterActionContext } from '../../data/public';
@@ -31,6 +32,17 @@ import type { ApplyGlobalFilterActionContext } from '../../data/public';
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
+
+export interface VisualizeFieldContext {
+  fieldName: string;
+  indexPatternId: string;
+}
+
+export interface VisualizeGeoFieldContext {
+  fieldName: string;
+  indexPatternId: string;
+  tooltipProperties?: string[];
+}
 
 const DEFAULT_TRIGGER = '';
 
@@ -44,7 +56,8 @@ export interface TriggerContextMapping {
   [SELECT_RANGE_TRIGGER]: RangeSelectContext;
   [VALUE_CLICK_TRIGGER]: ValueClickContext;
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
-  [VISUALIZE_FIELD_TRIGGER]: any;
+  [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
+  [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeGeoFieldContext;
 }
 
 const DEFAULT_ACTION = '';

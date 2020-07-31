@@ -6,6 +6,7 @@
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
+import { ApplicationStart } from '../../../../src/core/public';
 import { MapsConfigType } from '../config';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 
@@ -31,6 +32,7 @@ export function getUiActions(): any;
 export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
+export function getApplication(): ApplicationStart;
 export function getSearchService(): DataPublicPluginStart['search'];
 export function getKibanaCommonConfig(): MapsLegacyConfigType;
 export function getMapAppConfig(): MapsConfigType;
@@ -72,6 +74,7 @@ export function setUiActions(args: unknown): void;
 export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
+export function setApplication(args: ApplicationStart): void;
 export function setSearchService(args: DataPublicPluginStart['search']): void;
 export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;

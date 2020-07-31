@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
+import { Trigger } from '.';
+
+export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
+export const visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'> = {
+  id: VISUALIZE_GEO_FIELD_TRIGGER,
+  title: 'Visualize Geo field',
+  description: 'Triggered when user wants to visualize a geo field.',
+};

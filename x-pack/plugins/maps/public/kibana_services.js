@@ -177,3 +177,7 @@ export const setIsGoldPlus = (igp) => {
 export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
+
+let coreApplication;
+export const setApplication = (application) => (coreApplication = application);
+export const getApplication = () => coreApplication;
