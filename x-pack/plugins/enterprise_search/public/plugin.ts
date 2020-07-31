@@ -83,7 +83,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       description: 'Search everything',
       path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
       order: 100,
-      className: 'homSolutionPanel--enterpriseSearch',
     });
 
     plugins.home.featureCatalogue.register({

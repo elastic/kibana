@@ -64,7 +64,6 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         icon: 'logoObservability',
         path: '/app/observability',
         order: 200,
-        className: 'homSolutionPanel--observability',
       });
     }
 

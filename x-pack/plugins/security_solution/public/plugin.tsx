@@ -84,7 +84,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         icon: APP_ICON,
         path: APP_OVERVIEW_PATH,
         order: 300,
-        className: 'homSolutionPanel--security', // change to use APP_ID?
       });
 
       plugins.home.featureCatalogue.register({

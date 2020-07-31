@@ -69,7 +69,7 @@ export const SolutionPanel: FC<Props> = ({ solution, apps = [] }) =>
     >
       <EuiPanel
         paddingSize="none"
-        className={`homSolutionPanel  ${solution.className}`}
+        className={`homSolutionPanel  homSolutionPanel--${solution.id}`}
         onClick={createAppNavigationHandler(solution.path)} // TODO: double check this url once enterprise search overview page is available
       >
         <EuiFlexGroup gutterSize="none">
