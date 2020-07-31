@@ -8,16 +8,14 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
-  PROCESSOR_EVENT,
   SERVICE_NODE_NAME,
-} from '../elasticsearch_fieldnames';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { rangeFilter } from '../utils/range_filter';
-import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
+} from '../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../common/utils/range_filter';
+import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
+import { ProcessorEvent } from '../../common/processor_event';
 
 function getServiceNodeNameFilters(serviceNodeName?: string) {
   if (!serviceNodeName) {
@@ -40,18 +38,19 @@ export function getMetricsProjection({
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const { start, end, uiFiltersES, indices } = setup;
+  const { start, end, uiFiltersES } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...getServiceNodeNameFilters(serviceNodeName),
     ...uiFiltersES,
   ];
 
   return {
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       query: {
         bool: {

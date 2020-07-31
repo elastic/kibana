@@ -8,22 +8,21 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../elasticsearch_fieldnames';
-import { rangeFilter } from '../utils/range_filter';
+import { TRANSACTION_TYPE } from '../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../common/utils/range_filter';
+import { ProcessorEvent } from '../../common/processor_event';
 
 export function getRumOverviewProjection({
   setup,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, indices } = setup;
+  const { start, end, uiFiltersES } = setup;
 
   const bool = {
     filter: [
       { range: rangeFilter(start, end) },
-      { term: { [PROCESSOR_EVENT]: 'transaction' } },
       { term: { [TRANSACTION_TYPE]: 'page-load' } },
       {
         // Adding this filter to cater for some inconsistent rum data
@@ -36,7 +35,9 @@ export function getRumOverviewProjection({
   };
 
   return {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       query: {
         bool,

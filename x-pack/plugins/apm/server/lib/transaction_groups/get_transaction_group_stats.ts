@@ -5,7 +5,6 @@
  */
 import { merge } from 'lodash';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
   TRANSACTION_SAMPLED,
   TRANSACTION_DURATION,
@@ -52,7 +51,7 @@ export async function getSamples({ request, setup }: MetricParams) {
     { '@timestamp': { order: 'desc' as const } },
   ];
 
-  const response = await setup.client.search({
+  const response = await setup.apmEventClient.search({
     ...params,
     body: {
       ...params.body,
@@ -73,7 +72,7 @@ export async function getSamples({ request, setup }: MetricParams) {
     return {
       key: bucket.key as BucketKey,
       count: bucket.doc_count,
-      sample: bucket.sample.hits.hits[0]._source as Transaction,
+      sample: bucket.sample.hits.hits[0]._source,
     };
   });
 }
@@ -87,7 +86,7 @@ export async function getAverages({ request, setup }: MetricParams) {
     },
   });
 
-  const response = await setup.client.search(params);
+  const response = await setup.apmEventClient.search(params);
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -108,7 +107,7 @@ export async function getSums({ request, setup }: MetricParams) {
     },
   });
 
-  const response = await setup.client.search(params);
+  const response = await setup.apmEventClient.search(params);
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -131,7 +130,7 @@ export async function getPercentiles({ request, setup }: MetricParams) {
     },
   });
 
-  const response = await setup.client.search(params);
+  const response = await setup.apmEventClient.search(params);
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
