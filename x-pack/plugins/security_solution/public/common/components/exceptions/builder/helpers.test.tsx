@@ -466,7 +466,7 @@ describe('Exception builder helpers', () => {
 
   describe('#isEntryNested', () => {
     test('it returns "false" if payload is not of type EntryNested', () => {
-      const payload: BuilderEntry = { ...getEntryMatchMock() };
+      const payload: BuilderEntry = getEntryMatchMock();
       const output = isEntryNested(payload);
       const expected = false;
       expect(output).toEqual(expected);
@@ -483,7 +483,7 @@ describe('Exception builder helpers', () => {
   describe('#getFormattedBuilderEntries', () => {
     test('it returns formatted entry with field undefined if it unable to find a matching index pattern field', () => {
       const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItems: BuilderEntry[] = [{ ...getEntryMatchMock() }];
+      const payloadItems: BuilderEntry[] = [getEntryMatchMock()];
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
