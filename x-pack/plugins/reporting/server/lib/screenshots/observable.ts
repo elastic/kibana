@@ -128,7 +128,7 @@ export function screenshotsObservableFactory(
               takeUntil(exit$),
               mergeMap(
                 async (data: ScreenSetupData): Promise<ScreenshotResults> => {
-                  checkPageIsOpen(driver); // check once again the browser has not closed
+                  checkPageIsOpen(driver); // re-check that the browser has not closed
 
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes

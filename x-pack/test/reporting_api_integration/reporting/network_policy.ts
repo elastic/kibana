@@ -45,12 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const reportFailed = await fails$.toPromise();
 
-      // BUG Based on the timing of when and where the disconnection was detected, this error could look different
-      // Reporting generation failed: Error: Chromium was disconnected. Check the server logs for more information.
-      // Reporting generation failed: Error: Browser was closed unexpectedly! Check the server logs for more info.
-      expect(reportFailed).to.be(
-        'Reporting generation failed: Error: Browser was closed unexpectedly! Check the server logs for more info.'
-      );
+      expect(reportFailed).to.match(/Reporting generation failed: Error:/);
     });
   });
 }

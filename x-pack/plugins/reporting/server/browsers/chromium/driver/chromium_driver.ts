@@ -9,11 +9,11 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '../';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ConditionalHeaders, ElementPosition } from '../../../types';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
-import { getDisallowedOutgoingUrlError } from '..';
 
 export interface ChromiumDriverOptions {
   inspect: boolean;
