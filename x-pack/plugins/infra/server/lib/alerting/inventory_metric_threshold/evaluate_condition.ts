@@ -112,6 +112,8 @@ const getData = async (
   try {
     const { nodes } = await snapshot.getNodes(esClient, options);
 
+    if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
+
     return nodes.reduce((acc, n) => {
       const nodePathItem = last(n.path) as any;
       const m = first(n.metrics);
