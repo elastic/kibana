@@ -150,7 +150,9 @@ export class Session {
         (await this.crypto.decrypt(sessionIndexValue.content, sessionCookieValue.aad)) as string
       );
     } catch (err) {
-      this.options.logger.warn('Unable to decrypt session content, session will be invalidated.');
+      this.options.logger.warn(
+        `Unable to decrypt session content, session will be invalidated: ${err.message}`
+      );
       await this.clear(request);
       return null;
     }
@@ -379,7 +381,7 @@ export class Session {
     { username, state }: SessionValueContentToEncrypt
   ): Readonly<SessionValue> {
     // Extract values that are specific to session index value.
-    const { usernameHash, content, tenant, ...publicSessionValue } = sessionIndexValue;
+    const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
     return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
   }
 }

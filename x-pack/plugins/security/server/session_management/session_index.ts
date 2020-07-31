@@ -10,15 +10,10 @@ import { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
   readonly clusterClient: ILegacyClusterClient;
-  readonly tenant: string;
+  readonly indexName: string;
   readonly config: Pick<ConfigType, 'session'>;
   readonly logger: Logger;
 }
-
-/**
- * Version of the current session index template.
- */
-const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
  * Alias of the Elasticsearch index that is used to store user session information.
@@ -26,18 +21,21 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
 export const SESSION_INDEX_ALIAS = '.kibana_security_session';
 
 /**
- * Name of the Elasticsearch index that is used to store user session information.
+ * Version of the current session index template.
  */
-export const SESSION_INDEX_NAME = `${SESSION_INDEX_ALIAS}_${SESSION_INDEX_TEMPLATE_VERSION}`;
+export const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
- * Index template that is used for the current version of the session index.
+ * Name of the current session index template.
  */
-export const SESSION_INDEX_TEMPLATE = {
-  name: `${SESSION_INDEX_ALIAS}_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`,
-  version: SESSION_INDEX_TEMPLATE_VERSION,
-  template: {
-    index_patterns: SESSION_INDEX_NAME,
+export const SESSION_INDEX_TEMPLATE_NAME = `${SESSION_INDEX_ALIAS}_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
+
+/**
+ * Returns index template that is used for the current version of the session index.
+ */
+export function getSessionIndexTemplate(indexName: string) {
+  return Object.freeze({
+    index_patterns: indexName,
     order: 1000,
     settings: {
       index: {
@@ -54,7 +52,6 @@ export const SESSION_INDEX_TEMPLATE = {
       properties: {
         usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
-        tenant: { type: 'keyword' },
         idleTimeoutExpiration: { type: 'date' },
         lifespanExpiration: { type: 'date' },
         accessAgreementAcknowledged: { type: 'boolean' },
@@ -62,8 +59,8 @@ export const SESSION_INDEX_TEMPLATE = {
       },
     },
     aliases: { [SESSION_INDEX_ALIAS]: {} },
-  },
-};
+  });
+}
 
 /**
  * Represents shape of the session value stored in the index.
@@ -73,11 +70,6 @@ export interface SessionIndexValue {
    * Unique session ID.
    */
   sid: string;
-
-  /**
-   * Name of the current Kibana tenant.
-   */
-  tenant: string;
 
   /**
    * Hash of the username. It's defined only if session is authenticated, otherwise session
@@ -191,7 +183,7 @@ export class SessionIndex {
    * Creates a new document for the specified session value.
    * @param sessionValue Session index value.
    */
-  async create(sessionValue: Readonly<Omit<SessionIndexValue, 'tenant' | 'metadata'>>) {
+  async create(sessionValue: Readonly<Omit<SessionIndexValue, 'metadata'>>) {
     if (this.indexInitialization) {
       this.options.logger.warn(
         'Attempted to create a new session while session index is initializing.'
@@ -210,16 +202,12 @@ export class SessionIndex {
         // But we can reduce probability of getting into a weird state when session is being created
         // while session index is missing for some reason. This way we'll recreate index with a
         // proper name and alias. But this will only work if we still have a proper index template.
-        index: SESSION_INDEX_NAME,
-        body: { ...sessionValueToStore, tenant: this.options.tenant },
+        index: this.options.indexName,
+        body: sessionValueToStore,
         refresh: 'wait_for',
       });
 
-      return {
-        ...sessionValue,
-        tenant: this.options.tenant,
-        metadata: { primaryTerm, sequenceNumber },
-      } as SessionIndexValue;
+      return { ...sessionValue, metadata: { primaryTerm, sequenceNumber } } as SessionIndexValue;
     } catch (err) {
       this.options.logger.error(`Failed to create session value: ${err.message}`);
       throw err;
@@ -236,7 +224,7 @@ export class SessionIndex {
       const response = await this.options.clusterClient.callAsInternalUser('index', {
         id: sid,
         index: SESSION_INDEX_ALIAS,
-        body: { ...sessionValueToStore, tenant: this.options.tenant },
+        body: sessionValueToStore,
         ifSeqNo: metadata.sequenceNumber,
         ifPrimaryTerm: metadata.primaryTerm,
         refresh: 'wait_for',
@@ -256,7 +244,6 @@ export class SessionIndex {
 
       return {
         ...sessionValue,
-        tenant: this.options.tenant,
         metadata: { primaryTerm: response._primary_term, sequenceNumber: response._seq_no },
       } as SessionIndexValue;
     } catch (err) {
@@ -299,7 +286,7 @@ export class SessionIndex {
       try {
         indexTemplateExists = await this.options.clusterClient.callAsInternalUser(
           'indices.existsTemplate',
-          { name: SESSION_INDEX_TEMPLATE.name }
+          { name: SESSION_INDEX_TEMPLATE_NAME }
         );
       } catch (err) {
         this.options.logger.error(
@@ -314,8 +301,8 @@ export class SessionIndex {
       } else {
         try {
           await this.options.clusterClient.callAsInternalUser('indices.putTemplate', {
-            name: SESSION_INDEX_TEMPLATE.name,
-            body: SESSION_INDEX_TEMPLATE.template,
+            name: SESSION_INDEX_TEMPLATE_NAME,
+            body: getSessionIndexTemplate(this.options.indexName),
           });
           this.options.logger.debug('Successfully created session index template.');
         } catch (err) {
@@ -329,7 +316,7 @@ export class SessionIndex {
       let indexExists = false;
       try {
         indexExists = await this.options.clusterClient.callAsInternalUser('indices.exists', {
-          index: SESSION_INDEX_NAME,
+          index: this.options.indexName,
         });
       } catch (err) {
         this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
@@ -342,7 +329,7 @@ export class SessionIndex {
       } else {
         try {
           await this.options.clusterClient.callAsInternalUser('indices.create', {
-            index: SESSION_INDEX_NAME,
+            index: this.options.indexName,
           });
           this.options.logger.debug('Successfully created session index.');
         } catch (err) {
@@ -394,15 +381,7 @@ export class SessionIndex {
         index: SESSION_INDEX_ALIAS,
         refresh: 'wait_for',
         ignore: [409, 404],
-        body: {
-          query: {
-            bool: {
-              filter: { term: { tenant: this.options.tenant } },
-              should: deleteQueries,
-              minimum_should_match: 1,
-            },
-          },
-        },
+        body: { query: { bool: { should: deleteQueries } } },
       });
 
       if (response.deleted > 0) {

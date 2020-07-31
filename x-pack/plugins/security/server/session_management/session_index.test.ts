@@ -7,9 +7,9 @@
 import { ILegacyClusterClient } from '../../../../../src/core/server';
 import { ConfigSchema, createConfig } from '../config';
 import {
+  getSessionIndexTemplate,
   SESSION_INDEX_ALIAS,
-  SESSION_INDEX_NAME,
-  SESSION_INDEX_TEMPLATE,
+  SESSION_INDEX_TEMPLATE_NAME,
   SessionIndex,
 } from './session_index';
 
@@ -19,11 +19,12 @@ import { sessionIndexMock } from './session_index.mock';
 describe('Session index', () => {
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let sessionIndex: SessionIndex;
+  const indexName = '.kibana_some_tenant_security_session_1';
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
     const sessionIndexOptions = {
       logger: loggingSystemMock.createLogger(),
-      tenant: 'some-tenant',
+      indexName,
       config: createConfig(ConfigSchema.validate({}), loggingSystemMock.createLogger(), {
         isTLSEnabled: false,
       }),
@@ -36,10 +37,10 @@ describe('Session index', () => {
   describe('#initialize', () => {
     function assertExistenceChecksPerformed() {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.existsTemplate', {
-        name: SESSION_INDEX_TEMPLATE.name,
+        name: SESSION_INDEX_TEMPLATE_NAME,
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.exists', {
-        index: SESSION_INDEX_TEMPLATE.template.index_patterns,
+        index: getSessionIndexTemplate(indexName).index_patterns,
       });
     }
 
@@ -87,14 +88,15 @@ describe('Session index', () => {
 
       await sessionIndex.initialize();
 
+      const expectedIndexTemplate = getSessionIndexTemplate(indexName);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(4);
       assertExistenceChecksPerformed();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.putTemplate', {
-        name: SESSION_INDEX_TEMPLATE.name,
-        body: SESSION_INDEX_TEMPLATE.template,
+        name: SESSION_INDEX_TEMPLATE_NAME,
+        body: expectedIndexTemplate,
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.create', {
-        index: SESSION_INDEX_TEMPLATE.template.index_patterns,
+        index: expectedIndexTemplate.index_patterns,
       });
     });
 
@@ -114,8 +116,8 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(3);
       assertExistenceChecksPerformed();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.putTemplate', {
-        name: SESSION_INDEX_TEMPLATE.name,
-        body: SESSION_INDEX_TEMPLATE.template,
+        name: SESSION_INDEX_TEMPLATE_NAME,
+        body: getSessionIndexTemplate(indexName),
       });
     });
 
@@ -135,7 +137,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(3);
       assertExistenceChecksPerformed();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.create', {
-        index: SESSION_INDEX_TEMPLATE.template.index_patterns,
+        index: getSessionIndexTemplate(indexName).index_patterns,
       });
     });
 
@@ -184,12 +186,10 @@ describe('Session index', () => {
         body: {
           query: {
             bool: {
-              filter: { term: { tenant: 'some-tenant' } },
               should: [
                 { range: { lifespanExpiration: { lte: now } } },
                 { range: { idleTimeoutExpiration: { lte: now } } },
               ],
-              minimum_should_match: 1,
             },
           },
         },
@@ -199,7 +199,7 @@ describe('Session index', () => {
     it('when only `lifespan` is configured', async () => {
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        tenant: 'some-tenant',
+        indexName,
         config: createConfig(
           ConfigSchema.validate({ session: { lifespan: 456 } }),
           loggingSystemMock.createLogger(),
@@ -218,13 +218,11 @@ describe('Session index', () => {
         body: {
           query: {
             bool: {
-              filter: { term: { tenant: 'some-tenant' } },
               should: [
                 { range: { lifespanExpiration: { lte: now } } },
                 { bool: { must_not: { exists: { field: 'lifespanExpiration' } } } },
                 { range: { idleTimeoutExpiration: { lte: now } } },
               ],
-              minimum_should_match: 1,
             },
           },
         },
@@ -235,7 +233,7 @@ describe('Session index', () => {
       const idleTimeout = 123;
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        tenant: 'some-tenant',
+        indexName,
         config: createConfig(
           ConfigSchema.validate({ session: { idleTimeout } }),
           loggingSystemMock.createLogger(),
@@ -254,13 +252,11 @@ describe('Session index', () => {
         body: {
           query: {
             bool: {
-              filter: { term: { tenant: 'some-tenant' } },
               should: [
                 { range: { lifespanExpiration: { lte: now } } },
                 { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
                 { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
               ],
-              minimum_should_match: 1,
             },
           },
         },
@@ -271,7 +267,7 @@ describe('Session index', () => {
       const idleTimeout = 123;
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        tenant: 'some-tenant',
+        indexName,
         config: createConfig(
           ConfigSchema.validate({ session: { idleTimeout, lifespan: 456 } }),
           loggingSystemMock.createLogger(),
@@ -290,14 +286,12 @@ describe('Session index', () => {
         body: {
           query: {
             bool: {
-              filter: { term: { tenant: 'some-tenant' } },
               should: [
                 { range: { lifespanExpiration: { lte: now } } },
                 { bool: { must_not: { exists: { field: 'lifespanExpiration' } } } },
                 { range: { idleTimeoutExpiration: { lte: now - 3 * idleTimeout } } },
                 { bool: { must_not: { exists: { field: 'idleTimeoutExpiration' } } } },
               ],
-              minimum_should_match: 1,
             },
           },
         },
@@ -334,7 +328,6 @@ describe('Session index', () => {
         provider: { type: 'basic', name: 'basic1' },
         idleTimeoutExpiration: 123,
         lifespanExpiration: null,
-        tenant: 'some-tenant',
         content: 'some-encrypted-content',
       };
 
@@ -396,15 +389,14 @@ describe('Session index', () => {
       await expect(sessionIndex.create({ sid, ...sessionValue })).resolves.toEqual({
         ...sessionValue,
         sid,
-        tenant: 'some-tenant',
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('create', {
         id: sid,
-        index: SESSION_INDEX_NAME,
-        body: { ...sessionValue, tenant: 'some-tenant' },
+        index: indexName,
+        body: sessionValue,
         refresh: 'wait_for',
       });
     });
@@ -424,7 +416,6 @@ describe('Session index', () => {
         provider: { type: 'basic', name: 'basic1' },
         idleTimeoutExpiration: 100,
         lifespanExpiration: 200,
-        tenant: 'some-tenant',
         content: 'some-updated-encrypted-content',
       };
 
@@ -451,14 +442,12 @@ describe('Session index', () => {
         provider: { type: 'basic', name: 'basic1' },
         idleTimeoutExpiration: null,
         lifespanExpiration: null,
-        tenant: 'some-other-tenant',
         content: 'some-encrypted-content',
       };
 
       await expect(sessionIndex.update({ sid, metadata, ...sessionValue })).resolves.toEqual({
         ...latestSessionValue,
         sid,
-        tenant: 'some-tenant',
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
 
@@ -466,7 +455,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('index', {
         id: sid,
         index: SESSION_INDEX_ALIAS,
-        body: { ...sessionValue, tenant: 'some-tenant' },
+        body: sessionValue,
         ifSeqNo: 456,
         ifPrimaryTerm: 123,
         refresh: 'wait_for',
@@ -488,7 +477,6 @@ describe('Session index', () => {
         provider: { type: 'basic', name: 'basic1' },
         idleTimeoutExpiration: null,
         lifespanExpiration: null,
-        tenant: 'some-tenant',
         content: 'some-encrypted-content',
       };
 

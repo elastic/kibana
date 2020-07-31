@@ -5,13 +5,12 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { createHash } from 'crypto';
 import { HttpServiceSetup, ILegacyClusterClient, Logger } from '../../../../../src/core/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../task_manager/server';
 import { ConfigType } from '../config';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { SessionCookie } from './session_cookie';
-import { SessionIndex } from './session_index';
+import { SessionIndex, SESSION_INDEX_TEMPLATE_VERSION } from './session_index';
 import { Session } from './session';
 
 export interface SessionManagementServiceSetupParams {
@@ -65,15 +64,14 @@ export class SessionManagementService {
     this.sessionIndex = new SessionIndex({
       config,
       clusterClient,
-      // Unique identifier of Kibana "tenant" based on the .kibana index name it relies on.
-      tenant: createHash('sha3-256').update(kibanaIndexName).digest('hex'),
+      indexName: `${kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`,
       logger: this.logger.get('index'),
     });
 
     // Register task that will perform periodic session index cleanup.
     taskManager.registerTaskDefinitions({
       [SESSION_INDEX_CLEANUP_TASK_NAME]: {
-        title: 'Cleanup expired or invalid sessions',
+        title: 'Cleanup expired or invalid user sessions',
         type: SESSION_INDEX_CLEANUP_TASK_NAME,
         createTaskRunner: () => ({ run: () => this.sessionIndex.cleanUp() }),
       },

@@ -311,7 +311,6 @@ describe('Session', () => {
           'AQABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgIAAQIDBAUGBwgJCt8yPPMsaNAxn7qtLtc57UN967e9FpjmJgEIipe6nD20F47TtNIZnAuzd75zc8TNWvPMgRTzpHnYz7cT9m5ouv2V8TZ+ow==',
         provider: { name: 'basic1', type: 'basic' },
         usernameHash: '35133597af273830c3f139c72501e676338f28a39dca8ff62d5c2b8bfba75f69',
-        tenant: 'some-tenant',
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
         metadata: { primaryTerm: 1, sequenceNumber: 1 },

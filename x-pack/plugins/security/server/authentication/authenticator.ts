@@ -561,7 +561,7 @@ export class Authenticator {
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
     const sessionHasBeenAuthenticated =
-      !isExistingSessionAuthenticated && isNewSessionAuthenticated;
+      !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
