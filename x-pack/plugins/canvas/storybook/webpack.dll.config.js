@@ -114,7 +114,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+                path: require.resolve('@kbn/optimizer/postcss.config.js'),
               },
             },
           },

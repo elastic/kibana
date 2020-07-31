@@ -16,8 +16,11 @@ import {
 import { HomeLink } from '../../shared/Links/apm/HomeLink';
 import { useLocation } from '../../../hooks/useLocation';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 export function Settings(props: { children: ReactNode }) {
+  const plugin = useApmPluginContext();
+  const isMLEnabled = !!plugin.core.application.capabilities.ml;
   const { search, pathname } = useLocation();
   return (
     <>
@@ -48,17 +51,25 @@ export function Settings(props: { children: ReactNode }) {
                       '/settings/agent-configuration'
                     ),
                   },
-                  {
-                    name: i18n.translate(
-                      'xpack.apm.settings.anomalyDetection',
-                      {
-                        defaultMessage: 'Anomaly detection',
-                      }
-                    ),
-                    id: '4',
-                    href: getAPMHref('/settings/anomaly-detection', search),
-                    isSelected: pathname === '/settings/anomaly-detection',
-                  },
+                  ...(isMLEnabled
+                    ? [
+                        {
+                          name: i18n.translate(
+                            'xpack.apm.settings.anomalyDetection',
+                            {
+                              defaultMessage: 'Anomaly detection',
+                            }
+                          ),
+                          id: '4',
+                          href: getAPMHref(
+                            '/settings/anomaly-detection',
+                            search
+                          ),
+                          isSelected:
+                            pathname === '/settings/anomaly-detection',
+                        },
+                      ]
+                    : []),
                   {
                     name: i18n.translate('xpack.apm.settings.customizeApp', {
                       defaultMessage: 'Customize app',
