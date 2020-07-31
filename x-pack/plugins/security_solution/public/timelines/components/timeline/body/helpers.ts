@@ -69,7 +69,7 @@ export const getPinOnClick = ({
   if (!allowUnpinning) {
     return noop;
   }
-  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
+  return isEventPinned ? onUnPinEvent(eventId) : onPinEvent(eventId);
 };
 
 /**
