@@ -5,9 +5,7 @@
       "mappings": { "__scope_link": "put_mapping" },
       "settings": { "__scope_link": "put_settings" },
       "version": 0,
-      "template": {},
-      "composed_of": [],
-      "priority": 0,
+      "order": 0,
       "aliases": {
         "__template": {
           "NAME": {}

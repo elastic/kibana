@@ -1,5 +1,5 @@
 {
-  "indices.simulate_index_template": {
+  "indices.put_index_template": {
     "data_autocomplete_rules": {
       "index_patterns": [],
       "version": 0,
@@ -17,7 +17,7 @@
       "_meta": {}
     },
     "patterns": [
-      "_index_template/_simulate_index/{indices}"
+      "_index_template/{template}"
     ]
   }
 }

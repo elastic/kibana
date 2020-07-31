@@ -2,12 +2,19 @@
   "indices.simulate_template": {
     "data_autocomplete_rules": {
       "index_patterns": [],
-      "mappings": { "__scope_link": "put_mapping" },
-      "settings": { "__scope_link": "put_settings" },
       "version": 0,
-      "template": {},
+      "template": {
+        "mappings": { "__scope_link": "put_mapping" },
+        "settings": { "__scope_link": "put_settings" },
+        "aliases": {
+          "__template": {
+            "NAME": {}
+          }
+        }
+      },
       "composed_of": [],
-      "priority": 0
+      "priority": 0,
+      "_meta": {}
     },
     "patterns": [
       "_index_template/_simulate/{template}"
