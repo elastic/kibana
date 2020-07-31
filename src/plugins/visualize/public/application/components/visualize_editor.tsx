@@ -37,7 +37,7 @@ import { ExperimentalVisInfo } from './experimental_vis_info';
 import { VisualizeTopNav } from './visualize_top_nav';
 
 export const VisualizeEditor = () => {
-  const { id: visualizationIdFromUrl } = useParams();
+  const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());

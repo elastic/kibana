@@ -228,7 +228,7 @@ export class AdvancedSettingsComponent extends Component<
 }
 
 export const AdvancedSettings = (props: AdvancedSettingsProps) => {
-  const { query } = useParams();
+  const { query } = useParams<{ query: string }>();
   return (
     <AdvancedSettingsComponent
       queryText={query || ''}

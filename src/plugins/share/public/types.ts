@@ -55,7 +55,7 @@ export interface ShareContext {
  * */
 export interface ShareContextMenuPanelItem extends Omit<EuiContextMenuPanelItemDescriptor, 'name'> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
-  sortOrder: number;
+  sortOrder?: number;
 }
 
 /**
