@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EditMenu } from './edit_menu';
-export { EditMenu as EditMenuComponent } from './edit_menu.component';
+export { EmbeddableFlyoutPortal, AddEmbeddablePanel } from './flyout';
+export {
+  AddEmbeddableFlyout as AddEmbeddableFlyoutComponent,
+  Props as AddEmbeddableFlyoutComponentProps,
+} from './flyout.component';
