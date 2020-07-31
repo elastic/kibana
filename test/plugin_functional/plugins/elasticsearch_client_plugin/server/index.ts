@@ -17,6 +17,6 @@
  * under the License.
  */
 
-module.exports = {
-  plugins: [require('autoprefixer')()],
-};
+import { ElasticsearchClientPlugin } from './plugin';
+
+export const plugin = () => new ElasticsearchClientPlugin();
