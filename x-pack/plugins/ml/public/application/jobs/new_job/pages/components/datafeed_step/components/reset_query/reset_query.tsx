@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC, useContext, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  EuiOverlayMask,
+  EuiCodeBlock,
+  EuiSpacer,
+} from '@elastic/eui';
+import { JobCreatorContext } from '../../../job_creator_context';
+
+const DEFAULT_QUERY = {
+  bool: {
+    must: [
+      {
+        match_all: {},
+      },
+    ],
+  },
+};
+const DEFAULT_QUERY_STRING = JSON.stringify(DEFAULT_QUERY, null, 2);
+
+export const ResetQueryButton: FC = () => {
+  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const [confirmModelVisible, setConfirmModelVisible] = useState(false);
+
+  const closeModal = () => setConfirmModelVisible(false);
+  const showModal = () => setConfirmModelVisible(true);
+
+  function resetDatafeed() {
+    jobCreator.query = DEFAULT_QUERY;
+    jobCreatorUpdate();
+    closeModal();
+  }
+  return (
+    <>
+      {confirmModelVisible && (
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            title={i18n.translate(
+              'xpack.ml.newJob.wizard.datafeedStep.resetDatafeedConfirm.title',
+              { defaultMessage: 'Reset datafeed query' }
+            )}
+            onCancel={closeModal}
+            onConfirm={resetDatafeed}
+            cancelButtonText={i18n.translate(
+              'xpack.ml.newJob.wizard.datafeedStep.resetDatafeedConfirm.cancel',
+              { defaultMessage: 'Cancel' }
+            )}
+            confirmButtonText={i18n.translate(
+              'xpack.ml.newJob.wizard.datafeedStep.resetDatafeedConfirm.confirm',
+              { defaultMessage: 'Confirm' }
+            )}
+            defaultFocusedButton="confirm"
+          >
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.datafeedStep.resetDatafeedConfirm.description"
+              defaultMessage="Set the datafeed query to be the default."
+            />
+
+            <EuiSpacer size="s" />
+
+            <EuiCodeBlock language="js" fontSize="m" paddingSize="s">
+              {DEFAULT_QUERY_STRING}
+            </EuiCodeBlock>
+          </EuiConfirmModal>
+        </EuiOverlayMask>
+      )}
+
+      <EuiButtonEmpty size="s" onClick={showModal}>
+        Reset datafeed to default
+      </EuiButtonEmpty>
+    </>
+  );
+};
