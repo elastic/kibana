@@ -27,10 +27,11 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
 
   router.post(
     {
-      path: '/internal/search/{strategy}',
+      path: '/internal/search/{strategy}/{id?}',
       validate: {
         params: schema.object({
           strategy: schema.string(),
+          id: schema.maybe(schema.string()),
         }),
 
         query: schema.object({}, { unknowns: 'allow' }),
@@ -40,40 +41,6 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
     },
     async (context, request, res) => {
       const searchRequest = request.body;
-      const { strategy } = request.params;
-      const signal = getRequestAbortedSignal(request.events.aborted$);
-
-      const [, , selfStart] = await core.getStartServices();
-      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
-
-      try {
-        const response = await searchStrategy.search(context, searchRequest, { signal });
-        return res.ok({ body: response });
-      } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: '/internal/search/{strategy}/{id}',
-      validate: {
-        params: schema.object({
-          strategy: schema.string(),
-          id: schema.string(),
-        }),
-      },
-    },
-    async (context, request, res) => {
       const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -81,7 +48,9 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
       const searchStrategy = selfStart.search.getSearchStrategy(strategy);
 
       try {
-        const response = await searchStrategy.search(context, { id }, { signal });
+        const response = await searchStrategy.search(context, id ? { id } : searchRequest, {
+          signal,
+        });
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

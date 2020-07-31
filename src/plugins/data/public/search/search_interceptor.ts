@@ -94,8 +94,8 @@ export class SearchInterceptor {
   ): Observable<IEsSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = id != null ? `/internal/search/es/${id}` : '/internal/search/es';
-    const method = id != null ? 'GET' : 'POST';
-    const body = id != null ? undefined : JSON.stringify(searchRequest);
+    const method = 'POST';
+    const body = JSON.stringify(id != null ? {} : searchRequest);
     const response = this.deps.http.fetch({ path, method, body, signal });
     return from(response);
   }

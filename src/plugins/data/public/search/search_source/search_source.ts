@@ -463,6 +463,16 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
+    body.aggs = {
+      ...body.aggs,
+      delayed: {
+        delay: {
+          index: '*',
+          value: '5s',
+        },
+      },
+    };
+
     return searchRequest;
   }
 
