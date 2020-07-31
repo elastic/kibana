@@ -55,6 +55,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -81,6 +82,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -111,6 +113,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -143,6 +146,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -175,6 +179,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -207,6 +212,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -239,6 +245,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -271,6 +278,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -306,6 +314,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -331,6 +340,62 @@ describe('BuilderEntryItem', () => {
     ).toBeTruthy();
   });
 
+  test('it uses "correspondingKeywordField" if it exists', () => {
+    const wrapper = mount(
+      <BuilderEntryItem
+        entry={{
+          field: {
+            name: 'extension.text',
+            type: 'string',
+            esTypes: ['text'],
+            count: 0,
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+            readFromDocValues: true,
+          },
+          operator: isOneOfOperator,
+          value: ['1234'],
+          nested: undefined,
+          parent: undefined,
+          entryIndex: 0,
+          correspondingKeywordField: {
+            name: 'extension',
+            type: 'string',
+            esTypes: ['keyword'],
+            count: 0,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
+        }}
+        indexPattern={{
+          id: '1234',
+          title: 'logstash-*',
+          fields,
+        }}
+        showLabel={false}
+        listType="detection"
+        addNested={false}
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').prop('selectedField')
+    ).toEqual({
+      name: 'extension',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+  });
+
   test('it invokes "onChange" when new field is selected and resets operator and value fields', () => {
     const mockOnChange = jest.fn();
     const wrapper = mount(
@@ -342,6 +407,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -376,6 +442,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -410,6 +477,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -444,6 +512,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',
@@ -478,6 +547,7 @@ describe('BuilderEntryItem', () => {
           nested: undefined,
           parent: undefined,
           entryIndex: 0,
+          correspondingKeywordField: undefined,
         }}
         indexPattern={{
           id: '1234',

@@ -8,7 +8,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
 import { DATE_NOW } from '../../constants.mock';
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getCommentsArrayMock, getCommentsMock } from './comment.mock';
 import {
