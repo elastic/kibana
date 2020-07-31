@@ -128,7 +128,6 @@ class SlackNotificationsTest extends KibanaBasePipelineTest {
   @Test
   void 'sendFailedBuild() should call slackSend() with a channel id and timestamp on second call'() {
     mockFailureBuild()
-    def counter = 0
     helper.registerAllowedMethod('slackSend', [Map.class], { [ channelId: 'CHANNEL_ID', ts: 'TIMESTAMP' ] })
     slackNotifications.sendFailedBuild(isFinal: false)
     slackNotifications.sendFailedBuild(isFinal: true)
