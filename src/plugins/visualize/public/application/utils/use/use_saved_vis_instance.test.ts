@@ -149,6 +149,7 @@ describe('useSavedVisInstance', () => {
         pathname: VisualizeConstants.CREATE_PATH,
         search: '?type=area&indexPattern=1a2b3c4d',
       };
+      // @ts-ignore-error
       delete mockSavedVisInstance.savedVis.id;
     });
 
