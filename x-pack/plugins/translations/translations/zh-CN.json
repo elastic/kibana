@@ -11101,7 +11101,6 @@
     "xpack.ml.dataframe.analytics.create.detailsDetails.editButtonText": "编辑",
     "xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessage": "创建 Kibana 索引模式时发生错误：",
     "xpack.ml.dataframe.analytics.create.duplicateIndexPatternErrorMessageError": "索引模式 {indexPatternName} 已存在。",
-    "xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText": "您不能从 json 编辑器切回到此表单。",
     "xpack.ml.dataframe.analytics.create.errorCreatingDataFrameAnalyticsJob": "创建数据帧分析作业时发生错误：",
     "xpack.ml.dataframe.analytics.create.errorGettingDataFrameAnalyticsList": "获取现有数据帧分析作业 ID 时发生错误：",
     "xpack.ml.dataframe.analytics.create.errorGettingIndexPatternTitles": "获取现有索引模式标题时发生错误：",
