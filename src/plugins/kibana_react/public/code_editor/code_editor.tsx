@@ -20,6 +20,7 @@
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
+import { EuiScreenReaderOnly, htmlIdGenerator } from '@elastic/eui';
 
 import { monaco } from '@kbn/monaco';
 
@@ -99,8 +100,18 @@ export interface Props {
   useDarkTheme?: boolean;
 }
 
-export class CodeEditor extends React.Component<Props, {}> {
+interface State {
+  tabFocusMode: boolean;
+}
+
+export class CodeEditor extends React.Component<Props, State> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+
+  state: State = {
+    tabFocusMode: false,
+  };
+
+  private ariaTabFocusId = htmlIdGenerator()();
 
   _editorWillMount = (__monaco: unknown) => {
     if (__monaco !== monaco) {
@@ -154,28 +165,19 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     this._editor = editor;
 
+    const domNode = editor.getDomNode();
+    domNode
+      .getElementsByTagName('textarea')[0]
+      .setAttribute('aria-labelledby', this.ariaTabFocusId);
+
+    this._syncTabFocusMode();
+
     editor.addCommand(
       monaco.KeyCode.Escape,
       () => {
         editor.trigger('Change tab focus mode', 'editor.action.toggleTabFocusMode');
 
-        const { tabFocusMode } = this._editor.getConfiguration();
-        const ariaLabel = this.props.options && this.props.options.ariaLabel;
-        const extraEditorClassName =
-          this.props.options && this.props.options.extraEditorClassName
-            ? this.props.options.extraEditorClassName
-            : '';
-
-        const ariaTabLabel = tabFocusMode
-          ? 'Tab moves focus. To toggle tab mode, press escape'
-          : 'Tab currently adds tab character. To change tab mode, press escape.';
-
-        editor.updateOptions({
-          extraEditorClassName: `${extraEditorClassName} ${
-            tabFocusMode ? 'monacoEditor--tabMode' : ''
-          }`,
-          ariaLabel: ariaLabel ? `${ariaLabel}. ${ariaTabLabel}` : ariaTabLabel,
-        });
+        this._syncTabFocusMode();
       },
       '!suggestWidgetVisible'
     );
@@ -185,8 +187,38 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   };
 
+  _syncTabFocusMode = () => {
+    if (!this._editor) {
+      return;
+    }
+
+    const { tabFocusMode } = this._editor.getConfiguration();
+    const extraEditorClassName =
+      this.props.options && this.props.options.extraEditorClassName
+        ? this.props.options.extraEditorClassName
+        : '';
+
+    this.setState({
+      tabFocusMode,
+    });
+
+    this._editor.updateOptions({
+      extraEditorClassName: `${extraEditorClassName} ${
+        tabFocusMode ? 'monacoEditor--tabMode' : ''
+      }`,
+    });
+
+    this.setState({
+      tabFocusMode,
+    });
+  };
+
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
+
+    const tabFocusMessage = this.state.tabFocusMode
+      ? 'Tab moves focus. To toggle tab mode, press escape'
+      : 'Tab adds tab character. To change tab mode, press escape.';
 
     return (
       <React.Fragment>
@@ -201,6 +233,9 @@ export class CodeEditor extends React.Component<Props, {}> {
           height={height}
           options={options}
         />
+        <EuiScreenReaderOnly>
+          <p id={this.ariaTabFocusId}>{tabFocusMessage}</p>
+        </EuiScreenReaderOnly>
         <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
       </React.Fragment>
     );
