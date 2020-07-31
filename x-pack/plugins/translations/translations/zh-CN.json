@@ -10334,7 +10334,6 @@
     "xpack.maps.heatmapLegend.hotLabel": "热",
     "xpack.maps.indexPatternSelectLabel": "索引模式",
     "xpack.maps.indexPatternSelectPlaceholder": "选择索引模式",
-    "xpack.maps.indexSettings.fetchErrorMsg": "无法提取索引模式“{indexPatternTitle}”的索引设置。\n      确保您具有“{viewIndexMetaRole}”角色。",
     "xpack.maps.initialLayers.unableToParseMessage": "无法解析“initialLayers”参数的内容。错误：{errorMsg}",
     "xpack.maps.initialLayers.unableToParseTitle": "初始图层未添加到地图",
     "xpack.maps.inspector.centerLatLabel": "中心纬度",

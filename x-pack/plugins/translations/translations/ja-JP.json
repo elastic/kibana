@@ -10332,7 +10332,6 @@
     "xpack.maps.heatmapLegend.hotLabel": "ホット",
     "xpack.maps.indexPatternSelectLabel": "インデックスパターン",
     "xpack.maps.indexPatternSelectPlaceholder": "インデックスパターンを選択",
-    "xpack.maps.indexSettings.fetchErrorMsg": "インデックスパターン'{indexPatternTitle}'のインデックス設定を取得できません。\n      '{viewIndexMetaRole}'ロールがあることを確認してください。",
     "xpack.maps.initialLayers.unableToParseMessage": "「initialLayers」パラメーターのコンテンツをパースできませんエラー: {errorMsg}",
     "xpack.maps.initialLayers.unableToParseTitle": "初期レイヤーはマップに追加されません",
     "xpack.maps.inspector.centerLatLabel": "中央緯度",
