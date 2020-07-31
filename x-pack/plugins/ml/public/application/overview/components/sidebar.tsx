@@ -69,7 +69,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
                   />
                 </EuiLink>
               ),
-              createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
               transforms: (
                 <EuiLink href={transformsLink} target="blank">
                   <FormattedMessage
