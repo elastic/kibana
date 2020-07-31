@@ -24,6 +24,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   prepareExceptionItemsForBulkClose,
+  lowercaseHashValues,
 } from './helpers';
 import { EmptyEntry } from './types';
 import {
@@ -364,7 +365,7 @@ describe('Exception helpers', () => {
       const mockEmptyException: EntryNested = {
         field: '',
         type: OperatorTypeEnum.NESTED,
-        entries: [{ ...getEntryMatchMock() }],
+        entries: [getEntryMatchMock()],
       };
       const output: Array<
         ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -661,6 +662,50 @@ describe('Exception helpers', () => {
       ];
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#lowercaseHashValues', () => {
+    test('it should return an empty array with an empty array', () => {
+      const payload: ExceptionListItemSchema[] = [];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([]);
+    });
+
+    test('it should return all list items with entry hashes lowercased', () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'DDDFFF' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'DDDFFF'] },
+          ] as EntriesArray,
+        },
+      ];
+      const result = lowercaseHashValues(payload);
+      expect(result).toEqual([
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'dddfff' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [{ field: 'user.hash', type: 'match', value: 'aaabbb' }] as EntriesArray,
+        },
+        {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'user.hash', type: 'match_any', value: ['aaabbb', 'dddfff'] },
+          ] as EntriesArray,
+        },
+      ]);
     });
   });
 });
