@@ -24,7 +24,6 @@ import {
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
-import { getChartContainerWidth } from '../legacy_utils';
 import { explorerService } from '../explorer_dashboard_service';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -48,7 +47,13 @@ const MAX_CHARTS_PER_ROW = 4;
 
 // callback(getDefaultChartsData());
 
-export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs, severity = 0) {
+export const anomalyDataChange = function (
+  chartsContainerWidth,
+  anomalyRecords,
+  earliestMs,
+  latestMs,
+  severity = 0
+) {
   const data = getDefaultChartsData();
 
   const filteredRecords = anomalyRecords.filter((record) => {
@@ -56,7 +61,6 @@ export const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs,
   });
   const allSeriesRecords = processRecordsForDisplay(filteredRecords);
   // Calculate the number of charts per row, depending on the width available, to a max of 4.
-  const chartsContainerWidth = getChartContainerWidth();
   let chartsPerRow = Math.min(
     Math.max(Math.floor(chartsContainerWidth / 550), 1),
     MAX_CHARTS_PER_ROW

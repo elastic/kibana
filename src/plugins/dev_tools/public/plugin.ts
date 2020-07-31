@@ -61,7 +61,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
       }),
       updater$: this.appStateUpdater,
       euiIconType: 'devToolsApp',
-      order: 9001,
+      order: 9010,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;

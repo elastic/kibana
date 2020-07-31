@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual } from 'lodash';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -80,6 +79,14 @@ const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldEr
   return null;
 };
 
+const isDirtyForm = (formFields: DynamicSettings | null, settings?: DynamicSettings) => {
+  return (
+    settings?.certAgeThreshold !== formFields?.certAgeThreshold ||
+    settings?.certExpirationThreshold !== formFields?.certExpirationThreshold ||
+    settings?.heartbeatIndices !== formFields?.heartbeatIndices
+  );
+};
+
 export const SettingsPage: React.FC = () => {
   const dss = useSelector(selectDynamicSettings);
 
@@ -121,7 +128,8 @@ export const SettingsPage: React.FC = () => {
 
   const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
-  const isFormDirty = !isEqual(dss.settings, formFields);
+  const isFormDirty = isDirtyForm(formFields, dss.settings);
+
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
   const isFormDisabled = dss.loading || !canEdit;
@@ -135,13 +143,19 @@ export const SettingsPage: React.FC = () => {
     </>
   );
 
+  const history = useHistory();
+
   return (
     <>
-      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {Translations.settings.returnToOverviewLinkLabel}
-        </EuiButtonEmpty>
-      </Link>
+      <EuiButtonEmpty
+        color="primary"
+        data-test-subj="uptimeSettingsToOverviewLink"
+        iconType="arrowLeft"
+        href={history.createHref({ pathname: OVERVIEW_ROUTE })}
+        size="s"
+      >
+        {Translations.settings.returnToOverviewLinkLabel}
+      </EuiButtonEmpty>
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>

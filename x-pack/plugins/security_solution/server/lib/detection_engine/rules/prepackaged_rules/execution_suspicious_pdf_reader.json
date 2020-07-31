@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious child processes of PDF reader applications. These child processes are often launched via exploitation of PDF applications or social engineering.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious PDF Reader Child Process",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(AcroRd32.exe or Acrobat.exe or FoxitPhantomPDF.exe or FoxitReader.exe) and process.name:(arp.exe or dsquery.exe or dsget.exe or gpresult.exe or hostname.exe or ipconfig.exe or nbtstat.exe or net.exe or net1.exe or netsh.exe or netstat.exe or nltest.exe or ping.exe or qprocess.exe or quser.exe or qwinsta.exe or reg.exe or sc.exe or systeminfo.exe or tasklist.exe or tracert.exe or whoami.exe or bginfo.exe or cdb.exe or cmstp.exe or csi.exe or dnx.exe or fsi.exe or ieexec.exe or iexpress.exe or installutil.exe or Microsoft.Workflow.Compiler.exe or msbuild.exe or mshta.exe or msxsl.exe or odbcconf.exe or rcsi.exe or regsvr32.exe or xwizard.exe or atbroker.exe or forfiles.exe or schtasks.exe or regasm.exe or regsvcs.exe or cmd.exe or cscript.exe or powershell.exe or pwsh.exe or wmic.exe or wscript.exe or bitsadmin.exe or certutil.exe or ftp.exe)",
+  "risk_score": 21,
+  "rule_id": "53a26770-9cbd-40c5-8b57-61d01a325e14",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1204",
+          "name": "User Execution",
+          "reference": "https://attack.mitre.org/techniques/T1204/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

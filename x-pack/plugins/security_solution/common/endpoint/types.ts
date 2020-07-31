@@ -104,6 +104,8 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
    *
    * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
    * using this node's entity_id
+   *
+   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
    */
   nextChild?: string | null;
 }
@@ -334,13 +336,13 @@ export interface AlertEvent {
     start: number;
     thread?: ThreadFields[];
     uptime: number;
-    Ext: {
+    Ext?: {
       /*
        * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
        * values towards the end of the array are more distant ancestors (grandparents). Therefore
        * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
        */
-      ancestry: string[];
+      ancestry?: string[];
       code_signature: Array<{
         subject_name: string;
         trusted: boolean;
@@ -419,6 +421,11 @@ export enum HostStatus {
    * Host is offline as indicated by its checkin status during the last checkin window
    */
   OFFLINE = 'offline',
+
+  /**
+   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   */
+  UNENROLLING = 'unenrolling',
 }
 
 export type HostInfo = Immutable<{
@@ -482,7 +489,6 @@ export interface LegacyEndpointEvent {
     type: string;
     version: string;
   };
-  process?: object;
   rule?: object;
   user?: object;
   event?: {
@@ -539,8 +545,8 @@ export interface EndpointEvent {
      * values towards the end of the array are more distant ancestors (grandparents). Therefore
      * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
      */
-    Ext: {
-      ancestry: string[];
+    Ext?: {
+      ancestry?: string[];
     };
   };
   user?: {

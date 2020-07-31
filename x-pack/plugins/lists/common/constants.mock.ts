@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EntriesArray } from './schemas/types';
+import moment from 'moment';
 
+import { EntriesArray } from './schemas/types';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
+export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
 export const USER = 'some user';
 export const LIST_INDEX = '.lists';
 export const LIST_ITEM_INDEX = '.items';
@@ -41,7 +43,7 @@ export const OPERATOR = 'included';
 export const ENTRY_VALUE = 'some host name';
 export const MATCH = 'match';
 export const MATCH_ANY = 'match_any';
-export const MAX_IMPORT_PAYLOAD_BYTES = 40000000;
+export const MAX_IMPORT_PAYLOAD_BYTES = 9000000;
 export const IMPORT_BUFFER_SIZE = 1000;
 export const LIST = 'list';
 export const EXISTS = 'exists';
@@ -58,3 +60,9 @@ export const ITEM_TYPE = 'simple';
 export const _TAGS = [];
 export const TAGS = [];
 export const COMMENTS = [];
+export const FILTER = 'name:Nicolas Bourbaki';
+export const CURSOR = 'c29tZXN0cmluZ2ZvcnlvdQ==';
+export const _VERSION = 'WzI5NywxXQ==';
+export const VERSION = 1;
+export const IMMUTABLE = false;
+export const IMPORT_TIMEOUT = moment.duration(5, 'minutes');

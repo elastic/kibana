@@ -17,9 +17,9 @@ import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
 
 export interface OwnProps {
-  end: number;
+  end: string;
   id: string;
-  start: number;
+  start: string;
 }
 
 const defaultAlertsFilters: Filter[] = [
@@ -57,14 +57,16 @@ const defaultAlertsFilters: Filter[] = [
 
 interface Props {
   timelineId: TimelineIdLiteral;
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  eventsViewerBodyHeight?: number;
+  startDate: string;
   pageFilters?: Filter[];
 }
 
 const AlertsTableComponent: React.FC<Props> = ({
   timelineId,
   endDate,
+  eventsViewerBodyHeight,
   startDate,
   pageFilters = [],
 }) => {
@@ -91,6 +93,7 @@ const AlertsTableComponent: React.FC<Props> = ({
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
+      height={eventsViewerBodyHeight}
       id={timelineId}
       start={startDate}
     />

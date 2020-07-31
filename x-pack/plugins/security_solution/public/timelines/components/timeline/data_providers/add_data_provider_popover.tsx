@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiContextMenu,
   EuiText,
   EuiPopover,
@@ -139,21 +140,33 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     [browserFields, handleDataProviderEdited, timelineId, timelineType]
   );
 
-  const button = useMemo(
-    () => (
-      <EuiButton
+  const button = useMemo(() => {
+    if (timelineType === TimelineType.template) {
+      return (
+        <EuiButton
+          size="s"
+          onClick={handleOpenPopover}
+          data-test-subj="addFilter"
+          iconType="arrowDown"
+          fill
+          iconSide="right"
+        >
+          <EuiText size="s">{ADD_FIELD_LABEL}</EuiText>
+        </EuiButton>
+      );
+    }
+
+    return (
+      <EuiButtonEmpty
         size="s"
         onClick={handleOpenPopover}
         data-test-subj="addFilter"
-        iconType="arrowDown"
-        fill
         iconSide="right"
       >
-        <EuiText size="s">{ADD_FIELD_LABEL}</EuiText>
-      </EuiButton>
-    ),
-    [handleOpenPopover]
-  );
+        <EuiText size="s">{`+ ${ADD_FIELD_LABEL}`}</EuiText>
+      </EuiButtonEmpty>
+    );
+  }, [handleOpenPopover, timelineType]);
 
   const content = useMemo(() => {
     if (timelineType === TimelineType.template) {

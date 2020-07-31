@@ -11,7 +11,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../graphql/types';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, State } from '../../../../common/store';
@@ -41,6 +41,7 @@ import { plainRowRenderer } from './renderers/plain_row_renderer';
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
+  docValueFields: DocValueFields[];
   height?: number;
   id: string;
   isEventViewer?: boolean;
@@ -59,6 +60,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     browserFields,
     columnHeaders,
     data,
+    docValueFields,
     eventIdToNoteIds,
     excludedRowRendererIds,
     height,
@@ -77,6 +79,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     showCheckboxes,
     graphEventId,
     sort,
+    timelineType,
     toggleColumn,
     unPinEvent,
     updateColumns,
@@ -192,6 +195,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         columnHeaders={columnHeaders || emptyColumnHeaders}
         columnRenderers={columnRenderers}
         data={data}
+        docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
@@ -215,6 +219,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         show={id === TimelineId.active ? show : true}
         showCheckboxes={showCheckboxes}
         sort={sort}
+        timelineType={timelineType}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
       />
@@ -225,6 +230,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
+    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
     prevProps.graphEventId === nextProps.graphEventId &&
     deepEqual(prevProps.notesById, nextProps.notesById) &&
@@ -237,7 +243,8 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.showCheckboxes === nextProps.showCheckboxes &&
-    prevProps.sort === nextProps.sort
+    prevProps.sort === nextProps.sort &&
+    prevProps.timelineType === nextProps.timelineType
 );
 
 StatefulBodyComponent.displayName = 'StatefulBodyComponent';
@@ -264,6 +271,7 @@ const makeMapStateToProps = () => {
       selectedEventIds,
       show,
       showCheckboxes,
+      timelineType,
     } = timeline;
 
     return {
@@ -280,6 +288,7 @@ const makeMapStateToProps = () => {
       selectedEventIds,
       show,
       showCheckboxes,
+      timelineType,
     };
   };
   return mapStateToProps;

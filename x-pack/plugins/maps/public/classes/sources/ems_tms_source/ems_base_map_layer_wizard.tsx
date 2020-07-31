@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiPanel } from '@elastic/eui';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { EMSTMSSource, sourceTitle } from './ems_tms_source';
@@ -32,7 +33,11 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
       previewLayers([layerDescriptor]);
     };
 
-    return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
+    return (
+      <EuiPanel>
+        <TileServiceSelect onTileSelect={onSourceConfigChange} />
+      </EuiPanel>
+    );
   },
   title: sourceTitle,
 };

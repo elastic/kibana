@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { noop } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
-
+import { useWindowSize } from 'react-use';
 import { useHistory } from 'react-router-dom';
+
+import { globalHeaderHeightPx } from '../../../app/home';
 import { SecurityPageName } from '../../../app/types';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -31,22 +34,40 @@ import { NoWriteAlertsCallOut } from '../../components/no_write_alerts_callout';
 import { AlertsHistogramPanel } from '../../components/alerts_histogram_panel';
 import { alertsHistogramOptions } from '../../components/alerts_histogram_panel/config';
 import { useUserInfo } from '../../components/user_info';
+import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../common/components/events_viewer/events_viewer';
 import { OverviewEmpty } from '../../../overview/components/overview_empty';
-import { DetectionEngineNoIndex } from './detection_engine_no_signal_index';
+import { DetectionEngineNoIndex } from './detection_engine_no_index';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 import { LinkButton } from '../../../common/components/links';
 import { useFormatUrl } from '../../../common/components/link_to';
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
+import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { Display } from '../../../hosts/pages/display';
+import {
+  getEventsViewerBodyHeight,
+  MIN_EVENTS_VIEWER_BODY_HEIGHT,
+} from '../../../timelines/components/timeline/body/helpers';
+import { footerHeight } from '../../../timelines/components/timeline/footer';
+import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { buildShowBuildingBlockFilter } from '../../components/alerts_table/default_config';
 
 export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   filters,
+  graphEventId,
   query,
   setAbsoluteRangeDatePicker,
 }) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { height: windowHeight } = useWindowSize();
+  const { globalFullScreen } = useFullScreen();
   const {
-    loading,
+    loading: userInfoLoading,
     isSignalIndexExists,
     isAuthenticated: isUserAuthenticated,
     hasEncryptionKey,
@@ -54,9 +75,15 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
     signalIndexName,
     hasIndexWrite,
   } = useUserInfo();
+  const {
+    loading: listsConfigLoading,
+    needsConfiguration: needsListsConfiguration,
+  } = useListsConfig();
   const history = useHistory();
   const [lastAlerts] = useAlertInfo({});
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
+  const loading = userInfoLoading || listsConfigLoading;
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -64,7 +91,11 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      setAbsoluteRangeDatePicker({
+        id: 'global',
+        from: new Date(min).toISOString(),
+        to: new Date(max).toISOString(),
+      });
     },
     [setAbsoluteRangeDatePicker]
   );
@@ -75,6 +106,24 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       history.push(getRulesUrl());
     },
     [history]
+  );
+
+  const alertsHistogramDefaultFilters = useMemo(
+    () => [...filters, ...buildShowBuildingBlockFilter(showBuildingBlockAlerts)],
+    [filters, showBuildingBlockAlerts]
+  );
+
+  // AlertsTable manages global filters itself, so not including `filters`
+  const alertsTableDefaultFilters = useMemo(
+    () => buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+    [showBuildingBlockAlerts]
+  );
+
+  const onShowBuildingBlockAlertsChangedCallback = useCallback(
+    (newShowBuildingBlockAlerts: boolean) => {
+      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
+    },
+    [setShowBuildingBlockAlerts]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -90,11 +139,15 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       </WrapperPage>
     );
   }
-  if (isSignalIndexExists != null && !isSignalIndexExists && !loading) {
+
+  if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
     return (
       <WrapperPage>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-        <DetectionEngineNoIndex />
+        <DetectionEngineNoIndex
+          needsSignalsIndex={isSignalIndexExists === false}
+          needsListsIndex={needsListsConfiguration}
+        />
       </WrapperPage>
     );
   }
@@ -105,52 +158,73 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {indicesExist ? (
         <StickyContainer>
-          <FiltersGlobal>
+          <EuiWindowEvent event="resize" handler={noop} />
+          <FiltersGlobal
+            globalFullScreen={globalFullScreen}
+            show={showGlobalFilters({ globalFullScreen, graphEventId })}
+          >
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
-          <WrapperPage>
-            <DetectionEngineHeaderPage
-              subtitle={
-                lastAlerts != null && (
-                  <>
-                    {i18n.LAST_ALERT}
-                    {': '}
-                    {lastAlerts}
-                  </>
-                )
-              }
-              title={i18n.PAGE_TITLE}
-            >
-              <LinkButton
-                fill
-                onClick={goToRules}
-                href={formatUrl(getRulesUrl())}
-                iconType="gear"
-                data-test-subj="manage-alert-detection-rules"
-              >
-                {i18n.BUTTON_MANAGE_RULES}
-              </LinkButton>
-            </DetectionEngineHeaderPage>
 
-            <AlertsHistogramPanel
-              deleteQuery={deleteQuery}
-              filters={filters}
-              from={from}
-              query={query}
-              setQuery={setQuery}
-              showTotalAlertsCount={true}
-              signalIndexName={signalIndexName}
-              stackByOptions={alertsHistogramOptions}
-              to={to}
-              updateDateRange={updateDateRangeCallback}
-            />
-            <EuiSpacer size="l" />
+          <WrapperPage noPadding={globalFullScreen}>
+            <Display show={!globalFullScreen}>
+              <DetectionEngineHeaderPage
+                subtitle={
+                  lastAlerts != null && (
+                    <>
+                      {i18n.LAST_ALERT}
+                      {': '}
+                      {lastAlerts}
+                    </>
+                  )
+                }
+                title={i18n.PAGE_TITLE}
+              >
+                <LinkButton
+                  fill
+                  onClick={goToRules}
+                  href={formatUrl(getRulesUrl())}
+                  iconType="gear"
+                  data-test-subj="manage-alert-detection-rules"
+                >
+                  {i18n.BUTTON_MANAGE_RULES}
+                </LinkButton>
+              </DetectionEngineHeaderPage>
+              <AlertsHistogramPanel
+                deleteQuery={deleteQuery}
+                filters={alertsHistogramDefaultFilters}
+                from={from}
+                query={query}
+                setQuery={setQuery}
+                showTotalAlertsCount={true}
+                signalIndexName={signalIndexName}
+                stackByOptions={alertsHistogramOptions}
+                to={to}
+                updateDateRange={updateDateRangeCallback}
+              />
+              <EuiSpacer size="l" />
+            </Display>
+
             <AlertsTable
               timelineId={TimelineId.detectionsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
               canUserCRUD={(canUserCRUD ?? false) && (hasEncryptionKey ?? false)}
+              eventsViewerBodyHeight={
+                globalFullScreen
+                  ? getEventsViewerBodyHeight({
+                      footerHeight,
+                      headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
+                      kibanaChromeHeight: globalHeaderHeightPx,
+                      otherContentHeight: FILTERS_GLOBAL_HEIGHT,
+                      windowHeight,
+                    })
+                  : MIN_EVENTS_VIEWER_BODY_HEIGHT
+              }
               from={from}
+              defaultFilters={alertsTableDefaultFilters}
+              showBuildingBlockAlerts={showBuildingBlockAlerts}
+              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
               signalsIndex={signalIndexName ?? ''}
               to={to}
             />
@@ -169,13 +243,19 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
 const makeMapStateToProps = () => {
   const getGlobalInputs = inputsSelectors.globalSelector();
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
   return (state: State) => {
     const globalInputs: InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
 
+    const timeline: TimelineModel =
+      getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults;
+    const { graphEventId } = timeline;
+
     return {
       query,
       filters,
+      graphEventId,
     };
   };
 };

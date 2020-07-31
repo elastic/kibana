@@ -25,6 +25,10 @@ exports[`PageView component should display body header custom element 1`] = `
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   bodyHeader={
     <p>
@@ -118,6 +122,10 @@ exports[`PageView component should display body header wrapped in EuiTitle 1`] =
 
 .c0 .endpoint-navTabs {
   margin-left: 12px;
+}
+
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
 }
 
 <PageView
@@ -218,6 +226,10 @@ exports[`PageView component should display header left and right 1`] = `
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   headerLeft="page title"
   headerRight="right side actions"
@@ -243,10 +255,11 @@ exports[`PageView component should display header left and right 1`] = `
                 className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
                 <EuiPageHeaderSection
+                  className="endpoint-header-leftSection"
                   data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeaderSection"
+                    className="euiPageHeaderSection endpoint-header-leftSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
                     <PageViewHeaderTitle>
@@ -331,6 +344,10 @@ exports[`PageView component should display only body if not header props used 1`
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   viewType="list"
 >
@@ -403,6 +420,10 @@ exports[`PageView component should display only header left 1`] = `
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   headerLeft="page title"
   viewType="list"
@@ -427,10 +448,11 @@ exports[`PageView component should display only header left 1`] = `
                 className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
                 <EuiPageHeaderSection
+                  className="endpoint-header-leftSection"
                   data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeaderSection"
+                    className="euiPageHeaderSection endpoint-header-leftSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
                     <PageViewHeaderTitle>
@@ -505,6 +527,10 @@ exports[`PageView component should display only header right but include an empt
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   headerRight="right side actions"
   viewType="list"
@@ -529,10 +555,11 @@ exports[`PageView component should display only header right but include an empt
                 className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
                 <EuiPageHeaderSection
+                  className="endpoint-header-leftSection"
                   data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeaderSection"
+                    className="euiPageHeaderSection endpoint-header-leftSection"
                     data-test-subj="pageViewHeaderLeft"
                   />
                 </EuiPageHeaderSection>
@@ -602,6 +629,10 @@ exports[`PageView component should pass through EuiPage props 1`] = `
 
 .c0 .endpoint-navTabs {
   margin-left: 12px;
+}
+
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
 }
 
 <PageView
@@ -693,6 +724,10 @@ exports[`PageView component should use custom element for header left and not wr
   margin-left: 12px;
 }
 
+.c0 .endpoint-header-leftSection {
+  overflow: hidden;
+}
+
 <PageView
   headerLeft={
     <p>
@@ -721,10 +756,11 @@ exports[`PageView component should use custom element for header left and not wr
                 className="euiPageHeader euiPageHeader--responsive endpoint-header"
               >
                 <EuiPageHeaderSection
+                  className="endpoint-header-leftSection"
                   data-test-subj="pageViewHeaderLeft"
                 >
                   <div
-                    className="euiPageHeaderSection"
+                    className="euiPageHeaderSection endpoint-header-leftSection"
                     data-test-subj="pageViewHeaderLeft"
                   >
                     <p>

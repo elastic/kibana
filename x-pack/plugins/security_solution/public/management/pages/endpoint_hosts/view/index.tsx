@@ -46,9 +46,10 @@ import {
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath, getHostDetailsPath, getPolicyDetailPath } from '../../../common/routing';
+import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostAction } from '../store/action';
+import { HostPolicyLink } from './components/host_policy_link';
 
 const HostListNavLink = memo<{
   name: string;
@@ -88,8 +89,9 @@ export const HostList = () => {
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
+    hostsExist,
   } = useHostSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const dispatch = useDispatch<(a: HostAction) => void>();
 
@@ -127,12 +129,12 @@ export const HostList = () => {
       }`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
         onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
         onSaveNavigateTo: [
-          'securitySolution:management',
+          'securitySolution:administration',
           { path: getHostListPath({ name: 'hostList' }) },
         ],
       },
@@ -145,7 +147,7 @@ export const HostList = () => {
     path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
-        'securitySolution:management',
+        'securitySolution:administration',
         { path: getHostListPath({ name: 'hostList' }) },
       ],
     },
@@ -226,7 +228,7 @@ export const HostList = () => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpointList.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
             </EuiHealth>
@@ -236,27 +238,26 @@ export const HostList = () => {
       {
         field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policy', {
-          defaultMessage: 'Policy',
+          defaultMessage: 'Integration',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
-          const toRoutePath = getPolicyDetailPath(policy.id);
-          const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <HostListNavLink
-              name={policy.name}
-              href={toRouteUrl}
-              route={toRoutePath}
-              dataTestSubj="policyNameCellLink"
-            />
+            <HostPolicyLink
+              policyId={policy.id}
+              className="eui-textTruncate"
+              data-test-subj="policyNameCellLink"
+            >
+              {policy.name}
+            </HostPolicyLink>
           );
         },
       },
       {
         field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Configuration Status',
         }),
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
@@ -329,7 +330,7 @@ export const HostList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (!loading && listData && listData.length > 0) {
+    if (hostsExist) {
       return (
         <EuiBasicTable
           data-test-subj="hostListTable"
@@ -338,6 +339,7 @@ export const HostList = () => {
           error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
+          loading={loading}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -356,19 +358,20 @@ export const HostList = () => {
       );
     }
   }, [
-    listData,
-    policyItems,
-    columns,
     loading,
+    hostsExist,
+    policyItemsLoading,
+    policyItems,
+    listData,
+    columns,
+    listError?.message,
     paginationSetup,
     onTableChange,
-    listError?.message,
-    handleCreatePolicyClick,
     handleDeployEndpointsClick,
-    handleSelectableOnChange,
     selectedPolicyId,
+    handleSelectableOnChange,
     selectionOptions,
-    policyItemsLoading,
+    handleCreatePolicyClick,
   ]);
 
   return (
@@ -377,7 +380,7 @@ export const HostList = () => {
       data-test-subj="hostPage"
       headerLeft={
         <>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">
@@ -401,7 +404,7 @@ export const HostList = () => {
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.hostList.pageSubTitle"
-                defaultMessage="Hosts running the Elastic Endpoint"
+                defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
           </EuiText>
@@ -422,7 +425,7 @@ export const HostList = () => {
         </>
       )}
       {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.management} />
+      <SpyRoute pageName={SecurityPageName.administration} />
     </ManagementPageView>
   );
 };

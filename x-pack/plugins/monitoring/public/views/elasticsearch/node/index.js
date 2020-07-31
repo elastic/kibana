@@ -18,7 +18,7 @@ import { Node } from '../../../components/elasticsearch/node/node';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 import { MonitoringViewBaseController } from '../../base_controller';
-import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import { CODE_PATH_ELASTICSEARCH, ALERT_CPU_USAGE } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -47,6 +47,17 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
         reactNodeId: 'monitoringElasticsearchNodeApp',
         $scope,
         $injector,
+        alerts: {
+          shouldFetch: true,
+          options: {
+            alertTypeIds: [ALERT_CPU_USAGE],
+            filters: [
+              {
+                nodeUuid: nodeName,
+              },
+            ],
+          },
+        },
       });
 
       this.nodeName = nodeName;
@@ -79,6 +90,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           this.renderReact(
             <Node
               scope={$scope}
+              alerts={this.alerts}
               nodeId={this.nodeName}
               clusterUuid={$scope.cluster.cluster_uuid}
               onBrush={this.onBrush}

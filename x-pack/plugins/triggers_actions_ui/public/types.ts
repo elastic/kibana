@@ -19,7 +19,7 @@ export { Alert, AlertAction, AlertTaskState, RawAlertInstance, AlertingFramework
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
-export type AlertTypeIndex = Record<string, AlertType>;
+export type AlertTypeIndex = Map<string, AlertType>;
 export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
   TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
 >;
@@ -32,6 +32,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   errors: IErrorObject;
   docLinks: DocLinksStart;
   http?: HttpSetup;
+  readOnly: boolean;
   consumer?: string;
 }
 
@@ -40,8 +41,9 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (property: string, value: any, index: number) => void;
   errors: IErrorObject;
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  docLinks: DocLinksStart;
 }
 
 export interface Pagination {
@@ -92,6 +94,7 @@ export interface ActionVariable {
 export interface ActionVariables {
   context: ActionVariable[];
   state: ActionVariable[];
+  params: ActionVariable[];
 }
 
 export interface AlertType {
@@ -100,6 +103,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   producer: string;
 }
 
@@ -110,6 +114,7 @@ export type AlertWithoutId = Omit<Alert, 'id'>;
 export interface AlertTableItem extends Alert {
   alertType: AlertType['name'];
   tagsText: string;
+  isEditable: boolean;
 }
 
 export interface AlertTypeParamsExpressionProps<

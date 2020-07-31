@@ -20,11 +20,12 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 
-type MlDependencies = MlSetupDependencies & MlStartDependencies;
+export type MlDependencies = Omit<MlSetupDependencies, 'share'> & MlStartDependencies;
 
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
+  appMountParams: AppMountParameters;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -46,8 +47,9 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps = {
+    history: appMountParams.history,
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
@@ -104,7 +106,11 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   const mlLicense = setLicenseCache(deps.licensing, [
-    () => ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element),
+    () =>
+      ReactDOM.render(
+        <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+        appMountParams.element
+      ),
   ]);
 
   return () => {

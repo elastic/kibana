@@ -25,6 +25,7 @@ import {
   ContextValue,
   ContextValueState,
   Links,
+  ProcessorInternal,
 } from './types';
 
 import { useProcessorsState, isOnFailureSelector } from './processors_reducer';
@@ -33,11 +34,14 @@ import { deserialize } from './deserialize';
 
 import { serialize } from './serialize';
 
-import { OnSubmitHandler, ProcessorSettingsForm } from './components/processor_settings_form';
-
 import { OnActionHandler } from './components/processors_tree';
 
-import { ProcessorRemoveModal } from './components';
+import {
+  ProcessorRemoveModal,
+  PipelineProcessorsItemTooltip,
+  ProcessorSettingsForm,
+  OnSubmitHandler,
+} from './components';
 
 import { getValue } from './utils';
 
@@ -64,6 +68,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   children,
 }) => {
   const initRef = useRef(false);
+
   const [mode, setMode] = useState<EditorMode>(() => ({
     id: 'idle',
   }));
@@ -206,6 +211,15 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     >
       {children}
 
+      {mode.id === 'movingProcessor' && (
+        <PipelineProcessorsItemTooltip
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
+            processors,
+            onFailure: onFailureProcessors,
+          })}
+        />
+      )}
+
       {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
         <ProcessorSettingsForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
@@ -219,7 +233,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       {mode.id === 'removingProcessor' && (
         <ProcessorRemoveModal
           selector={mode.arg.selector}
-          processor={getValue(mode.arg.selector, {
+          processor={getValue<ProcessorInternal>(mode.arg.selector, {
             processors,
             onFailure: onFailureProcessors,
           })}

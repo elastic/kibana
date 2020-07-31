@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { shallow } from 'enzyme';
 
 import { TimelineType } from '../../../../../common/types/timeline';
+import { TestProviders } from '../../../../common/mock';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 jest.mock('react-redux', () => {
@@ -20,11 +22,15 @@ jest.mock('react-redux', () => {
 describe('useCreateTimelineButton', () => {
   const mockId = 'mockId';
   const timelineType = TimelineType.default;
+  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+    <TestProviders>{children}</TestProviders>
+  );
 
   test('return getButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCreateTimelineButton({ timelineId: mockId, timelineType })
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
       );
       await waitForNextUpdate();
 
@@ -34,8 +40,9 @@ describe('useCreateTimelineButton', () => {
 
   test('getButton renders correct outline - EuiButton', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCreateTimelineButton({ timelineId: mockId, timelineType })
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
       );
       await waitForNextUpdate();
 
@@ -47,8 +54,9 @@ describe('useCreateTimelineButton', () => {
 
   test('getButton renders correct outline - EuiButtonEmpty', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() =>
-        useCreateTimelineButton({ timelineId: mockId, timelineType })
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
       );
       await waitForNextUpdate();
 

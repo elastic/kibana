@@ -1,7 +1,7 @@
 {
   "id": "siem_winlogbeat_auth",
-  "title": "SIEM Winlogbeat Authentication",
-  "description": "Detect suspicious authentication events in Winlogbeat data (beta).",
+  "title": "Security: Winlogbeat Authentication",
+  "description": "Detect suspicious authentication events in Winlogbeat data.",
   "type": "Winlogbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "winlogbeat-*",

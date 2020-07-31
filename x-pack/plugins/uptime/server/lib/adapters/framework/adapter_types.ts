@@ -14,6 +14,7 @@ import {
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
 import { DynamicSettings } from '../../../../common/runtime_types';
+import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
 
 export type APICaller = (
   endpoint: string,
@@ -39,6 +40,7 @@ export interface UptimeCorePlugins {
   alerts: any;
   elasticsearch: any;
   usageCollection: UsageCollectionSetup;
+  ml: MlSetup;
 }
 
 export interface UMBackendFrameworkAdapter {

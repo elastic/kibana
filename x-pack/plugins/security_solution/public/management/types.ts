@@ -24,7 +24,7 @@ export type ManagementState = CombinedState<{
 /**
  * The management list of sub-tabs. Changes to these will impact the Router routes.
  */
-export enum ManagementSubTab {
+export enum AdministrationSubTab {
   hosts = 'hosts',
   policies = 'policy',
 }
@@ -33,8 +33,8 @@ export enum ManagementSubTab {
  * The URL route params for the Management Policy List section
  */
 export interface ManagementRoutePolicyListParams {
-  pageName: SecurityPageName.management;
-  tabName: ManagementSubTab.policies;
+  pageName: SecurityPageName.administration;
+  tabName: AdministrationSubTab.policies;
 }
 
 /**

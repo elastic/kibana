@@ -10,14 +10,15 @@ import React from 'react';
 import { OverviewHostProps } from '../overview_host';
 import { OverviewNetworkProps } from '../overview_network';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 
 import { EventCounts } from '.';
 
 jest.mock('../../../common/components/link_to');
 
 describe('EventCounts', () => {
-  const from = 1579553397080;
-  const to = 1579639797080;
+  const from = '2020-01-20T20:49:57.080Z';
+  const to = '2020-01-21T20:49:57.080Z';
 
   test('it filters the `Host events` widget with a `host.name` `exists` filter', () => {
     const wrapper = mount(

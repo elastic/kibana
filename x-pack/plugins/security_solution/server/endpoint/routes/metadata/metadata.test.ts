@@ -12,6 +12,7 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -31,7 +32,6 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -138,7 +138,16 @@ describe('test endpoint route', () => {
 
     expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
     expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-      match_all: {},
+      bool: {
+        must_not: {
+          terms: {
+            'elastic.agent.id': [
+              '00000000-0000-0000-0000-000000000000',
+              '11111111-1111-1111-1111-111111111111',
+            ],
+          },
+        },
+      },
     });
     expect(routeConfig.options).toEqual({ authRequired: true, tags: ['access:securitySolution'] });
     expect(mockResponse.ok).toBeCalled();
@@ -187,8 +196,19 @@ describe('test endpoint route', () => {
           {
             bool: {
               must_not: {
+                terms: {
+                  'elastic.agent.id': [
+                    '00000000-0000-0000-0000-000000000000',
+                    '11111111-1111-1111-1111-111111111111',
+                  ],
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              must_not: {
                 bool: {
-                  minimum_should_match: 1,
                   should: [
                     {
                       match: {
@@ -196,6 +216,7 @@ describe('test endpoint route', () => {
                       },
                     },
                   ],
+                  minimum_should_match: 1,
                 },
               },
             },
@@ -285,11 +306,11 @@ describe('test endpoint route', () => {
       });
 
       mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockAgentService.getAgent = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
@@ -314,7 +335,7 @@ describe('test endpoint route', () => {
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should return a single endpoint with status error when status is not offline or online', async () => {
+    it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({
@@ -347,7 +368,7 @@ describe('test endpoint route', () => {
       expect(result.host_status).toEqual(HostStatus.ERROR);
     });
 
-    it('should throw error when endpoint egent is not active', async () => {
+    it('should throw error when endpoint agent is not active', async () => {
       const response = createSearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
       const mockRequest = httpServerMock.createKibanaRequest({

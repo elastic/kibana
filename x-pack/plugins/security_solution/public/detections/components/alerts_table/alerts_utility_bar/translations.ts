@@ -27,6 +27,20 @@ export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: num
       'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
 
+export const ADDITIONAL_FILTERS_ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersTitle',
+  {
+    defaultMessage: 'Additional filters',
+  }
+);
+
+export const ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle',
+  {
+    defaultMessage: 'Include building block alerts',
+  }
+);
+
 export const CLEAR_SELECTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.utilityBar.clearSelectionTitle',
   {

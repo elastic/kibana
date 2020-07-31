@@ -1,0 +1,1236 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Variables/EditVar edit variable (boolean) 1`] = `
+Array [
+  <div
+    className="canvasVarHeader__triggerWrapper"
+  >
+    <button
+      className="canvasVarHeader__button"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="canvasVarHeader__iconWrapper"
+      >
+        <div
+          data-euiicon-type="sortLeft"
+          style={
+            Object {
+              "verticalAlign": "top",
+            }
+          }
+        />
+      </span>
+      <span>
+        <span
+          className="canvasVarHeader__anchor"
+        >
+          Edit variable
+        </span>
+      </span>
+    </button>
+  </div>,
+  <div
+    className="canvasSidebar__accordionContent"
+  >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
+    <form
+      className="euiForm"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Type
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                id="generated-id"
+                type="hidden"
+                value="boolean"
+              />
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <span
+                    className="euiScreenReaderOnly"
+                    id="generated-id"
+                  >
+                    Select an option: 
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenBoolean"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        Boolean
+                      </span>
+                    </div>
+                    , is selected
+                  </span>
+                  <button
+                    aria-haspopup="true"
+                    aria-labelledby="generated-id generated-id"
+                    aria-selected={true}
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    role="option"
+                    type="button"
+                  >
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis7 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenBoolean"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        Boolean
+                      </span>
+                    </div>
+                  </button>
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <span
+                      className="euiFormControlLayoutCustomIcon"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid={false}
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Name
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                id="generated-id"
+                name="name"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="text"
+                value="zenMode"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Value
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <fieldset
+            className="euiButtonGroup__fieldset euiButtonGroup__fieldset--fullWidth"
+          >
+            <div
+              className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--fullWidth"
+            >
+              <div
+                className="euiToggle euiToggle--checked euiButtonToggle__wrapper euiButtonGroup__toggle"
+              >
+                <input
+                  aria-label="True"
+                  checked={true}
+                  className="euiToggle__input euiButtonToggle__input"
+                  name="value"
+                  onChange={[Function]}
+                  title="True"
+                  type="radio"
+                />
+                <button
+                  className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button euiButtonGroup__button--selected"
+                  id="generated-id-true"
+                  tabIndex={-1}
+                  type="button"
+                >
+                  <span
+                    className="euiButton__content"
+                  >
+                    <span
+                      className="euiButton__text"
+                    >
+                      True
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div
+                className="euiToggle euiButtonToggle__wrapper euiButtonGroup__toggle"
+              >
+                <input
+                  aria-label="False"
+                  checked={false}
+                  className="euiToggle__input euiButtonToggle__input"
+                  name="value"
+                  onChange={[Function]}
+                  title="False"
+                  type="radio"
+                />
+                <button
+                  className="euiButton euiButton--text euiButton--small euiButtonToggle euiButtonGroup__button"
+                  id="generated-id-false"
+                  tabIndex={-1}
+                  type="button"
+                >
+                  <span
+                    className="euiButton__content"
+                  >
+                    <span
+                      className="euiButton__text"
+                    >
+                      False
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
+              <span
+                className="euiButton__text"
+              >
+                Save changes
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Variables/EditVar edit variable (number) 1`] = `
+Array [
+  <div
+    className="canvasVarHeader__triggerWrapper"
+  >
+    <button
+      className="canvasVarHeader__button"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="canvasVarHeader__iconWrapper"
+      >
+        <div
+          data-euiicon-type="sortLeft"
+          style={
+            Object {
+              "verticalAlign": "top",
+            }
+          }
+        />
+      </span>
+      <span>
+        <span
+          className="canvasVarHeader__anchor"
+        >
+          Edit variable
+        </span>
+      </span>
+    </button>
+  </div>,
+  <div
+    className="canvasSidebar__accordionContent"
+  >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
+    <form
+      className="euiForm"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Type
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                id="generated-id"
+                type="hidden"
+                value="number"
+              />
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <span
+                    className="euiScreenReaderOnly"
+                    id="generated-id"
+                  >
+                    Select an option: 
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenNumber"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        Number
+                      </span>
+                    </div>
+                    , is selected
+                  </span>
+                  <button
+                    aria-haspopup="true"
+                    aria-labelledby="generated-id generated-id"
+                    aria-selected={true}
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    role="option"
+                    type="button"
+                  >
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenNumber"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        Number
+                      </span>
+                    </div>
+                  </button>
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <span
+                      className="euiFormControlLayoutCustomIcon"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid={false}
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Name
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                id="generated-id"
+                name="name"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="text"
+                value="bigNumber"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Value
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                name="value"
+                onChange={[Function]}
+                type="number"
+                value={1000}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
+              <span
+                className="euiButton__text"
+              >
+                Save changes
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Variables/EditVar edit variable (string) 1`] = `
+Array [
+  <div
+    className="canvasVarHeader__triggerWrapper"
+  >
+    <button
+      className="canvasVarHeader__button"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="canvasVarHeader__iconWrapper"
+      >
+        <div
+          data-euiicon-type="sortLeft"
+          style={
+            Object {
+              "verticalAlign": "top",
+            }
+          }
+        />
+      </span>
+      <span>
+        <span
+          className="canvasVarHeader__anchor"
+        >
+          Edit variable
+        </span>
+      </span>
+    </button>
+  </div>,
+  <div
+    className="canvasSidebar__accordionContent"
+  >
+    <div>
+      <div
+        className="euiCallOut euiCallOut--warning euiCallOut--small"
+      >
+        <div
+          className="euiCallOutHeader"
+        >
+          <div
+            aria-hidden="true"
+            className="euiCallOutHeader__icon"
+            data-euiicon-type="alert"
+            size="m"
+          />
+          <span
+            className="euiCallOutHeader__title"
+          >
+            Editing a variable in use may adversely affect your workpad
+          </span>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </div>
+    <form
+      className="euiForm"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Type
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                id="generated-id"
+                type="hidden"
+                value="string"
+              />
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <span
+                    className="euiScreenReaderOnly"
+                    id="generated-id"
+                  >
+                    Select an option: 
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenString"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        String
+                      </span>
+                    </div>
+                    , is selected
+                  </span>
+                  <button
+                    aria-haspopup="true"
+                    aria-labelledby="generated-id generated-id"
+                    aria-selected={true}
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    role="option"
+                    type="button"
+                  >
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenString"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        String
+                      </span>
+                    </div>
+                  </button>
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <span
+                      className="euiFormControlLayoutCustomIcon"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid={false}
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Name
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                id="generated-id"
+                name="name"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="text"
+                value="homeUrl"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Value
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                name="value"
+                onChange={[Function]}
+                type="text"
+                value="https://elastic.co"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
+              <span
+                className="euiButton__text"
+              >
+                Save changes
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>,
+]
+`;
+
+exports[`Storyshots components/Variables/EditVar new variable 1`] = `
+Array [
+  <div
+    className="canvasVarHeader__triggerWrapper"
+  >
+    <button
+      className="canvasVarHeader__button"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="canvasVarHeader__iconWrapper"
+      >
+        <div
+          data-euiicon-type="sortLeft"
+          style={
+            Object {
+              "verticalAlign": "top",
+            }
+          }
+        />
+      </span>
+      <span>
+        <span
+          className="canvasVarHeader__anchor"
+        >
+          Add variable
+        </span>
+      </span>
+    </button>
+  </div>,
+  <div
+    className="canvasSidebar__accordionContent"
+  >
+    <form
+      className="euiForm"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Type
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                id="generated-id"
+                type="hidden"
+                value="string"
+              />
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <span
+                    className="euiScreenReaderOnly"
+                    id="generated-id"
+                  >
+                    Select an option: 
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenString"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        String
+                      </span>
+                    </div>
+                    , is selected
+                  </span>
+                  <button
+                    aria-haspopup="true"
+                    aria-labelledby="generated-id generated-id"
+                    aria-selected={true}
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    role="option"
+                    type="button"
+                  >
+                    <div
+                      className="canvasEditVar__typeOption"
+                    >
+                      <span
+                        className="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small canvasEditVar__tokenIcon"
+                        style={Object {}}
+                      >
+                        <div
+                          data-euiicon-type="tokenString"
+                          size="m"
+                        />
+                      </span>
+                       
+                      <span>
+                        String
+                      </span>
+                    </div>
+                  </button>
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <span
+                      className="euiFormControlLayoutCustomIcon"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid={false}
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Name
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                id="generated-id"
+                name="name"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Value
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                name="value"
+                onChange={[Function]}
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            disabled={true}
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButton__content"
+            >
+              <div
+                aria-hidden="true"
+                className="euiButton__icon"
+                data-euiicon-type="save"
+                size="m"
+              />
+              <span
+                className="euiButton__text"
+              >
+                Save changes
+              </span>
+            </span>
+          </button>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            onClick={[Function]}
+            type="button"
+          >
+            <span
+              className="euiButtonEmpty__content"
+            >
+              <span
+                className="euiButtonEmpty__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>,
+]
+`;

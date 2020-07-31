@@ -28,6 +28,8 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTitle,
+  EuiAccordion,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { getToastNotifications } from '../util/dependency_cache';
@@ -125,6 +127,8 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
+    focusAggregations: {},
+    focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
     fullRefresh: true,
@@ -1025,6 +1029,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityValues,
       focusAggregationInterval,
       focusAnnotationData,
+      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -1075,8 +1080,8 @@ export class TimeSeriesExplorer extends React.Component {
     const entityControls = this.getControlsForDetector();
     const fieldNamesWithEmptyValues = this.getFieldNamesWithEmptyValues();
     const arePartitioningFieldsProvided = this.arePartitioningFieldsProvided();
-
-    const detectorSelectOptions = getViewableDetectors(selectedJob).map((d) => ({
+    const detectors = getViewableDetectors(selectedJob);
+    const detectorSelectOptions = detectors.map((d) => ({
       value: d.index,
       text: d.detector_description,
     }));
@@ -1311,25 +1316,49 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
-                {showAnnotations && focusAnnotationData.length > 0 && (
-                  <div>
-                    <EuiTitle className="panel-title">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-                          defaultMessage="Annotations"
-                        />
-                      </h2>
-                    </EuiTitle>
+                {focusAnnotationData && focusAnnotationData.length > 0 && (
+                  <EuiAccordion
+                    id={'EuiAccordion-blah'}
+                    buttonContent={
+                      <EuiTitle className="panel-title">
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                            defaultMessage="Annotations {badge}"
+                            values={{
+                              badge: (
+                                <EuiBadge color={'hollow'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.explorer.annotationsTitleTotalCount"
+                                    defaultMessage="Total: {count}"
+                                    values={{ count: focusAnnotationData.length }}
+                                  />
+                                </EuiBadge>
+                              ),
+                            }}
+                          />
+                        </h2>
+                      </EuiTitle>
+                    }
+                  >
                     <AnnotationsTable
+                      chartDetails={chartDetails}
+                      detectorIndex={selectedDetectorIndex}
+                      detectors={detectors}
+                      jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
+                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />
                     <EuiSpacer size="l" />
-                  </div>
+                  </EuiAccordion>
                 )}
-                <AnnotationFlyout />
+                <AnnotationFlyout
+                  chartDetails={chartDetails}
+                  detectorIndex={selectedDetectorIndex}
+                  detectors={detectors}
+                />
                 <EuiTitle className="panel-title">
                   <h2>
                     <FormattedMessage

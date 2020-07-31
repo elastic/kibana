@@ -5,14 +5,9 @@
  */
 
 jest.mock('../../../../kibana_services', () => {
-  const mockUiSettings = {
-    get: () => {
-      return undefined;
-    },
-  };
   return {
-    getUiSettings: () => {
-      return mockUiSettings;
+    getIsDarkMode() {
+      return false;
     },
   };
 });

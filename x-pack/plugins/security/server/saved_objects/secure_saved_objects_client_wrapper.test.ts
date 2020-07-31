@@ -27,6 +27,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   const errors = ({
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
+    createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
   } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
   const getSpacesService = jest.fn().mockReturnValue(true);
@@ -73,7 +74,9 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>) => 
     SavedObjectActions['get']
   >).mock.calls;
   const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
-  const spaceId = args.options?.namespace || 'default';
+  const spaceId = args.options?.namespaces
+    ? args.options?.namespaces[0]
+    : args.options?.namespace || 'default';
 
   const ACTION = getCalls[0][1];
   const types = getCalls.map((x) => x[0]);
@@ -100,7 +103,7 @@ const expectSuccess = async (fn: Function, args: Record<string, any>) => {
   >).mock.calls;
   const ACTION = getCalls[0][1];
   const types = getCalls.map((x) => x[0]);
-  const spaceIds = [args.options?.namespace || 'default'];
+  const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
 
   expect(clientOpts.auditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
   expect(clientOpts.auditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
@@ -128,7 +131,7 @@ const expectPrivilegeCheck = async (fn: Function, args: Record<string, any>) => 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
     actions,
-    args.options?.namespace
+    args.options?.namespace ?? args.options?.namespaces
   );
 };
 
@@ -344,7 +347,7 @@ describe('#addToNamespaces', () => {
     );
   });
 
-  test(`checks privileges for user, actions, and namespace`, async () => {
+  test(`checks privileges for user, actions, and namespaces`, async () => {
     clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
       getMockCheckPrivilegesSuccess // create
     );
@@ -539,12 +542,12 @@ describe('#find', () => {
   });
 
   test(`throws decorated ForbiddenError when type's singular and unauthorized`, async () => {
-    const options = Object.freeze({ type: type1, namespace: 'some-ns' });
+    const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
     await expectForbiddenError(client.find, { options });
   });
 
   test(`throws decorated ForbiddenError when type's an array and unauthorized`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
     await expectForbiddenError(client.find, { options });
   });
 
@@ -552,18 +555,34 @@ describe('#find', () => {
     const apiCallReturnValue = { saved_objects: [], foo: 'bar' };
     clientOpts.baseClient.find.mockReturnValue(apiCallReturnValue as any);
 
-    const options = Object.freeze({ type: type1, namespace: 'some-ns' });
+    const options = Object.freeze({ type: type1, namespaces: ['some-ns'] });
     const result = await expectSuccess(client.find, { options });
     expect(result).toEqual(apiCallReturnValue);
   });
 
-  test(`checks privileges for user, actions, and namespace`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+  test(`throws BadRequestError when searching across namespaces when spaces is disabled`, async () => {
+    clientOpts = createSecureSavedObjectsClientWrapperOptions();
+    clientOpts.getSpacesService.mockReturnValue(undefined);
+    client = new SecureSavedObjectsClientWrapper(clientOpts);
+
+    // succeed privilege checks by default
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesSuccess
+    );
+
+    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
+    await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"_find across namespaces is not permitted when the Spaces plugin is disabled."`
+    );
+  });
+
+  test(`checks privileges for user, actions, and namespaces`, async () => {
+    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
     await expectPrivilegeCheck(client.find, { options });
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
-    const options = Object.freeze({ type: [type1, type2], namespace: 'some-ns' });
+    const options = Object.freeze({ type: [type1, type2], namespaces: ['some-ns'] });
     await expectObjectsNamespaceFiltering(client.find, { options });
   });
 });

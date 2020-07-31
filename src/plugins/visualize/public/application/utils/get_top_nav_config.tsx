@@ -39,6 +39,7 @@ interface TopNavConfigParams {
   setHasUnsavedChanges: (value: boolean) => void;
   openInspector: () => void;
   originatingApp?: string;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   savedVisInstance: SavedVisInstance;
   stateContainer: VisualizeAppStateContainer;
@@ -51,6 +52,7 @@ export const getTopNavConfig = (
     setHasUnsavedChanges,
     openInspector,
     originatingApp,
+    setOriginatingApp,
     hasUnappliedChanges,
     savedVisInstance: { embeddableHandler, savedVis, vis },
     stateContainer,
@@ -112,6 +114,9 @@ export const getTopNavConfig = (
             application.navigateToApp(originatingApp);
           }
         } else {
+          if (setOriginatingApp && originatingApp && savedVis.copyOnSave) {
+            setOriginatingApp(undefined);
+          }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.lastSavedTitle));
 

@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -30,7 +30,8 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
+export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
+  const { callAsInternalUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -133,7 +134,7 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
       });
     }
 
-    const resp: SearchResponse<any> = await callAsCurrentUser('search', {
+    const resp: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: maxRecords,
@@ -287,7 +288,7 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
       },
     };
 
-    const resp = await callAsCurrentUser('search', query);
+    const resp = await callAsInternalUser('search', query);
     const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -325,7 +326,7 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -369,7 +370,7 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
@@ -404,7 +405,7 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: 1,
@@ -435,6 +436,6 @@ export function resultsServiceProvider(callAsCurrentUser: LegacyAPICaller) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(callAsCurrentUser),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
   };
 }

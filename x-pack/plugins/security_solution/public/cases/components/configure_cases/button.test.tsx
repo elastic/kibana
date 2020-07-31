@@ -8,6 +8,7 @@ import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { EuiText } from '@elastic/eui';
 
+import '../../../common/mock/match_media';
 import { ConfigureCaseButton, ConfigureCaseButtonProps } from './button';
 import { TestProviders } from '../../../common/mock';
 import { searchURL } from './__mock__';

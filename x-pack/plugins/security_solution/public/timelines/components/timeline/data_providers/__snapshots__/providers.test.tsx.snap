@@ -9,10 +9,11 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
-        <AddDataProviderPopover
-          browserFields={Object {}}
-          timelineId="foo"
+      <styled.div
+        hideBadge={true}
+      >
+        <AndOrBadge
+          type="or"
         />
       </styled.div>
     </Styled(EuiFlexItem)>
@@ -58,7 +59,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -106,7 +109,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -154,7 +159,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -202,7 +209,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -250,7 +259,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -298,7 +309,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -346,7 +359,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -394,7 +409,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -442,7 +459,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -490,7 +509,9 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
     <Styled(EuiFlexItem)
       grow={false}
     >
-      <styled.div>
+      <styled.div
+        hideBadge={false}
+      >
         <AndOrBadge
           type="or"
         />
@@ -527,6 +548,10 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
         )
       </styled.span>
     </Styled(EuiFlexItem)>
+    <AddDataProviderPopover
+      browserFields={Object {}}
+      timelineId="foo"
+    />
   </EuiFlexGroup>
 </div>
 `;

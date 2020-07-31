@@ -9,6 +9,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
+import '../../mock/match_media';
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
@@ -20,6 +21,10 @@ describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';
   const mount = useMountAppended();
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
 
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
@@ -64,7 +69,7 @@ describe('DraggableWrapper', () => {
       expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
     });
 
-    test('it renders hover actions when the mouse is over the draggable wrapper', () => {
+    test('it renders hover actions when the mouse is over the text of draggable wrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
@@ -75,7 +80,9 @@ describe('DraggableWrapper', () => {
         </TestProviders>
       );
 
-      wrapper.simulate('mouseenter');
+      wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
+      wrapper.update();
+      jest.runAllTimers();
       wrapper.update();
       expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
     });

@@ -60,6 +60,7 @@ import { createSecurityLayerDescriptors } from './api/create_security_layer_desc
 import {getAlertType as getPeopleInSpaceAlertType} from './alert_types/astros';
 import {TriggersAndActionsUIPublicPluginSetup} from "../../triggers_actions_ui/public";
 import { getAlertMenuAction } from './components/alerts/alerts_top_nav_handling';
+import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -190,6 +191,8 @@ export class MapsPlugin
     bindStartCoreAndPlugins(core, plugins);
     return {
       createSecurityLayerDescriptors,
+      registerLayerWizard,
+      registerSource,
     };
   }
 }

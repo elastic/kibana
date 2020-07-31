@@ -42,9 +42,8 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
             'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
             'xpack-accessibility': kibanaPipeline.functionalTestProcess('xpack-accessibility', './test/scripts/jenkins_xpack_accessibility.sh'),
             'xpack-savedObjectsFieldMetrics': kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'),
-            // 'xpack-pageLoadMetrics': kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'),
             'xpack-securitySolutionCypress': { processNumber ->
-              whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/']) {
+              whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/', 'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/', 'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx']) {
                 kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh')(processNumber)
               }
             },

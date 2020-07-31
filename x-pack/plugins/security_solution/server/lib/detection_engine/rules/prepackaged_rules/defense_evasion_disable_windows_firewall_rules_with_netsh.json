@@ -1,0 +1,39 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of the netsh.exe to disable or weaken the local firewall. Attackers will use this command line tool to disable the firewall during troubleshooting or to enable network mobility.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Disable Windows Firewall Rules via Netsh",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:netsh.exe and process.args:(disable and firewall and set) or process.args:(advfirewall and off and state)",
+  "risk_score": 47,
+  "rule_id": "4b438734-3793-4fda-bd42-ceeada0be8f9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1089",
+          "name": "Disabling Security Tools",
+          "reference": "https://attack.mitre.org/techniques/T1089/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

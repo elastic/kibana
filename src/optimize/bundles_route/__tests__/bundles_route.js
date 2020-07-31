@@ -56,7 +56,6 @@ describe('optimizer/bundle route', () => {
   function createServer(options = {}) {
     const {
       regularBundlesPath = outputFixture,
-      dllBundlesPath = outputFixture,
       basePublicPath = '',
       builtCssPath = outputFixture,
       npUiPluginPublicDirs = [],
@@ -70,7 +69,6 @@ describe('optimizer/bundle route', () => {
     server.route(
       createBundlesRoute({
         regularBundlesPath,
-        dllBundlesPath,
         basePublicPath,
         builtCssPath,
         npUiPluginPublicDirs,
@@ -89,28 +87,24 @@ describe('optimizer/bundle route', () => {
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: null,
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: './relative',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: 1234,
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/absolute/path',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '',
         });
       }).to.not.throwError();
@@ -119,42 +113,36 @@ describe('optimizer/bundle route', () => {
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: 123,
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: {},
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a/',
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: 'a/',
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '/a',
         });
       }).to.not.throwError();
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
-          dllBundlesPath: '/absolute/path',
           basePublicPath: '',
         });
       }).to.not.throwError();
