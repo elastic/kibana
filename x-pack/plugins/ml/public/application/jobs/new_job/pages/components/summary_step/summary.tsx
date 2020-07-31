@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -42,6 +42,9 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   const {
     services: { notifications },
   } = useMlKibana();
+
+  const navigateToPath = useNavigateToPath();
+
   const { jobCreator, jobValidator, jobValidatorUpdated, resultsLoader } = useContext(
     JobCreatorContext
   );
@@ -87,7 +90,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(jobCreator);
+      advancedStartDatafeed(jobCreator, navigateToPath);
     } catch (error) {
       // catch and display all job creation errors
       const { toasts } = notifications;
@@ -112,11 +115,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function clickResetJob() {
-    resetJob(jobCreator);
+    resetJob(jobCreator, navigateToPath);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(jobCreator);
+    convertToAdvancedJob(jobCreator, navigateToPath);
   };
 
   useEffect(() => {
