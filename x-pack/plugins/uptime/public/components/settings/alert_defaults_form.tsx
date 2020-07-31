@@ -125,29 +125,29 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
             />
           }
         >
-          <>
-            <EuiComboBox
-              placeholder="Please select one or more connectors"
-              options={options}
-              selectedOptions={options.filter((opt) =>
-                formFields?.defaultConnectors.includes(opt.value)
-              )}
-              inputRef={(input) => {
-                inputRef.current = input;
-              }}
-              onSearchChange={onSearchChange}
-              onBlur={onBlur}
-              isLoading={loading}
-              isDisabled={isDisabled}
-              onChange={onOptionChange}
-              data-test-subj={`default-connectors-input-${loading ? 'loading' : 'loaded'}`}
-              renderOption={renderOption}
-            />
-            <EuiButtonEmpty iconType="plusInCircleFilled" href={path}>
-              New connector
-            </EuiButtonEmpty>
-          </>
+          <EuiComboBox
+            placeholder="Please select one or more connectors"
+            options={options}
+            selectedOptions={options.filter((opt) =>
+              formFields?.defaultConnectors.includes(opt.value)
+            )}
+            inputRef={(input) => {
+              inputRef.current = input;
+            }}
+            onSearchChange={onSearchChange}
+            onBlur={onBlur}
+            isLoading={loading}
+            isDisabled={isDisabled}
+            onChange={onOptionChange}
+            data-test-subj={`default-connectors-input-${loading ? 'loading' : 'loaded'}`}
+            renderOption={renderOption}
+          />
         </EuiFormRow>
+        <div>
+          <EuiButtonEmpty iconType="plusInCircleFilled" href={path}>
+            New connector
+          </EuiButtonEmpty>
+        </div>
       </EuiDescribedFormGroup>
     </>
   );

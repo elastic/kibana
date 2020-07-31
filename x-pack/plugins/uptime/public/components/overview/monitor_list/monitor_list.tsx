@@ -76,7 +76,7 @@ export const MonitorListComponent: ({
         ...map,
         [id]: (
           <MonitorListDrawer
-            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)!}
           />
         ),
       };
