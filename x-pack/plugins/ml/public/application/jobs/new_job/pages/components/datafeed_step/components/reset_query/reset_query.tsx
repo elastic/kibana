@@ -74,7 +74,10 @@ export const ResetQueryButton: FC = () => {
       )}
 
       <EuiButtonEmpty size="s" onClick={showModal}>
-        Reset datafeed to default
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.datafeedStep.resetQueryButton"
+          defaultMessage="Reset datafeed query to default"
+        />
       </EuiButtonEmpty>
     </>
   );
