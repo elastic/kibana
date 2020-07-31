@@ -208,6 +208,10 @@ def onFailure(Map options = [:]) {
 
 def onFailure(Map options = [:], Closure closure) {
   if (options.disabled) {
+    catchError {
+      closure()
+    }
+
     return
   }
 
