@@ -233,7 +233,9 @@ describe('import_rules_route', () => {
       const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) =>
         getImportRulesWithIdSchemaMock(ruleId)
       );
+      // @ts-expect-error
       delete rulesWithoutRuleIds[0].rule_id;
+      // @ts-expect-error
       delete rulesWithoutRuleIds[1].rule_id;
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
