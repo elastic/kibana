@@ -37,16 +37,15 @@ export function BeatsPanel(props) {
   }
 
   const setupModeData = get(setupMode.data, 'beats');
-  const setupModeMetricbeatMigrationTooltip =
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={BEATS_SYSTEM_ID}
-        badgeClickLink={getSafeForExternalLink('#/beats/beats')}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={BEATS_SYSTEM_ID}
+      badgeClickLink={getSafeForExternalLink('#/beats/beats')}
+    />
+  ) : null;
 
   const beatTypes = props.beats.types.map((beat, index) => {
     return [

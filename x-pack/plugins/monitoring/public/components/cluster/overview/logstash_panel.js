@@ -58,16 +58,15 @@ export function LogstashPanel(props) {
   const goToPipelines = () => getSafeForExternalLink('#/logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
-  const setupModeMetricbeatMigrationTooltip =
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={LOGSTASH_SYSTEM_ID}
-        badgeClickLink={goToNodes()}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={LOGSTASH_SYSTEM_ID}
+      badgeClickLink={goToNodes()}
+    />
+  ) : null;
 
   let nodesAlertStatus = null;
   if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {

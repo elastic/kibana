@@ -38,11 +38,7 @@ export class Listing extends PureComponent {
         field: 'name',
         render: (name, beat) => {
           let setupModeStatus = null;
-          if (
-            setupMode &&
-            setupMode.enabled &&
-            isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-          ) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const status = list[beat.uuid] || {};
             const instance = {
@@ -128,11 +124,7 @@ export class Listing extends PureComponent {
     const { stats, data, sorting, pagination, onTableChange, setupMode } = this.props;
 
     let setupModeCallOut = null;
-    if (
-      setupMode &&
-      setupMode.enabled &&
-      isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-    ) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}

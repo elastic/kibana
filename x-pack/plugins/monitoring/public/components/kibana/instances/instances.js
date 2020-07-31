@@ -41,11 +41,7 @@ const getColumns = (setupMode, alerts) => {
       field: 'name',
       render: (name, kibana) => {
         let setupModeStatus = null;
-        if (
-          setupMode &&
-          setupMode.enabled &&
-          isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-        ) {
+        if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
           const uuid = get(kibana, 'kibana.uuid');
           const status = list[uuid] || {};
@@ -172,11 +168,7 @@ export class KibanaInstances extends PureComponent {
     let setupModeCallOut = null;
     // Merge the instances data with the setup data if enabled
     const instances = this.props.instances || [];
-    if (
-      setupMode &&
-      setupMode.enabled &&
-      isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-    ) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       // We want to create a seamless experience for the user by merging in the setup data
       // and the node data from monitoring indices in the likely scenario where some instances
       // are using MB collection and some are using no collection

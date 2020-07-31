@@ -174,16 +174,15 @@ export function ElasticsearchPanel(props) {
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
 
   const setupModeData = get(setupMode.data, 'elasticsearch');
-  const setupModeMetricbeatMigrationTooltip =
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={ELASTICSEARCH_SYSTEM_ID}
-        badgeClickLink={goToNodes()}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={ELASTICSEARCH_SYSTEM_ID}
+      badgeClickLink={goToNodes()}
+    />
+  ) : null;
 
   const showMlJobs = () => {
     // if license doesn't support ML, then `ml === null`

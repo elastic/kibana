@@ -211,6 +211,9 @@ export const isInSetupMode = () => {
 };
 
 export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
+  if (!setupModeState.enabled) {
+    return true;
+  }
   if (feature === SetupModeFeature.MetricbeatMigration) {
     if (Legacy.shims.isCloud) {
       return false;

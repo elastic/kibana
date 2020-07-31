@@ -40,16 +40,15 @@ export function ApmPanel(props) {
 
   const goToInstances = () => getSafeForExternalLink('#/apm/instances');
   const setupModeData = get(setupMode.data, 'apm');
-  const setupModeMetricbeatMigrationTooltip =
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        badgeClickLink={goToInstances()}
-        productName={APM_SYSTEM_ID}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      badgeClickLink={goToInstances()}
+      productName={APM_SYSTEM_ID}
+    />
+  ) : null;
 
   return (
     <ClusterItemContainer

@@ -42,11 +42,7 @@ export class Listing extends PureComponent {
         sortable: true,
         render: (name, node) => {
           let setupModeStatus = null;
-          if (
-            setupMode &&
-            setupMode.enabled &&
-            isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-          ) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const uuid = get(node, 'logstash.uuid');
             const status = list[uuid] || {};
@@ -173,11 +169,7 @@ export class Listing extends PureComponent {
     }));
 
     let setupModeCallOut = null;
-    if (
-      setupMode &&
-      setupMode.enabled &&
-      isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-    ) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}

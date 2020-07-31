@@ -184,11 +184,7 @@ export class MonitoringMainController {
 
   isDisabledTab(product) {
     const setupMode = getSetupModeState();
-    if (
-      !setupMode.enabled ||
-      !setupMode.data ||
-      !isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-    ) {
+    if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       return false;
     }
 

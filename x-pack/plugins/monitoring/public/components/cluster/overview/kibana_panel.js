@@ -52,16 +52,15 @@ export function KibanaPanel(props) {
   const goToInstances = () => getSafeForExternalLink('#/kibana/instances');
 
   const setupModeData = get(setupMode.data, 'kibana');
-  const setupModeMetricbeatMigrationTooltip =
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration) ? (
-      <SetupModeTooltip
-        setupModeData={setupModeData}
-        productName={KIBANA_SYSTEM_ID}
-        badgeClickLink={goToInstances()}
-      />
-    ) : null;
+  const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
+    SetupModeFeature.MetricbeatMigration
+  ) ? (
+    <SetupModeTooltip
+      setupModeData={setupModeData}
+      productName={KIBANA_SYSTEM_ID}
+      badgeClickLink={goToInstances()}
+    />
+  ) : null;
 
   let instancesAlertStatus = null;
   if (shouldShowAlertBadge(alerts, INSTANCES_PANEL_ALERTS)) {

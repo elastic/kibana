@@ -38,11 +38,7 @@ function getColumns(setupMode) {
       field: 'name',
       render: (name, apm) => {
         let setupModeStatus = null;
-        if (
-          setupMode &&
-          setupMode.enabled &&
-          isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-        ) {
+        if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[apm.uuid] || {};
           const instance = {
@@ -135,11 +131,7 @@ export function ApmServerInstances({ apms, setupMode }) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
-  if (
-    setupMode.enabled &&
-    setupMode.data &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-  ) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}

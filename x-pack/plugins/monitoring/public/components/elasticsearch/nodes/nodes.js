@@ -87,11 +87,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       );
 
       let setupModeStatus = null;
-      if (
-        setupMode &&
-        setupMode.enabled &&
-        isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-      ) {
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         const list = _.get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
@@ -342,11 +338,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   }
 
   let setupModeCallout = null;
-  if (
-    setupMode &&
-    setupMode.enabled &&
-    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
-  ) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}
