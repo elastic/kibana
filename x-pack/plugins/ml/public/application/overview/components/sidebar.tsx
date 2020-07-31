@@ -9,7 +9,6 @@ import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlKibana } from '../../contexts/kibana';
 
-const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
 
 interface Props {
