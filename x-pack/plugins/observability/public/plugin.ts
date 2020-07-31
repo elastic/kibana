@@ -64,7 +64,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         icon: 'logoObservability',
         path: '/app/observability',
         order: 200,
-        className: 'homSolutionsSection__magentaCard',
+        className: 'homSolutions__magentaCard',
       });
     }
 

@@ -62,25 +62,25 @@ export const SolutionPanel: FC<Props> = ({ solution, apps = [] }) =>
   solution && apps.length ? (
     <EuiFlexItem
       key={solution.id}
-      className={`homSolutionsSection__container ${
-        solution.id === 'kibana' ? 'homSolutionsSection__single' : ''
+      className={`homSolutions__container ${
+        solution.id === 'kibana' ? 'homSolutions__single' : ''
       } ${solution.className}`}
       grow={1}
     >
       <EuiPanel
         paddingSize="none"
-        className="homSolutionsSection__panel"
+        className="homSolutions__panel"
         onClick={createAppNavigationHandler(solution.path)} // TODO: double check this url once enterprise search overview page is available
       >
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={1} className={`homSolutionsSection__panelHeader`}>
+          <EuiFlexItem grow={1} className={`homSolutions__panelHeader`}>
             <SolutionTitle
               iconType={solution.icon}
               title={solution.title}
               subtitle={solution.description}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={1} className="homSolutionsSection__panelDescriptions">
+          <EuiFlexItem grow={1} className="homSolutions__panelDescriptions">
             {getAppDescriptions(apps)}
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -59,11 +59,11 @@ export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
     solutionAppMap.set(solution.id, apps);
   });
 
-  const halfWidthClass = 'homSolutionsSection__multiple';
+  const halfWidthClass = 'homSolutions__multiple';
 
   return appCount || kibanaApps.length ? (
     <Fragment>
-      <EuiFlexGroup className="homSolutionsSection" justifyContent="spaceAround">
+      <EuiFlexGroup className="homSolutions" justifyContent="spaceAround">
         {appCount ? (
           <EuiFlexItem grow={1} className={halfWidthClass}>
             <EuiFlexGroup direction="column">

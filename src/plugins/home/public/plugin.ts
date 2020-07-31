@@ -145,7 +145,7 @@ export class HomePublicPlugin
       icon: 'logoKibana',
       path: '/app/dashboards',
       order: 400,
-      className: 'homSolutionsSection__blueCard',
+      className: 'homSolutions__blueCard',
     });
 
     return {
