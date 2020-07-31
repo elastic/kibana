@@ -17,6 +17,8 @@ and performance data for {es}, {ls}, and Beats in real time, as well as
 analyze past performance. You can also modify active alerts in the
 *{stack-monitor-app}* app.
 
+image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
+
 To review and modify all the available alerts, use the *{alerts-ui}* UI
 in the *{stack-manage-app}* app.
 
