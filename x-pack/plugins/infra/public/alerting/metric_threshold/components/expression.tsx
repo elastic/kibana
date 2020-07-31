@@ -256,6 +256,11 @@ export const Expressions: React.FC<Props> = (props) => {
     [onFilterChange]
   );
 
+  const groupByPreviewDisplayName = useMemo(() => {
+    if (Array.isArray(alertParams.groupBy)) return alertParams.groupBy.join(', ');
+    return alertParams.groupBy;
+  }, [alertParams.groupBy]);
+
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -400,7 +405,7 @@ export const Expressions: React.FC<Props> = (props) => {
         showNoDataResults={alertParams.alertOnNoData}
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
-        groupByDisplayName={alertParams.groupBy}
+        groupByDisplayName={groupByPreviewDisplayName}
       />
       <EuiSpacer size={'m'} />
     </>
