@@ -112,7 +112,7 @@ export function App({
         toDate: currentRange.to,
       },
       originatingApp: embeddableEditorIncomingState?.originatingApp,
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
     };
   });
