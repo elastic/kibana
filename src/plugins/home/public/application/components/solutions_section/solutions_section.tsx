@@ -59,7 +59,7 @@ export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
     solutionAppMap.set(solution.id, apps);
   });
 
-  const halfWidthClass = 'homSolutions__multiple';
+  const halfWidthClass = 'homSolutions__group homSolutions__group--multiple';
 
   return appCount || kibanaApps.length ? (
     <Fragment>
