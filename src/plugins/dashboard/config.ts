@@ -17,22 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../core/server';
-import { DashboardPlugin } from './plugin';
-import { configSchema, ConfigSchema } from '../config';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    allowByValueEmbeddables: true,
-  },
-  schema: configSchema,
-};
+export const configSchema = schema.object({
+  allowByValueEmbeddables: schema.boolean({ defaultValue: false }),
+});
 
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardPlugin(initializerContext);
-}
-
-export { DashboardPluginSetup, DashboardPluginStart } from './types';
+export type ConfigSchema = TypeOf<typeof configSchema>;
