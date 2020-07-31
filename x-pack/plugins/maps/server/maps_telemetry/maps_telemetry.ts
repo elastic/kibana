@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { SavedObject, SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
@@ -25,6 +25,7 @@ import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
+import { IndexPatternSavedObjectAttrs } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 interface IStats {
   [key: string]: {
@@ -268,16 +269,18 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
 }
 
 export async function getMapsTelemetry(config: MapsConfigType) {
+  const savedObjectsClient = getInternalRepository();
+
+  // Harvest layers lists from saved maps for each page of results
   let currentPage = 1;
   let perPage = 2; // Seed value
   let total = 3; // Seed value
   let savedObjects = [];
-  const savedObjectsClient = getInternalRepository();
-
-  // Harvest layers lists from saved maps for each page of results
   let layerLists: LayerDescriptor[][] = [];
   while (currentPage <= Math.ceil(total / perPage)) {
-    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find({
+    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find<
+      SavedObjectAttributes
+    >({
       type: MAP_SAVED_OBJECT_TYPE,
       page: currentPage++,
     }));
@@ -290,19 +293,23 @@ export async function getMapsTelemetry(config: MapsConfigType) {
   currentPage = 1;
   const indexPatternsTelemetry = {};
   while (currentPage <= Math.ceil(total / perPage)) {
-    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find({
+    ({ per_page: perPage, saved_objects: savedObjects, total } = await savedObjectsClient.find<
+      IndexPatternSavedObjectAttrs
+    >({
       type: 'index-pattern',
       page: currentPage++,
     }));
     _.mergeWith(
       indexPatternsTelemetry,
-      buildMapsIndexPatternsTelemetry(savedObjects, layerLists),
+      buildMapsIndexPatternsTelemetry((savedObjects as unknown) as IIndexPattern[], layerLists),
       (srcVal, objVal) => srcVal || 0 + objVal || 0
     );
   }
 
   return {
-    showMapVisualizationTypes: config.showMapVisualizationTypes,
+    settings: {
+      showMapVisualizationTypes: config.showMapVisualizationTypes,
+    },
     ...indexPatternsTelemetry,
     ...savedObjectsTelemetry,
   };
