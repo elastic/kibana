@@ -2,6 +2,11 @@
 
 exports[`trace queries fetches a trace 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_transaction_id": Object {
@@ -18,11 +23,6 @@ Object {
           Object {
             "term": Object {
               "trace.id": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "error",
             },
           },
           Object {
@@ -48,6 +48,5 @@ Object {
     },
     "size": "myIndex",
   },
-  "index": "myIndex",
 }
 `;
