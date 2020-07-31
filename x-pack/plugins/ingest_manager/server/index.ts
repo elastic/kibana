@@ -6,7 +6,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
-export { AgentService, ESIndexPatternService } from './services';
+export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
