@@ -5,14 +5,15 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCard, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { getResultsUrl } from '../../../analytics_management/components/analytics_list/common';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
 interface Props {
   jobId: string;
-  analysisType: string;
+  analysisType: ANALYSIS_CONFIG_TYPE;
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {

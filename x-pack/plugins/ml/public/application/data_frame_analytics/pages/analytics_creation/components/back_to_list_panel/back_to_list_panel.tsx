@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { EuiCard, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 
