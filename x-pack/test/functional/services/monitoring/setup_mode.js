@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import expect from '@kbn/expect';
-
 export function MonitoringSetupModeProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  // const retry = getService('retry');
 
   const SUBJ_SETUP_MODE_BTN = 'monitoringSetupModeBtn';
   const SUBJ_SETUP_MODE_BOTTOM_BAR = 'monitoringSetupModeBottomBar';
