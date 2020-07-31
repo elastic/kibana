@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode } from 'react';
-import classNames from 'classnames';
-import './field_button.scss';
 
-export interface FieldButtonProps {
+import classNames from 'classnames';
+import React, { ReactNode } from 'react';
+import './field_button.scss';
+import { OneOf } from '@elastic/eui';
+
+interface Props {
   isOpen?: boolean;
   fieldIcon?: ReactNode;
   fieldName?: ReactNode;
@@ -29,7 +31,10 @@ export interface FieldButtonProps {
   isDraggable?: boolean;
   size?: ButtonSize;
   className?: string;
+  onClick?: () => void;
 }
+
+export type FieldButtonProps = OneOf<Props, 'fieldInfoIcon' | 'fieldAction'>;
 
 /**
  * Wraps Object.keys with proper typescript definition of the resulting array
@@ -56,6 +61,7 @@ export function FieldButton({
   fieldAction,
   className,
   isDraggable = false,
+  onClick,
   ...rest
 }: FieldButtonProps) {
   const classes = classNames(
@@ -68,12 +74,12 @@ export function FieldButton({
 
   return (
     <div className={classes} {...rest}>
-      <div className="kbnFieldButton__content">
+      <button onClick={onClick} className="kbnFieldButton__content">
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
-        <div className="kbnFieldButton__fieldAction">{fieldAction}</div>
-        <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
-      </div>
+      </button>
+      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
     </div>
   );
 }

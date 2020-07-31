@@ -212,30 +212,23 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             exists ? 'exists' : 'missing'
           }`}
         >
-          <EuiKeyboardAccessible>
-            <FieldButton
-              className="lnsFieldItem__info"
-              isDraggable
-              isOpen={infoIsOpen}
-              data-test-subj={`lnsFieldListPanelField-${field.name}`}
-              onClick={() => {
-                if (exists) {
-                  togglePopover();
-                }
-              }}
-              onKeyPress={(event) => {
-                if (exists && event.key === 'ENTER') {
-                  togglePopover();
-                }
-              }}
-              aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-                defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-              })}
-              fieldInfoIcon={lensInfoIcon}
-              fieldIcon={lensFieldIcon}
-              fieldName={wrappableHighlightableFieldName}
-            />
-          </EuiKeyboardAccessible>
+          <FieldButton
+            className="lnsFieldItem__info"
+            isDraggable
+            isOpen={infoIsOpen}
+            data-test-subj={`lnsFieldListPanelField-${field.name}`}
+            onClick={() => {
+              if (exists) {
+                togglePopover();
+              }
+            }}
+            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })}
+            fieldInfoIcon={lensInfoIcon}
+            fieldIcon={lensFieldIcon}
+            fieldName={wrappableHighlightableFieldName}
+          />
         </DragDrop>
       }
       isOpen={infoIsOpen}

@@ -175,28 +175,21 @@ export function DiscoverField({
   return (
     <>
       <EuiPopover
+        ownFocus
         display="block"
         button={
-          <EuiKeyboardAccessible>
-            <FieldButton
-              size="s"
-              className="dscSidebarItem"
-              isOpen={showDetails}
-              tabIndex={0}
-              onClick={() => {
-                togglePopover();
-              }}
-              onKeyPress={(event: any) => {
-                if (event.key === 'ENTER') {
-                  togglePopover();
-                }
-              }}
-              data-test-subj={`field-${field.name}-showDetails`}
-              fieldIcon={dscFieldIcon}
-              fieldAction={actionButton}
-              fieldName={fieldName}
-            />
-          </EuiKeyboardAccessible>
+          <FieldButton
+            size="s"
+            className="dscSidebarItem"
+            isOpen={showDetails}
+            onClick={() => {
+              togglePopover();
+            }}
+            data-test-subj={`field-${field.name}-showDetails`}
+            fieldIcon={dscFieldIcon}
+            fieldAction={actionButton}
+            fieldName={fieldName}
+          />
         }
         isOpen={infoIsOpen}
         closePopover={() => setOpen(false)}
