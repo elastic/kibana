@@ -145,9 +145,10 @@ def sendFailedBuild(Map params = [:]) {
     color: 'danger',
     icon: ':jenkins:',
     username: 'Kibana Operations',
-    context: getDefaultContext(config),
     isFinal: false,
   ] + params
+
+  config.context = config.context ?: getDefaultContext(config)
 
   def title = "${getStatusIcon(config)} ${config.title}"
   def message = "${getStatusIcon(config)} ${config.message}"
