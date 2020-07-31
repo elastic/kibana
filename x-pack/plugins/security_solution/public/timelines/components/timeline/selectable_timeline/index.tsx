@@ -258,7 +258,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       onlyUserFavorite: onlyFavorites,
       status: null,
       timelineType,
-      templateTimelineType: null,
     });
   }, [fetchAllTimeline, onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
