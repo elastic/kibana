@@ -19,6 +19,9 @@ export const METRICS_FEATURE = {
   navLinkId: 'metrics',
   app: ['infra', 'metrics', 'kibana'],
   catalogue: ['infraops'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
   privileges: {
     all: {
@@ -32,7 +35,10 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: ['show', 'configureSource', 'save', 'alerting:show'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show', 'configureSource', 'save'],
     },
     read: {
       app: ['infra', 'metrics', 'kibana'],
@@ -45,7 +51,10 @@ export const METRICS_FEATURE = {
       alerting: {
         all: [METRIC_THRESHOLD_ALERT_TYPE_ID, METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID],
       },
-      ui: ['show', 'alerting:show'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show'],
     },
   },
 };

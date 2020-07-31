@@ -6,6 +6,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
 
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -16,7 +17,16 @@ export const useFullScreen = () => {
   const timelineFullScreen = useSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
 
   const setGlobalFullScreen = useCallback(
-    (fullScreen: boolean) => dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen })),
+    (fullScreen: boolean) => {
+      if (fullScreen) {
+        document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
+      } else {
+        document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
+        setTimeout(() => window.scrollTo(0, 0), 0);
+      }
+
+      dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
+    },
     [dispatch]
   );
 
