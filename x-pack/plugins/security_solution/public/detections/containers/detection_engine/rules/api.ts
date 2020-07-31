@@ -90,14 +90,16 @@ export const fetchRules = async ({
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filters = [
-    ...(filterOptions.filter.length ? [`alert.attributes.name: "${filterOptions.filter}"`] : []),
+    ...(filterOptions.filter.length
+      ? [`alert.attributes.name: "${filterOptions.filter.replace(/"/g, '')}"`]
+      : []),
     ...(filterOptions.showCustomRules
       ? [`alert.attributes.tags: "__internal_immutable:false"`]
       : []),
     ...(filterOptions.showElasticRules
       ? [`alert.attributes.tags: "__internal_immutable:true"`]
       : []),
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t}"`) ?? []),
+    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '')}"`) ?? []),
   ];
 
   const query = {

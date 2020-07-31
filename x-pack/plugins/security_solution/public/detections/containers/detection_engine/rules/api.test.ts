@@ -223,6 +223,52 @@ describe('Detections Rules API', () => {
       expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
     });
 
+    test('query KQL parses without errors when filter contains characters such as double quotes', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '"test"',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          showCustomRules: true,
+          showElasticRules: true,
+          tags: [],
+        },
+        signal: abortCtrl.signal,
+      });
+      const [
+        [
+          ,
+          {
+            query: { filter },
+          },
+        ],
+      ] = fetchMock.mock.calls;
+      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+    });
+
+    test('query KQL parses without errors when tags contains characters such as double quotes', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '"test"',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          showCustomRules: true,
+          showElasticRules: true,
+          tags: ['"test"'],
+        },
+        signal: abortCtrl.signal,
+      });
+      const [
+        [
+          ,
+          {
+            query: { filter },
+          },
+        ],
+      ] = fetchMock.mock.calls;
+      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+    });
+
     test('check parameter url, query with all options', async () => {
       await fetchRules({
         filterOptions: {
