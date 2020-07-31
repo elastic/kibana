@@ -16,13 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { format as formatUrl } from 'url';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-import supertestAsPromised from 'supertest-as-promised';
-
-export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
-  const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
-}
+// eslint-disable-next-line no-console
+console.log('plugin in an x-pack dir');

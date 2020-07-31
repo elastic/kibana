@@ -51,6 +51,7 @@ describe('HostList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
+        hostsExist: true,
       });
     });
 
