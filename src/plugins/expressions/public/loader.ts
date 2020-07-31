@@ -150,7 +150,7 @@ export class ExpressionLoader {
       variables: params.variables || {},
       inspectorAdapters: params.inspectorAdapters,
     });
-    if (!params.inspectorAdapters) params.inspectorAdapters = this.execution.inspect() as Adapters;
+
     const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
     if (this.execution !== prevDataHandler) {
@@ -181,6 +181,9 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+
+    this.params.inspectorAdapters = (params.inspectorAdapters ||
+      this.execution?.inspect()) as Adapters;
   }
 }
 

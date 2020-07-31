@@ -11,6 +11,8 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { NavigateToPath } from '../../contexts/kibana';
+
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
@@ -34,15 +36,15 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 
-export const timeSeriesExplorerRoute: MlRoute = {
+export const timeSeriesExplorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/timeseriesexplorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB,
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
         defaultMessage: 'Single Metric Viewer',
@@ -50,7 +52,7 @@ export const timeSeriesExplorerRoute: MlRoute = {
       href: '',
     },
   ],
-};
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useResolver('', undefined, deps.config, {

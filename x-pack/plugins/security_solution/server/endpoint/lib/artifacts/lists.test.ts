@@ -8,7 +8,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types/entries';
+import { EntriesArray, EntryList } from '../../../../../lists/common/schemas/types';
 import { buildArtifact, getFullEndpointExceptionList } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 
@@ -314,21 +314,23 @@ describe('buildEventTypeSignal', () => {
   test('it should convert the exception lists response to the proper endpoint format while paging', async () => {
     // The first call returns two exceptions
     const first = getFoundExceptionListItemSchemaMock();
+    first.per_page = 2;
+    first.total = 4;
     first.data.push(getExceptionListItemSchemaMock());
 
     // The second call returns two exceptions
     const second = getFoundExceptionListItemSchemaMock();
+    second.per_page = 2;
+    second.total = 4;
     second.data.push(getExceptionListItemSchemaMock());
 
-    // The third call returns no exceptions, paging stops
-    const third = getFoundExceptionListItemSchemaMock();
-    third.data = [];
     mockExceptionClient.findExceptionListItem = jest
       .fn()
       .mockReturnValueOnce(first)
-      .mockReturnValueOnce(second)
-      .mockReturnValueOnce(third);
+      .mockReturnValueOnce(second);
+
     const resp = await getFullEndpointExceptionList(mockExceptionClient, 'linux', 'v1');
+
     // Expect 2 exceptions, the first two calls returned the same exception list items
     expect(resp.entries.length).toEqual(2);
   });

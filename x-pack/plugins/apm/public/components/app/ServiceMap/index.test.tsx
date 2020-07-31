@@ -5,7 +5,7 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { FunctionComponent } from 'react';
+import React, { ReactNode } from 'react';
 import { License } from '../../../../../licensing/common/license';
 import { LicenseContext } from '../../../context/LicenseContext';
 import { ServiceMap } from './';
@@ -22,13 +22,13 @@ const expiredLicense = new License({
   },
 });
 
-const Wrapper: FunctionComponent = ({ children }) => {
+function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <LicenseContext.Provider value={expiredLicense}>
       <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
     </LicenseContext.Provider>
   );
-};
+}
 
 describe('ServiceMap', () => {
   describe('with an inactive license', () => {

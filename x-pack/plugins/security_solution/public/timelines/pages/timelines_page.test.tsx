@@ -21,6 +21,16 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
+jest.mock('../../common/containers/source', () => {
+  const originalModule = jest.requireActual('../../common/containers/source');
+
+  return {
+    ...originalModule,
+    useWithSource: jest.fn().mockReturnValue({
+      indicesExist: true,
+    }),
+  };
+});
 jest.mock('../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../common/lib/kibana');
 

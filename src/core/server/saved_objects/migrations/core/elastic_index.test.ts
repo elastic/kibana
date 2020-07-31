@@ -18,47 +18,52 @@
  */
 
 import _ from 'lodash';
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import * as Index from './elastic_index';
 
 describe('ElasticIndex', () => {
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+
+  beforeEach(() => {
+    client = elasticsearchClientMock.createElasticsearchClient();
+  });
   describe('fetchInfo', () => {
     test('it handles 404', async () => {
-      const callCluster = jest
-        .fn()
-        .mockImplementation(async (path: string, { ignore, index }: any) => {
-          expect(path).toEqual('indices.get');
-          expect(ignore).toEqual([404]);
-          expect(index).toEqual('.kibana-test');
-          return { status: 404 };
-        });
+      client.indices.get.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
 
-      const info = await Index.fetchInfo(callCluster as any, '.kibana-test');
+      const info = await Index.fetchInfo(client, '.kibana-test');
       expect(info).toEqual({
         aliases: {},
         exists: false,
         indexName: '.kibana-test',
         mappings: { dynamic: 'strict', properties: {} },
       });
+
+      expect(client.indices.get).toHaveBeenCalledWith({ index: '.kibana-test' }, { ignore: [404] });
     });
 
     test('fails if the index doc type is unsupported', async () => {
-      const callCluster = jest.fn(async (path: string, { index }: any) => {
-        return {
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { spock: { dynamic: 'strict', properties: { a: 'b' } } },
           },
-        };
+        });
       });
 
-      await expect(Index.fetchInfo(callCluster as any, '.baz')).rejects.toThrow(
+      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
       );
     });
 
     test('fails if there are multiple root types', async () => {
-      const callCluster = jest.fn().mockImplementation(async (path: string, { index }: any) => {
-        return {
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: {
@@ -66,25 +71,26 @@ describe('ElasticIndex', () => {
               doctor: { dynamic: 'strict', properties: { a: 'b' } },
             },
           },
-        };
+        });
       });
 
-      await expect(Index.fetchInfo(callCluster, '.baz')).rejects.toThrow(
+      await expect(Index.fetchInfo(client, '.baz')).rejects.toThrow(
         /cannot be automatically migrated/
       );
     });
 
     test('decorates index info with exists and indexName', async () => {
-      const callCluster = jest.fn().mockImplementation(async (path: string, { index }: any) => {
-        return {
+      client.indices.get.mockImplementation((params) => {
+        const index = params!.index as string;
+        return elasticsearchClientMock.createSuccessTransportRequestPromise({
           [index]: {
             aliases: { foo: index },
             mappings: { dynamic: 'strict', properties: { a: 'b' } },
           },
-        };
+        });
       });
 
-      const info = await Index.fetchInfo(callCluster, '.baz');
+      const info = await Index.fetchInfo(client, '.baz');
       expect(info).toEqual({
         aliases: { foo: '.baz' },
         mappings: { dynamic: 'strict', properties: { a: 'b' } },
@@ -96,171 +102,120 @@ describe('ElasticIndex', () => {
 
   describe('createIndex', () => {
     test('calls indices.create', async () => {
-      const callCluster = jest.fn(async (path: string, { body, index }: any) => {
-        expect(path).toEqual('indices.create');
-        expect(body).toEqual({
-          mappings: { foo: 'bar' },
-          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
-        });
-        expect(index).toEqual('.abcd');
-      });
+      await Index.createIndex(client, '.abcd', { foo: 'bar' } as any);
 
-      await Index.createIndex(callCluster as any, '.abcd', { foo: 'bar' } as any);
-      expect(callCluster).toHaveBeenCalled();
+      expect(client.indices.create).toHaveBeenCalledTimes(1);
+      expect(client.indices.create).toHaveBeenCalledWith({
+        body: {
+          mappings: { foo: 'bar' },
+          settings: {
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          },
+        },
+        index: '.abcd',
+      });
     });
   });
 
   describe('deleteIndex', () => {
     test('calls indices.delete', async () => {
-      const callCluster = jest.fn(async (path: string, { index }: any) => {
-        expect(path).toEqual('indices.delete');
-        expect(index).toEqual('.lotr');
-      });
+      await Index.deleteIndex(client, '.lotr');
 
-      await Index.deleteIndex(callCluster as any, '.lotr');
-      expect(callCluster).toHaveBeenCalled();
+      expect(client.indices.delete).toHaveBeenCalledTimes(1);
+      expect(client.indices.delete).toHaveBeenCalledWith({
+        index: '.lotr',
+      });
     });
   });
 
   describe('claimAlias', () => {
-    function assertCalled(callCluster: jest.Mock) {
-      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
-        'indices.getAlias',
-        'indices.updateAliases',
-        'indices.refresh',
-      ]);
-    }
-
     test('handles unaliased indices', async () => {
-      const callCluster = jest.fn(async (path: string, arg: any) => {
-        switch (path) {
-          case 'indices.getAlias':
-            expect(arg.ignore).toEqual([404]);
-            expect(arg.name).toEqual('.hola');
-            return { status: 404 };
-          case 'indices.updateAliases':
-            expect(arg.body).toEqual({
-              actions: [{ add: { index: '.hola-42', alias: '.hola' } }],
-            });
-            return true;
-          case 'indices.refresh':
-            expect(arg.index).toEqual('.hola-42');
-            return true;
-          default:
-            throw new Error(`Dunnoes what ${path} means.`);
-        }
+      client.indices.getAlias.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      );
+
+      await Index.claimAlias(client, '.hola-42', '.hola');
+
+      expect(client.indices.getAlias).toHaveBeenCalledWith(
+        {
+          name: '.hola',
+        },
+        { ignore: [404] }
+      );
+      expect(client.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [{ add: { index: '.hola-42', alias: '.hola' } }],
+        },
       });
-
-      await Index.claimAlias(callCluster as any, '.hola-42', '.hola');
-
-      assertCalled(callCluster);
+      expect(client.indices.refresh).toHaveBeenCalledWith({
+        index: '.hola-42',
+      });
     });
 
     test('removes existing alias', async () => {
-      const callCluster = jest.fn(async (path: string, arg: any) => {
-        switch (path) {
-          case 'indices.getAlias':
-            return { '.my-fanci-index': '.muchacha' };
-          case 'indices.updateAliases':
-            expect(arg.body).toEqual({
-              actions: [
-                { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
-                { add: { index: '.ze-index', alias: '.muchacha' } },
-              ],
-            });
-            return true;
-          case 'indices.refresh':
-            expect(arg.index).toEqual('.ze-index');
-            return true;
-          default:
-            throw new Error(`Dunnoes what ${path} means.`);
-        }
+      client.indices.getAlias.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          '.my-fanci-index': '.muchacha',
+        })
+      );
+
+      await Index.claimAlias(client, '.ze-index', '.muchacha');
+
+      expect(client.indices.getAlias).toHaveBeenCalledTimes(1);
+      expect(client.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [
+            { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
+            { add: { index: '.ze-index', alias: '.muchacha' } },
+          ],
+        },
       });
-
-      await Index.claimAlias(callCluster as any, '.ze-index', '.muchacha');
-
-      assertCalled(callCluster);
+      expect(client.indices.refresh).toHaveBeenCalledWith({
+        index: '.ze-index',
+      });
     });
 
     test('allows custom alias actions', async () => {
-      const callCluster = jest.fn(async (path: string, arg: any) => {
-        switch (path) {
-          case 'indices.getAlias':
-            return { '.my-fanci-index': '.muchacha' };
-          case 'indices.updateAliases':
-            expect(arg.body).toEqual({
-              actions: [
-                { remove_index: { index: 'awww-snap!' } },
-                { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
-                { add: { index: '.ze-index', alias: '.muchacha' } },
-              ],
-            });
-            return true;
-          case 'indices.refresh':
-            expect(arg.index).toEqual('.ze-index');
-            return true;
-          default:
-            throw new Error(`Dunnoes what ${path} means.`);
-        }
-      });
+      client.indices.getAlias.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          '.my-fanci-index': '.muchacha',
+        })
+      );
 
-      await Index.claimAlias(callCluster as any, '.ze-index', '.muchacha', [
+      await Index.claimAlias(client, '.ze-index', '.muchacha', [
         { remove_index: { index: 'awww-snap!' } },
       ]);
 
-      assertCalled(callCluster);
+      expect(client.indices.getAlias).toHaveBeenCalledTimes(1);
+      expect(client.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [
+            { remove_index: { index: 'awww-snap!' } },
+            { remove: { index: '.my-fanci-index', alias: '.muchacha' } },
+            { add: { index: '.ze-index', alias: '.muchacha' } },
+          ],
+        },
+      });
+      expect(client.indices.refresh).toHaveBeenCalledWith({
+        index: '.ze-index',
+      });
     });
   });
 
   describe('convertToAlias', () => {
     test('it creates the destination index, then reindexes to it', async () => {
-      const callCluster = jest.fn(async (path: string, arg: any) => {
-        switch (path) {
-          case 'indices.create':
-            expect(arg.body).toEqual({
-              mappings: {
-                dynamic: 'strict',
-                properties: { foo: { type: 'keyword' } },
-              },
-              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
-            });
-            expect(arg.index).toEqual('.ze-index');
-            return true;
-          case 'reindex':
-            expect(arg).toMatchObject({
-              body: {
-                dest: { index: '.ze-index' },
-                source: { index: '.muchacha' },
-                script: {
-                  source: `ctx._id = ctx._source.type + ':' + ctx._id`,
-                  lang: 'painless',
-                },
-              },
-              refresh: true,
-              waitForCompletion: false,
-            });
-            return { task: 'abc' };
-          case 'tasks.get':
-            expect(arg.taskId).toEqual('abc');
-            return { completed: true };
-          case 'indices.getAlias':
-            return { '.my-fanci-index': '.muchacha' };
-          case 'indices.updateAliases':
-            expect(arg.body).toEqual({
-              actions: [
-                { remove_index: { index: '.muchacha' } },
-                { remove: { alias: '.muchacha', index: '.my-fanci-index' } },
-                { add: { index: '.ze-index', alias: '.muchacha' } },
-              ],
-            });
-            return true;
-          case 'indices.refresh':
-            expect(arg.index).toEqual('.ze-index');
-            return true;
-          default:
-            throw new Error(`Dunnoes what ${path} means.`);
-        }
-      });
+      client.indices.getAlias.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          '.my-fanci-index': '.muchacha',
+        })
+      );
+      client.reindex.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+      );
+      client.tasks.get.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+      );
 
       const info = {
         aliases: {},
@@ -271,61 +226,77 @@ describe('ElasticIndex', () => {
           properties: { foo: { type: 'keyword' } },
         },
       };
+
       await Index.convertToAlias(
-        callCluster as any,
+        client,
         info,
         '.muchacha',
         10,
         `ctx._id = ctx._source.type + ':' + ctx._id`
       );
 
-      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
-        'indices.create',
-        'reindex',
-        'tasks.get',
-        'indices.getAlias',
-        'indices.updateAliases',
-        'indices.refresh',
-      ]);
+      expect(client.indices.create).toHaveBeenCalledWith({
+        body: {
+          mappings: {
+            dynamic: 'strict',
+            properties: { foo: { type: 'keyword' } },
+          },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+        },
+        index: '.ze-index',
+      });
+
+      expect(client.reindex).toHaveBeenCalledWith({
+        body: {
+          dest: { index: '.ze-index' },
+          source: { index: '.muchacha', size: 10 },
+          script: {
+            source: `ctx._id = ctx._source.type + ':' + ctx._id`,
+            lang: 'painless',
+          },
+        },
+        refresh: true,
+        wait_for_completion: false,
+      });
+
+      expect(client.tasks.get).toHaveBeenCalledWith({
+        task_id: 'abc',
+      });
+
+      expect(client.indices.updateAliases).toHaveBeenCalledWith({
+        body: {
+          actions: [
+            { remove_index: { index: '.muchacha' } },
+            { remove: { alias: '.muchacha', index: '.my-fanci-index' } },
+            { add: { index: '.ze-index', alias: '.muchacha' } },
+          ],
+        },
+      });
+
+      expect(client.indices.refresh).toHaveBeenCalledWith({
+        index: '.ze-index',
+      });
     });
 
     test('throws error if re-index task fails', async () => {
-      const callCluster = jest.fn(async (path: string, arg: any) => {
-        switch (path) {
-          case 'indices.create':
-            expect(arg.body).toEqual({
-              mappings: {
-                dynamic: 'strict',
-                properties: { foo: { type: 'keyword' } },
-              },
-              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
-            });
-            expect(arg.index).toEqual('.ze-index');
-            return true;
-          case 'reindex':
-            expect(arg).toMatchObject({
-              body: {
-                dest: { index: '.ze-index' },
-                source: { index: '.muchacha' },
-              },
-              refresh: true,
-              waitForCompletion: false,
-            });
-            return { task: 'abc' };
-          case 'tasks.get':
-            expect(arg.taskId).toEqual('abc');
-            return {
-              completed: true,
-              error: {
-                type: 'search_phase_execution_exception',
-                reason: 'all shards failed',
-                failed_shards: [],
-              },
-            };
-          default:
-            throw new Error(`Dunnoes what ${path} means.`);
-        }
-      });
+      client.indices.getAlias.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          '.my-fanci-index': '.muchacha',
+        })
+      );
+      client.reindex.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ task: 'abc' })
+      );
+      client.tasks.get.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          completed: true,
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'all shards failed',
+            failed_shards: [],
+          },
+        })
+      );
 
       const info = {
         aliases: {},
@@ -336,22 +307,44 @@ describe('ElasticIndex', () => {
           properties: { foo: { type: 'keyword' } },
         },
       };
-      await expect(Index.convertToAlias(callCluster as any, info, '.muchacha', 10)).rejects.toThrow(
+
+      await expect(Index.convertToAlias(client, info, '.muchacha', 10)).rejects.toThrow(
         /Re-index failed \[search_phase_execution_exception\] all shards failed/
       );
 
-      expect(callCluster.mock.calls.map(([path]) => path)).toEqual([
-        'indices.create',
-        'reindex',
-        'tasks.get',
-      ]);
+      expect(client.indices.create).toHaveBeenCalledWith({
+        body: {
+          mappings: {
+            dynamic: 'strict',
+            properties: { foo: { type: 'keyword' } },
+          },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+        },
+        index: '.ze-index',
+      });
+
+      expect(client.reindex).toHaveBeenCalledWith({
+        body: {
+          dest: { index: '.ze-index' },
+          source: { index: '.muchacha', size: 10 },
+        },
+        refresh: true,
+        wait_for_completion: false,
+      });
+
+      expect(client.tasks.get).toHaveBeenCalledWith({
+        task_id: 'abc',
+      });
     });
   });
 
   describe('write', () => {
     test('writes documents in bulk to the index', async () => {
+      client.bulk.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+      );
+
       const index = '.myalias';
-      const callCluster = jest.fn().mockResolvedValue({ items: [] });
       const docs = [
         {
           _id: 'niceguy:fredrogers',
@@ -375,19 +368,20 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      await Index.write(callCluster, index, docs);
+      await Index.write(client, index, docs);
 
-      expect(callCluster).toHaveBeenCalled();
-      expect(callCluster.mock.calls[0]).toMatchSnapshot();
+      expect(client.bulk).toHaveBeenCalled();
+      expect(client.bulk.mock.calls[0]).toMatchSnapshot();
     });
 
     test('fails if any document fails', async () => {
-      const index = '.myalias';
-      const callCluster = jest.fn(() =>
-        Promise.resolve({
+      client.bulk.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
           items: [{ index: { error: { type: 'shazm', reason: 'dern' } } }],
         })
       );
+
+      const index = '.myalias';
       const docs = [
         {
           _id: 'niceguy:fredrogers',
@@ -400,23 +394,20 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      await expect(Index.write(callCluster as any, index, docs)).rejects.toThrow(/dern/);
-      expect(callCluster).toHaveBeenCalled();
+      await expect(Index.write(client as any, index, docs)).rejects.toThrow(/dern/);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('reader', () => {
     test('returns docs in batches', async () => {
       const index = '.myalias';
-      const callCluster = jest.fn();
-
       const batch1 = [
         {
           _id: 'such:1',
           _source: { type: 'such', such: { num: 1 } },
         },
       ];
-
       const batch2 = [
         {
           _id: 'aaa:2',
@@ -432,42 +423,56 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      callCluster
-        .mockResolvedValueOnce({
+      client.search = jest.fn().mockReturnValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
           _shards: { success: 1, total: 1 },
           hits: { hits: _.cloneDeep(batch1) },
         })
-        .mockResolvedValueOnce({
-          _scroll_id: 'y',
-          _shards: { success: 1, total: 1 },
-          hits: { hits: _.cloneDeep(batch2) },
-        })
-        .mockResolvedValueOnce({
-          _scroll_id: 'z',
-          _shards: { success: 1, total: 1 },
-          hits: { hits: [] },
-        })
-        .mockResolvedValue({});
+      );
+      client.scroll = jest
+        .fn()
+        .mockReturnValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            _scroll_id: 'y',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch2) },
+          })
+        )
+        .mockReturnValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({
+            _scroll_id: 'z',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: [] },
+          })
+        );
 
-      const read = Index.reader(callCluster, index, { batchSize: 100, scrollDuration: '5m' });
+      const read = Index.reader(client, index, { batchSize: 100, scrollDuration: '5m' });
 
       expect(await read()).toEqual(batch1);
       expect(await read()).toEqual(batch2);
       expect(await read()).toEqual([]);
 
-      // Check order of calls, as well as args
-      expect(callCluster.mock.calls).toEqual([
-        ['search', { body: { size: 100 }, index, scroll: '5m' }],
-        ['scroll', { scroll: '5m', scrollId: 'x' }],
-        ['scroll', { scroll: '5m', scrollId: 'y' }],
-        ['clearScroll', { scrollId: 'z' }],
-      ]);
+      expect(client.search).toHaveBeenCalledWith({
+        body: { size: 100 },
+        index,
+        scroll: '5m',
+      });
+      expect(client.scroll).toHaveBeenCalledWith({
+        scroll: '5m',
+        scroll_id: 'x',
+      });
+      expect(client.scroll).toHaveBeenCalledWith({
+        scroll: '5m',
+        scroll_id: 'y',
+      });
+      expect(client.clearScroll).toHaveBeenCalledWith({
+        scroll_id: 'z',
+      });
     });
 
     test('returns all root-level properties', async () => {
       const index = '.myalias';
-      const callCluster = jest.fn();
       const batch = [
         {
           _id: 'such:1',
@@ -480,19 +485,22 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      callCluster
-        .mockResolvedValueOnce({
+      client.search = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'x',
           _shards: { success: 1, total: 1 },
           hits: { hits: _.cloneDeep(batch) },
         })
-        .mockResolvedValue({
+      );
+      client.scroll = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
           _scroll_id: 'z',
           _shards: { success: 1, total: 1 },
           hits: { hits: [] },
-        });
+        })
+      );
 
-      const read = Index.reader(callCluster, index, {
+      const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -502,11 +510,14 @@ describe('ElasticIndex', () => {
 
     test('fails if not all shards were successful', async () => {
       const index = '.myalias';
-      const callCluster = jest.fn();
 
-      callCluster.mockResolvedValue({ _shards: { successful: 1, total: 2 } });
+      client.search = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          _shards: { successful: 1, total: 2 },
+        })
+      );
 
-      const read = Index.reader(callCluster, index, {
+      const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -516,7 +527,6 @@ describe('ElasticIndex', () => {
 
     test('handles shards not being returned', async () => {
       const index = '.myalias';
-      const callCluster = jest.fn();
       const batch = [
         {
           _id: 'such:1',
@@ -529,11 +539,20 @@ describe('ElasticIndex', () => {
         },
       ];
 
-      callCluster
-        .mockResolvedValueOnce({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch) } })
-        .mockResolvedValue({ _scroll_id: 'z', hits: { hits: [] } });
+      client.search = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          _scroll_id: 'x',
+          hits: { hits: _.cloneDeep(batch) },
+        })
+      );
+      client.scroll = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          _scroll_id: 'z',
+          hits: { hits: [] },
+        })
+      );
 
-      const read = Index.reader(callCluster, index, {
+      const read = Index.reader(client, index, {
         batchSize: 100,
         scrollDuration: '5m',
       });
@@ -550,23 +569,24 @@ describe('ElasticIndex', () => {
       count,
       migrations,
     }: any) {
-      const callCluster = jest.fn(async (path: string) => {
-        if (path === 'indices.get') {
-          return {
-            [index]: { mappings },
-          };
-        }
-        if (path === 'count') {
-          return { count, _shards: { success: 1, total: 1 } };
-        }
-        throw new Error(`Unknown command ${path}.`);
-      });
-      const hasMigrations = await Index.migrationsUpToDate(callCluster as any, index, migrations);
-      return { hasMigrations, callCluster };
+      client.indices.get = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          [index]: { mappings },
+        })
+      );
+      client.count = jest.fn().mockReturnValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({
+          count,
+          _shards: { success: 1, total: 1 },
+        })
+      );
+
+      const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
+      return { hasMigrations };
     }
 
     test('is false if the index mappings do not contain migrationVersion', async () => {
-      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -578,17 +598,18 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      expect(callCluster.mock.calls[0]).toEqual([
-        'indices.get',
+      expect(client.indices.get).toHaveBeenCalledWith(
         {
-          ignore: [404],
           index: '.myalias',
         },
-      ]);
+        {
+          ignore: [404],
+        }
+      );
     });
 
     test('is true if there are no migrations defined', async () => {
-      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -604,12 +625,11 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeTruthy();
-      expect(callCluster).toHaveBeenCalled();
-      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
+      expect(client.indices.get).toHaveBeenCalledTimes(1);
     });
 
     test('is true if there are no documents out of date', async () => {
-      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -625,13 +645,12 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeTruthy();
-      expect(callCluster).toHaveBeenCalled();
-      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
-      expect(callCluster.mock.calls[1][0]).toEqual('count');
+      expect(client.indices.get).toHaveBeenCalledTimes(1);
+      expect(client.count).toHaveBeenCalledTimes(1);
     });
 
     test('is false if there are documents out of date', async () => {
-      const { hasMigrations, callCluster } = await testMigrationsUpToDate({
+      const { hasMigrations } = await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -647,12 +666,12 @@ describe('ElasticIndex', () => {
       });
 
       expect(hasMigrations).toBeFalsy();
-      expect(callCluster.mock.calls[0][0]).toEqual('indices.get');
-      expect(callCluster.mock.calls[1][0]).toEqual('count');
+      expect(client.indices.get).toHaveBeenCalledTimes(1);
+      expect(client.count).toHaveBeenCalledTimes(1);
     });
 
     test('counts docs that are out of date', async () => {
-      const { callCluster } = await testMigrationsUpToDate({
+      await testMigrationsUpToDate({
         index: '.myalias',
         mappings: {
           properties: {
@@ -686,23 +705,20 @@ describe('ElasticIndex', () => {
         };
       }
 
-      expect(callCluster.mock.calls[1]).toEqual([
-        'count',
-        {
-          body: {
-            query: {
-              bool: {
-                should: [
-                  shouldClause('dashy', '23.2.5'),
-                  shouldClause('bashy', '99.9.3'),
-                  shouldClause('flashy', '3.4.5'),
-                ],
-              },
+      expect(client.count).toHaveBeenCalledWith({
+        body: {
+          query: {
+            bool: {
+              should: [
+                shouldClause('dashy', '23.2.5'),
+                shouldClause('bashy', '99.9.3'),
+                shouldClause('flashy', '3.4.5'),
+              ],
             },
           },
-          index: '.myalias',
         },
-      ]);
+        index: '.myalias',
+      });
     });
   });
 });

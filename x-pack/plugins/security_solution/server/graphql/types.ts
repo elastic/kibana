@@ -399,11 +399,6 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -429,6 +424,15 @@ export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
+}
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 export type ToStringArray = string[] | string;
 
@@ -629,6 +633,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -2328,8 +2336,6 @@ export interface GetAllTimelineQueryArgs {
 
   timelineType?: Maybe<TimelineType>;
 
-  templateTimelineType?: Maybe<TemplateTimelineType>;
-
   status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
@@ -2805,8 +2811,6 @@ export namespace QueryResolvers {
     onlyUserFavorite?: Maybe<boolean>;
 
     timelineType?: Maybe<TimelineType>;
-
-    templateTimelineType?: Maybe<TemplateTimelineType>;
 
     status?: Maybe<TimelineStatus>;
   }
@@ -3579,6 +3583,10 @@ export namespace IndexFieldResolvers {
     description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
     format?: FormatResolver<Maybe<string>, TypeParent, TContext>;
+    /** the elastic type as mapped in the index */
+    esTypes?: EsTypesResolver<Maybe<ToStringArrayNoNullable>, TypeParent, TContext>;
+
+    subType?: SubTypeResolver<Maybe<ToIFieldSubTypeNonNullable>, TypeParent, TContext>;
   }
 
   export type CategoryResolver<R = string, Parent = IndexField, TContext = SiemContext> = Resolver<
@@ -3623,6 +3631,16 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, TContext>;
   export type FormatResolver<
     R = Maybe<string>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EsTypesResolver<
+    R = Maybe<ToStringArrayNoNullable>,
+    Parent = IndexField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SubTypeResolver<
+    R = Maybe<ToIFieldSubTypeNonNullable>,
     Parent = IndexField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -9317,6 +9335,14 @@ export interface DeprecatedDirectiveArgs {
   reason?: string;
 }
 
+export interface ToStringArrayNoNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToStringArrayNoNullable, any> {
+  name: 'ToStringArrayNoNullable';
+}
+export interface ToIFieldSubTypeNonNullableScalarConfig
+  extends GraphQLScalarTypeConfig<ToIFieldSubTypeNonNullable, any> {
+  name: 'ToIFieldSubTypeNonNullable';
+}
 export interface ToStringArrayScalarConfig extends GraphQLScalarTypeConfig<ToStringArray, any> {
   name: 'ToStringArray';
 }
@@ -9490,6 +9516,8 @@ export type IResolvers<TContext = SiemContext> = {
   EventsTimelineData?: EventsTimelineDataResolvers.Resolvers<TContext>;
   OsFields?: OsFieldsResolvers.Resolvers<TContext>;
   HostFields?: HostFieldsResolvers.Resolvers<TContext>;
+  ToStringArrayNoNullable?: GraphQLScalarType;
+  ToIFieldSubTypeNonNullable?: GraphQLScalarType;
   ToStringArray?: GraphQLScalarType;
   Date?: GraphQLScalarType;
   ToNumberArray?: GraphQLScalarType;

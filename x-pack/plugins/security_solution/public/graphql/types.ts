@@ -397,11 +397,6 @@ export enum SortFieldTimeline {
   created = 'created',
 }
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export enum NetworkDirectionEcs {
   inbound = 'inbound',
   outbound = 'outbound',
@@ -427,6 +422,15 @@ export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
+
+export enum TemplateTimelineType {
+  elastic = 'elastic',
+  custom = 'custom',
+}
+
+export type ToStringArrayNoNullable = any;
+
+export type ToIFieldSubTypeNonNullable = any;
 
 export type ToStringArray = string[];
 
@@ -627,6 +631,10 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: Maybe<ToStringArrayNoNullable>;
+
+  subType?: Maybe<ToIFieldSubTypeNonNullable>;
 }
 
 export interface AuthenticationsData {
@@ -2326,8 +2334,6 @@ export interface GetAllTimelineQueryArgs {
 
   timelineType?: Maybe<TimelineType>;
 
-  templateTimelineType?: Maybe<TemplateTimelineType>;
-
   status?: Maybe<TimelineStatus>;
 }
 export interface AuthenticationsSourceArgs {
@@ -2780,6 +2786,10 @@ export namespace SourceQuery {
     aggregatable: boolean;
 
     format: Maybe<string>;
+
+    esTypes: Maybe<ToStringArrayNoNullable>;
+
+    subType: Maybe<ToIFieldSubTypeNonNullable>;
   };
 }
 
@@ -4423,7 +4433,6 @@ export namespace GetAllTimeline {
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
     timelineType?: Maybe<TimelineType>;
-    templateTimelineType?: Maybe<TemplateTimelineType>;
     status?: Maybe<TimelineStatus>;
   };
 
@@ -5654,6 +5663,8 @@ export namespace GetOneTimeline {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<_QueryMatch>;
   };
 
@@ -5870,6 +5881,8 @@ export namespace PersistTimelineMutation {
 
     eventType: Maybe<string>;
 
+    excludedRowRendererIds: Maybe<RowRendererId[]>;
+
     favorite: Maybe<Favorite[]>;
 
     filters: Maybe<Filters[]>;
@@ -5932,6 +5945,8 @@ export namespace PersistTimelineMutation {
 
     kqlQuery: Maybe<string>;
 
+    type: Maybe<DataProviderType>;
+
     queryMatch: Maybe<QueryMatch>;
 
     and: Maybe<And[]>;
@@ -5963,6 +5978,8 @@ export namespace PersistTimelineMutation {
     excluded: Maybe<boolean>;
 
     kqlQuery: Maybe<string>;
+
+    type: Maybe<DataProviderType>;
 
     queryMatch: Maybe<_QueryMatch>;
   };
