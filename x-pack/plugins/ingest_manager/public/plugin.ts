@@ -104,10 +104,10 @@ export class IngestManagerPlugin
       deps.home.featureCatalogue.register({
         id: 'ingestManager',
         title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
-          defaultMessage: 'Manage ingest',
+          defaultMessage: 'Add Elastic Agent',
         }),
         description: i18n.translate('xpack.ingestManager.featureCatalogueDescription', {
-          defaultMessage: 'Management for Elastic Agents and integrations.',
+          defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
         }),
         icon: 'logstashInput',
         homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,

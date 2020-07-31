@@ -15,7 +15,7 @@ export const featureCatalogueEntry = {
   id: APP_ID,
   title: getAppTitle(),
   description: i18n.translate('xpack.maps.feature.appDescription', {
-    defaultMessage: 'Plot your geographic information.',
+    defaultMessage: 'Plot geographic data.',
   }),
   icon: APP_ICON,
   path: '/app/maps',

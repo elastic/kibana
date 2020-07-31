@@ -122,10 +122,10 @@ export class HomePublicPlugin
     featureCatalogue.register({
       id: 'home_tutorial_directory',
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
-        defaultMessage: 'Add an integration',
+        defaultMessage: 'Ingest data',
       }),
       description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
-        defaultMessage: 'Add data from a variety of common sources.',
+        defaultMessage: 'Ingest data from popular apps and services.',
       }),
       icon: 'indexOpen',
       homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,

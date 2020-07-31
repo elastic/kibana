@@ -88,38 +88,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       plugins.home.featureCatalogue.register({
-        id: `${APP_ID}_detections`,
-        title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
-          defaultMessage: 'Security',
-        }),
-        description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
-          defaultMessage: 'Detect critical security events.',
-        }),
-        icon: APP_ICON,
-        path: APP_DETECTIONS_PATH,
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-        category: FeatureCatalogueCategory.DATA,
-        solution: APP_ID,
-        order: 310,
-      });
-
-      plugins.home.featureCatalogue.register({
-        id: `${APP_ID}_cases`,
-        title: i18n.translate('xpack.securitySolution.cases.featureCatalogue.title', {
-          defaultMessage: 'Cases',
-        }),
-        description: i18n.translate('xpack.securitySolution.cases.featureCatalogue.description', {
-          defaultMessage: 'Investigate incidents and collaborate.',
-        }),
-        icon: APP_ICON,
-        path: APP_CASES_PATH,
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-        category: FeatureCatalogueCategory.DATA,
-        solution: APP_ID,
-        order: 320,
-      });
-
-      plugins.home.featureCatalogue.register({
         id: `${APP_ID}_management`,
         title: i18n.translate('xpack.securitySolution.cases.featureCatalogue.title', {
           defaultMessage: 'Management',
@@ -129,6 +97,38 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }),
         icon: APP_ICON,
         path: APP_MANAGEMENT_PATH, // TODO: check this!!!
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.DATA,
+        solution: APP_ID,
+        order: 310,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: `${APP_ID}_detections`,
+        title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
+          defaultMessage: 'Security',
+        }),
+        description: i18n.translate('xpack.securitySolution.featureCatalogue.description', {
+          defaultMessage: 'Detect and respond.',
+        }),
+        icon: APP_ICON,
+        path: APP_DETECTIONS_PATH,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        category: FeatureCatalogueCategory.DATA,
+        solution: APP_ID,
+        order: 320,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: `${APP_ID}_cases`,
+        title: i18n.translate('xpack.securitySolution.cases.featureCatalogue.title', {
+          defaultMessage: 'Cases',
+        }),
+        description: i18n.translate('xpack.securitySolution.cases.featureCatalogue.description', {
+          defaultMessage: 'Investigate incidents.',
+        }),
+        icon: APP_ICON,
+        path: APP_CASES_PATH,
         homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
         category: FeatureCatalogueCategory.DATA,
         solution: APP_ID,

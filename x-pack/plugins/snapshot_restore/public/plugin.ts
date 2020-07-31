@@ -69,7 +69,7 @@ export class SnapshotRestoreUIPlugin {
         }),
         description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
           defaultMessage:
-            'Use repositories to snapshot and restore Elasticsearch indices and clusters.',
+            'Save snapshots to a backup repository, and restore to recover index and cluster state.',
         }),
         icon: 'storage',
         path: '/app/management/data/snapshot_restore',

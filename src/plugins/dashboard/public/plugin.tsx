@@ -350,7 +350,7 @@ export class DashboardPlugin
           defaultMessage: 'Dashboard',
         }),
         description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-          defaultMessage: 'Visualize every aspect of your data.',
+          defaultMessage: 'Analyze data in dashboards.',
         }),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
