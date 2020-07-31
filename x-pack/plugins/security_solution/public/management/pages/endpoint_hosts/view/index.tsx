@@ -50,6 +50,7 @@ import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostAction } from '../store/action';
 import { HostPolicyLink } from './components/host_policy_link';
+import { AdminSearchBar } from '../../../components/search_bar';
 
 const HostListNavLink = memo<{
   name: string;
@@ -413,6 +414,7 @@ export const HostList = () => {
       }
     >
       {hasSelectedHost && <HostDetailsFlyout />}
+      <AdminSearchBar />
       {listData && listData.length > 0 && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">

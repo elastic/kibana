@@ -13,6 +13,7 @@ import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
 import { HostState } from '../types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -86,6 +87,16 @@ interface ServerReturnedHostExistValue {
   payload: boolean;
 }
 
+interface ServerReturnedMetadataPatterns {
+  type: 'serverReturnedMetadataPatterns';
+  payload: IIndexPattern[];
+}
+
+interface ServerFailedToReturnMetadataPatterns {
+  type: 'serverFailedToReturnMetadataPatterns';
+  payload: ServerApiError;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -100,4 +111,6 @@ export type HostAction =
   | ServerReturnedHostExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedHostNonExistingPolicies;
+  | ServerReturnedHostNonExistingPolicies
+  | ServerReturnedMetadataPatterns
+  | ServerFailedToReturnMetadataPatterns;
