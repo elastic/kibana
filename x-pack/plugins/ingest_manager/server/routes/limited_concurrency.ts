@@ -61,10 +61,8 @@ export function registerLimitedConcurrencyRoutes(core: CoreSetup, config: Ingest
 
     counter.increase();
 
-    // requests.events.aborted$ has a bug (but has test which explicitly verifies) where it's fired even when the request completes
-    // https://github.com/elastic/kibana/pull/70495#issuecomment-656288766
-    request.events.aborted$.toPromise().then(() => {
-      counter.decrease();
+    request.events.completed$.toPromise().then(() => {
+      maxCounter.decrease();
     });
 
     return toolkit.next();
