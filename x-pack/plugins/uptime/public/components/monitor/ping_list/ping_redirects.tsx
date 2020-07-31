@@ -7,13 +7,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiLink, EuiListGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../common/runtime_types/ping';
 
-const StyledLink = styled(EuiLink)`
-  margin-right: 5px;
-  margin-left: 5px;
-  display: block;
+const ListGroup = styled(EuiListGroup)`
+  &&& {
+    a {
+      padding-left: 0;
+    }
+  }
 `;
 
 interface Props {
@@ -26,8 +28,48 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
 
   const list = monitorStatus?.http?.response?.redirects;
 
+  const listOfRedirects = [
+    {
+      label: monitorUrl,
+      href: monitorUrl,
+      iconType: 'globe',
+      size: 's',
+      target: '_blank',
+      extraAction: {
+        color: 'subdued',
+        iconType: 'popout',
+        iconSize: 's',
+        'aria-label': 'Favorite link1',
+        alwaysShow: true,
+        href: monitorUrl,
+        target: '_blank',
+      },
+    },
+  ];
+
+  (list ?? []).forEach((url: string) => {
+    listOfRedirects.push({
+      label: url,
+      href: url,
+      iconType: 'sortDown',
+      size: 's',
+      target: '_blank',
+      extraAction: {
+        color: 'subdued',
+        iconType: 'popout',
+        iconSize: 's',
+        'aria-label': 'Favorite link1',
+        alwaysShow: true,
+        href: url,
+        target: '_blank',
+      },
+    });
+  });
+
+  const Panel = showTitle ? EuiPanel : 'div';
+
   return list ? (
-    <div data-test-subj="uptimeMonitorPingListRedirectInfo">
+    <Panel data-test-subj="uptimeMonitorPingListRedirectInfo">
       {showTitle && (
         <EuiText size="xs">
           <h3>
@@ -49,17 +91,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         </EuiText>
       }
       <EuiSpacer size="s" />
-      <div>
-        <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
-        {list?.map((url: string, ind: number) => (
-          <div key={ind}>
-            <EuiIcon type="sortDown" />
-            <StyledLink href={url}>
-              {url} <EuiIcon type={'popout'} size="s" />
-            </StyledLink>
-          </div>
-        ))}
-      </div>
-    </div>
+      <ListGroup gutterSize={'none'} listItems={listOfRedirects} />
+    </Panel>
   ) : null;
 };
