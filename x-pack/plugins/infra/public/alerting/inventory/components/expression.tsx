@@ -368,6 +368,7 @@ export const Expressions: React.FC<Props> = (props) => {
         validate={validateMetricThreshold}
         fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
+        showNoDataResults={alertParams.alertOnNoData}
       />
       <EuiSpacer size={'m'} />
     </>

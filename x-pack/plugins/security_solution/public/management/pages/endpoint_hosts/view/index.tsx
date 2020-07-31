@@ -89,6 +89,7 @@ export const HostList = () => {
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
+    hostsExist,
   } = useHostSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -330,7 +331,7 @@ export const HostList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (!loading && listData && listData.length > 0) {
+    if (hostsExist) {
       return (
         <EuiBasicTable
           data-test-subj="hostListTable"
@@ -339,6 +340,7 @@ export const HostList = () => {
           error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
+          loading={loading}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -357,19 +359,20 @@ export const HostList = () => {
       );
     }
   }, [
-    listData,
-    policyItems,
-    columns,
     loading,
+    hostsExist,
+    policyItemsLoading,
+    policyItems,
+    listData,
+    columns,
+    listError?.message,
     paginationSetup,
     onTableChange,
-    listError?.message,
-    handleCreatePolicyClick,
     handleDeployEndpointsClick,
-    handleSelectableOnChange,
     selectedPolicyId,
+    handleSelectableOnChange,
     selectionOptions,
-    policyItemsLoading,
+    handleCreatePolicyClick,
   ]);
 
   return (

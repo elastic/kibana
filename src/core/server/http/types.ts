@@ -250,7 +250,7 @@ export interface HttpServiceSetup {
    *    'myApp',
    *    (context, req) => {
    *     async function search (id: string) {
-   *       return await context.elasticsearch.legacy.client.callAsInternalUser('endpoint', id);
+   *       return await context.elasticsearch.client.asCurrentUser.find(id);
    *     }
    *     return { search };
    *    }
