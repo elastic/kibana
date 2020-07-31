@@ -95,38 +95,6 @@ to proceed in this mode.
 node scripts/mocha --debug <file>
 ----
 
-With `yarn test:karma`, you can run only the browser tests. Coverage
-reports are available for browser tests by running
-`yarn test:coverage`. You can find the results under the `coverage/`
-directory that will be created upon completion.
-
-[source,bash]
-----
-yarn test:karma
-----
-
-Using `yarn test:karma:debug` initializes an environment for debugging
-the browser tests. Includes an dedicated instance of the {kib} server
-for building the test bundle, and a karma server. When running this task
-the build is optimized for the first time and then a karma-owned
-instance of the browser is opened. Click the "`debug`" button to open a
-new tab that executes the unit tests.
-
-[source,bash]
-----
-yarn test:karma:debug
-----
-
-In the screenshot below, you’ll notice the URL is
-`localhost:9876/debug.html`. You can append a `grep` query parameter
-to this URL and set it to a string value which will be used to exclude
-tests which don’t match. For example, if you changed the URL to
-`localhost:9876/debug.html?query=my test` and then refreshed the
-browser, you’d only see tests run which contain "`my test`" in the test
-description.
-
-image:http://i.imgur.com/DwHxgfq.png[Browser test debugging]
-
 [discrete]
 === Unit Testing Plugins
 
@@ -141,5 +109,4 @@ command from your plugin:
 [source,bash]
 ----
 yarn test:mocha
-yarn test:karma:debug # remove the debug flag to run them once and close
 ----

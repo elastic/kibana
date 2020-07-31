@@ -1294,7 +1294,7 @@ Then this dependencies will be used to embed Actions form or register your own a
    return (
      <ActionForm
           actions={initialAlert.actions}
-          messageVariables={['test var1', 'test var2']}
+          messageVariables={[ { name: 'testVar1', description: 'test var1' } ]}
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
@@ -1329,7 +1329,7 @@ interface ActionAccordionFormProps {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   actionTypes?: ActionType[];
-  messageVariables?: string[];
+  messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   consumer: string;
 }

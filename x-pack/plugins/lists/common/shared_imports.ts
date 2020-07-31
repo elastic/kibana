@@ -8,6 +8,8 @@ export {
   NonEmptyString,
   DefaultUuid,
   DefaultStringArray,
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
   exactCheck,
   getPaths,
   foldLeftRight,

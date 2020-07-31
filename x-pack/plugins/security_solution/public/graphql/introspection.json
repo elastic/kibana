@@ -257,12 +257,6 @@
                 "defaultValue": null
               },
               {
-                "name": "templateTimelineType",
-                "description": "",
-                "type": { "kind": "ENUM", "name": "TemplateTimelineType", "ofType": null },
-                "defaultValue": null
-              },
-              {
                 "name": "status",
                 "description": "",
                 "type": { "kind": "ENUM", "name": "TimelineStatus", "ofType": null },
@@ -2669,10 +2663,46 @@
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "esTypes",
+            "description": "the elastic type as mapped in the index",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArrayNoNullable", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "subType",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToIFieldSubTypeNonNullable", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ToStringArrayNoNullable",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ToIFieldSubTypeNonNullable",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -10946,24 +10976,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "ENUM",
-        "name": "TemplateTimelineType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "elastic",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "ResponseTimelines",
         "description": "",
@@ -13129,6 +13141,24 @@
         ],
         "interfaces": null,
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "TemplateTimelineType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "elastic",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       }
     ],
