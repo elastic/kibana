@@ -9799,7 +9799,6 @@
     "xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel": "値",
     "xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError": "設定する値が必要です。",
     "xpack.ingestPipelines.pipelineEditor.settingsForm.learnMoreLabelLink.processor": "{processorLabel}ドキュメント",
-    "xpack.ingestPipelines.pipelineEditor.testPipelineButtonLabel": "パイプラインをテスト",
     "xpack.ingestPipelines.pipelineEditor.typeField.fieldRequiredError": "タイプが必要です。",
     "xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel": "プロセッサー",
     "xpack.ingestPipelines.processors.label.append": "末尾に追加",
