@@ -11,7 +11,6 @@ import { Agent } from '../../../../../../ingest_manager/common/types/models';
 
 const STATUS_QUERY_MAP = new Map([
   ['online', AgentStatusKueryHelper.buildKueryForOnlineAgents()],
-  ['enrolling', AgentStatusKueryHelper.buildKueryForEnrollingAgents()],
   ['offline', AgentStatusKueryHelper.buildKueryForOfflineAgents()],
   ['error', AgentStatusKueryHelper.buildKueryForErrorAgents()],
   ['unenrolling', AgentStatusKueryHelper.buildKueryForUnenrollingAgents()],

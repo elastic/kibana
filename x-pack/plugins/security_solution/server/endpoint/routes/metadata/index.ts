@@ -59,11 +59,10 @@ export const endpointFilters = schema.object({
   host_status: schema.nullable(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal('online'),
-        schema.literal('offline'),
-        schema.literal('error'),
-        schema.literal('enrolling'),
-        schema.literal('unenrolling'),
+        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.OFFLINE.toString()),
+        schema.literal(HostStatus.UNENROLLING.toString()),
+        schema.literal(HostStatus.ERROR.toString()),
       ])
     )
   ),
