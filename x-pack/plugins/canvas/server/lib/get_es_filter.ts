@@ -10,11 +10,11 @@
   filter is the abstracted canvas filter.
 */
 
-/*eslint import/namespace: ['error', { allowComputed: true }]*/
-import * as filters from './filters';
+import { filters } from './filters';
+import { ExpressionValueFilter } from '../../types';
 
-export function getESFilter(filter) {
-  if (!filters[filter.filterType]) {
+export function getESFilter(filter: ExpressionValueFilter) {
+  if (!filter.filterType || !filters[filter.filterType]) {
     throw new Error(`Unknown filter type: ${filter.filterType}`);
   }
 
