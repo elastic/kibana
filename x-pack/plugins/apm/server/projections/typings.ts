@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESSearchRequest, ESSearchBody } from '../../typings/elasticsearch';
+import { ESSearchBody } from '../../typings/elasticsearch';
 import {
   AggregationOptionsByType,
   AggregationInputMap,
 } from '../../typings/elasticsearch/aggregations';
+import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
-export type Projection = Omit<ESSearchRequest, 'body'> & {
+export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
   body: Omit<ESSearchBody, 'aggs'> & {
     aggs?: {
       [key: string]: {
@@ -20,14 +21,3 @@ export type Projection = Omit<ESSearchRequest, 'body'> & {
     };
   };
 };
-
-export enum PROJECTION {
-  SERVICES = 'services',
-  TRANSACTION_GROUPS = 'transactionGroups',
-  TRACES = 'traces',
-  TRANSACTIONS = 'transactions',
-  METRICS = 'metrics',
-  ERROR_GROUPS = 'errorGroups',
-  SERVICE_NODES = 'serviceNodes',
-  RUM_OVERVIEW = 'rumOverview',
-}

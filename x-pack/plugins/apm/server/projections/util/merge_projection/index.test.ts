@@ -10,10 +10,19 @@ describe('mergeProjection', () => {
   it('overrides arrays', () => {
     expect(
       mergeProjection(
-        { body: { query: { bool: { must: [{ terms: ['a'] }] } } } },
-        { body: { query: { bool: { must: [{ term: 'b' }] } } } }
+        {
+          apm: { events: [] },
+          body: { query: { bool: { must: [{ terms: ['a'] }] } } },
+        },
+        {
+          apm: { events: [] },
+          body: { query: { bool: { must: [{ term: 'b' }] } } },
+        }
       )
     ).toEqual({
+      apm: {
+        events: [],
+      },
       body: {
         query: {
           bool: {
@@ -32,8 +41,11 @@ describe('mergeProjection', () => {
     const termsAgg = { terms: { field: 'bar' } };
     expect(
       mergeProjection(
-        { body: { query: {}, aggs: { foo: termsAgg } } },
+        { apm: { events: [] }, body: { query: {}, aggs: { foo: termsAgg } } },
         {
+          apm: {
+            events: [],
+          },
           body: {
             aggs: {
               foo: { ...termsAgg, aggs: { bar: { terms: { field: 'baz' } } } },
@@ -42,6 +54,9 @@ describe('mergeProjection', () => {
         }
       )
     ).toEqual({
+      apm: {
+        events: [],
+      },
       body: {
         query: {},
         aggs: {
