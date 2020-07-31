@@ -14321,7 +14321,6 @@
     "xpack.remoteClusters.updateRemoteCluster.noRemoteClusterErrorMessage": "その名前のリモートクラスターはありません。",
     "xpack.remoteClusters.updateRemoteCluster.unknownRemoteClusterErrorMessage": "ES からレスポンスが返らず、クラスターを編集できません。",
     "xpack.reporting.breadcrumb": "レポート",
-    "xpack.reporting.browsers.chromium.chromiumClosed": "レポート生成時に Chromium の終了を検出しました。",
     "xpack.reporting.browsers.chromium.errorDetected": "レポート生成時にエラーを検出しました: {err}",
     "xpack.reporting.browsers.chromium.pageErrorDetected": "レポート生成時にページでエラーを検出しました: {err}",
     "xpack.reporting.chromiumDriver.disallowedOutgoingUrl": "無許可の着信 URL を受信しました: 「{interceptedUrl}」、終了します",
