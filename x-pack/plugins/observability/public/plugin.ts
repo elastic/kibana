@@ -53,7 +53,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
     });
 
     if (plugins.home) {
-      plugins.home.featureCatalogue.register({
+      plugins.home.featureCatalogue.registerSolution({
         id: 'observability',
         title: i18n.translate('xpack.observability.featureCatalogueTitle', {
           defaultMessage: 'Observability',
@@ -63,10 +63,8 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
         }),
         icon: 'logoObservability',
         path: '/app/observability',
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-        category: FeatureCatalogueCategory.SOLUTION,
-        solution: 'observability',
         order: 200,
+        className: 'homSolutionsSection__magentaCard',
       });
     }
 

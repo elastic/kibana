@@ -141,7 +141,7 @@ export class Home extends Component {
       .map(this.renderFeatureCard);
 
   renderNormal() {
-    const { addBasePath, directories } = this.props;
+    const { addBasePath, directories, solutions } = this.props;
 
     const devTools = this.findDirectoryById('console');
     const stackManagement = this.findDirectoryById('stack-management');
@@ -215,7 +215,11 @@ export class Home extends Component {
         </div>
         <div className="homPageMainContainer">
           <main className="homPageMain" data-test-subj="homeApp">
-            <SolutionsPanel addBasePath={addBasePath} directories={directories} />
+            <SolutionsPanel
+              addBasePath={addBasePath}
+              directories={directories}
+              solutions={solutions}
+            />
 
             {/* If there is only one card in each add and manage data section, this displays the two sections side by side */}
             {addDataFeatureCards.length === 1 && manageDataFeatureCards.length === 1 ? (
@@ -303,6 +307,16 @@ Home.propTypes = {
       homePageSection: PropTypes.string,
       category: PropTypes.string.isRequired,
       solution: PropTypes.string,
+      order: PropTypes.number,
+    })
+  ),
+  solutions: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      description: PropTypes.string.isRequired,
+      icon: PropTypes.string.isRequired,
+      path: PropTypes.string.isRequired,
       order: PropTypes.number,
     })
   ),

@@ -73,7 +73,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initTelemetry(plugins.usageCollection, APP_ID);
 
     if (plugins.home) {
-      plugins.home.featureCatalogue.register({
+      plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
         title: i18n.translate('xpack.securitySolution.featureCatalogue.title', {
           defaultMessage: 'Security',
@@ -83,9 +83,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }),
         icon: APP_ICON,
         path: APP_OVERVIEW_PATH,
-        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-        category: FeatureCatalogueCategory.SOLUTION,
         order: 300,
+        className: 'homSolutionsSection__blackCard',
       });
 
       plugins.home.featureCatalogue.register({

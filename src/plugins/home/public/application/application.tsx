@@ -38,12 +38,13 @@ export const renderApp = async (
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
   const directories = featureCatalogue.get();
+  const solutions = featureCatalogue.getSolutions();
 
   chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   render(
     <KibanaContextProvider services={{ ...coreStart }}>
-      <HomeApp directories={directories} />
+      <HomeApp directories={directories} solutions={solutions} />
     </KibanaContextProvider>,
     element
   );

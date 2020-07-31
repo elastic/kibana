@@ -134,7 +134,7 @@ export class HomePublicPlugin
       order: 500,
     });
 
-    featureCatalogue.register({
+    featureCatalogue.registerSolution({
       id: 'kibana',
       title: i18n.translate('home.kibana.featureCatalogueTitle', {
         defaultMessage: 'Kibana',
@@ -143,10 +143,9 @@ export class HomePublicPlugin
         defaultMessage: 'Visualize & analyze',
       }),
       icon: 'logoKibana',
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       path: '/app/dashboards',
-      category: FeatureCatalogueCategory.SOLUTION,
       order: 400,
+      className: 'homSolutionsSection__blueCard',
     });
 
     return {

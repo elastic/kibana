@@ -76,15 +76,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    plugins.home.featureCatalogue.register({
+    plugins.home.featureCatalogue.registerSolution({
       id: 'enterpriseSearch',
       title: 'Enterprise Search',
       icon: 'logoEnterpriseSearch',
       description: 'Search everything',
       path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
-      category: FeatureCatalogueCategory.SOLUTION,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
       order: 100,
+      className: 'homSolutionsSection__greenCard',
     });
 
     plugins.home.featureCatalogue.register({
