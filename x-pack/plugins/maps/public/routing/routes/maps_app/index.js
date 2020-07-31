@@ -9,8 +9,10 @@ import { MapsAppView } from './maps_app_view';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
   getFilters,
+  getQuery,
   getQueryableUniqueIndexPatternIds,
   getRefreshConfig,
+  getTimeFilters,
   hasUnsavedChanges,
 } from '../../../selectors/map_selectors';
 import {
@@ -38,17 +40,19 @@ function mapStateToProps(state = {}) {
     hasUnsavedChanges: (savedMap, initialLayerListConfig) => {
       return hasUnsavedChanges(state, savedMap, initialLayerListConfig);
     },
+    query: getQuery(state),
+    timeFilters: getTimeFilters(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    dispatchSetQuery: (refresh, filters, query, time) => {
+    dispatchSetQuery: ({ refresh, filters, query, timeFilters }) => {
       dispatch(
         setQuery({
           filters,
           query,
-          timeFilters: time,
+          timeFilters,
           refresh,
         })
       );

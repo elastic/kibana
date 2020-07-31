@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitoring-metricbeat]]
-=== Collect {kib} monitoring data with {metricbeat}
+= Collect {kib} monitoring data with {metricbeat}
 [subs="attributes"]
 ++++
 <titleabbrev>Collect monitoring data with {metricbeat}</titleabbrev>
