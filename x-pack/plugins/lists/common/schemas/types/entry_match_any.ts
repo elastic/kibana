@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../../siem_common_deps';
+import { NonEmptyString } from '../../shared_imports';
 import { operator } from '../common/schemas';
 
 import { nonEmptyOrNullableStringArray } from './non_empty_or_nullable_string_array';
