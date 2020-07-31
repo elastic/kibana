@@ -7,12 +7,12 @@
 import { filterIndexes } from './resolvers';
 
 describe('resolvers', () => {
-  test('it should filter single index that is has an empty string', () => {
+  test('it should filter single index that has an empty string', () => {
     const emptyArray = filterIndexes(['']);
     expect(emptyArray).toEqual([]);
   });
 
-  test('it should filter single index that is has blanks within it', () => {
+  test('it should filter single index that has blanks within it', () => {
     const emptyArray = filterIndexes(['   ']);
     expect(emptyArray).toEqual([]);
   });
