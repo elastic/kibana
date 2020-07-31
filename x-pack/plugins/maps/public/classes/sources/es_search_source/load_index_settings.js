@@ -38,11 +38,9 @@ async function fetchIndexSettings(indexPatternTitle) {
     });
   } catch (err) {
     const warningMsg = i18n.translate('xpack.maps.indexSettings.fetchErrorMsg', {
-      defaultMessage: `Unable to fetch index settings for index pattern '{indexPatternTitle}'.
-      Ensure you have '{viewIndexMetaRole}' role.`,
+      defaultMessage: `Unable to fetch index settings for index pattern '{indexPatternTitle}'.`,
       values: {
         indexPatternTitle,
-        viewIndexMetaRole: 'view_index_metadata',
       },
     });
     if (!toastDisplayed) {

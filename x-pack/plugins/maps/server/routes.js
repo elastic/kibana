@@ -540,7 +540,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       try {
-        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+        const resp = await context.core.elasticsearch.legacy.client.callAsInternalUser(
           'indices.getSettings',
           {
             index: query.indexPatternTitle,
