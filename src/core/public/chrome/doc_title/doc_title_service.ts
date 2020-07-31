@@ -21,6 +21,7 @@ import { compact, flattenDeep, isString } from 'lodash';
 
 interface StartDeps {
   document: { title: string };
+  documentTitlePrefix: string;
 }
 
 /**
@@ -73,10 +74,12 @@ const titleSeparator = ' - ';
 export class DocTitleService {
   private document = { title: '' };
   private baseTitle = '';
+  private documentTitlePrefix = '';
 
-  public start({ document }: StartDeps): ChromeDocTitle {
+  public start({ document, documentTitlePrefix }: StartDeps): ChromeDocTitle {
     this.document = document;
     this.baseTitle = document.title;
+    this.documentTitlePrefix = documentTitlePrefix;
 
     return {
       change: (title: string | string[]) => {
@@ -98,7 +101,7 @@ export class DocTitleService {
   }
 
   private render(title: string | string[]) {
-    const parts = [...(isString(title) ? [title] : title), this.baseTitle];
+    const parts = [this.documentTitlePrefix, title, this.baseTitle];
     // ensuring compat with legacy that might be passing nested arrays
     return compact(flattenDeep(parts)).join(titleSeparator);
   }

@@ -272,6 +272,16 @@ export function getUiSettingDefaults() {
       }),
       requiresPageReload: true,
     },
+    documentTitlePrefix: {
+      name: i18n.translate('kbn.advancedSettings.documentTitlePrefixTitle', {
+        defaultMessage: 'Document title prefix',
+      }),
+      value: '',
+      description: i18n.translate('kbn.advancedSettings.documentTitlePrefixText', {
+        defaultMessage: `Prepending text to the html document title.`,
+      }),
+      requiresPageReload: true,
+    },
     'theme:darkMode': {
       name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
         defaultMessage: 'Dark mode',

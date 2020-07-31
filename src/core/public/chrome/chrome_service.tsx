@@ -155,7 +155,10 @@ export class ChromeService {
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
-    const docTitle = this.docTitle.start({ document: window.document });
+    const docTitle = this.docTitle.start({
+      document: window.document,
+      documentTitlePrefix: uiSettings.get('documentTitlePrefix', ''),
+    });
 
     const setIsNavDrawerLocked = (isLocked: boolean) => {
       isNavDrawerLocked$.next(isLocked);
