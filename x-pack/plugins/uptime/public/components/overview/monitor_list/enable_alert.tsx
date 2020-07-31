@@ -5,7 +5,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiLink, EuiLoadingSpinner, EuiPopover, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { selectDynamicSettings } from '../../../state/selectors';
@@ -109,10 +116,10 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <div style={{ width: '300px' }}>
+      <EuiText style={{ width: '350px' }}>
         To start enabling alerts, please define a default alert action connector in{' '}
         <EuiLink href={path}>Settings</EuiLink>.
-      </div>
+      </EuiText>
     </EuiPopover>
   );
 };

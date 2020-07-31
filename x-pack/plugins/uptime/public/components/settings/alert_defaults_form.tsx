@@ -71,8 +71,8 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
 
     const { actionTypeId: type } = data?.find((dt) => dt.id === value) ?? {};
     return (
-      <EuiText size="m">
-        <EuiIcon type={type === '.slack' ? 'logoSlack' : 'email'} /> {label}
+      <EuiText size="s">
+        <EuiIcon type={type === '.slack' ? 'logoSlack' : 'email'} /> <span>{label}</span>
       </EuiText>
     );
   };
