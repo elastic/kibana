@@ -25,7 +25,7 @@ import {
   DefaultUuid,
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
-} from '../../siem_common_deps';
+} from '../../shared_imports';
 import { NamespaceType } from '../types';
 
 export const createExceptionListSchema = t.intersection([
