@@ -16,22 +16,6 @@ interface Props {
   createAnomalyDetectionJobDisabled: boolean;
 }
 
-function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
-  return createAnomalyDetectionJobDisabled === true ? (
-    <FormattedMessage
-      id="xpack.ml.overview.gettingStartedSectionCreateJob"
-      defaultMessage="creating a new job"
-    />
-  ) : (
-    <EuiLink href={createJobLink} target="blank">
-      <FormattedMessage
-        id="xpack.ml.overview.gettingStartedSectionCreateJob"
-        defaultMessage="creating a new job"
-      />
-    </EuiLink>
-  );
-}
-
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
   const {
     services: {
