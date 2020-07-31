@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EditMenu } from './edit_menu';
-export { EditMenu as EditMenuComponent } from './edit_menu.component';
+export { ElementSettings } from './element_settings';
+export { ElementSettings as ElementSettingsComponent } from './element_settings.component';
