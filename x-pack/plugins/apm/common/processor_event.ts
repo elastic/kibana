@@ -12,6 +12,12 @@ export enum ProcessorEvent {
   onboarding = 'onboarding',
   sourcemap = 'sourcemap',
 }
+/**
+ * Processor events that are searchable in the UI via the query bar.
+ *
+ * Some client-sideroutes will define 1 or more processor events that
+ * will be used to fetch the dynamic index pattern for the query bar.
+ */
 
 export type UIProcessorEvent =
   | ProcessorEvent.transaction

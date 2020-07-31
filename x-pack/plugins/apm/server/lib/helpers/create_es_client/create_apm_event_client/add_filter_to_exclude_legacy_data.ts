@@ -15,17 +15,11 @@ import {
   Adds a range query to the ES request to exclude legacy data
 */
 
-export function addFilterForLegacyData(
+export function addFilterToExcludeLegacyData(
   params: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };
-  },
-  { includeLegacyData = false } = {}
-) {
-  // search across all data (including data)
-  if (includeLegacyData) {
-    return params;
   }
-
+) {
   const nextParams = cloneDeep(params);
 
   // add filter for omitting pre-7.x data

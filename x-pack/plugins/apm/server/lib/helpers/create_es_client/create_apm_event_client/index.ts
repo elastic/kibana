@@ -4,41 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, uniq, cloneDeep } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
-  ESFilter,
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../typings/elasticsearch';
-import {
-  ApmIndicesConfig,
-  ApmIndicesName,
-} from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { APMRequestHandlerContext } from '../../../../routes/typings';
-import { addFilterForLegacyData } from './add_filter_for_legacy_data';
+import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
 import { callClientWithDebug } from '../call_client_with_debug';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { unpackProcessorEvents } from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     events: ProcessorEvent[];
   };
-};
-
-export const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
-  [ProcessorEvent.transaction]: 'apm_oss.transactionIndices',
-  [ProcessorEvent.span]: 'apm_oss.spanIndices',
-  [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
-  [ProcessorEvent.error]: 'apm_oss.errorIndices',
-  [ProcessorEvent.sourcemap]: 'apm_oss.sourcemapIndices',
-  [ProcessorEvent.onboarding]: 'apm_oss.onboardingIndices',
 };
 
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
@@ -84,40 +70,17 @@ export function createApmEventClient({
       params: TParams,
       { includeLegacyData } = { includeLegacyData: false }
     ): Promise<TypedSearchResponse<TParams>> {
-      const { apm, ...esParams } = params;
+      const withProcessorEventFilter = unpackProcessorEvents(params, indices);
 
-      const index = uniq(
-        apm.events.map((event) => indices[processorEventIndexMap[event]])
-      );
-
-      const nextParams: ESSearchRequest & {
-        body: { query: { bool: { filter: ESFilter[] } } };
-      } = defaultsDeep(cloneDeep(esParams), {
-        body: {
-          query: {
-            bool: {
-              filter: [],
-            },
-          },
-        },
-      });
-
-      nextParams.body.query.bool.filter.push({
-        terms: {
-          [PROCESSOR_EVENT]: apm.events,
-        },
-      });
-
-      const withLegacyData = addFilterForLegacyData(nextParams, {
-        includeLegacyData,
-      });
+      const withPossibleLegacyDataFilter = !includeLegacyData
+        ? addFilterToExcludeLegacyData(withProcessorEventFilter)
+        : withProcessorEventFilter;
 
       return callClientWithDebug({
         apiCaller: client.callAsCurrentUser,
         operationName: 'search',
         params: {
-          ...withLegacyData,
-          index,
+          ...withPossibleLegacyDataFilter,
           ignore_throttled: !includeFrozen,
         },
         request,
