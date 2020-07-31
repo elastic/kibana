@@ -6,8 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
-// @ts-expect-error
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+// @ts-expect-error
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { CircleIcon } from './circle_icon';

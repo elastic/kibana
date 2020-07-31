@@ -14,10 +14,9 @@ import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_ut
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';
+import { IconDynamicOptions } from '../../../../../common/descriptor_types';
 
-export class DynamicIconProperty<IconDynamicOptions> extends DynamicStyleProperty<
-  IconDynamicOptions
-> {
+export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions> {
   isOrdinal() {
     return false;
   }
