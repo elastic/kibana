@@ -153,6 +153,7 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
@@ -160,6 +161,9 @@ export class DashboardPlugin
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
   ): Setup {
+    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
+      DashboardFeatureFlagConfig
+    >();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -405,10 +409,11 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-    // TODO: once https://github.com/elastic/kibana/pull/73870 is merges, make this unlink from library action dependent on that config value.
-    const unlinkFromLibraryAction = new UnlinkFromLibraryAction(core);
-    uiActions.registerAction(unlinkFromLibraryAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+    if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction(core);
+      uiActions.registerAction(unlinkFromLibraryAction);
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
+    }
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
@@ -425,7 +430,7 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
-      dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
+      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),

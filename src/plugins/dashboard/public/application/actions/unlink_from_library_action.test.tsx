@@ -90,6 +90,31 @@ beforeEach(async () => {
   }
 });
 
+test('Unlink is not compatible when embeddable does not have a savedObjectId', async () => {
+  const action = new UnlinkFromLibraryAction(coreStart);
+  embeddable.updateInput({ savedObjectId: undefined });
+  expect(await action.isCompatible({ embeddable })).toBe(false);
+});
+
+test('Unlink is not compatible when embeddable is not in a dashboard container', async () => {
+  const orphanContactCard = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Orphan',
+  });
+  orphanContactCard.updateInput({ savedObjectId: 'coolestSavedObjectId' });
+  const action = new UnlinkFromLibraryAction(coreStart);
+  expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
+});
+
+test('Unlink is compatible when embeddable on dashboard has a savedObjectId', async () => {
+  const action = new UnlinkFromLibraryAction(coreStart);
+  embeddable.updateInput({ savedObjectId: undefined });
+  expect(await action.isCompatible({ embeddable })).toBe(false);
+});
+
 test('Unlink replaces embeddableId but retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
@@ -99,7 +124,7 @@ test('Unlink replaces embeddableId but retains panel count', async () => {
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
 
   const newPanelId = Object.keys(container.getInput().panels).find(
-    key => !originalPanelKeySet.has(key)
+    (key) => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
@@ -122,7 +147,7 @@ test('Unlink unwraps all attributes from savedObject', async () => {
   const action = new UnlinkFromLibraryAction(coreStart);
   await action.execute({ embeddable });
   const newPanelId = Object.keys(container.getInput().panels).find(
-    key => !originalPanelKeySet.has(key)
+    (key) => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
   const newPanel = container.getInput().panels[newPanelId!];
