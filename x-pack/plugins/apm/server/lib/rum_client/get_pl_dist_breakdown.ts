@@ -5,6 +5,7 @@
  */
 
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
@@ -59,6 +60,9 @@ export const getPageLoadDistBreakdown = async ({
   });
 
   const params = mergeProjection(projection, {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       aggs: {
