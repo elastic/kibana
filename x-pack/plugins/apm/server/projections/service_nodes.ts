@@ -8,9 +8,8 @@ import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../server/lib/helpers/setup_request';
-import { SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
+import { SERVICE_NODE_NAME } from '../../common/elasticsearch_fieldnames';
 import { mergeProjection } from './util/merge_projection';
 import { getMetricsProjection } from './metrics';
 
