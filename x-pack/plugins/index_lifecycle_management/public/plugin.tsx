@@ -86,7 +86,7 @@ export class IndexLifecycleManagementPlugin {
           }),
           description: i18n.translate('xpack.indexLifecycleManagement.featureCatalogueTitle', {
             defaultMessage:
-              'Attach a policy to automate when and how to transition an index through its lifecycle.',
+              'Define lifecycle policies to automatically perform operations as an index ages.',
           }),
           icon: 'indexSettings', // TODO: This is the same icon used for rollups in the feature catalogue. Do we need to pick a different one here?
           path: '/app/management/data/index_lifecycle_management',

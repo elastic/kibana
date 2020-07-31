@@ -27,7 +27,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
       defaultMessage: 'Machine Learning',
     }),
     description: i18n.translate('xpack.ml.machineLearningDescription', {
-      defaultMessage: 'Detect anomalous events.',
+      defaultMessage: 'Model, predict, and detect.',
     }),
     icon: 'machineLearningApp',
     path: '/app/ml',

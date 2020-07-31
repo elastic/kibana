@@ -18,7 +18,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
       defaultMessage: 'Metrics',
     }),
     description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
-      defaultMessage: 'Monitor all infrastructure metrics.',
+      defaultMessage: 'Monitor infrastructure metrics.',
     }),
     icon: 'metricsApp',
     path: `/app/metrics`,

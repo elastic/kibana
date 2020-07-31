@@ -114,7 +114,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       id: 'workplaceSearch',
       title: 'Workplace Search',
       icon: WorkplaceSearchLogo,
-      description: "Unify your team's content.",
+      description: 'Unify your team content.',
       path: '/app/enterprise_search/workplace_search',
       category: FeatureCatalogueCategory.DATA,
       homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
