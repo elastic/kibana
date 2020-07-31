@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { getBuckets } from '../get_buckets';
 import { APMConfig } from '../../../..';
+import { ProcessorEvent } from '../../../../../common/processor_event';
 
 describe('timeseriesFetcher', () => {
   let clientSpy: jest.Mock;
@@ -29,7 +29,7 @@ describe('timeseriesFetcher', () => {
       setup: {
         start: 1528113600000,
         end: 1528977600000,
-        client: {
+        apmEventClient: {
           search: clientSpy,
         } as any,
         internalClient: {
@@ -66,8 +66,6 @@ describe('timeseriesFetcher', () => {
 
   it('should limit query results to error documents', () => {
     const query = clientSpy.mock.calls[0][0];
-    expect(query.body.query.bool.filter).toEqual(
-      expect.arrayContaining([{ term: { [PROCESSOR_EVENT]: 'error' } }])
-    );
+    expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });

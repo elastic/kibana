@@ -5,6 +5,7 @@
  */
 
 import { flatten, orderBy, last } from 'lodash';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   SERVICE_NAME,
   SPAN_SUBTYPE,
@@ -13,7 +14,6 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
   TRANSACTION_BREAKDOWN_COUNT,
-  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
@@ -36,7 +36,7 @@ export async function getTransactionBreakdown({
   transactionName?: string;
   transactionType: string;
 }) {
-  const { uiFiltersES, client, start, end, indices } = setup;
+  const { uiFiltersES, apmEventClient, start, end } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -82,7 +82,6 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { term: { [PROCESSOR_EVENT]: 'metric' } },
     { range: rangeFilter(start, end) },
     ...uiFiltersES,
   ];
@@ -92,7 +91,9 @@ export async function getTransactionBreakdown({
   }
 
   const params = {
-    index: indices['apm_oss.metricsIndices'],
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
@@ -110,7 +111,7 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const formatBucket = (
     aggs:
