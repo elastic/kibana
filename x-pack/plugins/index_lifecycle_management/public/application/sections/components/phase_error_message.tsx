@@ -7,7 +7,7 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const PhaseErrorMessage = ({ isShowingErrors }) => {
+export const PhaseErrorMessage = ({ isShowingErrors }: { isShowingErrors: boolean }) => {
   return isShowingErrors ? (
     <EuiBadge className="eui-alignMiddle" color="danger">
       <FormattedMessage
