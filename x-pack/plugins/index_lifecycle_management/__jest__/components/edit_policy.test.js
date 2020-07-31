@@ -253,6 +253,9 @@ describe('edit policy', () => {
     beforeEach(() => {
       server.respondImmediately = true;
       httpRequestsMockHelpers.setNodesListResponse({});
+      httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
+        { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
+      ]);
     });
 
     test('should show number required error when trying to save empty warm phase', async () => {
@@ -395,7 +398,9 @@ describe('edit policy', () => {
       rendered.update();
       const flyoutButton = findTestSubject(rendered, 'warm-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
-      flyoutButton.simulate('click');
+      await act(async () => {
+        await flyoutButton.simulate('click');
+      });
       rendered.update();
       expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
     });
@@ -404,6 +409,9 @@ describe('edit policy', () => {
     beforeEach(() => {
       server.respondImmediately = true;
       httpRequestsMockHelpers.setNodesListResponse({});
+      httpRequestsMockHelpers.setNodesDetailsResponse('attribute:true', [
+        { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
+      ]);
     });
     test('should allow 0 for phase timing', async () => {
       const rendered = mountWithIntl(component);
@@ -470,7 +478,9 @@ describe('edit policy', () => {
       rendered.update();
       const flyoutButton = findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton');
       expect(flyoutButton.exists()).toBeTruthy();
-      flyoutButton.simulate('click');
+      await act(async () => {
+        await flyoutButton.simulate('click');
+      });
       rendered.update();
       expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
     });
