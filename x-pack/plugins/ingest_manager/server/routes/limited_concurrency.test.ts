@@ -39,7 +39,7 @@ describe('registerLimitedConcurrencyRoutes', () => {
 });
 
 // assertions for calls to .decrease are commented out because it's called on the
-// "req.events.aborted$ observable (which) will never emit from a mocked request in a jest unit test environment"
+// "req.events.completed$ observable (which) will never emit from a mocked request in a jest unit test environment"
 // https://github.com/elastic/kibana/pull/72338#issuecomment-661908791
 describe('preAuthHandler', () => {
   test(`ignores routes when !isMatch`, async () => {

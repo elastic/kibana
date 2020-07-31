@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { MLErrorMessages } from '../../../../../common/anomaly_detection';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 
 const errorToastTitle = i18n.translate(
@@ -27,7 +26,7 @@ export async function createJobs({
   toasts: NotificationsStart['toasts'];
 }) {
   try {
-    const res = await callApmApi({
+    await callApmApi({
       pathname: '/api/apm/settings/anomaly-detection/jobs',
       method: 'POST',
       params: {
@@ -35,23 +34,11 @@ export async function createJobs({
       },
     });
 
-    // a known error occurred
-    if (res?.errorCode) {
-      toasts.addDanger({
-        title: errorToastTitle,
-        text: MLErrorMessages[res.errorCode],
-      });
-      return false;
-    }
-
-    // job created successfully
     toasts.addSuccess({
       title: successToastTitle,
       text: getSuccessToastMessage(environments),
     });
     return true;
-
-    // an unknown/unexpected error occurred
   } catch (error) {
     toasts.addDanger({
       title: errorToastTitle,

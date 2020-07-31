@@ -10,20 +10,27 @@ import {
   enableFullScreen,
   openMapSettings,
   removePreviewLayers,
-  setRefreshConfig,
   setSelectedLayer,
   updateFlyout,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { getFlyoutDisplay } from '../../../selectors/ui_selectors';
-import { hasDirtyState } from '../../../selectors/map_selectors';
+import {
+  getQuery,
+  getRefreshConfig,
+  getTimeFilters,
+  hasDirtyState,
+} from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
     isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
     inspectorAdapters: getInspectorAdapters(state),
     isSaveDisabled: hasDirtyState(state),
+    query: getQuery(state),
+    refreshConfig: getRefreshConfig(state),
+    timeFilters: getTimeFilters(state),
   };
 }
 
@@ -34,7 +41,6 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removePreviewLayers());
     },
-    setRefreshStoreConfig: (refreshConfig) => dispatch(setRefreshConfig(refreshConfig)),
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
   };

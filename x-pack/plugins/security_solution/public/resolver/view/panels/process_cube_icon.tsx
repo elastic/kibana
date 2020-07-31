@@ -13,13 +13,11 @@ import { useResolverTheme } from '../assets';
  */
 export const CubeForProcess = memo(function CubeForProcess({
   isProcessTerminated,
-  isProcessOrigin,
 }: {
   isProcessTerminated: boolean;
-  isProcessOrigin: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol, descriptionText } = cubeAssetsForNode(isProcessTerminated, isProcessOrigin);
+  const { cubeSymbol, descriptionText } = cubeAssetsForNode(isProcessTerminated, false);
 
   return (
     <>

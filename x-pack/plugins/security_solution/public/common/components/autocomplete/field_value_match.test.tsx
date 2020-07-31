@@ -232,7 +232,6 @@ describe('AutocompleteFieldMatchComponent', () => {
         fields,
       },
       value: 'value 1',
-      signal: new AbortController().signal,
     });
   });
 });
