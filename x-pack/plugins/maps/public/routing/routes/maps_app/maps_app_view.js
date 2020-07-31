@@ -124,7 +124,7 @@ export class MapsAppView extends React.Component {
       return;
     }
 
-    this._onQueryChange({ time: globalState.time, refresh: false });
+    this._onQueryChange({ time: globalState.time, refresh: true });
   };
 
   async _updateIndexPatterns() {
