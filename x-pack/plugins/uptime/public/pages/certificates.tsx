@@ -86,6 +86,7 @@ export const CertificatesPage: React.FC = () => {
             to={OVERVIEW_ROUTE}
             iconType="arrowLeft"
             size="s"
+            aria-label={labels.RETURN_TO_OVERVIEW}
           >
             {labels.RETURN_TO_OVERVIEW}
           </EuiReactRouterButtonEmpty>

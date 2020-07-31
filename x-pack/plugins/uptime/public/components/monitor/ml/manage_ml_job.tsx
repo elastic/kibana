@@ -61,6 +61,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       disabled={hasMLJob && !canDeleteMLJob}
       isLoading={isMLJobCreating || isMLJobLoading}
       size="s"
+      aria-label={labels.ENABLE_MANAGE_JOB}
     >
       {isMLJobCreating || isMLJobLoading
         ? ''
