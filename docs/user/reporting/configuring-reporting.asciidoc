@@ -23,7 +23,7 @@ reporting job metadata.
 
 To set a static encryption key for reporting, set the
 `xpack.reporting.encryptionKey` property in the `kibana.yml`
-configuration file. You can use any text string as the encryption key.
+configuration file. You can use any alphanumeric, at least 32 characters long text string as the encryption key.
 
 [source,yaml]
 --------------------------------------------------------------------------------

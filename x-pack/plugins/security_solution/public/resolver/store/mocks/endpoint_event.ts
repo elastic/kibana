@@ -14,16 +14,18 @@ export function mockEndpointEvent({
   name,
   parentEntityId,
   timestamp,
+  lifecycleType,
 }: {
   entityID: string;
   name: string;
-  parentEntityId: string | undefined;
+  parentEntityId?: string;
   timestamp: number;
+  lifecycleType?: string;
 }): EndpointEvent {
   return {
     '@timestamp': timestamp,
     event: {
-      type: 'start',
+      type: lifecycleType ? lifecycleType : 'start',
       category: 'process',
     },
     process: {

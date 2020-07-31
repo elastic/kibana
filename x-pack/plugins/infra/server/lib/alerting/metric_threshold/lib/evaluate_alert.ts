@@ -67,10 +67,15 @@ export const evaluateAlert = (
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
           shouldFire: Array.isArray(points)
-            ? points.map((point) => comparisonFunction(point.value, threshold))
+            ? points.map(
+                (point) =>
+                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
+              )
             : [false],
-          isNoData: points === null,
-          isError: isNaN(points),
+          isNoData: Array.isArray(points)
+            ? points.map((point) => point?.value === null || point === null)
+            : [points === null],
+          isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
         };
       });
     })
@@ -172,7 +177,7 @@ const getValuesFromAggregations = (
     }
     return buckets.map((bucket) => ({
       key: bucket.key_as_string,
-      value: bucket.aggregatedValue.value,
+      value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {
     return NaN; // Error state
