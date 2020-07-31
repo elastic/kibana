@@ -13119,6 +13119,7 @@
     "xpack.securitySolution.auditd.errorFromDescription": "エラー：",
     "xpack.securitySolution.auditd.executedDescription": "実行",
     "xpack.securitySolution.auditd.executionOfForbiddenProgramDescription": "禁止されたプログラムの実行",
+    "xpack.securitySolution.auditd.failedxLoginTooManyTimesDescription": "ログイン回数超過によりログインに失敗",
     "xpack.securitySolution.auditd.inDescription": "次に含まれる：",
     "xpack.securitySolution.auditd.initializedAuditSubsystemDescription": "監査サブシステムを初期化しました",
     "xpack.securitySolution.auditd.issuedVmControlDescription": "仮想マシンコントロールを発行しました",
