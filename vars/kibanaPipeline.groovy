@@ -26,9 +26,9 @@ def notifyOnError(Closure closure) {
       githubPr.sendComment(false)
     }
     catchErrors {
-      def options = buildState.get('SLACK_NOTIFICATION_CONFIG')
-      if (options) {
-        slackNotifications.sendFailedBuild(options)
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
       }
     }
     throw ex
