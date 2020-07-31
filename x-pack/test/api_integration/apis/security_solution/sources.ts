@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(sourceStatus.indicesExist).to.be(false);
     });
 
-    it('should not find indexes as existing when there is are empty strings within it', async () => {
+    it('should not find indexes as existing when there are empty strings within it', async () => {
       const resp = await client.query<SourceQuery.Query>({
         query: sourceQuery,
         variables: {
@@ -83,6 +83,32 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const sourceStatus = resp.data.source.status;
       expect(sourceStatus.indicesExist).to.be(false);
+    });
+
+    it('should not find indexes as existing when there are blank spaces within it', async () => {
+      const resp = await client.query<SourceQuery.Query>({
+        query: sourceQuery,
+        variables: {
+          sourceId: 'default',
+          defaultIndex: ['   '],
+          docValueFields: [],
+        },
+      });
+      const sourceStatus = resp.data.source.status;
+      expect(sourceStatus.indicesExist).to.be(false);
+    });
+
+    it('should find indexes when one is an empty index but the others are valid', async () => {
+      const resp = await client.query<SourceQuery.Query>({
+        query: sourceQuery,
+        variables: {
+          sourceId: 'default',
+          defaultIndex: ['', 'auditbeat-*'],
+          docValueFields: [],
+        },
+      });
+      const sourceStatus = resp.data.source.status;
+      expect(sourceStatus.indicesExist).to.be(true);
     });
   });
 }
