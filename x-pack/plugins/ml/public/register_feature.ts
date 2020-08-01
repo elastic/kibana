@@ -9,12 +9,18 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
+import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 import { PLUGIN_ID } from '../common/constants/app';
 
-export const registerFeature = (home: HomePublicPluginSetup) => {
+export const registerFeature = (
+  home: HomePublicPluginSetup,
+  indexPatternManagement: IndexPatternManagementSetup
+) => {
   // register ML for the kibana home screen.
   // so the file data visualizer appears to allow people to import data
   home.environment.update({ ml: true });
+  // register ML for the index pattern management no data screen.
+  indexPatternManagement.environment.update({ ml: true });
 
   // register ML so it appears on the Kibana home page
   home.featureCatalogue.register({

@@ -7,7 +7,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { SavedElementsModal } from '../saved_elements_modal';
+import { SavedElementsModal } from '../saved_elements_modal.component';
 import { testCustomElements } from './fixtures/test_elements';
 import { CustomElement } from '../../../../types';
 

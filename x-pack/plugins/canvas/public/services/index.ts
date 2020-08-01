@@ -10,7 +10,15 @@ import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
+import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
+
+export { NotifyService } from './notify';
+export { PlatformService } from './platform';
+export { NavLinkService } from './nav_link';
+export { EmbeddablesService } from './embeddables';
+export { ExpressionsService } from '../../../../../src/plugins/expressions/common';
+export * from './context';
 
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
@@ -26,6 +34,10 @@ class CanvasServiceProvider<Service> {
 
   constructor(factory: CanvasServiceFactory<Service>) {
     this.factory = factory;
+  }
+
+  setService(service: Service) {
+    this.service = service;
   }
 
   async start(
@@ -60,13 +72,17 @@ class CanvasServiceProvider<Service> {
 export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? T : never;
 
 export const services = {
+  embeddables: new CanvasServiceProvider(embeddablesServiceFactory),
   expressions: new CanvasServiceProvider(expressionsServiceFactory),
   notify: new CanvasServiceProvider(notifyServiceFactory),
   platform: new CanvasServiceProvider(platformServiceFactory),
   navLink: new CanvasServiceProvider(navLinkServiceFactory),
 };
 
+export type CanvasServiceProviders = typeof services;
+
 export interface CanvasServices {
+  embeddables: ServiceFromProvider<typeof services.embeddables>;
   expressions: ServiceFromProvider<typeof services.expressions>;
   notify: ServiceFromProvider<typeof services.notify>;
   platform: ServiceFromProvider<typeof services.platform>;
@@ -88,10 +104,11 @@ export const startServices = async (
 };
 
 export const stopServices = () => {
-  Object.entries(services).forEach(([key, provider]) => provider.stop());
+  Object.values(services).forEach((provider) => provider.stop());
 };
 
 export const {
+  embeddables: embeddableService,
   notify: notifyService,
   platform: platformService,
   navLink: navLinkService,
