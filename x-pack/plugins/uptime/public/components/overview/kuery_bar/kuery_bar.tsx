@@ -103,8 +103,8 @@ export function KueryBar({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
           boolFilter: [
             {
               range: {

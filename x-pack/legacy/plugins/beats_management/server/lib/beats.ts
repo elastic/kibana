@@ -72,7 +72,7 @@ export class CMBeatsDomain {
 
     if (typeof userOrToken === 'string') {
       const { verified: isAccessTokenValid } = this.tokens.verifyToken(
-        beat ? beat.access_token : '',
+        beat?.access_token ?? '',
         userOrToken
       );
       if (!isAccessTokenValid) {
