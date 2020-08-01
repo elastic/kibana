@@ -15,7 +15,7 @@
 */
 def withDefaultPrComments(closure) {
   catchErrors {
-    // sendCommentOnError() needs to know if comments are enabled, so lets track it with a global
+    // kibanaPipeline.notifyOnError() needs to know if comments are enabled, so lets track it with a global
     // isPr() just ensures this functionality is skipped for non-PR builds
     buildState.set('PR_COMMENTS_ENABLED', isPr())
     catchErrors {
@@ -56,19 +56,6 @@ def sendComment(isFinal = false) {
     if (lastComment && lastComment.user.login == 'kibanamachine') {
       deleteComment(lastComment.id)
     }
-  }
-}
-
-def sendCommentOnError(Closure closure) {
-  try {
-    closure()
-  } catch (ex) {
-    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
-    currentBuild.result = 'FAILURE'
-    catchErrors {
-      sendComment(false)
-    }
-    throw ex
   }
 }
 
