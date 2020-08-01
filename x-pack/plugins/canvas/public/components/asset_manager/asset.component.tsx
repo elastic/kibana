@@ -23,7 +23,6 @@ import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { AssetType } from '../../../types';
-import { CanvasServices } from '../../services';
 
 import { ComponentStrings } from '../../../i18n';
 
