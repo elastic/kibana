@@ -97,7 +97,7 @@ export const fetchRules = async ({
     ...(filterOptions.showElasticRules
       ? [`alert.attributes.tags: "__internal_immutable:true"`]
       : []),
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: ${t}`) ?? []),
+    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
   ];
 
   const query = {
