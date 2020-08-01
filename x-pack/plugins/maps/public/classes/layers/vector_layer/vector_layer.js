@@ -158,8 +158,8 @@ export class VectorLayer extends AbstractLayer {
 
   async getBounds({ startLoading, stopLoading, registerCancelCallback, dataFilters }) {
     const isStaticLayer = !this.getSource().isBoundsAware();
-    if (isStaticLayer) {
-      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this._hasJoins());
+    if (isStaticLayer || this.hasJoins()) {
+      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
