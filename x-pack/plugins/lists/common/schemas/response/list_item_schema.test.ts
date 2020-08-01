@@ -84,6 +84,7 @@ describe('list_item_schema', () => {
 
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getListItemResponseMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = listItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -8,7 +8,7 @@ import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 export function useCore(): CoreStart {
-  const { services } = useKibana();
+  const { services } = useKibana<CoreStart>();
   if (services === null) {
     throw new Error('KibanaContextProvider not initialized');
   }

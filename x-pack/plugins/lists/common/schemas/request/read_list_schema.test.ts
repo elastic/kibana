@@ -25,6 +25,7 @@ describe('read_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getReadListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = readListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -65,7 +65,7 @@ export const CreatePackageConfigPage: React.FunctionComponent = () => {
   } = useConfig();
   const {
     params: { configId, pkgkey },
-  } = useRouteMatch();
+  } = useRouteMatch<{ configId: string; pkgkey: string }>();
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const routeState = useIntraAppState<CreatePackageConfigRouteState>();

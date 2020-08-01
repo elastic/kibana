@@ -53,7 +53,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   } = useConfig();
   const {
     params: { configId, packageConfigId },
-  } = useRouteMatch();
+  } = useRouteMatch<{ configId: string; packageConfigId: string }>();
   const history = useHistory();
   const { getHref, getPath } = useLink();
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);

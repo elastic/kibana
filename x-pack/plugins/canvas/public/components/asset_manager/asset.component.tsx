@@ -23,6 +23,7 @@ import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
 import { AssetType } from '../../../types';
+import { CanvasServices } from '../../services';
 
 import { ComponentStrings } from '../../../i18n';
 
@@ -38,7 +39,7 @@ interface Props {
 }
 
 export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ canvas: CanvasServices }>();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   const onCopy = (result: boolean) =>
