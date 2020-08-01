@@ -2875,6 +2875,7 @@ export const mockQueryDsl = {
 };
 
 const mockTimelineDetailsInspectResponse = cloneDeep(mockResponseSearchTimelineDetails);
+// @ts-expect-error
 delete mockTimelineDetailsInspectResponse.hits.hits[0]._source;
 
 export const mockTimelineDetailsResult = {
