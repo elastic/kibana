@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '@storybook/addon-actions/register';
-import '@storybook/addon-knobs/register';
-import '@storybook/addon-console';
+module.exports = {
+  presets: ['@kbn/babel-preset/webpack_preset'],
+  plugins: ['@babel/plugin-proposal-class-properties'],
+};
