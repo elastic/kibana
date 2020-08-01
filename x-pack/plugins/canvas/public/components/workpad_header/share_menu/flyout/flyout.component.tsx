@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ComponentStrings } from '../../../../../i18n/components';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
-import { OnCloseFn } from '../share_menu';
+import { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
