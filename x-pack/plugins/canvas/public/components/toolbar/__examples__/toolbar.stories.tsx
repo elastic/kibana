@@ -4,36 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- TODO: uncomment and fix this test to address storybook errors as a result of nested component dependencies - https://github.com/elastic/kibana/issues/58289
- */
-
-/*
-import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Toolbar } from '../toolbar';
+import { Toolbar } from '../toolbar.component';
+
+// @ts-expect-error untyped local
+import { getDefaultElement } from '../../../state/defaults';
 
 storiesOf('components/Toolbar', module)
-  .addDecorator(story => (
-    <div
-      style={{
-        width: '200px',
-      }}
-    >
-      {story()}
-    </div>
-  ))
-  .add('with null metric', () => (
+  .add('no element selected', () => (
     <Toolbar
-      setTray={action('setTray')}
-      nextPage={action('nextPage')}
-      previousPage={action('previousPage')}
-      setShowWorkpadManager={action('setShowWorkpadManager')}
+      isWriteable={true}
       selectedPageNumber={1}
       totalPages={1}
-      showWorkpadManager={false}
+      workpadId={'abc'}
+      workpadName={'My Canvas Workpad'}
+    />
+  ))
+  .add('element selected', () => (
+    <Toolbar
       isWriteable={true}
+      selectedElement={getDefaultElement()}
+      selectedPageNumber={1}
+      totalPages={1}
+      workpadId={'abc'}
+      workpadName={'My Canvas Workpad'}
     />
   ));
-*/
