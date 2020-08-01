@@ -6,7 +6,7 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ShareWebsiteFlyout } from '../share_website_flyout';
+import { ShareWebsiteFlyout } from '../flyout.component';
 
 storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
   .addParameters({
