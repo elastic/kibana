@@ -132,13 +132,9 @@ export type PivotGroupBy = GenericAgg | TermsAgg | HistogramAgg | DateHistogramA
 export type PivotGroupByDict = Dictionary<PivotGroupBy>;
 
 export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): GenericAgg {
-  const esAgg = { ...groupByConfig };
-
-  delete esAgg.agg;
-  delete esAgg.aggName;
-  delete esAgg.dropDownName;
+  const { agg, aggName, dropDownName, ...esAgg } = groupByConfig;
 
   return {
-    [groupByConfig.agg]: esAgg,
+    [agg]: esAgg,
   };
 }

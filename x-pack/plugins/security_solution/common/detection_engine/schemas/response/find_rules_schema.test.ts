@@ -80,6 +80,7 @@ describe('find_rules_schema', () => {
 
   test('it should invalidate a typical single find rules response if it is missing perPage', () => {
     const payload = getFindRulesSchemaMock();
+    // @ts-expect-error
     delete payload.perPage;
     const decoded = findRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

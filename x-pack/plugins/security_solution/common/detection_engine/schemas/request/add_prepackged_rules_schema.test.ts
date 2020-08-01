@@ -618,6 +618,7 @@ describe('add prepackaged rules schema', () => {
 
   test('rule_id is required', () => {
     const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
+    // @ts-expect-error
     delete payload.rule_id;
 
     const decoded = addPrepackagedRulesSchema.decode(payload);

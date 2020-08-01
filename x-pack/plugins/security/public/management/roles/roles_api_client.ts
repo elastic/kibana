@@ -52,6 +52,7 @@ export class RolesAPIClient {
       }
     });
 
+    // @ts-expect-error
     delete role.name;
     delete role.transient_metadata;
     delete role._unrecognized_applications;
