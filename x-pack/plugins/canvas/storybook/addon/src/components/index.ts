@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '@storybook/addon-actions/register';
-import '@storybook/addon-knobs/register';
-import '@storybook/addon-console';
+export { ActionList } from './action_list';
+export { ActionTree } from './action_tree';
