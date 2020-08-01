@@ -63,7 +63,7 @@ export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
     <Fragment>
       <EuiFlexGroup className="homSolutions" justifyContent="spaceAround">
         {appCount ? (
-          <EuiFlexItem grow={1} className="homSolutions__group homSolutions__group--multiple">
+          <EuiFlexItem grow={1} className="homSolutions__group">
             <EuiFlexGroup direction="column">
               {solutions.map((solution) => (
                 <SolutionPanel

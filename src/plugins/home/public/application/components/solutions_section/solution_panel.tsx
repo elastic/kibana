@@ -62,9 +62,7 @@ export const SolutionPanel: FC<Props> = ({ solution, apps = [] }) =>
   solution && apps.length ? (
     <EuiFlexItem
       key={solution.id}
-      className={`homSolutions__item ${
-        solution.id === 'kibana' ? 'homSolutions__group homSolutions__group--single' : ''
-      }`}
+      className={`homSolutions__item ${solution.id === 'kibana' ? 'homSolutions__group' : ''}`}
       grow={1}
     >
       <EuiPanel

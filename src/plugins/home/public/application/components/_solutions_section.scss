@@ -26,7 +26,6 @@
   }
 }
 
-// Don't need .homSolutions__group--single or .homSolutions__group--multiple?
 .homSolutions__group {
   max-width: 50%;
 
@@ -34,8 +33,6 @@
     max-width: none;
   }
 }
-
-// Don't need .homSolutions__item?
 
 .homSolutionPanel {
   align-items: stretch; // Necessary because element is a button
@@ -54,10 +51,6 @@
   box-shadow: none !important;
   margin: 0 auto $euiSizeS;
   padding: $euiSizeS;
-
-  .euiIcon__fillNegative {
-    fill: $euiColorInk;
-  }
 }
 
 .homSolutionPanel__subtitle {
