@@ -211,22 +211,23 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
                   </>
                 </UtilityBarText>
               </UtilityBarGroup>
-
               <UtilityBarGroup>
-                <UtilityBarText>
-                  {timelineType === TimelineType.template
-                    ? i18n.SELECTED_TEMPLATES(selectedItems.length)
-                    : i18n.SELECTED_TIMELINES(selectedItems.length)}
-                </UtilityBarText>
                 {timelineStatus !== TimelineStatus.immutable && (
-                  <UtilityBarAction
-                    iconSide="right"
-                    iconType="arrowDown"
-                    popoverContent={getBatchItemsPopoverContent}
-                    data-test-subj="utility-bar-action"
-                  >
-                    {i18n.BATCH_ACTIONS}
-                  </UtilityBarAction>
+                  <>
+                    <UtilityBarText data-test-subj="selected-count">
+                      {timelineType === TimelineType.template
+                        ? i18n.SELECTED_TEMPLATES(selectedItems.length)
+                        : i18n.SELECTED_TIMELINES(selectedItems.length)}
+                    </UtilityBarText>
+                    <UtilityBarAction
+                      iconSide="right"
+                      iconType="arrowDown"
+                      popoverContent={getBatchItemsPopoverContent}
+                      data-test-subj="utility-bar-action"
+                    >
+                      {i18n.BATCH_ACTIONS}
+                    </UtilityBarAction>
+                  </>
                 )}
                 <UtilityBarAction iconSide="right" iconType="refresh" onClick={onRefreshBtnClick}>
                   {i18n.REFRESH}
