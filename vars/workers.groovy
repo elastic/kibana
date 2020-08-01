@@ -134,7 +134,7 @@ def intake(jobName, String script) {
   return {
     ci(name: jobName, size: 's-highmem', ramDisk: true) {
       withEnv(["JOB=${jobName}"]) {
-        githubPr.sendCommentOnError {
+        kibanaPipeline.notifyOnError {
           runbld(script, "Execute ${jobName}")
         }
       }

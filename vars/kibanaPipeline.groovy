@@ -59,6 +59,25 @@ def getParallelWorkspaces() {
   return workspaces
 }
 
+def notifyOnError(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
+    catchErrors {
+      githubPr.sendComment(false)
+    }
+    catchErrors {
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
+      }
+    }
+    throw ex
+  }
+}
+
 def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   // This can go away once everything that uses the deprecated workers.parallelProcesses() is moved to task queue
   def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
@@ -92,7 +111,7 @@ def functionalTestProcess(String name, Closure closure) {
 
 def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
-    githubPr.sendCommentOnError {
+    notifyOnError {
       retryable(name) {
         runbld(script, "Execute ${name}")
       }
@@ -248,7 +267,7 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     retryWithDelay(2, 15) {
       try {
         runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
@@ -265,7 +284,7 @@ def doSetup() {
 }
 
 def buildOss(maxWorkers = '') {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
     }
@@ -273,7 +292,7 @@ def buildOss(maxWorkers = '') {
 }
 
 def buildXpack(maxWorkers = '') {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
       runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
     }
@@ -350,7 +369,7 @@ def withCiTaskQueue(Map options = [:], Closure closure) {
 def scriptTask(description, script) {
   return {
     withFunctionalTestEnv {
-      githubPr.sendCommentOnError {
+      notifyOnError {
         runbld(script, description)
       }
     }
