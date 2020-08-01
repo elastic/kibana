@@ -80,6 +80,7 @@ export const SolutionPanel: FC<Props> = ({ solution, apps = [] }) =>
               subtitle={solution.description}
             />
           </EuiFlexItem>
+
           <EuiFlexItem grow={1} className="homSolutionPanel__content">
             {getAppDescriptions(apps)}
           </EuiFlexItem>

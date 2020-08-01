@@ -44,12 +44,14 @@ export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
         size="l"
         className="homSolutionPanel__icon"
       />
+
       <EuiTitle className="eui-textInheritColor" size="s">
         <p>{title}</p>
       </EuiTitle>
+
       {subtitle ? (
         <EuiText size="s">
-          <p className="homSolutionPanelSubtitle">
+          <p className="homSolutionPanel__subtitle">
             {subtitle} <EuiIcon type="sortRight" />
           </p>
         </EuiText>
