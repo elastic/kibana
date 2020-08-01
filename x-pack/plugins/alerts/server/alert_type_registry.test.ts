@@ -319,9 +319,13 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     producer: 'alerts',
   };
 
+  if (!context && !state) return baseAlert;
+
   return {
     ...baseAlert,
-    ...(context ? { context: [{ name: context, description: `${id} context` }] } : {}),
-    ...(state ? { state: [{ name: state, description: `${id} state` }] } : {}),
+    actionVariables: {
+      ...(context ? { context: [{ name: context, description: `${id} context` }] } : {}),
+      ...(state ? { state: [{ name: state, description: `${id} state` }] } : {}),
+    },
   };
 }
