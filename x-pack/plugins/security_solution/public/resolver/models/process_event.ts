@@ -29,7 +29,7 @@ export function isTerminatedProcess(passedEvent: ResolverEvent) {
 }
 
 /**
- * ms since unix epoc, based on timestamp.
+ * ms since Unix epoc, based on timestamp.
  * may return NaN if the timestamp wasn't present or was invalid.
  */
 export function datetime(passedEvent: ResolverEvent): number | null {
@@ -85,7 +85,7 @@ export function eventType(passedEvent: ResolverEvent): ResolverProcessType {
 }
 
 /**
- * Returns the process event's pid
+ * Returns the process event's PID
  */
 export function uniquePidForProcess(passedEvent: ResolverEvent): string {
   if (event.isLegacyEvent(passedEvent)) {
@@ -96,7 +96,7 @@ export function uniquePidForProcess(passedEvent: ResolverEvent): string {
 }
 
 /**
- * Returns the pid for the process on the host
+ * Returns the PID for the process on the host
  */
 export function processPid(passedEvent: ResolverEvent): number | undefined {
   if (event.isLegacyEvent(passedEvent)) {
@@ -107,7 +107,7 @@ export function processPid(passedEvent: ResolverEvent): number | undefined {
 }
 
 /**
- * Returns the process event's parent pid
+ * Returns the process event's parent PID
  */
 export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | undefined {
   if (event.isLegacyEvent(passedEvent)) {
@@ -118,7 +118,7 @@ export function uniqueParentPidForProcess(passedEvent: ResolverEvent): string | 
 }
 
 /**
- * Returns the process event's parent pid
+ * Returns the process event's parent PID
  */
 export function processParentPid(passedEvent: ResolverEvent): number | undefined {
   if (event.isLegacyEvent(passedEvent)) {
@@ -144,12 +144,12 @@ export function processPath(passedEvent: ResolverEvent): string | undefined {
  */
 export function userInfoForProcess(
   passedEvent: ResolverEvent
-): { user?: string; domain?: string } | undefined {
+): { name?: string; domain?: string } | undefined {
   return passedEvent.user;
 }
 
 /**
- * Returns the MD5 hash for the `passedEvent` param, or undefined if it can't be located
+ * Returns the MD5 hash for the `passedEvent` parameter, or undefined if it can't be located
  * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the MD5 value for
  * @returns {string | undefined} The MD5 string for the event
  */
@@ -164,7 +164,7 @@ export function md5HashForProcess(passedEvent: ResolverEvent): string | undefine
 /**
  * Returns the command line path and arguments used to run the `passedEvent` if any
  *
- * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the arguemnts value for
+ * @param {ResolverEvent} passedEvent The `ResolverEvent` to get the arguments value for
  * @returns {string | undefined} The arguments (including the path) used to run the process
  */
 export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
