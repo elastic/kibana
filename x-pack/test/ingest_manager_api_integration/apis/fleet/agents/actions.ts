@@ -25,11 +25,9 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
-          action: {
-            type: 'CONFIG_CHANGE',
-            data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
-          },
+          type: 'CONFIG_CHANGE',
+          data: { data: 'action_data' },
+          sent_at: '2020-03-18T19:45:02.620Z',
         })
         .expect(200);
 
@@ -43,10 +41,8 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent1/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
-          action: {
-            data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
-          },
+          data: { data: 'action_data' },
+          sent_at: '2020-03-18T19:45:02.620Z',
         })
         .expect(400);
       expect(apiResponse.message).to.eql(
@@ -59,11 +55,9 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/ingest_manager/fleet/agents/agent100/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
-          action: {
-            type: 'CONFIG_CHANGE',
-            data: { data: 'action_data' },
-            sent_at: '2020-03-18T19:45:02.620Z',
-          },
+          type: 'CONFIG_CHANGE',
+          data: { data: 'action_data' },
+          sent_at: '2020-03-18T19:45:02.620Z',
         })
         .expect(404);
       expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
