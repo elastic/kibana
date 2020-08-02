@@ -6,9 +6,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-// @ts-ignore
-import turf from 'turf';
-// @ts-ignore
+// @ts-expect-error
+import turfDistance from '@turf/distance';
+// @ts-expect-error
 import turfCircle from '@turf/circle';
 
 type DrawCircleState = {
@@ -75,7 +75,7 @@ export const DrawCircle = {
       // second click, finish draw
       // @ts-ignore
       this.updateUIClasses({ mouse: 'pointer' });
-      state.circle.properties.radiusKm = turf.distance(state.circle.properties.center, [
+      state.circle.properties.radiusKm = turfDistance(state.circle.properties.center, [
         e.lngLat.lng,
         e.lngLat.lat,
       ]);
@@ -90,7 +90,7 @@ export const DrawCircle = {
     }
 
     const mouseLocation = [e.lngLat.lng, e.lngLat.lat];
-    state.circle.properties.radiusKm = turf.distance(state.circle.properties.center, mouseLocation);
+    state.circle.properties.radiusKm = turfDistance(state.circle.properties.center, mouseLocation);
     const newCircleFeature = turfCircle(
       state.circle.properties.center,
       state.circle.properties.radiusKm
