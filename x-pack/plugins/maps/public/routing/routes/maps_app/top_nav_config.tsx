@@ -6,109 +6,44 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from 'src/plugins/inspector/public';
+import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import {
-  getNavigation,
   getCoreChrome,
   getMapsCapabilities,
   getInspector,
   getToasts,
   getCoreI18n,
-  getData,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModal,
+  OnSaveProps,
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+// @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
+import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
 
-export function MapsTopNavMenu({
+export function getTopNavConfig({
   savedMap,
-  query,
-  onQueryChange,
-  onQuerySaved,
-  onSavedQueryUpdated,
-  savedQuery,
-  timeFilters,
-  refreshConfig,
-  onRefreshConfigChange,
-  indexPatterns,
-  onFiltersChange,
+  isOpenSettingsDisabled,
   isSaveDisabled,
   closeFlyout,
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
   setBreadcrumbs,
-  isOpenSettingsDisabled,
+}: {
+  savedMap: ISavedGisMap;
+  isOpenSettingsDisabled: boolean;
+  isSaveDisabled: boolean;
+  closeFlyout: () => void;
+  enableFullScreen: () => void;
+  openMapSettings: () => void;
+  inspectorAdapters: Adapters;
+  setBreadcrumbs: () => void;
 }) {
-  const { TopNavMenu } = getNavigation().ui;
-  const { filterManager, queryString } = getData().query;
-  const showSaveQuery = getMapsCapabilities().saveQuery;
-  const onClearSavedQuery = () => {
-    onQuerySaved(undefined);
-    onQueryChange({
-      filters: filterManager.getGlobalFilters(),
-      query: queryString.getDefaultQuery(),
-    });
-  };
-
-  // Nav settings
-  const config = getTopNavConfig(
-    savedMap,
-    isOpenSettingsDisabled,
-    isSaveDisabled,
-    closeFlyout,
-    enableFullScreen,
-    openMapSettings,
-    inspectorAdapters,
-    setBreadcrumbs
-  );
-
-  const submitQuery = function ({ dateRange, query }) {
-    onQueryChange({
-      query,
-      time: dateRange,
-      refresh: true,
-    });
-  };
-
-  return (
-    <TopNavMenu
-      appName="maps"
-      config={config}
-      indexPatterns={indexPatterns}
-      filters={filterManager.getFilters()}
-      query={query}
-      onQuerySubmit={submitQuery}
-      onFiltersUpdated={onFiltersChange}
-      dateRangeFrom={timeFilters.from}
-      dateRangeTo={timeFilters.to}
-      isRefreshPaused={refreshConfig.isPaused}
-      refreshInterval={refreshConfig.interval}
-      onRefreshChange={onRefreshConfigChange}
-      showSearchBar={true}
-      showFilterBar={true}
-      showDatePicker={true}
-      showSaveQuery={showSaveQuery}
-      savedQuery={savedQuery}
-      onSaved={onQuerySaved}
-      onSavedQueryUpdated={onSavedQueryUpdated}
-      onClearSavedQuery={onClearSavedQuery}
-    />
-  );
-}
-
-function getTopNavConfig(
-  savedMap,
-  isOpenSettingsDisabled,
-  isSaveDisabled,
-  closeFlyout,
-  enableFullScreen,
-  openMapSettings,
-  inspectorAdapters,
-  setBreadcrumbs
-) {
   return [
     {
       id: 'full-screen',
@@ -180,11 +115,11 @@ function getTopNavConfig(
                 newCopyOnSave,
                 isTitleDuplicateConfirmed,
                 onTitleDuplicate,
-              }) => {
+              }: OnSaveProps) => {
                 const currentTitle = savedMap.title;
                 savedMap.title = newTitle;
                 savedMap.copyOnSave = newCopyOnSave;
-                const saveOptions = {
+                const saveOptions: SavedObjectSaveOpts = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
@@ -218,7 +153,12 @@ function getTopNavConfig(
   ];
 }
 
-async function doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs) {
+async function doSave(
+  savedMap: ISavedGisMap,
+  saveOptions: SavedObjectSaveOpts,
+  closeFlyout: () => void,
+  setBreadcrumbs: () => void
+) {
   closeFlyout();
   savedMap.syncWithStore();
   let id;

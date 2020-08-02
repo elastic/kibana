@@ -5,12 +5,9 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
-export const Navbar = ({ children }) => {
-  return <div className="canvasNavbar">{children}</div>;
-};
+import { ServicesProvider } from '../../public/services';
 
-Navbar.propTypes = {
-  children: PropTypes.node,
-};
+export const servicesContextDecorator = (story: Function) => (
+  <ServicesProvider>{story()}</ServicesProvider>
+);

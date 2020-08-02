@@ -17,11 +17,25 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { TimelineTabsStyle } from './types';
 
 import { StatefulOpenTimeline } from '.';
+
 import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
+
+import { useParams } from 'react-router-dom';
+import { TimelineType } from '../../../../common/types/timeline';
+
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
+
+jest.mock('./helpers', () => {
+  const originalModule = jest.requireActual('./helpers');
+  return {
+    ...originalModule,
+    queryTimelineById: jest.fn(),
+  };
+});
+
 jest.mock('../../containers/all', () => {
   const originalModule = jest.requireActual('../../containers/all');
   return {
@@ -30,19 +44,21 @@ jest.mock('../../containers/all', () => {
     getAllTimeline: originalModule.getAllTimeline,
   };
 });
-jest.mock('./use_timeline_types', () => {
+
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
   return {
-    useTimelineTypes: jest.fn().mockReturnValue({
-      timelineType: 'default',
-      timelineTabs: <div data-test-subj="timeline-tab" />,
-      timelineFilters: <div data-test-subj="timeline-filter" />,
-    }),
+    ...originalModule,
+    useParams: jest.fn(),
+    useHistory: jest.fn().mockReturnValue([]),
   };
 });
 
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   beforeEach(() => {
+    (useParams as jest.Mock).mockReturnValue({ tabName: TimelineType.default });
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline(
@@ -433,10 +449,7 @@ describe('StatefulOpenTimeline', () => {
       });
     });
 
-    /**
-     * enable this test when createtTemplateTimeline is ready
-     */
-    test.skip('it renders the tabs', async () => {
+    test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
@@ -451,11 +464,27 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()
-        ).toEqual(true);
-      });
+      expect(wrapper.find('[data-test-subj="open-timeline-subtabs"]').exists()).toEqual(true);
+    });
+
+    test('it has the expected initial state for openTimelineModalBody - templateTimelineFilter', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              apolloClient={apolloClient}
+              isModal={true}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="open-timeline-modal-body-filters"]').exists()).toEqual(
+        true
+      );
     });
   });
 
