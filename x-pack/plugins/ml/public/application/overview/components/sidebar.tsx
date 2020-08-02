@@ -9,27 +9,10 @@ import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlKibana } from '../../contexts/kibana';
 
-const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
-}
-
-function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
-  return createAnomalyDetectionJobDisabled === true ? (
-    <FormattedMessage
-      id="xpack.ml.overview.gettingStartedSectionCreateJob"
-      defaultMessage="creating a new job"
-    />
-  ) : (
-    <EuiLink href={createJobLink} target="blank">
-      <FormattedMessage
-        id="xpack.ml.overview.gettingStartedSectionCreateJob"
-        defaultMessage="creating a new job"
-      />
-    </EuiLink>
-  );
 }
 
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
@@ -59,7 +42,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or creating a new job. We recommend using {transforms} to create feature indices for analytics jobs."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
@@ -69,7 +52,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
                   />
                 </EuiLink>
               ),
-              createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
               transforms: (
                 <EuiLink href={transformsLink} target="blank">
                   <FormattedMessage
