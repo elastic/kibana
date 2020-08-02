@@ -29,7 +29,7 @@ import {
   listSchema,
 } from '../../common/schemas';
 import { LIST_INDEX, LIST_ITEM_URL, LIST_PRIVILEGES_URL, LIST_URL } from '../../common/constants';
-import { validateEither } from '../../common/siem_common_deps';
+import { validateEither } from '../../common/shared_imports';
 import { toError, toPromise } from '../common/fp_utils';
 
 import {

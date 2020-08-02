@@ -13,14 +13,13 @@ import {
   ERROR_LOG_MESSAGE,
 } from '../../../common/elasticsearch_fieldnames';
 import { PromiseReturnType } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 import {
   Setup,
   SetupTimeRange,
   SetupUIFilters,
 } from '../helpers/setup_request';
-import { getErrorGroupsProjection } from '../../../common/projections/errors';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getErrorGroupsProjection } from '../../projections/errors';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
@@ -38,7 +37,7 @@ export async function getErrorGroups({
   sortDirection?: 'asc' | 'desc';
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'latestOccurrenceAt';
@@ -92,23 +91,7 @@ export async function getErrorGroups({
     },
   });
 
-  interface SampleError {
-    '@timestamp': APMError['@timestamp'];
-    error: {
-      log?: {
-        message: string;
-      };
-      exception?: Array<{
-        handled?: boolean;
-        message?: string;
-        type?: string;
-      }>;
-      culprit: APMError['error']['culprit'];
-      grouping_key: APMError['error']['grouping_key'];
-    };
-  }
-
-  const resp = await client.search<SampleError, typeof params>(params);
+  const resp = await apmEventClient.search(params);
 
   // aggregations can be undefined when no matching indices are found.
   // this is an exception rather than the rule so the ES type does not account for this.
