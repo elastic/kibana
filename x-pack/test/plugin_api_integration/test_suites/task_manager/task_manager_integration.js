@@ -68,6 +68,14 @@ export default function ({ getService }) {
         .then((response) => response.body);
     }
 
+    function ensureTasksIndexRefreshed() {
+      return supertest
+        .get(`/api/ensure_tasks_index_refreshed`)
+        .send({})
+        .expect(200)
+        .then((response) => response.body);
+    }
+
     function historyDocs(taskId) {
       return es
         .search({
@@ -420,7 +428,7 @@ export default function ({ getService }) {
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
 
-      await delay(1000);
+      await ensureTasksIndexRefreshed();
 
       // second run should still be successful
       const successfulRunNowResult = await runTaskNow({
@@ -434,7 +442,7 @@ export default function ({ getService }) {
         expect(task.status).to.eql('idle');
       });
 
-      await delay(1000);
+      await ensureTasksIndexRefreshed();
 
       // third run should fail
       const failedRunNowResult = await runTaskNow({
