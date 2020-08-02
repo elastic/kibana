@@ -17,29 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '../../../src/core/public';
-import { AppPluginStartDependencies } from './types';
-import { SearchExamplesApp } from './components/app';
+import { IRouter } from 'kibana/server';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { registerServerSearchRoute } from './server_search_route';
 
-export const renderApp = (
-  { notifications, savedObjects, uiSettings, http }: CoreStart,
-  { navigation, data }: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(
-    <SearchExamplesApp
-      basename={appBasePath}
-      notifications={notifications}
-      savedObjectsClient={savedObjects.client}
-      uiSettings={uiSettings}
-      navigation={navigation}
-      data={data}
-      http={http}
-    />,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
-};
+export function registerRoutes(router: IRouter, data: DataPluginStart) {
+  registerServerSearchRoute(router, data);
+}

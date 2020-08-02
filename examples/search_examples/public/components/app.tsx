@@ -44,7 +44,13 @@ import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
-import { PLUGIN_ID, PLUGIN_NAME, IMyStrategyRequest, IMyStrategyResponse } from '../../common';
+import {
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  IMyStrategyRequest,
+  IMyStrategyResponse,
+  SERVER_SEARCH_ROUTE_PATH,
+} from '../../common';
 
 import {
   DataPublicPluginStart,
@@ -57,6 +63,7 @@ interface SearchExamplesAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   uiSettings: CoreStart['uiSettings'];
+  http: CoreStart['http'];
   savedObjectsClient: CoreStart['savedObjects']['client'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
@@ -78,6 +85,7 @@ function formatFieldsToComboBox(fields?: IndexPatternField[]) {
 }
 
 export const SearchExamplesApp = ({
+  http,
   basename,
   notifications,
   uiSettings,
@@ -178,6 +186,22 @@ export const SearchExamplesApp = ({
 
   const onMyStrategyClickHandler = () => {
     doAsyncSearch('myStrategy');
+  };
+
+  const onServerClickHandler = async () => {
+    if (!indexPattern || !selectedField) return;
+    try {
+      const response = await http.get(SERVER_SEARCH_ROUTE_PATH, {
+        query: {
+          index: indexPattern.title,
+          field: selectedField.name,
+        },
+      });
+
+      notifications.toasts.addSuccess(`Server returned ${JSON.stringify(response)}`);
+    } catch (e) {
+      notifications.toasts.addDanger('Failed to run search');
+    }
   };
 
   if (!indexPattern) return null;
@@ -289,6 +313,22 @@ export const SearchExamplesApp = ({
                       <FormattedMessage
                         id="searchExamples.myStrategyButtonText"
                         defaultMessage="Get data via My Strategy"
+                      />
+                    </EuiButton>
+                  </EuiText>
+                  <EuiSpacer />
+                  <EuiTitle size="s">
+                    <h3>Using search on the server</h3>
+                  </EuiTitle>
+                  <EuiText>
+                    You can also run your search request from the server, without registering a
+                    search strategy. This request does not take the configuration of{' '}
+                    <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
+                    server as well.
+                    <EuiButton type="primary" size="s" onClick={onServerClickHandler}>
+                      <FormattedMessage
+                        id="searchExamples.myServerButtonText"
+                        defaultMessage="Get data on the server"
                       />
                     </EuiButton>
                   </EuiText>

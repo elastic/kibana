@@ -16,30 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '../../../src/core/public';
-import { AppPluginStartDependencies } from './types';
-import { SearchExamplesApp } from './components/app';
-
-export const renderApp = (
-  { notifications, savedObjects, uiSettings, http }: CoreStart,
-  { navigation, data }: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
-) => {
-  ReactDOM.render(
-    <SearchExamplesApp
-      basename={appBasePath}
-      notifications={notifications}
-      savedObjectsClient={savedObjects.client}
-      uiSettings={uiSettings}
-      navigation={navigation}
-      data={data}
-      http={http}
-    />,
-    element
-  );
-
-  return () => ReactDOM.unmountComponentAtNode(element);
-};
+export { registerRoutes } from './register_routes';

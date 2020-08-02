@@ -32,6 +32,7 @@ import {
   SearchExamplesPluginStartDeps,
 } from './types';
 import { mySearchStrategyProvider } from './my_strategy';
+import { registerRoutes } from './routes';
 
 export class SearchExamplesPlugin
   implements
@@ -52,10 +53,12 @@ export class SearchExamplesPlugin
     deps: SearchExamplesPluginSetupDeps
   ) {
     this.logger.debug('search_examples: Setup');
+    const router = core.http.createRouter();
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
+      registerRoutes(router, depsStart.data);
     });
 
     return {};
