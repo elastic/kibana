@@ -218,7 +218,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         }}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
-        inputTargetValue={comments[0].comment}
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : ''}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.jira.commentsTextAreaFieldLabel',
           {

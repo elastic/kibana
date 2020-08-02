@@ -6,9 +6,15 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 import { Logger } from '../../../../../../src/core/server';
-import { JiraPublicConfigurationType, JiraSecretConfigurationType } from './types';
+import {
+  ExternalServiceCredentials,
+  ExternalService,
+  ExternalServiceParams,
+  CreateIncidentParams,
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+} from './types';
 import { Comment } from './case_types';
 
 import * as i18n from './translations';
@@ -74,10 +80,28 @@ export const createExternalService = (
     return undefined;
   };
 
-  const createIncident = async ({ incident }: ExternalServiceParams) => {
+  const createIncident = async ({ incident }: CreateIncidentParams) => {
     // The response from Jira when creating an issue contains only the key and the id.
     // The function makes two calls when creating an issue. One to create the issue and one to get
     // the created issue with all the necessary fields.
+    let fields: { [key: string]: string | string[] | { name: string } | { key: string } } = {
+      summary: incident.summary,
+      project: { key: projectKey },
+      issuetype: { name: incident.issueType ?? 'Task' },
+    };
+
+    if (incident.description) {
+      fields = { ...fields, description: incident.description };
+    }
+
+    if (incident.labels) {
+      fields = { ...fields, labels: incident.labels };
+    }
+
+    if (incident.priority) {
+      fields = { ...fields, priority: { name: incident.priority } };
+    }
+
     try {
       const res = await request({
         axios: axiosInstance,
@@ -85,11 +109,7 @@ export const createExternalService = (
         logger,
         method: 'post',
         data: {
-          fields: {
-            ...(incident as Record<string, unknown>),
-            project: { key: projectKey },
-            issuetype: { name: 'Task' },
-          },
+          fields,
         },
         proxySettings,
       });

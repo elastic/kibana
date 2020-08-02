@@ -62,9 +62,9 @@ const pushToServiceHandler = async ({
     }
   }
 
-  let incident = {};
+  let incident;
   // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping && Array.isArray(params.comments)) {
+  if (mapping) {
     const fields = prepareFieldsForTransformation({
       externalCase: params.externalObject,
       mapping,
@@ -77,7 +77,8 @@ const pushToServiceHandler = async ({
       currentIncident,
     });
   } else {
-    incident = { ...params, summary: params.title };
+    const { title, description, priority, labels, issueType } = params;
+    incident = { summary: title, description, priority, labels, issueType };
   }
 
   if (updateIncident) {
@@ -89,27 +90,21 @@ const pushToServiceHandler = async ({
     res = await externalService.createIncident({
       incident: {
         ...incident,
-        caller_id: secrets.username,
       },
     });
   }
 
   // TODO: should temporary keep comments for a Case usage
-  if (
-    comments &&
-    Array.isArray(comments) &&
-    comments.length > 0 &&
-    mapping &&
-    mapping.get('comments')?.actionType !== 'nothing'
-  ) {
-    const commentsTransformed = transformComments(comments, ['informationAdded']);
+  if (comments && Array.isArray(comments) && comments.length > 0) {
+    const commentsTransformed = mapping
+      ? transformComments(comments, ['informationAdded'])
+      : comments;
 
     res.comments = [];
     for (const currentComment of commentsTransformed) {
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
-        field: mapping.get('comments')?.target ?? 'comments',
       });
       res.comments = [
         ...(res.comments ?? []),

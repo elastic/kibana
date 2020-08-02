@@ -57,10 +57,17 @@ export interface ExternalServiceCommentResponse {
 
 export type ExternalServiceParams = Record<string, unknown>;
 
+export interface CreateIncidentParams {
+  incident: Pick<
+    ExecutorSubActionPushParams,
+    'description' | 'priority' | 'labels' | 'issueType'
+  > & { summary: string };
+}
+
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
-  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
   getCreateIssueMetadata: () => Promise<ExternalServiceParams>;
