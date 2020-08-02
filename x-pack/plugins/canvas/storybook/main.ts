@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Tray } from './tray';
+module.exports = {
+  stories: ['../**/*.stories.tsx'],
+  addons: [
+    '@storybook/addon-actions',
+    '@storybook/addon-knobs',
+    './storybook/addon/target/register',
+  ],
+};

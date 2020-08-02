@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-import { Navbar as Component } from './navbar';
-
-export const Navbar = pure(Component);
+module.exports = {
+  presets: ['@kbn/babel-preset/webpack_preset'],
+  plugins: ['@babel/plugin-proposal-class-properties'],
+};
