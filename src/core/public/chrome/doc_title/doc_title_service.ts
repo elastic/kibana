@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compact, flattenDeep, isString } from 'lodash';
+import { compact, flattenDeep } from 'lodash';
 
 interface StartDeps {
   document: { title: string };
