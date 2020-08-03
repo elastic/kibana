@@ -131,6 +131,11 @@ const APPLIED_POLICIES: Array<{
     id: 'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
     status: HostPolicyResponseActionStatus.success,
   },
+  {
+    name: 'Detect Malware Only',
+    id: '47d7965d-6869-478b-bd9c-fb0d2bb3959f',
+    status: HostPolicyResponseActionStatus.success,
+  },
 ];
 
 const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'deletion'];
