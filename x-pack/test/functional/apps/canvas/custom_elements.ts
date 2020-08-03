@@ -19,7 +19,7 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  describe.only('custom elements', function () {
+  describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -61,8 +61,6 @@ export default function canvasCustomElementTest({
     it('adds the custom element to the workpad when prompted', async () => {
       // open the saved elements modal
       await PageObjects.canvas.openSavedElementsModal();
-
-      await PageObjects.common.sleep(500); // give time for modal to open
 
       // ensure the custom element is the one expected and click it to add to the workpad
       const customElement = await find.byCssSelector('.canvasElementCard__wrapper');
