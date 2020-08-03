@@ -187,7 +187,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         ) : null}
         {field.displayName !== field.name && (
           <div>
-            <EuiBadge size="xs" iconType="eye" iconSide="left">
+            <EuiBadge iconType="eye" iconSide="left">
               {field.displayName}
             </EuiBadge>
           </div>
