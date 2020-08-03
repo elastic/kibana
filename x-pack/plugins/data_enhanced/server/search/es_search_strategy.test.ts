@@ -115,7 +115,7 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'foo-*', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$);
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
