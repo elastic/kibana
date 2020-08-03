@@ -15,27 +15,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-
-const DEFAULT_QUERY = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
-const DEFAULT_QUERY_STRING = JSON.stringify(DEFAULT_QUERY, null, 2);
+import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 
 export const ResetQueryButton: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [defaultQueryString] = useState(JSON.stringify(getDefaultDatafeedQuery(), null, 2));
 
   const closeModal = () => setConfirmModalVisible(false);
   const showModal = () => setConfirmModalVisible(true);
 
   function resetDatafeed() {
-    jobCreator.query = DEFAULT_QUERY;
+    jobCreator.query = getDefaultDatafeedQuery();
     jobCreatorUpdate();
     closeModal();
   }
@@ -67,7 +58,7 @@ export const ResetQueryButton: FC = () => {
             <EuiSpacer size="s" />
 
             <EuiCodeBlock language="js" fontSize="m" paddingSize="s">
-              {DEFAULT_QUERY_STRING}
+              {defaultQueryString}
             </EuiCodeBlock>
           </EuiConfirmModal>
         </EuiOverlayMask>
