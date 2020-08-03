@@ -260,7 +260,6 @@ export class ExpressionsService {
   /**
    * Migrates expression AST to the latest version. This function should be called whenever expression is read from any place where expression could be from previous kibana version.
    * @param state old version of expression AST
-   * @param version kibana version of expression AST passed in
    */
   public readonly migrate = (state: ExpressionAstExpression) => {
     return this.executor.migrate(state);
