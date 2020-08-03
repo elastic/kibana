@@ -10,7 +10,6 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
@@ -200,7 +199,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      ) : null,
+      ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentConfig, configId, agentStatus]
   );
@@ -238,9 +237,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     if (error) {
       return (
         <Error
-          title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
-            defaultMessage: 'An error happened while loading the config',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.unexceptedErrorTitle"
+              defaultMessage="An error happened while loading the config"
+            />
+          }
           error={error}
         />
       );
@@ -249,9 +251,12 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
     if (!agentConfig) {
       return (
         <Error
-          title={i18n.translate('xpack.ingestManager.configDetails.unexceptedErrorTitle', {
-            defaultMessage: 'An error happened while loading the config',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.unexceptedErrorTitle"
+              defaultMessage="An error happened while loading the config"
+            />
+          }
           error={i18n.translate('xpack.ingestManager.configDetails.configNotFoundErrorTitle', {
             defaultMessage: "Config '{id}' not found",
             values: {
