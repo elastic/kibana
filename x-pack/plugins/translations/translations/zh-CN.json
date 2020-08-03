@@ -14341,7 +14341,6 @@
     "xpack.remoteClusters.updateRemoteCluster.noRemoteClusterErrorMessage": "没有该名称的远程集群。",
     "xpack.remoteClusters.updateRemoteCluster.unknownRemoteClusterErrorMessage": "无法编辑集群，ES 未返回任何响应。",
     "xpack.reporting.breadcrumb": "报告",
-    "xpack.reporting.browsers.chromium.chromiumClosed": "Reporting 检测到 Chromium 已关闭。",
     "xpack.reporting.browsers.chromium.errorDetected": "Reporting 检测到错误：{err}",
     "xpack.reporting.browsers.chromium.pageErrorDetected": "Reporting 在页面上检测到错误：{err}",
     "xpack.reporting.chromiumDriver.disallowedOutgoingUrl": "接收到禁止的传出 URL：“{interceptedUrl}”，正在退出",
