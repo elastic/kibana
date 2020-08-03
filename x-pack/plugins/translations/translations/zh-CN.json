@@ -19310,7 +19310,6 @@
     "xpack.watcher.models.baseAction.simulateMessage": "已成功模拟操作 {id}",
     "xpack.watcher.models.baseAction.typeName": "操作",
     "xpack.watcher.models.baseWatch.createUnknownActionTypeErrorMessage": "尝试创建的操作类型 {type} 未知。",
-    "xpack.watcher.models.baseWatch.displayName": "新建监视",
     "xpack.watcher.models.baseWatch.idPropertyMissingBadRequestMessage": "json 参数必须包含 {id} 属性",
     "xpack.watcher.models.baseWatch.selectMessageText": "设置新监视。",
     "xpack.watcher.models.baseWatch.typeName": "监视",
