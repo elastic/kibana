@@ -51,7 +51,7 @@ def getParallelWorkspaces() {
       workspaces = findFiles(glob: '*/kibana/package.json')
         .collect {
           // get the paths to the kibana directories for the parallel workspaces
-            return parallelWorkspace + '/' + it.path.tokenize('/').dropRight(1).join('/')
+          return parallelWorkspace + '/' + it.path.tokenize('/').dropRight(1).join('/')
         }
     }
   }
