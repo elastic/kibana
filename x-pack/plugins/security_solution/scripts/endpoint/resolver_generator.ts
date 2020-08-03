@@ -10,6 +10,7 @@ import * as url from 'url';
 import fetch from 'node-fetch';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
 
@@ -203,6 +204,8 @@ async function main() {
     node: argv.node,
   };
 
+  const kibana = new KbnClient(new ToolingLog(), { url: argv.kibana });
+
   const client = new Client(clientOptions);
   if (argv.delete) {
     await deleteIndices(
@@ -219,6 +222,7 @@ async function main() {
   const startTime = new Date().getTime();
   await indexHostsAndAlerts(
     client,
+    kibana,
     seed,
     argv.numHosts,
     argv.numDocs,
