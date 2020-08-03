@@ -66,7 +66,7 @@ describe('test filtering endpoint hosts by agent status', () => {
     mockAgentService.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
-          agents: [({ id: 'enrollA' } as unknown) as Agent, ({ id: 'errorB' } as unknown) as Agent],
+          agents: [({ id: 'A' } as unknown) as Agent, ({ id: 'B' } as unknown) as Agent],
           total: 2,
           page: 1,
           perPage: 2,
@@ -82,15 +82,15 @@ describe('test filtering endpoint hosts by agent status', () => {
       );
 
     const result = await findAgentIDsByStatus(mockAgentService, mockSavedObjectClient, [
-      'enrolling',
+      'unenrolling',
       'error',
     ]);
-    const enrollKuery = AgentStatusKueryHelper.buildKueryForEnrollingAgents();
+    const unenrollKuery = AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
     expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
-      expect.stringContaining(`${enrollKuery} OR ${errorKuery}`)
+      expect.stringContaining(`${unenrollKuery} OR ${errorKuery}`)
     );
     expect(result).toBeDefined();
-    expect(result).toEqual(['enrollA', 'errorB']);
+    expect(result).toEqual(['A', 'B']);
   });
 });
