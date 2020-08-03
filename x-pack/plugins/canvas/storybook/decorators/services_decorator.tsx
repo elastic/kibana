@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import { RouterContext } from '../../public/components/router';
+import { ServicesProvider } from '../../public/services';
 
-export const routerContextDecorator = (story: Function) => (
-  <RouterContext.Provider value={{ navigateTo: () => {} }}>{story()}</RouterContext.Provider>
+export const servicesContextDecorator = (story: Function) => (
+  <ServicesProvider>{story()}</ServicesProvider>
 );
