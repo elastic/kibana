@@ -30,7 +30,7 @@ export async function indexHostsAndAlerts(
   numHosts: number,
   numDocs: number,
   metadataIndex: string,
-  policyIndex: string,
+  policyResponseIndex: string,
   eventIndex: string,
   alertIndex: string,
   alertsPerHost: number,
@@ -50,7 +50,7 @@ export async function indexHostsAndAlerts(
       realPolicies,
       epmEndpointPackage,
       metadataIndex,
-      policyIndex,
+      policyResponseIndex,
       generator
     );
     await indexAlerts(client, eventIndex, alertIndex, generator, alertsPerHost, options);
@@ -75,7 +75,7 @@ async function indexHostDocs(
   realPolicies: Record<string, CreatePackageConfigResponse['item']>,
   epmEndpointPackage: GetPackagesResponse['response'][0],
   metadataIndex: string,
-  policyIndex: string,
+  policyResponseIndex: string,
   generator: EndpointDocGenerator
 ) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -123,7 +123,7 @@ async function indexHostDocs(
       op_type: 'create',
     });
     await client.index({
-      index: policyIndex,
+      index: policyResponseIndex,
       body: generator.generatePolicyResponse(timestamp - timeBetweenDocs * (numDocs - j - 1)),
       op_type: 'create',
     });
