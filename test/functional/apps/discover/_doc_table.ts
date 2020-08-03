@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
       const initialRows = await PageObjects.discover.getDocTableRows();
       // click the Skip to the end of the table
-      await PageObjects.discoverToEndOfDocTable();
+      await PageObjects.discover.skipToEndOfDocTable();
       // now count the rows
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.above(initialRows.length);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should go the end of the table when using the accessible Skip button', async function () {
       // click the Skip to the end of the table
-      await PageObjects.discoverToEndOfDocTable();
+      await PageObjects.discover.skipToEndOfDocTable();
       // now check the footer text content
       const footer = await PageObjects.discover.getDocTableFooter();
       log.debug(await footer.getVisibleText());
