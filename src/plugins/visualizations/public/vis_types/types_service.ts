@@ -104,6 +104,13 @@ export class TypesService {
           }
         });
       },
+      /**
+       * returns if a specific type is hidden
+       * @param {string} typeName - list of type ids to hide
+       */
+      typeIsHidden: (typeName: string) => {
+        return this.types[typeName].hidden;
+      },
     };
   }
 

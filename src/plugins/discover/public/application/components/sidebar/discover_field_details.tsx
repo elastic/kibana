@@ -23,7 +23,6 @@ import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import { triggerVisualizeActions, isFieldVisualizable } from './lib/get_visualize_trigger';
 import { Bucket, FieldDetails } from './types';
-import { getServices } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
 interface DiscoverFieldDetailsProps {
@@ -91,9 +90,6 @@ export function DiscoverFieldDetails({
         <>
           <EuiLink
             onClick={() => {
-              // getServices().core.application.navigateToApp(details.visualizeUrl.app, {
-              //   path: details.visualizeUrl.path,
-              // });
               triggerVisualizeActions(field, indexPattern.id, details.columns);
             }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"

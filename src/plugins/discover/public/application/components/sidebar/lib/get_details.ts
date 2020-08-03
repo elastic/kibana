@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { getVisualizeUrl, isFieldVisualizable } from './visualize_url_utils';
 import { AppState } from '../../../angular/discover_state';
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
@@ -32,10 +31,6 @@ export function getDetails(
   services: DiscoverServices
 ) {
   const details = {
-    visualizeUrl:
-      services.capabilities.visualize.show && isFieldVisualizable(field, services.visualizations)
-        ? getVisualizeUrl(field, indexPattern, state, columns, services)
-        : null,
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,

@@ -28,10 +28,6 @@ export interface FieldDetails {
   total: boolean;
   buckets: Bucket[];
   columns: string[];
-  visualizeUrl: {
-    app: string;
-    path: string;
-  };
 }
 
 export interface Bucket {

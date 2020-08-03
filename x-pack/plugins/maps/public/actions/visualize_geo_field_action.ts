@@ -14,7 +14,7 @@ export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 
 export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_FIELD>({
   type: ACTION_VISUALIZE_GEO_FIELD,
-  getDisplayName: () => 'Visualize Geo Field',
+  getDisplayName: () => 'Go to Maps',
   execute: async (context) => {
     const indexPattern = await getIndexPatternService().get(context.indexPatternId);
     const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);

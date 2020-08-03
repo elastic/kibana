@@ -34,9 +34,29 @@ import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setQueryService } from './services';
-import { setKibanaLegacy } from './services';
+import {
+  UiActionsStart,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  VisualizeGeoFieldContext,
+} from '../../ui_actions/public';
+import {
+  setFormatService,
+  setQueryService,
+  setKibanaLegacy,
+  setApplication,
+  setVisualizations,
+} from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import {
+  visualizeTilemapFieldAction,
+  ACTION_VISUALIZE_TILEMAP_FIELD,
+} from './actions/visualize_tilemap_field_actions';
+
+declare module '../../ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_VISUALIZE_TILEMAP_FIELD]: VisualizeGeoFieldContext;
+  }
+}
 
 export interface TileMapConfigType {
   tilemap: any;
@@ -62,6 +82,7 @@ export interface TileMapPluginSetupDependencies {
 export interface TileMapPluginStartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
+  uiActions: UiActionsStart;
 }
 
 export interface TileMapPluginSetup {
@@ -83,6 +104,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {
     const { getZoomPrecision, getPrecision, serviceSettings } = mapsLegacy;
+    setVisualizations(visualizations);
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
@@ -101,10 +123,12 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     };
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: TileMapPluginStartDependencies) {
+  public start(core: CoreStart, { data, kibanaLegacy, uiActions }: TileMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setQueryService(data.query);
     setKibanaLegacy(kibanaLegacy);
+    setApplication(core.application);
+    uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeTilemapFieldAction);
     return {};
   }
 }
