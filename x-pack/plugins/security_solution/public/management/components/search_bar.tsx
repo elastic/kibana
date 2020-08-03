@@ -8,10 +8,18 @@ import React, { memo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import { Query } from 'src/plugins/data/public';
+import styled from 'styled-components';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from '../pages/endpoint_hosts/view/url_from_query_params';
 import { useHostSelector } from '../pages/endpoint_hosts/view/hooks';
 import * as selectors from '../pages/endpoint_hosts/store/selectors';
+
+const AdminQueryBar = styled.div`
+  margin-bottom: ${(props) => props.theme.eui.ruleMargins.marginMedium};
+  .globalQueryBar {
+    padding: 0;
+  }
+`;
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
@@ -42,18 +50,20 @@ export const AdminSearchBar = memo(() => {
   return (
     <div>
       {searchBarIndexPatterns && searchBarIndexPatterns.length > 0 && (
-        <SearchBar
-          dataTestSubj="adminSearchBar"
-          appName="endpoint"
-          query={searchBarQuery}
-          indexPatterns={searchBarIndexPatterns}
-          onQuerySubmit={onQuerySubmit}
-          isLoading={false}
-          showFilterBar={false}
-          showDatePicker={false}
-          showQueryBar={true}
-          showQueryInput={true}
-        />
+        <AdminQueryBar>
+          <SearchBar
+            dataTestSubj="adminSearchBar"
+            appName="endpoint"
+            query={searchBarQuery}
+            indexPatterns={searchBarIndexPatterns}
+            onQuerySubmit={onQuerySubmit}
+            isLoading={false}
+            showFilterBar={false}
+            showDatePicker={false}
+            showQueryBar={true}
+            showQueryInput={true}
+          />
+        </AdminQueryBar>
       )}
     </div>
   );
