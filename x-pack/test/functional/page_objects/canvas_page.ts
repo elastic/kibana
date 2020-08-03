@@ -8,10 +8,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CanvasPageProvider({ getService }: FtrProviderContext) {
+export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async enterFullscreen() {
