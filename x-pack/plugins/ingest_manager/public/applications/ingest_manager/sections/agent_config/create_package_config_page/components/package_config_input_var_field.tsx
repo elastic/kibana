@@ -6,7 +6,14 @@
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText, EuiCodeEditor } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiComboBox,
+  EuiSelect,
+  EuiText,
+  EuiCodeEditor,
+} from '@elastic/eui';
 import { RegistryVarsEntry } from '../../../../types';
 
 import 'brace/mode/yaml';
@@ -58,6 +65,14 @@ export const PackageConfigInputVarField: React.FunctionComponent<{
           onBlur={() => setIsDirty(true)}
         />
       );
+    }
+    if (type === 'enum') {
+      const options = [
+        { value: 'http', text: 'HTTP' },
+        { value: 'icmp', text: 'ICMP' },
+        { value: 'tcp', text: 'TCP' },
+      ];
+      return <EuiSelect options={options} value="http" onChange={(e) => onChange(e)} />;
     }
     return (
       <EuiFieldText
