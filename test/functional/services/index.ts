@@ -55,6 +55,7 @@ import { KibanaSupertestProvider } from './supertest';
 export const services = {
   ...commonServiceProviders,
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
