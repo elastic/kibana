@@ -36,7 +36,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
 systemctl enable elastic-agent
 systemctl start elastic-agent`;
 
-  const windowsCommand = `./elastic-agent enroll ${enrollArgs}
+  const windowsCommand = `.\elastic-agent enroll ${enrollArgs}
 ./install-service-elastic-agent.ps1`;
 
   return (
