@@ -70,7 +70,7 @@ const TitleFlexGroup = styled(EuiFlexGroup)`
 
 const EventsContainerLoading = styled.div`
   width: 100%;
-  overflow: auto;
+  overflow: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
