@@ -974,6 +974,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
 // @public
 export interface KibanaRequestEvents {
     aborted$: Observable<void>;
+    completed$: Observable<void>;
 }
 
 // @public

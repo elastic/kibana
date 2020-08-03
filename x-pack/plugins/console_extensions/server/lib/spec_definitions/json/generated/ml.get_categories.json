@@ -2,7 +2,8 @@
   "ml.get_categories": {
     "url_params": {
       "from": 0,
-      "size": 0
+      "size": 0,
+      "partition_field_value": ""
     },
     "methods": [
       "GET",
