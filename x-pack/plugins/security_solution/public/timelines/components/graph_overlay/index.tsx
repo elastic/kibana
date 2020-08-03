@@ -107,6 +107,7 @@ const GraphOverlayComponent = ({
   const dispatch = useDispatch();
   const onCloseOverlay = useCallback(() => {
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
+    setTimeout(() => window.scrollTo(0, 0), 0);
   }, [dispatch, timelineId]);
 
   const currentTimeline = useSelector((state: State) =>
