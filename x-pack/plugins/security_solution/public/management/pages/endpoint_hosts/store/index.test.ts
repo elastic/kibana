@@ -52,6 +52,7 @@ describe('HostList store concerns', () => {
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
         hostsExist: true,
+        patterns: [],
       });
     });
 

@@ -90,7 +90,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
         hostResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filter: adminQuery ? ((decode(adminQuery) as unknown) as Query).query : '',
+            filters: { kql: adminQuery ? ((decode(adminQuery) as unknown) as Query).query : '' },
           }),
         });
         hostResponse.request_page_index = Number(pageIndex);
