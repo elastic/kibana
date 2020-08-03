@@ -19,8 +19,7 @@ export const BackToListPanel: FC = () => {
   return (
     <Fragment>
       <EuiCard
-        // @ts-ignore
-        style={{ width: '300px' }}
+        className="dfAnalyticsCreationWizard__card"
         icon={<EuiIcon size="xxl" type="list" />}
         title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
           defaultMessage: 'Data Frame Analytics',

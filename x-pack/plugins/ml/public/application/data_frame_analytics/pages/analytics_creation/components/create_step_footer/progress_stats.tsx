@@ -14,15 +14,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataFrameAnalyticsId } from '../../../../common/analytics';
+import { AnalyticsProgressStats } from './create_step_footer';
 
 interface Props {
-  currentProgress: any;
-  failedJobMessage: any;
-  jobId: DataFrameAnalyticsId;
+  currentProgress?: AnalyticsProgressStats;
+  failedJobMessage: string | undefined;
 }
 
-export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage, jobId }) => {
+export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) => {
   if (currentProgress === undefined) return null;
 
   return (

@@ -28,18 +28,19 @@ interface Props {
   showProgress: boolean;
 }
 
+export interface AnalyticsProgressStats {
+  currentPhase: number;
+  progress: number;
+  totalPhases: number;
+}
+
 export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
   const [jobFinished, setJobFinished] = useState<boolean>(false);
-  const [currentProgress, setCurrentProgress] = useState<
-    | {
-        currentPhase: number;
-        progress: number;
-        totalPhases: number;
-      }
-    | undefined
-  >(undefined);
+  const [currentProgress, setCurrentProgress] = useState<AnalyticsProgressStats | undefined>(
+    undefined
+  );
 
   const {
     services: { notifications },
@@ -104,11 +105,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         {showProgress && (
-          <ProgressStats
-            jobId={jobId}
-            currentProgress={currentProgress}
-            failedJobMessage={failedJobMessage}
-          />
+          <ProgressStats currentProgress={currentProgress} failedJobMessage={failedJobMessage} />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
