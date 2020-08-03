@@ -44,6 +44,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetupContract;
   alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface PluginsStart {
