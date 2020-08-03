@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
@@ -16,72 +16,77 @@ import {
   EuiModalFooter,
   EuiButton,
 } from '@elastic/eui';
-import { CanvasElement } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-
-// @ts-expect-error untyped local
-import { Navbar } from '../navbar';
 // @ts-expect-error untyped local
 import { WorkpadManager } from '../workpad_manager';
+import { RouterContext } from '../router';
 import { PageManager } from '../page_manager';
 // @ts-expect-error untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
+import { CanvasElement } from '../../../types';
+import { ComponentStrings } from '../../../i18n';
+
 const { Toolbar: strings } = ComponentStrings;
 
-enum TrayType {
-  pageManager = 'pageManager',
-  expression = 'expression',
-}
+type TrayType = 'pageManager' | 'expression';
 
 interface Props {
-  workpadName: string;
   isWriteable: boolean;
-  canUserWrite: boolean;
-  tray: TrayType | null;
-  setTray: (tray: TrayType | null) => void;
-
-  previousPage: () => void;
-  nextPage: () => void;
+  selectedElement?: CanvasElement;
   selectedPageNumber: number;
   totalPages: number;
-
-  selectedElement: CanvasElement;
-
-  showWorkpadManager: boolean;
-  setShowWorkpadManager: (show: boolean) => void;
+  workpadId: string;
+  workpadName: string;
 }
 
-export const Toolbar = (props: Props) => {
-  const {
-    selectedElement,
-    tray,
-    setTray,
-    previousPage,
-    nextPage,
-    selectedPageNumber,
-    workpadName,
-    totalPages,
-    showWorkpadManager,
-    setShowWorkpadManager,
-    isWriteable,
-  } = props;
+export const Toolbar: FC<Props> = ({
+  isWriteable,
+  selectedElement,
+  selectedPageNumber,
+  totalPages,
+  workpadId,
+  workpadName,
+}) => {
+  const [activeTray, setActiveTray] = useState<TrayType | null>(null);
+  const [showWorkpadManager, setShowWorkpadManager] = useState(false);
+  const router = useContext(RouterContext);
+
+  // While the tray doesn't get activated if the workpad isn't writeable,
+  // this effect will ensure that if the tray is open and the workpad
+  // changes its writeable state, the tray will close.
+  useEffect(() => {
+    if (!isWriteable && activeTray === 'expression') {
+      setActiveTray(null);
+    }
+  }, [isWriteable, activeTray]);
+
+  if (!router) {
+    return <div>{strings.getErrorMessage('Router Undefined')}</div>;
+  }
+
+  const nextPage = () => {
+    const page = Math.min(selectedPageNumber + 1, totalPages);
+    router.navigateTo('loadWorkpad', { id: workpadId, page });
+  };
+
+  const previousPage = () => {
+    const page = Math.max(1, selectedPageNumber - 1);
+    router.navigateTo('loadWorkpad', { id: workpadId, page });
+  };
 
   const elementIsSelected = Boolean(selectedElement);
 
-  const done = () => setTray(null);
-
-  if (!isWriteable && tray === TrayType.expression) {
-    done();
-  }
-
-  const showHideTray = (exp: TrayType) => {
-    if (tray && tray === exp) {
-      return done();
+  const toggleTray = (tray: TrayType) => {
+    if (activeTray === tray) {
+      setActiveTray(null);
+    } else {
+      if (!isWriteable && tray === 'expression') {
+        return;
+      }
+      setActiveTray(tray);
     }
-    setTray(exp);
   };
 
   const closeWorkpadManager = () => setShowWorkpadManager(false);
@@ -102,13 +107,13 @@ export const Toolbar = (props: Props) => {
 
   const trays = {
     pageManager: <PageManager onPreviousPage={previousPage} />,
-    expression: !elementIsSelected ? null : <Expression done={done} />,
+    expression: !elementIsSelected ? null : <Expression done={() => setActiveTray(null)} />,
   };
 
   return (
     <div className="canvasToolbar hide-for-sharing">
-      {tray !== null && <Tray done={done}>{trays[tray]}</Tray>}
-      <Navbar>
+      {activeTray !== null && <Tray done={() => setActiveTray(null)}>{trays[activeTray]}</Tray>}
+      <div className="canvasToolbar__container">
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="text" iconType="grid" onClick={() => openWorkpadManager()}>
@@ -126,7 +131,7 @@ export const Toolbar = (props: Props) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" onClick={() => showHideTray(TrayType.pageManager)}>
+            <EuiButtonEmpty color="text" onClick={() => toggleTray('pageManager')}>
               {strings.getPageButtonLabel(selectedPageNumber, totalPages)}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -145,7 +150,7 @@ export const Toolbar = (props: Props) => {
               <EuiButtonEmpty
                 color="text"
                 iconType="editorCodeBlock"
-                onClick={() => showHideTray(TrayType.expression)}
+                onClick={() => toggleTray('expression')}
                 data-test-subj="canvasExpressionEditorButton"
               >
                 {strings.getEditorButtonLabel()}
@@ -153,23 +158,17 @@ export const Toolbar = (props: Props) => {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-      </Navbar>
-
+      </div>
       {showWorkpadManager && workpadManager}
     </div>
   );
 };
 
 Toolbar.propTypes = {
-  workpadName: PropTypes.string,
-  tray: PropTypes.string,
-  setTray: PropTypes.func.isRequired,
-  nextPage: PropTypes.func.isRequired,
-  previousPage: PropTypes.func.isRequired,
+  isWriteable: PropTypes.bool.isRequired,
+  selectedElement: PropTypes.object,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  selectedElement: PropTypes.object,
-  showWorkpadManager: PropTypes.bool.isRequired,
-  setShowWorkpadManager: PropTypes.func.isRequired,
-  isWriteable: PropTypes.bool.isRequired,
+  workpadId: PropTypes.string.isRequired,
+  workpadName: PropTypes.string.isRequired,
 };
