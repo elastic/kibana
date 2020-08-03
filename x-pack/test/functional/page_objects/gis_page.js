@@ -136,6 +136,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       // Navigate directly because we don't need to go through the map listing
       // page. The listing page is skipped if there are no saved objects
       await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
+      await renderable.waitForRender();
     }
 
     async saveMap(name) {
