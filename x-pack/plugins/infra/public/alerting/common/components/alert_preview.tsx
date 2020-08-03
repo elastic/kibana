@@ -194,7 +194,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                     plural: previewResult.resultTotals.noData !== 1 ? 's' : '',
                   }}
                 />
-              ) : null}
+              ) : null}{' '}
               {previewResult.resultTotals.error ? (
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.alertPreviewErrorResult"

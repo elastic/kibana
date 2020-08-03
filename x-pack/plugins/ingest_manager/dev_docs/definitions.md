@@ -10,7 +10,7 @@ This section is to define terms used across ingest management.
 A package config is a definition on how to collect data from a service, for example `nginx`. A package config contains
 definitions for one or multiple inputs and each input can contain one or multiple streams.
 
-With the example of the nginx Package Config, it contains to inputs: `logs` and `nginx/metrics`. Logs and metrics are collected
+With the example of the nginx Package Config, it contains two inputs: `logs` and `nginx/metrics`. Logs and metrics are collected
 differently. The `logs` input contains two streams, `access` and `error`, the `nginx/metrics` input contains the stubstatus stream.
 
 ## Data Stream
