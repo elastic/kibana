@@ -32,7 +32,7 @@ import {
   getLimitedPackages,
   getInstallationObject,
 } from '../../services/epm/packages';
-import { PackageNotFound, PackageOutdated } from '../../errors';
+import { PackageNotFoundError, PackageOutdatedError } from '../../errors';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -166,13 +166,13 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
-    if (e instanceof PackageNotFound) {
+    if (e instanceof PackageNotFoundError) {
       return response.notFound({
         body: { message: `${e.message} not found` },
       });
     }
 
-    if (e instanceof PackageOutdated) {
+    if (e instanceof PackageOutdatedError) {
       return response.badRequest({
         body: { message: `${e.message} is out-of-date and cannot be installed or updated` },
       });

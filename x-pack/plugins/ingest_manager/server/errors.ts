@@ -21,5 +21,5 @@ export const getHTTPResponseCode = (error: IngestManagerError): number => {
 };
 
 export class RegistryError extends IngestManagerError {}
-export class PackageNotFound extends IngestManagerError {}
-export class PackageOutdated extends IngestManagerError {}
+export class PackageNotFoundError extends IngestManagerError {}
+export class PackageOutdatedError extends IngestManagerError {}

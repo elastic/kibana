@@ -32,7 +32,7 @@ import {
 } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
-import { PackageOutdated } from '../../../errors';
+import { PackageOutdatedError } from '../../../errors';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -102,7 +102,7 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version)) throw new PackageOutdated(pkgkey);
+  if (semver.lt(pkgVersion, latestPackage.version)) throw new PackageOutdatedError(pkgkey);
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);

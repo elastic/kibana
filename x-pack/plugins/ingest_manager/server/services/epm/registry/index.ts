@@ -22,7 +22,7 @@ import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
-import { PackageNotFound } from '../../../errors';
+import { PackageNotFoundError } from '../../../errors';
 
 export { ArchiveEntry } from './extract';
 
@@ -77,7 +77,7 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   if (searchResults.length) {
     return searchResults[0];
   } else {
-    throw new PackageNotFound(packageName);
+    throw new PackageNotFoundError(packageName);
   }
 }
 
