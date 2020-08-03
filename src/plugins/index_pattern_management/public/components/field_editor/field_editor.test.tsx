@@ -23,6 +23,8 @@ import {
   IIndexPatternFieldList,
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -37,6 +39,7 @@ jest.mock('@elastic/eui', () => ({
   EuiButtonEmpty: 'eui-button-empty',
   EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
+  EuiCodeEditor: 'eui-code-editor',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
   EuiFieldText: 'eui-field-text',
@@ -59,6 +62,11 @@ jest.mock('../../scripting_languages', () => ({
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
+}));
+
+jest.mock('./lib', () => ({
+  isScriptValid: () => Promise.resolve(true),
+  executeScript: () => Promise.resolve({}),
 }));
 
 jest.mock('./components/scripting_call_outs', () => ({
@@ -112,7 +120,7 @@ describe('FieldEditor', () => {
 
   beforeEach(() => {
     indexPattern = ({
-      fields: fields as IIndexPatternFieldList,
+      fields: [...fields] as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
   });
 
@@ -132,11 +140,13 @@ describe('FieldEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render edit scripted field correctly', async () => {
+  it('should display and update a label field correctly', async () => {
     const testField = {
-      ...field,
       name: 'test',
-      script: 'doc.test.value',
+      label: 'Test',
+      format: new Format(),
+      lang: undefined,
+      type: 'string',
     };
     indexPattern.fields.push(testField as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
@@ -145,6 +155,11 @@ describe('FieldEditor', () => {
       };
       return flds[name] as IndexPatternField;
     };
+    indexPattern.fields.add = jest.fn();
+    indexPattern.fields.update = jest.fn();
+    indexPattern.fieldFormatMap = { test: field };
+
+    indexPattern.save = jest.fn(() => Promise.resolve());
 
     const component = createComponentWithContext(
       FieldEditor,
@@ -158,7 +173,14 @@ describe('FieldEditor', () => {
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
-    expect(component).toMatchSnapshot();
+    const input = findTestSubject(component, 'editorFieldLabel');
+    expect(input.props().value).toBe('Test');
+    input.simulate('change', { target: { value: 'new Test' } });
+    const saveBtn = findTestSubject(component, 'fieldSaveButton');
+
+    await saveBtn.simulate('click');
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(indexPattern.fields.update).toHaveBeenCalledWith({ ...testField, label: 'new Test' });
   });
 
   it('should show deprecated lang warning', async () => {
