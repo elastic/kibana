@@ -30,6 +30,7 @@ export const initialHostListState: Immutable<HostState> = {
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
   hostsExist: true,
+  patterns: [],
 };
 
 /* eslint-disable-next-line complexity */

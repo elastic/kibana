@@ -8,7 +8,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { decode } from 'rison-node';
+import { decode, RisonValue } from 'rison-node';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -17,7 +17,6 @@ import {
 } from '../../../../../common/endpoint/types';
 import { HostState, HostIndexUIQueryParams } from '../types';
 import { MANAGEMENT_ROUTING_HOSTS_PATH } from '../../../common/constants';
-import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
 
@@ -218,9 +217,9 @@ export const hostsExist: (state: Immutable<HostState>) => boolean = (state) => s
 /**
  * Returns query text from query bar
  */
-export const searchBarQuery: (state: Immutable<HostState>) => Query = createSelector(
+export const searchBarQuery: (state: Immutable<HostState>) => RisonValue = createSelector(
   uiQueryParams,
   ({ admin_query: adminQuery }) => {
-    return adminQuery ? (decode(adminQuery) as Query) : { query: '', language: 'kuery' };
+    return adminQuery ? decode(adminQuery) : { query: '', language: 'kuery' };
   }
 );

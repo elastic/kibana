@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { decode } from 'rison-node';
 import { HttpStart } from 'kibana/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
@@ -24,7 +25,7 @@ import {
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 import { metadataIndexPattern } from '../../../../../common/endpoint/constants';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
   coreStart,
@@ -64,7 +65,9 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
           });
       }
 
-      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      const { page_index: pageIndex, page_size: pageSize, admin_query: adminQuery } = uiQueryParams(
+        state
+      );
       let hostResponse;
 
       try {
@@ -87,6 +90,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
         hostResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+            filter: adminQuery ? ((decode(adminQuery) as unknown) as Query).query : '',
           }),
         });
         hostResponse.request_page_index = Number(pageIndex);
