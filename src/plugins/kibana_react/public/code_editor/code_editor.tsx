@@ -169,7 +169,7 @@ export class CodeEditor extends React.Component<Props, State> {
     if (domNode) {
       domNode
         .getElementsByTagName('textarea')[0]
-        .setAttribute('aria-labelledby', this.ariaTabFocusId);
+        .setAttribute('aria-describedby', this.ariaTabFocusId);
     }
 
     this._syncTabFocusMode();
