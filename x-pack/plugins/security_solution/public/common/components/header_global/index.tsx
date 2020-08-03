@@ -7,7 +7,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
 import { gutterTimeline } from '../../lib/helpers';
