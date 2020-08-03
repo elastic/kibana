@@ -46,7 +46,7 @@ export const theme: ExpressionFunctionTheme = {
     variable: {
       aliases: ['_'],
       help: i18n.translate('expressions.functions.theme.args.variableHelpText', {
-        defaultMessage: 'theme variable to read.',
+        defaultMessage: 'Name of the theme variable to read.',
       }),
       required: true,
       types: ['string'],
