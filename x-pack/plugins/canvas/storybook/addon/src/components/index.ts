@@ -4,13 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-
-export const Navbar = ({ children }) => {
-  return <div className="canvasNavbar">{children}</div>;
-};
-
-Navbar.propTypes = {
-  children: PropTypes.node,
-};
+export { ActionList } from './action_list';
+export { ActionTree } from './action_tree';
