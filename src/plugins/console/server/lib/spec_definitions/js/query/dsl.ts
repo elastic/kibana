@@ -36,7 +36,7 @@ import {
   regexpTemplate,
 } from './templates';
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 const matchOptions = {
   cutoff_frequency: 0.001,
   query: '',

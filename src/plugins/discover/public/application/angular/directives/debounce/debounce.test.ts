@@ -52,6 +52,7 @@ describe('debounce service', function () {
     angular.mock.module('app/discover');
 
     angular.mock.inject(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ($injector: auto.IInjectorService, _$timeout_: ITimeoutService, Private: any) => {
         $timeout = _$timeout_;
 

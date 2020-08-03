@@ -381,6 +381,7 @@ export function useForm<T extends FormData = FormData>(
       getErrors,
       getFieldDefaultValue,
       reset,
+      /* eslint-disable @typescript-eslint/naming-convention */
       __options: formOptions,
       __getFormData$: getFormData$,
       __updateFormDataAt: updateFormDataAt,
@@ -388,6 +389,7 @@ export function useForm<T extends FormData = FormData>(
       __addField: addField,
       __removeField: removeField,
       __validateFields: validateFields,
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
   }, [
     isSubmitted,

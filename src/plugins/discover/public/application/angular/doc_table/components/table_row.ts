@@ -143,7 +143,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
           newHtmls.push(
             cellTemplate({
               timefield: true,
-              formatted: _displayField(row, indexPattern.timeFieldName),
+              formatted: displayField(row, indexPattern.timeFieldName),
               filterable: mapping(indexPattern.timeFieldName).filterable && $scope.filter,
               column: indexPattern.timeFieldName,
             })
@@ -157,7 +157,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
             cellTemplate({
               timefield: false,
               sourcefield: column === '_source',
-              formatted: _displayField(row, column, true),
+              formatted: displayField(row, column, true),
               filterable: isFilterable,
               column,
             })
@@ -203,7 +203,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
       /**
        * Fill an element with the value of a field
        */
-      function _displayField(row: any, fieldName: string, truncate = false) {
+      function displayField(row: any, fieldName: string, truncate = false) {
         const indexPattern = $scope.indexPattern;
         const text = indexPattern.formatField(row, fieldName);
 

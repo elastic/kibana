@@ -26,6 +26,7 @@ const { __getArgs } = require('../execution/execution');
 jest.mock('../execution/execution', () => {
   const mockedModule = {
     args: undefined,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     __getArgs: () => mockedModule.args,
     Execution: function ExecutionMock(...args: any) {
       mockedModule.args = args;

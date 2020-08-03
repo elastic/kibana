@@ -102,8 +102,8 @@ export interface Props {
 export class CodeEditor extends React.Component<Props, {}> {
   _editor: monaco.editor.IStandaloneCodeEditor | null = null;
 
-  _editorWillMount = (__monaco: unknown) => {
-    if (__monaco !== monaco) {
+  _editorWillMount = (_monaco: unknown) => {
+    if (_monaco !== monaco) {
       throw new Error('react-monaco-editor is using a different version of monaco');
     }
 
@@ -147,8 +147,8 @@ export class CodeEditor extends React.Component<Props, {}> {
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
 
-  _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
-    if (__monaco !== monaco) {
+  _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, _monaco: unknown) => {
+    if (_monaco !== monaco) {
       throw new Error('react-monaco-editor is using a different version of monaco');
     }
 

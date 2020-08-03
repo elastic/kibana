@@ -385,6 +385,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           id: schema.string(),
           params: schema.object({}),
         }),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         _default_: schema.object({
           id: schema.string(),
           params: schema.object({}),

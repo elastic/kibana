@@ -132,6 +132,7 @@ export const npStart = {
  * Only used by unit tests
  * @internal
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function __reset__() {
   npSetup.core = (null as unknown) as LegacyCoreSetup;
   npSetup.plugins = {} as any;
@@ -140,6 +141,7 @@ export function __reset__() {
   legacyAppRegistered = false;
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
@@ -152,6 +154,7 @@ export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   setSetupServices(npSetup);
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
@@ -174,6 +177,7 @@ export const legacyAppRegister = (app: App<any>) => {
   }
   legacyAppRegistered = true;
 
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
     const element = document.createElement('div');
     $element[0].appendChild(element);

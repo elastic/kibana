@@ -39,6 +39,7 @@ export interface FormHook<T extends FormData = FormData> {
   /* Returns a list of all errors in the form */
   getErrors: () => string[];
   reset: (options?: { resetValues?: boolean }) => void;
+  /* eslint-disable @typescript-eslint/naming-convention */
   readonly __options: Required<FormOptions>;
   __getFormData$: () => Subject<T>;
   __addField: (field: FieldHook) => void;
@@ -48,6 +49,7 @@ export interface FormHook<T extends FormData = FormData> {
   ) => Promise<{ areFieldsValid: boolean; isFormValid: boolean | undefined }>;
   __updateFormDataAt: (field: string, value: unknown) => T;
   __readFieldConfigFromSchema: (fieldName: string) => FieldConfig;
+  /* eslint-enable @typescript-eslint/naming-convention */
 }
 
 export interface FormSchema<T extends FormData = FormData> {
@@ -116,6 +118,7 @@ export interface FieldHook<T = unknown> {
     validationType?: string;
   }) => FieldValidateResponse | Promise<FieldValidateResponse>;
   reset: (options?: { resetValue: boolean }) => unknown | undefined;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __serializeOutput: (rawValue?: unknown) => unknown;
 }
 

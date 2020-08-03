@@ -23,7 +23,7 @@ import { SpecDefinitionsService } from '../../../services';
 
 import { BOOLEAN } from './shared';
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 export const mappings = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('put_mapping', {
     priority: 10, // collides with put doc by id

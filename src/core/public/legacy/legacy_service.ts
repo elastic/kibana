@@ -28,7 +28,9 @@ export interface LegacyPlatformParams {
   requireLegacyFiles?: () => void;
   requireLegacyBootstrapModule?: () => BootstrapModule;
   requireNewPlatformShimModule?: () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     __setup__: (legacyCore: LegacyCoreSetup, plugins: Record<string, unknown>) => void;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     __start__: (legacyCore: LegacyCoreStart, plugins: Record<string, unknown>) => void;
   };
 }

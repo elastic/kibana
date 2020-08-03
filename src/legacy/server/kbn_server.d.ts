@@ -104,6 +104,7 @@ export interface PluginsSetup {
 }
 
 export interface KibanaCore {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __internals: {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
@@ -129,6 +130,7 @@ export interface KibanaCore {
 }
 
 export interface NewPlatform {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __internals: KibanaCore['__internals'];
   env: KibanaCore['env'];
   coreContext: {

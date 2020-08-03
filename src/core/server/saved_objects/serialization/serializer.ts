@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import uuid from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -63,6 +61,7 @@ export class SavedObjectsSerializer {
    *  @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
    */
   public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _id, _source, _seq_no, _primary_term } = doc;
     const { type, namespace, namespaces } = _source;
 
@@ -97,6 +96,7 @@ export class SavedObjectsSerializer {
       namespaces,
       attributes,
       migrationVersion,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
       version,
       references,

@@ -107,7 +107,9 @@ export class AggConfig {
   public brandNew?: boolean;
   public schema?: string;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private __type: IAggType;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
 

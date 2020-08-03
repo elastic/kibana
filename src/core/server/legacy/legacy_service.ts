@@ -354,6 +354,7 @@ export class LegacyService implements CoreService {
           core: coreStart,
           plugins: startDeps.plugins,
         },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __internals: {
           http: {
             registerStaticDir: setupDeps.core.http.registerStaticDir,
@@ -375,6 +376,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

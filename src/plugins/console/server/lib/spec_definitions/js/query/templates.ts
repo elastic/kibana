@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 export const regexpTemplate = {
   FIELD: 'REGEXP',
 };

@@ -21,6 +21,7 @@ import { getMatchedIndices } from './get_matched_indices';
 import { Tag, MatchedItem } from '../types';
 
 jest.mock('./../constants', () => ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 

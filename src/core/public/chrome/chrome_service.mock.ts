@@ -47,6 +47,7 @@ const createStartContractMock = () => {
     docTitle: {
       change: jest.fn(),
       reset: jest.fn(),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       __legacy: {
         setBaseTitle: jest.fn(),
       },

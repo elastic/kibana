@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSystem } from './core_system';
 
 /** @internal */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function __kbnBootstrap__() {
   const injectedMetadata = JSON.parse(
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
