@@ -7,6 +7,7 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+import { ToolingLog } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -24,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.be(providerName);
+
+    return request.cookie(apiResponse.headers['set-cookie'][0])!;
   }
 
   async function getNumberOfSessionDocuments() {
@@ -74,6 +77,39 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(401);
+    });
+
+    it('should not clean up session if user is active', async function () {
+      this.timeout(180000);
+
+      const response = await supertest
+        .post('/internal/security/login')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          providerType: 'basic',
+          providerName: 'basic',
+          currentURL: '/',
+          params: { username, password },
+        })
+        .expect(200);
+
+      let sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      await checkSessionCookie(sessionCookie, 'basic');
+      expect(await getNumberOfSessionDocuments()).to.be(1);
+
+      // Run 15 consequent requests with 10s delay, during this time cleanup procedure should run at
+      // least twice.
+      const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
+      for (const counter of [...Array(15).keys()]) {
+        // Session idle timeout is 15s, let's wait 10s and make a new request that would extend the session.
+        await delay(10000);
+
+        sessionCookie = await checkSessionCookie(sessionCookie, 'basic');
+        log.info(`Session is still valid after ${(counter + 1) * 10}s`);
+      }
+
+      // Session document should still be present.
+      expect(await getNumberOfSessionDocuments()).to.be(1);
     });
   });
 }

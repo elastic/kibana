@@ -358,7 +358,7 @@ export class SessionIndex {
     // Always try to delete sessions with expired lifespan (even if it's not configured right now).
     const deleteQueries: object[] = [{ range: { lifespanExpiration: { lte: now } } }];
 
-    // If lifespan is configured we should remove sessions that were created without it if any.
+    // If lifespan is configured we should remove any sessions that were created without one.
     if (this.options.config.session.lifespan) {
       deleteQueries.push({ bool: { must_not: { exists: { field: 'lifespanExpiration' } } } });
     }
@@ -372,7 +372,7 @@ export class SessionIndex {
       );
     } else {
       // Otherwise just delete all expired sessions that were previously created with the idle
-      // timeout if any.
+      // timeout.
       deleteQueries.push({ range: { idleTimeoutExpiration: { lte: now } } });
     }
 

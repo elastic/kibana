@@ -298,7 +298,8 @@ export class Session {
     } else if (
       this.idleIndexUpdateTimeout !== null &&
       this.idleIndexUpdateTimeout <
-        sessionExpirationInfo.idleTimeoutExpiration! - sessionValue.idleTimeoutExpiration!
+        sessionExpirationInfo.idleTimeoutExpiration! -
+          sessionValue.metadata.index.idleTimeoutExpiration!
     ) {
       // 3. If idle timeout was updated a while ago.
       this.options.logger.debug(

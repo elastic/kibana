@@ -483,7 +483,16 @@ describe('Session', () => {
       await expect(
         session.extend(
           mockRequest,
-          sessionMock.createValue({ idleTimeoutExpiration: now + 1, lifespanExpiration: now + 2 })
+          sessionMock.createValue({
+            idleTimeoutExpiration: now + 1,
+            lifespanExpiration: now + 2,
+            metadata: {
+              index: sessionIndexMock.createValue({
+                idleTimeoutExpiration: now - 123,
+                lifespanExpiration: now + 2,
+              }),
+            },
+          })
         )
       ).resolves.toEqual(
         expect.objectContaining({ idleTimeoutExpiration: now + 123, lifespanExpiration: now + 2 })
@@ -519,7 +528,14 @@ describe('Session', () => {
         await expect(
           session.extend(
             mockRequest,
-            sessionMock.createValue({ idleTimeoutExpiration: expectedNewExpiration - 2 * 123 })
+            sessionMock.createValue({
+              idleTimeoutExpiration: expectedNewExpiration - 123,
+              metadata: {
+                index: sessionIndexMock.createValue({
+                  idleTimeoutExpiration: expectedNewExpiration - 2 * 123,
+                }),
+              },
+            })
           )
         ).resolves.toEqual(
           expect.objectContaining({ idleTimeoutExpiration: expectedNewExpiration })
@@ -569,7 +585,14 @@ describe('Session', () => {
         await expect(
           session.extend(
             mockRequest,
-            sessionMock.createValue({ idleTimeoutExpiration: expectedNewExpiration - 2 * 123 - 1 })
+            sessionMock.createValue({
+              idleTimeoutExpiration: expectedNewExpiration - 123,
+              metadata: {
+                index: sessionIndexMock.createValue({
+                  idleTimeoutExpiration: expectedNewExpiration - 2 * 123 - 1,
+                }),
+              },
+            })
           )
         ).resolves.toEqual(
           expect.objectContaining({
