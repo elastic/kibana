@@ -18,6 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useNavigateToPath } from '../../../../contexts/kibana';
 import { useMlContext } from '../../../../contexts/ml';
 import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
@@ -28,6 +29,8 @@ import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
+  const navigateToPath = useNavigateToPath();
+
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
   const { currentSavedSearch, currentIndexPattern } = mlContext;
@@ -68,25 +71,23 @@ export const Page: FC = () => {
     },
   };
 
-  const getUrl = (basePath: string) => {
+  const getUrlParams = () => {
     return !isSavedSearchSavedObject(currentSavedSearch)
-      ? `${basePath}?index=${currentIndexPattern.id}`
-      : `${basePath}?savedSearchId=${currentSavedSearch.id}`;
+      ? `?index=${currentIndexPattern.id}`
+      : `?savedSearchId=${currentSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = () => {
     const title = !isSavedSearchSavedObject(currentSavedSearch)
       ? currentIndexPattern.title
       : (currentSavedSearch.attributes.title as string);
-    const url = getUrl('');
-    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
-
-    window.location.href = getUrl('#jobs/new_job/datavisualizer');
+    addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, '');
+    navigateToPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
   };
 
   const jobTypes = [
     {
-      href: getUrl('#jobs/new_job/single_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/single_metric${getUrlParams()}`),
       icon: {
         type: 'createSingleMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
@@ -102,7 +103,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkSingleMetricJob',
     },
     {
-      href: getUrl('#jobs/new_job/multi_metric'),
+      onClick: () => navigateToPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
@@ -119,7 +120,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkMultiMetricJob',
     },
     {
-      href: getUrl('#jobs/new_job/population'),
+      onClick: () => navigateToPath(`/jobs/new_job/population${getUrlParams()}`),
       icon: {
         type: 'createPopulationJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
@@ -136,7 +137,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkPopulationJob',
     },
     {
-      href: getUrl('#jobs/new_job/advanced'),
+      onClick: () => navigateToPath(`/jobs/new_job/advanced${getUrlParams()}`),
       icon: {
         type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
@@ -153,7 +154,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkAdvancedJob',
     },
     {
-      href: getUrl('#jobs/new_job/categorization'),
+      onClick: () => navigateToPath(`/jobs/new_job/categorization${getUrlParams()}`),
       icon: {
         type: CategorizationIcon,
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
@@ -247,11 +248,11 @@ export const Page: FC = () => {
         <EuiSpacer size="m" />
 
         <EuiFlexGrid gutterSize="l" columns={4}>
-          {jobTypes.map(({ href, icon, title, description, id }) => (
+          {jobTypes.map(({ onClick, icon, title, description, id }) => (
             <EuiFlexItem key={id}>
               <CreateJobLinkCard
                 data-test-subj={id}
-                href={href}
+                onClick={onClick}
                 icon={icon.type}
                 iconAreaLabel={icon.ariaLabel}
                 title={title}
@@ -307,7 +308,6 @@ export const Page: FC = () => {
                 />
               }
               onClick={addSelectionToRecentlyAccessed}
-              href={getUrl('#jobs/new_job/datavisualizer')}
             />
           </EuiFlexItem>
         </EuiFlexGrid>
