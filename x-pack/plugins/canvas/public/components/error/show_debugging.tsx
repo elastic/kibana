@@ -30,6 +30,6 @@ export const ShowDebugging: FC<Props> = ({ payload }) => {
   );
 };
 
-ShowDebuggingComponent.propTypes = {
+ShowDebugging.propTypes = {
   payload: PropTypes.object.isRequired,
 };
