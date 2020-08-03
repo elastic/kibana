@@ -99,10 +99,9 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  dynamicIndexPattern: any;
   start: number;
   end: number;
-  client: any;
+  apmEventClient: any;
   internalClient: any;
   config: APMConfig;
   uiFiltersES: ESFilter[];
@@ -148,7 +147,7 @@ export async function inspectSearchParams(
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
-    client: { search: spy } as any,
+    apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
     uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
