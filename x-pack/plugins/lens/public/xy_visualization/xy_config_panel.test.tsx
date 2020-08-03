@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
-import { EuiButtonGroupProps, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar } from './xy_config_panel';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
@@ -51,9 +51,8 @@ describe('XY Config panels', () => {
         />
       );
 
-      // TODO: fix
       const options = component
-        .find('[data-test-subj="lnsXY_seriesType"]')
+        .find(EuiButtonGroup)
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
@@ -79,9 +78,8 @@ describe('XY Config panels', () => {
         />
       );
 
-      // TODO: fix
       const options = component
-        .find('[data-test-subj="lnsXY_seriesType"]')
+        .find(EuiButtonGroup)
         .first()
         .prop('options') as EuiButtonGroupProps['options'];
 
