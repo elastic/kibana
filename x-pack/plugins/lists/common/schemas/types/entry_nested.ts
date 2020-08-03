@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../../siem_common_deps';
+import { NonEmptyString } from '../../shared_imports';
 
 import { nonEmptyNestedEntriesArray } from './non_empty_nested_entries_array';
 
