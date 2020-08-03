@@ -33,14 +33,14 @@ export default function (providerContext: FtrProviderContext) {
     });
     it('should return 400 if trying to update/install to an out-of-date package', async function () {
       await supertest
-        .post(`/api/ingest_manager/epm/packages/outdated-0.1.0`)
+        .post(`/api/ingest_manager/epm/packages/update-0.1.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(400);
       let res;
       try {
         res = await kibanaServer.savedObjects.get({
           type: 'epm-package',
-          id: 'oudated',
+          id: 'update',
         });
       } catch (err) {
         res = err;
