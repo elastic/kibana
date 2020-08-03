@@ -56,9 +56,8 @@ import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors } from './api/create_security_layer_descriptors';
-import {getAlertType as getPeopleInSpaceAlertType} from './alert_types/astros';
-import {TriggersAndActionsUIPublicPluginSetup} from "../../triggers_actions_ui/public";
+import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import { getAlertMenuAction } from './components/alerts/alerts_top_nav_handling';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 
