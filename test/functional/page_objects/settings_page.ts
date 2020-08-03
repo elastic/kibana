@@ -302,9 +302,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async isIndexPatternListEmpty() {
-      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
-      const indexPatternList = await this.getIndexPatternList();
-      return indexPatternList.length === 0;
+      if (await testSubjects.exists('indexPatternTable', { timeout: 5000 })) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     async removeLogstashIndexPatternIfExist() {
