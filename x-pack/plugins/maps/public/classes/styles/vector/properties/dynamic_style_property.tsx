@@ -195,7 +195,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return this._field && this._field.supportsAutoDomain();
+    return this._field && this._field.canReadFromGeoJson();
   }
 
   getFieldMetaOptions() {
