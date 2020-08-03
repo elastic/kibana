@@ -15,7 +15,8 @@ Restart=on-failure
 RestartSec=3
 StartLimitBurst=3
 StartLimitInterval=60
-WorkingDirectory=/
+WorkingDirectory=/usr/share/kibana
+PrivateTmp=yes
 
 [Install]
 WantedBy=multi-user.target
