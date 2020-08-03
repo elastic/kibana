@@ -78,7 +78,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
-  '../public/components/workpad_header/share_menu/flyout/__examples__/flyout.stories',
+  '../public/components/workpad_header/share_menu/flyout/__stories__/flyout.stories',
   () => {
     return 'Disabled Panel';
   }
