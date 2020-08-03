@@ -134,6 +134,8 @@ export async function setupIngestManager(
     // if anything errors, reject/fail
     onSetupReject(error);
   }
+
+  return setupIngestStatus;
 }
 
 export async function setupFleet(
