@@ -98,7 +98,6 @@ export interface ExpressionFunctionDefinition<
   /**
    * migrate function
    * @param state any previous or current version of the ast for this function
-   * @param version string representation of version of the state
    */
   migrate?(state: ExpressionAstFunction): ExpressionAstFunction;
 
