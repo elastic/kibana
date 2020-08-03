@@ -7,6 +7,7 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
 import {
   apolloClientObservable,
@@ -88,8 +89,8 @@ const state: State = {
         kind: 'relative',
         fromStr: 'now-24h',
         toStr: 'now',
-        from: 1586835969047,
-        to: 1586922369047,
+        from: '2020-04-14T03:46:09.047Z',
+        to: '2020-04-15T03:46:09.047Z',
       },
     },
   },
@@ -242,7 +243,7 @@ describe('StatefulTopN', () => {
     test(`provides 'from' via GlobalTime when rendering in a global context`, () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.from).toEqual(0);
+      expect(props.from).toEqual('2020-07-07T08:20:18.966Z');
     });
 
     test('provides the global query from Redux state (inputs > global > query) when rendering in a global context', () => {
@@ -260,7 +261,7 @@ describe('StatefulTopN', () => {
     test(`provides 'to' via GlobalTime when rendering in a global context`, () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.to).toEqual(1);
+      expect(props.to).toEqual('2020-07-08T08:20:18.966Z');
     });
   });
 
@@ -298,7 +299,7 @@ describe('StatefulTopN', () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
       expect(props.combinedQueries).toEqual(
-        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1586835969047}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1586922369047}}}],"minimum_should_match":1}}]}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
+        '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
       );
     });
 
@@ -323,7 +324,7 @@ describe('StatefulTopN', () => {
     test(`provides 'from' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.from).toEqual(1586835969047);
+      expect(props.from).toEqual('2020-04-14T03:46:09.047Z');
     });
 
     test('provides an empty query when rendering in a timeline context', () => {
@@ -341,7 +342,7 @@ describe('StatefulTopN', () => {
     test(`provides 'to' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
       const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-      expect(props.to).toEqual(1586922369047);
+      expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
   });
 

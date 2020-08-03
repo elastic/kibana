@@ -34,6 +34,7 @@ import {
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
+  registerLimitedConcurrencyRoutes,
   registerEPMRoutes,
   registerPackageConfigRoutes,
   registerDataStreamRoutes,
@@ -82,8 +83,9 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
-  isProductionMode: boolean;
-  kibanaVersion: string;
+  isProductionMode: PluginInitializerContext['env']['mode']['prod'];
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -142,8 +144,9 @@ export class IngestManagerPlugin
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
-  private isProductionMode: boolean;
-  private kibanaVersion: string;
+  private isProductionMode: IngestManagerAppContext['isProductionMode'];
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'];
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'];
   private httpSetup: HttpServiceSetup | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 
@@ -151,6 +154,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+    this.kibanaBranch = this.initializerContext.env.packageInfo.branch;
     this.logger = this.initializerContext.logger.get();
   }
 
@@ -215,12 +219,9 @@ export class IngestManagerPlugin
       registerOutputRoutes(router);
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
+      registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.epm.enabled) {
-        registerEPMRoutes(router);
-      }
-
       if (config.fleet.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -231,6 +232,9 @@ export class IngestManagerPlugin
             );
           }
         } else {
+          // we currently only use this global interceptor if fleet is enabled
+          // since it would run this func on *every* req (other plugins, CSS, etc)
+          registerLimitedConcurrencyRoutes(core, config);
           registerAgentRoutes(router);
           registerEnrollmentApiKeyRoutes(router);
           registerInstallScriptRoutes({
@@ -256,6 +260,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
+      kibanaBranch: this.kibanaBranch,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,

@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
-import { getGenericComboBoxProps, validateParams } from './helpers';
+import { getGenericComboBoxProps, paramIsValid } from './helpers';
 import { OperatorTypeEnum } from '../../../lists_plugin_deps';
 import { GetGenericComboBoxPropsReturn } from './types';
 import * as i18n from './translations';
@@ -22,6 +22,7 @@ interface AutocompleteFieldMatchAnyProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  isRequired?: boolean;
   onChange: (arg: string[]) => void;
 }
 
@@ -33,8 +34,10 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   isLoading,
   isDisabled = false,
   isClearable = false,
+  isRequired = false,
   onChange,
 }): JSX.Element => {
+  const [touched, setIsTouched] = useState(false);
   const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH_ANY,
@@ -62,29 +65,41 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   };
 
   const onSearchChange = (searchVal: string) => {
-    const signal = new AbortController().signal;
-
-    updateSuggestions({
-      fieldSelected: selectedField,
-      value: `${searchVal}`,
-      patterns: indexPattern,
-      signal,
-    });
+    if (updateSuggestions != null) {
+      updateSuggestions({
+        fieldSelected: selectedField,
+        value: searchVal,
+        patterns: indexPattern,
+      });
+    }
   };
 
   const onCreateOption = (option: string) => onChange([...(selectedValue || []), option]);
 
   const isValid = useMemo((): boolean => {
-    const areAnyInvalid = selectedComboOptions.filter(
-      ({ label }) => !validateParams(label, selectedField ? selectedField.type : '')
-    );
-    return areAnyInvalid.length === 0;
-  }, [selectedComboOptions, selectedField]);
+    const areAnyInvalid =
+      selectedComboOptions.filter(
+        ({ label }) => !paramIsValid(label, selectedField, isRequired, touched)
+      ).length > 0;
+    return !areAnyInvalid;
+  }, [selectedComboOptions, selectedField, isRequired, touched]);
+
+  const setIsTouchedValue = useCallback((): void => setIsTouched(true), [setIsTouched]);
+
+  const inputPlaceholder = useMemo(
+    (): string => (isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder),
+    [isLoading, isLoadingSuggestions, placeholder]
+  );
+
+  const isLoadingState = useMemo((): boolean => isLoading || isLoadingSuggestions, [
+    isLoading,
+    isLoadingSuggestions,
+  ]);
 
   return (
     <EuiComboBox
-      placeholder={isLoading || isLoadingSuggestions ? i18n.LOADING : placeholder}
-      isLoading={isLoading || isLoadingSuggestions}
+      placeholder={inputPlaceholder}
+      isLoading={isLoadingState}
       isClearable={isClearable}
       isDisabled={isDisabled}
       options={comboOptions}
@@ -93,6 +108,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       onSearchChange={onSearchChange}
       onCreateOption={onCreateOption}
       isInvalid={!isValid}
+      onFocus={setIsTouchedValue}
       delimiter=", "
       data-test-subj="valuesAutocompleteComboBox matchAnyComboxBox"
       fullWidth

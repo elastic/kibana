@@ -24,8 +24,8 @@ import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 export const getAnomaliesHostTableColumns = (
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   interval: string,
   narrowDateRange: NarrowDateRange
 ): [
@@ -132,8 +132,8 @@ export const getAnomaliesHostTableColumns = (
 
 export const getAnomaliesHostTableColumnsCurated = (
   pageType: HostsType,
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   interval: string,
   narrowDateRange: NarrowDateRange
 ) => {

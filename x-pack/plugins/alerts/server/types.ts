@@ -23,6 +23,8 @@ import {
 export type State = Record<string, any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Context = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AlertParams = Record<string, unknown>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
@@ -40,9 +42,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedCallCluster(
-    clusterClient: ILegacyClusterClient
-  ): ILegacyScopedClusterClient['callAsCurrentUser'];
+  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
 export interface AlertServices extends Services {
@@ -84,6 +84,7 @@ export interface AlertType {
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
+    params?: ActionVariable[];
   };
 }
 

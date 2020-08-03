@@ -14,8 +14,8 @@ interface AlertExpressionPopoverProps {
   'data-test-subj': string;
   isEnabled?: boolean;
   id: string;
+  value: string | JSX.Element;
   isInvalid?: boolean;
-  value: string;
 }
 
 const getColor = (

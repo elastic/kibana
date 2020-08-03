@@ -124,7 +124,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       defaultTimelineCount,
       templateTimelineCount,
     });
-    const { timelineStatus, templateTimelineType, templateTimelineFilter } = useTimelineStatus({
+    const {
+      timelineStatus,
+      templateTimelineFilter,
+      installPrepackagedTimelines,
+    } = useTimelineStatus({
       timelineType,
       customTemplateTimelineCount,
       elasticTemplateTimelineCount,
@@ -142,7 +146,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         },
         onlyUserFavorite: onlyFavorites,
         timelineType,
-        templateTimelineType,
         status: timelineStatus,
       });
     }, [
@@ -154,7 +157,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       sortDirection,
       timelineType,
       timelineStatus,
-      templateTimelineType,
       onlyFavorites,
     ]);
 
@@ -287,7 +289,13 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       focusInput();
     }, []);
 
-    useEffect(() => refetch(), [refetch]);
+    useEffect(() => {
+      const fetchData = async () => {
+        await installPrepackagedTimelines();
+        refetch();
+      };
+      fetchData();
+    }, [refetch, installPrepackagedTimelines]);
 
     return !isModal ? (
       <OpenTimeline
@@ -318,6 +326,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineStatus={timelineStatus}
         timelineFilter={timelineTabs}
         title={title}
         totalSearchResultsCount={totalCount}
@@ -348,6 +357,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortField={sortField}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
+        timelineStatus={timelineStatus}
         timelineFilter={timelineFilters}
         title={title}
         totalSearchResultsCount={totalCount}

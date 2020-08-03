@@ -18,7 +18,7 @@ node scripts/es snapshot --download-only;
 node scripts/es snapshot --license=oss --download-only;
 
 # download reporting browsers
-(cd "x-pack" && yarn gulp prepare);
+(cd "x-pack" && yarn gulp downloadChromium);
 
 # cache the chromedriver archive
 chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"

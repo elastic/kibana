@@ -5,7 +5,7 @@
  */
 
 import { generateBreadcrumb } from './generate_breadcrumbs';
-import { appSearchBreadcrumbs, enterpriseSearchBreadcrumbs } from './';
+import { appSearchBreadcrumbs, enterpriseSearchBreadcrumbs, workplaceSearchBreadcrumbs } from './';
 
 import { mockHistory as mockHistoryUntyped } from '../../__mocks__';
 const mockHistory = mockHistoryUntyped as any;
@@ -189,6 +189,89 @@ describe('appSearchBreadcrumbs', () => {
     });
 
     it('has a link to App Search second', () => {
+      (subject()[1] as any).onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/');
+    });
+
+    it('has a link to page 1 third', () => {
+      (subject()[2] as any).onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/page1');
+    });
+
+    it('has a link to page 2 last', () => {
+      (subject()[3] as any).onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/page2');
+    });
+  });
+});
+
+describe('workplaceSearchBreadcrumbs', () => {
+  const breadCrumbs = [
+    {
+      text: 'Page 1',
+      path: '/page1',
+    },
+    {
+      text: 'Page 2',
+      path: '/page2',
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHistory.createHref.mockImplementation(
+      ({ pathname }: any) => `/enterprise_search/workplace_search${pathname}`
+    );
+  });
+
+  const subject = () => workplaceSearchBreadcrumbs(mockHistory)(breadCrumbs);
+
+  it('Builds a chain of breadcrumbs with Enterprise Search and Workplace Search at the root', () => {
+    expect(subject()).toEqual([
+      {
+        text: 'Enterprise Search',
+      },
+      {
+        href: '/enterprise_search/workplace_search/',
+        onClick: expect.any(Function),
+        text: 'Workplace Search',
+      },
+      {
+        href: '/enterprise_search/workplace_search/page1',
+        onClick: expect.any(Function),
+        text: 'Page 1',
+      },
+      {
+        href: '/enterprise_search/workplace_search/page2',
+        onClick: expect.any(Function),
+        text: 'Page 2',
+      },
+    ]);
+  });
+
+  it('shows just the root if breadcrumbs is empty', () => {
+    expect(workplaceSearchBreadcrumbs(mockHistory)()).toEqual([
+      {
+        text: 'Enterprise Search',
+      },
+      {
+        href: '/enterprise_search/workplace_search/',
+        onClick: expect.any(Function),
+        text: 'Workplace Search',
+      },
+    ]);
+  });
+
+  describe('links', () => {
+    const eventMock = {
+      preventDefault: jest.fn(),
+    } as any;
+
+    it('has Enterprise Search text first', () => {
+      expect(subject()[0].onClick).toBeUndefined();
+    });
+
+    it('has a link to Workplace Search second', () => {
       (subject()[1] as any).onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/');
     });

@@ -33,7 +33,7 @@ import { generateTablePaginationOptions } from '../../../common/components/pagin
 const ID = 'hostsQuery';
 
 export interface HostsArgs {
-  endDate: number;
+  endDate: string;
   hosts: HostsEdges[];
   id: string;
   inspect: inputsModel.InspectQuery;
@@ -42,15 +42,15 @@ export interface HostsArgs {
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
-  startDate: number;
+  startDate: string;
   totalCount: number;
 }
 
 export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: HostsArgs) => React.ReactNode;
   type: hostsModel.HostsType;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
 }
 
 export interface HostsComponentReduxProps {
@@ -81,6 +81,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
   public render() {
     const {
       activePage,
+      docValueFields,
       id = ID,
       isInspected,
       children,
@@ -110,6 +111,7 @@ class HostsComponentQuery extends QueryTemplatePaginated<
       pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
       defaultIndex,
+      docValueFields: docValueFields ?? [],
       inspect: isInspected,
     };
     return (

@@ -32,11 +32,11 @@ exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
       ],
     }
   }
-  from={1560578400000}
+  from="2019-06-15T06:00:00.000Z"
   id="kpiNetwork"
   loading={true}
   narrowDateRange={[MockFunction]}
-  to={1560837600000}
+  to="2019-06-18T06:00:00.000Z"
 />
 `;
 
@@ -72,10 +72,10 @@ exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
       ],
     }
   }
-  from={1560578400000}
+  from="2019-06-15T06:00:00.000Z"
   id="kpiNetwork"
   loading={false}
   narrowDateRange={[MockFunction]}
-  to={1560837600000}
+  to="2019-06-18T06:00:00.000Z"
 />
 `;

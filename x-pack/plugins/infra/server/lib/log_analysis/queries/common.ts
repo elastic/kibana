@@ -55,3 +55,14 @@ export const createCategoryIdFilters = (categoryIds: number[]) => [
     },
   },
 ];
+
+export const createDatasetsFilters = (datasets?: string[]) =>
+  datasets && datasets.length > 0
+    ? [
+        {
+          terms: {
+            partition_field_value: datasets,
+          },
+        },
+      ]
+    : [];

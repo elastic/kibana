@@ -301,6 +301,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,

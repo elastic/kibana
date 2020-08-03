@@ -95,6 +95,14 @@ function createMockFilterManager() {
   };
 }
 
+function createMockQueryString() {
+  return {
+    getQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+    setQuery: jest.fn(),
+    getDefaultQuery: jest.fn(() => ({ query: '', language: 'kuery' })),
+  };
+}
+
 function createMockTimefilter() {
   const unsubscribe = jest.fn();
 
@@ -148,6 +156,7 @@ describe('Lens App', () => {
           timefilter: {
             timefilter: createMockTimefilter(),
           },
+          queryString: createMockQueryString(),
           state$: new Observable(),
         },
         indexPatterns: {
@@ -238,6 +247,27 @@ describe('Lens App', () => {
     mount(<App {...defaultArgs} />);
 
     expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
+  it('passes global filters to frame', async () => {
+    const args = makeDefaultArgs();
+    args.editorFrame = frame;
+    const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+    const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
+    const pinnedFilter = esFilters.buildExistsFilter(pinnedField, indexPattern);
+    args.data.query.filterManager.getFilters = jest.fn().mockImplementation(() => {
+      return [pinnedFilter];
+    });
+    const component = mount(<App {...args} />);
+    component.update();
+    expect(frame.mount).toHaveBeenCalledWith(
+      expect.any(Element),
+      expect.objectContaining({
+        dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        query: { query: '', language: 'kuery' },
+        filters: [pinnedFilter],
+      })
+    );
   });
 
   it('sets breadcrumbs when the document title changes', async () => {

@@ -16,3 +16,5 @@ export const toPromise = async <E, A>(taskEither: TaskEither<E, A>): Promise<A> 
       (a) => Promise.resolve(a)
     )
   );
+
+export const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));

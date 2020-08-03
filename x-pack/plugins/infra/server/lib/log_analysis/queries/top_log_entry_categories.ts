@@ -11,6 +11,7 @@ import {
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
+  createDatasetsFilters,
 } from './common';
 
 export const createTopLogEntryCategoriesQuery = (
@@ -122,17 +123,6 @@ export const createTopLogEntryCategoriesQuery = (
   size: 0,
 });
 
-const createDatasetsFilters = (datasets: string[]) =>
-  datasets.length > 0
-    ? [
-        {
-          terms: {
-            partition_field_value: datasets,
-          },
-        },
-      ]
-    : [];
-
 const metricAggregationRT = rt.type({
   value: rt.union([rt.number, rt.null]),
 });
@@ -169,7 +159,7 @@ export type LogEntryCategoryBucket = rt.TypeOf<typeof logEntryCategoryBucketRT>;
 
 export const topLogEntryCategoriesResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
+  rt.partial({
     aggregations: rt.type({
       terms_category_id: rt.type({
         buckets: rt.array(logEntryCategoryBucketRT),

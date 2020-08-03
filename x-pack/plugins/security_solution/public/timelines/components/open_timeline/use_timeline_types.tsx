@@ -7,26 +7,31 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer, EuiFilterButton } from '@elastic/eui';
 
+import { noop } from 'lodash/fp';
 import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
 import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
 
-export const useTimelineTypes = ({
-  defaultTimelineCount,
-  templateTimelineCount,
-}: {
+export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;
-}): {
+}
+
+export interface UseTimelineTypesResult {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element[];
-} => {
+}
+
+export const useTimelineTypes = ({
+  defaultTimelineCount,
+  templateTimelineCount,
+}: UseTimelineTypesArgs): UseTimelineTypesResult => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.timelines);
-  const { tabName } = useParams<{ pageName: string; tabName: string }>();
+  const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
   const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
     tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
   );
@@ -61,7 +66,7 @@ export const useTimelineTypes = ({
           timelineTabsStyle === TimelineTabsStyle.filter
             ? defaultTimelineCount ?? undefined
             : undefined,
-        onClick: goToTimeline,
+        onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
       },
       {
         id: TimelineType.template,
@@ -76,7 +81,7 @@ export const useTimelineTypes = ({
           timelineTabsStyle === TimelineTabsStyle.filter
             ? templateTimelineCount ?? undefined
             : undefined,
-        onClick: goToTemplateTimeline,
+        onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTemplateTimeline : noop,
       },
     ],
     [
@@ -90,20 +95,23 @@ export const useTimelineTypes = ({
   );
 
   const onFilterClicked = useCallback(
-    (tabId) => {
-      if (tabId === timelineType) {
-        setTimelineTypes(null);
-      } else {
-        setTimelineTypes(tabId);
-      }
+    (tabId, tabStyle: TimelineTabsStyle) => {
+      setTimelineTypes((prevTimelineTypes) => {
+        if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
+          return null;
+        } else if (prevTimelineTypes !== tabId) {
+          setTimelineTypes(tabId);
+        }
+        return prevTimelineTypes;
+      });
     },
-    [timelineType, setTimelineTypes]
+    [setTimelineTypes]
   );
 
   const timelineTabs = useMemo(() => {
     return (
       <>
-        <EuiTabs>
+        <EuiTabs data-test-subj="open-timeline-subtabs">
           {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
             <EuiTab
               isSelected={tab.id === tabName}
@@ -112,7 +120,7 @@ export const useTimelineTypes = ({
               href={tab.href}
               onClick={(ev) => {
                 tab.onClick(ev);
-                onFilterClicked(tab.id);
+                onFilterClicked(tab.id, TimelineTabsStyle.tab);
               }}
             >
               {tab.name}
@@ -128,12 +136,13 @@ export const useTimelineTypes = ({
   const timelineFilters = useMemo(() => {
     return getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
       <EuiFilterButton
+        data-test-subj="open-timeline-modal-body-filters"
         hasActiveFilters={tab.id === timelineType}
         key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
         numFilters={tab.count}
         onClick={(ev: { preventDefault: () => void }) => {
           tab.onClick(ev);
-          onFilterClicked(tab.id);
+          onFilterClicked(tab.id, TimelineTabsStyle.filter);
         }}
         withNext={tab.withNext}
       >

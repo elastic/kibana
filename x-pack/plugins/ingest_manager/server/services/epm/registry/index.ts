@@ -21,6 +21,7 @@ import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
+import { appContextService } from '../..';
 
 export { ArchiveEntry } from './extract';
 
@@ -39,6 +40,8 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -48,14 +51,26 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
+
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
   const registryUrl = getRegistryUrl();
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+  const kibanaBranch = appContextService.getKibanaBranch();
   const url = new URL(
     `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
   );
+
+  // on master, request all packages regardless of version
+  if (kibanaVersion && kibanaBranch !== 'master') {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
   if (searchResults.length) {

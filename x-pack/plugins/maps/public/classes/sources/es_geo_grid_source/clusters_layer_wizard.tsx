@@ -28,7 +28,7 @@ import {
   VECTOR_STYLES,
   STYLE_TYPE,
 } from '../../../../common/constants';
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 
 export const clustersLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -57,7 +57,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
               },
-              color: COLOR_GRADIENTS[0].value,
+              color: NUMERICAL_COLOR_PALETTES[0].value,
               type: COLOR_MAP_TYPE.ORDINAL,
             },
           },

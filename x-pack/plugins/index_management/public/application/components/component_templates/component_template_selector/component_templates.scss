@@ -7,7 +7,8 @@
 $heightHeader: $euiSizeL * 2;
 
 .componentTemplates {
-  @include euiBottomShadowFlat;
+  border: $euiBorderThin;
+  border-top: none;
   height: 100%;
 
   &__header {
@@ -20,6 +21,7 @@ $heightHeader: $euiSizeL * 2;
 
   &__searchBox {
     border-bottom: $euiBorderThin;
+    border-top: $euiBorderThin;
     box-shadow: none;
     max-width: initial;
   }

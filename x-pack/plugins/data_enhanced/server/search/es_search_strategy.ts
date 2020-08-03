@@ -8,12 +8,14 @@ import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../src/core/server';
-import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
-  ISearch,
+  LegacyAPICaller,
+  SharedGlobalConfig,
+  RequestHandlerContext,
+  Logger,
+} from '../../../../../src/core/server';
+import {
   ISearchOptions,
-  ISearchCancel,
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
@@ -29,13 +31,15 @@ export interface AsyncSearchResponse<T> {
 }
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
-  const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
-    context,
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger
+): ISearchStrategy => {
+  const search = async (
+    context: RequestHandlerContext,
     request: IEnhancedEsSearchRequest,
-    options
+    options?: ISearchOptions
   ) => {
+    logger.info(`search ${JSON.stringify(request.params) || request.id}`);
     const config = await config$.pipe(first()).toPromise();
     const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
     const defaultParams = getDefaultSearchParams(config);
@@ -46,7 +50,8 @@ export const enhancedEsSearchStrategyProvider = (
       : asyncSearch(caller, { ...request, params }, options);
   };
 
-  const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async (context, id) => {
+  const cancel = async (context: RequestHandlerContext, id: string) => {
+    logger.info(`cancel ${id}`);
     const method = 'DELETE';
     const path = encodeURI(`/_async_search/${id}`);
     await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
@@ -75,8 +80,15 @@ async function asyncSearch(
   const method = request.id ? 'GET' : 'POST';
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
-  // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
+  // Only report partial results every 64 shards; this should be reduced when we actually display partial results
+  const batchedReduceSize = request.id ? undefined : 64;
+
+  const query = toSnakeCase({
+    waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
+    keepAlive: '1m', // Extend the TTL for this search request by one minute
+    ...(batchedReduceSize && { batchedReduceSize }),
+    ...queryParams,
+  });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',

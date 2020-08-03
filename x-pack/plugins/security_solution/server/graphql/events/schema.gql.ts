@@ -76,17 +76,20 @@ export const eventsSchema = gql`
       timerange: TimerangeInput
       filterQuery: String
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): TimelineData!
     TimelineDetails(
       eventId: String!
       indexName: String!
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): TimelineDetailsData!
     LastEventTime(
       id: String
       indexKey: LastEventIndexKey!
       details: LastTimeDetails!
       defaultIndex: [String!]!
+      docValueFields: [docValueFieldsInput!]!
     ): LastEventTimeData!
   }
 `;

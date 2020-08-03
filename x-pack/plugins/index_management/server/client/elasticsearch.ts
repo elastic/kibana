@@ -182,4 +182,14 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     ],
     method: 'HEAD',
   });
+
+  dataManagement.simulateTemplate = ca({
+    urls: [
+      {
+        fmt: '/_index_template/_simulate',
+      },
+    ],
+    needBody: true,
+    method: 'POST',
+  });
 };

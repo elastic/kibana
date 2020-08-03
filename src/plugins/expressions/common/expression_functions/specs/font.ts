@@ -52,7 +52,9 @@ interface Arguments {
   weight?: FontWeight;
 }
 
-export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> = {
+export type ExpressionFunctionFont = ExpressionFunctionDefinition<'font', null, Arguments, Style>;
+
+export const font: ExpressionFunctionFont = {
   name: 'font',
   aliases: [],
   type: 'style',

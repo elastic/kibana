@@ -51,7 +51,13 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('ml', 'monitoring', 'enterpriseSearch', 'appSearch')
+              navLinksBuilder.except(
+                'ml',
+                'monitoring',
+                'enterpriseSearch',
+                'appSearch',
+                'workplaceSearch'
+              )
             );
             break;
           case 'superuser at nothing_space':

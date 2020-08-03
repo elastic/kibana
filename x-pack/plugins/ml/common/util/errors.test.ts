@@ -30,6 +30,8 @@ describe('ML - error message utils', () => {
       const bodyWithStringMsg: MLCustomHttpResponseOptions<MLResponseError> = {
         body: {
           msg: testMsg,
+          statusCode: 404,
+          response: `{"error":{"reason":"${testMsg}"}}`,
         },
         statusCode: 404,
       };

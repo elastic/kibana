@@ -139,7 +139,7 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/management/data/index_management/indices/filter/${index}`}
+          href={`${basePath.get()}/app/management/data/index_management/indices`}
         />
       </EuiFlexItem>
 

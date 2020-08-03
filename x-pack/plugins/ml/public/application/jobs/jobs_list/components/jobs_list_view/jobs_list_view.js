@@ -63,9 +63,14 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
     this.showCreateWatchFlyout = () => {};
+    // work around to keep track of whether the component is mounted
+    // used to block timeouts for results polling
+    // which can run after unmounting
+    this._isMounted = false;
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.refreshJobSummaryList(true);
 
     if (this.props.isManagementTable !== true) {
@@ -87,6 +92,7 @@ export class JobsListView extends Component {
     if (this.props.isManagementTable === undefined) {
       deletingJobsRefreshTimeout = null;
     }
+    this._isMounted = false;
   }
 
   openAutoStartDatafeedModal() {
@@ -232,7 +238,7 @@ export class JobsListView extends Component {
   };
 
   async refreshJobSummaryList(forceRefresh = false) {
-    if (forceRefresh === true || this.props.blockRefresh !== true) {
+    if (this._isMounted && (forceRefresh === true || this.props.blockRefresh !== true)) {
       // Set loading to true for jobs_list table for initial job loading
       if (this.state.loading === null) {
         this.setState({ loading: true });
@@ -283,6 +289,10 @@ export class JobsListView extends Component {
   }
 
   async checkDeletingJobTasks(forceRefresh = false) {
+    if (this._isMounted === false) {
+      return;
+    }
+
     const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
 
     const taskListHasChanged =

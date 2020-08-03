@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import {
   StepRuleDescriptionComponent,
@@ -367,6 +367,52 @@ describe('description_step', () => {
       });
     });
 
+    describe('threshold', () => {
+      test('returns threshold description when threshold exist and field is empty', () => {
+        const mockThreshold = {
+          isNew: false,
+          threshold: {
+            field: [''],
+            value: 100,
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'threshold',
+          'Threshold label',
+          mockThreshold,
+          mockFilterManager
+        );
+
+        expect(result[0].title).toEqual('Threshold label');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+        expect(mount(result[0].description as React.ReactElement).html()).toContain(
+          'All results >= 100'
+        );
+      });
+
+      test('returns threshold description when threshold exist and field is set', () => {
+        const mockThreshold = {
+          isNew: false,
+          threshold: {
+            field: ['user.name'],
+            value: 100,
+          },
+        };
+        const result: ListItems[] = getDescriptionItem(
+          'threshold',
+          'Threshold label',
+          mockThreshold,
+          mockFilterManager
+        );
+
+        expect(result[0].title).toEqual('Threshold label');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+        expect(mount(result[0].description as React.ReactElement).html()).toContain(
+          'Results aggregated by user.name >= 100'
+        );
+      });
+    });
+
     describe('references', () => {
       test('returns array of ListItems when references exist', () => {
         const result: ListItems[] = getDescriptionItem(
@@ -404,7 +450,7 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Severity label');
+        expect(result[0].title).toEqual('Severity');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });
@@ -418,7 +464,7 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Risk score label');
+        expect(result[0].title).toEqual('Risk score');
         expect(result[0].description).toEqual(21);
       });
     });

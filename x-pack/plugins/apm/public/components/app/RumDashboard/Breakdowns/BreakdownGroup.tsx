@@ -22,12 +22,12 @@ export interface BreakdownGroupProps {
   onChange: (values: BreakdownItem[]) => void;
 }
 
-export const BreakdownGroup = ({
+export function BreakdownGroup({
   id,
   disabled,
   onChange,
   items,
-}: BreakdownGroupProps) => {
+}: BreakdownGroupProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const [activeItems, setActiveItems] = useState<BreakdownItem[]>(items);
@@ -88,6 +88,7 @@ export const BreakdownGroup = ({
               data-cy={`filter-breakdown-item_${name}`}
               key={name + count}
               onClick={onFilterItemClick(name)}
+              disabled={!selected && getSelItems().length > 0}
             >
               {name}
             </EuiFilterSelectItem>
@@ -96,4 +97,4 @@ export const BreakdownGroup = ({
       </EuiPopover>
     </EuiFilterGroup>
   );
-};
+}

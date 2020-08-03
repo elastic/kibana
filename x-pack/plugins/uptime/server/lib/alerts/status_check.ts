@@ -21,7 +21,7 @@ import {
   MonitorAvailabilityType,
   DynamicSettings,
 } from '../../../common/runtime_types';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
 import { commonStateTranslations } from './translations';

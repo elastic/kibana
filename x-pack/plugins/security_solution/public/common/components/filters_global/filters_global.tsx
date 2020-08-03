@@ -9,6 +9,7 @@ import React from 'react';
 import { Sticky } from 'react-sticky';
 import styled, { css } from 'styled-components';
 
+import { FILTERS_GLOBAL_HEIGHT } from '../../../../common/constants';
 import { gutterTimeline } from '../../lib/helpers';
 
 const offsetChrome = 49;
@@ -17,6 +18,7 @@ const disableSticky = `screen and (max-width: ${euiLightVars.euiBreakpoints.s})`
 const disableStickyMq = window.matchMedia(disableSticky);
 
 const Wrapper = styled.aside<{ isSticky?: boolean }>`
+  height: ${FILTERS_GLOBAL_HEIGHT}px;
   position: relative;
   z-index: ${({ theme }) => theme.eui.euiZNavigation};
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -37,17 +39,41 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
 `;
 Wrapper.displayName = 'Wrapper';
 
+const FiltersGlobalContainer = styled.header<{ show: boolean }>`
+  ${({ show }) => css`
+    ${show ? '' : 'display: none;'};
+  `}
+`;
+
+FiltersGlobalContainer.displayName = 'FiltersGlobalContainer';
+
+const NO_STYLE: React.CSSProperties = {};
+
 export interface FiltersGlobalProps {
   children: React.ReactNode;
+  globalFullScreen: boolean;
+  show?: boolean;
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
-  <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
-    {({ style, isSticky }) => (
-      <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
-        {children}
-      </Wrapper>
-    )}
-  </Sticky>
-));
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(
+  ({ children, globalFullScreen, show = true }) =>
+    globalFullScreen ? (
+      <FiltersGlobalContainer data-test-subj="non-sticky-global-container" show={show}>
+        <Wrapper className="siemFiltersGlobal" isSticky={false} style={NO_STYLE}>
+          {children}
+        </Wrapper>
+      </FiltersGlobalContainer>
+    ) : (
+      <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
+        {({ style, isSticky }) => (
+          <FiltersGlobalContainer data-test-subj="sticky-filters-global-container" show={show}>
+            <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
+              {children}
+            </Wrapper>
+          </FiltersGlobalContainer>
+        )}
+      </Sticky>
+    )
+);
+
 FiltersGlobal.displayName = 'FiltersGlobal';

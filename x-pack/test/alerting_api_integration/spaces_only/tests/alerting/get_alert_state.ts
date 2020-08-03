@@ -44,7 +44,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           name: 'abc',
           tags: ['foo'],
           alertTypeId: 'test.cumulative-firing',
-          consumer: 'bar',
+          consumer: 'alertsFixture',
           schedule: { interval: '5s' },
           throttle: '5s',
           actions: [],

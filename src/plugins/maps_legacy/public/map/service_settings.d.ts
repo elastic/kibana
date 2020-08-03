@@ -48,4 +48,5 @@ export interface IServiceSettings {
   getEMSHotLink(layer: FileLayer): Promise<string>;
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;
+  getUrlForRegionLayer(layer: FileLayer): Promise<string>;
 }

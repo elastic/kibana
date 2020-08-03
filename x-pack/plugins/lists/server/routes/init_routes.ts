@@ -9,20 +9,22 @@ import { IRouter } from 'kibana/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ConfigType } from '../config';
 
-import { readPrivilegesRoute } from './read_privileges_route';
-
 import {
+  createEndpointListItemRoute,
+  createEndpointListRoute,
   createExceptionListItemRoute,
   createExceptionListRoute,
   createListIndexRoute,
   createListItemRoute,
   createListRoute,
+  deleteEndpointListItemRoute,
   deleteExceptionListItemRoute,
   deleteExceptionListRoute,
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
   exportListItemRoute,
+  findEndpointListItemRoute,
   findExceptionListItemRoute,
   findExceptionListRoute,
   findListItemRoute,
@@ -30,11 +32,14 @@ import {
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
+  readEndpointListItemRoute,
   readExceptionListItemRoute,
   readExceptionListRoute,
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  readPrivilegesRoute,
+  updateEndpointListItemRoute,
   updateExceptionListItemRoute,
   updateExceptionListRoute,
   updateListItemRoute,
@@ -83,4 +88,14 @@ export const initRoutes = (
   updateExceptionListItemRoute(router);
   deleteExceptionListItemRoute(router);
   findExceptionListItemRoute(router);
+
+  // endpoint list
+  createEndpointListRoute(router);
+
+  // endpoint list items
+  createEndpointListItemRoute(router);
+  readEndpointListItemRoute(router);
+  updateEndpointListItemRoute(router);
+  deleteEndpointListItemRoute(router);
+  findEndpointListItemRoute(router);
 };

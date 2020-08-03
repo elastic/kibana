@@ -120,7 +120,7 @@ class ArgFormComponent extends PureComponent {
           );
 
           return (
-            <div className={`canvasArg ${expandableLabel ? 'canvasArg--expandable' : null}`}>
+            <div className={`canvasArg ${expandableLabel ? 'canvasSidebar__expandable' : null}`}>
               <ArgLabel
                 className="resolved"
                 argId={argId}

@@ -45,11 +45,11 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const [, , selfStart] = await core.getStartServices();
-      const searchStrategy = selfStart.search.getSearchStrategy(strategy);
 
       try {
-        const response = await searchStrategy.search(context, id ? { id } : searchRequest, {
+        const response = await selfStart.search.search(context, id ? { id } : searchRequest, {
           signal,
+          strategy,
         });
         return res.ok({ body: response });
       } catch (err) {
