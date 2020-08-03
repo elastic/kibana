@@ -5,32 +5,9 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+
 import { RouterContext } from '../../public/components/router';
 
-const context = {
-  router: {
-    getFullPath: () => 'path',
-    create: () => '',
-  },
-  navigateTo: () => {},
-};
-
-class RouterProvider extends React.Component {
-  static childContextTypes = {
-    router: PropTypes.object.isRequired,
-    navigateTo: PropTypes.func,
-  };
-
-  getChildContext() {
-    return context;
-  }
-
-  render() {
-    return <RouterContext.Provider value={context}>{this.props.children}</RouterContext.Provider>;
-  }
-}
-
-export function routerContextDecorator(story: Function) {
-  return <RouterProvider>{story()}</RouterProvider>;
-}
+export const routerContextDecorator = (story: Function) => (
+  <RouterContext.Provider value={{ navigateTo: () => {} }}>{story()}</RouterContext.Provider>
+);
