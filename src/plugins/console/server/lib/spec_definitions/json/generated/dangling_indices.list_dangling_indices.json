@@ -1,0 +1,11 @@
+{
+  "dangling_indices.list_dangling_indices": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_dangling"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-gateway-dangling-indices.html"
+  }
+}
