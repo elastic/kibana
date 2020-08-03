@@ -23,7 +23,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Okta"
+    "Okta",
+    "SecOps",
+    "Network",
+    "Continuous Monitoring"
   ],
   "type": "query",
   "version": 1
