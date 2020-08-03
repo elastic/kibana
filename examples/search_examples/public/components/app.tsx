@@ -276,14 +276,14 @@ export const SearchExamplesApp = ({
                   <EuiSpacer />
                   <EuiTitle size="s">
                     <h3>
-                      Searching ElasticSearch using <EuiCode>data.search</EuiCode>
+                      Searching Elasticsearch using <EuiCode>data.search</EuiCode>
                     </h3>
                   </EuiTitle>
                   <EuiText>
-                    If you want to fetch data from ElasticSearch, you can use the different services
+                    If you want to fetch data from Elasticsearch, you can use the different services
                     provided by the <EuiCode>data</EuiCode> plugin. These help you get the index
                     pattern and search bar configuration, format them into a DSL query and send it
-                    to ElasticSearch.
+                    to Elasticsearch.
                     <EuiSpacer />
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
                       <FormattedMessage id="searchExamples.buttonText" defaultMessage="Get data" />
