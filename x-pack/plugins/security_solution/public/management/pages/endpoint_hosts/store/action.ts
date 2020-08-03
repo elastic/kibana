@@ -81,6 +81,11 @@ interface ServerReturnedHostNonExistingPolicies {
   payload: HostState['nonExistingPolicies'];
 }
 
+interface ServerReturnedHostExistValue {
+  type: 'serverReturnedHostExistValue';
+  payload: boolean;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -92,6 +97,7 @@ export type HostAction =
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
   | ServerCancelledHostListLoading
+  | ServerReturnedHostExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
   | ServerReturnedHostNonExistingPolicies;
