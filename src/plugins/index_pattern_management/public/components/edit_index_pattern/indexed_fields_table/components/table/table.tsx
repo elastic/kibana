@@ -19,7 +19,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn, EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -160,7 +160,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
 
     return (
       <span>
-        {name}
+        {field.name}
         {field.info && field.info.length ? (
           <span>
             &nbsp;
@@ -185,6 +185,13 @@ export class Table extends PureComponent<IndexedFieldProps> {
             />
           </span>
         ) : null}
+        {field.displayName !== field.name && (
+          <div>
+            <EuiBadge size="xs" iconType="eye" iconSide="left">
+              {field.displayName}
+            </EuiBadge>
+          </div>
+        )}
       </span>
     );
   }

@@ -76,10 +76,7 @@ export class IndexedFieldsTable extends Component<
         fields.map((field) => {
           return {
             ...field,
-            displayName:
-              field.displayName !== field.name
-                ? `${field.name} (${field.displayName})`
-                : field.displayName,
+            displayName: field.displayName,
             indexPattern: field.indexPattern,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
