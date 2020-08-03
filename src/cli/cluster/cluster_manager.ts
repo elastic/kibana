@@ -346,7 +346,13 @@ export class ClusterManager {
     this.addedCount += 1;
   };
 
-  onWatcherChange = (e: any, path: string) => {
+  onWatcherChange = (e: string, path: string) => {
+    // ignore add events
+    if (e === 'add') {
+      return;
+    }
+
+    // handle change events
     for (const worker of this.workers) {
       worker.onChange(path);
     }
