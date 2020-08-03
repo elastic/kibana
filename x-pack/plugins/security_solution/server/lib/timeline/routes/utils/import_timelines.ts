@@ -77,6 +77,24 @@ export const timelineSavedObjectOmittedFields = [
   'version',
 ];
 
+export const setTimeline = (
+  parsedTimelineObject: Partial<ImportedTimeline>,
+  parsedTimeline: ImportedTimeline,
+  isTemplateTimeline: boolean
+) => {
+  return {
+    ...parsedTimelineObject,
+    status:
+      parsedTimeline.status === TimelineStatus.draft
+        ? TimelineStatus.active
+        : parsedTimeline.status ?? TimelineStatus.active,
+    templateTimelineVersion: isTemplateTimeline
+      ? parsedTimeline.templateTimelineVersion ?? 1
+      : null,
+    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+  };
+};
+
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 const DEFAULT_IMPORT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
@@ -151,15 +169,7 @@ export const importTimelines = async (
                 // create timeline / timeline template
                 newTimeline = await createTimelines({
                   frameworkRequest,
-                  timeline: {
-                    ...parsedTimelineObject,
-                    status:
-                      status === TimelineStatus.draft
-                        ? TimelineStatus.active
-                        : status ?? TimelineStatus.active,
-                    templateTimelineVersion: isTemplateTimeline ? templateTimelineVersion : null,
-                    templateTimelineId: isTemplateTimeline ? templateTimelineId ?? uuid.v4() : null,
-                  },
+                  timeline: setTimeline(parsedTimelineObject, parsedTimeline, isTemplateTimeline),
                   pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
                   notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                   isImmutable,
