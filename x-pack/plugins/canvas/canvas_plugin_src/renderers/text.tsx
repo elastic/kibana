@@ -16,7 +16,7 @@ export const text: RendererFactory<{ text: string }> = () => ({
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render(domNode, { textString }, handlers) {
+  render(domNode, { text: textString }, handlers) {
     ReactDOM.render(<div>{textString}</div>, domNode, () => handlers.done());
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

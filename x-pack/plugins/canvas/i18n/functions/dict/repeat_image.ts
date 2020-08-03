@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { repeatImage } from '../../../canvas_plugin_src/functions/common/repeatImage';
+import { repeatImage } from '../../../canvas_plugin_src/functions/common/repeat_image';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT, BASE64, URL } from '../../constants';

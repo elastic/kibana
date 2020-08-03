@@ -7,7 +7,6 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 // @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-expect-error .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';

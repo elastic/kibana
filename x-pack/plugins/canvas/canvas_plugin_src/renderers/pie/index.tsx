@@ -8,7 +8,7 @@
 import 'jquery';
 import '../../lib/flot-charts';
 
-import { debounce, includes, String } from 'lodash';
+import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
 // @ts-ignore Untyped local: Will not convert
 import { pie as piePlugin } from './plugins/pie';

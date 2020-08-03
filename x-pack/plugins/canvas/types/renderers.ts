@@ -47,3 +47,6 @@ export interface RendererSpec<RendererConfig = {}> {
 }
 
 export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
+
+export type AnyRendererFactory = RendererFactory<any>;
+export type AnyRendererSpec = RendererSpec<any>;
