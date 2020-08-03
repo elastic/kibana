@@ -32,14 +32,14 @@ interface AsyncSearchResponse<T> {
   response: SearchResponse<T>;
 }
 
-interface EnhancedEsSearchResponse<T> extends IEsSearchResponse<T> {
+interface EnhancedEsSearchResponse extends IEsSearchResponse {
   is_partial: boolean;
   is_running: boolean;
 }
 
-function isEnhancedEsSearchResponse<T>(
-  response: IEsSearchResponse<T>
-): response is EnhancedEsSearchResponse<T> {
+function isEnhancedEsSearchResponse(
+  response: IEsSearchResponse
+): response is EnhancedEsSearchResponse {
   return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
 }
 
@@ -67,8 +67,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       if (
         usage &&
-        (!isEnhancedEsSearchResponse<any>(response) ||
-          (!response.is_partial && !response.is_running))
+        (!isEnhancedEsSearchResponse(response) || (!response.is_partial && !response.is_running))
       ) {
         usage.trackSuccess(response.rawResponse.took);
       }
