@@ -29,10 +29,10 @@ const DEFAULT_QUERY_STRING = JSON.stringify(DEFAULT_QUERY, null, 2);
 
 export const ResetQueryButton: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
-  const [confirmModelVisible, setConfirmModelVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
-  const closeModal = () => setConfirmModelVisible(false);
-  const showModal = () => setConfirmModelVisible(true);
+  const closeModal = () => setConfirmModalVisible(false);
+  const showModal = () => setConfirmModalVisible(true);
 
   function resetDatafeed() {
     jobCreator.query = DEFAULT_QUERY;
@@ -41,7 +41,7 @@ export const ResetQueryButton: FC = () => {
   }
   return (
     <>
-      {confirmModelVisible && (
+      {confirmModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate('xpack.ml.newJob.wizard.datafeedStep.resetQueryConfirm.title', {
