@@ -140,7 +140,7 @@ describe('FieldEditor', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should display and update a label field correctly', async () => {
+  it('should display and update a displayName correctly', async () => {
     const testField = {
       name: 'test',
       displayName: 'Test',
