@@ -63,6 +63,16 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
       expect(simulator.processNodeElements().length).toBe(3);
     });
 
+    it(`should have the default "process list" panel present`, async () => {
+      expect(simulator.panelElement().length).toBe(1);
+      expect(simulator.panelContentElement().length).toBe(1);
+      const testSubjectName = simulator
+        .panelContentElement()
+        .getDOMNode()
+        .getAttribute('data-test-subj');
+      expect(testSubjectName).toMatch(/process-list/g);
+    });
+
     describe("when the second child node's first button has been clicked", () => {
       beforeEach(() => {
         // Click the first button under the second child element.
