@@ -6,6 +6,7 @@
 
 import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
+import moment from 'moment';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
 import { LevelLogger } from '../lib';
 import * as contexts from '../lib/screenshots/constants';
@@ -95,7 +96,11 @@ export const createMockBrowserDriverFactory = async (
   opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
   const captureConfig: CaptureConfig = {
-    timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
+    timeouts: {
+      openUrl: moment.duration(60, 's'),
+      waitForElements: moment.duration(30, 's'),
+      renderComplete: moment.duration(30, 's'),
+    },
     browser: {
       type: 'chromium',
       chromium: {
@@ -107,7 +112,7 @@ export const createMockBrowserDriverFactory = async (
     },
     networkPolicy: { enabled: true, rules: [] },
     viewport: { width: 800, height: 600 },
-    loadDelay: 2000,
+    loadDelay: moment.duration(2, 's'),
     zoom: 2,
     maxAttempts: 1,
   };

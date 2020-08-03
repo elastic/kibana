@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -53,11 +54,11 @@ const toasts = {
 
 const mockPollConfig = {
   jobCompletionNotifier: {
-    interval: 5000,
+    interval: moment.duration(5, 's'),
     intervalErrorMultiplier: 3,
   },
   jobsRefresh: {
-    interval: 5000,
+    interval: moment.duration(5, 's'),
     intervalErrorMultiplier: 3,
   },
 };

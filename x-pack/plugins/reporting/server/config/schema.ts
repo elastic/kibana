@@ -5,7 +5,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import moment from 'moment';
 
 const KibanaServerSchema = schema.object({
   hostname: schema.maybe(
@@ -31,11 +30,11 @@ const KibanaServerSchema = schema.object({
 }); // default values are all dynamic in createConfig$
 
 const QueueSchema = schema.object({
-  indexInterval: schema.string({ defaultValue: 'week' }),
+  indexInterval: schema.string({ defaultValue: 'week' }), // no schema.duration: used to create weekly indices
   pollEnabled: schema.boolean({ defaultValue: true }),
   pollInterval: schema.number({ defaultValue: 3000 }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
-  timeout: schema.number({ defaultValue: moment.duration(2, 'm').asMilliseconds() }),
+  timeout: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 120000 }),
 });
 
 const RulesSchema = schema.object({
@@ -46,9 +45,9 @@ const RulesSchema = schema.object({
 
 const CaptureSchema = schema.object({
   timeouts: schema.object({
-    openUrl: schema.number({ defaultValue: 60000 }),
-    waitForElements: schema.number({ defaultValue: 30000 }),
-    renderComplete: schema.number({ defaultValue: 30000 }),
+    openUrl: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
+    waitForElements: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
+    renderComplete: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 30000 }),
   }),
   networkPolicy: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -68,9 +67,7 @@ const CaptureSchema = schema.object({
     width: schema.number({ defaultValue: 1950 }),
     height: schema.number({ defaultValue: 1200 }),
   }),
-  loadDelay: schema.number({
-    defaultValue: moment.duration(3, 's').asMilliseconds(),
-  }), // TODO: use schema.duration
+  loadDelay: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 3000 }),
   browser: schema.object({
     autoDownload: schema.conditional(
       schema.contextRef('dist'),
@@ -116,9 +113,9 @@ const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
-  maxSizeBytes: schema.number({
-    defaultValue: 1024 * 1024 * 10, // 10MB
-  }), // TODO: use schema.byteSize
+  maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
+    defaultValue: 1024 * 1024 * 10,
+  }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
     duration: schema.string({
@@ -148,15 +145,11 @@ const IndexSchema = schema.string({ defaultValue: '.reporting' });
 
 const PollSchema = schema.object({
   jobCompletionNotifier: schema.object({
-    interval: schema.number({
-      defaultValue: moment.duration(10, 's').asMilliseconds(),
-    }), // TODO: use schema.duration
+    interval: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 10000 }),
     intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
   }),
   jobsRefresh: schema.object({
-    interval: schema.number({
-      defaultValue: moment.duration(5, 's').asMilliseconds(),
-    }), // TODO: use schema.duration
+    interval: schema.oneOf([schema.number(), schema.duration()], { defaultValue: 5000 }),
     intervalErrorMultiplier: schema.number({ defaultValue: 5 }),
   }),
 });

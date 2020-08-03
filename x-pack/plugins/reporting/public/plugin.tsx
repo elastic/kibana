@@ -158,8 +158,8 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
     const { http, notifications } = core;
     const apiClient = new ReportingAPIClient(http);
     const streamHandler = new StreamHandler(notifications, apiClient);
-    const { interval } = this.config.poll.jobsRefresh;
-
+    const { interval: intervalRaw } = this.config.poll.jobsRefresh;
+    const interval = typeof intervalRaw === 'number' ? intervalRaw : intervalRaw.asMilliseconds();
     Rx.timer(0, interval)
       .pipe(
         takeUntil(this.stop$), // stop the interval when stop method is called

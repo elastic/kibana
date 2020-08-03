@@ -25,7 +25,7 @@ const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
 export const waitForVisualizations = async (
   captureConfig: CaptureConfig,
   browser: HeadlessChromiumDriver,
-  itemsCount: number,
+  toEqual: number,
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<void> => {
@@ -35,29 +35,26 @@ export const waitForVisualizations = async (
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.waitingForRenderedElements', {
       defaultMessage: `waiting for {itemsCount} rendered elements to be in the DOM`,
-      values: { itemsCount },
+      values: { itemsCount: toEqual },
     })
   );
 
   try {
+    const timeoutRaw = captureConfig.timeouts.renderComplete;
+    const timeout = typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds();
     await browser.waitFor(
-      {
-        fn: getCompletedItemsCount,
-        args: [{ renderCompleteSelector }],
-        toEqual: itemsCount,
-        timeout: captureConfig.timeouts.renderComplete,
-      },
+      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
       { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
       logger
     );
 
-    logger.debug(`found ${itemsCount} rendered elements in the DOM`);
+    logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntFinishRendering', {
         defaultMessage: `An error occurred when trying to wait for {count} visualizations to finish rendering. You may need to increase '{configKey}'. {error}`,
         values: {
-          count: itemsCount,
+          count: toEqual,
           configKey: 'xpack.reporting.capture.timeouts.renderComplete',
           error: err,
         },

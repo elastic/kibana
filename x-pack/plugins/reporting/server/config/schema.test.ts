@@ -105,6 +105,41 @@ describe('Reporting Config Schema', () => {
     });
   });
 
+  it('allows Duration values for certain keys', () => {
+    expect(ConfigSchema.validate({ queue: { timeout: '2m' } }).queue.timeout).toMatchInlineSnapshot(
+      `"PT2M"`
+    );
+
+    expect(
+      ConfigSchema.validate({ capture: { loadDelay: '3s' } }).capture.loadDelay
+    ).toMatchInlineSnapshot(`"PT3S"`);
+
+    expect(
+      ConfigSchema.validate({
+        capture: { timeouts: { openUrl: '1m', waitForElements: '30s', renderComplete: '10s' } },
+      }).capture.timeouts
+    ).toMatchInlineSnapshot(`
+      Object {
+        "openUrl": "PT1M",
+        "renderComplete": "PT10S",
+        "waitForElements": "PT30S",
+      }
+    `);
+
+    expect(
+      ConfigSchema.validate({ csv: { scroll: { duration: '1m' } } }).csv.scroll.duration
+    ).toMatchInlineSnapshot(`"1m"`);
+  });
+
+  it('allows ByteSizeValue values for certain keys', () => {
+    expect(ConfigSchema.validate({ csv: { maxSizeBytes: '12mb' } }).csv.maxSizeBytes)
+      .toMatchInlineSnapshot(`
+      ByteSizeValue {
+        "valueInBytes": 12582912,
+      }
+    `);
+  });
+
   it(`allows optional settings`, () => {
     // encryption key
     expect(

@@ -48,8 +48,10 @@ export class ReportingStore {
     this.client = elasticsearch.legacy.client;
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
+
+    const timeoutRaw = config.get('queue', 'timeout');
     this.jobSettings = {
-      timeout: config.get('queue', 'timeout'),
+      timeout: typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds(),
       browser_type: config.get('capture', 'browser', 'type'),
       max_attempts: config.get('capture', 'maxAttempts'),
       priority: 10, // unused

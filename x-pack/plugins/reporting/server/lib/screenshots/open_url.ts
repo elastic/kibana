@@ -19,13 +19,11 @@ export const openUrl = async (
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {
+    const timeoutRaw = captureConfig.timeouts.openUrl;
+    const timeout = typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds();
     await browser.open(
       url,
-      {
-        conditionalHeaders,
-        waitForSelector: pageLoadSelector,
-        timeout: captureConfig.timeouts.openUrl,
-      },
+      { conditionalHeaders, waitForSelector: pageLoadSelector, timeout },
       logger
     );
   } catch (err) {

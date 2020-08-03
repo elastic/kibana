@@ -5,10 +5,11 @@
  */
 
 import numeral from '@elastic/numeral';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { defaults, get } from 'lodash';
-import { ReportingConfig } from '../../';
 import { LevelLogger } from '../';
+import { ReportingConfig } from '../../';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
@@ -27,10 +28,16 @@ export async function validateMaxContentLength(
   const elasticClusterSettings = defaults({}, persistent, transient, defaultSettings);
 
   const elasticSearchMaxContent = get(elasticClusterSettings, 'http.max_content_length', '100mb');
-  const elasticSearchMaxContentBytes = numeral().unformat(elasticSearchMaxContent.toUpperCase());
-  const kibanaMaxContentBytes = config.get('csv', 'maxSizeBytes');
+  const elasticSearchMaxContentBytes = new ByteSizeValue(
+    numeral().unformat(elasticSearchMaxContent.toUpperCase())
+  );
+  const kibanaMaxContentBytesRaw = config.get('csv', 'maxSizeBytes');
+  const kibanaMaxContentBytes =
+    typeof kibanaMaxContentBytesRaw === 'number'
+      ? new ByteSizeValue(kibanaMaxContentBytesRaw)
+      : kibanaMaxContentBytesRaw;
 
-  if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
+  if (kibanaMaxContentBytes.isGreaterThan(elasticSearchMaxContentBytes)) {
     // TODO this should simply throw an error and let the handler conver it to a warning mesasge. See validateServerHost.
     logger.warning(
       `xpack.reporting.${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +

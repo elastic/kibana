@@ -8,7 +8,6 @@ import moment, { unitOfTime } from 'moment';
 
 export const intervals = ['year', 'month', 'week', 'day', 'hour', 'minute'];
 
-// TODO: This helper function can be removed by using `schema.duration` objects in the reporting config schema
 export function indexTimestamp(intervalStr: string, separator = '-') {
   const startOf = intervalStr as unitOfTime.StartOf;
   if (separator.match(/[a-z]/i)) throw new Error('Interval separator can not be a letter');

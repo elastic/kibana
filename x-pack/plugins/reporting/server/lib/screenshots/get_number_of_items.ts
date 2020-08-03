@@ -31,9 +31,11 @@ export const getNumberOfItems = async (
     // the dashboard is using the `itemsCountAttribute` attribute to let us
     // know how many items to expect since gridster incrementally adds panels
     // we have to use this hint to wait for all of them
+    const timeoutRaw = captureConfig.timeouts.waitForElements;
+    const timeout = typeof timeoutRaw === 'number' ? timeoutRaw : timeoutRaw.asMilliseconds();
     await browser.waitForSelector(
       `${renderCompleteSelector},[${itemsCountAttribute}]`,
-      { timeout: captureConfig.timeouts.waitForElements },
+      { timeout },
       { context: CONTEXT_READMETADATA },
       logger
     );

@@ -15,10 +15,11 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
   }),
 }));
 
+import moment from 'moment';
 import * as Rx from 'rxjs';
+import { LevelLogger } from '../';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { LevelLogger } from '../';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../test_helpers';
 import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
 import * as contexts from './constants';
@@ -30,7 +31,7 @@ import { screenshotsObservableFactory } from './observable';
 const mockLogger = jest.fn(loggingSystemMock.create);
 const logger = new LevelLogger(mockLogger());
 
-const mockConfig = { timeouts: { openUrl: 13 } } as CaptureConfig;
+const mockConfig = { timeouts: { openUrl: moment.duration(13, 'ms') } } as CaptureConfig;
 const mockLayout = createMockLayoutInstance(mockConfig);
 
 /*
