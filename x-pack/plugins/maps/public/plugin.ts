@@ -50,7 +50,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
 import {
   VISUALIZE_GEO_FIELD_TRIGGER,
-  VisualizeGeoFieldContext,
+  VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
@@ -75,7 +75,7 @@ export interface MapsPluginStartDependencies {}
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
-    [ACTION_VISUALIZE_GEO_FIELD]: VisualizeGeoFieldContext;
+    [ACTION_VISUALIZE_GEO_FIELD]: VisualizeFieldContext;
   }
 }
 

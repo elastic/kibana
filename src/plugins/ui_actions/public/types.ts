@@ -38,12 +38,6 @@ export interface VisualizeFieldContext {
   indexPatternId: string;
 }
 
-export interface VisualizeGeoFieldContext {
-  fieldName: string;
-  indexPatternId: string;
-  tooltipProperties?: string[];
-}
-
 const DEFAULT_TRIGGER = '';
 
 export type TriggerId = keyof TriggerContextMapping;
@@ -57,7 +51,7 @@ export interface TriggerContextMapping {
   [VALUE_CLICK_TRIGGER]: ValueClickContext;
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
   [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
-  [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeGeoFieldContext;
+  [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
 }
 
 const DEFAULT_ACTION = '';

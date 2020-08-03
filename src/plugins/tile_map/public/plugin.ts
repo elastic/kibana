@@ -37,7 +37,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import {
   UiActionsStart,
   VISUALIZE_GEO_FIELD_TRIGGER,
-  VisualizeGeoFieldContext,
+  VisualizeFieldContext,
 } from '../../ui_actions/public';
 import {
   setFormatService,
@@ -54,7 +54,7 @@ import {
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
-    [ACTION_VISUALIZE_TILEMAP_FIELD]: VisualizeGeoFieldContext;
+    [ACTION_VISUALIZE_TILEMAP_FIELD]: VisualizeFieldContext;
   }
 }
 

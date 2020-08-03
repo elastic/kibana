@@ -54,6 +54,5 @@ export {
   ActionContextMapping,
   ActionType,
   VisualizeFieldContext,
-  VisualizeGeoFieldContext,
 } from './types';
 export { ActionByType } from './actions';

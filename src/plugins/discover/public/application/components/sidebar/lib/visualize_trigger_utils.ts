@@ -30,36 +30,31 @@ function getTrigger(type: string) {
 async function getCompatibleActions(
   fieldName: string,
   indexPatternId: string,
-  tooltipProperties: string[],
   action: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(action, {
     indexPatternId,
     fieldName,
-    tooltipProperties,
   });
   return compatibleActions.length;
 }
 
 export function triggerVisualizeActions(
   field: IndexPatternField,
-  indexPatternId: string | undefined,
-  tooltipProperties: string[]
+  indexPatternId: string | undefined
 ) {
   if (!indexPatternId) return;
   const trigger = getTrigger(field.type);
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
-    tooltipProperties: trigger === VISUALIZE_GEO_FIELD_TRIGGER ? tooltipProperties : [],
   };
   getUiActions().executeTriggerActions(trigger, triggerOptions);
 }
 
 export async function isFieldVisualizable(
   field: IndexPatternField,
-  indexPatternId: string | undefined,
-  tooltipProperties: string[]
+  indexPatternId: string | undefined
 ) {
   if (!indexPatternId) return;
   if (field.name === '_id') {
@@ -67,11 +62,6 @@ export async function isFieldVisualizable(
     return false;
   }
   const trigger = getTrigger(field.type);
-  const compatibleActions = await getCompatibleActions(
-    field.name,
-    indexPatternId,
-    tooltipProperties,
-    trigger
-  );
+  const compatibleActions = await getCompatibleActions(field.name, indexPatternId, trigger);
   return compatibleActions > 0 && field.visualizable;
 }

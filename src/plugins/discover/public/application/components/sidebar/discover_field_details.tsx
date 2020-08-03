@@ -21,7 +21,7 @@ import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
-import { triggerVisualizeActions, isFieldVisualizable } from './lib/get_visualize_trigger';
+import { triggerVisualizeActions, isFieldVisualizable } from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
@@ -41,9 +41,9 @@ export function DiscoverFieldDetails({
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean | undefined>(false);
 
-  isFieldVisualizable(field, indexPattern.id, details.columns).then(
-    (v) => {
-      setShowVisualizeLink(v);
+  isFieldVisualizable(field, indexPattern.id).then(
+    (flag) => {
+      setShowVisualizeLink(flag);
     },
     () => {
       setShowVisualizeLink(false);
@@ -90,7 +90,7 @@ export function DiscoverFieldDetails({
         <>
           <EuiLink
             onClick={() => {
-              triggerVisualizeActions(field, indexPattern.id, details.columns);
+              triggerVisualizeActions(field, indexPattern.id);
             }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
             data-test-subj={`fieldVisualize-${field.name}`}

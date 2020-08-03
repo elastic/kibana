@@ -18,16 +18,24 @@
  */
 import rison from 'rison-node';
 import { stringify } from 'query-string';
+import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../ui_actions/public';
+import { DiscoverAppState } from '../../../discover/public';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '../../../kibana_utils/public';
 import { getApplication, getVisualizations } from '../services';
 
 export const ACTION_VISUALIZE_TILEMAP_FIELD = 'ACTION_VISUALIZE_TILEMAP_FIELD';
 
 export const visualizeTilemapFieldAction = createAction<typeof ACTION_VISUALIZE_TILEMAP_FIELD>({
   type: ACTION_VISUALIZE_TILEMAP_FIELD,
-  getDisplayName: () => 'Go to Tile Maps',
+  getDisplayName: () =>
+    i18n.translate('tileMap.discover.visualizeFieldLabel', {
+      defaultMessage: 'Visualize on Coordinate Maps',
+    }),
   isCompatible: async () => !getVisualizations().typeIsHidden('tile_map'),
   execute: async (context) => {
+    const stateStorage: IKbnUrlStateStorage = createKbnUrlStateStorage();
+    const appStateFromUrl: DiscoverAppState | null = stateStorage.get('_a');
     const agg = {
       type: 'geohash_grid',
       schema: 'segment',
@@ -41,6 +49,8 @@ export const visualizeTilemapFieldAction = createAction<typeof ACTION_VISUALIZE_
       indexPattern: context.indexPatternId,
       type: 'tile_map',
       _a: rison.encode({
+        filters: appStateFromUrl?.filters || [],
+        query: appStateFromUrl?.query,
         vis: {
           type: 'tile_map',
           aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],
