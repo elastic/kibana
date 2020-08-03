@@ -23,7 +23,7 @@ image::images/canvas-gs-example.png[Getting started example]
 For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
 
 [float]
-[[create-workpads]]
+[[create-canvas-workpads]]
 == Create workpads
 
 A _workpad_ provides you with a workspace where you can build presentations of your live data.
