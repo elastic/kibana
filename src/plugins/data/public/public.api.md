@@ -1046,8 +1046,6 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     indexPattern?: IIndexPattern;
     // (undocumented)
-    label?: string;
-    // (undocumented)
     lang?: string;
     // (undocumented)
     name: string;
