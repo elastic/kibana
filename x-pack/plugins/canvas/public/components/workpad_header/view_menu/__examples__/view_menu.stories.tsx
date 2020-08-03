@@ -6,7 +6,7 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ViewMenu } from '../view_menu';
+import { ViewMenu } from '../view_menu.component';
 
 const handlers = {
   setZoomScale: action('setZoomScale'),
