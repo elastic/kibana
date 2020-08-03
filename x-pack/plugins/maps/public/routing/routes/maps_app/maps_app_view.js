@@ -308,6 +308,7 @@ export class MapsAppView extends React.Component {
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
       setBreadcrumbs: this._setBreadcrumbs,
+      originatingApp: this.props.originatingApp,
     });
 
     const { TopNavMenu } = getNavigation().ui;

@@ -16,7 +16,7 @@ import {
   getCoreI18n,
 } from '../../../kibana_services';
 import {
-  SavedObjectSaveModal,
+  SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
 } from '../../../../../../../src/plugins/saved_objects/public';
@@ -34,6 +34,7 @@ export function getTopNavConfig({
   openMapSettings,
   inspectorAdapters,
   setBreadcrumbs,
+  originatingApp,
 }: {
   savedMap: ISavedGisMap;
   isOpenSettingsDisabled: boolean;
@@ -43,14 +44,104 @@ export function getTopNavConfig({
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   setBreadcrumbs: () => void;
+  originatingApp?: string;
 }) {
-  return [
+  const topNavConfigs = [];
+
+  const hasWritePermissions = getMapsCapabilities().save;
+
+  if (hasWritePermissions && savedMap.id && originatingApp) {
+    topNavConfigs.push({
+      id: 'saveAndReturn',
+      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
+        defaultMessage: 'Save and return',
+      }),
+      emphasize: true,
+      iconType: 'check',
+      run: () => {
+        /* if (isSaveable && lastKnownDoc) {
+          runSave({
+            newTitle: lastKnownDoc.title,
+            newCopyOnSave: false,
+            isTitleDuplicateConfirmed: false,
+            returnToOrigin: true,
+          });
+        }*/
+      },
+      testId: 'mapSaveAndReturnButton',
+    });
+  }
+
+  if (hasWritePermissions) {
+    topNavConfigs.push({
+      id: 'save',
+      label: i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
+        defaultMessage: `save`,
+      }),
+      description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
+        defaultMessage: `Save map`,
+      }),
+      testId: 'mapSaveButton',
+      disableButton() {
+        return isSaveDisabled;
+      },
+      tooltip() {
+        if (isSaveDisabled) {
+          return i18n.translate('xpack.maps.topNav.saveMapDisabledButtonTooltip', {
+            defaultMessage: 'Confirm or Cancel your layer changes before saving',
+          });
+        }
+      },
+      run: async () => {
+        const onSave = ({
+          newTitle,
+          newCopyOnSave,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        }: OnSaveProps) => {
+          const currentTitle = savedMap.title;
+          savedMap.title = newTitle;
+          savedMap.copyOnSave = newCopyOnSave;
+          const saveOptions: SavedObjectSaveOpts = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs).then((response) => {
+            // If the save wasn't successful, put the original values back.
+            if (!response.id || response.error) {
+              savedMap.title = currentTitle;
+            }
+            return response;
+          });
+        };
+
+        const saveModal = (
+          <SavedObjectSaveModalOrigin
+            originatingApp={originatingApp}
+            onSave={onSave}
+            onClose={() => {}}
+            documentInfo={{
+              id: savedMap.id,
+              title: savedMap.title,
+            }}
+            objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
+              defaultMessage: 'map',
+            })}
+          />
+        );
+        showSaveModal(saveModal, getCoreI18n().Context);
+      },
+    });
+  }
+
+  topNavConfigs.push(
     {
       id: 'full-screen',
-      label: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
         defaultMessage: `full screen`,
       }),
-      description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
+      description: i18n.translate('xpack.maps.topNav.fullScreenDescription', {
         defaultMessage: `full screen`,
       }),
       testId: 'mapsFullScreenMode',
@@ -61,10 +152,10 @@ export function getTopNavConfig({
     },
     {
       id: 'inspect',
-      label: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+      label: i18n.translate('xpack.maps.topNav.openInspectorButtonLabel', {
         defaultMessage: `inspect`,
       }),
-      description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
+      description: i18n.translate('xpack.maps.topNav.openInspectorDescription', {
         defaultMessage: `Open Inspector`,
       }),
       testId: 'openInspectorButton',
@@ -74,10 +165,10 @@ export function getTopNavConfig({
     },
     {
       id: 'mapSettings',
-      label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+      label: i18n.translate('xpack.maps.topNav.openSettingsButtonLabel', {
         defaultMessage: `Map settings`,
       }),
-      description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+      description: i18n.translate('xpack.maps.topNav.openSettingsDescription', {
         defaultMessage: `Open map settings`,
       }),
       testId: 'openSettingsButton',
@@ -87,70 +178,10 @@ export function getTopNavConfig({
       run() {
         openMapSettings();
       },
-    },
-    ...(getMapsCapabilities().save
-      ? [
-          {
-            id: 'save',
-            label: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
-              defaultMessage: `save`,
-            }),
-            description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
-              defaultMessage: `Save map`,
-            }),
-            testId: 'mapSaveButton',
-            disableButton() {
-              return isSaveDisabled;
-            },
-            tooltip() {
-              if (isSaveDisabled) {
-                return i18n.translate('xpack.maps.mapController.saveMapDisabledButtonTooltip', {
-                  defaultMessage: 'Save or Cancel your layer changes before saving',
-                });
-              }
-            },
-            run: async () => {
-              const onSave = ({
-                newTitle,
-                newCopyOnSave,
-                isTitleDuplicateConfirmed,
-                onTitleDuplicate,
-              }: OnSaveProps) => {
-                const currentTitle = savedMap.title;
-                savedMap.title = newTitle;
-                savedMap.copyOnSave = newCopyOnSave;
-                const saveOptions: SavedObjectSaveOpts = {
-                  confirmOverwrite: false,
-                  isTitleDuplicateConfirmed,
-                  onTitleDuplicate,
-                };
-                return doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs).then(
-                  (response) => {
-                    // If the save wasn't successful, put the original values back.
-                    if (!response.id || response.error) {
-                      savedMap.title = currentTitle;
-                    }
-                    return response;
-                  }
-                );
-              };
+    }
+  );
 
-              const saveModal = (
-                <SavedObjectSaveModal
-                  onSave={onSave}
-                  onClose={() => {}}
-                  title={savedMap.title}
-                  showCopyOnSave={!!savedMap.id}
-                  objectType={MAP_SAVED_OBJECT_TYPE}
-                  showDescription={false}
-                />
-              );
-              showSaveModal(saveModal, getCoreI18n().Context);
-            },
-          },
-        ]
-      : []),
-  ];
+  return topNavConfigs;
 }
 
 async function doSave(
@@ -168,7 +199,7 @@ async function doSave(
     getCoreChrome().docTitle.change(savedMap.title);
   } catch (err) {
     getToasts().addDanger({
-      title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {
+      title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
         defaultMessage: `Error on saving '{title}'`,
         values: { title: savedMap.title },
       }),
@@ -182,8 +213,10 @@ async function doSave(
     goToSpecifiedPath(`/map/${id}${window.location.hash}`);
     setBreadcrumbs();
 
+    // coreStart.application.navigateToApp(originatingApp);
+
     getToasts().addSuccess({
-      title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
+      title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,
         values: { title: savedMap.title },
       }),
