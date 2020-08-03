@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppNavLinkStatus,
+} from '../../../src/core/public';
 import {
   SearchExamplesPluginSetup,
   SearchExamplesPluginStart,
@@ -34,11 +40,15 @@ export class SearchExamplesPlugin
       AppPluginSetupDependencies,
       AppPluginStartDependencies
     > {
-  public setup(core: CoreSetup<AppPluginStartDependencies>): SearchExamplesPluginSetup {
+  public setup(
+    core: CoreSetup<AppPluginStartDependencies>,
+    { developerExamples }: AppPluginSetupDependencies
+  ): SearchExamplesPluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
       id: 'searchExamples',
       title: PLUGIN_NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -47,6 +57,12 @@ export class SearchExamplesPlugin
         // Render the application
         return renderApp(coreStart, depsStart, params);
       },
+    });
+
+    developerExamples.register({
+      appId: 'searchExamples',
+      title: 'Search Examples',
+      description: `Search Examples`,
     });
 
     return {};

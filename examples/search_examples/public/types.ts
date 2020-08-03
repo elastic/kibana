@@ -19,6 +19,7 @@
 
 import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginSetup {}
@@ -26,7 +27,9 @@ export interface SearchExamplesPluginSetup {}
 export interface SearchExamplesPluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AppPluginSetupDependencies {}
+export interface AppPluginSetupDependencies {
+  developerExamples: DeveloperExamplesSetup;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;

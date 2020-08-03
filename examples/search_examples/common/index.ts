@@ -20,7 +20,7 @@
 import { IEsSearchResponse, IEsSearchRequest } from '../../../src/plugins/data/common';
 
 export const PLUGIN_ID = 'searchExamples';
-export const PLUGIN_NAME = 'search_examples';
+export const PLUGIN_NAME = 'Search Examples';
 
 export interface IMyStrategyRequest extends IEsSearchRequest {
   get_cool: boolean;
