@@ -32,7 +32,7 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('empty_kibana');
     });
 
-    describe('', async function () {
+    describe('', function () {
       this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_index_patterns_empty'));
