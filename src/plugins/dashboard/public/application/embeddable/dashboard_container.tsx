@@ -195,14 +195,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       //   ...previousPanelState.explicitInput,
       //   ...newPanelState,
       // });
-      const changes = {
-        panels: {
-          [previousPanelState.explicitInput.id]: {
-            type: newPanelState.type,
-            explicitInput: { ...previousPanelState.explicitInput, ...newPanelState.explicitInput },
-          },
-        },
-      };
+      // const changes = {
+      //   panels: {
+      //     [previousPanelState.explicitInput.id]: {
+      //       type: newPanelState.type,
+      //       explicitInput: { ...previousPanelState.explicitInput, ...newPanelState.explicitInput },
+      //     },
+      //   },
+      // };
+      // explicitInput content here:
+      const changes = { ...previousPanelState.explicitInput, ...newPanelState.explicitInput };
       // console.log({ changes });
       embeddable.updateInput(changes);
       // console.log('Post', embeddable, {
