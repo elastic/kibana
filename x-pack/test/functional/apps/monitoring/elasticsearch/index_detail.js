@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      it.skip('should have an index summary with NA for deleted index', async () => {
+      it('should have an index summary with NA for deleted index', async () => {
         await indicesList.setFilter('deleted');
         await indicesList.clickRowByName('many-0001_clruksahirti');
 

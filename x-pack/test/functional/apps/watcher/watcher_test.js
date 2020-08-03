@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
   // Still flaky test :c
   // https://github.com/elastic/kibana/pull/56361
   // https://github.com/elastic/kibana/pull/56304
-  describe.skip('watcher_test', function () {
+  describe('watcher_test', function () {
     before('initialize tests', async () => {
       // There may be system watches if monitoring was previously enabled
       // These cannot be deleted via the UI, so we need to delete via the API

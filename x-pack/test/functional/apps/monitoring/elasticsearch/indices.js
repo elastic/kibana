@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // Revisit once https://github.com/elastic/eui/issues/1322 is resolved
-    it.skip('should show indices table with correct rows after sorting by Search Rate Desc', async () => {
+    it('should show indices table with correct rows after sorting by Search Rate Desc', async () => {
       await indicesList.clickSearchCol();
       await indicesList.clickSearchCol();
 
