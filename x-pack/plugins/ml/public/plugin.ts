@@ -32,10 +32,18 @@ import { registerFeature } from './register_feature';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { registerMlUiActions } from './ui_actions';
+import {
+  registerMlUiActions,
+  APPLY_INFLUENCER_FILTERS_ACTION,
+  EDIT_SWIMLANE_PANEL_ACTION,
+  OPEN_IN_ANOMALY_EXPLORER_ACTION,
+  APPLY_TIME_RANGE_SELECTION_ACTION,
+  SWIM_LANE_SELECTION_TRIGGER,
+} from './ui_actions';
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { registerUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 import { isMlEnabled, isFullLicense } from '../common/license';
+import { SwimLaneDrilldownContext, EditSwimlanePanelContext } from './embeddables';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -54,6 +62,19 @@ export interface MlSetupDependencies {
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
+}
+
+declare module '../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [EDIT_SWIMLANE_PANEL_ACTION]: EditSwimlanePanelContext;
+    [OPEN_IN_ANOMALY_EXPLORER_ACTION]: SwimLaneDrilldownContext;
+    [APPLY_INFLUENCER_FILTERS_ACTION]: SwimLaneDrilldownContext;
+    [APPLY_TIME_RANGE_SELECTION_ACTION]: SwimLaneDrilldownContext;
+  }
+
+  export interface TriggerContextMapping {
+    [SWIM_LANE_SELECTION_TRIGGER]: SwimLaneDrilldownContext;
+  }
 }
 
 declare module '../../../../src/plugins/share/public' {

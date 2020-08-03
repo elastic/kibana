@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  AnomalySwimlaneEmbeddable,
+  IAnomalySwimlaneEmbeddable,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -28,7 +28,7 @@ import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
-  embeddableContext: AnomalySwimlaneEmbeddable;
+  embeddableContext: InstanceType<IAnomalySwimlaneEmbeddable>;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;

@@ -17,3 +17,5 @@ export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSet
     anomalySwimlaneEmbeddableFactory
   );
 }
+
+export { SwimLaneDrilldownContext, EditSwimlanePanelContext } from './anomaly_swimlane';

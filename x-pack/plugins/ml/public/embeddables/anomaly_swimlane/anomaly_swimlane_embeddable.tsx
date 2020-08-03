@@ -30,8 +30,7 @@ import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { MlDependencies } from '../../application/app';
 import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
@@ -84,6 +83,8 @@ export type AnomalySwimlaneEmbeddableServices = [
   MlDependencies,
   AnomalySwimlaneServices
 ];
+
+export type IAnomalySwimlaneEmbeddable = typeof AnomalySwimlaneEmbeddable;
 
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
