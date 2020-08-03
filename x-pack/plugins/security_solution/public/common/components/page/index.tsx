@@ -71,12 +71,6 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     overflow-y: hidden;
   }
 
-  /*
-    kibana-body MUST have a (hidden) scroll bar when NOT in full screen mode.
-    This hidden scroll bar is required to enable the full range of vertical
-    scrolling when the content is larger than the viewport, but we hide it
-    to avoid "double scroll bars".
-  */
   #kibana-body {
     height: 100%;
 

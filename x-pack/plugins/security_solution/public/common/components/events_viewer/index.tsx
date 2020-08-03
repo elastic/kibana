@@ -26,8 +26,10 @@ import { useFetchIndexPatterns } from '../../../detections/containers/detection_
 import { InspectButtonContainer } from '../inspect';
 import { useFullScreen } from '../../containers/use_full_screen';
 
+const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
-  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : '624px')};
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
   display: flex;
   width: 100%;
 `;
