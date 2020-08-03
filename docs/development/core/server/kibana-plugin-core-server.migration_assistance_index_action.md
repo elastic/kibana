@@ -4,6 +4,9 @@
 
 ## MIGRATION\_ASSISTANCE\_INDEX\_ACTION type
 
+> Warning: This API is now obsolete.
+> 
+> 
 
 <b>Signature:</b>
 
