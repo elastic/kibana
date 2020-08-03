@@ -3,6 +3,11 @@
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
   position: relative;
+
+  &:focus-within,
+  .euiPopover-isOpen & {
+    @include euiFocusRing;
+  }
 }
 
 .kbnFieldButton--isDraggable {
