@@ -168,31 +168,34 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+        it('displays details for the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
+            id: testData.jobId,
+            description: testData.jobDescription,
+            sourceIndex: testData.source,
+            destinationIndex: testData.destinationIndex,
+            type: testData.expected.row.type,
+            status: testData.expected.row.status,
+            progress: testData.expected.row.progress,
+          });
+        });
+
         it('should open the edit form for the created job in the analytics table', async () => {
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
-          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter((row) => row.id === testData.jobId);
-          expect(filteredRows).to.have.length(
-            1,
-            `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`
-          );
-          if (filteredRows?.length) {
-            await ml.dataFrameAnalyticsTable.openEditFlyout();
-          }
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
         });
 
         it('should input the description in the edit form', async () => {
-          await ml.dataFrameAnalyticsCreation.assertJobDescriptionEditInputExists();
-          await ml.dataFrameAnalyticsCreation.setJobDescriptionEdit(editedDescription);
+          await ml.dataFrameAnalyticsEdit.assertJobDescriptionEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobDescriptionEdit(editedDescription);
         });
 
         it('should input the model memory limit in the edit form', async () => {
-          await ml.dataFrameAnalyticsCreation.assertJobMmlEditInputExists();
-          await ml.dataFrameAnalyticsCreation.setJobMmlEdit('21mb');
+          await ml.dataFrameAnalyticsEdit.assertJobMmlEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobMmlEdit('21mb');
         });
 
         it('should submit the edit job form', async () => {
-          await ml.dataFrameAnalyticsCreation.updateAnalyticsJob();
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
 
         it('displays details for the created job in the analytics table', async () => {

@@ -88,10 +88,8 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       await testSubjects.existOrFail('mlAnalyticsJobViewButton');
     }
 
-    public async openEditFlyout() {
-      await testSubjects.existOrFail('euiCollapsedItemActionsButton', { timeout: 5000 });
-      await testSubjects.click('euiCollapsedItemActionsButton');
-      await testSubjects.existOrFail('mlAnalyticsJobEditButton', { timeout: 5000 });
+    public async openEditFlyout(analyticsId: string) {
+      await this.openRowActions(analyticsId);
       await testSubjects.click('mlAnalyticsJobEditButton');
       await testSubjects.existOrFail('analyticsEditFlyout', { timeout: 5000 });
     }
