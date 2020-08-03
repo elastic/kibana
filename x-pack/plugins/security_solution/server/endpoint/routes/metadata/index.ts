@@ -92,7 +92,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
                 ])
               )
             ),
-            filters: endpointFilters,
+            filters: schema.nullable(endpointFilters),
           })
         ),
       },
