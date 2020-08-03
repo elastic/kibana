@@ -406,7 +406,10 @@ describe('http service', () => {
       // client contains authHeaders for BWC with legacy platform.
       const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual(authHeaders);
+      expect(clientHeaders).toEqual({
+        ...authHeaders,
+        'x-opaque-id': expect.any(String),
+      });
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
@@ -430,7 +433,10 @@ describe('http service', () => {
 
       const [client] = MockLegacyScopedClusterClient.mock.calls;
       const [, , clientHeaders] = client;
-      expect(clientHeaders).toEqual({ authorization: authorizationHeader });
+      expect(clientHeaders).toEqual({
+        authorization: authorizationHeader,
+        'x-opaque-id': expect.any(String),
+      });
     });
 
     it('forwards 401 errors returned from elasticsearch', async () => {

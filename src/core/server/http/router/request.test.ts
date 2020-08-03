@@ -16,12 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+}));
+
 import { RouteOptions } from 'hapi';
 import { KibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
 
 describe('KibanaRequest', () => {
+  describe('id property', () => {
+    it('uses the request.app.requestId property if present', () => {
+      const request = httpServerMock.createRawRequest({
+        app: { requestId: 'fakeId' },
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('fakeId');
+    });
+
+    it('generates a new UUID if request.app property is not present', () => {
+      // Undefined app property
+      const request = httpServerMock.createRawRequest({
+        app: undefined,
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+
+    it('generates a new UUID if request.app.requestId property is not present', () => {
+      // Undefined app.requestId property
+      const request = httpServerMock.createRawRequest({
+        app: {},
+      });
+      const kibanaRequest = KibanaRequest.from(request);
+      expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+    });
+  });
+
   describe('get all headers', () => {
     it('returns all headers', () => {
       const request = httpServerMock.createRawRequest({

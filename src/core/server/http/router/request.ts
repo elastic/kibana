@@ -18,6 +18,7 @@
  */
 
 import { Url } from 'url';
+import uuid from 'uuid';
 import { Request, RouteOptionsApp, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
@@ -190,9 +191,8 @@ export class KibanaRequest<
   ) {
     // The `requestId` property will not be populated for requests that are 'faked' by internal systems that leverage
     // KibanaRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
-    // In these cases, the id defaults to `internal`.
-    // This should be solved as part of https://github.com/elastic/kibana/issues/39430.
-    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? 'internal';
+    // In these cases, the id defaults to a newly generated UUID.
+    this.id = (request.app as KibanaRequestState | undefined)?.requestId ?? uuid.v4();
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
