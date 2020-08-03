@@ -3,5 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { DatafeedPreviewFlyout } from './datafeed_preview_flyout';
-export { DatafeedPreview } from './datafeed_preview';
+
+export { ResetQueryButton } from './reset_query';
