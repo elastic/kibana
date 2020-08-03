@@ -409,24 +409,21 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     );
   }
 
-  renderLabel() {
+  renderDisplayName() {
     const { field } = this.state;
 
     return (
       <EuiFormRow
-        label={i18n.translate('indexPatternManagement.customLabelLabel', {
-          defaultMessage: 'Custom Label',
+        label={i18n.translate('indexPatternManagement.displayNameLabel', {
+          defaultMessage: 'Display Name',
         })}
       >
         <EuiFieldText
-          value={field.label || ''}
-          placeholder={i18n.translate('indexPatternManagement.customLabelPlaceholder', {
-            defaultMessage: 'Displayed instead of {name}',
-            values: { name: field.name },
-          })}
-          data-test-subj="editorFieldLabel"
+          value={field.displayName || ''}
+          placeholder={field.name}
+          data-test-subj="editorFieldDisplayName"
           onChange={(e) => {
-            this.onFieldChange('label', e.target.value);
+            this.onFieldChange('displayName', e.target.value);
           }}
         />
       </EuiFormRow>
@@ -897,7 +894,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
-          {this.renderLabel()}
+          {this.renderDisplayName()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

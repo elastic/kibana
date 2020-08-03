@@ -119,8 +119,8 @@ export class Field implements IFieldType {
 
     this.name = '';
     obj.fact('name');
-    this.label = '';
-    obj.fact('label');
+    this.displayName = '';
+    obj.fact('displayName');
     this.type = '';
     obj.fact('type');
     obj.fact('esTypes');
@@ -144,9 +144,7 @@ export class Field implements IFieldType {
 
     // computed values
     obj.comp('indexPattern', indexPattern);
-    if (spec.label) {
-      obj.comp('displayName', spec.label);
-    } else {
+    if (!spec.displayName) {
       obj.comp('displayName', shortDotsEnable ? shortenDottedString(spec.name) : spec.name);
     }
     this.$$spec = spec;
@@ -166,6 +164,7 @@ export class Field implements IFieldType {
         lang: this.lang,
         conflictDescriptions: this.conflictDescriptions,
         name: this.name,
+        displayName: this.displayName,
         type: this.type,
         esTypes: this.esTypes,
         scripted: this.scripted,

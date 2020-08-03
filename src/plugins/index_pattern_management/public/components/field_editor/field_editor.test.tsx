@@ -143,7 +143,7 @@ describe('FieldEditor', () => {
   it('should display and update a label field correctly', async () => {
     const testField = {
       name: 'test',
-      label: 'Test',
+      displayName: 'Test',
       format: new Format(),
       lang: undefined,
       type: 'string',
@@ -173,14 +173,17 @@ describe('FieldEditor', () => {
 
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
-    const input = findTestSubject(component, 'editorFieldLabel');
+    const input = findTestSubject(component, 'editorFieldDisplayName');
     expect(input.props().value).toBe('Test');
     input.simulate('change', { target: { value: 'new Test' } });
     const saveBtn = findTestSubject(component, 'fieldSaveButton');
 
     await saveBtn.simulate('click');
     await new Promise((resolve) => process.nextTick(resolve));
-    expect(indexPattern.fields.update).toHaveBeenCalledWith({ ...testField, label: 'new Test' });
+    expect(indexPattern.fields.update).toHaveBeenCalledWith({
+      ...testField,
+      displayName: 'new Test',
+    });
   });
 
   it('should show deprecated lang warning', async () => {

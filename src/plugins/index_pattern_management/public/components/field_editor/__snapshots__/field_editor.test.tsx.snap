@@ -51,12 +51,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      label="Display Name"
     >
       <eui-field-text
-        data-test-subj="editorFieldLabel"
+        data-test-subj="editorFieldDisplayName"
         onChange={[Function]}
-        placeholder="Displayed instead of "
         value=""
       />
     </eui-form-row>
@@ -320,12 +319,12 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      label="Display Name"
     >
       <eui-field-text
-        data-test-subj="editorFieldLabel"
+        data-test-subj="editorFieldDisplayName"
         onChange={[Function]}
-        placeholder="Displayed instead of foobar"
+        placeholder="foobar"
         value=""
       />
     </eui-form-row>
@@ -561,12 +560,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       script="doc.test.value"
     />
     <eui-form-row
-      label="Custom Label"
+      label="Display Name"
     >
       <eui-field-text
-        data-test-subj="editorFieldLabel"
+        data-test-subj="editorFieldDisplayName"
         onChange={[Function]}
-        placeholder="Displayed instead of test"
+        placeholder="test"
         value=""
       />
     </eui-form-row>
@@ -926,12 +925,12 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      label="Custom Label"
+      label="Display Name"
     >
       <eui-field-text
-        data-test-subj="editorFieldLabel"
+        data-test-subj="editorFieldDisplayName"
         onChange={[Function]}
-        placeholder="Displayed instead of foobar"
+        placeholder="foobar"
         value=""
       />
     </eui-form-row>

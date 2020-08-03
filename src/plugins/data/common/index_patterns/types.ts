@@ -137,7 +137,7 @@ export interface FieldSpecExportFmt {
   lang?: string;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
-  label?: string;
+  displayName: string;
   type: KBN_FIELD_TYPES;
   esTypes?: string[];
   scripted: boolean;
