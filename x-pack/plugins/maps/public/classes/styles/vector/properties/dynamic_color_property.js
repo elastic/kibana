@@ -91,10 +91,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return colors ? colors.length : 0;
   }
 
-  supportsMbFeatureState() {
-    return true;
-  }
-
   _getMbColor() {
     if (!this._field || !this._field.getName()) {
       return null;
@@ -120,7 +116,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
-        ['coalesce', ['feature-state', targetName], lessThanFirstStopValue],
+        ['coalesce', [MB_LOOKUP_FUNCTION.FEATURE_STATE, targetName], lessThanFirstStopValue],
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];

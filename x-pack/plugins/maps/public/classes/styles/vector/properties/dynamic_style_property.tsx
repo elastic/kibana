@@ -195,7 +195,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return true;
+    return this._field && this._field.supportsAutoDomain();
   }
 
   getFieldMetaOptions() {

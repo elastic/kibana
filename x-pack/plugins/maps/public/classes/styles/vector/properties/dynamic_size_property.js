@@ -33,7 +33,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       return false;
     }
 
-    return true;
+    return super.supportsMbFeatureState();
   }
 
   syncHaloWidthWithMb(mbLayerId, mbMap) {
