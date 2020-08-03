@@ -14,6 +14,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface EndpointState {
   /** list of host **/
@@ -55,9 +56,7 @@ export interface EndpointState {
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** index patterns for query bar */
-  patterns: string[];
-  /** query from search bar */
-  searchBarQuery: string;
+  patterns: IIndexPattern[];
 }
 
 /**
