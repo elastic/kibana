@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('empty_kibana');
+      await esArchiver.loadIfNeeded('makelogs');
     });
 
     // create index pattern and return to verify list
