@@ -29,9 +29,7 @@
     ],
     "patterns": [
       "{indices}/_doc/{id}",
-      "{indices}/_doc",
-      "{indices}/{type}",
-      "{indices}/{type}/{id}"
+      "{indices}/_doc"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
