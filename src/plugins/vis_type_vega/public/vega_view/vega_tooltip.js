@@ -85,12 +85,12 @@ export class TooltipHandler {
     let anchorBounds;
     if (item.bounds.width() > this.centerOnMark || item.bounds.height() > this.centerOnMark) {
       // I would expect clientX/Y, but that shows incorrectly
-      anchorBounds = createRect(event.pageX, event.pageY, 0, 0);
+      anchorBounds = createRect(event.clientX, event.clientY, 0, 0);
     } else {
       const containerBox = this.container.getBoundingClientRect();
       anchorBounds = createRect(
-        containerBox.left + view._origin[0] + item.bounds.x1 + window.pageXOffset,
-        containerBox.top + view._origin[1] + item.bounds.y1 + window.pageYOffset,
+        containerBox.left + view._origin[0] + item.bounds.x1,
+        containerBox.top + view._origin[1] + item.bounds.y1,
         item.bounds.width(),
         item.bounds.height()
       );
