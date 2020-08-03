@@ -46,11 +46,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
   }
 
-  async function assertExpectedChart() {
+  async function assertExpectedChartTitleInEmbeddable(title: string) {
     await PageObjects.lens.assertExactText(
-      '[data-test-subj="embeddablePanelHeading-lnsXYvis"]',
-      'lnsXYvis'
+      `[data-test-subj="embeddablePanelHeading-${title}"]`,
+      title
     );
+  }
+
+  async function assertExpectedChartTitle(title: string) {
+    await PageObjects.lens.assertExactText(`[data-test-subj="lns_ChartTitle"]`, title);
   }
 
   async function assertExpectedTimerange() {
@@ -99,22 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('applyFiltersPopoverButton');
       });
 
-      await assertExpectedChart();
+      await assertExpectedChartTitleInEmbeddable('lnsXYvis');
       await assertExpectedTimerange();
       const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasIpFilter).to.be(true);
-    });
-
-    it('should allow seamless transition to and from table view', async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
-      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
-      await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await assertExpectedTable();
-      await PageObjects.lens.switchToVisualization('lnsMetric');
-      await assertExpectedMetric();
     });
 
     it('should allow creation of lens visualizations', async () => {
@@ -166,6 +158,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(3);
     });
 
+    it('should allow seamless transition to and from table view', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
+      await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
+      await PageObjects.lens.goToTimeRange();
+      await assertExpectedMetric();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await assertExpectedTable();
+      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await assertExpectedMetric();
+    });
+
     it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -190,6 +194,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.switchToVisualization('line');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+    });
+
+    it('should allow transition from line chart to donut chart and to bar chart', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('lnsXYvis');
+      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('donut');
+      await assertExpectedChartTitle('lnsXYvis');
+      // TODO: to check if chart is valid, we check dimension panel
+      // - once we have access to check if chart renders properly, we should make assertions based on chart
+      expect(
+        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sliceByDimensionPanel')
+      ).to.eql('Top values of ip');
+      expect(
+        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sizeByDimensionPanel')
+      ).to.eql('Average of bytes');
+
+      await PageObjects.lens.switchToVisualization('bar');
+      await assertExpectedChartTitle('lnsXYvis');
+    });
+
+    it('should allow seamless transition from bar chart to line chart using layer chart switch', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('lnsXYvis');
+      await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchLayerSeriesType('line');
+      await assertExpectedChartTitle('lnsXYvis');
+    });
+
+    it('should allow seamless transition from pie chart to treemap chart', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('lnsPieVis');
+      await PageObjects.lens.clickVisualizeListItemTitle('lnsPieVis');
+      await PageObjects.lens.goToTimeRange();
+      expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
+      await PageObjects.lens.switchToVisualization('treemap');
+      expect(
+        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_groupByDimensionPanel', 0)
+      ).to.eql('Top values of geo.dest');
+      expect(
+        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_groupByDimensionPanel', 1)
+      ).to.eql('Top values of geo.src');
+      expect(
+        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sizeByDimensionPanel')
+      ).to.eql('Average of bytes');
     });
   });
 }

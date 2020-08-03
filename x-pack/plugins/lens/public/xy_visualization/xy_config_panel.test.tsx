@@ -51,6 +51,7 @@ describe('XY Config panels', () => {
         />
       );
 
+      // TODO: fix
       const options = component
         .find('[data-test-subj="lnsXY_seriesType"]')
         .first()
@@ -78,6 +79,7 @@ describe('XY Config panels', () => {
         />
       );
 
+      // TODO: fix
       const options = component
         .find('[data-test-subj="lnsXY_seriesType"]')
         .first()

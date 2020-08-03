@@ -182,6 +182,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Uses the Lens layer switcher to switch seriesType for xy charts.
+     *
+     * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
+     * line,
+     */
+    async switchLayerSeriesType(seriesType: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lns_layer_settings');
+      });
+
+      return await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+    },
+
+    /**
      * Returns the number of layers visible in the chart configuration
      */
     async getLayerCount() {
@@ -204,6 +218,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async notLinkedToOriginatingApp() {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('lnsApp_saveAndReturnButton');
+    },
+    /**
+     * Gets label of dimension trigger in dimension panel
+     *
+     * @param dimension - the selector of the dimension
+     */
+    async getVisibleTextOfDimensionTrigger(dimension: string, index = 0) {
+      const dimensionElements = await testSubjects.findAll(dimension);
+      const trigger = await testSubjects.findDescendant(
+        'lns-dimensionTrigger',
+        dimensionElements[index]
+      );
+      const text = await trigger.getVisibleText();
+      return text;
     },
   });
 }
