@@ -52,7 +52,7 @@ export type DatatableRow = Record<string, any>;
 export interface DatatableColumnMeta {
   type: DatatableColumnType;
   field?: string;
-  params?: SerializableState | {};
+  params?: SerializableState;
 }
 /**
  * This type represents the shape of a column in a `Datatable`.
