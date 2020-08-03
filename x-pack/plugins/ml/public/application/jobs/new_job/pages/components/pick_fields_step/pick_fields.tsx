@@ -6,23 +6,26 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
 import { CategorizationView } from './components/categorization_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
-import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
+import {
+  isSingleMetricJobCreator,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isCategorizationJobCreator,
+  isAdvancedJobCreator,
+} from '../../../common/job_creator';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
-  const jobType = jobCreator.type;
 
   useEffect(() => {
     setNextActive(jobValidator.isPickFieldsStepValid);
@@ -32,25 +35,25 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     <Fragment>
       {isCurrentStep && (
         <Fragment>
-          {jobType === JOB_TYPE.SINGLE_METRIC && (
+          {isSingleMetricJobCreator(jobCreator) && (
             <SingleMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.MULTI_METRIC && (
+          {isMultiMetricJobCreator(jobCreator) && (
             <MultiMetricView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.POPULATION && (
+          {isPopulationJobCreator(jobCreator) && (
             <PopulationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.ADVANCED && (
+          {isAdvancedJobCreator(jobCreator) && (
             <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
-          {jobType === JOB_TYPE.CATEGORIZATION && (
+          {isCategorizationJobCreator(jobCreator) && (
             <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
           <WizardNav
             previous={() =>
               setCurrentStep(
-                jobCreator.type === JOB_TYPE.ADVANCED
+                isAdvancedJobCreator(jobCreator)
                   ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
                   : WIZARD_STEPS.TIME_RANGE
               )
@@ -58,19 +61,12 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
             next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
             nextActive={nextActive}
           >
-            {jobType === JOB_TYPE.ADVANCED && (
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <JsonEditorFlyout
-                    isDisabled={false}
-                    jobEditorMode={EDITOR_MODE.EDITABLE}
-                    datafeedEditorMode={EDITOR_MODE.HIDDEN}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DatafeedPreviewFlyout isDisabled={false} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+            {isAdvancedJobCreator(jobCreator) && (
+              <JsonEditorFlyout
+                isDisabled={false}
+                jobEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={EDITOR_MODE.EDITABLE}
+              />
             )}
           </WizardNav>
         </Fragment>
