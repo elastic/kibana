@@ -24,7 +24,9 @@ import { getUiActions } from '../../../../kibana_services';
 import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 function getTrigger(type: string) {
-  return type === KBN_FIELD_TYPES.GEO_POINT ? VISUALIZE_GEO_FIELD_TRIGGER : VISUALIZE_FIELD_TRIGGER;
+  return type === KBN_FIELD_TYPES.GEO_POINT || KBN_FIELD_TYPES.GEO_SHAPE
+    ? VISUALIZE_GEO_FIELD_TRIGGER
+    : VISUALIZE_FIELD_TRIGGER;
 }
 
 async function getCompatibleActions(
