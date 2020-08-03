@@ -70,7 +70,7 @@ export const RiskScoreField = ({
           {
             field: newField?.name ?? '',
             operator: 'equals',
-            value: undefined,
+            value: '',
             riskScore: undefined,
           },
         ],
