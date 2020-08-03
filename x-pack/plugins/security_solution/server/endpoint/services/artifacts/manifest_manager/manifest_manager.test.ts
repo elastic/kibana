@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
-import { getManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
@@ -203,6 +203,15 @@ describe('manifest_manager', () => {
         ArtifactConstants.SAVED_OBJECT_TYPE,
         oldArtifactId
       );
+    });
+
+    test('ManifestManager handles promise rejections when building artifacts', async () => {
+      // This test won't fail on an unhandled promise rejection, but it will cause
+      // an UnhandledPromiseRejectionWarning to be printed.
+      const manifestManager = getManifestManagerMock({
+        mockType: ManifestManagerMockType.ListClientPromiseRejection,
+      });
+      await expect(manifestManager.buildNewManifest()).rejects.toThrow();
     });
   });
 });

@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  getCloneFormStateFromJobConfig,
-  getInitialState,
-  getJobConfigFromFormState,
-} from './state';
+import { getFormStateFromJobConfig, getInitialState, getJobConfigFromFormState } from './state';
 
 const regJobConfig = {
   id: 'reg-test-01',
@@ -96,8 +92,8 @@ describe('useCreateAnalyticsForm', () => {
     ]);
   });
 
-  test('state: getCloneFormStateFromJobConfig() regression', () => {
-    const clonedState = getCloneFormStateFromJobConfig(regJobConfig);
+  test('state: getFormStateFromJobConfig() regression', () => {
+    const clonedState = getFormStateFromJobConfig(regJobConfig);
 
     expect(clonedState?.sourceIndex).toBe('reg-test-index');
     expect(clonedState?.includes).toStrictEqual([]);
@@ -112,8 +108,8 @@ describe('useCreateAnalyticsForm', () => {
     expect(clonedState?.jobId).toBe(undefined);
   });
 
-  test('state: getCloneFormStateFromJobConfig() outlier detection', () => {
-    const clonedState = getCloneFormStateFromJobConfig(outlierJobConfig);
+  test('state: getFormStateFromJobConfig() outlier detection', () => {
+    const clonedState = getFormStateFromJobConfig(outlierJobConfig);
 
     expect(clonedState?.sourceIndex).toBe('outlier-test-index');
     expect(clonedState?.includes).toStrictEqual(['field', 'other_field']);
