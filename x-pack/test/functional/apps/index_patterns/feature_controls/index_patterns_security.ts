@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const es = getService('legacyEs');
 
   describe('security', () => {
     before(async () => {
@@ -75,19 +74,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Stack Management']);
       });
 
-      it(`index pattern empty shows create anyway link`, async () => {
+      it(`index pattern listing shows create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('createAnyway');
-        // @ts-expect-error
-        await es.transport.request({
-          path: '/logstash-a/_doc',
-          method: 'POST',
-          body: { user: 'matt', message: 20 },
-        });
-        // await new Promise((r) => setTimeout(r, 300000));
-        await testSubjects.click('refreshIndicesButton');
-        await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
-        // test when there's an existing pattern
+        await testSubjects.existOrFail('createIndexPatternButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -139,18 +128,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Stack Management']);
       });
 
-      it(`index pattern empty page show create anyway link`, async () => {
+      it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.missingOrFail('createAnyway');
-        // @ts-expect-error
-        await es.transport.request({
-          path: '/logstash-a/_doc',
-          method: 'POST',
-          body: { user: 'matt', message: 20 },
-        });
-        await testSubjects.click('refreshIndicesButton');
-        await testSubjects.missingOrFail('createIndexPatternButton', { timeout: 5000 });
-        // test when there's an existing pattern
+        await testSubjects.existOrFail('indexPatternTable');
+        await testSubjects.missingOrFail('createIndexPatternButton');
       });
 
       it(`shows read-only badge`, async () => {

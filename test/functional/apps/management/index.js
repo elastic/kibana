@@ -32,9 +32,11 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('empty_kibana');
     });
 
-    describe('', function () {
+    describe('', async function () {
       this.tags('ciGroup7');
 
+      loadTestFile(require.resolve('./_index_patterns_empty'));
+      await esArchiver.loadIfNeeded('makelogs');
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
       loadTestFile(require.resolve('./_index_pattern_results_sort'));
