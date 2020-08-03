@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { unzip } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,6 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'vegaChart',
   ]);
   const filterBar = getService('filterBar');
+  const inspector = getService('inspector');
   const log = getService('log');
 
   describe('vega chart in visualize app', () => {
@@ -86,6 +87,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
           expect(filteredDataLabels[0]).to.eql('0');
           expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
+        });
+      });
+    });
+
+    describe('Inspector Panel', () => {
+      it('should have inspector enabled', async () => {
+        await inspector.expectIsEnabled();
+      });
+
+      describe('Request Tab', () => {
+        beforeEach(async () => {
+          await inspector.open();
+        });
+
+        afterEach(async () => {
+          await inspector.close();
+        });
+
+        it('should contain Statistics, Request, Response tabs', async () => {
+          await inspector.openInspectorRequestsView();
+          await inspector.expectRequestStatisticTabIsExists();
+          await inspector.expectRequestDetailRequestTabIsExists();
+          await inspector.expectRequestDetailResponseTabIsEnabled();
+        });
+
+        it('should set the default query name if not given in the schema', async () => {
+          const requests = await inspector.getRequestNames();
+
+          expect(requests).to.be('Unnamed request #0');
+        });
+
+        it('should log the request statistic', async () => {
+          await inspector.openInspectorRequestsView();
+          const rawTableData = await inspector.getTableData();
+
+          expect(unzip(rawTableData)[0].join(', ')).to.be(
+            'Hits, Hits (total), Query time, Request timestamp'
+          );
         });
       });
     });
