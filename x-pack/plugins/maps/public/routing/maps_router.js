@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { getCoreI18n } from '../kibana_services';
+import { getCoreI18n, getEmbeddableService } from '../kibana_services';
 import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
@@ -32,6 +32,9 @@ const App = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
+  const { originatingApp } =
+    getEmbeddableService()?.getStateTransfer(history)?.getIncomingEditorState() || {};
+
   return (
     <I18nContext>
       <Provider store={store}>
@@ -43,6 +46,7 @@ const App = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  originatingApp={originatingApp}
                 />
               )}
             />

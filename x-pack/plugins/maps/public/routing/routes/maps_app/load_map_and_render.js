@@ -56,6 +56,12 @@ export const LoadMapAndRender = class extends React.Component {
       return <Redirect to="/" />;
     }
 
-    return savedMap ? <MapsAppView savedMap={savedMap} onAppLeave={this.props.onAppLeave} /> : null;
+    return savedMap ? (
+      <MapsAppView
+        savedMap={savedMap}
+        onAppLeave={this.props.onAppLeave}
+        originatingApp={this.props.originatingApp}
+      />
+    ) : null;
   }
 };

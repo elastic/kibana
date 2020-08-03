@@ -177,3 +177,11 @@ export const setIsGoldPlus = (igp) => {
 export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
+
+let _embeddableService;
+export const setEmbeddableService = (embeddableService) => {
+  _embeddableService = embeddableService;
+};
+export const getEmbeddableService = () => {
+  return _embeddableService;
+};
