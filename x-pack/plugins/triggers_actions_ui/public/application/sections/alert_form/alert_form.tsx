@@ -255,15 +255,7 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <Suspense
-          fallback={
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
+        <Suspense fallback={CenterJustifiedSpinner}>
           <AlertParamsExpressionComponent
             alertParams={alert.params}
             alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
@@ -522,12 +514,22 @@ export const AlertForm = ({
           </EuiFlexGrid>
           <EuiSpacer size="l" />
         </Fragment>
-      ) : (
+      ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
+      ) : (
+        <CenterJustifiedSpinner />
       )}
     </EuiForm>
   );
 };
+
+const CenterJustifiedSpinner = () => (
+  <EuiFlexGroup justifyContent="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="m" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
   <EuiEmptyPrompt

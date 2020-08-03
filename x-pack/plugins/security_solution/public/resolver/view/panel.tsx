@@ -162,19 +162,10 @@ const PanelContent = memo(function PanelContent() {
     return 'processListWithCounts';
   }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
 
-  const terminatedProcesses = useSelector(selectors.terminatedProcesses);
-  const processEntityId = uiSelectedEvent ? event.entityId(uiSelectedEvent) : undefined;
-  const isProcessTerminated = processEntityId ? terminatedProcesses.has(processEntityId) : false;
-
   const panelInstance = useMemo(() => {
     if (panelToShow === 'processDetails') {
       return (
-        <ProcessDetails
-          processEvent={uiSelectedEvent!}
-          pushToQueryParams={pushToQueryParams}
-          isProcessTerminated={isProcessTerminated}
-          isProcessOrigin={false}
-        />
+        <ProcessDetails processEvent={uiSelectedEvent!} pushToQueryParams={pushToQueryParams} />
       );
     }
 
@@ -213,13 +204,7 @@ const PanelContent = memo(function PanelContent() {
       );
     }
     // The default 'Event List' / 'List of all processes' view
-    return (
-      <ProcessListWithCounts
-        pushToQueryParams={pushToQueryParams}
-        isProcessTerminated={isProcessTerminated}
-        isProcessOrigin={false}
-      />
-    );
+    return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
   }, [
     uiSelectedEvent,
     crumbEvent,
@@ -227,7 +212,6 @@ const PanelContent = memo(function PanelContent() {
     pushToQueryParams,
     relatedStatsForIdFromParams,
     panelToShow,
-    isProcessTerminated,
   ]);
 
   return <>{panelInstance}</>;
@@ -236,7 +220,7 @@ PanelContent.displayName = 'PanelContent';
 
 export const Panel = memo(function Event({ className }: { className?: string }) {
   return (
-    <EuiPanel className={className}>
+    <EuiPanel className={className} data-test-subj="resolver:panel">
       <PanelContent />
     </EuiPanel>
   );
