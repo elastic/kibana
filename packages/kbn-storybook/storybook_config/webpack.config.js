@@ -29,87 +29,89 @@ const { currentConfig } = require('../../../built_assets/storybook/current.confi
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config: storybookConfig }) => {
   let config = {
-    rules: [
-      // Include the React preset from Kibana for JS(X) and TS(X)
-      {
-        test: /\.(j|t)sx?$/,
-        exclude: /node_modules/,
-        loaders: 'babel-loader',
-        options: {
-          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+    module: {
+      rules: [
+        // Include the React preset from Kibana for JS(X) and TS(X)
+        {
+          test: /\.(j|t)sx?$/,
+          exclude: /node_modules/,
+          loaders: 'babel-loader',
+          options: {
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
         },
-      },
-      {
-        test: /\.(html|md|txt|tmpl)$/,
-        use: {
-          loader: 'raw-loader',
+        {
+          test: /\.(html|md|txt|tmpl)$/,
+          use: {
+            loader: 'raw-loader',
+          },
         },
-      },
-      // Parse props data for .tsx files
-      // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
-      // See: https://github.com/storybookjs/storybook/issues/7998
-      //
-      // {
-      //   test: /\.tsx$/,
-      //   // Exclude example files, as we don't display props info for them
-      //   exclude: /\.stories.tsx$/,
-      //   use: [
-      //     // Parse TS comments to create Props tables in the UI
-      //     require.resolve('react-docgen-typescript-loader'),
-      //   ],
-      // },
-      {
-        test: /\.scss$/,
-        exclude: /\.module.(s(a|c)ss)$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: require.resolve('@kbn/optimizer/postcss.config.js'),
+        // Parse props data for .tsx files
+        // This is notoriously slow, and is making Storybook unusable.  Disabling for now.
+        // See: https://github.com/storybookjs/storybook/issues/7998
+        //
+        // {
+        //   test: /\.tsx$/,
+        //   // Exclude example files, as we don't display props info for them
+        //   exclude: /\.stories.tsx$/,
+        //   use: [
+        //     // Parse TS comments to create Props tables in the UI
+        //     require.resolve('react-docgen-typescript-loader'),
+        //   ],
+        // },
+        {
+          test: /\.scss$/,
+          exclude: /\.module.(s(a|c)ss)$/,
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader', options: { importLoaders: 2 } },
+            {
+              loader: 'postcss-loader',
+              options: {
+                config: {
+                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                },
               },
             },
-          },
-          {
-            loader: 'resolve-url-loader',
-            options: {
-              // If you don't have arguments (_, __) to the join function, the
-              // resolve-url-loader fails with a loader misconfiguration error.
-              //
-              // eslint-disable-next-line no-unused-vars
-              join: (_, __) => (uri, base) => {
-                if (!base || !parse(base).dir.includes('legacy')) {
+            {
+              loader: 'resolve-url-loader',
+              options: {
+                // If you don't have arguments (_, __) to the join function, the
+                // resolve-url-loader fails with a loader misconfiguration error.
+                //
+                // eslint-disable-next-line no-unused-vars
+                join: (_, __) => (uri, base) => {
+                  if (!base || !parse(base).dir.includes('legacy')) {
+                    return null;
+                  }
+
+                  // URIs on mixins in src/legacy/public/styles need to be resolved.
+                  if (uri.startsWith('ui/assets')) {
+                    return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
+                  }
+
                   return null;
-                }
-
-                // URIs on mixins in src/legacy/public/styles need to be resolved.
-                if (uri.startsWith('ui/assets')) {
-                  return resolve(REPO_ROOT, 'src/core/server/core_app/', uri.replace('ui/', ''));
-                }
-
-                return null;
+                },
               },
             },
-          },
-          {
-            loader: 'sass-loader',
-            options: {
-              prependData(loaderContext) {
-                return `@import ${stringifyRequest(
-                  loaderContext,
-                  resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
-                )};\n`;
-              },
-              sassOptions: {
-                includePaths: [resolve(REPO_ROOT, 'node_modules')],
+            {
+              loader: 'sass-loader',
+              options: {
+                prependData(loaderContext) {
+                  return `@import ${stringifyRequest(
+                    loaderContext,
+                    resolve(REPO_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
+                  )};\n`;
+                },
+                sassOptions: {
+                  includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                },
               },
             },
-          },
-        ],
-      },
-    ],
+          ],
+        },
+      ],
+    },
     plugins: [
       // Reference the built DLL file of static(ish) dependencies, which are removed
       // during kbn:bootstrap and rebuilt if missing.
@@ -134,7 +136,7 @@ module.exports = async ({ config: storybookConfig }) => {
     ],
     resolve: {
       // Tell Webpack about the ts/x extensions
-      extenstions: ['.ts', '.tsx', '.scss'],
+      extensions: ['.ts', '.tsx', '.scss'],
     },
   };
 
