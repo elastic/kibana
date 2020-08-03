@@ -17,25 +17,18 @@
  * under the License.
  */
 
-export function teamName(githubHandle) {
-  const prefix = /elastic\//;
+export function teamName(githubHandle: string) {
+  const prefix: RegExp = /elastic\//;
   const dropElastic = dropPrefix(prefix);
   const prefixedWithES = prefixed(prefix);
 
   return prefixedWithES(githubHandle) ? dropElastic(githubHandle) : githubHandle;
 }
 
-export function hasPath(path) {
-  return (iterable) => !!iterable.has(path);
+function prefixed(prefix: RegExp) {
+  return (x: string) => prefix.test(x);
 }
 
-function prefixed(prefix) {
-  return (x) => prefix.test(x);
-}
-
-function dropPrefix(prefix) {
-  return (x) => x.replace(prefix, '');
-}
-export function hasOverrides(xs) {
-  return !!Array.isArray(xs[0]);
+function dropPrefix(prefix: RegExp) {
+  return (x: string) => x.replace(prefix, '');
 }
