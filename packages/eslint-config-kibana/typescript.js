@@ -7,7 +7,7 @@ const semver = require('semver');
 const PKG = require('../../package.json');
 
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
-const allowedNamePrefixRegexp = '^(UNSAFE_|__html|__LEGACY|__filename|__dirname)';
+const allowedNamePrefixRegexp = '^(UNSAFE_|_|__|___)|_{1,3}$';
 module.exports = {
   overrides: [
     {
@@ -112,7 +112,12 @@ module.exports = {
                 'UPPER_CASE', // const SOMETHING = ...
                 'PascalCase', // React.FunctionComponent =
               ],
-              leadingUnderscore: 'allow',
+              filter: {
+                // Doesn't work unless duplicated in 'default'
+                regex: allowedNamePrefixRegexp,
+                match: false
+              }
+              // leadingUnderscore: 'allow',
             },
             {
               selector: 'parameter',
@@ -120,7 +125,12 @@ module.exports = {
                 'camelCase',
                 'PascalCase',
               ],
-              leadingUnderscore: 'allow'
+              // leadingUnderscore: 'allow'
+              filter: {
+                // Doesn't work unless duplicated in 'default'
+                regex: allowedNamePrefixRegexp,
+                match: false
+              }
             },
             {
               selector: 'memberLike',
@@ -130,7 +140,7 @@ module.exports = {
                 'snake_case', // keys in elasticsearch requests / responses
                 'UPPER_CASE'
               ],
-              leadingUnderscore: 'allow',
+              // leadingUnderscore: 'allow',
               filter: {
                 // Doesn't work unless duplicated in 'default'
                 regex: allowedNamePrefixRegexp,
@@ -143,7 +153,12 @@ module.exports = {
                 'camelCase',
                 'PascalCase' // React.FunctionComponent =
               ],
-              leadingUnderscore: 'allow'
+              // leadingUnderscore: 'allow'
+              filter: {
+                // Doesn't work unless duplicated in 'default'
+                regex: allowedNamePrefixRegexp,
+                match: false
+              }
             },
             {
               selector: 'typeLike',
