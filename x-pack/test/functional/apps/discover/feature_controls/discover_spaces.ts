@@ -137,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with index pattern management disabled', () => {
+    describe('space with index pattern management disabled', function () {
       this.tags(['skipCloud']);
       before(async () => {
         await spacesService.create({
