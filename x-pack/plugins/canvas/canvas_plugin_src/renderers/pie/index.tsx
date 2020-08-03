@@ -10,7 +10,7 @@ import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
-// @ts-ignore Untyped local: Will not convert
+// @ts-expect-error Untyped local: Will not convert
 import { pie as piePlugin } from './plugins/pie';
 import { Pie } from '../../functions/common/pie';
 import { RendererFactory } from '../../../types';

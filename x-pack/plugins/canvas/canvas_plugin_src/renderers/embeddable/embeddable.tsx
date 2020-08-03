@@ -17,7 +17,7 @@ import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
-import { RendererHandlers, RendererFactory } from '../../../types';
+import { RendererFactory } from '../../../types';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
@@ -53,7 +53,7 @@ export const embeddableRendererFactory = (
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: async (domNode: HTMLElement, { input, embeddableType }, handlers: RendererHandlers) => {
+    render: async (domNode, { input, embeddableType }, handlers) => {
       const uniqueId = handlers.getElementId();
 
       if (!embeddablesRegistry[uniqueId]) {
