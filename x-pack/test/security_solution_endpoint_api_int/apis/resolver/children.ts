@@ -116,7 +116,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           eventsIndexPattern
         );
         // [1] here gets the body portion of the array
-        const query = childrenQuery.buildMSearch(origin.process.entity_id)[1];
+        const [, query] = childrenQuery.buildMSearch(origin.process.entity_id);
         const { body } = await es.search<SearchResponse<ResolverEvent>>({ body: query });
         expect(body.hits.hits.length).to.be(1);
 
