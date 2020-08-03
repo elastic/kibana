@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useThrottledResizeObserver } from '../../common/components/utils';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { HeaderGlobal } from '../../common/components/header_global';
@@ -15,65 +14,33 @@ import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
 import { useWithSource } from '../../common/containers/source';
-import { useFullScreen } from '../../common/containers/use_full_screen';
-import { getPageContainerTop, hasCompactHeader } from '../../common/utils/route/helpers';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { SecurityPageName } from '../types';
 
-const WrappedByAutoSizer = styled.div`
+const SecuritySolutionAppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  width: 100%;
 `;
-WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
+SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
-/** the global Kibana navigation at the top of every page */
-export const globalHeaderHeightPx = 49;
-
-interface MainProps {
-  $globalFullScreen: boolean;
-  top: number;
-}
-
-const Main = styled.main.attrs<MainProps>(({ $globalFullScreen, top }) => ({
-  $globalFullScreen,
-  top,
-}))<MainProps>`
-  height: calc(100vh - ${({ top }) => top}px);
-  overflow-y: ${({ $globalFullScreen }) => ($globalFullScreen ? 'hidden' : 'auto')};
+const Main = styled.main`
   position: relative;
-  top: ${({ top }) => top}px;
+  overflow: auto;
+  flex: 1;
 `;
 
 Main.displayName = 'Main';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
-const calculateFlyoutHeight = ({
-  globalHeaderSize,
-  windowHeight,
-}: {
-  globalHeaderSize: number;
-  windowHeight: number;
-}): number => Math.max(0, windowHeight - globalHeaderSize);
-
 interface HomePageProps {
   children: React.ReactNode;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ children }) => {
-  const [route] = useRouteSpy();
-  const { globalFullScreen } = useFullScreen();
-  const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
-  const flyoutHeight = useMemo(
-    () =>
-      calculateFlyoutHeight({
-        globalHeaderSize: globalHeaderHeightPx,
-        windowHeight,
-      }),
-    [windowHeight]
-  );
+const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { signalIndexExists, signalIndexName } = useSignalIndex();
 
   const indexToAdd = useMemo<string[] | null>(() => {
@@ -85,26 +52,18 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
 
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
-  const top = getPageContainerTop({
-    globalFullScreen,
-    hasCompactHeader: hasCompactHeader(route.pageName as SecurityPageName),
-  });
 
   return (
-    <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
+    <SecuritySolutionAppWrapper>
       <HeaderGlobal />
 
-      <Main data-test-subj="pageContainer" $globalFullScreen={globalFullScreen} top={top}>
+      <Main data-test-subj="pageContainer">
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
             <>
               <AutoSaveWarningMsg />
-              <Flyout
-                flyoutHeight={flyoutHeight}
-                timelineId="timeline-1"
-                usersViewing={usersViewing}
-              />
+              <Flyout timelineId="timeline-1" usersViewing={usersViewing} />
             </>
           )}
 
@@ -113,8 +72,10 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
       </Main>
 
       <HelpMenu />
-    </WrappedByAutoSizer>
+    </SecuritySolutionAppWrapper>
   );
 };
 
-HomePage.displayName = 'HomePage';
+HomePageComponent.displayName = 'HomePage';
+
+export const HomePage = React.memo(HomePageComponent);

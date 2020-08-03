@@ -30,7 +30,6 @@ const Wrapper = styled.header<{ $globalFullScreen: boolean }>`
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
     padding-top: ${$globalFullScreen ? theme.eui.paddingSizes.s : theme.eui.paddingSizes.m};
-    position: fixed;
     width: 100%;
     z-index: ${theme.eui.euiZNavigation};
   `}

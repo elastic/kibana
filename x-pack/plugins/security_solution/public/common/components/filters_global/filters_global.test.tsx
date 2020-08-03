@@ -6,7 +6,6 @@
 
 import { mount, ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
-import { StickyContainer } from 'react-sticky';
 
 import '../../mock/match_media';
 import { FiltersGlobal } from './filters_global';
@@ -29,11 +28,9 @@ describe('rendering', () => {
     beforeEach(() => {
       wrapper = mount(
         <TestProviders>
-          <StickyContainer>
-            <FiltersGlobal>
-              <p>{'Filter content'}</p>
-            </FiltersGlobal>
-          </StickyContainer>
+          <FiltersGlobal>
+            <p>{'Filter content'}</p>
+          </FiltersGlobal>
         </TestProviders>
       );
     });
@@ -49,11 +46,9 @@ describe('rendering', () => {
     test('it renders the container with a `display: none` style', () => {
       const wrapper = mount(
         <TestProviders>
-          <StickyContainer>
-            <FiltersGlobal show={false}>
-              <p>{'Filter content'}</p>
-            </FiltersGlobal>
-          </StickyContainer>
+          <FiltersGlobal show={false}>
+            <p>{'Filter content'}</p>
+          </FiltersGlobal>
         </TestProviders>
       );
 

@@ -77,11 +77,27 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     scrolling when the content is larger than the viewport, but we hide it
     to avoid "double scroll bars".
   */
-   #kibana-body {
-    scrollbar-width: none;
+  #kibana-body {
+    height: 100%;
 
-    &::-webkit-scrollbar {
-      width: 0px;
+    > .content {
+      height: 100%;
+
+      > .app-wrapper {
+        height: 100%;
+
+        > .app-wrapper-panel {
+          height: 100%;
+
+          > .application {
+            height: 100%;
+
+            > div {
+               height: 100%;
+            }
+          }
+        }
+      }
     }
   }
 
