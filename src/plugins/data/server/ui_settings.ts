@@ -527,7 +527,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
     },
     [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
-      name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
+      name: i18n.translate('data.advancedSettings.timepicker.timeDefaultsTitle', {
         defaultMessage: 'Time filter defaults',
       }),
       value: `{
@@ -535,7 +535,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "to": "now"
 }`,
       type: 'json',
-      description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
         defaultMessage: 'The timefilter selection to use when Kibana is started without one',
       }),
       requiresPageReload: true,
