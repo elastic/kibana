@@ -9,7 +9,7 @@ import { EndpointAppContext } from '../../types';
 
 export interface QueryBuilderOptions {
   unenrolledAgentIds?: string[];
-  statusAgentIDs?: string[] | null;
+  statusAgentIDs?: string[];
 }
 
 export async function kibanaRequestToMetadataListESQuery(

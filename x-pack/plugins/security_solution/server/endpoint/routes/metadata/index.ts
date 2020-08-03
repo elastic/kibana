@@ -122,7 +122,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
               context.core.savedObjects.client,
               req.body?.filters?.host_status
             )
-          : null;
+          : undefined;
 
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
