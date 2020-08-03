@@ -113,7 +113,9 @@ export function deserializeSnapshotConfig(snapshotConfigEs: SnapshotConfigEs): S
   } = snapshotConfigEs;
 
   const snapshotConfig: SnapshotConfig = {
-    indices,
+    // The ES API supports indices defined as an array or comma-separated string
+    // If a string is defined, we'll convert to an array for the UI to more easily consume
+    indices: typeof indices === 'string' ? indices.split(',') : indices,
     ignoreUnavailable,
     includeGlobalState,
     partial,

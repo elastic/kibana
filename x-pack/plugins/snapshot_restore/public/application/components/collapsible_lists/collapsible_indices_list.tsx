@@ -15,52 +15,60 @@ interface Props {
 }
 
 export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices }) => {
-  const { hiddenItemsCount, isShowingFullList, items, setIsShowingFullList } = useCollapsibleList({
-    items: indices,
-  });
-  return items === 'all' ? (
-    <FormattedMessage
-      id="xpack.snapshotRestore.indicesList.allIndicesValue"
-      defaultMessage="All indices"
-    />
-  ) : (
+  const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
+  const hiddenIndicesCount = indices && indices.length > 10 ? indices.length - 10 : 0;
+
+  return (
     <>
-      <EuiText>
-        <ul>
-          {items.map((index) => (
-            <li key={index}>
-              <EuiTitle size="xs">
-                <span>{index}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
-      </EuiText>
-      {hiddenItemsCount ? (
+      {indices ? (
         <>
-          <EuiSpacer size="xs" />
-          <EuiLink
-            onClick={() =>
-              isShowingFullList ? setIsShowingFullList(false) : setIsShowingFullList(true)
-            }
-          >
-            {isShowingFullList ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.indicesList.indicesCollapseAllLink"
-                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                values={{ count: hiddenItemsCount }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.indicesList.indicesExpandAllLink"
-                defaultMessage="Show {count, plural, one {# index} other {# indices}}"
-                values={{ count: hiddenItemsCount }}
-              />
-            )}{' '}
-            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} />
-          </EuiLink>
+          <EuiText>
+            <ul>
+              {(isShowingFullIndicesList ? indices : [...indices].splice(0, 10)).map(
+                (index: string) => (
+                  <li key={index}>
+                    <EuiTitle size="xs">
+                      <span>{index}</span>
+                    </EuiTitle>
+                  </li>
+                )
+              )}
+            </ul>
+          </EuiText>
+          {hiddenIndicesCount ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiLink
+                onClick={() =>
+                  isShowingFullIndicesList
+                    ? setIsShowingFullIndicesList(false)
+                    : setIsShowingFullIndicesList(true)
+                }
+              >
+                {isShowingFullIndicesList ? (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.indicesList.indicesCollapseAllLink"
+                    defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                    values={{ count: hiddenIndicesCount }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.indicesList.indicesExpandAllLink"
+                    defaultMessage="Show {count, plural, one {# index} other {# indices}}"
+                    values={{ count: hiddenIndicesCount }}
+                  />
+                )}{' '}
+                <EuiIcon type={isShowingFullIndicesList ? 'arrowUp' : 'arrowDown'} />
+              </EuiLink>
+            </>
+          ) : null}
         </>
-      ) : null}
+      ) : (
+        <FormattedMessage
+          id="xpack.snapshotRestore.indicesList.allIndicesValue"
+          defaultMessage="All indices"
+        />
+      )}
     </>
   );
 };

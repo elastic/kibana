@@ -132,6 +132,65 @@ describe('repository_serialization', () => {
         isManagedPolicy: true,
       });
     });
+
+    it('should deserialize a policy with indices defined as strings', () => {
+      expect(
+        deserializePolicy(
+          'my-backups-snapshots',
+          {
+            version: 1,
+            modified_date: '2019-07-09T22:11:55.761Z',
+            modified_date_millis: 1562710315761,
+            policy: {
+              name: '<daily-snap-{now/d}>',
+              schedule: '0 30 1 * * ?',
+              repository: 'my-backups',
+              config: {
+                indices: 'index-1,index-2,index-3',
+                ignore_unavailable: false,
+                include_global_state: false,
+                metadata: {
+                  foo: 'bar',
+                },
+              },
+              retention: {
+                expire_after: '14d',
+                max_count: 30,
+                min_count: 4,
+              },
+            },
+            next_execution: '2019-07-11T01:30:00.000Z',
+            next_execution_millis: 1562722200000,
+          },
+          ['my-backups-snapshots']
+        )
+      ).toEqual({
+        name: 'my-backups-snapshots',
+        version: 1,
+        modifiedDate: '2019-07-09T22:11:55.761Z',
+        modifiedDateMillis: 1562710315761,
+        snapshotName: '<daily-snap-{now/d}>',
+        schedule: '0 30 1 * * ?',
+        repository: 'my-backups',
+        config: {
+          indices: ['index-1', 'index-2', 'index-3'],
+          includeGlobalState: false,
+          ignoreUnavailable: false,
+          metadata: {
+            foo: 'bar',
+          },
+        },
+        retention: {
+          expireAfterValue: 14,
+          expireAfterUnit: 'd',
+          maxCount: 30,
+          minCount: 4,
+        },
+        nextExecution: '2019-07-11T01:30:00.000Z',
+        nextExecutionMillis: 1562722200000,
+        isManagedPolicy: true,
+      });
+    });
   });
 
   describe('serializePolicy()', () => {
