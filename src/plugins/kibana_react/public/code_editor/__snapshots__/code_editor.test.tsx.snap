@@ -19,6 +19,13 @@ exports[`is rendered 1`] = `
 "
     width="100%"
   />
+  <EuiScreenReaderOnly>
+    <p
+      id="i86fedfc1-d5c7-11ea-91ca-bdcdb4409d48"
+    >
+      Tab adds tab character. To change tab mode, press escape.
+    </p>
+  </EuiScreenReaderOnly>
   <ResizeDetector
     handleHeight={true}
     handleWidth={true}
