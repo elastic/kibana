@@ -26,7 +26,7 @@ import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 import { LinkAnchor } from '../links';
 
 const Wrapper = styled.header<{ $globalFullScreen: boolean }>`
-  ${({ $globalFullScreen, theme }) => css`
+  ${({ $globalFullScreen, theme }) => `
     background: ${theme.eui.euiColorEmptyShade};
     border-bottom: ${theme.eui.euiBorderThin};
     padding-top: ${$globalFullScreen ? theme.eui.paddingSizes.s : theme.eui.paddingSizes.m};
@@ -43,7 +43,7 @@ const FlexItem = styled(EuiFlexItem)`
 FlexItem.displayName = 'FlexItem';
 
 const FlexGroup = styled(EuiFlexGroup)<{ $globalFullScreen: boolean }>`
-  ${({ $globalFullScreen, theme }) => css`
+  ${({ $globalFullScreen, theme }) => `
     border-bottom: ${theme.eui.euiBorderThin};
     margin-bottom: 1px;
     padding-bottom: 4px;

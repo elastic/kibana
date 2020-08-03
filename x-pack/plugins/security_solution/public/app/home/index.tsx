@@ -31,7 +31,15 @@ WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 /** the global Kibana navigation at the top of every page */
 export const globalHeaderHeightPx = 49;
 
-const Main = styled.main<{ $globalFullScreen: boolean; top: number }>`
+interface MainProps {
+  $globalFullScreen: boolean;
+  top: number;
+}
+
+const Main = styled.main.attrs<MainProps>(({ $globalFullScreen, top }) => ({
+  $globalFullScreen,
+  top,
+}))<MainProps>`
   height: calc(100vh - ${({ top }) => top}px);
   overflow-y: ${({ $globalFullScreen }) => ($globalFullScreen ? 'hidden' : 'auto')};
   position: relative;
@@ -77,19 +85,16 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
 
   const [showTimeline] = useShowTimeline();
   const { browserFields, indexPattern, indicesExist } = useWithSource('default', indexToAdd);
+  const top = getPageContainerTop({
+    globalFullScreen,
+    hasCompactHeader: hasCompactHeader(route.pageName as SecurityPageName),
+  });
 
   return (
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
-      <Main
-        data-test-subj="pageContainer"
-        $globalFullScreen={globalFullScreen}
-        top={getPageContainerTop({
-          globalFullScreen,
-          hasCompactHeader: hasCompactHeader(route.pageName as SecurityPageName),
-        })}
-      >
+      <Main data-test-subj="pageContainer" $globalFullScreen={globalFullScreen} top={top}>
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (
