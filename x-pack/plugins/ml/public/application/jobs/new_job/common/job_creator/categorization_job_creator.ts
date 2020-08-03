@@ -41,6 +41,7 @@ export class CategorizationJobCreator extends JobCreator {
     ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
+  private _partitionField: string | null;
 
   constructor(
     indexPattern: IndexPattern,
@@ -53,6 +54,7 @@ export class CategorizationJobCreator extends JobCreator {
 
     const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
     this._defaultCategorizationAnalyzer = anomalyDetectors.categorization_analyzer || {};
+    this._partitionField = null;
   }
 
   public setDefaultDetectorProperties(
@@ -106,6 +108,26 @@ export class CategorizationJobCreator extends JobCreator {
 
   public get categorizationFieldName(): string | null {
     return this._job_config.analysis_config.categorization_field_name || null;
+  }
+
+  public get categorizationPerPartitionField() {
+    return this._partitionField;
+  }
+
+  public set categorizationPerPartitionField(fieldName: string | null) {
+    if (fieldName === null) {
+      this._detectors.forEach((detector) => {
+        delete detector.partition_field_name;
+      });
+      this._partitionField = null;
+    } else {
+      if (this._partitionField !== fieldName) {
+        this._partitionField = fieldName;
+        this._detectors.forEach((detector) => {
+          detector.partition_field_name = fieldName;
+        });
+      }
+    }
   }
 
   public async loadCategorizationFieldExamples() {
@@ -172,5 +194,35 @@ export class CategorizationJobCreator extends JobCreator {
       // as setDetectorType applies a default
       this.bucketSpan = bs;
     }
+  }
+
+  private _initPerPartitionCategorization() {
+    if (this._job_config.analysis_config.per_partition_categorization === undefined) {
+      this._job_config.analysis_config.per_partition_categorization = {};
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.enabled === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.enabled = false;
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = false;
+    }
+  }
+
+  public get perPartitionCategorization() {
+    return this._job_config.analysis_config.per_partition_categorization?.enabled === true;
+  }
+
+  public set perPartitionCategorization(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.enabled = enabled;
+  }
+
+  public get partitionStopOnWarn() {
+    return this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === true;
+  }
+
+  public set partitionStopOnWarn(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
 }
