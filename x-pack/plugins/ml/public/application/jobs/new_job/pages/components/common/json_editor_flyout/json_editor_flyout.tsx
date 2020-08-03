@@ -65,6 +65,8 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       });
 
       setShowChangedIndicesWarning(false);
+    } else {
+      setTempCombinedJob(null);
     }
   }, [showJsonFlyout]);
 

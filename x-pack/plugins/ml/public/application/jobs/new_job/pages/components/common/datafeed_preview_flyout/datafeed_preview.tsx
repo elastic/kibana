@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -49,7 +49,7 @@ export const DatafeedPreview: FC<{
     }
   }, [combinedJob]);
 
-  async function loadDataPreview() {
+  const loadDataPreview = useCallback(async () => {
     setPreviewJsonString('');
     if (combinedJob === null) {
       return;
@@ -80,7 +80,7 @@ export const DatafeedPreview: FC<{
       );
       setPreviewJsonString(errorText);
     }
-  }
+  }, [combinedJob]);
 
   return (
     <EuiFlexItem>
