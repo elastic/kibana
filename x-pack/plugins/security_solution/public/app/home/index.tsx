@@ -15,24 +15,32 @@ import { HelpMenu } from '../../common/components/help_menu';
 import { AutoSaveWarningMsg } from '../../timelines/components/timeline/auto_save_warning';
 import { UseUrlState } from '../../common/components/url_state';
 import { useWithSource } from '../../common/containers/source';
+import { useFullScreen } from '../../common/containers/use_full_screen';
+import { getPageContainerTop, hasCompactHeader } from '../../common/utils/route/helpers';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import { navTabs } from './home_navigations';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { SecurityPageName } from '../types';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
-const Main = styled.main`
-  height: 100%;
+/** the global Kibana navigation at the top of every page */
+export const globalHeaderHeightPx = 49;
+
+const Main = styled.main<{ $globalFullScreen: boolean; top: number }>`
+  height: calc(100vh - ${({ top }) => top}px);
+  overflow-y: ${({ $globalFullScreen }) => ($globalFullScreen ? 'none' : 'auto')};
+  position: relative;
+  top: ${({ top }) => top}px;
 `;
+
 Main.displayName = 'Main';
 
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
-
-/** the global Kibana navigation at the top of every page */
-export const globalHeaderHeightPx = 48;
 
 const calculateFlyoutHeight = ({
   globalHeaderSize,
@@ -47,6 +55,8 @@ interface HomePageProps {
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ children }) => {
+  const [route] = useRouteSpy();
+  const { globalFullScreen } = useFullScreen();
   const { ref: measureRef, height: windowHeight = 0 } = useThrottledResizeObserver();
   const flyoutHeight = useMemo(
     () =>
@@ -72,7 +82,14 @@ export const HomePage: React.FC<HomePageProps> = ({ children }) => {
     <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
       <HeaderGlobal />
 
-      <Main data-test-subj="pageContainer">
+      <Main
+        data-test-subj="pageContainer"
+        $globalFullScreen={globalFullScreen}
+        top={getPageContainerTop({
+          globalFullScreen,
+          hasCompactHeader: hasCompactHeader(route.pageName as SecurityPageName),
+        })}
+      >
         <DragDropContextWrapper browserFields={browserFields}>
           <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
           {indicesExist && showTimeline && (

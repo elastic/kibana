@@ -7,7 +7,6 @@
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 import { useWindowSize } from 'react-use';
 import { useHistory } from 'react-router-dom';
@@ -157,12 +156,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
       {hasEncryptionKey != null && !hasEncryptionKey && <NoApiIntegrationKeyCallOut />}
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal
-            globalFullScreen={globalFullScreen}
-            show={showGlobalFilters({ globalFullScreen, graphEventId })}
-          >
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -229,7 +225,7 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
               to={to}
             />
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

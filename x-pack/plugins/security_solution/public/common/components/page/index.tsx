@@ -62,13 +62,27 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950;
   }
 
-  /** applies a "toggled" button style to the Full Screen button */
+  /* applies a "toggled" button style to the Full Screen button */
   .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  .${SCROLLING_DISABLED_CLASS_NAME} body {
+  body {
     overflow-y: hidden;
+  }
+
+  /*
+    kibana-body MUST have a (hidden) scroll bar when NOT in full screen mode.
+    This hidden scroll bar is required to enable the full range of vertical
+    scrolling when the content is larger than the viewport, but we hide it
+    to avoid "double scroll bars".
+  */
+   #kibana-body {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      width: 0px;
+    }
   }
 
   .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {

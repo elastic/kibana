@@ -21,7 +21,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 import { useWindowSize } from 'react-use';
 
@@ -364,12 +363,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal
-            globalFullScreen={globalFullScreen}
-            show={showGlobalFilters({ globalFullScreen, graphEventId })}
-          >
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -542,7 +538,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
