@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../../../state';
-import { monitorDetailsSelector } from '../../../../state/selectors';
+import { monitorDetailsLoadingSelector, monitorDetailsSelector } from '../../../../state/selectors';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
@@ -24,6 +24,8 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
 
   const monitorDetails = useSelector((state: AppState) => monitorDetailsSelector(state, summary));
 
+  const isLoading = useSelector(monitorDetailsLoadingSelector);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -35,5 +37,11 @@ export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
       })
     );
   }, [dateStart, dateEnd, monitorId, dispatch]);
-  return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
+  return (
+    <MonitorListDrawerComponent
+      monitorDetails={monitorDetails}
+      summary={summary}
+      loading={isLoading}
+    />
+  );
 };

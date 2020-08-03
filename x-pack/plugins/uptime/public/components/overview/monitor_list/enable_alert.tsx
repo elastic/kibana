@@ -14,7 +14,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { MonitorSummary } from '../../../../common/runtime_types';
 import { selectDynamicSettings } from '../../../state/selectors';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
@@ -28,10 +27,11 @@ import {
 import { BellIcon } from './bell_icon';
 
 interface Props {
-  monitor: MonitorSummary;
+  monitorId: string;
+  monitorName: string;
 }
 
-export const EnableMonitorAlert = ({ monitor }: Props) => {
+export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const dss = useSelector(selectDynamicSettings);
 
@@ -52,9 +52,7 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
 
   const isDeleting = useSelector(isAlertDeleting);
 
-  const hasAlert = (alerts?.data ?? []).find((alert) =>
-    alert.params.search.includes(monitor.monitor_id)
-  );
+  const hasAlert = (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
 
   const defaultActions = (actionConnectors ?? []).filter((act) =>
     dss.settings?.defaultConnectors.includes(act.id)
@@ -64,8 +62,8 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
     dispatch(
       createAlertAction.get({
         defaultActions,
-        monitorId: monitor.monitor_id,
-        monitorName: monitor.state.monitor.name || monitor.state.url.full,
+        monitorId,
+        monitorName,
       })
     );
     setIsLoading(true);
@@ -89,7 +87,7 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
   const defaultConnectors = dss?.settings?.defaultConnectors ?? [];
 
   return defaultConnectors.length > 0 ? (
-    <div style={{ marginRight: 15 }}>
+    <div className="eui-displayInlineBlock" style={{ marginRight: 15 }}>
       {((isCreating || isDeleting) && isLoading) || loading ? (
         <EuiLoadingSpinner />
       ) : (
@@ -97,8 +95,8 @@ export const EnableMonitorAlert = ({ monitor }: Props) => {
           <EuiButtonIcon
             aria-label={'Enable down alert'}
             onClick={hasAlert ? disableAlert : enableAlert}
-            color={hasAlert ? 'success' : 'primary'}
             iconType={hasAlert ? BellIcon : 'bell'}
+            size="m"
           />
         </EuiToolTip>
       )}

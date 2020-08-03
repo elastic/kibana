@@ -11,12 +11,25 @@ export interface GetMonitorDetailsParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
+  alertsClient: any;
 }
+
+const getMonitorAlerts = async (alertsClient: any) => {
+  const options: any = {
+    page: 1,
+    perPage: 500,
+    filter: 'alert.attributes.alertTypeId(xpack.uptime.alerts.monitorStatus)',
+    defaultSearchOperator: 'AND',
+    sortField: 'name.keyword',
+  };
+
+  const findResult = await alertsClient.find({ options });
+};
 
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -66,7 +79,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
 
   const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-
+  await getMonitorAlerts(alertsClient);
   return {
     monitorId,
     error: monitorError,

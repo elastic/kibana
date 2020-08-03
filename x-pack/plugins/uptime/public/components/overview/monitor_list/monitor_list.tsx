@@ -149,7 +149,12 @@ export const MonitorListComponent: ({
         {
           name: 'Alert',
           description: 'Enable an alert',
-          render: (item: MonitorSummary) => <EnableMonitorAlert monitor={item} />,
+          render: (item: MonitorSummary) => (
+            <EnableMonitorAlert
+              monitorId={item.monitor_id}
+              monitorName={item.state.monitor.name || item.state.url.full}
+            />
+          ),
         },
       ],
     },

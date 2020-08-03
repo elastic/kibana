@@ -101,8 +101,8 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.sourceConfiguration.defaultConnectors"
-              defaultMessage="Connectors"
+              id="xpack.uptime.sourceConfiguration.alertConnectors"
+              defaultMessage="Alert Connectors"
             />
           </h4>
         }

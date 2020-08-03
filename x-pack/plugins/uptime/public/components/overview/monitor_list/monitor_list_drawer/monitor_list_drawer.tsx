@@ -6,7 +6,16 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
@@ -27,13 +36,18 @@ interface MonitorListDrawerProps {
    * Monitor details to be fetched from rest api using monitorId
    */
   monitorDetails: MonitorDetails;
+  loading: boolean;
 }
 
 /**
  * The elements shown when the user expands the monitor list rows.
  */
 
-export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorListDrawerProps) {
+export function MonitorListDrawerComponent({
+  summary,
+  monitorDetails,
+  loading,
+}: MonitorListDrawerProps) {
   const monitorUrl = summary?.state?.url?.full || '';
 
   return summary && summary.state.summaryPings ? (
@@ -51,8 +65,19 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
           <ActionsPopover summary={summary} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
+      <EuiSpacer size="m" />
+      <EuiText size="xs">
+        <h3>
+          {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
+            defaultMessage: 'Enabled alerts:',
+            description: 'Alerts enable for this monitor',
+          })}
+        </h3>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      {loading && <EuiLoadingSpinner />}
       {monitorDetails && monitorDetails.error && (
         <MostRecentError
           error={monitorDetails.error}

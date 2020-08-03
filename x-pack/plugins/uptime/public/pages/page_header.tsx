@@ -44,10 +44,6 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-const H1Text = styled.h1`
-  white-space: nowrap;
-`;
-
 export const PageHeader = React.memo(
   ({ headingText, extraLinks = false, datePicker = true }: PageHeaderProps) => {
     const DatePickerComponent = () =>
@@ -97,7 +93,7 @@ export const PageHeader = React.memo(
         >
           <EuiFlexItem grow={true}>
             <EuiTitle>
-              <H1Text>{headingText}</H1Text>
+              <h1 className="eui-textNoWrap">{headingText}</h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{extraLinkComponents}</EuiFlexItem>
