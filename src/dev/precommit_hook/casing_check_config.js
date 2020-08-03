@@ -105,6 +105,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
+  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
 ];
 
 /**

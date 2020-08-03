@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getUpdateCommentMock, getUpdateCommentsArrayMock } from './update_comment.mock';
 import {
