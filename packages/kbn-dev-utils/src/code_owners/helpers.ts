@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { pretty } from '../code_coverage/ingest_coverage/utils';
-
 export function teamName(githubHandle) {
   const prefix = /elastic\//;
   const dropElastic = dropPrefix(prefix);
@@ -40,8 +38,4 @@ function dropPrefix(prefix) {
 }
 export function hasOverrides(xs) {
   return !!Array.isArray(xs[0]);
-}
-
-export function printMap(map) {
-  map.forEach((value, key) => console.log(key + ' -> ' + pretty(value)));
 }

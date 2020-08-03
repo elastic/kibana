@@ -17,18 +17,20 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-import { hasPath } from '../helpers';
+import { run } from '@kbn/dev-utils';
+import { parseSourceOfTruth } from './parse';
+import { sourceOfTruth as sot } from './owners_source_of_truth';
+import { flush } from './flush';
 
-describe(`Code Owners`, () => {
-  describe(`hasPath predicate fn`, () => {
-    const iterable = new Map();
-    iterable.set('a', 'b');
-    it(`should return true if the iterable has the path`, () => {
-      expect(hasPath('a')(iterable)).to.be(true);
-    });
-    it(`should return false if the iterable does not have the path`, () => {
-      expect(hasPath('b')(iterable)).to.be(false);
-    });
+const codeownersPath: string | undefined = process.env.CODEOWNERS_PATH;
+const description = `
+
+Create .github/CODEOWNERS file from authoritative source
+
+`;
+
+export const defineCodeOwners = () => {
+  run(({ log }) => flush(codeownersPath)(log as any)(parseSourceOfTruth(log)(sot as [])), {
+    description,
   });
-});
+};

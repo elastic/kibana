@@ -27,7 +27,7 @@ def defineCodeOwners(destination, title) {
     source src/dev/ci_setup/setup_env.sh
     yarn kbn bootstrap --prefer-offline
 
-    . src/dev/code_owners/shell_scripts/define_code_owners.sh' '${destination}'
+    . packages/kbn-dev-utils/src/code_owners/shell_scripts/define_code_owners.sh '${destination}'
     cat '${destination}'
   """, title)
 }

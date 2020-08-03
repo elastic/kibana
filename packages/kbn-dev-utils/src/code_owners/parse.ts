@@ -17,24 +17,27 @@
  * under the License.
  */
 
-import { createWriteStream } from 'fs';
-import { noop } from '../code_coverage/ingest_coverage/utils';
+import { teamName } from './helpers';
 
-const preamble = `# GitHub CODEOWNERS definition
-# Identify which groups will be pinged by changes to different parts of the codebase.
-# For more info, see https://help.github.com/articles/about-codeowners/\n\n`;
+export const parseSourceOfTruth = (log: any) => (sourceOfTruth: []) => {
+  const owners = new Map();
 
-export const flush = (codeOwnersPath) => (log) => (ownersMap) => {
-  log.info(`\n### Flushing to codeOwnersPath: \n\t${codeOwnersPath}`);
-  const file = createWriteStream(codeOwnersPath);
+  for (const { title, githubHandle, pathPatterns, review = true } of sourceOfTruth) {
+    const handle = `@${githubHandle}`;
+    const team = teamName(githubHandle);
 
-  file.write(preamble);
+    for (const path of pathPatterns as []) {
+      log.verbose(`\n### Parsing path: \n${path}`);
+      const existing = owners.get(path);
 
-  ownersMap.forEach(({ owners, review /* teams */ }, key) => {
-    const flat = owners.join(' ');
-    review ? noop() : log.warning(`\n### Not recording \n${key} ${flat}`);
-    review ? file.write(`${key} ${flat}\n`) : noop();
-  });
+      owners.set(path, {
+        owners: existing ? [...existing.owners, handle] : [handle],
+        teams: existing ? [...existing.teams, team] : [team],
+        title,
+        review,
+      });
+    }
+  }
 
-  file.end();
+  return owners;
 };

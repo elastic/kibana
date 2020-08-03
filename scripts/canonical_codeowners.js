@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/code_owners').defineCodeOwners();
+require('../packages/kbn-dev-utils/src/code_owners').defineCodeOwners();
