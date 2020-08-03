@@ -29,6 +29,7 @@ export const initialHostListState: Immutable<HostState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
+  hostsExist: true,
 };
 
 /* eslint-disable-next-line complexity */
@@ -125,6 +126,11 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       endpointPackageInfo: action.payload,
     };
+  } else if (action.type === 'serverReturnedHostExistValue') {
+    return {
+      ...state,
+      hostsExist: action.payload,
+    };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
       ...state,
@@ -181,6 +187,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
+      hostsExist: true,
     };
   }
   return state;
