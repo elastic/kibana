@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import {
-  AnomalySwimlaneEmbeddable,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+} from '../embeddables/anomaly_swimlane';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
@@ -73,7 +73,7 @@ export function createApplyInfluencerFiltersAction(
     async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
       // Only compatible with view by influencer swim lanes and single selection
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         data !== undefined &&
         data.type === SWIMLANE_TYPE.VIEW_BY &&
         data.viewByFieldName !== VIEW_BY_JOB_LABEL &&

@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import {
-  AnomalySwimlaneEmbeddable,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+} from '../embeddables/anomaly_swimlane';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_URL_GENERATOR } from '../url_generator';
 
@@ -60,7 +60,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
       await application.navigateToUrl(anomalyExplorerUrl!);
     },
     async isCompatible({ embeddable }: SwimLaneDrilldownContext) {
-      return embeddable instanceof AnomalySwimlaneEmbeddable;
+      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
     },
   });
 }

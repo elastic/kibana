@@ -31,9 +31,9 @@ import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerEmbeddables } from './embeddables';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { registerMlUiActions } from './ui_actions';
-import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { registerUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 import { isMlEnabled, isFullLicense } from '../common/license';
 

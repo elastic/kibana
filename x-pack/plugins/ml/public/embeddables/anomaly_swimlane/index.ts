@@ -5,4 +5,8 @@
  */
 
 export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './anomaly_swimlane_embeddable';
+export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './constants';
+export type {
+  EditSwimlanePanelContext,
+  SwimLaneDrilldownContext,
+} from './anomaly_swimlane_embeddable';

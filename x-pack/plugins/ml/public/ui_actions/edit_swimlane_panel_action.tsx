@@ -7,10 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import {
-  AnomalySwimlaneEmbeddable,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   EditSwimlanePanelContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { resolveAnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
+} from '../embeddables/anomaly_swimlane';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
 
@@ -35,6 +34,9 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
       const [coreStart] = await getStartServices();
 
       try {
+        const { resolveAnomalySwimlaneUserInput } = await import(
+          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+        );
         const result = await resolveAnomalySwimlaneUserInput(coreStart, embeddable.getInput());
         embeddable.updateInput(result);
       } catch (e) {
@@ -43,7 +45,7 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
     },
     isCompatible: async ({ embeddable }: EditSwimlanePanelContext) => {
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },

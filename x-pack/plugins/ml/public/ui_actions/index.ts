@@ -13,16 +13,16 @@ import {
   createOpenInExplorerAction,
   OPEN_IN_ANOMALY_EXPLORER_ACTION,
 } from './open_in_anomaly_explorer_action';
-import { EditSwimlanePanelContext } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
-import { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { EditSwimlanePanelContext } from '../embeddables/anomaly_swimlane';
+import type { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
+import type { MlPluginStart, MlStartDependencies } from '../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import {
   APPLY_INFLUENCER_FILTERS_ACTION,
   createApplyInfluencerFiltersAction,
 } from './apply_influencer_filters_action';
 import { SWIM_LANE_SELECTION_TRIGGER, swimLaneSelectionTrigger } from './triggers';
-import { SwimLaneDrilldownContext } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { SwimLaneDrilldownContext } from '../embeddables/anomaly_swimlane';
 import {
   APPLY_TIME_RANGE_SELECTION_ACTION,
   createApplyTimeRangeSelectionAction,

@@ -6,27 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { StartServicesAccessor } from 'kibana/public';
+import type { StartServicesAccessor } from 'kibana/public';
 
-import {
+import type {
   EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddable,
+import type {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableServices,
 } from './anomaly_swimlane_embeddable';
-import { HttpService } from '../../application/services/http_service';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { AnomalyTimelineService } from '../../application/services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../application/services/results_service';
-import { resolveAnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
-import { mlApiServicesProvider } from '../../application/services/ml_api_service';
-import { MlPluginStart, MlStartDependencies } from '../../plugin';
-import { MlDependencies } from '../../application/app';
+import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlDependencies } from '../../application/app';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './constants';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {
@@ -50,6 +42,7 @@ export class AnomalySwimlaneEmbeddableFactory
     const [coreStart] = await this.getServices();
 
     try {
+      const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
       return await resolveAnomalySwimlaneUserInput(coreStart);
     } catch (e) {
       return Promise.reject();
@@ -58,6 +51,14 @@ export class AnomalySwimlaneEmbeddableFactory
 
   private async getServices(): Promise<AnomalySwimlaneEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
+
+    const {
+      HttpService,
+      AnomalyDetectorService,
+      AnomalyTimelineService,
+      mlResultsServiceProvider,
+      mlApiServicesProvider,
+    } = await import('./services');
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
@@ -74,11 +75,9 @@ export class AnomalySwimlaneEmbeddableFactory
     ];
   }
 
-  public async create(
-    initialInput: AnomalySwimlaneEmbeddableInput,
-    parent?: IContainer
-  ): Promise<AnomalySwimlaneEmbeddable | ErrorEmbeddable> {
+  public async create(initialInput: AnomalySwimlaneEmbeddableInput, parent?: IContainer) {
     const services = await this.getServices();
+    const { AnomalySwimlaneEmbeddable } = await import('./anomaly_swimlane_embeddable');
     return new AnomalySwimlaneEmbeddable(initialInput, services, parent);
   }
 }

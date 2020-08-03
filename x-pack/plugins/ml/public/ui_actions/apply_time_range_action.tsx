@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
 import {
-  AnomalySwimlaneEmbeddable,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+} from '../embeddables/anomaly_swimlane';
 import { MlCoreSetup } from '../plugin';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
@@ -52,7 +52,7 @@ export function createApplyTimeRangeSelectionAction(
       });
     },
     async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
-      return embeddable instanceof AnomalySwimlaneEmbeddable && data !== undefined;
+      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE && data !== undefined;
     },
   });
 }
