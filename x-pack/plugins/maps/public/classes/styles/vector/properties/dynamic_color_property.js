@@ -114,9 +114,12 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       }, []);
       const firstStopValue = colorStops[0];
       const lessThanFirstStopValue = firstStopValue - 1;
+      const mbLookupFunction = this.supportsMbFeatureState()
+        ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+        : MB_LOOKUP_FUNCTION.GET;
       return [
         'step',
-        ['coalesce', [MB_LOOKUP_FUNCTION.FEATURE_STATE, targetName], lessThanFirstStopValue],
+        ['coalesce', [mbLookupFunction, targetName], lessThanFirstStopValue],
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
@@ -136,13 +139,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       }
 
       const lessThanFirstStopValue = rangeFieldMeta.min - 1;
+      const mbLookupFunction = this.supportsMbFeatureState()
+        ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+        : MB_LOOKUP_FUNCTION.GET;
       return [
         'interpolate',
         ['linear'],
         makeMbClampedNumberExpression({
           minValue: rangeFieldMeta.min,
           maxValue: rangeFieldMeta.max,
-          lookupFunction: MB_LOOKUP_FUNCTION.FEATURE_STATE,
+          lookupFunction: mbLookupFunction,
           fallback: lessThanFirstStopValue,
           fieldName: targetName,
         }),
