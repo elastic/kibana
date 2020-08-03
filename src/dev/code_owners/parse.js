@@ -17,47 +17,27 @@
  * under the License.
  */
 
-import { left, right } from '../code_coverage/ingest_coverage/either';
-import { teamName, hasPath } from './helpers';
+import { teamName } from './helpers';
 
 export const parseSourceOfTruth = (log) => (sourceOfTruth) => {
-  const init = new Map();
+  const owners = new Map();
 
-  const owners = sourceOfTruth.reduce(
-    (acc, { title, githubHandle, pathPatterns, review = true }) => {
-      const handle = `@${githubHandle}`;
-      const team = teamName(githubHandle);
+  for (const { title, githubHandle, pathPatterns, review = true } of sourceOfTruth) {
+    const handle = `@${githubHandle}`;
+    const team = teamName(githubHandle);
 
-      pathPatterns.forEach((path) => {
-        log.verbose(`\n### Parsing path: \n${path}`);
-        const whetherHasPath = hasPath(path)(acc) ? right(acc) : left(acc);
+    for (const path of pathPatterns) {
+      log.verbose(`\n### Parsing path: \n${path}`);
+      const existing = owners.get(path);
 
-        const mutateOwnersAndTeams = (path) => (accObj) => {
-          const { owners: currOwners, teams: currTeams } = accObj.get(path);
-
-          accObj.set(path, {
-            owners: currOwners.concat(handle),
-            teams: currTeams.concat(team),
-            title,
-            review,
-          });
-        };
-
-        const addNew = (path) => (accObj) =>
-          accObj.set(path, {
-            owners: [handle],
-            teams: [team],
-            title,
-            review,
-          });
-
-        whetherHasPath.fold(addNew(path), mutateOwnersAndTeams(path));
+      owners.set(path, {
+        owners: existing ? [...existing.owners, handle] : [handle],
+        teams: existing ? [...existing.teams, team] : [team],
+        title,
+        review,
       });
-
-      return acc;
-    },
-    init
-  );
+    }
+  }
 
   return owners;
 };
