@@ -99,7 +99,7 @@ export function App({
         toDate: currentRange.to,
       },
       originatingApp,
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
     };
   });
