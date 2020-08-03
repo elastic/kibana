@@ -166,16 +166,18 @@ export class CodeEditor extends React.Component<Props, State> {
     this._editor = editor;
 
     const domNode = editor.getDomNode();
-    domNode
-      .getElementsByTagName('textarea')[0]
-      .setAttribute('aria-labelledby', this.ariaTabFocusId);
+    if (domNode) {
+      domNode
+        .getElementsByTagName('textarea')[0]
+        .setAttribute('aria-labelledby', this.ariaTabFocusId);
+    }
 
     this._syncTabFocusMode();
 
     editor.addCommand(
       monaco.KeyCode.Escape,
       () => {
-        editor.trigger('Change tab focus mode', 'editor.action.toggleTabFocusMode');
+        editor.trigger('Change tab focus mode', 'editor.action.toggleTabFocusMode', {});
 
         this._syncTabFocusMode();
       },
