@@ -95,7 +95,16 @@ export class PluginWrapper<
   public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
-    return await this.instance.setup(setupContext, plugins);
+    const setup = this.instance.setup(setupContext, plugins);
+
+    if (isPromise(setup) && this.initializerContext.env.mode.dev) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[${this.name}] \`setup\` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.`
+      );
+    }
+
+    return setup;
   }
 
   /**
@@ -110,10 +119,17 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = await this.instance.start(startContext, plugins);
+    const startContractReturnValue = this.instance.start(startContext, plugins);
 
+    if (isPromise(startContractReturnValue) && this.initializerContext.env.mode.dev) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[${this.name}] \`start\` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.`
+      );
+    }
+
+    const startContract = await startContractReturnValue;
     this.startDependencies$.next([startContext, plugins, startContract]);
-
     return startContract;
   }
 
@@ -150,4 +166,8 @@ export class PluginWrapper<
 
     return instance;
   }
+}
+
+function isPromise(o: any): o is Promise<any> {
+  return o !== null && typeof o === 'object' && 'then' in o && typeof o.then === 'function';
 }

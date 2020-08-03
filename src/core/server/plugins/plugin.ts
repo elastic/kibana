@@ -18,6 +18,7 @@
  */
 
 import { join } from 'path';
+import { types } from 'util';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -97,7 +98,15 @@ export class PluginWrapper<
   public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
     this.instance = this.createPluginInstance();
 
-    return this.instance.setup(setupContext, plugins);
+    const setup = this.instance.setup(setupContext, plugins);
+
+    if (types.isPromise(setup) && this.params.initializerContext.env.mode.dev) {
+      this.log.warn(
+        '`setup` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
+      );
+    }
+
+    return setup;
   }
 
   /**
@@ -112,7 +121,14 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = await this.instance.start(startContext, plugins);
+    const startContractReturnValue = this.instance.start(startContext, plugins);
+    if (types.isPromise(startContractReturnValue) && this.params.initializerContext.env.mode.dev) {
+      this.log.warn(
+        '`start` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
+      );
+    }
+
+    const startContract = await startContractReturnValue;
     this.startDependencies$.next([startContext, plugins, startContract]);
     return startContract;
   }

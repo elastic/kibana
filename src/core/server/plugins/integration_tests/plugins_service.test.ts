@@ -76,7 +76,7 @@ describe('PluginsService', () => {
         ui,
       },
       opaqueId: Symbol(id),
-      initializerContext: { logger } as any,
+      initializerContext: { logger, env: { mode: { dev: false } } } as any,
     });
   };
 

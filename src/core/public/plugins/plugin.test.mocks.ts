@@ -29,3 +29,5 @@ export const mockPluginReader = jest.fn(() => mockInitializer);
 jest.mock('./plugin_reader', () => ({
   read: mockPluginReader,
 }));
+
+export const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});

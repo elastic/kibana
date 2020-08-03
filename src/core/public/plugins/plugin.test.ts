@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
+import { mockInitializer, mockPlugin, mockPluginReader, consoleWarnSpy } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
 import { coreMock } from '../mocks';
@@ -45,7 +45,12 @@ beforeEach(() => {
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
+  consoleWarnSpy.mockClear();
   plugin = new PluginWrapper(createManifest('plugin-a'), opaqueId, initializerContext);
+});
+
+afterAll(() => {
+  consoleWarnSpy.mockRestore();
 });
 
 describe('PluginWrapper', () => {
@@ -60,6 +65,17 @@ describe('PluginWrapper', () => {
     mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
     await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"start\\" function."`
+    );
+  });
+
+  test('`setup` logs warning in development if plugin.setup returns a Promise', async () => {
+    mockInitializer.mockReturnValueOnce({
+      setup: jest.fn().mockResolvedValue({}),
+      start: jest.fn(),
+    } as any);
+    await plugin.setup({} as any, {} as any);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[plugin-a] `setup` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
     );
   });
 
@@ -78,6 +94,18 @@ describe('PluginWrapper', () => {
   test('`start` fails if setup is not called first', async () => {
     await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
+    );
+  });
+
+  test('`start` logs warning in development if plugin.start returns a Promise', async () => {
+    mockInitializer.mockReturnValueOnce({
+      setup: jest.fn(),
+      start: jest.fn().mockResolvedValue({}),
+    } as any);
+    await plugin.setup({} as any, {} as any);
+    await plugin.start({} as any, {} as any);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      '[plugin-a] `start` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
     );
   });
 

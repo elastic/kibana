@@ -31,6 +31,7 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { PluginWrapper } from './plugin';
 import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
+import { Logger } from '../logging';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();
@@ -171,6 +172,29 @@ test('`setup` fails if object returned from initializer does not define `setup` 
   );
 });
 
+test('`setup` logs warning in development if lifecycle hook returns a Promise', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  env = Env.createDefault(getEnvOptions({ cliArgs: { dev: true } }));
+  coreContext = { coreId, env, logger, configService: configService as any };
+  const initializerContext = createPluginInitializerContext(coreContext, opaqueId, manifest);
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext,
+  });
+
+  const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'async' }) };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  plugin.setup({} as any, {});
+  const pluginLogger: jest.Mocked<Logger> = logger.get.mock.results[0].value;
+  expect(pluginLogger.warn).toHaveBeenCalledWith(
+    '`setup` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
+  );
+});
+
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
@@ -208,6 +232,33 @@ test('`start` fails if setup is not called first', async () => {
 
   await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
+  );
+});
+
+test('`start` logs warning in development if lifecycle hook returns a Promise', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  env = Env.createDefault(getEnvOptions({ cliArgs: { dev: true } }));
+  coreContext = { coreId, env, logger, configService: configService as any };
+  const initializerContext = createPluginInitializerContext(coreContext, opaqueId, manifest);
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext,
+  });
+
+  const mockPluginInstance = {
+    setup: jest.fn(),
+    start: jest.fn().mockResolvedValue({ contract: 'async' }),
+  };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {});
+  await plugin.start({} as any, {});
+  const pluginLogger: jest.Mocked<Logger> = logger.get.mock.results[0].value;
+  expect(pluginLogger.warn).toHaveBeenCalledWith(
+    '`start` returned a Promise. Async lifecycles are deprecated and will be removed in 8.0.'
   );
 });
 
