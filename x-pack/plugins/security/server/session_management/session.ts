@@ -124,20 +124,21 @@ export class Session {
       return null;
     }
 
+    const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
     const now = Date.now();
     if (
       (sessionCookieValue.idleTimeoutExpiration &&
         sessionCookieValue.idleTimeoutExpiration < now) ||
       (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
     ) {
-      this.options.logger.debug('Session has expired and will be invalidated.');
+      sessionLogger.debug('Session has expired and will be invalidated.');
       await this.clear(request);
       return null;
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
     if (!sessionIndexValue) {
-      this.options.logger.debug(
+      sessionLogger.debug(
         'Session value is not available in the index, session cookie will be invalidated.'
       );
       await this.options.sessionCookie.clear(request);
@@ -150,7 +151,7 @@ export class Session {
         (await this.crypto.decrypt(sessionIndexValue.content, sessionCookieValue.aad)) as string
       );
     } catch (err) {
-      this.options.logger.warn(
+      sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
       await this.clear(request);
@@ -180,6 +181,9 @@ export class Session {
       this.randomBytes(256).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 
+    const sessionLogger = this.getLoggerForSID(sid);
+    sessionLogger.debug('Creating a new session.');
+
     const sessionExpirationInfo = this.calculateExpiry();
     const { username, state, ...publicSessionValue } = sessionValue;
 
@@ -195,7 +199,7 @@ export class Session {
 
     await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
 
-    this.options.logger.debug('Successfully created new session.');
+    sessionLogger.debug('Successfully created a new session.');
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
   }
@@ -207,8 +211,9 @@ export class Session {
    */
   async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
+    const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
-      this.options.logger.warn('Session cannot be updated since it does not exist.');
+      sessionLogger.warn('Session cannot be updated since it does not exist.');
       return null;
     }
 
@@ -231,7 +236,7 @@ export class Session {
     // Session may be already invalidated by another concurrent request, in this case we should
     // clear cookie for the request as well.
     if (sessionIndexValue === null) {
-      this.options.logger.warn('Session cannot be updated as it has been invalidated already.');
+      sessionLogger.warn('Session cannot be updated as it has been invalidated already.');
       await this.options.sessionCookie.clear(request);
       return null;
     }
@@ -241,7 +246,7 @@ export class Session {
       ...sessionExpirationInfo,
     });
 
-    this.options.logger.debug('Successfully updated existing session.');
+    sessionLogger.debug('Successfully updated existing session.');
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
   }
@@ -253,8 +258,9 @@ export class Session {
    */
   async extend(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
+    const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
-      this.options.logger.warn('Session cannot be extended since it does not exist.');
+      sessionLogger.warn('Session cannot be extended since it does not exist.');
       return null;
     }
 
@@ -279,7 +285,7 @@ export class Session {
     ) {
       // 1. If idle timeout wasn't configured when session was initially created and is configured
       // now or vice versa.
-      this.options.logger.debug(
+      sessionLogger.debug(
         'Session idle timeout configuration has changed, session index will be updated.'
       );
       updateSessionIndex = true;
@@ -291,7 +297,7 @@ export class Session {
     ) {
       // 2. If lifespan wasn't configured when session was initially created and is configured now
       // or vice versa.
-      this.options.logger.debug(
+      sessionLogger.debug(
         'Session lifespan configuration has changed, session index will be updated.'
       );
       updateSessionIndex = true;
@@ -302,7 +308,7 @@ export class Session {
           sessionValue.metadata.index.idleTimeoutExpiration!
     ) {
       // 3. If idle timeout was updated a while ago.
-      this.options.logger.debug(
+      sessionLogger.debug(
         'Session idle timeout stored in the index is too old and will be updated.'
       );
       updateSessionIndex = true;
@@ -319,7 +325,7 @@ export class Session {
       // Session may be already invalidated by another concurrent request, in this case we should
       // clear cookie for the request as well.
       if (sessionIndexValue === null) {
-        this.options.logger.warn('Session cannot be extended as it has been invalidated already.');
+        sessionLogger.warn('Session cannot be extended as it has been invalidated already.');
         await this.options.sessionCookie.clear(request);
         return null;
       }
@@ -332,7 +338,7 @@ export class Session {
       ...sessionExpirationInfo,
     });
 
-    this.options.logger.debug('Successfully extended existing session.');
+    sessionLogger.debug('Successfully extended existing session.');
 
     return { ...sessionValue, ...sessionExpirationInfo } as Readonly<SessionValue>;
   }
@@ -347,12 +353,15 @@ export class Session {
       return;
     }
 
+    const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
+    sessionLogger.debug('Invalidating session.');
+
     await Promise.all([
       this.options.sessionCookie.clear(request),
       this.options.sessionIndex.clear(sessionCookieValue.sid),
     ]);
 
-    this.options.logger.debug('Successfully invalidated existing session.');
+    sessionLogger.debug('Successfully invalidated session.');
   }
 
   private calculateExpiry(
@@ -384,5 +393,13 @@ export class Session {
     // Extract values that are specific to session index value.
     const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
     return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
+  }
+
+  /**
+   * Creates logger scoped to a specified session ID.
+   * @param sid Session ID to create logger for.
+   */
+  private getLoggerForSID(sid: string) {
+    return this.options.logger.get(sid?.slice(-10));
   }
 }
