@@ -303,9 +303,9 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async isIndexPatternListEmpty() {
       if (await testSubjects.exists('indexPatternTable', { timeout: 5000 })) {
-        return true;
-      } else {
         return false;
+      } else {
+        return true;
       }
     }
 
