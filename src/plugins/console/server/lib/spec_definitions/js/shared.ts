@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const BOOLEAN = Object.freeze({
   __one_of: [true, false],
 });

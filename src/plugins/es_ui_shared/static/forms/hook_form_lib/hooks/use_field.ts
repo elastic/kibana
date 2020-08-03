@@ -42,7 +42,6 @@ export const useField = <T>(
     deserializer,
   } = config;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { getFormData, __removeField, __updateFormDataAt, __validateFields } = form;
 
   const initialValue = useMemo(() => {
@@ -494,7 +493,6 @@ export const useField = <T>(
       clearErrors,
       validate,
       reset,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __serializeOutput: serializeOutput,
     };
   }, [

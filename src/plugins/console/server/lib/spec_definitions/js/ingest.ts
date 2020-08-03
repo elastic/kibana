@@ -19,7 +19,6 @@
 
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {

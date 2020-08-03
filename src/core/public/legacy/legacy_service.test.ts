@@ -57,9 +57,7 @@ const defaultParams = {
     };
   }),
   requireNewPlatformShimModule: jest.fn(() => ({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __setup__: mockUiNewPlatformSetup,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __start__: mockUiNewPlatformStart,
   })),
 };

@@ -61,7 +61,6 @@ export interface ChromeDocTitle {
   reset(): void;
 
   /** @internal */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __legacy: {
     setBaseTitle(baseTitle: string): void;
   };
@@ -86,7 +85,6 @@ export class DocTitleService {
       reset: () => {
         this.applyTitle(defaultTitle);
       },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __legacy: {
         setBaseTitle: (baseTitle) => {
           this.baseTitle = baseTitle;

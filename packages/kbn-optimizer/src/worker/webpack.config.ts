@@ -159,7 +159,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'resolve-url-loader',
                   options: {
-                    join: (a: string, b: any) => (uri: string, base?: string) => {
+                    join: (_: string, __: any) => (uri: string, base?: string) => {
                       // apply only to legacy platform styles
                       if (!base || !parseDirPath(base).dirs.includes('legacy')) {
                         return null;

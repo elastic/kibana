@@ -20,7 +20,6 @@
 import { CoreWindow, read } from './plugin_reader';
 
 const coreWindow: CoreWindow & {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __kbnBundles__: { stub(key: string, value: any): void };
 } = window as any;
 

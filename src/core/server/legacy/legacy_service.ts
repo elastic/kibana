@@ -354,7 +354,6 @@ export class LegacyService implements CoreService {
           core: coreStart,
           plugins: startDeps.plugins,
         },
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __internals: {
           http: {
             registerStaticDir: setupDeps.core.http.registerStaticDir,

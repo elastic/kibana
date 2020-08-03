@@ -8,7 +8,6 @@
 const commonPipelineParams = {
   on_failure: [],
   ignore_failure: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __one_of: [false, true],
   },
   if: '',
@@ -18,7 +17,6 @@ const commonPipelineParams = {
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/enrich-processor.html
 const enrichProcessorDefinition = {
   enrich: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __template: {
       policy_name: '',
       field: '',
@@ -28,11 +26,9 @@ const enrichProcessorDefinition = {
     field: '',
     target_field: '',
     ignore_missing: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __one_of: [false, true],
     },
     override: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __one_of: [true, false],
     },
     max_matches: 1,
@@ -44,7 +40,6 @@ const enrichProcessorDefinition = {
 // Based on https://www.elastic.co/guide/en/elasticsearch/reference/master/inference-processor.html
 const inferenceProcessorDefinition = {
   inference: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __template: {
       model_id: '',
       inference_config: {},
@@ -53,17 +48,14 @@ const inferenceProcessorDefinition = {
     target_field: '',
     model_id: '',
     field_mappings: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __template: {},
     },
     inference_config: {
       regression: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __template: {},
         results_field: '',
       },
       classification: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __template: {},
         results_field: '',
         num_top_classes: 2,

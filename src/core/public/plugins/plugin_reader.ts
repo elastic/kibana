@@ -30,7 +30,6 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  * @internal
  */
 export interface CoreWindow {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __kbnBundles__: {
     has(key: string): boolean;
     get(key: string): { plugin: UnknownPluginInitializer } | undefined;

@@ -26,7 +26,6 @@ export const document = (specService: SpecDefinitionsService) => {
       },
       doc: {},
       upsert: {},
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       scripted_upsert: { __one_of: [true, false] },
     },
   });
@@ -45,7 +44,6 @@ export const document = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('termvectors', {
     data_autocomplete_rules: {
       fields: ['{field}'],
-      /* eslint-disable @typescript-eslint/naming-convention */
       offsets: { __one_of: [false, true] },
       payloads: { __one_of: [false, true] },
       positions: { __one_of: [false, true] },
@@ -55,7 +53,6 @@ export const document = (specService: SpecDefinitionsService) => {
         __template: { FIELD: '' },
         '{field}': '',
       },
-      /* eslint-enable @typescript-eslint/naming-convention */
       routing: '',
       version: 1,
       version_type: ['external', 'external_gt', 'external_gte', 'force', 'internal'],
