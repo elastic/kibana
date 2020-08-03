@@ -40,6 +40,7 @@ import {
   getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
+  lowercaseHashValues,
 } from '../helpers';
 import { Loader } from '../../loader';
 
@@ -195,7 +196,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
