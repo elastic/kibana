@@ -15,6 +15,14 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./services/rum_services.ts'));
     });
 
+    describe('Settings', function () {
+      describe('Anomaly detection', function () {
+        loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/write_user'));
+      });
+    });
+
     describe('Service Maps', function () {
       loadTestFile(require.resolve('./service_maps/service_maps'));
     });

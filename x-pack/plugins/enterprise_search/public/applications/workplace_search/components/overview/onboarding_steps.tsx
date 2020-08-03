@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useValues } from 'kea';
 
 import {
   EuiSpacer,
@@ -28,7 +29,7 @@ import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { ContentSection } from '../shared/content_section';
 
-import { IAppServerData } from './overview';
+import { OverviewLogic, IOverviewValues } from './overview_logic';
 
 import { OnboardingCard } from './onboarding_card';
 
@@ -57,17 +58,19 @@ const ONBOARDING_USERS_CARD_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Invite your colleagues into this organization to search with you.' }
 );
 
-export const OnboardingSteps: React.FC<IAppServerData> = ({
-  hasUsers,
-  hasOrgSources,
-  canCreateContentSources,
-  canCreateInvitations,
-  accountsCount,
-  sourcesCount,
-  fpAccount: { isCurated },
-  organization: { name, defaultOrgName },
-  isFederatedAuth,
-}) => {
+export const OnboardingSteps: React.FC = () => {
+  const {
+    hasUsers,
+    hasOrgSources,
+    canCreateContentSources,
+    canCreateInvitations,
+    accountsCount,
+    sourcesCount,
+    fpAccount: { isCurated },
+    organization: { name, defaultOrgName },
+    isFederatedAuth,
+  } = useValues(OverviewLogic) as IOverviewValues;
+
   const accountsPath =
     !isFederatedAuth && (canCreateInvitations || isCurated) ? USERS_PATH : undefined;
   const sourcesPath = canCreateContentSources || isCurated ? ORG_SOURCES_PATH : undefined;

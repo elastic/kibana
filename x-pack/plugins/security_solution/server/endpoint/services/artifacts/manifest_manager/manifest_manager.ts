@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import semver from 'semver';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
@@ -13,7 +13,6 @@ import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/ma
 
 import {
   ArtifactConstants,
-  ManifestConstants,
   Manifest,
   buildArtifact,
   getFullEndpointExceptionList,
@@ -52,6 +51,7 @@ export class ManifestManager {
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
+  protected schemaVersion: ManifestSchemaVersion;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -60,41 +60,39 @@ export class ManifestManager {
     this.savedObjectsClient = context.savedObjectsClient;
     this.logger = context.logger;
     this.cache = context.cache;
+    this.schemaVersion = 'v1';
   }
 
   /**
-   * Gets a ManifestClient for the provided schemaVersion.
+   * Gets a ManifestClient for this manager's schemaVersion.
    *
-   * @param schemaVersion The schema version of the manifest.
-   * @returns {ManifestClient} A ManifestClient scoped to the provided schemaVersion.
+   * @returns {ManifestClient} A ManifestClient scoped to the appropriate schemaVersion.
    */
-  protected getManifestClient(schemaVersion: string): ManifestClient {
-    return new ManifestClient(this.savedObjectsClient, schemaVersion as ManifestSchemaVersion);
+  protected getManifestClient(): ManifestClient {
+    return new ManifestClient(this.savedObjectsClient, this.schemaVersion);
   }
 
   /**
    * Builds an array of artifacts (one per supported OS) based on the current
    * state of exception-list-agnostic SOs.
    *
-   * @param schemaVersion The schema version of the artifact
    * @returns {Promise<InternalArtifactCompleteSchema[]>} An array of uncompressed artifacts built from exception-list-agnostic SOs.
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
-    schemaVersion: string
+    artifactSchemaVersion?: string
   ): Promise<InternalArtifactCompleteSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
-      Promise<InternalArtifactCompleteSchema[]>
-    >(async (acc, os) => {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptionList = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
-        schemaVersion
+        artifactSchemaVersion ?? 'v1'
       );
-      const artifacts = await acc;
-      const artifact = await buildArtifact(exceptionList, os, schemaVersion);
-      return Promise.resolve([...artifacts, artifact]);
-    }, Promise.resolve([]));
+      const artifact = await buildArtifact(exceptionList, os, artifactSchemaVersion ?? 'v1');
+      artifacts.push(artifact);
+    }
+    return artifacts;
   }
 
   /**
@@ -168,20 +166,23 @@ export class ManifestManager {
    * Returns the last computed manifest based on the state of the
    * user-artifact-manifest SO.
    *
-   * @param schemaVersion The schema version of the manifest.
    * @returns {Promise<Manifest | null>} The last computed manifest, or null if does not exist.
    * @throws Throws/rejects if there is an unexpected error retrieving the manifest.
    */
-  public async getLastComputedManifest(schemaVersion: string): Promise<Manifest | null> {
+  public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestClient = this.getManifestClient(schemaVersion);
+      const manifestClient = this.getManifestClient();
       const manifestSo = await manifestClient.getManifest();
 
       if (manifestSo.version === undefined) {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest(schemaVersion, manifestSo.version);
+      const manifest = new Manifest({
+        schemaVersion: this.schemaVersion,
+        semanticVersion: manifestSo.attributes.semanticVersion,
+        soVersion: manifestSo.version,
+      });
 
       for (const id of manifestSo.attributes.ids) {
         const artifactSo = await this.artifactClient.getArtifact(id);
@@ -199,22 +200,17 @@ export class ManifestManager {
   /**
    * Builds a new manifest based on the current user exception list.
    *
-   * @param schemaVersion The schema version of the manifest.
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async buildNewManifest(
-    schemaVersion: string,
-    baselineManifest?: Manifest
-  ): Promise<Manifest> {
+  public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
     // Build new exception list artifacts
-    const artifacts = await this.buildExceptionListArtifacts(ArtifactConstants.SCHEMA_VERSION);
+    const artifacts = await this.buildExceptionListArtifacts();
 
     // Build new manifest
     const manifest = Manifest.fromArtifacts(
       artifacts,
-      ManifestConstants.SCHEMA_VERSION,
-      baselineManifest ?? Manifest.getDefault(schemaVersion)
+      baselineManifest ?? Manifest.getDefault(this.schemaVersion)
     );
 
     return manifest;
@@ -247,14 +243,12 @@ export class ManifestManager {
       for (const packageConfig of items) {
         const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
         if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
-          const artifactManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
+          const oldManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
             value: {},
           };
 
-          const oldManifest =
-            Manifest.fromPkgConfig(artifactManifest.value) ??
-            Manifest.getDefault(ManifestConstants.SCHEMA_VERSION);
-          if (!manifest.equals(oldManifest)) {
+          const newManifestVersion = manifest.getSemanticVersion();
+          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
             newPackageConfig.inputs[0].config.artifact_manifest = {
               value: serializedManifest,
             };
@@ -262,7 +256,7 @@ export class ManifestManager {
             try {
               await this.packageConfigService.update(this.savedObjectsClient, id, newPackageConfig);
               this.logger.debug(
-                `Updated package config ${id} with manifest version ${manifest.getSha256()}`
+                `Updated package config ${id} with manifest version ${manifest.getSemanticVersion()}`
               );
             } catch (err) {
               errors.push(err);
@@ -274,8 +268,7 @@ export class ManifestManager {
           errors.push(new Error(`Package config ${id} has no config.`));
         }
       }
-
-      paging = page * items.length < total;
+      paging = (page - 1) * 20 + items.length < total;
       page++;
     }
 
@@ -290,11 +283,11 @@ export class ManifestManager {
    */
   public async commit(manifest: Manifest): Promise<Error | null> {
     try {
-      const manifestClient = this.getManifestClient(manifest.getSchemaVersion());
+      const manifestClient = this.getManifestClient();
 
       // Commit the new manifest
       const manifestSo = manifest.toSavedObject();
-      const version = manifest.getSoVersion();
+      const version = manifest.getSavedObjectVersion();
 
       if (version == null) {
         await manifestClient.createManifest(manifestSo);
@@ -304,7 +297,7 @@ export class ManifestManager {
         });
       }
 
-      this.logger.info(`Committed manifest ${manifest.getSha256()}`);
+      this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
     } catch (err) {
       return err;
     }

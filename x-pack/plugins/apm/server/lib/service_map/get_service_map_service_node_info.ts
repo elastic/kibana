@@ -6,13 +6,12 @@
 
 import { UIFilters } from '../../../typings/ui_filters';
 import {
+  SERVICE_NAME,
+  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -109,17 +108,18 @@ async function getTransactionStats({
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
 }> {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             ...filter,
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
             {
               terms: {
                 [TRANSACTION_TYPE]: [
@@ -135,8 +135,9 @@ async function getTransactionStats({
       aggs: { duration: { avg: { field: TRANSACTION_DURATION } } },
     },
   };
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
   const docCount = response.hits.total.value;
+
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,
     avgRequestsPerMinute: docCount > 0 ? docCount / minutes : null,
@@ -147,18 +148,17 @@ async function getCpuStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
+  const response = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter: filter.concat([
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
-            { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
-          ]),
+          filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
         },
       },
       aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
@@ -172,17 +172,19 @@ async function getMemoryStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
-  const { client, indices } = setup;
-  const response = await client.search({
-    index: indices['apm_oss.metricsIndices'],
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
     body: {
       query: {
         bool: {
-          filter: filter.concat([
-            { term: { [PROCESSOR_EVENT]: 'metric' } },
+          filter: [
+            ...filter,
             { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
             { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          ]),
+          ],
         },
       },
       aggs: { avgMemoryUsage: { avg: { script: percentMemoryUsedScript } } },
