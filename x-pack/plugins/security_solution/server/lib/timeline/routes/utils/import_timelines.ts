@@ -163,6 +163,7 @@ export const importTimelines = async (
                   pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
                   notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                   isImmutable,
+                  overideNotes: false,
                 });
 
                 resolve({
@@ -196,6 +197,7 @@ export const importTimelines = async (
                     notes: globalNotes,
                     existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
                     isImmutable,
+                    overideNotes: false,
                   });
 
                   resolve({

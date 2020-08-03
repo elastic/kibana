@@ -136,7 +136,8 @@ export const persistNote = async (
   request: FrameworkRequest,
   noteId: string | null,
   version: string | null,
-  note: SavedNote
+  note: SavedNote,
+  overideNote: boolean = true
 ): Promise<ResponseNote> => {
   try {
     const savedObjectsClient = request.context.core.savedObjects.client;
@@ -163,14 +164,14 @@ export const persistNote = async (
         note: convertSavedObjectToSavedNote(
           await savedObjectsClient.create(
             noteSavedObjectType,
-            pickSavedNote(noteId, note, request.user)
+            overideNote ? pickSavedNote(noteId, note, request.user) : note
           ),
           timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
         ),
       };
     }
 
-    // Update new note
+    // Update existing note
 
     const existingNote = await getSavedNote(request, noteId);
     return {
@@ -180,7 +181,7 @@ export const persistNote = async (
         await savedObjectsClient.update(
           noteSavedObjectType,
           noteId,
-          pickSavedNote(noteId, note, request.user),
+          overideNote ? pickSavedNote(noteId, note, request.user) : note,
           {
             version: existingNote.version || undefined,
           }

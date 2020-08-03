@@ -45,26 +45,44 @@ export const savePinnedEvents = (
     )
   );
 
-export const saveNotes = (
+export const saveNotes = async (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
   timelineVersion?: string | null,
   existingNoteIds?: string[],
-  newNotes?: NoteResult[]
+  newNotes?: NoteResult[],
+  overideNotes: boolean = true
 ) => {
   return Promise.all(
-    newNotes?.map((note) => {
-      const newNote: SavedNote = {
-        eventId: note.eventId,
-        note: note.note,
-        timelineId: timelineSavedObjectId,
-      };
+    newNotes?.map(async (note) => {
+      let savedNote = note;
 
+      try {
+        savedNote = await noteLib.getNote(frameworkRequest, note.noteId);
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      const newNote: SavedNote = overideNotes
+        ? {
+            eventId: note.eventId,
+            note: note.note,
+            timelineId: timelineSavedObjectId,
+          }
+        : {
+            eventId: savedNote.eventId,
+            note: savedNote.note,
+            created: savedNote.created,
+            createdBy: savedNote.createdBy,
+            updated: savedNote.updated,
+            updatedBy: savedNote.updatedBy,
+            timelineId: timelineSavedObjectId,
+          };
       return noteLib.persistNote(
         frameworkRequest,
-        existingNoteIds?.find((nId) => nId === note.noteId) ?? null,
+        overideNotes ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
         timelineVersion ?? null,
-        newNote
+        newNote,
+        overideNotes
       );
     }) ?? []
   );
@@ -75,12 +93,18 @@ interface CreateTimelineProps {
   timeline: SavedTimeline;
   timelineSavedObjectId?: string | null;
   timelineVersion?: string | null;
+  overideNotes?: boolean;
   pinnedEventIds?: string[] | null;
   notes?: NoteResult[];
   existingNoteIds?: string[];
   isImmutable?: boolean;
 }
 
+/** allow override means overriding by current username,
+ * disallow override means keep the original username.
+ * override = flase only happens when import timeline templates,
+ * as we want to keep the original creator for notes
+ **/
 export const createTimelines = async ({
   frameworkRequest,
   timeline,
@@ -90,6 +114,7 @@ export const createTimelines = async ({
   notes = [],
   existingNoteIds = [],
   isImmutable,
+  overideNotes = true,
 }: CreateTimelineProps): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
@@ -119,7 +144,8 @@ export const createTimelines = async ({
         timelineSavedObjectId ?? newTimelineSavedObjectId,
         newTimelineVersion,
         existingNoteIds,
-        notes
+        notes,
+        overideNotes
       ),
     ];
   }
