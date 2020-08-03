@@ -173,7 +173,9 @@ export function defaultValidationErrorHandler(
 
 export function getRequestId(request: Request, options: HttpConfig['requestOpaqueId']): string {
   return options.allowFromAnyIp ||
-    options.ipAllowlist.includes(request.raw.req.socket.remoteAddress!)
+    // socket may be undefined in integration tests that connect via the http listener directly
+    (request.raw.req.socket?.remoteAddress &&
+      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
     ? request.headers['x-opaque-id'] ?? uuid.v4()
     : uuid.v4();
 }
