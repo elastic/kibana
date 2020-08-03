@@ -102,7 +102,8 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version)) throw new PackageOutdatedError(pkgkey);
+  if (semver.lt(pkgVersion, latestPackage.version))
+    throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);

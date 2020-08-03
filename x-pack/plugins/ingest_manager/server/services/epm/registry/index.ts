@@ -77,7 +77,7 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
   if (searchResults.length) {
     return searchResults[0];
   } else {
-    throw new PackageNotFoundError(packageName);
+    throw new PackageNotFoundError(`${packageName} not found`);
   }
 }
 
