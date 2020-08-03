@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { NewRule } from '../../../../containers/detection_engine/rules';
+import {
+  getListMock,
+  getEndpointListMock,
+} from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
@@ -371,6 +376,51 @@ describe('helpers', () => {
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with endpoint exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        []
+      );
+      expect(result.exceptions_list).toEqual([getEndpointListMock()]);
+    });
+
+    test('returns formatted object with detections exceptions_list', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, [getListMock()]);
+      expect(result.exceptions_list).toEqual([getListMock()]);
+    });
+
+    test('returns formatted object with both exceptions_lists', () => {
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        [getListMock()]
+      );
+      expect(result.exceptions_list).toEqual([getEndpointListMock(), getListMock()]);
+    });
+
+    test('returns formatted object with pre-existing exceptions lists', () => {
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
+      const result: AboutStepRuleJson = formatAboutStepData(
+        {
+          ...mockData,
+          isAssociatedToEndpointList: true,
+        },
+        exceptionsLists
+      );
+      expect(result.exceptions_list).toEqual(exceptionsLists);
+    });
+
+    test('returns formatted object with pre-existing endpoint exceptions list disabled', () => {
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, exceptionsLists);
+      expect(result.exceptions_list).toEqual([getListMock()]);
     });
 
     test('returns formatted object with empty falsePositive and references filtered out', () => {

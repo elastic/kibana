@@ -142,11 +142,6 @@ export const timelineSchema = gql`
     immutable
   }
 
-  enum TemplateTimelineType {
-    elastic
-    custom
-  }
-
   enum RowRendererId {
     auditd
     auditd_file
@@ -321,7 +316,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

@@ -25,9 +25,6 @@ module.exports = {
     '@elastic/eui/dist/eui_theme_light.css',
     '@kbn/ui-framework/dist/kui_light.css',
     '@storybook/addon-actions/register',
-    '@storybook/addon-knobs',
-    '@storybook/addon-knobs/react',
-    '@storybook/addon-knobs/register',
     '@storybook/core',
     '@storybook/core/dist/server/common/polyfills.js',
     '@storybook/react',
@@ -38,6 +35,7 @@ module.exports = {
     'chroma-js',
     'highlight.js',
     'html-entities',
+    'jsondiffpatch',
     'jquery',
     'lodash',
     'markdown-it',
@@ -114,7 +112,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+                path: require.resolve('@kbn/optimizer/postcss.config.js'),
               },
             },
           },

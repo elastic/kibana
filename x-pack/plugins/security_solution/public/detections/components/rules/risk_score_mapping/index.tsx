@@ -14,8 +14,9 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { noop } from 'lodash/fp';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { CommonUseField } from '../../../../cases/components/create';
@@ -23,6 +24,10 @@ import { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types'
 import { FieldComponent } from '../../../../common/components/autocomplete/field';
 import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+
+const RiskScoreMappingEuiFormRow = styled(EuiFormRow)`
+  width: 468px;
+`;
 
 const NestedContent = styled.div`
   margin-left: 24px;
@@ -41,6 +46,7 @@ interface RiskScoreFieldProps {
   field: FieldHook;
   idAria: string;
   indices: IIndexPattern;
+  isDisabled: boolean;
   placeholder?: string;
 }
 
@@ -49,40 +55,23 @@ export const RiskScoreField = ({
   field,
   idAria,
   indices,
+  isDisabled,
   placeholder,
 }: RiskScoreFieldProps) => {
-  const [isRiskScoreMappingChecked, setIsRiskScoreMappingChecked] = useState(false);
-  const [initialFieldCheck, setInitialFieldCheck] = useState(true);
-
   const fieldTypeFilter = useMemo(() => ['number'], []);
-
-  useEffect(() => {
-    if (
-      !isRiskScoreMappingChecked &&
-      initialFieldCheck &&
-      (field.value as AboutStepRiskScore).mapping?.length > 0
-    ) {
-      setIsRiskScoreMappingChecked(true);
-      setInitialFieldCheck(false);
-    }
-  }, [
-    field,
-    initialFieldCheck,
-    isRiskScoreMappingChecked,
-    setIsRiskScoreMappingChecked,
-    setInitialFieldCheck,
-  ]);
 
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
       const values = field.value as AboutStepRiskScore;
       field.setValue({
         value: values.value,
+        isMappingChecked: values.isMappingChecked,
         mapping: [
           {
             field: newField?.name ?? '',
             operator: 'equals',
             value: '',
+            riskScore: undefined,
           },
         ],
       });
@@ -99,8 +88,13 @@ export const RiskScoreField = ({
   }, [field.value, indices]);
 
   const handleRiskScoreMappingChecked = useCallback(() => {
-    setIsRiskScoreMappingChecked(!isRiskScoreMappingChecked);
-  }, [isRiskScoreMappingChecked, setIsRiskScoreMappingChecked]);
+    const values = field.value as AboutStepRiskScore;
+    field.setValue({
+      value: values.value,
+      mapping: [...values.mapping],
+      isMappingChecked: !values.isMappingChecked,
+    });
+  }, [field]);
 
   const riskScoreLabel = useMemo(() => {
     return (
@@ -117,11 +111,16 @@ export const RiskScoreField = ({
   const riskScoreMappingLabel = useMemo(() => {
     return (
       <div>
-        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={handleRiskScoreMappingChecked}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          onClick={!isDisabled ? handleRiskScoreMappingChecked : noop}
+        >
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id={`risk_score-mapping-override`}
-              checked={isRiskScoreMappingChecked}
+              checked={(field.value as AboutStepRiskScore).isMappingChecked}
+              disabled={isDisabled}
               onChange={handleRiskScoreMappingChecked}
             />
           </EuiFlexItem>
@@ -133,7 +132,7 @@ export const RiskScoreField = ({
         </NestedContent>
       </div>
     );
-  }, [handleRiskScoreMappingChecked, isRiskScoreMappingChecked]);
+  }, [field.value, handleRiskScoreMappingChecked, isDisabled]);
 
   return (
     <EuiFlexGroup>
@@ -153,6 +152,7 @@ export const RiskScoreField = ({
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleRiskScore',
               'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+              isDisabled,
               euiFieldProps: {
                 max: 100,
                 min: 0,
@@ -166,11 +166,11 @@ export const RiskScoreField = ({
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow
+        <RiskScoreMappingEuiFormRow
           label={riskScoreMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
-            isRiskScoreMappingChecked ? (
+            (field.value as AboutStepRiskScore).isMappingChecked ? (
               <NestedContent>{i18n.RISK_SCORE_MAPPING_DETAILS}</NestedContent>
             ) : (
               ''
@@ -184,7 +184,7 @@ export const RiskScoreField = ({
         >
           <NestedContent>
             <EuiSpacer size="s" />
-            {isRiskScoreMappingChecked && (
+            {(field.value as AboutStepRiskScore).isMappingChecked && (
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -208,11 +208,11 @@ export const RiskScoreField = ({
                         fieldTypeFilter={fieldTypeFilter}
                         isLoading={false}
                         isClearable={false}
-                        isDisabled={false}
+                        isDisabled={isDisabled}
                         onChange={handleFieldChange}
                         data-test-subj={dataTestSubj}
                         aria-label={idAria}
-                        fieldInputWidth={230}
+                        fieldInputWidth={270}
                       />
                     </EuiFlexItem>
                     <EuiFlexItemIconColumn grow={false}>
@@ -226,7 +226,7 @@ export const RiskScoreField = ({
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </EuiFormRow>
+        </RiskScoreMappingEuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

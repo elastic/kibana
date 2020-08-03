@@ -44,7 +44,9 @@ export const ENDPOINT_LIST_ITEM_URL = '/api/endpoint_list/items';
 export const ENDPOINT_LIST_ID = 'endpoint_list';
 
 /** The name of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Exception List';
+export const ENDPOINT_LIST_NAME = 'Elastic Endpoint Security Exception List';
 
 /** The description of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Exception List';
+export const ENDPOINT_LIST_DESCRIPTION = 'Elastic Endpoint Security Exception List';
+
+export const MAX_EXCEPTION_LIST_SIZE = 10000;

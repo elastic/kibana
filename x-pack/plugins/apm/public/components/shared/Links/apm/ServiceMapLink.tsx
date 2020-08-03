@@ -16,11 +16,11 @@ interface ServiceMapLinkProps extends APMLinkExtendProps {
   serviceName?: string;
 }
 
-const ServiceMapLink = ({ serviceName, ...rest }: ServiceMapLinkProps) => {
+function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
   const path = serviceName
     ? `/services/${serviceName}/service-map`
     : '/service-map';
   return <APMLink path={path} {...rest} />;
-};
+}
 
 export { ServiceMapLink };
