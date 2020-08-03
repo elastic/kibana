@@ -133,8 +133,8 @@ export const EventColumnView = React.memo<Props>(
               ...acc,
               icon: [
                 ...acc.icon,
-                <EventsTd>
-                  <EventsTdContent key={action.id} textAlign="center" width={action.width}>
+                <EventsTd key={action.id}>
+                  <EventsTdContent textAlign="center" width={action.width}>
                     <EuiToolTip
                       data-test-subj={`${action.dataTestSubj}-tool-tip`}
                       content={action.content}
@@ -178,12 +178,8 @@ export const EventColumnView = React.memo<Props>(
       return grouped.contextMenu.length > 0
         ? [
             ...grouped.icon,
-            <EventsTd>
-              <EventsTdContent
-                key="actions-context-menu"
-                textAlign="center"
-                width={DEFAULT_ICON_BUTTON_WIDTH}
-              >
+            <EventsTd key="actions-context-menu">
+              <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiPopover
                   id="singlePanel"
                   button={button}
@@ -200,6 +196,18 @@ export const EventColumnView = React.memo<Props>(
           ]
         : grouped.icon;
     }, [button, closePopover, id, onClickCb, data, ecsData, timelineActions, isPopoverOpen]);
+
+    const handlePinClicked = useCallback(
+      () =>
+        getPinOnClick({
+          allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
+          eventId: id,
+          onPinEvent,
+          onUnPinEvent,
+          isEventPinned,
+        }),
+      [eventIdToNoteIds, id, isEventPinned, onPinEvent, onUnPinEvent]
+    );
 
     return (
       <EventsTrData data-test-subj="event-column-view">
@@ -219,13 +227,7 @@ export const EventColumnView = React.memo<Props>(
           loadingEventIds={loadingEventIds}
           noteIds={eventIdToNoteIds[id] || emptyNotes}
           onEventToggled={onEventToggled}
-          onPinClicked={getPinOnClick({
-            allowUnpinning: !eventHasNotes(eventIdToNoteIds[id]),
-            eventId: id,
-            onPinEvent,
-            onUnPinEvent,
-            isEventPinned,
-          })}
+          onPinClicked={handlePinClicked}
           showCheckboxes={showCheckboxes}
           showNotes={showNotes}
           toggleShowNotes={toggleShowNotes}

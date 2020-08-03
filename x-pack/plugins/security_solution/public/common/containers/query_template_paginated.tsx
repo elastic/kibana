@@ -13,14 +13,18 @@ import deepEqual from 'fast-deep-equal';
 import { ESQuery } from '../../../common/typed_json';
 import { inputsModel } from '../store/model';
 import { generateTablePaginationOptions } from '../components/paginated_table/helpers';
+import { DocValueFields } from './source';
+
+export { DocValueFields };
 
 export interface QueryTemplatePaginatedProps {
+  docValueFields?: DocValueFields[];
   id?: string;
-  endDate?: number;
+  endDate?: string;
   filterQuery?: ESQuery | string;
   skip?: boolean;
   sourceId: string;
-  startDate?: number;
+  startDate?: string;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &

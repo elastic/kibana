@@ -14,7 +14,7 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  fetchChartsData,
+  getFieldType,
   getErrorMessage,
   extractErrorMessage,
   formatHumanReadableDateTimeSeconds,

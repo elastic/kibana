@@ -5,6 +5,5 @@
   "ui": true,
   "configPath": ["xpack", "upgrade_assistant"],
   "requiredPlugins": ["management", "licensing"],
-  "optionalPlugins": ["cloud", "usageCollection"],
-  "requiredBundles": ["management"]
+  "optionalPlugins": ["cloud", "usageCollection"]
 }

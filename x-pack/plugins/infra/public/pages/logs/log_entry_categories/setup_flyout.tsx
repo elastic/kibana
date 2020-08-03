@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiSteps,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useMemo } from 'react';
 import {
   createInitialConfigurationStep,
   createProcessStep,
 } from '../../../components/logging/log_analysis_setup';
-import { useLogEntryCategoriesSetup } from './use_log_entry_categories_setup';
+import { useLogEntryCategoriesSetup } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 
 interface LogEntryCategoriesSetupFlyoutProps {
   isOpen: boolean;

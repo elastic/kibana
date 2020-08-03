@@ -89,6 +89,6 @@ export const calculateAuto = {
   }),
 };
 
-export const calculateTimeSeriesInterval = (from: number, to: number) => {
-  return `${Math.floor((to - from) / 32)}ms`;
+export const calculateTimeSeriesInterval = (from: string, to: string) => {
+  return `${Math.floor(moment(to).diff(moment(from)) / 32)}ms`;
 };

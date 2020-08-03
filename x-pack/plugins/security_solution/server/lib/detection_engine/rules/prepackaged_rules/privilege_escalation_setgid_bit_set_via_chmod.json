@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An adversary may add the setgid bit to a file or directory in order to run a file with the privileges of the owning group. An adversary can take advantage of this to either do a shell escape or exploit a vulnerability in an application with the setgid bit to get code running in a different user\u2019s context. Additionally, adversaries can use this mechanism on their own malware to make sure they're able to execute in elevated contexts in the future.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License",
+  "max_signals": 33,
+  "name": "Setgid Bit Set via chmod",
+  "query": "event.category:process AND event.type:(start or process_started) AND process.name:chmod AND process.args:(g+s OR /2[0-9]{3}/) AND NOT user.name:root",
+  "risk_score": 21,
+  "rule_id": "3a86e085-094c-412d-97ff-2439731e59cb",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1166",
+          "name": "Setuid and Setgid",
+          "reference": "https://attack.mitre.org/techniques/T1166/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1166",
+          "name": "Setuid and Setgid",
+          "reference": "https://attack.mitre.org/techniques/T1166/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

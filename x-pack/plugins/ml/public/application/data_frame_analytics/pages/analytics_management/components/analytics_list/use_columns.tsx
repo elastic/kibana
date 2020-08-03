@@ -22,7 +22,6 @@ import {
 import { getJobIdUrl } from '../../../../../util/get_job_id_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
@@ -145,10 +144,9 @@ export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true,
-  createAnalyticsForm?: CreateAnalyticsFormProps
+  isMlEnabledInSpace: boolean = true
 ) => {
-  const { actions, modals } = useActions(createAnalyticsForm!, isManagementTable);
+  const { actions, modals } = useActions(isManagementTable);
 
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

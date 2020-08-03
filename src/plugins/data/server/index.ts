@@ -86,7 +86,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -105,7 +104,6 @@ export const fieldFormats = {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -163,20 +161,17 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
+  ISearchStrategy,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchSetup,
   ISearchStart,
-  TStrategyTypes,
-  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace

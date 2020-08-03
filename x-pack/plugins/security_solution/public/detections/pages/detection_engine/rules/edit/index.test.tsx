@@ -7,11 +7,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { EditRulePage } from './index';
 import { useUserInfo } from '../../../../components/user_info';
 import { useParams } from 'react-router-dom';
 
+jest.mock('../../../../containers/detection_engine/lists/use_lists_config');
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../components/user_info');
 jest.mock('react-router-dom', () => {

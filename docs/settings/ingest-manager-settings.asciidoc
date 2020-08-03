@@ -8,8 +8,7 @@
 experimental[]
 
 You can configure `xpack.ingestManager` settings in your `kibana.yml`. 
-By default, {ingest-manager} is not enabled. You need to
-enable it. To use {fleet}, you also need to configure {kib} and {es} hosts.
+By default, {ingest-manager} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
 
 See the {ingest-guide}/index.html[Ingest Management] docs for more information.
 
@@ -19,9 +18,7 @@ See the {ingest-guide}/index.html[Ingest Management] docs for more information.
 [cols="2*<"]
 |===
 | `xpack.ingestManager.enabled` {ess-icon}
-  | Set to `true` to enable {ingest-manager}. 
-| `xpack.ingestManager.epm.enabled` {ess-icon}
-  | Set to `true` (default) to enable {package-manager}. 
+  | Set to `true` (default) to enable {ingest-manager}. 
 | `xpack.ingestManager.fleet.enabled` {ess-icon}
   | Set to `true` (default) to enable {fleet}. 
 |===
@@ -32,7 +29,7 @@ See the {ingest-guide}/index.html[Ingest Management] docs for more information.
 
 [cols="2*<"]
 |===
-| `xpack.ingestManager.epm.registryUrl`
+| `xpack.ingestManager.registryUrl`
   | The address to use to reach {package-manager} registry.
 |===
 

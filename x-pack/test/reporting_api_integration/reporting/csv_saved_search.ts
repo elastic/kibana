@@ -6,23 +6,14 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import {
-  CSV_RESULT_DOCVALUE,
-  CSV_RESULT_HUGE,
-  CSV_RESULT_NANOS,
-  CSV_RESULT_SCRIPTED,
-  CSV_RESULT_SCRIPTED_REQUERY,
-  CSV_RESULT_SCRIPTED_RESORTED,
-  CSV_RESULT_TIMEBASED,
-  CSV_RESULT_TIMELESS,
-} from '../fixtures';
+import * as fixtures from '../fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 interface GenerateOpts {
   timerange?: {
     timezone: string;
-    min: number | string | Date;
-    max: number | string | Date;
+    min?: number | string | Date;
+    max?: number | string | Date;
   };
   state: any;
 }
@@ -52,17 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingAPI.deleteAllReports();
       });
 
-      it('With filters and timebased data', async () => {
+      it('With filters and timebased data, explicit UTC format', async () => {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/logs');
         await esArchiver.load('logstash_functional');
 
-        // TODO: check headers for inline filename
-        const {
-          status: resStatus,
-          text: resText,
-          type: resType,
-        } = (await generateAPI.getCsvFromSavedSearch(
+        const res = (await generateAPI.getCsvFromSavedSearch(
           'search:d7a79750-3edd-11e9-99cc-4d80163ee9e7',
           {
             timerange: {
@@ -73,10 +59,66 @@ export default function ({ getService }: FtrProviderContext) {
             state: {},
           }
         )) as supertest.Response;
+        const { status: resStatus, text: resText, type: resType } = res;
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_TIMEBASED);
+        expect(resText).to.eql(fixtures.CSV_RESULT_TIMEBASED_UTC);
+
+        await esArchiver.unload('reporting/logs');
+        await esArchiver.unload('logstash_functional');
+      });
+
+      it('With filters and timebased data, default to UTC', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/logs');
+        await esArchiver.load('logstash_functional');
+
+        const res = (await generateAPI.getCsvFromSavedSearch(
+          'search:d7a79750-3edd-11e9-99cc-4d80163ee9e7',
+          {
+            // @ts-expect-error: timerange.timezone is missing from post params
+            timerange: {
+              min: '2015-09-19T10:00:00.000Z',
+              max: '2015-09-21T10:00:00.000Z',
+            },
+            state: {},
+          }
+        )) as supertest.Response;
+        const { status: resStatus, text: resText, type: resType } = res;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(fixtures.CSV_RESULT_TIMEBASED_UTC);
+
+        await esArchiver.unload('reporting/logs');
+        await esArchiver.unload('logstash_functional');
+      });
+
+      it('With filters and timebased data, custom timezone', async () => {
+        // load test data that contains a saved search and documents
+        await esArchiver.load('reporting/logs');
+        await esArchiver.load('logstash_functional');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:d7a79750-3edd-11e9-99cc-4d80163ee9e7',
+          {
+            timerange: {
+              timezone: 'America/Phoenix',
+              min: '2015-09-19T10:00:00.000Z',
+              max: '2015-09-21T10:00:00.000Z',
+            },
+            state: {},
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(fixtures.CSV_RESULT_TIMEBASED_CUSTOM);
 
         await esArchiver.unload('reporting/logs');
         await esArchiver.unload('logstash_functional');
@@ -99,21 +141,21 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_TIMELESS);
+        expect(resText).to.eql(fixtures.CSV_RESULT_TIMELESS);
 
         await esArchiver.unload('reporting/sales');
       });
 
       it('With scripted fields and field formatters', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted_small');
+        await esArchiver.load('reporting/scripted_small2');
 
         const {
           status: resStatus,
           text: resText,
           type: resType,
         } = (await generateAPI.getCsvFromSavedSearch(
-          'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          'search:a6d51430-ace2-11ea-815f-39e12f89a8c2',
           {
             timerange: {
               timezone: 'UTC',
@@ -126,12 +168,12 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_SCRIPTED);
+        expect(resText).to.eql(fixtures.CSV_RESULT_SCRIPTED);
 
-        await esArchiver.unload('reporting/scripted_small');
+        await esArchiver.unload('reporting/scripted_small2');
       });
 
-      it('Formatted date_nanos data', async () => {
+      it('Formatted date_nanos data, UTC timezone', async () => {
         await esArchiver.load('reporting/nanos');
 
         const {
@@ -147,7 +189,29 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_NANOS);
+        expect(resText).to.eql(fixtures.CSV_RESULT_NANOS);
+
+        await esArchiver.unload('reporting/nanos');
+      });
+
+      it('Formatted date_nanos data, custom time zone', async () => {
+        await esArchiver.load('reporting/nanos');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCsvFromSavedSearch(
+          'search:e4035040-a295-11e9-a900-ef10e0ac769e',
+          {
+            state: {},
+            timerange: { timezone: 'America/New_York' },
+          }
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expect(resText).to.eql(fixtures.CSV_RESULT_NANOS_CUSTOM);
 
         await esArchiver.unload('reporting/nanos');
       });
@@ -214,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_HUGE);
+        expect(resText).to.eql(fixtures.CSV_RESULT_HUGE);
 
         await esArchiver.unload('reporting/hugedata');
       });
@@ -223,13 +287,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('Merge user state into the query', () => {
       it('for query', async () => {
         // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/scripted_small');
+        await esArchiver.load('reporting/scripted_small2');
 
         const params = {
-          searchId: 'search:f34bf440-5014-11e9-bce7-4dabcb8bef24',
+          searchId: 'search:a6d51430-ace2-11ea-815f-39e12f89a8c2',
           postPayload: {
             timerange: { timezone: 'UTC', min: '1979-01-01T10:00:00Z', max: '1981-01-01T10:00:00Z' }, // prettier-ignore
-            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fe*' } }] } } ] } } ] } } } // prettier-ignore
+            state: { query: { bool: { filter: [ { bool: { filter: [ { bool: { minimum_should_match: 1, should: [{ query_string: { fields: ['name'], query: 'Fel*' } }] } } ] } } ] } } } // prettier-ignore
           },
           isImmediate: true,
         };
@@ -245,9 +309,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_SCRIPTED_REQUERY);
+        expect(resText).to.eql(fixtures.CSV_RESULT_SCRIPTED_REQUERY);
 
-        await esArchiver.unload('reporting/scripted_small');
+        await esArchiver.unload('reporting/scripted_small2');
       });
 
       it('for sort', async () => {
@@ -272,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_SCRIPTED_RESORTED);
+        expect(resText).to.eql(fixtures.CSV_RESULT_SCRIPTED_RESORTED);
 
         await esArchiver.unload('reporting/hugedata');
       });
@@ -333,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expect(resText).to.eql(CSV_RESULT_DOCVALUE);
+        expect(resText).to.eql(fixtures.CSV_RESULT_DOCVALUE);
 
         await esArchiver.unload('reporting/ecommerce');
         await esArchiver.unload('reporting/ecommerce_kibana');

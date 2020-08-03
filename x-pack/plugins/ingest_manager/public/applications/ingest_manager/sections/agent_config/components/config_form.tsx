@@ -13,10 +13,10 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiComboBox,
   EuiIconTip,
+  EuiCheckbox,
   EuiCheckboxGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -221,16 +221,48 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
           options={[
             {
               id: 'logs',
-              label: i18n.translate(
-                'xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel',
-                { defaultMessage: 'Collect agent logs' }
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
+                    defaultMessage="Collect agent logs"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringLogsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect logs from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
             {
               id: 'metrics',
-              label: i18n.translate(
-                'xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel',
-                { defaultMessage: 'Collect agent metrics' }
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
+                    defaultMessage="Collect agent metrics"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringMetricsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect metrics from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
           ]}
@@ -315,16 +347,14 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
       {!isEditing ? (
         <EuiFormRow
           label={
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel"
-                defaultMessage="Optional"
-              />
-            </EuiText>
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel"
+              defaultMessage="System monitoring"
+            />
           }
         >
-          <EuiSwitch
-            showLabel={true}
+          <EuiCheckbox
+            id="agentConfigFormSystemMonitoringCheckbox"
             label={
               <>
                 <FormattedMessage
@@ -341,6 +371,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                   )}
                   position="right"
                   type="iInCircle"
+                  color="subdued"
                 />
               </>
             }

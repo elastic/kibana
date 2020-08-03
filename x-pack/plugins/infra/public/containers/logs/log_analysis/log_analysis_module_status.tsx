@@ -43,8 +43,6 @@ type StatusReducerAction =
       payload: FetchJobStatusResponsePayload;
     }
   | { type: 'failedFetchingJobStatuses' }
-  | { type: 'requestedJobConfigurationUpdate' }
-  | { type: 'requestedJobDefinitionUpdate' }
   | { type: 'viewedResults' };
 
 const createInitialState = <JobType extends string>({
@@ -173,18 +171,6 @@ const createStatusReducer = <JobType extends string>(jobTypes: JobType[]) => (
         ),
       };
     }
-    case 'requestedJobConfigurationUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'reconfiguration' },
-      };
-    }
-    case 'requestedJobDefinitionUpdate': {
-      return {
-        ...state,
-        setupStatus: { type: 'required', reason: 'update' },
-      };
-    }
     case 'viewedResults': {
       return {
         ...state,
@@ -251,7 +237,7 @@ const getSetupStatus = <JobType extends string>(everyJobStatus: Record<JobType, 
 ): SetupStatus =>
   Object.entries<JobStatus>(everyJobStatus).reduce<SetupStatus>((setupStatus, [, jobStatus]) => {
     if (jobStatus === 'missing') {
-      return { type: 'required', reason: 'missing' };
+      return { type: 'required' };
     } else if (setupStatus.type === 'required' || setupStatus.type === 'succeeded') {
       return setupStatus;
     } else if (setupStatus.type === 'skipped' || isJobStatusWithResults(jobStatus)) {

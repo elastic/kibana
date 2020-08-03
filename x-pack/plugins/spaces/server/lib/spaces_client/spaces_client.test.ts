@@ -228,14 +228,19 @@ describe('#getAll', () => {
           mockAuthorization.actions.login,
       },
       {
-        purpose: 'any',
+        purpose: 'any' as GetSpacePurpose,
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.login,
       },
       {
-        purpose: 'copySavedObjectsIntoSpace',
+        purpose: 'copySavedObjectsIntoSpace' as GetSpacePurpose,
         expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
+      },
+      {
+        purpose: 'findSavedObjects' as GetSpacePurpose,
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
+          mockAuthorization.actions.savedObject.get('config', 'find'),
       },
     ].forEach((scenario) => {
       describe(`with purpose='${scenario.purpose}'`, () => {
@@ -276,9 +281,7 @@ describe('#getAll', () => {
             mockInternalRepository,
             request
           );
-          await expect(
-            client.getAll(scenario.purpose as GetSpacePurpose)
-          ).rejects.toThrowErrorMatchingSnapshot();
+          await expect(client.getAll(scenario.purpose)).rejects.toThrowErrorMatchingSnapshot();
 
           expect(mockInternalRepository.find).toHaveBeenCalledWith({
             type: 'space',
@@ -290,7 +293,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            privilege
+            [privilege]
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(
             username,
@@ -336,7 +339,7 @@ describe('#getAll', () => {
             mockInternalRepository,
             request
           );
-          const actualSpaces = await client.getAll(scenario.purpose as GetSpacePurpose);
+          const actualSpaces = await client.getAll(scenario.purpose);
 
           expect(actualSpaces).toEqual([expectedSpaces[0]]);
           expect(mockInternalRepository.find).toHaveBeenCalledWith({
@@ -349,7 +352,7 @@ describe('#getAll', () => {
           expect(mockAuthorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
           expect(mockCheckPrivilegesAtSpaces).toHaveBeenCalledWith(
             savedObjects.map((savedObject) => savedObject.id),
-            privilege
+            [privilege]
           );
           expect(mockAuditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(0);
           expect(mockAuditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(

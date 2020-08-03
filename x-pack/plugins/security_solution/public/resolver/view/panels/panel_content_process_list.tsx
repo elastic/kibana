@@ -50,12 +50,8 @@ const StyledLimitWarning = styled(LimitWarning)`
  */
 export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   pushToQueryParams,
-  isProcessTerminated,
-  isProcessOrigin,
 }: {
   pushToQueryParams: (queryStringKeyValuePair: CrumbInfo) => unknown;
-  isProcessTerminated: boolean;
-  isProcessOrigin: boolean;
 }) {
   interface ProcessTableView {
     name: string;
@@ -65,6 +61,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
 
   const dispatch = useResolverDispatch();
   const { timestamp } = useContext(SideEffectContext);
+  const isProcessTerminated = useSelector(selectors.isProcessTerminated);
   const handleBringIntoViewClick = useCallback(
     (processTableViewItem) => {
       dispatch({
@@ -92,6 +89,8 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
         sortable: true,
         truncateText: true,
         render(name: string, item: ProcessTableView) {
+          const entityId = event.entityId(item.event);
+          const isTerminated = isProcessTerminated(entityId);
           return name === '' ? (
             <EuiBadge color="warning">
               {i18n.translate(
@@ -108,10 +107,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
                 pushToQueryParams({ crumbId: event.entityId(item.event), crumbEvent: '' });
               }}
             >
-              <CubeForProcess
-                isProcessTerminated={isProcessTerminated}
-                isProcessOrigin={isProcessOrigin}
-              />
+              <CubeForProcess isProcessTerminated={isTerminated} />
               {name}
             </EuiButtonEmpty>
           );
@@ -143,10 +139,10 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
         },
       },
     ],
-    [pushToQueryParams, handleBringIntoViewClick, isProcessOrigin, isProcessTerminated]
+    [pushToQueryParams, handleBringIntoViewClick, isProcessTerminated]
   );
 
-  const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const { processNodePositions } = useSelector(selectors.layout);
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
@@ -191,7 +187,12 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
-      <EuiInMemoryTable<ProcessTableView> items={processTableView} columns={columns} sorting />
+      <EuiInMemoryTable<ProcessTableView>
+        data-test-subj="resolver:panel:process-list"
+        items={processTableView}
+        columns={columns}
+        sorting
+      />
     </>
   );
 });

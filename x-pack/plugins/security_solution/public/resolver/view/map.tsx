@@ -10,6 +10,7 @@
 
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as selectors from '../store/selectors';
@@ -19,6 +20,7 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
+import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityId } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
@@ -29,6 +31,7 @@ import { SideEffectContext } from './side_effect_context';
 export const ResolverMap = React.memo(function ({
   className,
   databaseDocumentID,
+  resolverComponentInstanceID,
 }: {
   /**
    * Used by `styled-components`.
@@ -39,25 +42,37 @@ export const ResolverMap = React.memo(function ({
    * Used as the origin of the Resolver graph.
    */
   databaseDocumentID?: string;
+  /**
+   * A string literal describing where in the app resolver is located,
+   * used to prevent collisions in things like query params
+   */
+  resolverComponentInstanceID: string;
 }) {
   /**
    * This is responsible for dispatching actions that include any external data.
    * `databaseDocumentID`
    */
-  useStateSyncingActions({ databaseDocumentID });
+  useStateSyncingActions({ databaseDocumentID, resolverComponentInstanceID });
 
   const { timestamp } = useContext(SideEffectContext);
+
+  // use this for the entire render in order to keep things in sync
+  const timeAtRender = timestamp();
+
   const { processNodePositions, connectingEdgeLineSegments } = useSelector(
-    selectors.visibleProcessNodePositionsAndEdgeLineSegments
-  )(timestamp());
-  const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-  const relatedEventsStats = useSelector(selectors.relatedEventsStats);
+    selectors.visibleNodesAndEdgeLines
+  )(timeAtRender);
   const terminatedProcesses = useSelector(selectors.terminatedProcesses);
   const { projectionMatrix, ref, onMouseDown } = useCamera();
   const isLoading = useSelector(selectors.isLoading);
   const hasError = useSelector(selectors.hasError);
-  const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+  const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
+  const { cleanUpQueryParams } = useResolverQueryParams();
+
+  useEffectOnce(() => {
+    return () => cleanUpQueryParams();
+  });
 
   return (
     <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -94,24 +109,15 @@ export const ResolverMap = React.memo(function ({
             />
           ))}
           {[...processNodePositions].map(([processEvent, position]) => {
-            const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
             const processEntityId = entityId(processEvent);
-            if (!adjacentNodeMap) {
-              // This should never happen
-              throw new Error('Issue calculating adjacency node map.');
-            }
             return (
               <ProcessEventDot
                 key={processEntityId}
                 position={position}
                 projectionMatrix={projectionMatrix}
                 event={processEvent}
-                adjacentNodeMap={adjacentNodeMap}
-                relatedEventsStatsForProcess={
-                  relatedEventsStats ? relatedEventsStats.get(entityId(processEvent)) : undefined
-                }
                 isProcessTerminated={terminatedProcesses.has(processEntityId)}
-                isProcessOrigin={false}
+                timeAtRender={timeAtRender}
               />
             );
           })}

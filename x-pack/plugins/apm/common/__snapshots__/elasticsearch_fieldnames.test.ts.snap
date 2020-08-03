@@ -38,6 +38,8 @@ exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -67,6 +69,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Error OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -182,6 +186,8 @@ exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
+exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -211,6 +217,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Span OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -326,6 +334,8 @@ exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
+exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
+
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
@@ -355,6 +365,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 

@@ -6,15 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { CoreSetup } from 'src/core/public';
+
 import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/field_histograms';
 
 import { ml } from '../../../services/ml_api_service';
-import { FieldRequestConfig } from '../common';
+import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
@@ -23,10 +25,15 @@ export class DataLoader {
   private _indexPattern: IndexPattern;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
+  private _toastNotifications: CoreSetup['notifications']['toasts'];
 
-  constructor(indexPattern: IndexPattern, kibanaConfig: any) {
+  constructor(
+    indexPattern: IndexPattern,
+    toastNotifications: CoreSetup['notifications']['toasts']
+  ) {
     this._indexPattern = indexPattern;
     this._indexPatternTitle = indexPattern.title;
+    this._toastNotifications = toastNotifications;
   }
 
   async loadOverallData(
@@ -90,10 +97,24 @@ export class DataLoader {
     return stats;
   }
 
+  async loadFieldHistograms(
+    fields: FieldHistogramRequestConfig[],
+    query: string | SavedSearchQuery,
+    samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
+  ): Promise<any[]> {
+    const stats = await ml.getVisualizerFieldHistograms({
+      indexPatternTitle: this._indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+    });
+
+    return stats;
+  }
+
   displayError(err: any) {
-    const toastNotifications = getToastNotifications();
     if (err.statusCode === 500) {
-      toastNotifications.addDanger(
+      this._toastNotifications.addDanger(
         i18n.translate('xpack.ml.datavisualizer.dataLoader.internalServerErrorMessage', {
           defaultMessage:
             'Error loading data in index {index}. {message}. ' +
@@ -105,7 +126,7 @@ export class DataLoader {
         })
       );
     } else {
-      toastNotifications.addDanger(
+      this._toastNotifications.addDanger(
         i18n.translate('xpack.ml.datavisualizer.page.errorLoadingDataMessage', {
           defaultMessage: 'Error loading data in index {index}. {message}',
           values: {

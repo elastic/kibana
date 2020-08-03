@@ -17,6 +17,7 @@ export const dark: CanvasTemplate = {
     height: 720,
     page: 0,
     css: '',
+    variables: [],
     pages: [
       {
         id: 'page-fda26a1f-c096-44e4-a149-cb99e1038a34',

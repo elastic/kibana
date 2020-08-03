@@ -30,7 +30,6 @@
     "esUiShared",
     "kibanaUtils",
     "kibanaReact",
-    "management",
     "dashboard",
     "savedObjects"
   ]

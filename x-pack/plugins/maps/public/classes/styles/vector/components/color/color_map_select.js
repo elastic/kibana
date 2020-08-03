@@ -161,7 +161,7 @@ export class ColorMapSelect extends Component {
 
     return (
       <Fragment>
-        <EuiFlexGroup gutterSize={'none'}>
+        <EuiFlexGroup gutterSize={'xs'}>
           {toggle}
           <EuiFlexItem>
             <EuiColorPalettePicker

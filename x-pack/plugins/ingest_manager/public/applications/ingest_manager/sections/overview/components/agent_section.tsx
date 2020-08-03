@@ -5,13 +5,13 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiI18nNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
-  EuiButtonEmpty,
+  EuiI18nNumber,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
@@ -24,23 +24,19 @@ export const OverviewAgentSection = () => {
 
   return (
     <EuiFlexItem component="section">
-      <OverviewPanel>
-        <header>
-          <EuiTitle size="xs">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestManager.overviewPageFleetPanelTitle"
-                defaultMessage="Fleet"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={getHref('fleet_agent_list')}>
-            <FormattedMessage
-              id="xpack.ingestManager.overviewPageFleetPanelAction"
-              defaultMessage="View agents"
-            />
-          </EuiButtonEmpty>
-        </header>
+      <OverviewPanel
+        title={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTitle', {
+          defaultMessage: 'Fleet',
+        })}
+        tooltip={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTooltip', {
+          defaultMessage:
+            'Use Fleet to enroll agents and manage their configurations from a central location.',
+        })}
+        linkTo={getHref('fleet_agent_list')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPageFleetPanelAction', {
+          defaultMessage: 'View agents',
+        })}
+      >
         <OverviewStats>
           {agentStatusRequest.isLoading ? (
             <Loading />

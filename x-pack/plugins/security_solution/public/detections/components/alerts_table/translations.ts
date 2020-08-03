@@ -20,21 +20,21 @@ export const ALERTS_DOCUMENT_TYPE = i18n.translate(
 export const OPEN_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.openAlertsTitle',
   {
-    defaultMessage: 'Open alerts',
+    defaultMessage: 'Open',
   }
 );
 
 export const CLOSED_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.closedAlertsTitle',
   {
-    defaultMessage: 'Closed alerts',
+    defaultMessage: 'Closed',
   }
 );
 
 export const IN_PROGRESS_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.inProgressAlertsTitle',
   {
-    defaultMessage: 'In progress alerts',
+    defaultMessage: 'In progress',
   }
 );
 
