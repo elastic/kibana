@@ -8,12 +8,13 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { AgentService } from '../../../../../../ingest_manager/server';
 import { AgentStatusKueryHelper } from '../../../../../../ingest_manager/common/services';
 import { Agent } from '../../../../../../ingest_manager/common/types/models';
+import { HostStatus } from '../../../../../common/endpoint/types';
 
 const STATUS_QUERY_MAP = new Map([
-  ['online', AgentStatusKueryHelper.buildKueryForOnlineAgents()],
-  ['offline', AgentStatusKueryHelper.buildKueryForOfflineAgents()],
-  ['error', AgentStatusKueryHelper.buildKueryForErrorAgents()],
-  ['unenrolling', AgentStatusKueryHelper.buildKueryForUnenrollingAgents()],
+  [HostStatus.ONLINE.toString(), AgentStatusKueryHelper.buildKueryForOnlineAgents()],
+  [HostStatus.OFFLINE.toString(), AgentStatusKueryHelper.buildKueryForOfflineAgents()],
+  [HostStatus.ERROR.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents()],
+  [HostStatus.UNENROLLING.toString(), AgentStatusKueryHelper.buildKueryForUnenrollingAgents()],
 ]);
 
 export async function findAgentIDsByStatus(
