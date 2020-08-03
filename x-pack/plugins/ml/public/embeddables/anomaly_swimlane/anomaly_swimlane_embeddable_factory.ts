@@ -12,14 +12,14 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableServices,
-} from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
 import { MlPluginStart, MlStartDependencies } from '../../plugin';
 import { MlDependencies } from '../../application/app';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableServices,
+} from '..';
 
 export class AnomalySwimlaneEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalySwimlaneEmbeddableInput> {

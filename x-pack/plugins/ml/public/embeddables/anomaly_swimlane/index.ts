@@ -5,4 +5,3 @@
  */
 
 export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-export { SwimLaneDrilldownContext, EditSwimlanePanelContext } from './anomaly_swimlane_embeddable';

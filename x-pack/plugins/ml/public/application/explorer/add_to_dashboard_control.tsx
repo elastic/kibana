@@ -29,7 +29,7 @@ import { getDefaultPanelTitle } from '../../embeddables/anomaly_swimlane/anomaly
 import { useDashboardService } from '../services/dashboard_service';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../../embeddables';
 
 export interface DashboardItem {
   id: string;

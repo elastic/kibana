@@ -7,9 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import { SwimLaneDrilldownContext } from '../embeddables';
 import { MlCoreSetup } from '../plugin';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 

@@ -23,5 +23,3 @@ export const plugin: PluginInitializer<
 
 export { MlPluginSetup, MlPluginStart };
 export * from './shared';
-
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';

@@ -6,11 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import { SwimLaneDrilldownContext } from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 

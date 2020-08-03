@@ -30,7 +30,6 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { registerEmbeddables } from './embeddables';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import {
   registerMlUiActions,
@@ -43,7 +42,11 @@ import {
 import { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import { registerUrlGenerator, MlUrlGeneratorState, ML_APP_URL_GENERATOR } from './url_generator';
 import { isMlEnabled, isFullLicense } from '../common/license';
-import { SwimLaneDrilldownContext, EditSwimlanePanelContext } from './embeddables';
+import {
+  EditSwimlanePanelContext,
+  SwimLaneDrilldownContext,
+  registerEmbeddables,
+} from './embeddables';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
