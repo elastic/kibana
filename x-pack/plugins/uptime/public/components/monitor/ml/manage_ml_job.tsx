@@ -54,6 +54,10 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
   const deleteAnomalyAlert = () =>
     dispatch(deleteAlertAction.get({ alertId: anomalyAlert?.id as string }));
 
+  const showLoading = isMLJobCreating || isMLJobLoading;
+
+  const btnText = hasMLJob ? labels.ANOMALY_DETECTION : labels.ENABLE_ANOMALY_DETECTION;
+
   const button = (
     <EuiButton
       data-test-subj={hasMLJob ? 'uptimeManageMLJobBtn' : 'uptimeEnableAnomalyBtn'}
@@ -63,11 +67,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       size="s"
       aria-label={labels.ENABLE_MANAGE_JOB}
     >
-      {isMLJobCreating || isMLJobLoading
-        ? ''
-        : hasMLJob
-        ? labels.ANOMALY_DETECTION
-        : labels.ENABLE_ANOMALY_DETECTION}
+      {showLoading ? '' : btnText}
     </EuiButton>
   );
 

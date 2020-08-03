@@ -12,7 +12,7 @@ import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { EuiReactRouterButtonEmpty } from '../components/common/react_router_helpers/eui_link';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers/eui_link';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -65,13 +65,13 @@ export const PageHeader = React.memo(
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiReactRouterButtonEmpty
+          <ReactRouterEuiButtonEmpty
             data-test-subj="settings-page-link"
             iconType="gear"
             to={SETTINGS_ROUTE}
           >
             {SETTINGS_LINK_TEXT}
-          </EuiReactRouterButtonEmpty>
+          </ReactRouterEuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

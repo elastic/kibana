@@ -33,7 +33,7 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
-import { EuiReactRouterButtonEmpty } from '../components/common/react_router_helpers/eui_link';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers/eui_link';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -145,7 +145,7 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
-      <EuiReactRouterButtonEmpty
+      <ReactRouterEuiButtonEmpty
         color="primary"
         data-test-subj="uptimeSettingsToOverviewLink"
         iconType="arrowLeft"
@@ -153,7 +153,7 @@ export const SettingsPage: React.FC = () => {
         size="s"
       >
         {Translations.settings.returnToOverviewLinkLabel}
-      </EuiReactRouterButtonEmpty>
+      </ReactRouterEuiButtonEmpty>
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>

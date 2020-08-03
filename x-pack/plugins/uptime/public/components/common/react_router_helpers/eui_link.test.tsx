@@ -10,7 +10,7 @@ import { EuiLink, EuiButton } from '@elastic/eui';
 
 import '../../../lib/__mocks__/react_router_history.mock';
 
-import { EuiReactRouterLink, EuiReactRouterButton } from './eui_link';
+import { ReactRouterEuiLink, ReactRouterEuiButton } from './eui_link';
 import { mockHistory } from '../../../lib/__mocks__';
 
 describe('EUI & React Router Component Helpers', () => {
@@ -19,19 +19,19 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<EuiReactRouterLink to="/" />);
+    const wrapper = shallow(<ReactRouterEuiLink to="/" />);
 
     expect(wrapper.find(EuiLink)).toHaveLength(1);
   });
 
   it('renders an EuiButton', () => {
-    const wrapper = shallow(<EuiReactRouterButton to="/" />);
+    const wrapper = shallow(<ReactRouterEuiButton to="/" />);
 
     expect(wrapper.find(EuiButton)).toHaveLength(1);
   });
 
   it('passes down all ...rest props', () => {
-    const wrapper = shallow(<EuiReactRouterLink to="/" data-test-subj="foo" external={true} />);
+    const wrapper = shallow(<ReactRouterEuiLink to="/" data-test-subj="foo" external={true} />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('external')).toEqual(true);
@@ -39,7 +39,7 @@ describe('EUI & React Router Component Helpers', () => {
   });
 
   it('renders with the correct href and onClick props', () => {
-    const wrapper = mount(<EuiReactRouterLink to="/foo/bar" />);
+    const wrapper = mount(<ReactRouterEuiLink to="/foo/bar" />);
     const link = wrapper.find(EuiLink);
 
     expect(link.prop('onClick')).toBeInstanceOf(Function);
@@ -49,7 +49,7 @@ describe('EUI & React Router Component Helpers', () => {
 
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history', () => {
-      const wrapper = mount(<EuiReactRouterLink to="/bar/baz" />);
+      const wrapper = mount(<ReactRouterEuiLink to="/bar/baz" />);
 
       const simulatedEvent = {
         button: 0,
@@ -63,7 +63,7 @@ describe('EUI & React Router Component Helpers', () => {
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
-      const wrapper = mount(<EuiReactRouterLink to="/bar/baz" />);
+      const wrapper = mount(<ReactRouterEuiLink to="/bar/baz" />);
 
       const simulatedEvent = {
         shiftKey: true,

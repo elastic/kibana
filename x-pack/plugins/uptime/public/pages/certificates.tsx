@@ -29,7 +29,7 @@ import { certificatesSelector, getCertificatesAction } from '../state/certificat
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { CLIENT_ALERT_TYPES } from '../../common/constants/alerts';
-import { EuiReactRouterButtonEmpty } from '../components/common/react_router_helpers/eui_link';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers/eui_link';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -80,7 +80,7 @@ export const CertificatesPage: React.FC = () => {
     <>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false} style={{ marginRight: 'auto', alignSelf: 'center' }}>
-          <EuiReactRouterButtonEmpty
+          <ReactRouterEuiButtonEmpty
             color="primary"
             data-test-subj="uptimeCertificatesToOverviewLink"
             to={OVERVIEW_ROUTE}
@@ -89,7 +89,7 @@ export const CertificatesPage: React.FC = () => {
             aria-label={labels.RETURN_TO_OVERVIEW}
           >
             {labels.RETURN_TO_OVERVIEW}
-          </EuiReactRouterButtonEmpty>
+          </ReactRouterEuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton alertOptions={[CLIENT_ALERT_TYPES.TLS]} />

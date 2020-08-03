@@ -52,19 +52,19 @@ type TEuiReactRouterLinkProps = EuiLinkAnchorProps & IEuiReactRouterProps;
 type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
 type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProps;
 
-export const EuiReactRouterLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
+export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
   <EuiReactRouterHelper to={to}>
     <EuiLink {...rest} />
   </EuiReactRouterHelper>
 );
 
-export const EuiReactRouterButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
+export const ReactRouterEuiButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
   <EuiReactRouterHelper to={to}>
     <EuiButton {...rest} />
   </EuiReactRouterHelper>
 );
 
-export const EuiReactRouterButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps> = ({
+export const ReactRouterEuiButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps> = ({
   to,
   ...rest
 }) => (
