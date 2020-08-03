@@ -529,6 +529,7 @@ module.exports = {
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
