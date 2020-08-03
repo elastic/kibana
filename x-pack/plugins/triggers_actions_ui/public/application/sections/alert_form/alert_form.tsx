@@ -197,7 +197,7 @@ export const AlertForm = ({
           key={index}
           data-test-subj={`${item.id}-SelectOption`}
           layout="horizontal"
-          icon={<EuiIcon type={item.iconClass} size="l" />}
+          icon={null}
           title={item.name}
           description={
             <EuiText color="subdued" size="s">
@@ -500,14 +500,14 @@ export const AlertForm = ({
         <Fragment>
           <EuiHorizontalRule />
 
-          <EuiTitle size="xs">
-            <h5 id="alertTypeTitle">
+          <EuiText size="s">
+            <p id="alertTypeTitle">
               <FormattedMessage
                 defaultMessage="Select alert type"
                 id="xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle"
               />
-            </h5>
-          </EuiTitle>
+            </p>
+          </EuiText>
           <EuiSpacer size="m" />
           <EuiFlexGrid gutterSize="s" columns={1}>
             {alertTypeNodes}
