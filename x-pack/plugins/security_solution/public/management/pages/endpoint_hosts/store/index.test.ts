@@ -52,6 +52,7 @@ describe('EndpointList store concerns', () => {
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
         endpointsExist: true,
+        patterns: [],
       });
     });
 
