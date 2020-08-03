@@ -19,13 +19,13 @@ import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 import { SourceQuery } from '../../../../graphql/types';
 
-type stringOrNull = string | null;
+type StringOrNull = string | null;
 
 interface Props {
   loading: boolean;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
-  onLoadMore: (afterKey: stringOrNull | Record<string, stringOrNull>) => void;
+  onLoadMore: (afterKey: StringOrNull | Record<string, StringOrNull>) => void;
   onRefetch: () => void;
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;

@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
+      /* eslint-disable @typescript-eslint/naming-convention */
       const expectedResult = {
         __typename: 'KpiHostDetailsData',
         authSuccess: 0,
@@ -72,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       };
-
+      /* eslint-enable @typescript-eslint/naming-convention */
       it('Make sure that we get KpiHostDetails data', () => {
         return client
           .query<GetKpiHostDetailsQuery.Query>({
@@ -103,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      /* eslint-disable @typescript-eslint/naming-convention */
       const expectedResult = {
         __typename: 'KpiHostDetailsData',
         authSuccess: 0,
@@ -156,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
       };
+      /* eslint-enable @typescript-eslint/naming-convention */
       it('Make sure that we get KpiHostDetails data', () => {
         return client
           .query<GetKpiHostDetailsQuery.Query>({

@@ -43,9 +43,9 @@ export class KibanaFramework {
     this.plugins = plugins;
   }
 
-  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
-    config: InfraRouteConfig<params, query, body, method>,
-    handler: RequestHandler<params, query, body>
+  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    config: InfraRouteConfig<Params, Query, Body, Method>,
+    handler: RequestHandler<Params, Query, Body>
   ) {
     const defaultOptions = {
       tags: ['access:infra'],

@@ -111,6 +111,7 @@ export const createStartServices = () => {
       getFeatures: jest.fn(),
       features$: jest.fn(),
     },
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     __legacyCompat: { logoutUrl: 'logoutUrl', tenant: 'tenant' },
   };
 

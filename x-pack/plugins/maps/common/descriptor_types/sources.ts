@@ -132,6 +132,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
   };
 
 export type GeojsonFileSourceDescriptor = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   __featureCollection: FeatureCollection;
   name: string;
   type: string;
@@ -161,11 +162,13 @@ export type SourceDescriptor =
   | GeojsonFileSourceDescriptor;
 
 export type LayerDescriptor = {
+  /* eslint-disable @typescript-eslint/naming-convention */
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __isPreviewLayer?: boolean;
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
+  /* eslint-enable @typescript-eslint/naming-convention */
   alpha?: number;
   id: string;
   joins?: JoinDescriptor[];

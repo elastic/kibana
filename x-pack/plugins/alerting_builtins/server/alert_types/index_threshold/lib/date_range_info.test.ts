@@ -215,6 +215,7 @@ function sloppyMilliDiff(ms1: number | string, ms2: number | string) {
 function asReadableDateRangeInfo(info: DateRangeInfo) {
   return {
     dateStart: info.dateStart,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     dateStop_: info.dateEnd,
     ranges: info.dateRanges.map((dateRange) => {
       return {

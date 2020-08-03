@@ -38,6 +38,7 @@ describe('Security Plugin', () => {
           }
         )
       ).toEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
         authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {

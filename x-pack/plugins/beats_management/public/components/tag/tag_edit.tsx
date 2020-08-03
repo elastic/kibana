@@ -67,6 +67,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { tag, attachedBeats, configuration_blocks } = this.props;
 
     return (
@@ -152,7 +153,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               <ConfigList
                 onTableChange={this.props.onConfigListChange}
                 configs={
-                  configuration_blocks // eslint-disable-line @typescript-eslint/camelcase
+                  configuration_blocks // eslint-disable-line @typescript-eslint/naming-convention
                 }
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {

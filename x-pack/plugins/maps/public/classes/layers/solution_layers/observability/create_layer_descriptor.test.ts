@@ -32,6 +32,7 @@ describe('createLayerDescriptor', () => {
     });
 
     expect(layerDescriptor).toEqual({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
@@ -163,6 +164,7 @@ describe('createLayerDescriptor', () => {
       display: DISPLAY.HEATMAP,
     });
     expect(layerDescriptor).toEqual({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
@@ -204,6 +206,7 @@ describe('createLayerDescriptor', () => {
       display: DISPLAY.CLUSTERS,
     });
     expect(layerDescriptor).toEqual({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',

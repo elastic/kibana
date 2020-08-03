@@ -38,6 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
         filebeatSystemModule: 0,
         winlogbeatSecurity: 0,
         winlogbeatMWSysmonOperational: 0,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'OverviewHostData',
       };
 

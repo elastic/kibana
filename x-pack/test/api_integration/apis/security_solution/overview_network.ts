@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         packetbeatDNS: 0,
         packetbeatFlow: 0,
         packetbeatTLS: 0,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'OverviewNetworkData',
       };
 
@@ -72,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         packetbeatDNS: 0,
         packetbeatFlow: 0,
         packetbeatTLS: 0,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'OverviewNetworkData',
       };
 
@@ -114,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
         packetbeatDNS: 0,
         packetbeatFlow: 0,
         packetbeatTLS: 0,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'OverviewNetworkData',
       };
 

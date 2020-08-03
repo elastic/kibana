@@ -20,10 +20,12 @@ describe('helpers', () => {
   describe('stringifyEvent', () => {
     test('it omits __typename when it appears at arbitrary levels', () => {
       const toStringify: Ecs = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'level 0',
         _id: '4',
         timestamp: '2018-11-08T19:03:25.937Z',
         host: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           __typename: 'level 1',
           name: ['suricata'],
           ip: ['192.168.0.1'],
@@ -50,6 +52,7 @@ describe('helpers', () => {
             alert: {
               signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
               signature_id: [4],
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               __typename: 'level 2',
             },
           },

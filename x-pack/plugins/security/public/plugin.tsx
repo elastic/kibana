@@ -132,6 +132,7 @@ export class SecurityPlugin
       authc: this.authc,
       sessionTimeout: this.sessionTimeout,
       license,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       __legacyCompat: { logoutUrl, tenant },
     };
   }

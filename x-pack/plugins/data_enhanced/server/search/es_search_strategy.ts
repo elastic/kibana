@@ -83,6 +83,7 @@ async function asyncSearch(
   // Wait up to 1s for the response to return
   const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
     { method, path, body, query },

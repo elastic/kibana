@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 type DetailsData = Array<
   Pick<DetailItem, 'field' | 'values' | 'originalValue'> & {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     __typename: string;
   }
 >;
@@ -322,6 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
             []) as DetailsData;
           expect(
             sortBy(detailsData, 'name').map((item) => {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               const { __typename, ...rest } = item;
               return rest;
             })

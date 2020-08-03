@@ -328,13 +328,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         lists: ExceptionIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
-        (acc, { id, list_id, namespace_type, type }) => {
+        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
           const { allowedExceptionListTypes, lists } = acc;
           const shouldAddEndpoint =
             type === ExceptionListTypeEnum.ENDPOINT &&
             !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
           return {
-            lists: [...lists, { id, listId: list_id, namespaceType: namespace_type, type }],
+            lists: [...lists, { id, listId, namespaceType, type }],
             allowedExceptionListTypes: shouldAddEndpoint
               ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
               : allowedExceptionListTypes,

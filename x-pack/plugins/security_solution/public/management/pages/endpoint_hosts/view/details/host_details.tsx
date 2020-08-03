@@ -82,6 +82,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   }, [details]);
 
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(

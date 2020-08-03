@@ -74,6 +74,7 @@ export async function getErrorRate({
 
   const erroneousTransactionsRate =
     resp.aggregations?.total_transactions.buckets.map(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ key, doc_count: totalTransactions, erroneous_transactions }) => {
         const errornousTransactionsCount =
           // @ts-ignore

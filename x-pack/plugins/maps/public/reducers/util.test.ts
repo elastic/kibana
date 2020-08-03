@@ -13,6 +13,7 @@ describe('reducers/util', () => {
         foo: 'bar',
         nested: {
           bar: 'foo',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           __bar: 'foo__',
         },
       });
@@ -31,6 +32,7 @@ describe('reducers/util', () => {
         nested: {
           nullval: null,
           bar: 'foo',
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           __bar: 'foo__',
         },
       });

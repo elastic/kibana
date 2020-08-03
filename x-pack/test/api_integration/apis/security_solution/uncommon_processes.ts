@@ -133,6 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           inspect: false,
         },
       });
+      /* eslint-disable @typescript-eslint/naming-convention */
       const expected: GetUncommonProcessesQuery.Node = {
         _id: 'HCFxB2kBR346wHgnL4ik',
         instances: 1,
@@ -154,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         __typename: 'UncommonProcessItem',
       };
+      /* eslint-enable @typescript-eslint/naming-convention */
       expect(UncommonProcesses.edges[0].node).to.eql(expected);
     });
   });

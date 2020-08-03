@@ -46,7 +46,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getValueSuggestions(query: string): Promise<string[]>;
 }
 
-type fieldFormatter = (value: string | undefined) => string;
+type FieldFormatter = (value: string | undefined) => string;
 
 export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
@@ -54,14 +54,14 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
 
   protected readonly _field: IField | null;
   protected readonly _layer: IVectorLayer;
-  protected readonly _getFieldFormatter: (fieldName: string) => null | fieldFormatter;
+  protected readonly _getFieldFormatter: (fieldName: string) => null | FieldFormatter;
 
   constructor(
     options: T,
     styleName: VECTOR_STYLES,
     field: IField | null,
     vectorLayer: IVectorLayer,
-    getFieldFormatter: (fieldName: string) => null | fieldFormatter
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter
   ) {
     super(options, styleName);
     this._field = field;

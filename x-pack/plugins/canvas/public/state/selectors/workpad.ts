@@ -214,13 +214,13 @@ export function getGlobalFilters(state: State): string[] {
   }, []);
 }
 
-type onValueFunction = (
+type OnValueFunction = (
   argValue: ExpressionAstArgument,
   argNames?: string,
   args?: ExpressionAstFunction['arguments']
 ) => ExpressionAstArgument | ExpressionAstArgument[] | undefined;
 
-function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: onValueFunction) {
+function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: OnValueFunction) {
   const argNames = Object.keys(args);
 
   return argNames.reduce<ExpressionAstArgument[]>((values, argName) => {

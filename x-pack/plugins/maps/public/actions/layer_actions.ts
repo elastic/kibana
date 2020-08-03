@@ -139,6 +139,7 @@ export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {
     dispatch<any>(removePreviewLayers());
 
     layerDescriptors.forEach((layerDescriptor) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       dispatch<any>(addLayer({ ...layerDescriptor, __isPreviewLayer: true }));
     });
   };

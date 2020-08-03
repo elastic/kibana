@@ -19,9 +19,9 @@ import {
 
 import { ILicense } from '../../../licensing/server';
 
-type GrokDebuggerRouteConfig<params, query, body, method extends RouteMethod> = {
+type GrokDebuggerRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;
 
 export class KibanaFramework {
   public router: IRouter;
@@ -44,12 +44,12 @@ export class KibanaFramework {
     return this.license.isActive;
   }
 
-  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
-    config: GrokDebuggerRouteConfig<params, query, body, method>,
-    handler: RequestHandler<params, query, body>
+  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
+    handler: RequestHandler<Params, Query, Body>
   ) {
     // Automatically wrap all route registrations with license checking
-    const wrappedHandler: RequestHandler<params, query, body> = async (
+    const wrappedHandler: RequestHandler<Params, Query, Body> = async (
       requestContext,
       request,
       response

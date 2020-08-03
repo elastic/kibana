@@ -105,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that we get Host Overview data', () => {
+      /* eslint-disable @typescript-eslint/naming-convention */
       const expectedHost: Omit<GetHostOverviewQuery.HostOverview, 'inspect'> = {
         _id: 'zeek-sensor-san-francisco',
         endpoint: null,
@@ -139,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         __typename: 'HostItem',
       };
-
+      /* eslint-enable @typescript-eslint/naming-convention */
       return client
         .query<GetHostOverviewQuery.Query>({
           query: HostOverviewQuery,
@@ -176,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((resp) => {
           const firstLastSeenHost = resp.data.source.HostFirstLastSeen;
           expect(firstLastSeenHost).to.eql({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             __typename: 'FirstLastSeenHost',
             firstSeen: '2019-02-19T19:36:23.561Z',
             lastSeen: '2019-02-19T20:42:33.561Z',
