@@ -102,10 +102,12 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
 
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
-  installedObjects: AssetReference[]
+  installedRefs: AssetReference[]
 ) {
+  if (!installedRefs.length) return;
+
   const logger = appContextService.getLogger();
-  const deletePromises = installedObjects.map(({ id, type }) => {
+  const deletePromises = installedRefs.map(({ id, type }) => {
     const assetType = type as AssetType;
 
     if (savedObjectTypes.includes(assetType)) {
