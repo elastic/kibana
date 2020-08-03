@@ -20,6 +20,7 @@ export const useFullScreen = () => {
     (fullScreen: boolean) => {
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME);
+        setTimeout(() => window.scrollTo(0, 0), 0);
       } else {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME);
         setTimeout(() => window.scrollTo(0, 0), 0);
