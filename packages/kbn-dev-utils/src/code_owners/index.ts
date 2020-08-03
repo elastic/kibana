@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { run } from '@kbn/dev-utils';
+import { run } from '../run';
 import { parseSourceOfTruth } from './parse';
 import { sourceOfTruth as sot } from './owners_source_of_truth';
 import { flush } from './flush';
+import { ToolingLog } from '../tooling_log';
 
 const codeownersPath: string | undefined = process.env.CODEOWNERS_PATH;
 const description = `
@@ -30,7 +31,7 @@ Create .github/CODEOWNERS file from authoritative source
 `;
 
 export const defineCodeOwners = () => {
-  run(({ log }) => flush(codeownersPath)(log as any)(parseSourceOfTruth(log)(sot as [])), {
+  run(({ log }) => flush(codeownersPath)(log as ToolingLog)(parseSourceOfTruth(log)(sot as [])), {
     description,
   });
 };
