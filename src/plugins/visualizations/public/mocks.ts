@@ -33,6 +33,7 @@ const createSetupContract = (): VisualizationsSetup => ({
   createReactVisualization: jest.fn(),
   registerAlias: jest.fn(),
   hideTypes: jest.fn(),
+  typeIsHidden: jest.fn(),
 });
 
 const createStartContract = (): VisualizationsStart => ({
