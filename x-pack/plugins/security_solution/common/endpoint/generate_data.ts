@@ -110,6 +110,12 @@ const Mac: OSFields[] = [];
 
 const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
+const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
+  HostPolicyResponseActionStatus.success,
+  HostPolicyResponseActionStatus.failure,
+  HostPolicyResponseActionStatus.warning,
+];
+
 const APPLIED_POLICIES: Array<{
   name: string;
   id: string;
@@ -364,15 +370,12 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Creates new random policy id for the host to simulate new policy application
+   * Updates the current Host common record applied Policy to a different one from the list
+   * of random choices and gives it a random policy response status.
    */
-  public updatePolicyId() {
-    this.commonInfo.Endpoint.policy.applied.id = this.randomChoice(APPLIED_POLICIES).id;
-    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice([
-      HostPolicyResponseActionStatus.success,
-      HostPolicyResponseActionStatus.failure,
-      HostPolicyResponseActionStatus.warning,
-    ]);
+  public updateHostPolicyData() {
+    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
   }
 
   private createHostData(): HostInfo {
