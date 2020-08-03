@@ -60,6 +60,7 @@ export interface ReqOptions {
   path: string;
   query?: Record<string, any>;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  headers?: Record<string, string>;
   body?: any;
   retries?: number;
 }
@@ -117,6 +118,7 @@ export class KbnClientRequester {
           params: options.query,
           headers: {
             'kbn-xsrf': 'kbn-client',
+            ...options.headers,
           },
           httpsAgent: this.httpsAgent,
         });
