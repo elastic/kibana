@@ -75,7 +75,8 @@ export function isFieldFiltered(
   const matchName =
     !filterState.name ||
     field.name.indexOf(filterState.name) !== -1 ||
-    field.displayName?.toLowerCase().indexOf(filterState.name.toLowerCase()) !== -1;
+    (field.displayName &&
+      field.displayName.toLowerCase().indexOf(filterState.name.toLowerCase()) !== -1);
 
   return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
 }
