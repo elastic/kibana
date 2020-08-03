@@ -7,7 +7,7 @@ const semver = require('semver');
 const PKG = require('../../package.json');
 
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
-
+const allowedNamePrefixRegexp = '^(UNSAFE_|__html|__LEGACY|__filename|__dirname)';
 module.exports = {
   overrides: [
     {
@@ -87,16 +87,73 @@ module.exports = {
               'React.StatelessComponent': {
                 message: 'Use FunctionComponent instead.',
                 fixWith: 'React.FunctionComponent'
-              }
+              },
+              // used in the codebase in the wild
+              '{}': false,
+              'object': false,
+              'Function': false,
             }
           }],
           'camelcase': 'off',
-          '@typescript-eslint/camelcase': ['error', {
-            'properties': 'never',
-            'ignoreDestructuring': true,
-            'allow': ['^[A-Z0-9_]+$', '^UNSAFE_']
-          }],
-          '@typescript-eslint/class-name-casing': 'error',
+          '@typescript-eslint/naming-convention': [
+            'error',
+            {
+              selector: 'default',
+              format: ['camelCase'],
+              filter: {
+                regex: allowedNamePrefixRegexp,
+                match: false
+              }
+            },
+            {
+              selector: 'variable',
+              format: [
+                'camelCase',
+                'UPPER_CASE', // const SOMETHING = ...
+                'PascalCase', // React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allow',
+            },
+            {
+              selector: 'parameter',
+              format: [
+                'camelCase',
+                'PascalCase',
+              ],
+              leadingUnderscore: 'allow'
+            },
+            {
+              selector: 'memberLike',
+              format: [
+                'camelCase',
+                'PascalCase',
+                'snake_case', // keys in elasticsearch requests / responses
+                'UPPER_CASE'
+              ],
+              leadingUnderscore: 'allow',
+              filter: {
+                // Doesn't work unless duplicated in 'default'
+                regex: allowedNamePrefixRegexp,
+                match: false
+              }
+            },
+            {
+              selector: 'function',
+              format: [
+                'camelCase',
+                'PascalCase' // React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allow'
+            },
+            {
+              selector: 'typeLike',
+              format: ['PascalCase', 'UPPER_CASE'],
+            },
+            {
+              selector: 'enum',
+              format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
+            },
+          ],
           '@typescript-eslint/explicit-member-accessibility': ['error',
             {
               accessibility: 'off',
