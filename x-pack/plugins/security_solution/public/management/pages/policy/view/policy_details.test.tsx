@@ -11,7 +11,7 @@ import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getHostListPath } from '../../../common/routing';
-import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
+import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
 
 jest.mock('../../../../common/components/link_to');
 
@@ -80,6 +80,8 @@ describe('Policy Details', () => {
       policyPackageConfig = generator.generatePolicyPackageConfig();
       policyPackageConfig.id = '1';
 
+      const policyListApiHandlers = policyListApiPathHandlers();
+
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
@@ -103,9 +105,9 @@ describe('Policy Details', () => {
 
           // Get package data
           // Used in tests that route back to the list
-          if (apiPathMockResponseProviders[path]) {
+          if (policyListApiHandlers[path]) {
             asyncActions = asyncActions.then(async () => sleep());
-            return apiPathMockResponseProviders[path]();
+            return Promise.resolve(policyListApiHandlers[path]());
           }
         }
 
@@ -255,11 +257,11 @@ describe('Policy Details', () => {
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addSuccess.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'success',
-          iconType: 'check',
+          title: 'Success!',
+          text: expect.any(Function),
         });
       });
       it('should show an error notification toast if update fails', async () => {
@@ -270,11 +272,11 @@ describe('Policy Details', () => {
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addDanger.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'danger',
-          iconType: 'alert',
+          title: 'Failed!',
+          text: expect.any(String),
         });
       });
     });

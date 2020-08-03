@@ -913,6 +913,13 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
         defaultMessage: 'Close',
       }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.toolbar.errorMessage', {
+        defaultMessage: 'TOOLBAR ERROR: {message}',
+        values: {
+          message,
+        },
+      }),
   },
   ToolbarTray: {
     getCloseTrayAriaLabel: () =>
