@@ -68,3 +68,7 @@
   right: $euiSizeS;
   transform: translateY(-50%);
 }
+
+.kbnFieldButton__infoIcon + .kbnFieldButton__fieldAction {
+  right: $euiSizeS * 4;
+}

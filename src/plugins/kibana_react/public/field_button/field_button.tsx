@@ -22,7 +22,7 @@ import React, { ReactNode } from 'react';
 import './field_button.scss';
 import { OneOf } from '@elastic/eui';
 
-interface Props {
+export interface FieldButtonProps {
   isOpen?: boolean;
   fieldIcon?: ReactNode;
   fieldName?: ReactNode;
@@ -33,8 +33,6 @@ interface Props {
   className?: string;
   onClick?: () => void;
 }
-
-export type FieldButtonProps = OneOf<Props, 'fieldInfoIcon' | 'fieldAction'>;
 
 /**
  * Wraps Object.keys with proper typescript definition of the resulting array
@@ -78,8 +76,8 @@ export function FieldButton({
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
       </button>
-      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
       {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
     </div>
   );
 }
