@@ -13,11 +13,11 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (!agent.active) {
     return 'inactive';
   }
-  if (!agent.last_checkin) {
-    return 'enrolling';
-  }
   if (agent.unenrollment_started_at && !agent.unenrolled_at) {
     return 'unenrolling';
+  }
+  if (!agent.last_checkin) {
+    return 'enrolling';
   }
 
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();

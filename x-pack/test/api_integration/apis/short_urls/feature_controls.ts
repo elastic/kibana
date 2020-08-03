@@ -24,30 +24,37 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       {
         featureId: 'discover',
         canAccess: true,
+        canCreate: true,
       },
       {
         featureId: 'dashboard',
         canAccess: true,
+        canCreate: true,
       },
       {
         featureId: 'visualize',
         canAccess: true,
+        canCreate: true,
       },
       {
         featureId: 'infrastructure',
         canAccess: true,
+        canCreate: false,
       },
       {
         featureId: 'canvas',
         canAccess: true,
+        canCreate: false,
       },
       {
         featureId: 'maps',
         canAccess: true,
+        canCreate: false,
       },
       {
         featureId: 'unknown-feature',
         canAccess: false,
+        canCreate: false,
       },
     ];
 
@@ -64,10 +71,44 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             },
           ],
         });
+        await security.role.create(`${feature.featureId}-minimal-role`, {
+          kibana: [
+            {
+              base: [],
+              feature: {
+                [feature.featureId]: ['minimal_all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.role.create(`${feature.featureId}-minimal-shorten-role`, {
+          kibana: [
+            {
+              base: [],
+              feature: {
+                [feature.featureId]: ['minimal_read', 'url_create'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
 
         await security.user.create(`${feature.featureId}-user`, {
           password: kibanaUserPassword,
           roles: [`${feature.featureId}-role`],
+          full_name: 'a kibana user',
+        });
+
+        await security.user.create(`${feature.featureId}-minimal-user`, {
+          password: kibanaUserPassword,
+          roles: [`${feature.featureId}-minimal-role`],
+          full_name: 'a kibana user',
+        });
+
+        await security.user.create(`${feature.featureId}-minimal-shorten-user`, {
+          password: kibanaUserPassword,
+          roles: [`${feature.featureId}-minimal-shorten-role`],
           full_name: 'a kibana user',
         });
       }
@@ -89,8 +130,16 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     });
 
     after(async () => {
-      const users = features.map((feature) => security.user.delete(`${feature.featureId}-user`));
-      const roles = features.map((feature) => security.role.delete(`${feature.featureId}-role`));
+      const users = features.flatMap((feature) => [
+        security.user.delete(`${feature.featureId}-user`),
+        security.user.delete(`${feature.featureId}-minimal-user`),
+        security.user.delete(`${feature.featureId}-minimal-shorten-user`),
+      ]);
+      const roles = features.flatMap((feature) => [
+        security.role.delete(`${feature.featureId}-role`),
+        security.role.delete(`${feature.featureId}-minimal-role`),
+        security.role.delete(`${feature.featureId}-minimal-shorten-role`),
+      ]);
       await Promise.all([...users, ...roles]);
       await security.user.delete(kibanaUsername);
     });
@@ -109,6 +158,36 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             } else {
               expect(resp.status).to.eql(403);
               expect(resp.headers.location).to.eql(undefined);
+            }
+          });
+      });
+
+      it(`users with "minimal_all" access to ${feature.featureId} should not be able to create short-urls`, async () => {
+        await supertest
+          .post(`/api/shorten_url`)
+          .auth(`${feature.featureId}-minimal-user`, kibanaUserPassword)
+          .set('kbn-xsrf', 'foo')
+          .send({ url: '/app/dashboard' })
+          .then((resp: Record<string, any>) => {
+            expect(resp.status).to.eql(403);
+            expect(resp.body.message).to.eql('Unable to create url');
+          });
+      });
+
+      it(`users with "url_create" access to ${feature.featureId} ${
+        feature.canCreate ? 'should' : 'should not'
+      } be able to create short-urls`, async () => {
+        await supertest
+          .post(`/api/shorten_url`)
+          .auth(`${feature.featureId}-minimal-shorten-user`, kibanaUserPassword)
+          .set('kbn-xsrf', 'foo')
+          .send({ url: '/app/dashboard' })
+          .then((resp: Record<string, any>) => {
+            if (feature.canCreate) {
+              expect(resp.status).to.eql(200);
+            } else {
+              expect(resp.status).to.eql(403);
+              expect(resp.body.message).to.eql('Unable to create url');
             }
           });
       });

@@ -104,6 +104,8 @@ export interface ResolverChildNode extends ResolverLifecycleNode {
    *
    * string: Indicates this is a leaf node and it can be used to continue querying for additional descendants
    * using this node's entity_id
+   *
+   * For more information see the resolver docs on pagination [here](../../server/endpoint/routes/resolver/docs/README.md#L129)
    */
   nextChild?: string | null;
 }
@@ -419,6 +421,11 @@ export enum HostStatus {
    * Host is offline as indicated by its checkin status during the last checkin window
    */
   OFFLINE = 'offline',
+
+  /**
+   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   */
+  UNENROLLING = 'unenrolling',
 }
 
 export type HostInfo = Immutable<{

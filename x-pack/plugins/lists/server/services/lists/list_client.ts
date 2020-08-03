@@ -110,11 +110,13 @@ export class ListClient {
   public createList = async ({
     id,
     deserializer,
+    immutable,
     serializer,
     name,
     description,
     type,
     meta,
+    version,
   }: CreateListOptions): Promise<ListSchema> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
@@ -123,12 +125,14 @@ export class ListClient {
       description,
       deserializer,
       id,
+      immutable,
       listIndex,
       meta,
       name,
       serializer,
       type,
       user,
+      version,
     });
   };
 
@@ -138,8 +142,10 @@ export class ListClient {
     serializer,
     name,
     description,
+    immutable,
     type,
     meta,
+    version,
   }: CreateListIfItDoesNotExistOptions): Promise<ListSchema> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
@@ -148,12 +154,14 @@ export class ListClient {
       description,
       deserializer,
       id,
+      immutable,
       listIndex,
       meta,
       name,
       serializer,
       type,
       user,
+      version,
     });
   };
 
@@ -334,6 +342,7 @@ export class ListClient {
     listId,
     stream,
     meta,
+    version,
   }: ImportListItemsToStreamOptions): Promise<ListSchema | null> => {
     const { callCluster, user, config } = this;
     const listItemIndex = this.getListItemIndex();
@@ -350,6 +359,7 @@ export class ListClient {
       stream,
       type,
       user,
+      version,
     });
   };
 
@@ -395,6 +405,7 @@ export class ListClient {
   };
 
   public updateListItem = async ({
+    _version,
     id,
     value,
     meta,
@@ -402,6 +413,7 @@ export class ListClient {
     const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return updateListItem({
+      _version,
       callCluster,
       id,
       listItemIndex,
@@ -412,14 +424,17 @@ export class ListClient {
   };
 
   public updateList = async ({
+    _version,
     id,
     name,
     description,
     meta,
+    version,
   }: UpdateListOptions): Promise<ListSchema | null> => {
     const { callCluster, user } = this;
     const listIndex = this.getListIndex();
     return updateList({
+      _version,
       callCluster,
       description,
       id,
@@ -427,6 +442,7 @@ export class ListClient {
       meta,
       name,
       user,
+      version,
     });
   };
 

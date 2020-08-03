@@ -21,7 +21,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import { alertsIndexPattern } from '../../../../../common/endpoint/constants';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -38,8 +38,9 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_exception_list';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
-  enrichExceptionItemsWithComments,
+  enrichNewExceptionItemsWithComments,
   enrichExceptionItemsWithOS,
+  lowercaseHashValues,
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
@@ -47,39 +48,34 @@ import {
 } from '../helpers';
 import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 
-export interface AddExceptionOnClick {
+export interface AddExceptionModalBaseProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
+  ruleIndices: string[];
   alertData?: {
     ecsData: Ecs;
     nonEcsData: TimelineNonEcsData[];
   };
 }
 
-interface AddExceptionModalProps {
-  ruleName: string;
-  ruleId: string;
-  exceptionListType: ExceptionListType;
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
+export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean) => void;
+  onRuleChange?: () => void;
+  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
   ${({ theme }) => css`
-    width: ${theme.eui.euiBreakpoints.m};
+    width: ${theme.eui.euiBreakpoints.l};
+    max-width: ${theme.eui.euiBreakpoints.l};
   `}
 `;
 
 const ModalHeader = styled(EuiModalHeader)`
-  ${({ theme }) => css`
-    flex-direction: column;
-    align-items: flex-start;
-  `}
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const ModalHeaderSubtitle = styled.div`
@@ -101,10 +97,13 @@ const ModalBodySection = styled.section`
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
   ruleId,
+  ruleIndices,
   exceptionListType,
   alertData,
   onCancel,
   onConfirm,
+  onRuleChange,
+  alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
@@ -117,9 +116,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const [
+    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
+  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
 
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    signalIndexName !== null ? [signalIndexName] : []
+  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+    ruleIndices,
+    'rules'
   );
 
   const onError = useCallback(
@@ -153,6 +156,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setExceptionItemsToAdd]
   );
 
+  const handleRuleChange = useCallback(
+    (ruleChanged: boolean): void => {
+      if (ruleChanged && onRuleChange) {
+        onRuleChange();
+      }
+    },
+    [onRuleChange]
+  );
   const onFetchOrCreateExceptionListError = useCallback(
     (error: Error) => {
       setFetchOrCreateListError(true);
@@ -164,6 +175,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     ruleId,
     exceptionListType,
     onError: onFetchOrCreateExceptionListError,
+    onSuccess: handleRuleChange,
   });
 
   const initialExceptionItems = useMemo(() => {
@@ -180,18 +192,19 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
 
   useEffect(() => {
-    if (indexPatternLoading === false && isSignalIndexLoading === false) {
+    if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
-          entryHasNonEcsType(exceptionItemsToAdd, indexPatterns)
+          entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
+          exceptionItemsToAdd.length === 0
       );
     }
   }, [
     setShouldDisableBulkClose,
     exceptionItemsToAdd,
-    indexPatternLoading,
+    isSignalIndexPatternLoading,
     isSignalIndexLoading,
-    indexPatterns,
+    signalIndexPatterns,
   ]);
 
   useEffect(() => {
@@ -222,7 +235,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   );
 
   const retrieveAlertOsTypes = useCallback(() => {
-    const osDefaults = ['windows', 'macos', 'linux'];
+    const osDefaults = ['windows', 'macos'];
     if (alertData) {
       const osTypes = getMappedNonEcsValue({
         data: alertData.nonEcsData,
@@ -240,11 +253,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
     enriched =
       comment !== ''
-        ? enrichExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
+        ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
       const osTypes = retrieveAlertOsTypes();
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
@@ -265,23 +278,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     signalIndexName,
   ]);
 
-  const isSubmitButtonDisabled = useCallback(
-    () => fetchOrCreateListError || exceptionItemsToAdd.length === 0,
+  const isSubmitButtonDisabled = useMemo(
+    () => fetchOrCreateListError || exceptionItemsToAdd.every((item) => item.entries.length === 0),
     [fetchOrCreateListError, exceptionItemsToAdd]
   );
 
-  const indexPatternConfig = useCallback(() => {
-    if (exceptionListType === 'endpoint') {
-      return [alertsIndexPattern];
-    }
-    return signalIndexName ? [signalIndexName] : [];
-  }, [exceptionListType, signalIndexName]);
-
   return (
-    <EuiOverlayMask>
+    <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>{i18n.ADD_EXCEPTION}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
+          </EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -292,13 +300,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
             <p>{i18n.ADD_EXCEPTION_FETCH_ERROR}</p>
           </EuiCallOut>
         )}
-        {fetchOrCreateListError === false && isLoadingExceptionList === true && (
-          <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
-        )}
+        {fetchOrCreateListError === false &&
+          (isLoadingExceptionList ||
+            isIndexPatternLoading ||
+            isSignalIndexLoading ||
+            isSignalIndexPatternLoading) && (
+            <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
+          )}
         {fetchOrCreateListError === false &&
           !isSignalIndexLoading &&
-          !indexPatternLoading &&
+          !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
+          !isIndexPatternLoading &&
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
@@ -310,23 +323,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
-                  indexPatternConfig={indexPatternConfig()}
-                  isLoading={false}
+                  indexPatterns={indexPatterns}
                   isOrDisabled={false}
                   isAndDisabled={false}
+                  isNestedDisabled={false}
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
                 />
 
                 <EuiSpacer />
-
-                {exceptionListType === 'endpoint' && (
-                  <>
-                    <EuiText size="s">{i18n.ENDPOINT_QUARANTINE_TEXT}</EuiText>
-                    <EuiSpacer />
-                  </>
-                )}
 
                 <AddExceptionComments
                   newCommentValue={comment}
@@ -335,7 +341,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               </ModalBodySection>
               <EuiHorizontalRule />
               <ModalBodySection>
-                {alertData !== undefined && (
+                {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
                       id="close-alert-on-add-add-exception-checkbox"
@@ -358,6 +364,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                     disabled={shouldDisableBulkClose}
                   />
                 </EuiFormRow>
+                {exceptionListType === 'endpoint' && (
+                  <>
+                    <EuiSpacer />
+                    <EuiText color="subdued" size="s">
+                      {i18n.ENDPOINT_QUARANTINE_TEXT}
+                    </EuiText>
+                  </>
+                )}
               </ModalBodySection>
             </>
           )}
@@ -368,7 +382,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <EuiButton
             onClick={onAddExceptionConfirm}
             isLoading={addExceptionIsLoading}
-            isDisabled={isSubmitButtonDisabled()}
+            isDisabled={isSubmitButtonDisabled}
             fill
           >
             {i18n.ADD_EXCEPTION}

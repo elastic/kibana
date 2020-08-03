@@ -61,10 +61,11 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
 /** @public */
 export function getResponseInspectorStats(
-  searchSource: ISearchSource,
-  resp: SearchResponse<unknown>
+  resp: SearchResponse<unknown>,
+  searchSource?: ISearchSource
 ) {
-  const lastRequest = searchSource.history && searchSource.history[searchSource.history.length - 1];
+  const lastRequest =
+    searchSource?.history && searchSource.history[searchSource.history.length - 1];
   const stats: RequestStatistics = {};
 
   if (resp && resp.took) {

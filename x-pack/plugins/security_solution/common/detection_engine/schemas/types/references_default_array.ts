@@ -11,12 +11,10 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the ReferencesDefaultArray as:
  *   - If null or undefined, then a default array will be set
  */
-export const ReferencesDefaultArray = new t.Type<string[], string[], unknown>(
+export const ReferencesDefaultArray = new t.Type<string[], string[] | undefined, unknown>(
   'referencesWithDefaultArray',
   t.array(t.string).is,
   (input, context): Either<t.Errors, string[]> =>
     input == null ? t.success([]) : t.array(t.string).validate(input, context),
   t.identity
 );
-
-export type ReferencesDefaultArrayC = typeof ReferencesDefaultArray;

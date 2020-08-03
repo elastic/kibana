@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
@@ -22,7 +22,7 @@ import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
-const ErrorGroupOverview: React.FC = () => {
+function ErrorGroupOverview() {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
@@ -79,7 +79,7 @@ const ErrorGroupOverview: React.FC = () => {
       params: {
         serviceName,
       },
-      projection: PROJECTION.ERROR_GROUPS,
+      projection: Projection.errorGroups,
     };
 
     return config;
@@ -123,6 +123,6 @@ const ErrorGroupOverview: React.FC = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}
 
 export { ErrorGroupOverview };

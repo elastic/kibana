@@ -209,49 +209,52 @@ describe('get_filter', () => {
                 minimum_should_match: 1,
               },
             },
+          ],
+          must_not: [
             {
               bool: {
-                must_not: {
-                  bool: {
-                    filter: [
-                      {
-                        nested: {
-                          path: 'some.parentField',
-                          query: {
-                            bool: {
-                              should: [
-                                {
-                                  match_phrase: {
-                                    'some.parentField.nested.field': 'some value',
+                should: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                should: [
+                                  {
+                                    match_phrase: {
+                                      'some.parentField.nested.field': 'some value',
+                                    },
                                   },
-                                },
-                              ],
-                              minimum_should_match: 1,
-                            },
-                          },
-                          score_mode: 'none',
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match_phrase: {
-                                'some.not.nested.field': 'some value',
+                                ],
+                                minimum_should_match: 1,
                               },
                             },
-                          ],
-                          minimum_should_match: 1,
+                            score_mode: 'none',
+                          },
                         },
-                      },
-                    ],
+                        {
+                          bool: {
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
+                ],
               },
             },
           ],
           should: [],
-          must_not: [],
         },
       });
     });

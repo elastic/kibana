@@ -16,6 +16,25 @@ def withPostBuildReporting(Closure closure) {
   }
 }
 
+def notifyOnError(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
+    catchErrors {
+      githubPr.sendComment(false)
+    }
+    catchErrors {
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
+      }
+    }
+    throw ex
+  }
+}
+
 def functionalTestProcess(String name, Closure closure) {
   return { processNumber ->
     def kibanaPort = "61${processNumber}1"
@@ -35,7 +54,9 @@ def functionalTestProcess(String name, Closure closure) {
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
     ]) {
-      closure()
+      notifyOnError {
+        closure()
+      }
     }
   }
 }
@@ -180,26 +201,32 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  retryWithDelay(2, 15) {
-    try {
-      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-    } catch (ex) {
+  notifyOnError {
+    retryWithDelay(2, 15) {
       try {
-        // Setup expects this directory to be missing, so we need to remove it before we do a retry
-        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
-      } finally {
-        throw ex
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
       }
     }
   }
 }
 
 def buildOss() {
-  runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  notifyOnError {
+    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  }
 }
 
 def buildXpack() {
-  runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  notifyOnError {
+    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  }
 }
 
 def runErrorReporter() {

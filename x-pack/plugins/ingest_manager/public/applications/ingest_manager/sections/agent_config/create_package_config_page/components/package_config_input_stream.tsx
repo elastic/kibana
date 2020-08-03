@@ -5,6 +5,7 @@
  */
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGrid,
@@ -22,6 +23,10 @@ import {
   validationHasErrors,
 } from '../services';
 import { PackageConfigInputVarField } from './package_config_input_var_field';
+
+const FlexItemWithMaxWidth = styled(EuiFlexItem)`
+  max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
+`;
 
 export const PackageConfigInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
@@ -91,7 +96,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <FlexItemWithMaxWidth>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
@@ -178,7 +183,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
               </Fragment>
             ) : null}
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </FlexItemWithMaxWidth>
       </EuiFlexGrid>
     );
   }

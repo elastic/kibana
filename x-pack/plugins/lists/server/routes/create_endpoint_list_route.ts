@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { ENDPOINT_LIST_URL } from '../../common/constants';
 import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { createEndpointListSchema } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
@@ -26,7 +26,7 @@ export const createEndpointListRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: ENDPOINT_LIST_URL,
       validate: false,

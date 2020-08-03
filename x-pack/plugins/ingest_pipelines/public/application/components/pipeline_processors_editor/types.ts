@@ -7,7 +7,7 @@
 import { Dispatch } from 'react';
 import { OnFormUpdateArg } from '../../../shared_imports';
 import { SerializeResult } from './serialize';
-import { OnActionHandler, ProcessorInfo } from './components/processors_tree';
+import { OnActionHandler, ProcessorInfo } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
 
 export interface Links {

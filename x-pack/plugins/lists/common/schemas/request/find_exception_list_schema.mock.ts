@@ -7,11 +7,11 @@
 import { FILTER, NAMESPACE_TYPE } from '../../constants.mock';
 
 import {
-  FindExceptionListSchemaPartial,
-  FindExceptionListSchemaPartialDecoded,
+  FindExceptionListSchema,
+  FindExceptionListSchemaDecoded,
 } from './find_exception_list_schema';
 
-export const getFindExceptionListSchemaMock = (): FindExceptionListSchemaPartial => ({
+export const getFindExceptionListSchemaMock = (): FindExceptionListSchema => ({
   filter: FILTER,
   namespace_type: NAMESPACE_TYPE,
   page: '1',
@@ -20,7 +20,7 @@ export const getFindExceptionListSchemaMock = (): FindExceptionListSchemaPartial
   sort_order: undefined,
 });
 
-export const getFindExceptionListSchemaDecodedMock = (): FindExceptionListSchemaPartialDecoded => ({
+export const getFindExceptionListSchemaDecodedMock = (): FindExceptionListSchemaDecoded => ({
   filter: FILTER,
   namespace_type: NAMESPACE_TYPE,
   page: 1,
