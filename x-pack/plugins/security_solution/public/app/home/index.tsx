@@ -33,7 +33,7 @@ export const globalHeaderHeightPx = 49;
 
 const Main = styled.main<{ $globalFullScreen: boolean; top: number }>`
   height: calc(100vh - ${({ top }) => top}px);
-  overflow-y: ${({ $globalFullScreen }) => ($globalFullScreen ? 'none' : 'auto')};
+  overflow-y: ${({ $globalFullScreen }) => ($globalFullScreen ? 'hidden' : 'auto')};
   position: relative;
   top: ${({ top }) => top}px;
 `;
