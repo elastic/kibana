@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { importListItemQuerySchema, listSchema } from '../../common/schemas';
 import { ConfigType } from '../config';
 
