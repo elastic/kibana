@@ -31,9 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Loads the app', async () => {
       await security.testUser.setRoles(['test_api_keys']);
-      log.debug('Checking for section header');
-      const headerText = await pageObjects.apiKeys.noAPIKeysHeading();
-      expect(headerText).to.be('No API keys');
+      const description = await pageObjects.apiKeys.getApiKeyAdminDesc();
+      expect(description).to.be('You are an API Key administrator.');
       const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
       expect(await goToConsoleButton.isDisplayed()).to.be(true);
     });
