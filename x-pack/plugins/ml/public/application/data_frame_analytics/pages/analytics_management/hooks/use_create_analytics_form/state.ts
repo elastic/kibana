@@ -12,6 +12,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalyticsConfig,
   ANALYSIS_CONFIG_TYPE,
+  defaultSearchQuery,
 } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
@@ -44,6 +45,7 @@ export interface FormMessage {
 export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
+  disableSwitchToForm: boolean;
   form: {
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
@@ -97,6 +99,7 @@ export interface State {
   indexPatternsMap: SourceIndexMap;
   isAdvancedEditorEnabled: boolean;
   isAdvancedEditorValidJson: boolean;
+  hasSwitchedToEditor: boolean;
   isJobCreated: boolean;
   isJobStarted: boolean;
   isValid: boolean;
@@ -110,6 +113,7 @@ export interface State {
 export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
+  disableSwitchToForm: false,
   form: {
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
@@ -131,7 +135,7 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
-    jobConfigQuery: { match_all: {} },
+    jobConfigQuery: defaultSearchQuery,
     jobConfigQueryString: undefined,
     lambda: undefined,
     loadingFieldOptions: false,
@@ -167,6 +171,7 @@ export const getInitialState = (): State => ({
   indexPatternsMap: {},
   isAdvancedEditorEnabled: false,
   isAdvancedEditorValidJson: true,
+  hasSwitchedToEditor: false,
   isJobCreated: false,
   isJobStarted: false,
   isValid: false,
@@ -283,8 +288,9 @@ function toCamelCase(property: string): string {
  * Extracts form state for a job clone from the analytics job configuration.
  * For cloning we keep job id and destination index empty.
  */
-export function getCloneFormStateFromJobConfig(
-  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>
+export function getFormStateFromJobConfig(
+  analyticsJobConfig: Readonly<CloneDataFrameAnalyticsConfig>,
+  isClone: boolean = true
 ): Partial<State['form']> {
   const jobType = Object.keys(analyticsJobConfig.analysis)[0] as ANALYSIS_CONFIG_TYPE;
 
@@ -299,6 +305,10 @@ export function getCloneFormStateFromJobConfig(
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields.includes,
   };
+
+  if (isClone === false) {
+    resultState.destinationIndex = analyticsJobConfig?.dest.index ?? '';
+  }
 
   const analysisConfig = analyticsJobConfig.analysis[jobType];
 

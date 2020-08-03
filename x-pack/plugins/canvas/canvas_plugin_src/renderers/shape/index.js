@@ -75,6 +75,7 @@ export const shape = () => ({
         domNode.removeChild(oldShape);
       }
 
+      domNode.style.lineHeight = 0;
       domNode.appendChild(shapeSvg);
     };
 
