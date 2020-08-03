@@ -17,6 +17,18 @@
  * under the License.
  */
 
-require('@kbn/apm').start();
-require('../setup_node_env');
-require('./cli');
+import Agent from 'elastic-apm-node';
+
+export const isKibanaDistributable: boolean;
+
+export function start(options?: any): typeof Agent;
+
+export function active(): boolean;
+
+export function addSystemLabels(): undefined;
+
+export function getConfig(options?: any): any;
+
+export function flush(): Promise<undefined>;
+
+export { Agent };

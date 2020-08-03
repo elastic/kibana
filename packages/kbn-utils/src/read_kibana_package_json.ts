@@ -17,6 +17,10 @@
  * under the License.
  */
 
-require('@kbn/apm').start();
-require('../setup_node_env');
-require('./cli');
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { REPO_ROOT } from './repo_root';
+
+export function readKibanaPackageJSON() {
+  return JSON.parse(readFileSync(resolve(REPO_ROOT, './package.json')).toString());
+}

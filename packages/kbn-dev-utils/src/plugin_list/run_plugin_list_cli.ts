@@ -19,10 +19,9 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { run } from '../run';
-import { REPO_ROOT } from '../repo_root';
-
 import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 

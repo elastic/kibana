@@ -17,6 +17,5 @@
  * under the License.
  */
 
-require('@kbn/apm').start();
-require('../setup_node_env');
-require('./cli');
+export * from './repo_root';
+export * from './read_kibana_package_json';

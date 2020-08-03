@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { getConfig, isKibanaDistributable } from '../../../apm';
+import { config as apmConfig, active } from '@kbn/apm';
 import agent from 'elastic-apm-node';
 
-const apmEnabled = !isKibanaDistributable && process.env.ELASTIC_APM_ACTIVE === 'true';
+const apmEnabled = true;
 
 export function apmImport() {
   return apmEnabled ? 'import { init } from "@elastic/apm-rum"' : '';
@@ -35,9 +35,10 @@ export function getApmConfig(requestPath) {
     return null;
   }
   const config = {
-    ...getConfig('kibana-frontend'),
+    ...apmConfig,
     ...{
-      active: true,
+      serviceName: 'kibana-frontend',
+      active: active(),
       pageLoadTransactionName: requestPath,
     },
   };
