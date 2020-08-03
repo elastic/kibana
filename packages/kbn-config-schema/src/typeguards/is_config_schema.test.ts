@@ -51,6 +51,7 @@ describe('isConfigSchema', () => {
   });
 
   it('returns true as long as `__isKbnConfigSchemaType` is true', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(isConfigSchema({ __isKbnConfigSchemaType: true })).toBe(true);
   });
 });
