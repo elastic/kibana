@@ -3,7 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CustomRule, MachineLearningRule, machineLearningRule } from '../objects/rule';
+
+import {
+  CustomRule,
+  MachineLearningRule,
+  machineLearningRule,
+  ThresholdRule,
+} from '../objects/rule';
 import {
   ABOUT_CONTINUE_BTN,
   ANOMALY_THRESHOLD_INPUT,
@@ -15,6 +21,7 @@ import {
   DEFINE_CONTINUE_BUTTON,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
+  INPUT,
   INVESTIGATION_NOTES_TEXTAREA,
   MACHINE_LEARNING_DROPDOWN,
   MACHINE_LEARNING_LIST,
@@ -30,6 +37,9 @@ import {
   SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
   TAGS_INPUT,
+  THRESHOLD_FIELD_SELECTION,
+  THRESHOLD_INPUT_AREA,
+  THRESHOLD_TYPE,
 } from '../screens/create_new_rule';
 import { TIMELINE } from '../screens/timeline';
 
@@ -39,7 +49,9 @@ export const createAndActivateRule = () => {
   cy.get(CREATE_AND_ACTIVATE_BTN).should('not.exist');
 };
 
-export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
+export const fillAboutRuleAndContinue = (
+  rule: CustomRule | MachineLearningRule | ThresholdRule
+) => {
   cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
@@ -80,18 +92,28 @@ export const fillAboutRuleAndContinue = (rule: CustomRule | MachineLearningRule)
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
 };
 
-export const fillDefineCustomRuleAndContinue = (rule: CustomRule) => {
-  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
+export const fillDefineCustomRuleWithImportedQueryAndContinue = (rule: CustomRule) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(rule.timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const fillDefineCustomRuleWithImportedQueryAndContinue = (rule: CustomRule) => {
-  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-  cy.get(TIMELINE(rule.timelineId)).click();
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
+  const thresholdField = 0;
+  const threshold = 1;
+
+  cy.get(CUSTOM_QUERY_INPUT).type(rule.customQuery);
   cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
+  cy.get(THRESHOLD_INPUT_AREA)
+    .find(INPUT)
+    .then((inputs) => {
+      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
+      cy.get(THRESHOLD_FIELD_SELECTION).click({ force: true });
+      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
+    });
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -110,4 +132,8 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
 
 export const selectMachineLearningRuleType = () => {
   cy.get(MACHINE_LEARNING_TYPE).click({ force: true });
+};
+
+export const selectThresholdRuleType = () => {
+  cy.get(THRESHOLD_TYPE).click({ force: true });
 };

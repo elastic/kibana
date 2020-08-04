@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 
-export const CircleIcon = ({ style }) => (
+export const CircleIcon = ({ style }: { style: CSSProperties }) => (
   <svg
     className="euiIcon euiIcon--medium mapFillableCircle"
     xmlns="http://www.w3.org/2000/svg"
