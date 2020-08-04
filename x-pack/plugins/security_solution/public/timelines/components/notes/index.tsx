@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -20,7 +13,6 @@ import { Note } from '../../../common/lib/note';
 import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';
-import { NOTES_PANEL_WIDTH, NOTES_PANEL_HEIGHT } from '../timeline/properties/notes_size';
 import { TimelineStatusLiteral, TimelineStatus } from '../../../../common/types/timeline';
 
 interface Props {
@@ -32,11 +24,7 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const NotesPanel = styled(EuiPanel)`
-  height: ${NOTES_PANEL_HEIGHT}px;
-  width: ${NOTES_PANEL_WIDTH}px;
-  overflow-y: auto;
-
+const NotesPanel = styled.div`
   & thead {
     display: none;
   }
