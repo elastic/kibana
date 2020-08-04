@@ -7,7 +7,7 @@ const semver = require('semver');
 const PKG = require('../../package.json');
 
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
-const allowedNamePrefixRegexp = '^(UNSAFE_|_|__|___)|_{1,3}$';
+const allowedNamePrefixRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
@@ -218,10 +218,12 @@ module.exports = {
           'no-extend-native': 'error',
           'no-eval': 'error',
           'no-new-wrappers': 'error',
+          'no-script-url': 'error',
           'no-shadow': 'error',
           'no-throw-literal': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',
+          'no-unsanitized/property': 'error',
           'no-unused-expressions': 'error',
           'no-unused-labels': 'error',
           'no-var': 'error',
@@ -244,7 +246,9 @@ module.exports = {
 
           ],
           'import/no-default-export': 'error',
-          'eslint-comments/no-unused-disable': 'error'
+
+          'eslint-comments/no-unused-disable': 'error',
+          'eslint-comments/no-unused-enable': 'error'
         },
         eslintConfigPrettierTypescriptEslintRules
       )
