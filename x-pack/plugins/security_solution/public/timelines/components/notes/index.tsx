@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiInMemoryTable, EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -24,13 +30,15 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const NotesPanel = styled.div`
+const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
+  EuiInMemoryTable as React.ComponentType<EuiInMemoryTableProps<Note>>
+)`
   & thead {
     display: none;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-NotesPanel.displayName = 'NotesPanel';
+InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
 export const Notes = React.memo<Props>(
@@ -39,7 +47,7 @@ export const Notes = React.memo<Props>(
     const isImmutable = status === TimelineStatus.immutable;
 
     return (
-      <NotesPanel>
+      <>
         <EuiModalHeader>
           <NotesCount noteIds={noteIds} />
         </EuiModalHeader>
@@ -55,7 +63,7 @@ export const Notes = React.memo<Props>(
             />
           )}
           <EuiSpacer size="s" />
-          <EuiInMemoryTable
+          <InMemoryTable
             data-test-subj="notes-table"
             items={getNotesByIds(noteIds)}
             columns={columns}
@@ -63,7 +71,7 @@ export const Notes = React.memo<Props>(
             sorting={true}
           />
         </EuiModalBody>
-      </NotesPanel>
+      </>
     );
   }
 );
