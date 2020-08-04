@@ -219,7 +219,6 @@ export class VisualizePlugin
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
-    // const visualizeFieldAction = createVisualizeFieldAction(core.application);
     plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 

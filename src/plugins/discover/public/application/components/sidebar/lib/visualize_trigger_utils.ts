@@ -39,7 +39,7 @@ async function getCompatibleActions(
     indexPatternId,
     fieldName,
   });
-  return compatibleActions.length;
+  return compatibleActions;
 }
 
 export function triggerVisualizeActions(
@@ -67,5 +67,7 @@ export async function isFieldVisualizable(
   const trigger = getTrigger(field.type);
   const services: DiscoverServices = getServices();
   const compatibleActions = await getCompatibleActions(field.name, indexPatternId, trigger);
-  return compatibleActions > 0 && field.visualizable && !!services.capabilities.visualize.show;
+  return (
+    compatibleActions.length > 0 && field.visualizable && !!services.capabilities.visualize.show
+  );
 }
