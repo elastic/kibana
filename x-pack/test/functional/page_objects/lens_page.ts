@@ -276,7 +276,5 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
     },
-
-    },
   });
 }
