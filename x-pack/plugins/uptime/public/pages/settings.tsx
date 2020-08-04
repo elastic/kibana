@@ -33,7 +33,7 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
-import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers/eui_link';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';

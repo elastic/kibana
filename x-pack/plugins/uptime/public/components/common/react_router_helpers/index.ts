@@ -5,5 +5,8 @@
  */
 
 export { letBrowserHandleEvent } from './link_events';
-export { ReactRouterEuiLink as EuiLink } from './link_for_eui';
-export { ReactRouterEuiButton as EuiButton } from './link_for_eui';
+export {
+  ReactRouterEuiLink,
+  ReactRouterEuiButton,
+  ReactRouterEuiButtonEmpty,
+} from './link_for_eui';

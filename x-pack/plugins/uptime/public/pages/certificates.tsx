@@ -29,7 +29,7 @@ import { certificatesSelector, getCertificatesAction } from '../state/certificat
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { CLIENT_ALERT_TYPES } from '../../common/constants/alerts';
-import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers/eui_link';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
