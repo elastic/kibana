@@ -163,15 +163,15 @@ export class SessionService {
         ...Object.fromEntries(sessionInfo.requests),
       };
 
-      // TODO: implement concurrency with version
-      // const version = Number.parseInt(sessionSavedObject.version)
-      //   ? (Number.parseInt(sessionSavedObject.version) + 1).toString()
-      //   : '1';
+      // Handle the case where multiple servers attempt to update the background session.
       const res = await this.internalSavedObjectsClient.update(
         BACKGROUND_SESSION_TYPE,
         sessionSavedObject.id,
         {
           idMapping: requests,
+        },
+        {
+          version: sessionSavedObject.version,
         }
       );
       if (res && !res.error) {
