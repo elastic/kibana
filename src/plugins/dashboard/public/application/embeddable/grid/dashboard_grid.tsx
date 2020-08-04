@@ -270,6 +270,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
+            // Sometimes panels can keep the same id but change the type: make it react to this change
+            key={`${panel.explicitInput.id}-${panel.type}`}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}
