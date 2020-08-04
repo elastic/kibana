@@ -8,6 +8,7 @@ import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
@@ -183,12 +184,12 @@ export const ReportHelper = ({ apiClient }: Props) => {
   return (
     <div>
       {flyout}
-      <EuiButton iconType="help" onClick={showFlyout}>
+      <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
         <FormattedMessage
           id="xpack.reporting.listing.helpButtonText"
           defaultMessage="Check Reporting"
         />
-      </EuiButton>
+      </EuiButtonEmpty>
     </div>
   );
 };

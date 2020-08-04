@@ -6,9 +6,10 @@
 
 import { registerDiagnoseBrowser } from './browser';
 import { registerDiagnoseConfig } from './config';
-import { ReportingCore } from '../core';
+import { LevelLogger as Logger } from '../../lib';
+import { ReportingCore } from '../../core';
 
-export const registerDiagnosticRoutes = (reporting: ReportingCore) => {
-  registerDiagnoseBrowser(reporting);
-  registerDiagnoseConfig(reporting);
+export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
+  registerDiagnoseBrowser(reporting, logger);
+  registerDiagnoseConfig(reporting, logger);
 };

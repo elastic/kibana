@@ -154,11 +154,9 @@ class ReportListingUi extends Component<Props, State> {
                   id="xpack.reporting.listing.reports.subtitle"
                   defaultMessage="Find reports generated in Kibana applications here"
                 />
+                <ReportHelper apiClient={this.props.apiClient} />
               </p>
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ReportHelper apiClient={this.props.apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />

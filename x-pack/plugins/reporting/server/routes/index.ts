@@ -13,5 +13,5 @@ import { registerDiagnosticRoutes } from './diagnose';
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerJobGenerationRoutes(reporting, logger);
   registerJobInfoRoutes(reporting);
-  registerDiagnosticRoutes(reporting);
+  registerDiagnosticRoutes(reporting, logger);
 }

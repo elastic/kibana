@@ -26,7 +26,7 @@ import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
-import { chromiumTest } from './chromium_test';
+import { browserTest } from './chromium_test';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
 type ViewportConfig = CaptureConfig['viewport'];
@@ -67,7 +67,7 @@ export class HeadlessChromiumDriverFactory {
       proxy: this.browserConfig.proxy,
     });
 
-    return chromiumTest(this.binaryPath, chromiumArgs);
+    return browserTest(this.binaryPath, chromiumArgs, logger);
   }
 
   /*

@@ -7,9 +7,10 @@ import { spawn } from 'child_process';
 import { createInterface } from 'readline';
 import { uniq } from 'lodash';
 import { BROWSER_TEST_COMMON_ISSUES } from '../../../../constants';
+import { LevelLogger } from '../../../lib';
 
 const maxTimeToWait = 10 * 1000;
-const chromiumCoolDown = 3 * 1000;
+const browserCoolDown = 3 * 1000;
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 // Default args used by pptr
@@ -45,16 +46,17 @@ const defaultArgs = [
 interface BrowserDiagnosticPayload {
   help: string[];
   browserStartedSuccessfully: boolean;
-  chromiumLogs: string;
+  browserLogs: string;
 }
 
-export const chromiumTest = (
+export const browserTest = (
   executablePath: string,
-  args: string[] = []
+  args: string[] = [],
+  logger: LevelLogger
 ): Promise<BrowserDiagnosticPayload> => {
   let closed = false;
   const finalArgs = uniq([...defaultArgs, ...args]);
-  let chromiumLogs = '';
+  let browserLogs = '';
 
   const browserProcess = spawn(executablePath, finalArgs, {
     // On non-windows platforms, `detached: true` makes child process a
@@ -66,52 +68,60 @@ export const chromiumTest = (
 
   return new Promise((resolve) => {
     const cleanup = async (err?: Error) => {
-      const help: BrowserDiagnosticPayload['help'] = [];
       if (closed) return;
+      if (err) {
+        logger.error(`Browser didn't start or didn't bind to the local port in time`);
+        logger.error(err);
+      }
+      const help: BrowserDiagnosticPayload['help'] = [];
       closed = true;
       clearTimeout(timer);
       rl.close();
       rl.removeAllListeners();
       browserProcess.removeAllListeners();
 
-      // Sometimes logs with significant issues can creep in after chromium has bound it's remote
-      // debugging port, so let them flow through before calling it.
-      await sleep(chromiumCoolDown);
+      // Sometimes logs with significant issues can creep in after browser has bound it's remote
+      // debugging port, so let them flow through before SIGKILL is sent.
+      await sleep(browserCoolDown);
 
       for (const knownIssue of BROWSER_TEST_COMMON_ISSUES.keys()) {
-        if (chromiumLogs.includes(knownIssue)) {
+        if (browserLogs.includes(knownIssue)) {
           // Not sure why TS can't figure out that `issue` here is guaranteed to be a string...
-          help.push(BROWSER_TEST_COMMON_ISSUES.get(knownIssue) as string);
+          const helpText = BROWSER_TEST_COMMON_ISSUES.get(knownIssue) as string;
+          logger.warn(helpText);
+          help.push(helpText);
         }
       }
-
-      resolve({
-        help,
-        chromiumLogs,
-        browserStartedSuccessfully: !err,
-      });
 
       if (browserProcess && browserProcess.pid && !browserProcess.killed) {
         try {
           browserProcess.kill('SIGKILL');
         } catch (error) {
-          throw new Error(
+          logger.warn(
             `Reporting was unable to close the browser process (PID: ${browserProcess.pid}). Please check your open processes and ensure that the browser processes that Reporting has launched have been killed.\nError cause: ${error.stack}`
           );
         }
       }
+
+      return resolve({
+        help,
+        browserLogs,
+        browserStartedSuccessfully: !err,
+      });
     };
 
-    const rl = createInterface({ input: browserProcess.stderr });
     const timer = setTimeout(
       () => cleanup(new Error(`Browser didn't bind successfully in ${maxTimeToWait} milliseconds`)),
       maxTimeToWait
     );
 
+    const rl = createInterface({ input: browserProcess.stderr });
     rl.on('line', (data) => {
-      chromiumLogs += data + '\n';
+      logger.debug(`Browser log output: "${data}"`);
+      browserLogs += data + '\n';
       const match = data.match(/^DevTools listening on (ws:\/\/.*)$/);
       if (match) {
+        logger.debug(`Browser successfully started remote DevTools listener`);
         return cleanup();
       }
     });

@@ -4,15 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import numeral from '@elastic/numeral';
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
+import { LevelLogger as Logger } from '../../lib';
 
 const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
-export const registerDiagnoseConfig = (reporting: ReportingCore) => {
+interface ConfigResponse {
+  body: {
+    help: string[];
+    configDiagnoseSuccessful: boolean;
+    configLogs: string;
+  };
+}
+
+export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router, elasticsearch } = setupDeps;
@@ -52,9 +62,19 @@ export const registerDiagnoseConfig = (reporting: ReportingCore) => {
         );
       }
 
-      return res.ok({
-        body: { warnings },
-      });
+      if (warnings.length) {
+        warnings.forEach((warn) => logger.warn(warn));
+      }
+
+      const response: ConfigResponse = {
+        body: {
+          help: [],
+          configDiagnoseSuccessful: !warnings.length,
+          configLogs: warnings.join('\n'),
+        },
+      };
+
+      return res.ok(response);
     })
   );
 };
