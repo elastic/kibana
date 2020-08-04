@@ -102,9 +102,9 @@ export interface TlsSortField {
 }
 
 export interface PageInfoTimeline {
-  pageIndex?: Maybe<number>;
+  pageIndex: number;
 
-  pageSize?: Maybe<number>;
+  pageSize: number;
 }
 
 export interface SortTimeline {
@@ -2319,7 +2319,7 @@ export interface GetOneTimelineQueryArgs {
   id: string;
 }
 export interface GetAllTimelineQueryArgs {
-  pageInfo?: Maybe<PageInfoTimeline>;
+  pageInfo: PageInfoTimeline;
 
   search?: Maybe<string>;
 
