@@ -8,6 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import { KbnClient } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
+import fetch from 'node-fetch';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import {
@@ -288,7 +289,13 @@ const fleetEnrollAgentForHost = async (kbnClient: KbnClient, host: HostMetadata)
     shared_id: host.elastic.agent.id,
     metadata: {
       local: {
-        ...host.host,
+        host: host.host,
+        elastic: {
+          agent: {
+            ...host.agent,
+            version: '8.0.0',
+          },
+        },
       },
       user_provided: {
         dev_agent_version: '0.0.1',
@@ -298,16 +305,39 @@ const fleetEnrollAgentForHost = async (kbnClient: KbnClient, host: HostMetadata)
   };
 
   try {
-    await kbnClient.request<PostAgentEnrollResponse>({
-      path: AGENT_API_ROUTES.ENROLL_PATTERN,
+    // FIXME: should we use `fetch()` in this module?
+    // FIXME: need way to get kibana URL without auth in it
+    const res = await fetch(`http://localhost:5601${AGENT_API_ROUTES.ENROLL_PATTERN}`, {
       method: 'POST',
-      body,
+      body: JSON.stringify(body),
       headers: {
+        'kbn-xsrf': 'xxx',
         Authorization: `ApiKey ${enrollmentApiKey}`,
         'Content-Type': 'application/json',
       },
     });
+
+    if (res) {
+      const obj: PostAgentEnrollResponse = await res.json();
+      if (!obj.success) {
+        // eslint-disable-next-line no-console
+        console.error(obj);
+      }
+    }
+
+    // THIS DOES NOT WORK because its sent with basic auth (Authorization header is stripped out)
+    //
+    // await kbnClient.request<PostAgentEnrollResponse>({
+    //   path: AGENT_API_ROUTES.ENROLL_PATTERN,
+    //   method: 'POST',
+    //   body,
+    //   headers: {
+    //     Authorization: `ApiKey ${enrollmentApiKey}`,
+    //     'Content-Type': 'application/json',
+    //   },
+    // });
   } catch (error) {
-    // debugger;
+    // eslint-disable-next-line no-console
+    console.error(error);
   }
 };
