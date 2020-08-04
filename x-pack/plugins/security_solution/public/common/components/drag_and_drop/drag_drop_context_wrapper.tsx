@@ -34,6 +34,7 @@ import {
   userIsReArrangingProviders,
 } from './helpers';
 
+// @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;
 
 interface Props {
