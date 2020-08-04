@@ -161,6 +161,8 @@ module.exports = {
             {
               selector: 'typeLike',
               format: ['PascalCase', 'UPPER_CASE'],
+              leadingUnderscore: 'allow',
+              trailingUnderscore: 'allow',
             },
             {
               selector: 'enum',

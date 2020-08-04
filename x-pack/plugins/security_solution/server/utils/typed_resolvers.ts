@@ -23,7 +23,6 @@ type AppResolverResult<R> =
   | { [P in keyof R]: () => R[P] }
   | R;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type ResultOf<Resolver_> = Resolver_ extends Resolver<AppResolverResult<infer Result>>
   ? Result
   : never;
@@ -60,7 +59,6 @@ export type SubsetResolverWithoutFields<R, ExcludedFields extends string> = R ex
   ? Resolver<Pick<Result, Exclude<keyof Result, ExcludedFields>>, Parent, Context, Args>
   : never;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type ResolverWithParent<Resolver_, Parent> = Resolver_ extends Resolver<
   infer Result,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,7 +77,6 @@ export type AppResolver<Result = any, Parent = any, Context = any, Args = any> =
   Args
 >;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type AppResolverOf<Resolver_> = Resolver_ extends Resolver<
   ResolverResult<infer ResultWithNeverParent>,
   never,
@@ -96,15 +93,14 @@ export type AppResolverOf<Resolver_> = Resolver_ extends Resolver<
   ? AppResolver<Result, Parent, Context, Args>
   : never;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type AppResolverWithFields<Resolver_, IncludedFields extends string> = AppResolverOf<
   SubsetResolverWithFields<Resolver_, IncludedFields>
 >;
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export type AppResolverWithoutFields<Resolver_, ExcludedFields extends string> = AppResolverOf<
   SubsetResolverWithoutFields<Resolver_, ExcludedFields>
 >;
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 export type ChildResolverOf<Resolver_, ParentResolver> = ResolverWithParent<
   Resolver_,
   ResultOf<ParentResolver>
