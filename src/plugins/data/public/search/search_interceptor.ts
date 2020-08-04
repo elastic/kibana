@@ -22,7 +22,7 @@ import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observab
 import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
@@ -97,7 +97,7 @@ export class SearchInterceptor {
     strategy?: string
   ): Observable<IEsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || 'es'}/${id}`, '/');
+    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(id != null ? {} : searchRequest);
     return from(
       this.deps.http.fetch({
