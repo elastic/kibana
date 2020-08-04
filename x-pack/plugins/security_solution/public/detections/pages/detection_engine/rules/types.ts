@@ -88,11 +88,13 @@ export interface AboutStepRuleDetails {
 export interface AboutStepSeverity {
   value: string;
   mapping: SeverityMapping;
+  isMappingChecked: boolean;
 }
 
 export interface AboutStepRiskScore {
   value: number;
   mapping: RiskScoreMapping;
+  isMappingChecked: boolean;
 }
 
 export interface DefineStepRule extends StepRuleData {

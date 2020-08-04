@@ -23,17 +23,20 @@ import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { retryCallCluster, migrationRetryCallCluster } from './retry_call_cluster';
 
 const dummyBody = { foo: 'bar' };
-const createErrorReturn = (err: any) => elasticsearchClientMock.createClientError(err);
+const createErrorReturn = (err: any) =>
+  elasticsearchClientMock.createErrorTransportRequestPromise(err);
 
 describe('retryCallCluster', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
   });
 
   it('returns response from ES API call in case of success', async () => {
-    const successReturn = elasticsearchClientMock.createClientResponse({ ...dummyBody });
+    const successReturn = elasticsearchClientMock.createSuccessTransportRequestPromise({
+      ...dummyBody,
+    });
 
     client.asyncSearch.get.mockReturnValue(successReturn);
 
@@ -42,7 +45,9 @@ describe('retryCallCluster', () => {
   });
 
   it('retries ES API calls that rejects with `NoLivingConnectionsError`', async () => {
-    const successReturn = elasticsearchClientMock.createClientResponse({ ...dummyBody });
+    const successReturn = elasticsearchClientMock.createSuccessTransportRequestPromise({
+      ...dummyBody,
+    });
 
     client.asyncSearch.get
       .mockImplementationOnce(() =>
@@ -57,7 +62,9 @@ describe('retryCallCluster', () => {
   it('rejects when ES API calls reject with other errors', async () => {
     client.ping
       .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
 
     await expect(retryCallCluster(() => client.ping())).rejects.toMatchInlineSnapshot(
       `[Error: unknown error]`
@@ -73,7 +80,9 @@ describe('retryCallCluster', () => {
         createErrorReturn(new errors.NoLivingConnectionsError('no living connections', {} as any))
       )
       .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
 
     await expect(retryCallCluster(() => client.ping())).rejects.toMatchInlineSnapshot(
       `[Error: unknown error]`
@@ -82,11 +91,11 @@ describe('retryCallCluster', () => {
 });
 
 describe('migrationRetryCallCluster', () => {
-  let client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
   });
 
@@ -94,7 +103,9 @@ describe('migrationRetryCallCluster', () => {
     client.ping
       .mockImplementationOnce(() => createErrorReturn(error))
       .mockImplementationOnce(() => createErrorReturn(error))
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
   };
 
   it('retries ES API calls that rejects with `NoLivingConnectionsError`', async () => {
@@ -225,7 +236,9 @@ describe('migrationRetryCallCluster', () => {
           } as any)
         )
       )
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
 
     await migrationRetryCallCluster(() => client.ping(), logger, 1);
 
@@ -258,7 +271,9 @@ describe('migrationRetryCallCluster', () => {
           } as any)
         )
       )
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
 
     await expect(
       migrationRetryCallCluster(() => client.ping(), logger, 1)
@@ -274,7 +289,9 @@ describe('migrationRetryCallCluster', () => {
         createErrorReturn(new errors.TimeoutError('timeout error', {} as any))
       )
       .mockImplementationOnce(() => createErrorReturn(new Error('unknown error')))
-      .mockImplementationOnce(() => elasticsearchClientMock.createClientResponse({ ...dummyBody }));
+      .mockImplementationOnce(() =>
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ ...dummyBody })
+      );
 
     await expect(
       migrationRetryCallCluster(() => client.ping(), logger, 1)

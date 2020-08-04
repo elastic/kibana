@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import { CoreSetup } from 'kibana/public';
+import { SharePluginSetup, UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 import { TimeRange } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { JobId } from '../../reporting/common/types';
 import { ExplorerAppState } from './application/explorer/explorer_dashboard_service';
+import { MlStartDependencies } from './plugin';
 
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
 
@@ -81,10 +83,26 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
 
     if (timeRange) queryState.time = timeRange;
 
-    let url = `${this.params.appBasePath}#/explorer`;
+    let url = `${this.params.appBasePath}/explorer`;
     url = setStateToKbnUrl<ExplorerQueryState>('_g', queryState, { useHash: false }, url);
     url = setStateToKbnUrl('_a', appState, { useHash: false }, url);
 
     return url;
   }
+}
+
+/**
+ * Registers the URL generator
+ */
+export function registerUrlGenerator(
+  share: SharePluginSetup,
+  core: CoreSetup<MlStartDependencies>
+) {
+  const baseUrl = core.http.basePath.prepend('/app/ml');
+  share.urlGenerators.registerUrlGenerator(
+    new MlUrlGenerator({
+      appBasePath: baseUrl,
+      useHash: core.uiSettings.get('state:storeInSessionStorage'),
+    })
+  );
 }

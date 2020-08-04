@@ -47,8 +47,6 @@ describe.skip('Mappings editor: text datatype', () => {
 
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
-      _meta: {},
-      _source: {},
       properties: {
         myField: {
           type: 'text',

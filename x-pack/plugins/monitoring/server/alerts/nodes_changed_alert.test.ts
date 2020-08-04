@@ -128,7 +128,8 @@ describe('NodesChangedAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -180,7 +181,8 @@ describe('NodesChangedAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

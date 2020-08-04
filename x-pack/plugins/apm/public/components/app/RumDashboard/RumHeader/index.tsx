@@ -5,16 +5,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { DatePicker } from '../../../shared/DatePicker';
 
-export const RumHeader: React.FC = ({ children }) => (
-  <>
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{children}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DatePicker />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </>
-);
+export function RumHeader({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>{children}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}
