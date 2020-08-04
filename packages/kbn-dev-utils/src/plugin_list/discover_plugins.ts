@@ -25,6 +25,7 @@ import cheerio from 'cheerio';
 
 import { REPO_ROOT } from '../repo_root';
 import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
+import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
   id: string;
@@ -57,16 +58,10 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);
 
         const readmeText = Fs.readFileSync(relativeReadmePath).toString();
-        // First group is to grab the anchor - \[\[(.*)\]\]
-        // Tecond group, (== ), removes the equals from the header
-        // Third group could perhaps be done better, but is essentially:
-        // If there is a sub heading after the intro, match the intro and stop - (([\s\S]*?)(?=\=\=\=|\[\[)))
-        // If there is not a sub heading after the intro, match the intro - ([\s\S]*)
-        const matchAnchorAndIntro = /\[\[(.*)\]\]\n(== )(((([\s\S]*?)(?=\=\=\=|\[\[)))|([\s\S]*))/gm;
 
-        const matches = matchAnchorAndIntro.exec(readmeText);
-        readmeSnippet = matches && matches.length >= 4 ? matches[3].toString() : undefined;
-        readmeAsciidocAnchor = matches && matches.length >= 2 ? matches[1].toString() : undefined;
+        const { firstParagraph, anchor } = extractAsciidocInfo(readmeText);
+        readmeSnippet = firstParagraph;
+        readmeAsciidocAnchor = anchor;
       } else if (readmeName) {
         const readmePath = Path.resolve(directory, readmeName);
         relativeReadmePath = Path.relative(REPO_ROOT, readmePath);

@@ -30,16 +30,15 @@ function* printPlugins(plugins: Plugins, includes: string[]) {
     yield '';
 
     if (plugin.readmeAsciidocAnchor) {
-      yield `- <<${plugin.readmeAsciidocAnchor}>>`;
+      yield `|<<${plugin.readmeAsciidocAnchor}>>`;
 
       includes.push(`include::{kibana-root}/${path}[leveloffset=+1]`);
     } else {
-      yield `- {kib-repo}blob/{branch}/${path}[${plugin.id}]`;
+      yield `|{kib-repo}blob/{branch}/${path}[${plugin.id}]`;
     }
 
     if (!plugin.relativeReadmePath || plugin.readmeSnippet) {
-      yield '';
-      yield plugin.readmeSnippet || 'WARNING: Missing README.';
+      yield plugin.readmeSnippet ? `|${plugin.readmeSnippet}` : '|WARNING: Missing README.';
       yield '';
     }
   }
@@ -67,11 +66,27 @@ NOTE:
 
 [discrete]
 === src/plugins
+
+[%header,cols=2*] 
+|===
+|Name
+|Description
+
 ${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
+
+|===
 
 [discrete]
 === x-pack/plugins
+
+[%header,cols=2*] 
+|===
+|Name
+|Description
+
 ${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
+
+|===
 
 ${Array.from(includes).join('\n')}
 `;
