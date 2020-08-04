@@ -34,7 +34,7 @@ import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
 import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
-const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
+const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config.js');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const EMPTY_MODULE_PATH = require.resolve('./intentionally_empty_module.js');
