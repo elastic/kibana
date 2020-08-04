@@ -43,7 +43,7 @@ interface FunctionDictionary {
 }
 
 const wrapInBackTicks = (str: string) => `\`${str}\``;
-const wrapInDoubleQuotes = (str: string) => (str.charAt(0) === '"' ? str : `"${str}"`);
+const wrapInDoubleQuotes = (str: string) => (str.contains('"') ? str : `"${str}"`);
 const stringSorter = (a: string, b: string) => {
   if (a < b) {
     return -1;

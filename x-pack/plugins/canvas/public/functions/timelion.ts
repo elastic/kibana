@@ -68,7 +68,7 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
           types: ['string'],
           aliases: ['_', 'q'],
           help: argHelp.query,
-          default: '.es(*)',
+          default: '".es(*)"',
         },
         interval: {
           types: ['string'],
