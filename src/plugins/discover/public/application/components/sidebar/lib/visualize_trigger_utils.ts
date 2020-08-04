@@ -22,6 +22,7 @@ import {
 } from '../../../../../../ui_actions/public';
 import { getUiActions, getServices } from '../../../../kibana_services';
 import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
+import { DiscoverServices } from '../../../../build_services';
 
 function getTrigger(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -64,7 +65,7 @@ export async function isFieldVisualizable(
     return false;
   }
   const trigger = getTrigger(field.type);
-  const services = getServices();
+  const services: DiscoverServices = getServices();
   const compatibleActions = await getCompatibleActions(field.name, indexPatternId, trigger);
-  return compatibleActions > 0 && field.visualizable && services.capabilities.visualize.show;
+  return compatibleActions > 0 && field.visualizable && !!services.capabilities.visualize.show;
 }
