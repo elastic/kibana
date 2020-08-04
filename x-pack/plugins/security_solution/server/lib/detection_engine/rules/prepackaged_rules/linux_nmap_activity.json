@@ -7,7 +7,8 @@
     "Security testing tools and frameworks may run `Nmap` in the course of security auditing. Some normal use of this command may originate from security engineers and network or server administrators. Use of nmap by ordinary users is uncommon."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

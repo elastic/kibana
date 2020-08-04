@@ -126,10 +126,17 @@ export class Plugin {
       const coreStart = (await core.getStartServices())[0];
       return coreStart.uiSettings;
     };
-
+    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
+      alert.initializeAlertType(
+        getUiSettingsService,
+        cluster,
+        this.getLogger,
+        config,
+        kibanaUrl,
+        isCloud
+      );
       plugins.alerts.registerType(alert.getAlertType());
     }
 
