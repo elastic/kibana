@@ -13,36 +13,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
 
-  async function assertExpectedMetric(title: string, metric: string) {
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_title"]', title);
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metric);
-  }
-
-  async function assertExpectedChartTitle(title: string) {
-    await PageObjects.lens.assertExactText(`[data-test-subj="lns_ChartTitle"]`, title);
-  }
-
-  async function assertDatatableThText(text: string, index = 0) {
-    return PageObjects.lens.assertExactText(
-      `[data-test-subj="lnsDataTable"] thead th:nth-child(${index + 1}) .euiTableCellContent__text`,
-      text
-    );
-  }
-
-  async function assertDatatableCellText(text: string, rowIndex = 0, colIndex = 0) {
-    return PageObjects.lens.assertExactText(
-      `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${colIndex + 1})`,
-      text
-    );
-  }
-
   describe('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
 
     it('should allow creation of lens xy chart', async () => {
@@ -99,12 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await assertDatatableThText('Maximum of bytes');
-      await assertDatatableCellText('19,986', 0, 0);
+      await PageObjects.lens.assertDatatableThText('Maximum of bytes');
+      await PageObjects.lens.assertDatatableCellText('19,986', 0, 0);
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await assertExpectedMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
 
     it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
@@ -139,18 +116,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('donut');
-      await assertExpectedChartTitle('lnsXYvis');
+      await PageObjects.lens.assertChartTitle('lnsXYvis');
       // TODO: to check if chart is valid, we check dimension panel
       // - once we have access to check if chart renders properly, we should make assertions based on chart
-      expect(
-        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sliceByDimensionPanel')
-      ).to.eql('Top values of ip');
-      expect(
-        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sizeByDimensionPanel')
-      ).to.eql('Average of bytes');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+        'Top values of ip'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
 
       await PageObjects.lens.switchToVisualization('bar');
-      await assertExpectedChartTitle('lnsXYvis');
+      await PageObjects.lens.assertChartTitle('lnsXYvis');
     });
 
     it('should allow seamless transition from bar chart to line chart using layer chart switch', async () => {
@@ -159,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchLayerSeriesType('line');
-      await assertExpectedChartTitle('lnsXYvis');
+      await PageObjects.lens.assertChartTitle('lnsXYvis');
     });
 
     it('should allow seamless transition from pie chart to treemap chart', async () => {
@@ -170,14 +147,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
-        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_groupByDimensionPanel', 0)
+        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 0)
       ).to.eql('Top values of geo.dest');
       expect(
-        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_groupByDimensionPanel', 1)
+        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 1)
       ).to.eql('Top values of geo.src');
-      expect(
-        await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sizeByDimensionPanel')
-      ).to.eql('Average of bytes');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
     });
 
     it('should allow creating a pie chart and switching to datatable', async () => {
@@ -198,10 +175,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await assertDatatableThText('@timestamp per 3 hours', 0);
-      await assertDatatableThText('Average of bytes', 1);
-      await assertDatatableCellText('2015-09-20 00:00', 0, 0);
-      await assertDatatableCellText('6,011.351', 0, 1);
+      await PageObjects.lens.assertDatatableThText('@timestamp per 3 hours', 0);
+      await PageObjects.lens.assertDatatableThText('Average of bytes', 1);
+      await PageObjects.lens.assertDatatableCellText('2015-09-20 00:00', 0, 0);
+      await PageObjects.lens.assertDatatableCellText('6,011.351', 0, 1);
     });
   });
 }

@@ -224,7 +224,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param dimension - the selector of the dimension
      */
-    async getVisibleTextOfDimensionTrigger(dimension: string, index = 0) {
+    async getDimensionTriggerText(dimension: string, index = 0) {
       const dimensionElements = await testSubjects.findAll(dimension);
       const trigger = await testSubjects.findDescendant(
         'lns-dimensionTrigger',
@@ -232,6 +232,57 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
       const text = await trigger.getVisibleText();
       return text;
+    },
+
+    /**
+     * Asserts that metric has expected title and count
+     *
+     * @param title - expected title
+     * @param count - expected count of metric
+     */
+    async assertMetric(title: string, count: string) {
+      await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
+      await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    /**
+     * Asserts expected chart title
+     *
+     * @param title - expected title
+     */
+    async assertChartTitle(title: string) {
+      await this.assertExactText(`[data-test-subj="lns_ChartTitle"]`, title);
+    },
+
+    /**
+     * Asserts that datatable th element has expected text
+     *
+     * @param text - the expected text
+     * @param index - index of th element in datatable
+     */
+    async assertDatatableThText(text: string, index = 0) {
+      return this.assertExactText(
+        `[data-test-subj="lnsDataTable"] thead th:nth-child(${
+          index + 1
+        }) .euiTableCellContent__text`,
+        text
+      );
+    },
+
+    /**
+     * Asserts that the specified datatable cell has expected text
+     *
+     * @param text - the expected text
+     * @param rowIndex - index of row of the cell
+     * @param colIndex - index of column of the cell
+     */
+    async assertDatatableCellText(text: string, rowIndex = 0, colIndex = 0) {
+      return this.assertExactText(
+        `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
+          colIndex + 1
+        })`,
+        text
+      );
     },
   });
 }

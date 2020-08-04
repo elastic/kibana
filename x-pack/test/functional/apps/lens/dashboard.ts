@@ -19,25 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  async function assertExpectedMetric(title: string, metric: string) {
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_title"]', title);
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metric);
-  }
-
-  async function assertExpectedChartTitleInEmbeddable(title: string) {
-    await PageObjects.lens.assertExactText(
-      `[data-test-subj="embeddablePanelHeading-${title}"]`,
-      title
-    );
-  }
-
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
     await browser.getActions().move({ x, y, origin: el._webElement }).click().perform();
   }
 
   describe('lens dashboard tests', () => {
-    it('metric should be embeddable in dashboards', async () => {
+    it('metric should be embeddable', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -45,10 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
 
-    it('click on the bar in XYChart adds proper filters/timerange in dashboard', async () => {
+    it('should be able to add filters/timerange by clicking in XYChart', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -63,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('applyFiltersPopoverButton');
       });
 
-      await assertExpectedChartTitleInEmbeddable('lnsXYvis');
+      await PageObjects.lens.assertChartTitle('lnsXYvis');
       const time = await PageObjects.timePicker.getTimeConfig();
       expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
       expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
