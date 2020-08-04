@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await testSubjects.click('refreshIndicesButton');
       await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
-      await PageObjects.settings.createIndexPattern('logstash-*');
+      await PageObjects.settings.createIndexPattern('logstash-*','');
     });
 
     it(`doesn't show read-only badge`, async () => {
