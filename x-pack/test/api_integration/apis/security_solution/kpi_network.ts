@@ -19,7 +19,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
-      /* eslint-disable @typescript-eslint/naming-convention */
       const expectedResult = {
         __typename: 'KpiNetworkData',
         networkEvents: 6158,
@@ -73,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         dnsQueries: 169,
         tlsHandshakes: 62,
       };
-      /* eslint-enable @typescript-eslint/naming-convention */
+
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetKpiNetworkQuery.Query>({
@@ -103,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
-      /* eslint-disable @typescript-eslint/naming-convention */
       const expectedResult = {
         __typename: 'KpiNetworkData',
         networkEvents: 6158,
@@ -157,7 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
         dnsQueries: 169,
         tlsHandshakes: 62,
       };
-      /* eslint-enable @typescript-eslint/naming-convention */
       it('Make sure that we get KpiNetwork data', () => {
         return client
           .query<GetKpiNetworkQuery.Query>({

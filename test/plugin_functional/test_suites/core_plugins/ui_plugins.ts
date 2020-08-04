@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');

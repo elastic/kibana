@@ -19,7 +19,6 @@ const TO = '3000-01-01T00:00:00.000Z';
 const SOURCE_IP = '10.128.0.35';
 const DESTINATION_IP = '74.125.129.95';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const expectedResult = {
   __typename: 'TlsNode',
   _id: '16989191B1A93ECECD5FE9E63EBD4B5C3B606D26',
@@ -88,7 +87,7 @@ const expectedOverviewSourceResult = {
   },
   totalCount: 3,
 };
-/* eslint-enable @typescript-eslint/naming-convention */
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('securitySolutionGraphQLClient');

@@ -33,7 +33,6 @@ const getPathWithHash = (absoluteUrl: string) => {
   return `${parsed.path}${parsed.hash ?? ''}`;
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');

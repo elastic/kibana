@@ -28,12 +28,10 @@ declare global {
      * We use this global variable to track page history changes to ensure that
      * navigation is done without causing a full page reload.
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __RENDERING_SESSION__: string[];
   }
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const appsMenu = getService('appsMenu');
