@@ -19,6 +19,8 @@ export const ID_FIELD = '[data-test-subj="timeline"] [data-test-subj="field-name
 
 export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
+export const PIN_EVENT = '[data-test-subj="pin"]';
+
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
 export const REMOVE_COLUMN =
