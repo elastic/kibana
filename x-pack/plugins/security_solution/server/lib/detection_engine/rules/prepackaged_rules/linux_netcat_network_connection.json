@@ -7,7 +7,8 @@
     "Netcat is a dual-use tool that can be used for benign or malicious activity. Netcat is included in some Linux distributions so its presence is not necessarily suspicious. Some normal use of this program, while uncommon, may originate from scripts, automation tools, and frameworks."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
