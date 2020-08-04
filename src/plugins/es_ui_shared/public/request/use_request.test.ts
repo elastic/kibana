@@ -145,9 +145,6 @@ describe('useRequest hook', () => {
         expect(hookResult.isLoading).toBe(false);
         expect(hookResult.error).toBe(getErrorResponse().error);
 
-        // NOTE: This emits the warning "You called act(async () => ...) without await", because
-        // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
-        // because we want to assert against the hook state while the Promise is pending.
         act(() => {
           hookResult.sendRequest();
         });
@@ -183,9 +180,6 @@ describe('useRequest hook', () => {
         expect(hookResult.isLoading).toBe(false);
         expect(hookResult.data).toBe(getSuccessResponse().data);
 
-        // NOTE: This emits the warning "You called act(async () => ...) without await", because
-        // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
-        // because we want to assert against the hook state while the Promise is pending.
         act(() => {
           hookResult.sendRequest();
         });
@@ -235,10 +229,6 @@ describe('useRequest hook', () => {
       });
 
       it('resets the pollIntervalMs', async () => {
-        // NOTE: This tests emits the warning "You called act(async () => ...) without await", because
-        // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
-        // because we want to assert against the hook state while the Promise is pending.
-
         const { setupSuccessRequest, advanceTime, hookResult, getSendRequestSpy } = helpers;
         const DOUBLE_REQUEST_TIME = REQUEST_TIME * 2;
         setupSuccessRequest({ pollIntervalMs: DOUBLE_REQUEST_TIME });
@@ -264,10 +254,6 @@ describe('useRequest hook', () => {
       });
 
       it(`doesn't block requests that are in flight`, async () => {
-        // NOTE: This test emits the warning "You called act(async () => ...) without await", because
-        // sendRequest returns a Promise. We don't want to await the resolution of this Promise,
-        // because we want to assert against the hook state while the Promise is pending.
-
         const {
           setupSuccessRequest,
           advanceTime,
