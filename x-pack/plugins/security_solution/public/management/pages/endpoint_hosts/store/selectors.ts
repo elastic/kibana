@@ -52,6 +52,9 @@ export const endpointPackageVersion = createSelector(
   (info) => info?.version ?? undefined
 );
 
+/**
+ * Returns the index patterns for the SearchBar to use for autosuggest
+ */
 export const patterns = (state: Immutable<HostState>) => state.patterns;
 
 /**

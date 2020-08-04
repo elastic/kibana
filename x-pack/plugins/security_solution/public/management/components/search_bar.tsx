@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
-import { Query, SearchBar } from '../../../../../../src/plugins/data/public/';
+import { Query, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public/';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../pages/endpoint_hosts/view/url_from_query_params';
 import { useHostSelector } from '../pages/endpoint_hosts/view/hooks';
 import * as selectors from '../pages/endpoint_hosts/store/selectors';
+import { clone } from '../pages/endpoint_hosts/models/index_pattern';
 
 const AdminQueryBar = styled.div`
   margin-bottom: ${(props) => props.theme.eui.ruleMargins.marginMedium};
@@ -25,6 +27,10 @@ export const AdminSearchBar = memo(() => {
   const queryParams = useHostSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useHostSelector(selectors.patterns);
   const searchBarQuery = useHostSelector(selectors.searchBarQuery);
+  const clonedIndexPatterns = useMemo(
+    () => searchBarIndexPatterns.map((pattern) => clone(pattern)),
+    [searchBarIndexPatterns]
+  );
 
   const onQuerySubmit = useCallback(
     (params: { query?: Query }) => {
@@ -44,9 +50,9 @@ export const AdminSearchBar = memo(() => {
         <AdminQueryBar>
           <SearchBar
             dataTestSubj="adminSearchBar"
-            appName="endpoint"
             query={searchBarQuery}
-            indexPatterns={searchBarIndexPatterns}
+            indexPatterns={clonedIndexPatterns}
+            timeHistory={new TimeHistory(new Storage(localStorage))}
             onQuerySubmit={onQuerySubmit}
             isLoading={false}
             showFilterBar={false}
