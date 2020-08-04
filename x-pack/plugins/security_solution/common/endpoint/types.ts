@@ -564,29 +564,119 @@ export interface EndpointEvent {
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
-/**
- * A mapping type that returns a more ES safe version of an underlying type.
- * This should take type we expect to get from the sensor, and return a similar type.
- * The type it returns should represent any value that ES could possibly return.
- * The type from the sensor and the type from ES are different because:
- * 1. sensor versions
- * 2. index allows other data and other producers populate it
- * 3. bugs.
- */
-export type ECSSafe<T> = T extends unknown[]
-  ? T
-  : T extends object
-  ? { [K in keyof T]?: ECSSafe<T[K]> }
-  : number extends T
-  ? number | number[]
-  : string extends T
-  ? string | string[]
-  : T;
+export type ECSField<T> = T | null | Array<T | null>;
+
+export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
 
 /**
  * Safer version of ResolverEvent. Please use this going forward.
  */
-export type SafeResolverEvent = ECSSafe<EndpointEvent> | ECSSafe<LegacyEndpointEvent>;
+export type SafeEndpointEvent = Partial<{
+  '@timestamp': ECSField<number>;
+  agent: Partial<{
+    id: ECSField<string>;
+    version: ECSField<string>;
+    type: ECSField<string>;
+  }>;
+  ecs: Partial<{
+    version: ECSField<string>;
+  }>;
+  event: Partial<{
+    category: ECSField<string>;
+    type: ECSField<string>;
+    id: ECSField<string>;
+    kind: ECSField<string>;
+  }>;
+  host: Partial<{
+    id: ECSField<string>;
+    hostname: ECSField<string>;
+    name: ECSField<string>;
+    ip: ECSField<string>;
+    mac: ECSField<string>;
+    architecture: ECSField<string>;
+    os: Partial<{
+      full: ECSField<string>;
+      name: ECSField<string>;
+      version: ECSField<string>;
+      platform: ECSField<string>;
+      family: ECSField<string>;
+      Ext: Partial<{
+        variant: ECSField<string>;
+      }>;
+    }>;
+  }>;
+  network: Partial<{
+    direction: ECSField<string>;
+    forwarded_ip: ECSField<string>;
+  }>;
+  dns: Partial<{
+    question: Partial<{ name: ECSField<string> }>;
+  }>;
+  process: Partial<{
+    entity_id: ECSField<string>;
+    name: ECSField<string>;
+    executable: ECSField<string>;
+    args: ECSField<string>;
+    code_signature: Partial<{
+      status: ECSField<string>;
+      subject_name: ECSField<string>;
+    }>;
+    pid: ECSField<number>;
+    hash: Partial<{
+      md5: ECSField<string>;
+    }>;
+    parent: Partial<{
+      entity_id: ECSField<string>;
+      name: ECSField<string>;
+      pid: ECSField<number>;
+    }>;
+    /*
+     * The array has a special format. The entity_ids towards the beginning of the array are closer ancestors and the
+     * values towards the end of the array are more distant ancestors (grandparents). Therefore
+     * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
+     */
+    Ext: Partial<{
+      ancestry: ECSField<string>;
+    }>;
+  }>;
+  user: Partial<{
+    domain: ECSField<string>;
+    name: ECSField<string>;
+  }>;
+  file: Partial<{ path: ECSField<string> }>;
+  registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+}>;
+
+export interface SafeLegacyEndpointEvent {
+  '@timestamp'?: ECSField<number>;
+  // This is required
+  endgame: Partial<{
+    pid: ECSField<number>;
+    ppid: ECSField<number>;
+    event_type_full: ECSField<string>;
+    event_subtype_full: ECSField<string>;
+    event_timestamp: ECSField<number>;
+    event_type: ECSField<number>;
+    unique_pid: ECSField<number>;
+    unique_ppid: ECSField<number>;
+    machine_id: ECSField<string>;
+    process_name: ECSField<string>;
+    process_path: ECSField<string>;
+    timestamp_utc: ECSField<string>;
+    serial_event_id: ECSField<number>;
+  }>;
+  agent: Partial<{
+    id: ECSField<string>;
+    type: ECSField<string>;
+    version: ECSField<string>;
+  }>;
+  event: Partial<{
+    action: ECSField<string>;
+    type: ECSField<string>;
+    category: ECSField<string>;
+    id: ECSField<string>;
+  }>;
+}
 
 /**
  * The response body for the resolver '/entity' index API

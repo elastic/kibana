@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function hasValue<T>(valueOrCollection: T | T[] | undefined, expected: T): boolean {
+import { ECSField } from '../types';
+
+export function hasValue<T>(valueOrCollection: ECSField<T>, expected: T): boolean {
   if (Array.isArray(valueOrCollection)) {
     return valueOrCollection.includes(expected);
   } else {
@@ -12,22 +14,43 @@ export function hasValue<T>(valueOrCollection: T | T[] | undefined, expected: T)
   }
 }
 
-export function firstValue<T>(valueOrCollection: T | T[] | undefined): T | undefined {
-  if (Array.isArray(valueOrCollection)) {
-    return valueOrCollection[0];
+/**
+ * Return first non-null value.
+ */
+export function firstValue<T>(valueOrCollection: ECSField<T>): T | undefined {
+  if (valueOrCollection === null) {
+    // make it consistent
+    return undefined;
+  } else if (Array.isArray(valueOrCollection)) {
+    for (const value of valueOrCollection) {
+      // TODO can ES return an array with null in the first position and non-null values later on?
+      if (value !== null) {
+        return value;
+      }
+    }
   } else {
     return valueOrCollection;
   }
 }
 
-export function values<T>(valueOrCollection: T | T[] | undefined): T[] {
+/*
+ * Get an array of all non-null values. If there was originally 1 value, return it wrapped in an array. If there were multiple values, return the non-null ones.
+ * Use this when you want to consistently access the value(s) as an array.
+ */
+export function values<T>(valueOrCollection: ECSField<T>): T[] {
   if (Array.isArray(valueOrCollection)) {
-    return valueOrCollection;
-  } else if (valueOrCollection !== undefined) {
-    // wrap it in an array
+    const nonNullValues: T[] = [];
+    for (const value of valueOrCollection) {
+      if (value !== null) {
+        nonNullValues.push(value);
+      }
+    }
+    return nonNullValues;
+  } else if (valueOrCollection !== null) {
+    // if there is a single non-null value, wrap it in an array and return it.
     return [valueOrCollection];
   } else {
-    // return `[]` for undefined
+    // if the value was null, return `[]`.
     return [];
   }
 }

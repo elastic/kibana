@@ -22,7 +22,7 @@ import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
-import { entityId } from '../../../common/endpoint/models/event';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
 import { ResolverProps } from '../types';
 
@@ -116,7 +116,7 @@ export const ResolverWithoutProviders = React.memo(
               )
             )}
             {[...processNodePositions].map(([processEvent, position]) => {
-              const processEntityId = entityId(processEvent);
+              const processEntityId = entityIDSafeVersion(processEvent);
               return (
                 <ProcessEventDot
                   key={processEntityId}

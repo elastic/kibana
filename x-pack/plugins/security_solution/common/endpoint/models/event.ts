@@ -3,12 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSSafe } from '../types';
+import {
+  LegacyEndpointEvent,
+  ResolverEvent,
+  SafeResolverEvent,
+  SafeLegacyEndpointEvent,
+} from '../types';
 import { firstValue } from './ecs_safety_helpers';
 
 export function isLegacyEventSafeVersion(
   event: SafeResolverEvent
-): event is ECSSafe<LegacyEndpointEvent> & { endgame: ECSSafe<LegacyEndpointEvent['endgame']> } {
+): event is SafeLegacyEndpointEvent {
   return 'endgame' in event && event.endgame !== undefined;
 }
 
@@ -39,7 +44,9 @@ export function isProcessRunning(event: ResolverEvent): boolean {
 }
 
 export function eventTimestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
-  return firstValue(event?.['@timestamp'] ?? event.endgame?.timestamp_utc);
+  return isLegacyEventSafeVersion(event)
+    ? firstValue(event.endgame?.timestamp_utc)
+    : firstValue(event?.['@timestamp']);
 }
 
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
@@ -55,6 +62,14 @@ export function eventName(event: ResolverEvent): string {
     return event.endgame.process_name ? event.endgame.process_name : '';
   } else {
     return event.process.name;
+  }
+}
+
+export function processNameSafeVersion(event: SafeResolverEvent): string | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return firstValue(event.endgame.process_name);
+  } else {
+    return firstValue(event.process?.name);
   }
 }
 
@@ -79,8 +94,8 @@ export function entityId(event: ResolverEvent): string {
 }
 
 export function entityIDSafeVersion(event: SafeResolverEvent): string | undefined {
-  if (event.endgame) {
-    return event.endgame.unique_pid === undefined
+  if (isLegacyEventSafeVersion(event)) {
+    return event.endgame?.unique_pid === undefined
       ? undefined
       : String(firstValue(event.endgame.unique_pid));
   } else {

@@ -519,7 +519,7 @@ const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = creat
         maxX: nodeX + 0.5 * processNodeViewWidth,
         maxY: nodeY + 0.5 * processNodeViewHeight,
         position,
-        entity: processEvent as ResolverEvent,
+        entity: processEvent,
         type: 'processNode',
       };
       processesToIndex.push(indexedEvent);

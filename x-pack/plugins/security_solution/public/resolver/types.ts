@@ -11,7 +11,6 @@ import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
 import {
-  ResolverEvent,
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
