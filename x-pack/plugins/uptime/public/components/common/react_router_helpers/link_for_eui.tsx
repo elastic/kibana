@@ -28,7 +28,7 @@ interface IEuiReactRouterProps {
   to: string;
 }
 
-export const EuiReactRouterHelper: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
+export const ReactRouterHelperForEUi: React.FC<IEuiReactRouterProps> = ({ to, children }) => {
   const history = useHistory();
 
   const onClick = (event: React.MouseEvent) => {
@@ -53,22 +53,22 @@ type TEuiReactRouterButtonProps = EuiButtonProps & IEuiReactRouterProps;
 type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProps;
 
 export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
-  <EuiReactRouterHelper to={to}>
+  <ReactRouterHelperForEUi to={to}>
     <EuiLink {...rest} />
-  </EuiReactRouterHelper>
+  </ReactRouterHelperForEUi>
 );
 
 export const ReactRouterEuiButton: React.FC<TEuiReactRouterButtonProps> = ({ to, ...rest }) => (
-  <EuiReactRouterHelper to={to}>
+  <ReactRouterHelperForEUi to={to}>
     <EuiButton {...rest} />
-  </EuiReactRouterHelper>
+  </ReactRouterHelperForEUi>
 );
 
 export const ReactRouterEuiButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps> = ({
   to,
   ...rest
 }) => (
-  <EuiReactRouterHelper to={to}>
+  <ReactRouterHelperForEUi to={to}>
     <EuiButtonEmpty {...rest} />
-  </EuiReactRouterHelper>
+  </ReactRouterHelperForEUi>
 );

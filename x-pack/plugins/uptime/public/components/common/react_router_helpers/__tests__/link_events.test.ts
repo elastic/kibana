@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { letBrowserHandleEvent } from '../react_router_helpers';
+import { letBrowserHandleEvent } from '../index';
 
 describe('letBrowserHandleEvent', () => {
   const event = {
