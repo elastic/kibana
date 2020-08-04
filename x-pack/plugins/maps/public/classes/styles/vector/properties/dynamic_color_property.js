@@ -8,7 +8,7 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
 import React from 'react';
-import { COLOR_MAP_TYPE, MB_LOOKUP_FUNCTION } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
@@ -114,12 +114,9 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       }, []);
       const firstStopValue = colorStops[0];
       const lessThanFirstStopValue = firstStopValue - 1;
-      const mbLookupFunction = this.supportsMbFeatureState()
-        ? MB_LOOKUP_FUNCTION.FEATURE_STATE
-        : MB_LOOKUP_FUNCTION.GET;
       return [
         'step',
-        ['coalesce', [mbLookupFunction, targetName], lessThanFirstStopValue],
+        ['coalesce', [this.getMbLookupFunction(), targetName], lessThanFirstStopValue],
         RGBA_0000, // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
@@ -139,16 +136,13 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       }
 
       const lessThanFirstStopValue = rangeFieldMeta.min - 1;
-      const mbLookupFunction = this.supportsMbFeatureState()
-        ? MB_LOOKUP_FUNCTION.FEATURE_STATE
-        : MB_LOOKUP_FUNCTION.GET;
       return [
         'interpolate',
         ['linear'],
         makeMbClampedNumberExpression({
           minValue: rangeFieldMeta.min,
           maxValue: rangeFieldMeta.max,
-          lookupFunction: mbLookupFunction,
+          lookupFunction: this.getMbLookupFunction(),
           fallback: lessThanFirstStopValue,
           fieldName: targetName,
         }),
