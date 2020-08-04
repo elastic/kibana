@@ -54,19 +54,19 @@ export const getListHandler: RequestHandler = async (context, request, response)
             aggs: {
               dataset: {
                 terms: {
-                  field: 'dataset.name',
+                  field: 'datastream.dataset',
                   size: 1,
                 },
               },
               namespace: {
                 terms: {
-                  field: 'dataset.namespace',
+                  field: 'datastream.namespace',
                   size: 1,
                 },
               },
               type: {
                 terms: {
-                  field: 'dataset.type',
+                  field: 'datastream.type',
                   size: 1,
                 },
               },
