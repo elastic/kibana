@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
@@ -79,7 +79,7 @@ function ErrorGroupOverview() {
       params: {
         serviceName,
       },
-      projection: PROJECTION.ERROR_GROUPS,
+      projection: Projection.errorGroups,
     };
 
     return config;
