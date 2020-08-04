@@ -21,7 +21,7 @@ import {
 import { ImmutableCombineReducers } from '../../common/store';
 import { Immutable } from '../../../common/endpoint/types';
 import { ManagementState } from '../types';
-import { hostListReducer, initialHostListState } from '../pages/endpoint_hosts/store/reducer';
+import { endpointListReducer, initialHostListState } from '../pages/endpoint_hosts/store/reducer';
 
 const immutableCombineReducers: ImmutableCombineReducers = combineReducers;
 
@@ -40,5 +40,5 @@ export const mockManagementState: Immutable<ManagementState> = {
 export const managementReducer = immutableCombineReducers({
   [MANAGEMENT_STORE_POLICY_LIST_NAMESPACE]: policyListReducer,
   [MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE]: policyDetailsReducer,
-  [MANAGEMENT_STORE_HOSTS_NAMESPACE]: hostListReducer,
+  [MANAGEMENT_STORE_HOSTS_NAMESPACE]: endpointListReducer,
 });

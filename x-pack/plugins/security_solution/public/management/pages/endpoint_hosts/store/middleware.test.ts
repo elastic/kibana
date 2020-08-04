@@ -19,9 +19,9 @@ import { AppAction } from '../../../../common/store/actions';
 import { mockHostResultList } from './mock_host_result_list';
 import { listData } from './selectors';
 import { HostState } from '../types';
-import { hostListReducer } from './reducer';
+import { endpointListReducer } from './reducer';
 import { hostMiddlewareFactory } from './middleware';
-import { getHostListPath } from '../../../common/routing';
+import { getEndpointListPath } from '../../../common/routing';
 
 describe('host list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -44,7 +44,7 @@ describe('host list middleware', () => {
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
     store = createStore(
-      hostListReducer,
+      endpointListReducer,
       applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
@@ -60,7 +60,7 @@ describe('host list middleware', () => {
       type: 'userChangedUrl',
       payload: {
         ...history.location,
-        pathname: getHostListPath({ name: 'hostList' }),
+        pathname: getEndpointListPath({ name: 'endpointList' }),
       },
     });
     await waitForAction('serverReturnedHostList');

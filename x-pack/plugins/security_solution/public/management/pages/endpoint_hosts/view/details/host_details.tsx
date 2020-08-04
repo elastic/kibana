@@ -26,7 +26,7 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getHostDetailsPath } from '../../../../common/routing';
+import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
@@ -86,14 +86,14 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
-        getHostDetailsPath({
-          name: 'hostPolicyResponse',
+        getEndpointDetailsPath({
+          name: 'endpointPolicyResponse',
           ...currentUrlParams,
           selected_host: details.host.id,
         })
       ),
-      getHostDetailsPath({
-        name: 'hostPolicyResponse',
+      getEndpointDetailsPath({
+        name: 'endpointPolicyResponse',
         ...currentUrlParams,
         selected_host: details.host.id,
       }),
@@ -110,7 +110,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       onDoneNavigateTo: [
         'securitySolution:administration',
         {
-          path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
+          path: getEndpointDetailsPath({ name: 'endpointDetails', selected_host: details.host.id }),
         },
       ],
     },

@@ -15,7 +15,7 @@ import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
 import { hostMiddlewareFactory } from './middleware';
 
-import { hostListReducer } from './reducer';
+import { endpointListReducer } from './reducer';
 
 import { uiQueryParams } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
@@ -24,7 +24,7 @@ import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
-import { getHostListPath } from '../../../common/routing';
+import { getEndpointListPath } from '../../../common/routing';
 
 describe('host list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -47,7 +47,7 @@ describe('host list pagination: ', () => {
     history = createBrowserHistory();
     const middleware = hostMiddlewareFactory(fakeCoreStart, depsStart);
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
-    store = createStore(hostListReducer, applyMiddleware(middleware, actionSpyMiddleware));
+    store = createStore(endpointListReducer, applyMiddleware(middleware, actionSpyMiddleware));
 
     history.listen((location) => {
       store.dispatch({ type: 'userChangedUrl', payload: location });
@@ -56,7 +56,7 @@ describe('host list pagination: ', () => {
     queryParams = () => uiQueryParams(store.getState());
 
     historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(getHostListPath({ name: 'hostList', ...nextQueryParams }));
+      return history.push(getEndpointListPath({ name: 'endpointList', ...nextQueryParams }));
     };
   });
 
@@ -70,7 +70,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: getHostListPath({ name: 'hostList' }),
+          pathname: getEndpointListPath({ name: 'endpointList' }),
         },
       });
       await waitForAction('serverReturnedHostList');

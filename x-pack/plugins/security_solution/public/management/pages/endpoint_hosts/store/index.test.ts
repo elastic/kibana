@@ -9,13 +9,13 @@ import { HostState } from '../types';
 import { listData } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
 import { HostAction } from './action';
-import { hostListReducer } from './reducer';
+import { endpointListReducer } from './reducer';
 
 describe('HostList store concerns', () => {
   let store: Store<HostState>;
   let dispatch: Dispatch<HostAction>;
   const createTestStore = () => {
-    store = createStore(hostListReducer);
+    store = createStore(endpointListReducer);
     dispatch = store.dispatch;
   };
 

@@ -7,7 +7,7 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 
-import { HostList } from './index';
+import { EndpointList } from './index';
 import {
   mockHostDetailsApiResult,
   mockHostResultList,
@@ -38,7 +38,7 @@ describe('when on the hosts page', () => {
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
-    render = () => mockedContext.render(<HostList />);
+    render = () => mockedContext.render(<EndpointList />);
     reactTestingLibrary.act(() => {
       history.push('/hosts');
     });

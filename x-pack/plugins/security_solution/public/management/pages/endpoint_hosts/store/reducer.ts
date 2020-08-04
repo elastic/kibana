@@ -33,7 +33,7 @@ export const initialHostListState: Immutable<HostState> = {
 };
 
 /* eslint-disable-next-line complexity */
-export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
+export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
   state = initialHostListState,
   action
 ) => {

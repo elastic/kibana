@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { HostDetailsFlyout } from './details';
+import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useHostSelector } from './hooks';
 import {
@@ -46,12 +46,12 @@ import {
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostAction } from '../store/action';
 import { HostPolicyLink } from './components/host_policy_link';
 
-const HostListNavLink = memo<{
+const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
@@ -71,10 +71,10 @@ const HostListNavLink = memo<{
     </EuiLink>
   );
 });
-HostListNavLink.displayName = 'HostListNavLink';
+EndpointListNavLink.displayName = 'EndpointListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-export const HostList = () => {
+export const EndpointList = () => {
   const history = useHistory();
   const {
     listData,
@@ -108,10 +108,10 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
-      // FIXME: PT: if host details is open, table is not displaying correct number of rows
+      // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
       history.push(
-        getHostListPath({
-          name: 'hostList',
+        getEndpointListPath({
+          name: 'endpointList',
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -130,12 +130,12 @@ export const HostList = () => {
       state: {
         onCancelNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
-        onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
+        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
         onSaveNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
     }
@@ -148,7 +148,7 @@ export const HostList = () => {
     state: {
       onDoneNavigateTo: [
         'securitySolution:administration',
-        { path: getHostListPath({ name: 'hostList' }) },
+        { path: getEndpointListPath({ name: 'endpointList' }) },
       ],
     },
   });
@@ -194,17 +194,17 @@ export const HostList = () => {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getHostDetailsPath(
+          const toRoutePath = getEndpointDetailsPath(
             {
               ...queryParams,
-              name: 'hostDetails',
+              name: 'endpointDetails',
               selected_host: id,
             },
             search
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <HostListNavLink
+            <EndpointListNavLink
               name={hostname}
               href={toRouteUrl}
               route={toRoutePath}
@@ -260,8 +260,8 @@ export const HostList = () => {
           defaultMessage: 'Configuration Status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getHostDetailsPath({
-            name: 'hostPolicyResponse',
+          const toRoutePath = getEndpointDetailsPath({
+            name: 'endpointPolicyResponse',
             ...queryParams,
             selected_host: item.metadata.host.id,
           });
@@ -272,7 +272,7 @@ export const HostList = () => {
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
-              <HostListNavLink
+              <EndpointListNavLink
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
@@ -385,15 +385,15 @@ export const HostList = () => {
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">
                   <FormattedMessage
-                    id="xpack.securitySolution.hostList.pageTitle"
-                    defaultMessage="Hosts"
+                    id="xpack.securitySolution.endpointList.pageTitle"
+                    defaultMessage="Endpoints"
                   />
                 </h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.hostList.beta', {
+                label={i18n.translate('xpack.securitySolution.endpoint.endpointList.beta', {
                   defaultMessage: 'Beta',
                 })}
               />
@@ -403,7 +403,7 @@ export const HostList = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.hostList.pageSubTitle"
+                id="xpack.securitySolution.endpointList.pageSubTitle"
                 defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
@@ -411,7 +411,7 @@ export const HostList = () => {
         </>
       }
     >
-      {hasSelectedHost && <HostDetailsFlyout />}
+      {hasSelectedHost && <EndpointDetailsFlyout />}
       {listData && listData.length > 0 && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">

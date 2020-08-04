@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOSTS_TAB = i18n.translate('xpack.securitySolution.hostsTab', {
-  defaultMessage: 'Hosts',
+export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
+  defaultMessage: 'Endpoints',
 });
 
 export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab', {

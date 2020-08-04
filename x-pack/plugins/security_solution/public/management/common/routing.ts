@@ -10,7 +10,7 @@ import { generatePath } from 'react-router-dom';
 import querystring from 'querystring';
 
 import {
-  MANAGEMENT_ROUTING_HOSTS_PATH,
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PATH,
 } from './constants';
@@ -35,8 +35,8 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
 type HostDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
   Required<Pick<HostIndexUIQueryParams, 'selected_host'>>;
 
-export const getHostListPath = (
-  props: { name: 'default' | 'hostList' } & HostIndexUIQueryParams,
+export const getEndpointListPath = (
+  props: { name: 'default' | 'endpointList' } & HostIndexUIQueryParams,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
@@ -45,28 +45,28 @@ export const getHostListPath = (
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  if (name === 'hostList') {
-    return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
-      tabName: AdministrationSubTab.hosts,
+  if (name === 'endpointList') {
+    return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+      tabName: AdministrationSubTab.endpoints,
     })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
   }
   return `${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 
-export const getHostDetailsPath = (
-  props: { name: 'hostDetails' | 'hostPolicyResponse' } & HostIndexUIQueryParams &
+export const getEndpointDetailsPath = (
+  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & HostIndexUIQueryParams &
     HostDetailsUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  queryParams.show = (props.name === 'hostPolicyResponse'
+  queryParams.show = (props.name === 'endpointPolicyResponse'
     ? 'policy_response'
     : '') as HostIndexUIQueryParams['show'];
   const urlQueryParams = querystringStringify<HostDetailsUrlProps, typeof queryParams>(queryParams);
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
-  return `${generatePath(MANAGEMENT_ROUTING_HOSTS_PATH, {
-    tabName: AdministrationSubTab.hosts,
+  return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {
+    tabName: AdministrationSubTab.endpoints,
   })}${appendSearch(`${urlQueryParams ? `${urlQueryParams}${urlSearch}` : urlSearch}`)}`;
 };
 

@@ -38,11 +38,11 @@ import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { getHostListPath } from '../../../../common/routing';
+import { getEndpointListPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
-export const HostDetailsFlyout = memo(() => {
+export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const toasts = useToasts();
   const queryParams = useHostSelector(uiQueryParams);
@@ -105,7 +105,7 @@ export const HostDetailsFlyout = memo(() => {
   );
 });
 
-HostDetailsFlyout.displayName = 'HostDetailsFlyout';
+EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
@@ -120,14 +120,14 @@ const PolicyResponseFlyoutPanel = memo<{
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
       formatUrl(
-        getHostListPath({
-          name: 'hostList',
+        getEndpointListPath({
+          name: 'endpointList',
           ...queryParams,
           selected_host: hostMeta.host.id,
         })
       ),
-      getHostListPath({
-        name: 'hostList',
+      getEndpointListPath({
+        name: 'endpointList',
         ...queryParams,
         selected_host: hostMeta.host.id,
       }),
