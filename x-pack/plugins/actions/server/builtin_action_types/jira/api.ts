@@ -12,6 +12,7 @@ import {
   GetIncidentApiHandlerArgs,
   CreateIssueMetadataHandlerArgs,
   ExternalServiceApi,
+  Incident,
 } from './types';
 
 // TODO: to remove, need to support Case
@@ -43,7 +44,6 @@ const pushToServiceHandler = async ({
   externalService,
   mapping,
   params,
-  secrets,
   logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { externalId, comments } = params;
@@ -62,7 +62,7 @@ const pushToServiceHandler = async ({
     }
   }
 
-  let incident;
+  let incident: Incident;
   // TODO: should be removed later but currently keep it for the Case implementation support
   if (mapping) {
     const fields = prepareFieldsForTransformation({
@@ -94,7 +94,6 @@ const pushToServiceHandler = async ({
     });
   }
 
-  // TODO: should temporary keep comments for a Case usage
   if (comments && Array.isArray(comments) && comments.length > 0) {
     const commentsTransformed = mapping
       ? transformComments(comments, ['informationAdded'])
@@ -123,7 +122,7 @@ export const transformFields = ({
   params,
   fields,
   currentIncident,
-}: TransformFieldsArgs): Record<string, string> => {
+}: TransformFieldsArgs): Incident => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
     return {
@@ -142,7 +141,7 @@ export const transformFields = ({
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
-  }, {});
+  }, {} as Incident);
 };
 
 export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {

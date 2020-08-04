@@ -43,7 +43,7 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   issueType: schema.nullable(schema.string()),
   priority: schema.nullable(schema.string()),
   labels: schema.nullable(schema.arrayOf(schema.string())),
-  // TODO: remove later  - need for support Case push multiple comments
+  // TODO: modify later to string[] - need for support Case schema
   comments: schema.maybe(schema.arrayOf(CommentSchema)),
   ...EntityInformation,
 });

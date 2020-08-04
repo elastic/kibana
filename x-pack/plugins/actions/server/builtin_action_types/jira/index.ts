@@ -97,7 +97,6 @@ async function executor(
       externalService,
       mapping,
       params: { ...pushToServiceParams, externalObject },
-      secrets,
       logger,
     });
 

@@ -13,6 +13,14 @@ describe('IndexParamsFields renders', () => {
     const actionParams = {
       documents: [{ test: 123 }],
     };
+    const connector = {
+      secrets: {},
+      config: {},
+      id: 'test',
+      actionTypeId: '.test',
+      name: 'Test',
+      isPreconfigured: false,
+    };
     const wrapper = mountWithIntl(
       <ParamsFields
         actionParams={actionParams}
@@ -20,6 +28,7 @@ describe('IndexParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{

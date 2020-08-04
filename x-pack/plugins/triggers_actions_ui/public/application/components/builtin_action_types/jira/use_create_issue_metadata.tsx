@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { EuiSelectOption } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
+import { map } from 'lodash/fp';
 import { ActionConnector } from '../../../../types';
 import { getCreateIssueMetadata } from './api';
 
@@ -91,10 +92,13 @@ export const useCreateIssueMetadata = ({
     if (selectedIssueType != null) {
       const fields = issueTypes[selectedIssueType]?.fields ?? {};
       const priorities = fields.priority?.allowedValues ?? [];
-      const options = priorities.map<string>((priority) => ({
-        value: priority.name,
-        text: priority.name,
-      }));
+      const options = map(
+        (priority) => ({
+          value: priority.name,
+          text: priority.name,
+        }),
+        priorities
+      );
       setPrioritiesSelectOptions(options);
     }
   }, [selectedIssueType, issueTypes]);

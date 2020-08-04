@@ -19,7 +19,7 @@ import {
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { IncidentConfigurationSchema } from './case_schema';
-import { PushToServiceResponse } from './case_types';
+import { PushToServiceResponse, Comment } from './case_types';
 import { Logger } from '../../../../../../src/core/server';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -57,11 +57,18 @@ export interface ExternalServiceCommentResponse {
 
 export type ExternalServiceParams = Record<string, unknown>;
 
+export type Incident = Pick<
+  ExecutorSubActionPushParams,
+  'description' | 'priority' | 'labels' | 'issueType'
+> & { summary: string };
+
 export interface CreateIncidentParams {
-  incident: Pick<
-    ExecutorSubActionPushParams,
-    'description' | 'priority' | 'labels' | 'issueType'
-  > & { summary: string };
+  incident: Incident;
+}
+
+export interface CreateCommentParams {
+  incidentId: string;
+  comment: Comment;
 }
 
 export interface ExternalService {
@@ -69,18 +76,13 @@ export interface ExternalService {
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
+  createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   getCreateIssueMetadata: () => Promise<ExternalServiceParams>;
   getCapabilities: () => Promise<ExternalServiceParams>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
   externalObject: Record<string, any>;
-}
-
-export interface ExternalServiceApiHandlerArgs {
-  externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
@@ -99,9 +101,13 @@ export type ExecutorSubActionGetCapabilitiesParams = TypeOf<
   typeof ExecutorSubActionGetCapabilitiesParamsSchema
 >;
 
+export interface ExternalServiceApiHandlerArgs {
+  externalService: ExternalService;
+  mapping: Map<string, any> | null;
+}
+
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
-  secrets: Record<string, unknown>;
   logger: Logger;
 }
 
@@ -118,11 +124,6 @@ export interface CreateIssueMetadataHandlerArgs {
   params: ExecutorSubActionCreateIssueMetadataParams;
 }
 
-export interface GetCapabilitiesHandlerArgs {
-  externalService: ExternalService;
-  params: ExecutorSubActionGetCapabilitiesParams;
-}
-
 export type GetCreateIssueMetadataResponse = Record<string, unknown>;
 
 export interface ExternalServiceApi {
@@ -132,4 +133,8 @@ export interface ExternalServiceApi {
   getCreateIssueMetadata: (
     args: CreateIssueMetadataHandlerArgs
   ) => Promise<GetCreateIssueMetadataResponse>;
+}
+
+export interface Fields {
+  [key: string]: string | string[] | { name: string } | { key: string };
 }

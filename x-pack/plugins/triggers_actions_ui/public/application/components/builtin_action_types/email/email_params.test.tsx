@@ -17,6 +17,16 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
       message: 'test message',
     };
+
+    const connector = {
+      secrets: {},
+      config: {},
+      id: 'test',
+      actionTypeId: '.test',
+      name: 'Test',
+      isPreconfigured: false,
+    };
+
     const wrapper = mountWithIntl(
       <EmailParamsFields
         actionParams={actionParams}
@@ -24,6 +34,7 @@ describe('EmailParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        actionConnector={connector}
       />
     );
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();

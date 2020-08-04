@@ -14,8 +14,9 @@ import {
   CreateIncidentParams,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
+  Fields,
+  CreateCommentParams,
 } from './types';
-import { Comment } from './case_types';
 
 import * as i18n from './translations';
 import { request, getErrorMessage } from '../lib/axios_utils';
@@ -84,7 +85,7 @@ export const createExternalService = (
     // The response from Jira when creating an issue contains only the key and the id.
     // The function makes two calls when creating an issue. One to create the issue and one to get
     // the created issue with all the necessary fields.
-    let fields: { [key: string]: string | string[] | { name: string } | { key: string } } = {
+    let fields: Fields = {
       summary: incident.summary,
       project: { key: projectKey },
       issuetype: { name: incident.issueType ?? 'Task' },
@@ -158,21 +159,19 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ incidentId, comment }: ExternalServiceParams) => {
-    const commentTyped = comment as Comment;
-
+  const createComment = async ({ incidentId, comment }: CreateCommentParams) => {
     try {
       const res = await request({
         axios: axiosInstance,
         method: 'post',
-        url: getCommentsURL(incidentId as string),
+        url: getCommentsURL(incidentId),
         logger,
-        data: { body: commentTyped.comment },
+        data: { body: comment.comment },
         proxySettings,
       });
 
       return {
-        commentId: commentTyped.commentId,
+        commentId: comment.commentId,
         externalCommentId: res.data.id,
         pushedDate: new Date(res.data.created).toISOString(),
       };
@@ -190,7 +189,7 @@ export const createExternalService = (
     try {
       const capabilitiesResponse = await getCapabilities();
 
-      const capabilities = Object.keys(capabilitiesResponse?.capabilities ?? []);
+      const capabilities = Object.keys(capabilitiesResponse?.capabilities ?? {});
       const supportsNewAPI = createMetaCapabilities.every((c) => capabilities.includes(c));
 
       if (!supportsNewAPI) {
@@ -200,27 +199,41 @@ export const createExternalService = (
           url: createIssueMetadataUrl,
         });
 
-        const issueTypes = res.data.projects[0].issuetypes;
-        const metadata = issueTypes.reduce((acc, currentIssueType) => {
-          const fields = Object.keys(currentIssueType.fields).reduce((fieldsAcc, fieldKey) => {
+        const issueTypes = res.data.projects[0]?.issuetypes ?? [];
+        const metadata = issueTypes.reduce(
+          (
+            acc: Record<string, unknown>,
+            currentIssueType: {
+              name: string;
+              id: string;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fields: { [k: string]: { allowedValues?: any; defaultValue?: any } };
+            }
+          ) => {
+            const fields = Object.keys(currentIssueType.fields ?? {}).reduce(
+              (fieldsAcc, fieldKey) => {
+                return {
+                  ...fieldsAcc,
+                  [fieldKey]: {
+                    allowedValues: currentIssueType.fields[fieldKey]?.allowedValues ?? [],
+                    defaultValue: currentIssueType.fields[fieldKey]?.defaultValue ?? {},
+                  },
+                };
+              },
+              {}
+            );
+
             return {
-              ...fieldsAcc,
-              [fieldKey]: {
-                allowedValues: currentIssueType.fields[fieldKey].allowedValues ?? [],
-                defaultValue: currentIssueType.fields[fieldKey].defaultValue ?? {},
+              ...acc,
+              [currentIssueType.name]: {
+                id: currentIssueType.id,
+                name: currentIssueType.name,
+                fields,
               },
             };
-          }, {});
-
-          return {
-            ...acc,
-            [currentIssueType.name]: {
-              id: currentIssueType.id,
-              name: currentIssueType.name,
-              fields,
-            },
-          };
-        }, {});
+          },
+          {}
+        );
 
         return { issueTypes: metadata };
       }
