@@ -108,6 +108,54 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
+      it('should have created the correct saved object', async function () {
+        const res = await kibanaServer.savedObjects.get({
+          type: 'epm-packages',
+          id: 'all_assets',
+        });
+        expect(res.attributes).eql({
+          installed_kibana: [
+            {
+              id: 'sample_dashboard',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_dashboard2',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_search',
+              type: 'search',
+            },
+            {
+              id: 'sample_visualization',
+              type: 'visualization',
+            },
+          ],
+          installed_es: [
+            {
+              id: 'logs-all_assets.test_logs-0.1.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs',
+              type: 'index_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics',
+              type: 'index_template',
+            },
+          ],
+          es_index_patterns: {
+            test_logs: 'logs-all_assets.test_logs-*',
+            test_metrics: 'metrics-all_assets.test_metrics-*',
+          },
+          name: 'all_assets',
+          version: '0.1.0',
+          internal: false,
+          removable: true,
+        });
+      });
     });
 
     describe('uninstalls all assets when uninstalling a package', async () => {
@@ -191,6 +239,18 @@ export default function (providerContext: FtrProviderContext) {
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
+      });
+      it('should have removed the saved object', async function () {
+        let res;
+        try {
+          res = await kibanaServer.savedObjects.get({
+            type: 'epm-packages',
+            id: 'all_assets',
+          });
+        } catch (err) {
+          res = err;
+        }
+        expect(res.response.data.statusCode).equal(404);
       });
     });
   });

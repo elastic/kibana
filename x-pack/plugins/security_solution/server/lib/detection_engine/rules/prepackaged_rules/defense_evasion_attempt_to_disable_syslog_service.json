@@ -4,7 +4,8 @@
   ],
   "description": "Adversaries may attempt to disable the syslog service in an attempt to an attempt to disrupt event logging and evade detection by security controls.",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
