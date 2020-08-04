@@ -103,7 +103,7 @@ function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTim
   }
 }
 
-const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
+export const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {
