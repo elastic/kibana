@@ -50,7 +50,9 @@ export function getTopNavConfig({
 
   const hasWritePermissions = getMapsCapabilities().save;
 
+  let hasSaveAndReturnConfig = false;
   if (hasWritePermissions && savedMap.id && originatingApp) {
+    hasSaveAndReturnConfig = true;
     topNavConfigs.push({
       id: 'saveAndReturn',
       label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
@@ -81,6 +83,7 @@ export function getTopNavConfig({
       description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
         defaultMessage: `Save map`,
       }),
+      emphasize: !hasSaveAndReturnConfig,
       testId: 'mapSaveButton',
       disableButton() {
         return isSaveDisabled;
@@ -92,15 +95,18 @@ export function getTopNavConfig({
           });
         }
       },
-      run: async () => {
+      run: () => {
         const onSave = ({
+          newDescription,
           newTitle,
           newCopyOnSave,
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
         }: OnSaveProps) => {
           const currentTitle = savedMap.title;
+          const currentDescription = savedMap.description;
           savedMap.title = newTitle;
+          savedMap.description = newDescription;
           savedMap.copyOnSave = newCopyOnSave;
           const saveOptions: SavedObjectSaveOpts = {
             confirmOverwrite: false,
@@ -111,6 +117,7 @@ export function getTopNavConfig({
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedMap.title = currentTitle;
+              savedMap.description = currentDescription;
             }
             return response;
           });
@@ -122,6 +129,7 @@ export function getTopNavConfig({
             onSave={onSave}
             onClose={() => {}}
             documentInfo={{
+              description: savedMap.description,
               id: savedMap.id,
               title: savedMap.title,
             }}
@@ -137,17 +145,19 @@ export function getTopNavConfig({
 
   topNavConfigs.push(
     {
-      id: 'full-screen',
-      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
-        defaultMessage: `full screen`,
+      id: 'mapSettings',
+      label: i18n.translate('xpack.maps.topNav.openSettingsButtonLabel', {
+        defaultMessage: `Map settings`,
       }),
-      description: i18n.translate('xpack.maps.topNav.fullScreenDescription', {
-        defaultMessage: `full screen`,
+      description: i18n.translate('xpack.maps.topNav.openSettingsDescription', {
+        defaultMessage: `Open map settings`,
       }),
-      testId: 'mapsFullScreenMode',
+      testId: 'openSettingsButton',
+      disableButton() {
+        return isOpenSettingsDisabled;
+      },
       run() {
-        getCoreChrome().setIsVisible(false);
-        enableFullScreen();
+        openMapSettings();
       },
     },
     {
@@ -164,19 +174,17 @@ export function getTopNavConfig({
       },
     },
     {
-      id: 'mapSettings',
-      label: i18n.translate('xpack.maps.topNav.openSettingsButtonLabel', {
-        defaultMessage: `Map settings`,
+      id: 'full-screen',
+      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
+        defaultMessage: `full screen`,
       }),
-      description: i18n.translate('xpack.maps.topNav.openSettingsDescription', {
-        defaultMessage: `Open map settings`,
+      description: i18n.translate('xpack.maps.topNav.fullScreenDescription', {
+        defaultMessage: `full screen`,
       }),
-      testId: 'openSettingsButton',
-      disableButton() {
-        return isOpenSettingsDisabled;
-      },
+      testId: 'mapsFullScreenMode',
       run() {
-        openMapSettings();
+        getCoreChrome().setIsVisible(false);
+        enableFullScreen();
       },
     }
   );
