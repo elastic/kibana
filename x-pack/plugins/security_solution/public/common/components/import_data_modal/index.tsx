@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  // @ts-ignore no-exported-member
   EuiFilePicker,
   EuiModal,
   EuiModalBody,
