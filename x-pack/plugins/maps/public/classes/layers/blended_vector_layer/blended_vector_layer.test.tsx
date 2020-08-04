@@ -44,7 +44,6 @@ describe('getSource', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [clusteredDataRequest],
           },
           mapColors
@@ -61,7 +60,6 @@ describe('getSource', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [clusteredDataRequest],
           },
           mapColors
@@ -81,7 +79,6 @@ describe('getSource', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [clusteredDataRequest],
           },
           mapColors
@@ -100,7 +97,6 @@ describe('getSource', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [notClusteredDataRequest],
           },
           mapColors
@@ -121,7 +117,6 @@ describe('cloneDescriptor', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [clusteredDataRequest],
           },
           mapColors
@@ -141,7 +136,6 @@ describe('cloneDescriptor', () => {
         layerDescriptor: BlendedVectorLayer.createDescriptor(
           {
             sourceDescriptor: documentSourceDescriptor,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __dataRequests: [notClusteredDataRequest],
           },
           mapColors

@@ -39,7 +39,6 @@ const SCSS = {
 };
 
 interface NodeWithData extends Node {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __clickData__: {
     time: number;
     bucketScore: number;

@@ -116,7 +116,6 @@ describe('syncData', () => {
     };
     const layer2: TiledVectorLayer = createLayer(
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [dataRequestDescriptor],
       },
       {}
@@ -141,7 +140,6 @@ describe('syncData', () => {
     };
     const layer2: TiledVectorLayer = createLayer(
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [dataRequestDescriptor],
       },
       { layerName: 'barfoo' }

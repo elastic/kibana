@@ -33,7 +33,6 @@ import {
   EmptyNestedEntry,
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
 /**

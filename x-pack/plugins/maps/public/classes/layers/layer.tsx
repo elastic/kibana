@@ -122,7 +122,6 @@ export class AbstractLayer implements ILayer {
     return {
       ...options,
       sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __dataRequests: _.get(options, '__dataRequests', []),
       id: _.get(options, 'id', uuid()),
       label: options.label && options.label.length > 0 ? options.label : null,

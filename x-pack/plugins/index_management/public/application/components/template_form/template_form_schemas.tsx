@@ -213,7 +213,6 @@ export const schemas: Record<string, FormSchema> = {
         }
       },
     },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __internal__: {
       addMeta: {
         type: FIELD_TYPES.TOGGLE,

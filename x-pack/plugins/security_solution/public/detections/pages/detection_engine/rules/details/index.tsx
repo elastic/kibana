@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks, complexity */
+/* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
@@ -257,7 +257,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
