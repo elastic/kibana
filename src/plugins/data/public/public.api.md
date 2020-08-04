@@ -1661,7 +1661,7 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
     // (undocumented)
-    protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal): Observable<IEsSearchResponse>;
+    protected runSearch(request: IEsSearchRequest, signal: AbortSignal): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // (undocumented)
     protected setupTimers(options?: ISearchOptions): {
