@@ -47,7 +47,7 @@ describe('buildSeverityFromMapping', () => {
       doc: sampleDocSeverity(23),
       severity: 'low',
       severityMapping: [
-        { field: 'event.severity', operator: 'equals', value: '13', severity: 'loew' },
+        { field: 'event.severity', operator: 'equals', value: '13', severity: 'low' },
         { field: 'event.severity', operator: 'equals', value: '23', severity: 'medium' },
         { field: 'event.severity', operator: 'equals', value: '33', severity: 'high' },
         { field: 'event.severity', operator: 'equals', value: '43', severity: 'critical' },
