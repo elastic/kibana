@@ -22,7 +22,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   constructor(options, styleName, field, vectorLayer, getFieldFormatter) {
     super(options, styleName);
-    super(options, styleName);
     this._field = field;
     this._layer = vectorLayer;
     this._getFieldFormatter = getFieldFormatter;
