@@ -20,7 +20,6 @@
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import './field_button.scss';
-import { OneOf } from '@elastic/eui';
 
 export interface FieldButtonProps {
   isOpen?: boolean;

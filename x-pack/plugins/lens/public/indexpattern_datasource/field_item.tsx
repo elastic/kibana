@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiKeyboardAccessible,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
