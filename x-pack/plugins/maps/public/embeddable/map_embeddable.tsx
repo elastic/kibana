@@ -10,7 +10,11 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
-import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
+import {
+  ACTION_APPLY_FILTER,
+  Embeddable,
+  IContainer,
+} from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
@@ -241,11 +245,22 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
-  addFilters = (filters: Filter[]) => {
-    getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
-      embeddable: this,
-      filters,
-    });
+  addFilters = (
+    filters: Filter[],
+    { skipTrigger = false }: { skipTrigger?: boolean } = { skipTrigger: false }
+  ) => {
+    if (!skipTrigger) {
+      getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
+        embeddable: this,
+        filters,
+      });
+    } else {
+      // Applies filters immediately, without intermediate context menu with multiple possible actions
+      getUiActions().getAction(ACTION_APPLY_FILTER).execute({
+        embeddable: this,
+        filters,
+      });
+    }
   };
 
   destroy() {
