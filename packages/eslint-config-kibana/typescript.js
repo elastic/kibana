@@ -19,6 +19,7 @@ module.exports = {
         'ban',
         'import',
         'prefer-object-spread',
+        'eslint-comments'
       ],
 
       settings: {
@@ -243,6 +244,7 @@ module.exports = {
 
           ],
           'import/no-default-export': 'error',
+          'eslint-comments/no-unused-disable': 'error'
         },
         eslintConfigPrettierTypescriptEslintRules
       )
