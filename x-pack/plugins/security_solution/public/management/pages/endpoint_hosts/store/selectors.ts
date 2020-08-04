@@ -8,7 +8,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { decode, RisonValue } from 'rison-node';
+import { decode } from 'rison-node';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
@@ -219,9 +219,11 @@ export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (sta
 /**
  * Returns query text from query bar
  */
-export const searchBarQuery: (state: Immutable<HostState>) => RisonValue = createSelector(
+export const searchBarQuery: (state: Immutable<HostState>) => Query = createSelector(
   uiQueryParams,
   ({ admin_query: adminQuery }) => {
-    return adminQuery ? decode(adminQuery) : { query: '', language: 'kuery' };
+    return adminQuery
+      ? ((decode(adminQuery) as unknown) as Query)
+      : { query: '', language: 'kuery' };
   }
 );
