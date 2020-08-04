@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.only('shared links with state in sessionStorage', async () => {
+    describe('shared links with state in sessionStorage', async () => {
       let teardown;
       before(async function () {
         teardown = await setup({ storeStateInSessionStorage: true });
