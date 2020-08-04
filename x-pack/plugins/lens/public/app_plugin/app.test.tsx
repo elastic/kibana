@@ -32,7 +32,7 @@ const dataStartMock = dataPluginMock.createStartContract();
 import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import { coreMock } from 'src/core/public/mocks';
-import { FeatureFlagConfig } from '../plugin';
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 
 jest.mock('../persistence');
 jest.mock('src/core/public');
@@ -143,7 +143,7 @@ describe('Lens App', () => {
     originatingApp: string | undefined;
     onAppLeave: AppMountParameters['onAppLeave'];
     history: History;
-    featureFlagConfig: FeatureFlagConfig;
+    featureFlagConfig: DashboardFeatureFlagConfig;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -208,7 +208,7 @@ describe('Lens App', () => {
       originatingApp: string | undefined;
       onAppLeave: AppMountParameters['onAppLeave'];
       history: History;
-      featureFlagConfig: FeatureFlagConfig;
+      featureFlagConfig: DashboardFeatureFlagConfig;
     }>;
   }
 

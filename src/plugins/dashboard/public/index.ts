@@ -31,7 +31,7 @@ export {
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { DashboardStart, DashboardUrlGenerator } from './plugin';
+export { DashboardStart, DashboardUrlGenerator, DashboardFeatureFlagConfig } from './plugin';
 export {
   DASHBOARD_APP_URL_GENERATOR,
   createDashboardUrlGenerator,

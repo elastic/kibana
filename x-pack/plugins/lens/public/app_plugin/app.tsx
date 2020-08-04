@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, AppMountParameters, NotificationsStart } from 'kibana/public';
 import { History } from 'history';
+import { DashboardFeatureFlagConfig } from 'src/plugins/dashboard/public';
 import {
   Query,
   DataPublicPluginStart,
@@ -39,7 +40,6 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
 import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable';
-import { FeatureFlagConfig } from '../plugin';
 
 interface State {
   indicateNoData: boolean;
@@ -78,7 +78,7 @@ interface LensAppProps {
   embeddableEditorIncomingState?: EmbeddableEditorState;
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
-  featureFlagConfig: FeatureFlagConfig;
+  featureFlagConfig: DashboardFeatureFlagConfig;
 }
 
 export function App({
@@ -101,7 +101,7 @@ export function App({
       isLoading: !!savedObjectId || !!embeddableEditorIncomingState?.valueInput,
       isSaveModalVisible: false,
       byValueMode:
-        featureFlagConfig.showNewLensFlow &&
+        featureFlagConfig.allowByValueEmbeddables &&
         !!embeddableEditorIncomingState?.originatingApp &&
         (!!embeddableEditorIncomingState?.valueInput ||
           !embeddableEditorIncomingState?.embeddableId),
