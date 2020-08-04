@@ -28,16 +28,17 @@ interface Props {
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const [isSearchFocused, setSearchFocus] = useState(false);
   const [options, setOptions] = useState([] as GlobalSearchResult[]);
-  const [isLoading, setLoadingState] = useState(false);
+  // const [isLoading, setLoadingState] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
   const onSearch = useCallback(
     (term: string) => {
       const arr: GlobalSearchResult[] = [];
-      setLoadingState(true);
+      // setLoadingState(true);
       // @ts-ignore this is a bug, TODO, {} should be optional
       globalSearch.find(term, {}).subscribe({
+        // @ts-ignore this is a bug, TODO, TS thinks results don't exist, they exist
         next: ({ results }) => {
           arr.push(...results);
           setOptions([...arr]);
@@ -46,7 +47,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           // TODO
         },
         complete: () => {
-          setLoadingState(false);
+          // setLoadingState(false);
         },
       });
     },
@@ -59,8 +60,11 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
-      if (event.key === 'k' && (isWindows ? event.ctrlKey : event.metaKey)) {
-        if (searchRef) searchRef.focus();
+      if (event.key === 's' && (isWindows ? event.ctrlKey : event.metaKey)) {
+        if (searchRef) {
+          event.preventDefault();
+          searchRef.focus();
+        }
       }
     };
     window.addEventListener('keydown', openSearch);
@@ -76,7 +80,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       height={300}
       singleSelection={true}
       searchProps={{
-        isLoading,
         onSearch,
         'data-test-subj': 'header-search',
         onFocus: () => {
@@ -97,7 +100,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         rowHeight: 68,
       }}
       options={options.map((option) => ({ key: option.id, ...option }))}
-      renderOption={(option, searchValue) => (
+      renderOption={(option) => (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
           <EuiFlexItem>{option.title}</EuiFlexItem>
@@ -122,6 +125,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           } else {
             // else is relative path
             navigateToUrl(url);
+            (document.querySelector('a') as HTMLElement).focus(); // assumption that header link is first, is this bad assumption?
           }
         } else {
           // else is url obj
@@ -152,7 +156,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                       id="searchBar.shortcut"
                       defaultMessage="Quickly search using {shortcut}"
                       values={{
-                        shortcut: <EuiBadge>{isWindows ? 'Command + K' : 'Ctrl + K'}</EuiBadge>,
+                        shortcut: <EuiBadge>{isWindows ? 'Command + S' : 'Ctrl + S'}</EuiBadge>,
                       }}
                     />
                   </EuiFlexItem>
