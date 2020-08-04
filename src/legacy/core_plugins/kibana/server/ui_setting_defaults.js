@@ -258,20 +258,6 @@ export function getUiSettingDefaults() {
           'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
       }),
     },
-    'timepicker:timeDefaults': {
-      name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
-        defaultMessage: 'Time filter defaults',
-      }),
-      value: `{
-  "from": "now-15m",
-  "to": "now"
-}`,
-      type: 'json',
-      description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
-      }),
-      requiresPageReload: true,
-    },
     'theme:darkMode': {
       name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
         defaultMessage: 'Dark mode',
