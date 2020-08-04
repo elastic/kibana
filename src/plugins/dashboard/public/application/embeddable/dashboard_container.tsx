@@ -130,7 +130,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
-    newStateComplete: Promise<Partial<PanelState>>,
+    newStateComplete: Promise<Partial<PanelState> & { explicitInput: EmbeddableInput }>,
     placementMethod?: PanelPlacementMethod<TPlacementMethodArgs>,
     placementArgs?: TPlacementMethodArgs
   ): void {
@@ -159,32 +159,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) =>
-      this.replacePanel(placeholderPanelState, newPanelState)
+    newStateComplete.then(
+      (newPanelState: Partial<PanelState> & { explicitInput: EmbeddableInput }) =>
+        this.replacePanel(placeholderPanelState, newPanelState)
     );
   }
 
-  public replacePanel(
+  public async replacePanel(
     previousPanelState: DashboardPanelState<EmbeddableInput>,
-    newPanelState: Partial<PanelState>
+    newPanelState: Partial<PanelState> & { explicitInput: EmbeddableInput }
   ) {
-    // Because the embeddable type can change, we have to operate at the container level here
-    return this.updateInput({
-      panels: {
-        ...this.input.panels,
-        [previousPanelState.explicitInput.id]: {
-          ...previousPanelState,
-          ...newPanelState,
-          gridData: {
-            ...previousPanelState.gridData,
-          },
-          explicitInput: {
-            ...newPanelState.explicitInput,
-            id: previousPanelState.explicitInput.id,
-          },
-        },
-      },
-    });
+    const embeddableToReplace = await this.untilEmbeddableLoaded(
+      previousPanelState.explicitInput.id
+    );
+    embeddableToReplace.updateInput(newPanelState.explicitInput);
   }
 
   public async addOrUpdateEmbeddable<
@@ -197,7 +185,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: explicitInput.id!,
         },
       });
     } else {

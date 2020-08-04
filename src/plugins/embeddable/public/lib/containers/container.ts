@@ -348,7 +348,10 @@ export abstract class Container<
       }
       // In case of type change, remove and add a panel with the same id
       if (currentPanels[id] && prevPanels[id]) {
-        if (currentPanels[id].type !== prevPanels[id].type) {
+        if (
+          currentPanels[id].type !== prevPanels[id].type ||
+          currentPanels[id].explicitInput !== prevPanels[id].explicitInput
+        ) {
           this.onPanelRemoved(id);
           this.onPanelAdded(currentPanels[id]);
         }

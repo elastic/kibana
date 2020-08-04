@@ -167,7 +167,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    let incomingEmbeddable = embeddable
+    const incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
@@ -329,18 +329,18 @@ export class DashboardAppController {
       });
 
       // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
-      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
-        const originalPanelState = { ...embeddablesMap[incomingEmbeddable.embeddableId] };
-        embeddablesMap[incomingEmbeddable.embeddableId] = {
-          gridData: originalPanelState.gridData,
-          type: incomingEmbeddable.type,
-          explicitInput: {
-            ...incomingEmbeddable.input,
-            id: incomingEmbeddable.embeddableId,
-          },
-        };
-        incomingEmbeddable = undefined;
-      }
+      // if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+      //   const originalPanelState = { ...embeddablesMap[incomingEmbeddable.embeddableId] };
+      //   embeddablesMap[incomingEmbeddable.embeddableId] = {
+      //     gridData: originalPanelState.gridData,
+      //     type: incomingEmbeddable.type,
+      //     explicitInput: {
+      //       ...incomingEmbeddable.input,
+      //       id: incomingEmbeddable.embeddableId,
+      //     },
+      //   };
+      //   incomingEmbeddable = undefined;
+      // }
 
       let expandedPanelId;
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
@@ -468,16 +468,11 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
-            if (
-              incomingEmbeddable &&
-              (!incomingEmbeddable.embeddableId ||
-                !container.getInput().panels[incomingEmbeddable.embeddableId])
-            ) {
-              container.addNewEmbeddable<EmbeddableInput>(
-                incomingEmbeddable.type,
-                incomingEmbeddable.input
-              );
+            if (incomingEmbeddable) {
+              container.addOrUpdateEmbeddable<EmbeddableInput>(incomingEmbeddable.type, {
+                ...incomingEmbeddable.input,
+                id: incomingEmbeddable.embeddableId,
+              });
             }
           }
 
