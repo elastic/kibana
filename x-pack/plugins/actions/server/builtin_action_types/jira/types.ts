@@ -71,13 +71,28 @@ export interface CreateCommentParams {
   comment: Comment;
 }
 
+export interface IssueTypes {
+  [key: string]: {
+    name: string;
+    fields: {
+      [key: string]: {
+        allowedValues: Array<{ name: string; id: string }> | [];
+        defaultValue: { name: string; id: string } | {};
+      };
+    };
+  };
+}
+export interface GetCreateIssueMetadataResponse {
+  issueTypes: IssueTypes;
+}
+
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
-  getCreateIssueMetadata: () => Promise<ExternalServiceParams>;
+  getCreateIssueMetadata: () => Promise<GetCreateIssueMetadataResponse>;
   getCapabilities: () => Promise<ExternalServiceParams>;
 }
 
@@ -118,13 +133,10 @@ export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs
 export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionHandshakeParams;
 }
-
 export interface CreateIssueMetadataHandlerArgs {
   externalService: ExternalService;
   params: ExecutorSubActionCreateIssueMetadataParams;
 }
-
-export type GetCreateIssueMetadataResponse = Record<string, unknown>;
 
 export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;

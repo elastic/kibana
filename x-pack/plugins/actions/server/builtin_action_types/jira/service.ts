@@ -16,7 +16,9 @@ import {
   JiraSecretConfigurationType,
   Fields,
   CreateCommentParams,
+  Incident,
   ResponseError,
+  ExternalServiceIncidentResponse,
 } from './types';
 
 import * as i18n from './translations';
@@ -59,6 +61,31 @@ export const createExternalService = (
     return commentUrl.replace('{issueId}', issueId);
   };
 
+  const createFields = (key: string, incident: Incident): Fields => {
+    let fields: Fields = {
+      summary: incident.summary,
+      project: { key },
+    };
+
+    if (incident.issueType) {
+      fields = { ...fields, issuetype: { name: incident.issueType } };
+    }
+
+    if (incident.description) {
+      fields = { ...fields, description: incident.description };
+    }
+
+    if (incident.labels) {
+      fields = { ...fields, labels: incident.labels };
+    }
+
+    if (incident.priority) {
+      fields = { ...fields, priority: { name: incident.priority } };
+    }
+
+    return fields;
+  };
+
   const createErrorMessage = (errors: ResponseError) => {
     return Object.entries(errors).reduce((errorMessage, [, value]) => {
       const msg = errorMessage.length > 0 ? `${errorMessage} ${value}` : value;
@@ -94,27 +121,20 @@ export const createExternalService = (
     return undefined;
   };
 
-  const createIncident = async ({ incident }: CreateIncidentParams) => {
+  const createIncident = async ({
+    incident,
+  }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     // The response from Jira when creating an issue contains only the key and the id.
     // The function makes two calls when creating an issue. One to create the issue and one to get
     // the created issue with all the necessary fields.
-    let fields: Fields = {
-      summary: incident.summary,
-      project: { key: projectKey },
-      issuetype: { name: incident.issueType ?? 'Task' },
-    };
-
-    if (incident.description) {
-      fields = { ...fields, description: incident.description };
-    }
-
-    if (incident.labels) {
-      fields = { ...fields, labels: incident.labels };
-    }
-
-    if (incident.priority) {
-      fields = { ...fields, priority: { name: incident.priority } };
-    }
+    const createIssueMetadata = await getCreateIssueMetadata();
+    const fields = createFields(projectKey, {
+      ...incident,
+      issueType: incident.issueType
+        ? incident.issueType
+        : createIssueMetadata.issueTypes[Object.keys(createIssueMetadata.issueTypes)[0]]?.name ??
+          '',
+    });
 
     try {
       const res = await request({
@@ -207,7 +227,7 @@ export const createExternalService = (
     }
   };
 
-  const getCreateIssueMetadata = async () => {
+  const getCreateIssueMetadata = async (): Promise<GetCreateIssueMetadataResponse> => {
     try {
       const capabilitiesResponse = await getCapabilities();
 
@@ -260,7 +280,7 @@ export const createExternalService = (
         return { issueTypes: metadata };
       }
 
-      return { issueTypes: [] };
+      return { issueTypes: {} };
     } catch (error) {
       throw new Error(
         getErrorMessage(
