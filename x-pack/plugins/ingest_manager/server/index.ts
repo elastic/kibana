@@ -6,7 +6,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
-export { AgentService, ESIndexPatternService } from './services';
+export { AgentService, ESIndexPatternService, getRegistryUrl } from './services';
 export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,
@@ -35,7 +35,8 @@ export const config = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
-      agentConfigRolloutConcurrency: schema.number({ defaultValue: 10 }),
+      agentConfigRolloutRateLimitIntervalMs: schema.number({ defaultValue: 5000 }),
+      agentConfigRolloutRateLimitRequestPerInterval: schema.number({ defaultValue: 5 }),
     }),
   }),
 };
