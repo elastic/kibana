@@ -22,7 +22,6 @@ import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
-// @ts-expect-error untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
