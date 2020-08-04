@@ -70,15 +70,14 @@ const createInternalClientMock = (): DeeplyMockedKeys<Client> => {
   return (mock as unknown) as DeeplyMockedKeys<Client>;
 };
 
-// TODO fix naming ElasticsearchClientMock
-export type ElasticSearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
+export type ElasticsearchClientMock = DeeplyMockedKeys<ElasticsearchClient>;
 
-const createClientMock = (): ElasticSearchClientMock =>
-  (createInternalClientMock() as unknown) as ElasticSearchClientMock;
+const createClientMock = (): ElasticsearchClientMock =>
+  (createInternalClientMock() as unknown) as ElasticsearchClientMock;
 
 interface ScopedClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
-  asCurrentUser: ElasticSearchClientMock;
+  asInternalUser: ElasticsearchClientMock;
+  asCurrentUser: ElasticsearchClientMock;
 }
 
 const createScopedClusterClientMock = () => {
@@ -91,7 +90,7 @@ const createScopedClusterClientMock = () => {
 };
 
 export interface ClusterClientMock {
-  asInternalUser: ElasticSearchClientMock;
+  asInternalUser: ElasticsearchClientMock;
   asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
 }
 
@@ -157,7 +156,7 @@ export const elasticsearchClientMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
-  createElasticSearchClient: createClientMock,
+  createElasticsearchClient: createClientMock,
   createInternalClient: createInternalClientMock,
   createSuccessTransportRequestPromise,
   createErrorTransportRequestPromise,

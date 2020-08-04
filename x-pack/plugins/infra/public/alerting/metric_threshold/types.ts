@@ -53,7 +53,7 @@ export interface ExpressionChartData {
 
 export interface AlertParams {
   criteria: MetricExpression[];
-  groupBy?: string;
+  groupBy?: string[];
   filterQuery?: string;
   sourceId?: string;
   filterQueryText?: string;

@@ -82,18 +82,17 @@ export class ManifestManager {
   protected async buildExceptionListArtifacts(
     artifactSchemaVersion?: string
   ): Promise<InternalArtifactCompleteSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
-      Promise<InternalArtifactCompleteSchema[]>
-    >(async (acc, os) => {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptionList = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
         artifactSchemaVersion ?? 'v1'
       );
-      const artifacts = await acc;
       const artifact = await buildArtifact(exceptionList, os, artifactSchemaVersion ?? 'v1');
-      return Promise.resolve([...artifacts, artifact]);
-    }, Promise.resolve([]));
+      artifacts.push(artifact);
+    }
+    return artifacts;
   }
 
   /**
