@@ -4,12 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
+import React, { ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { VectorIcon } from './vector_icon';
 
-export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId }) {
+interface Props {
+  styleName: VECTOR_STYLES;
+  label: ReactElement<any> | string;
+  color: string;
+  isLinesOnly: boolean;
+  isPointsOnly: boolean;
+  symbolId: string;
+}
+
+export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId }: Props) {
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
       return (

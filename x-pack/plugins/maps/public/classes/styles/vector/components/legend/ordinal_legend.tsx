@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+// @ts-expect-error
 import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { CircleIcon } from './circle_icon';
+import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 function getLineWidthIcons() {
   const defaultStyle = {
@@ -37,41 +39,50 @@ function getSymbolSizeIcons() {
 }
 const EMPTY_VALUE = '';
 
-export class OrdinalLegend extends React.Component {
-  constructor() {
-    super();
-    this._isMounted = false;
-    this.state = {
-      label: EMPTY_VALUE,
-    };
-  }
+interface Props {
+  style: IDynamicStyleProperty<any>;
+}
 
-  async _loadParams() {
-    const label = await this.props.style.getField().getLabel();
-    const newState = { label };
-    if (this._isMounted && !_.isEqual(this.state, newState)) {
-      this.setState(newState);
-    }
-  }
+interface State {
+  label: string;
+}
 
-  _formatValue(value) {
-    if (value === EMPTY_VALUE) {
-      return value;
-    }
-    return this.props.style.formatField(value);
+export class OrdinalLegend extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  state: State = {
+    label: EMPTY_VALUE,
+  };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadLabel();
   }
 
   componentDidUpdate() {
-    this._loadParams();
+    this._loadLabel();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadParams();
+  async _loadLabel() {
+    const field = this.props.style.getField();
+    if (!field) {
+      return;
+    }
+    const label = await field.getLabel();
+    if (this._isMounted && !_.isEqual(this.state.label, label)) {
+      this.setState({ label });
+    }
+  }
+
+  _formatValue(value: string | number) {
+    if (value === EMPTY_VALUE) {
+      return value;
+    }
+    return this.props.style.formatField(value);
   }
 
   _renderRangeLegendHeader() {
@@ -115,21 +126,16 @@ export class OrdinalLegend extends React.Component {
 
     const fieldMeta = this.props.style.getRangeFieldMeta();
 
-    let minLabel = EMPTY_VALUE;
-    let maxLabel = EMPTY_VALUE;
+    let minLabel: string | number = EMPTY_VALUE;
+    let maxLabel: string | number = EMPTY_VALUE;
     if (fieldMeta) {
-      const range = { min: fieldMeta.min, max: fieldMeta.max };
-      const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+      const min = this._formatValue(_.get(fieldMeta, 'min', EMPTY_VALUE));
       minLabel =
-        this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange
-          ? `< ${min}`
-          : min;
+        this.props.style.isFieldMetaEnabled() && fieldMeta.isMinOutsideStdRange ? `< ${min}` : min;
 
-      const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+      const max = this._formatValue(_.get(fieldMeta, 'max', EMPTY_VALUE));
       maxLabel =
-        this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange
-          ? `> ${max}`
-          : max;
+        this.props.style.isFieldMetaEnabled() && fieldMeta.isMaxOutsideStdRange ? `> ${max}` : max;
     }
 
     return (
