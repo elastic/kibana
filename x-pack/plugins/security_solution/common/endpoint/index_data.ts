@@ -16,13 +16,19 @@ import {
   CreatePackageConfigRequest,
   CreatePackageConfigResponse,
   GetPackagesResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
-import {
+  PostAgentEnrollRequest,
+  AGENT_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
   EPM_API_ROUTES,
   PACKAGE_CONFIG_API_ROUTES,
+  ENROLLMENT_API_KEY_ROUTES,
+  GetEnrollmentAPIKeysResponse,
+  GetOnePackageConfigResponse,
+  GetOneEnrollmentAPIKeyResponse,
+  PostAgentEnrollResponse,
 } from '../../../ingest_manager/common';
 import { factory as policyConfigFactory } from './models/policy_config';
+import { HostMetadata } from './types';
 
 export async function indexHostsAndAlerts(
   client: Client,
@@ -81,14 +87,13 @@ async function indexHostDocs(
 ) {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
+  let hostMetadata: HostMetadata;
 
   for (let j = 0; j < numDocs; j++) {
     generator.updateHostData();
     generator.updateHostPolicyData();
 
-    let hostMetadata = generator.generateHostMetadata(
-      timestamp - timeBetweenDocs * (numDocs - j - 1)
-    );
+    hostMetadata = generator.generateHostMetadata(timestamp - timeBetweenDocs * (numDocs - j - 1));
     const { id: appliedPolicyId, name: appliedPolicyName } = hostMetadata.Endpoint.policy.applied;
 
     if (appliedPolicyId !== '00000000-0000-0000-0000-000000000000') {
@@ -128,6 +133,10 @@ async function indexHostDocs(
       body: generator.generatePolicyResponse(timestamp - timeBetweenDocs * (numDocs - j - 1)),
       op_type: 'create',
     });
+  }
+
+  if (hostMetadata!.Endpoint.policy.applied.id !== '00000000-0000-0000-0000-000000000000') {
+    await fleetEnrollAgentForHost(kbnClient, hostMetadata!);
   }
 }
 
@@ -231,4 +240,74 @@ const getEndpointPackageInfo = async (
   }
 
   return endpointPackage;
+};
+
+const fleetEnrollAgentForHost = async (kbnClient: KbnClient, host: HostMetadata) => {
+  // Get Enrollement key for host's applied policy
+  const enrollmentApiKey = await kbnClient
+    .request<GetOnePackageConfigResponse>({
+      path: PACKAGE_CONFIG_API_ROUTES.INFO_PATTERN.replace(
+        '{packageConfigId}',
+        host.Endpoint.policy.applied.id
+      ),
+      method: 'GET',
+    })
+    .then((packageConfigResponse) => {
+      return kbnClient.request<GetEnrollmentAPIKeysResponse>({
+        path: ENROLLMENT_API_KEY_ROUTES.LIST_PATTERN,
+        method: 'GET',
+        query: {
+          kuery: `fleet-enrollment-api-keys.config_id:"${packageConfigResponse.data.item.config_id}"`,
+        },
+      });
+    })
+    .then((apiKeysResponse) => {
+      const apiKey = apiKeysResponse.data.list[0];
+
+      // TODO: Handle if it does not exist
+
+      return kbnClient.request<GetOneEnrollmentAPIKeyResponse>({
+        path: ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', apiKey.id),
+        method: 'GET',
+      });
+    })
+    .then((apiKeyDetailsResponse) => {
+      return apiKeyDetailsResponse.data.item.api_key;
+    })
+    .catch(() => {
+      return '';
+    });
+
+  if (enrollmentApiKey.length === 0) {
+    return;
+  }
+
+  // Enroll an agent for the Host
+  const body: PostAgentEnrollRequest['body'] = {
+    type: 'PERMANENT',
+    shared_id: host.elastic.agent.id,
+    metadata: {
+      local: {
+        ...host.host,
+      },
+      user_provided: {
+        dev_agent_version: '0.0.1',
+        region: 'us-east',
+      },
+    },
+  };
+
+  try {
+    await kbnClient.request<PostAgentEnrollResponse>({
+      path: AGENT_API_ROUTES.ENROLL_PATTERN,
+      method: 'POST',
+      body,
+      headers: {
+        Authorization: `ApiKey ${enrollmentApiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (error) {
+    // debugger;
+  }
 };
