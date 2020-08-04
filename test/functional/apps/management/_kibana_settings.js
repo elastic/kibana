@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
+      await PageObjects.settings.navigateTo();
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.createIndexPattern('logstash-*');
