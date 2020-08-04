@@ -29,7 +29,7 @@ Hello
 I'm an intro paragraph!`
   );
 
-  expect(firstParagraph).toEqual(`I'm the heading!\n\nHello\n\nI'm an intro paragraph!`);
+  expect(firstParagraph).toEqual(`Hello\n\nI'm an intro paragraph!`);
   expect(anchor).toEqual('this-is-the-anchor');
 });
 
@@ -40,12 +40,12 @@ it('Returns the info and anchor when there are multiple paragraphs without an an
 
 Intro.
 
-=== Another headering
+=== Another heading
 
 More details`
   );
 
-  expect(firstParagraph).toEqual(`Heading here\n\nIntro.`);
+  expect(firstParagraph).toEqual(`Intro.`);
   expect(anchor).toEqual('this-is-the-anchor');
 });
 
@@ -57,13 +57,13 @@ it('Returns the info and anchor when there are multiple paragraphs with anchors'
 Intro.
 
 [[an-anchor]]
-=== Another headering
+=== Another heading
 
 More details
  `
   );
 
-  expect(firstParagraph).toEqual(`Heading here\n\nIntro.`);
+  expect(firstParagraph).toEqual(`Intro.`);
   expect(anchor).toEqual('this-is-the-anchor');
 });
 
@@ -75,12 +75,12 @@ it('Returns the info and anchor when there are multiple paragraphs with discrete
 Intro.
 
 [discrete]
-=== Another headering
+=== Another heading
 
 More details
  `
   );
 
-  expect(firstParagraph).toEqual(`Heading here\n\nIntro.`);
+  expect(firstParagraph).toEqual(`Intro.`);
   expect(anchor).toEqual('this-is-the-anchor');
 });

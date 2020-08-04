@@ -43,9 +43,7 @@ NOTE:
 
 
 |<<kibana-dashboard-plugin>>
-|Dashboard plugin
-
-- Registers the dashboard application.
+|- Registers the dashboard application.
 - Adds a dashboard embeddable that can be used in other applications.
 
 
@@ -284,7 +282,9 @@ routes, etc.
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/dashboard_enhanced/README.md[dashboardEnhanced]
+|<<dashboard-enhanced-plugin>>
+|Adds drilldown capabailities to dashboard.  Owned by the Kibana App team.
+
 
 |{kib-repo}blob/{branch}/x-pack/plugins/dashboard_mode[dashboardMode]
 |WARNING: Missing README.
@@ -299,12 +299,8 @@ routes, etc.
 
 
 |<<enhanced-embeddables-plugin>>
-|Enhanced embeddables plugin
-
-Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
+|Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
-
-
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/encrypted_saved_objects/README.md[encryptedSavedObjects]
@@ -487,4 +483,5 @@ in their infrastructure.
 |===
 
 include::{kibana-root}/src/plugins/dashboard/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]

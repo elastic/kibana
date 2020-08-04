@@ -23,7 +23,7 @@ export function extractAsciidocInfo(text: string): { firstParagraph?: string; an
   // Third group could perhaps be done better, but is essentially:
   // If there is a sub heading after the intro, match the intro and stop - (([\s\S]*?)(?=\=\=\=|\[\[)))
   // If there is not a sub heading after the intro, match the intro - ([\s\S]*)
-  const matchAnchorAndIntro = /\[\[(.*)\]\]\n(== )(((([\s\S]*?)(?=\=\=\=|\[)))|([\s\S]*))/gm;
+  const matchAnchorAndIntro = /\[\[(.*)\]\]\n(== .*)\n(((([\s\S]*?)(?=\=\=\=|\[)))|([\s\S]*))/gm;
 
   const matches = matchAnchorAndIntro.exec(text);
   const firstParagraph = matches && matches.length >= 4 ? matches[3].toString().trim() : undefined;
