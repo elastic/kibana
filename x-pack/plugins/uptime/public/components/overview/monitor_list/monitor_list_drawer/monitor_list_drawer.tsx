@@ -20,6 +20,7 @@ import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
+import { EnabledAlerts } from './enabled_alerts';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -66,17 +67,7 @@ export function MonitorListDrawerComponent({
         </EuiFlexItem>
       </EuiFlexGroup>
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
-      <EuiSpacer size="m" />
-      <EuiText size="xs">
-        <h3>
-          {i18n.translate('xpack.uptime.monitorList.enabledAlerts.title', {
-            defaultMessage: 'Enabled alerts:',
-            description: 'Alerts enable for this monitor',
-          })}
-        </h3>
-      </EuiText>
-      <EuiSpacer size="m" />
-
+      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts} />
       {loading && <EuiLoadingSpinner />}
       {monitorDetails && monitorDetails.error && (
         <MostRecentError

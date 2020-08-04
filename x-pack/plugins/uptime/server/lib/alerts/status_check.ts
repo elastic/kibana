@@ -28,6 +28,7 @@ import { commonStateTranslations, commonMonitorStateI18 } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { UMServerLibs } from '../lib';
+import { APICaller } from '../adapters/framework';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -262,10 +263,10 @@ export const generateFilterDSL = async (
   );
 };
 
-const formatFilterString = async (
+export const formatFilterString = async (
   libs: UMServerLibs,
   dynamicSettings: DynamicSettings,
-  options: AlertExecutorOptions,
+  callES: APICaller,
   filters?: StatusCheckFilters,
   search?: string
 ) =>
@@ -273,7 +274,7 @@ const formatFilterString = async (
     await generateFilterDSL(
       () =>
         libs.requests.getIndexPattern({
-          callES: options.services.callCluster,
+          callES,
           dynamicSettings,
         }),
       filters,
@@ -394,7 +395,13 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     ) {
       const { filters, search } = availabilityDecoded.right;
       if (filterString === '' && (filters || search)) {
-        filterString = await formatFilterString(libs, dynamicSettings, options, filters, search);
+        filterString = await formatFilterString(
+          libs,
+          dynamicSettings,
+          options.services.callCluster,
+          filters,
+          search
+        );
       }
 
       availabilityResults = await libs.requests.getMonitorAvailability({
