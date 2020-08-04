@@ -106,7 +106,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     indexPatternName: '',
     isIncludingSystemIndices: false,
   };
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {

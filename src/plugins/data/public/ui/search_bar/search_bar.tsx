@@ -224,9 +224,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* eslint-enable */
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
