@@ -393,16 +393,14 @@ const updateExistingIndex = async ({
   // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
-  delete mappings.properties.data_stream;
+  delete mappings.properties.datastream;
 
-  // get the data_stream values from the index template to compose data stream name
+  // get the datastream values from the index template to compose data stream name
   const indexMappings = await getIndexMappings(indexName, callCluster);
-  // Use snake case for easier grepping across files
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  const data_stream = indexMappings[indexName].mappings.properties.data_stream.properties;
-  if (!data_stream.type.value || !data_stream.dataset.value || !data_stream.namespace.value)
-    throw new Error(`data_stream values are missing from the index template ${indexName}`);
-  const datastreamName = `${data_stream.type.value}-${data_stream.dataset.value}-${data_stream.namespace.value}`;
+  const datastream = indexMappings[indexName].mappings.properties.datastream.properties;
+  if (!datastream.type.value || !datastream.dataset.value || !datastream.namespace.value)
+    throw new Error(`datastream values are missing from the index template ${indexName}`);
+  const datastreamName = `${datastream.type.value}-${datastream.dataset.value}-${datastream.namespace.value}`;
 
   // try to update the mappings first
   try {
