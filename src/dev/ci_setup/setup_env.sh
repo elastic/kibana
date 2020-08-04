@@ -42,6 +42,8 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
+export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
+
 ###
 ### download node
 ###
@@ -150,7 +152,7 @@ export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 
-ES_DIR="$PARENT_DIR/elasticsearch"
+ES_DIR="$WORKSPACE/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then

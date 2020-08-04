@@ -9,6 +9,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
       ciStats.trackBuild {
         catchError {
           retryable.enable()
+<<<<<<< HEAD
           parallel([
             'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
             'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
@@ -35,6 +36,9 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
               'xpack-ciGroup6': kibanaPipeline.xpackCiGroupProcess(6),
             ]),
           ])
+=======
+          kibanaPipeline.allCiTasks()
+>>>>>>> 0ca8e99a9f... [CI] Add pipeline task queue framework and merge workers into one (#71268)
         }
       }
     }
