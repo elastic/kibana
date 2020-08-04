@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { AddComment } from '.';
+import { AddComment, AddCommentRefObject } from '.';
 import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
@@ -60,9 +60,11 @@ const defaultPostCommment = {
   isError: false,
   postComment,
 };
+
 const sampleData = {
   comment: 'what a cool comment',
 };
+
 describe('AddComment ', () => {
   const formHookMock = getFormMock(sampleData);
 
@@ -122,16 +124,18 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should insert a quote if one is available', () => {
+  it('should insert a quote', () => {
     const sampleQuote = 'what a cool quote';
+    const ref = React.createRef<AddCommentRefObject>();
     mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, insertQuote: sampleQuote }} />
+          <AddComment {...{ ...addCommentProps }} ref={ref} />
         </Router>
       </TestProviders>
     );
 
+    ref.current!.addQuote(sampleQuote);
     expect(formHookMock.setFieldValue).toBeCalledWith(
       'comment',
       `${sampleData.comment}\n\n${sampleQuote}`

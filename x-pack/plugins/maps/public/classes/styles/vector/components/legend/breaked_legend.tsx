@@ -4,35 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, ReactElement } from 'react';
 import _ from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { Category } from './category';
+import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+
 const EMPTY_VALUE = '';
 
-export class BreakedLegend extends React.Component {
-  state = {
+interface Break {
+  color: string;
+  label: ReactElement<any> | string;
+  symbolId: string;
+}
+
+interface Props {
+  style: IDynamicStyleProperty<any>;
+  breaks: Break[];
+  isLinesOnly: boolean;
+  isPointsOnly: boolean;
+}
+
+interface State {
+  label: string;
+}
+
+export class BreakedLegend extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  state: State = {
     label: EMPTY_VALUE,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadParams();
+    this._loadLabel();
   }
 
   componentDidUpdate() {
-    this._loadParams();
+    this._loadLabel();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadParams() {
-    const label = await this.props.style.getField().getLabel();
-    const newState = { label };
-    if (this._isMounted && !_.isEqual(this.state, newState)) {
-      this.setState(newState);
+  async _loadLabel() {
+    const field = this.props.style.getField();
+    if (!field) {
+      return;
+    }
+    const label = await field.getLabel();
+    if (this._isMounted && !_.isEqual(this.state.label, label)) {
+      this.setState({ label });
     }
   }
 

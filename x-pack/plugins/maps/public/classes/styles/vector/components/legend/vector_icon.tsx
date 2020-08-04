@@ -5,14 +5,21 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { CircleIcon } from './circle_icon';
 import { LineIcon } from './line_icon';
 import { PolygonIcon } from './polygon_icon';
 import { SymbolIcon } from './symbol_icon';
 
-export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }) {
+interface Props {
+  fillColor?: string;
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  strokeColor?: string;
+  symbolId?: string;
+}
+
+export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, symbolId }: Props) {
   if (isLinesOnly) {
     const style = {
       stroke: strokeColor,
@@ -44,11 +51,3 @@ export function VectorIcon({ fillColor, isPointsOnly, isLinesOnly, strokeColor, 
     />
   );
 }
-
-VectorIcon.propTypes = {
-  fillColor: PropTypes.string,
-  isPointsOnly: PropTypes.bool.isRequired,
-  isLinesOnly: PropTypes.bool.isRequired,
-  strokeColor: PropTypes.string,
-  symbolId: PropTypes.string,
-};
