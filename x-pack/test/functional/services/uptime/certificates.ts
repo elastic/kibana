@@ -7,9 +7,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeCertProvider({ getService }: FtrProviderContext) {
+export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
   const changeSearchField = async (text: string) => {
     const input = await testSubjects.find('uptimeCertSearch');
@@ -61,6 +63,7 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
       const self = this;
       return retry.tryForTime(60 * 1000, async () => {
         await changeSearchField(monId);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await self.hasCertificates(1);
       });
     },
