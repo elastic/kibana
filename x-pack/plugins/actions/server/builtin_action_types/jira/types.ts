@@ -66,6 +66,11 @@ export interface CreateIncidentParams {
   incident: Incident;
 }
 
+export interface UpdateIncidentParams {
+  incidentId: string;
+  incident: Incident;
+}
+
 export interface CreateCommentParams {
   incidentId: string;
   comment: Comment;
@@ -90,7 +95,7 @@ export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   getCreateIssueMetadata: () => Promise<GetCreateIssueMetadataResponse>;
   getCapabilities: () => Promise<ExternalServiceParams>;

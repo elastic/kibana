@@ -34,7 +34,6 @@ const getIncidentHandler = async ({
 
 const getCreateIssueMetadataHandler = async ({
   externalService,
-  params,
 }: CreateIssueMetadataHandlerArgs) => {
   const res = await externalService.getCreateIssueMetadata();
   return res;
@@ -81,7 +80,7 @@ const pushToServiceHandler = async ({
     incident = { summary: title, description, priority, labels, issueType };
   }
 
-  if (updateIncident) {
+  if (externalId != null) {
     res = await externalService.updateIncident({
       incidentId: externalId,
       incident,
