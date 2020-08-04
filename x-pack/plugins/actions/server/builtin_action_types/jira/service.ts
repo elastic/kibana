@@ -51,6 +51,8 @@ export const createExternalService = (
   const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/${COMMENT_URL}`;
   const createIssueMetadataUrl = `${url}/${BASE_URL}/issue/createmeta?projectKeys=${projectKey}&expand=projects.issuetypes.fields`;
+  const getIssueTypesUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
+  const getIssueTypeFieldsUrl = `${url}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
   const axiosInstance = axios.create({
     auth: { username: email, password: apiToken },
   });
@@ -61,6 +63,9 @@ export const createExternalService = (
 
   const getCommentsURL = (issueId: string) => {
     return commentUrl.replace('{issueId}', issueId);
+  };
+  const createGetIssueTypeFieldsUrl = (issueTypeId: string) => {
+    return getIssueTypeFieldsUrl.replace('{issueTypeId}', issueTypeId);
   };
 
   const createFields = (key: string, incident: Incident): Fields => {
@@ -296,9 +301,44 @@ export const createExternalService = (
         );
 
         return { issueTypes: metadata };
-      }
+      } else {
+        let metadata = {};
+        const issueTypeRes = await request({
+          axios: axiosInstance,
+          method: 'get',
+          url: getIssueTypesUrl,
+        });
 
-      return { issueTypes: {} };
+        const issueTypes = issueTypeRes.data.values;
+
+        for (const issueType of issueTypes) {
+          const fieldsRes = await request({
+            axios: axiosInstance,
+            method: 'get',
+            url: createGetIssueTypeFieldsUrl(issueType.id),
+          });
+          const fields = fieldsRes.data.values;
+
+          metadata = {
+            ...metadata,
+            name: issueType.name,
+            [issueType.name]: {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              fields: fields.reduce((fieldsAcc: {}, field: Record<string, any>) => {
+                return {
+                  ...fieldsAcc,
+                  [field.fieldId]: {
+                    allowedValues: field.allowedValues ?? [],
+                    defaultValue: field.defaultValue ?? {},
+                  },
+                };
+              }, {}),
+            },
+          };
+        }
+
+        return { issueTypes: metadata };
+      }
     } catch (error) {
       throw new Error(
         getErrorMessage(
