@@ -20,7 +20,7 @@ analyze past performance. You can also modify active alerts in the
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
 
-To review and modify all the available alerts, use the *{alerts-ui}* UI
+To review and modify all the available alerts, use *{alerts-ui}* 
 in the *{stack-manage-app}* app.
 
 [discrete]
