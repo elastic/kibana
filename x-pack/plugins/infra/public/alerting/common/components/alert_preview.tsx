@@ -162,11 +162,10 @@ export const AlertPreview: React.FC<Props> = (props) => {
                       <strong>
                         <FormattedMessage
                           id="xpack.infra.metrics.alertFlyout.alertPreviewGroups"
-                          defaultMessage="{numberOfGroups} {groupName}{plural}"
+                          defaultMessage="{numberOfGroups, plural, one {# {groupName}} other {# {groupName}s}}"
                           values={{
                             numberOfGroups: previewResult.numberOfGroups,
                             groupName: previewResult.groupByDisplayName,
-                            plural: previewResult.numberOfGroups !== 1 ? 's' : '',
                           }}
                         />
                       </strong>{' '}
@@ -187,11 +186,9 @@ export const AlertPreview: React.FC<Props> = (props) => {
               {showNoDataResults && previewResult.resultTotals.noData ? (
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
-                  defaultMessage="There {were} {noData} result{plural} of no data."
+                  defaultMessage="There {noData, plural, one {was # result} other {were # results}} of no data."
                   values={{
-                    were: previewResult.resultTotals.noData !== 1 ? 'were' : 'was',
                     noData: <strong>{previewResult.resultTotals.noData}</strong>,
-                    plural: previewResult.resultTotals.noData !== 1 ? 's' : '',
                   }}
                 />
               ) : null}{' '}
