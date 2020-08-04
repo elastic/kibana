@@ -115,6 +115,7 @@ export const useRequest = <D = any, E = Error>(
     return { data: serializedResponseData, error: responseError };
   };
 
+  // The stringified value won't change even if the object reference does.
   const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
 
   useEffect(() => {
