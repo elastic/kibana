@@ -13142,24 +13142,6 @@
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "TemplateTimelineType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "elastic",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
       }
     ],
     "directives": [

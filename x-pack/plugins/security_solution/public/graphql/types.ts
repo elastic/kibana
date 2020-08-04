@@ -423,11 +423,6 @@ export enum FlowDirection {
   biDirectional = 'biDirectional',
 }
 
-export enum TemplateTimelineType {
-  elastic = 'elastic',
-  custom = 'custom',
-}
-
 export type ToStringArrayNoNullable = any;
 
 export type ToIFieldSubTypeNonNullable = any;
