@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup } from '../../../../../src/core/public';
 import { sendRequest, SendRequestConfig, SendRequestResponse } from './send_request';
@@ -115,13 +115,15 @@ export const useRequest = <D = any, E = Error>(
     return { data: serializedResponseData, error: responseError };
   };
 
+  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+
   useEffect(() => {
     sendRequestRef.current!();
 
     // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
     // object even if its shape hasn't changed, so for now we're just watching the path and the query.
-  }, [path, query]);
+  }, [path, stringifiedQuery]);
 
   useEffect(() => {
     scheduleRequestRef.current!();
