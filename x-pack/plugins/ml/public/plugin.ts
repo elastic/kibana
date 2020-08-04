@@ -49,7 +49,7 @@ export interface MlSetupDependencies {
   management?: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   kibanaVersion: string;
@@ -114,7 +114,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     licensing.subscribe((license) => {
       if (isMlEnabled(license)) {
         // add ML to home page
-        registerFeature(pluginsSetup.home);
+        if (pluginsSetup.home) {
+          registerFeature(pluginsSetup.home);
+        }
 
         // register various ML plugin features which require a full license
         if (isFullLicense(license)) {

@@ -14,7 +14,7 @@ import { registerFeature } from './register_feature';
 export interface PluginsDependencies {
   data: DataPublicPluginStart;
   management: ManagementSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export class TransformUiPlugin {
@@ -34,7 +34,9 @@ export class TransformUiPlugin {
         return mountManagementSection(coreSetup, params);
       },
     });
-    registerFeature(home);
+    if (home) {
+      registerFeature(home);
+    }
   }
 
   public start() {}

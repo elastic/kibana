@@ -32,7 +32,7 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }

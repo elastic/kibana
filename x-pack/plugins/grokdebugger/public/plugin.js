@@ -12,7 +12,9 @@ import { registerFeature } from './register_feature';
 
 export class GrokDebuggerUIPlugin {
   setup(coreSetup, plugins) {
-    registerFeature(plugins.home);
+    if (plugins.home) {
+      registerFeature(plugins.home);
+    }
 
     const devTool = plugins.devTools.register({
       order: 6,

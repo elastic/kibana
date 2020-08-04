@@ -11,7 +11,7 @@ import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 
 export interface Dependencies {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
   charts: ChartsPluginStart;

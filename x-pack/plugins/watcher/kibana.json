@@ -3,16 +3,17 @@
   "configPath": ["xpack", "watcher"],
   "version": "kibana",
   "requiredPlugins": [
-    "home",
     "licensing",
     "management",
     "charts",
     "data"
   ],
+  "optionalPlugins": ["home"],
   "server": true,
   "ui": true,
   "requiredBundles": [
     "esUiShared",
-    "kibanaReact"
+    "kibanaReact",
+    "home"
   ]
 }

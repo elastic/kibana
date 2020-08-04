@@ -59,7 +59,7 @@ import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } f
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: unknown };
@@ -145,7 +145,9 @@ export class MapsPlugin
     bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
 
     inspector.registerView(MapView);
-    home.featureCatalogue.register(featureCatalogueEntry);
+    if (home) {
+      home.featureCatalogue.register(featureCatalogueEntry);
+    }
     visualizations.registerAlias(getMapsVisTypeAlias());
     embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
 

@@ -10,6 +10,6 @@ import { LicensingPluginSetup } from '../../licensing/public';
 
 export interface PluginDependencies {
   licensing: LicensingPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   devTools: DevToolsSetup;
 }

@@ -5,13 +5,13 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "home",
     "licensing",
     "management"
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "home"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
@@ -20,6 +20,7 @@
     "discover",
     "kibanaUtils",
     "kibanaReact",
-    "savedObjects"
+    "savedObjects",
+    "home"
   ]
 }
