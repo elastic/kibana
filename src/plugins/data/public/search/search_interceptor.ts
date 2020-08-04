@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter, tap } from 'rxjs/operators';
+import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
@@ -92,16 +92,14 @@ export class SearchInterceptor {
 
   protected runSearch(
     request: IEsSearchRequest,
-    combinedSignal: AbortSignal
+    signal: AbortSignal
   ): Observable<IEsSearchResponse> {
-    return from(
-      this.deps.http.fetch({
-        path: `/internal/search/es`,
-        method: 'POST',
-        body: JSON.stringify(request),
-        signal: combinedSignal,
-      })
-    );
+    const { id, ...searchRequest } = request;
+    const path = id != null ? `/internal/search/es/${id}` : '/internal/search/es';
+    const method = 'POST';
+    const body = JSON.stringify(id != null ? {} : searchRequest);
+    const response = this.deps.http.fetch({ path, method, body, signal });
+    return from(response);
   }
 
   /**
@@ -123,13 +121,6 @@ export class SearchInterceptor {
       this.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal).pipe(
-        tap({
-          next: (e) => {
-            if (this.deps.usageCollector) {
-              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
-            }
-          },
-        }),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
