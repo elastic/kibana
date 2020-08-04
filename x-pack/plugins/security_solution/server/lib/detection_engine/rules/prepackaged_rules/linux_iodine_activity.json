@@ -7,7 +7,8 @@
     "Normal use of Iodine is uncommon apart from security testing and research. Use by non-security engineers is very uncommon."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
