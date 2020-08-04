@@ -263,6 +263,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         <div
           style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
           className={classes}
+          // This key is required for the ReactGridLayout to work properly
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
           ref={(reactGridItem) => {
@@ -270,8 +271,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
-            // Sometimes panels can keep the same id but change the type: make it react to this change
-            key={`${panel.explicitInput.id}-${panel.type}`}
+            // This key is used to force rerendering on embeddable type change while the id remains the same
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}
