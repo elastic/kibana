@@ -37,3 +37,11 @@ export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
 
 // Actions
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+
+// Diagnostic links/help for common reporting issues
+export const BROWSER_TEST_COMMON_ISSUES: Map<string, string> = new Map();
+
+BROWSER_TEST_COMMON_ISSUES.set(
+  'Could not find the default font',
+  `Chrome couldn't find a default font, please see https://www.elastic.co/guide/en/kibana/current/reporting-troubleshooting.html#reporting-troubleshooting-system-dependencies to fix this issue.`
+);

@@ -6,8 +6,11 @@
 import { spawn } from 'child_process';
 import { createInterface } from 'readline';
 import { uniq } from 'lodash';
+import { BROWSER_TEST_COMMON_ISSUES } from '../../../../constants';
 
-const maxTimeToWait = 10000;
+const maxTimeToWait = 10 * 1000;
+const chromiumCoolDown = 3 * 1000;
+const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 // Default args used by pptr
 // https://github.com/puppeteer/puppeteer/blob/main/src/node/Launcher.ts#L168
@@ -39,10 +42,19 @@ const defaultArgs = [
   '--headless',
 ];
 
-export const start = (executablePath: string, args: string[] = []): Promise<string> => {
+interface BrowserDiagnosticPayload {
+  help: string[];
+  browserStartedSuccessfully: boolean;
+  chromiumLogs: string;
+}
+
+export const chromiumTest = (
+  executablePath: string,
+  args: string[] = []
+): Promise<BrowserDiagnosticPayload> => {
   let closed = false;
   const finalArgs = uniq([...defaultArgs, ...args]);
-  let errorLogs = '';
+  let chromiumLogs = '';
 
   const browserProcess = spawn(executablePath, finalArgs, {
     // On non-windows platforms, `detached: true` makes child process a
@@ -52,8 +64,9 @@ export const start = (executablePath: string, args: string[] = []): Promise<stri
     detached: process.platform !== 'win32',
   });
 
-  return new Promise((resolve, reject) => {
-    const cleanup = (err?: Error) => {
+  return new Promise((resolve) => {
+    const cleanup = async (err?: Error) => {
+      const help: BrowserDiagnosticPayload['help'] = [];
       if (closed) return;
       closed = true;
       clearTimeout(timer);
@@ -61,11 +74,22 @@ export const start = (executablePath: string, args: string[] = []): Promise<stri
       rl.removeAllListeners();
       browserProcess.removeAllListeners();
 
-      if (err) {
-        reject(`${err}:\n${errorLogs}`);
-      } else {
-        resolve();
+      // Sometimes logs with significant issues can creep in after chromium has bound it's remote
+      // debugging port, so let them flow through before calling it.
+      await sleep(chromiumCoolDown);
+
+      for (const knownIssue of BROWSER_TEST_COMMON_ISSUES.keys()) {
+        if (chromiumLogs.includes(knownIssue)) {
+          // Not sure why TS can't figure out that `issue` here is guaranteed to be a string...
+          help.push(BROWSER_TEST_COMMON_ISSUES.get(knownIssue) as string);
+        }
       }
+
+      resolve({
+        help,
+        chromiumLogs,
+        browserStartedSuccessfully: !err,
+      });
 
       if (browserProcess && browserProcess.pid && !browserProcess.killed) {
         try {
@@ -80,12 +104,12 @@ export const start = (executablePath: string, args: string[] = []): Promise<stri
 
     const rl = createInterface({ input: browserProcess.stderr });
     const timer = setTimeout(
-      () => cleanup(new Error(`Browser didn't start successfully in 10 seconds`)),
+      () => cleanup(new Error(`Browser didn't bind successfully in ${maxTimeToWait} milliseconds`)),
       maxTimeToWait
     );
 
     rl.on('line', (data) => {
-      errorLogs += data + '\n';
+      chromiumLogs += data + '\n';
       const match = data.match(/^DevTools listening on (ws:\/\/.*)$/);
       if (match) {
         return cleanup();

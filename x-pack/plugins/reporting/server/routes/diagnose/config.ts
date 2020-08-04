@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { defaults, get } from 'lodash';
 import { ReportingCore } from '../..';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
@@ -14,7 +15,6 @@ const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 export const registerDiagnoseConfig = (reporting: ReportingCore) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
-  const config = reporting.getConfig();
   const { router, elasticsearch } = setupDeps;
 
   router.post(
@@ -27,6 +27,7 @@ export const registerDiagnoseConfig = (reporting: ReportingCore) => {
     userHandler(async (user, context, req, res) => {
       const warnings = [];
       const { callAsInternalUser } = elasticsearch.legacy.client;
+      const config = reporting.getConfig();
 
       const elasticClusterSettingsResponse = await callAsInternalUser('cluster.getSettings', {
         includeDefaults: true,

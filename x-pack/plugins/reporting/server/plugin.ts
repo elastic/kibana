@@ -8,13 +8,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, ReportingConfigType } from './config';
-import {
-  createQueueFactory,
-  enqueueJobFactory,
-  LevelLogger,
-  runValidations,
-  ReportingStore,
-} from './lib';
+import { createQueueFactory, enqueueJobFactory, LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
@@ -84,7 +78,6 @@ export class ReportingPlugin
     setFieldFormats(plugins.data.fieldFormats);
 
     const { logger, reportingCore } = this;
-    const { elasticsearch } = reportingCore.getPluginSetupDeps();
 
     // async background start
     (async () => {
@@ -104,9 +97,6 @@ export class ReportingPlugin
         enqueueJob,
         store,
       });
-
-      // run self-check validations
-      runValidations(config, elasticsearch, browserDriverFactory, this.logger);
 
       this.logger.debug('Start complete');
     })().catch((e) => {

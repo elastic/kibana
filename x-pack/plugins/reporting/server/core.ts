@@ -115,7 +115,7 @@ export class ReportingCore {
   /*
    * Gives async access to the startDeps
    */
-  private async getPluginStartDeps() {
+  public async getPluginStartDeps() {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }

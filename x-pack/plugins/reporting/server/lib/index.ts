@@ -12,4 +12,3 @@ export { getExportTypesRegistry } from './export_types_registry';
 export { LevelLogger } from './level_logger';
 export { ReportingStore } from './store';
 export { startTrace } from './trace';
-export { runValidations } from './validate';
