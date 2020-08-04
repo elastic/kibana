@@ -50,7 +50,7 @@ export interface Note {
     noteId: string | null,
     version: string | null,
     note: SavedNote,
-    overideOwner: boolean
+    overrideOwner: boolean
   ) => Promise<ResponseNote>;
   convertSavedObjectToSavedNote: (
     savedObject: unknown,
@@ -138,7 +138,7 @@ export const persistNote = async (
   noteId: string | null,
   version: string | null,
   note: SavedNote,
-  overideOwner: boolean = true
+  overrideOwner: boolean = true
 ): Promise<ResponseNote> => {
   try {
     const savedObjectsClient = request.context.core.savedObjects.client;
@@ -165,7 +165,7 @@ export const persistNote = async (
         note: convertSavedObjectToSavedNote(
           await savedObjectsClient.create(
             noteSavedObjectType,
-            overideOwner ? pickSavedNote(noteId, note, request.user) : note
+            overrideOwner ? pickSavedNote(noteId, note, request.user) : note
           ),
           timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
         ),
@@ -182,7 +182,7 @@ export const persistNote = async (
         await savedObjectsClient.update(
           noteSavedObjectType,
           noteId,
-          overideOwner ? pickSavedNote(noteId, note, request.user) : note,
+          overrideOwner ? pickSavedNote(noteId, note, request.user) : note,
           {
             version: existingNote.version || undefined,
           }
