@@ -56,14 +56,23 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
     async toggleToMapView() {
       await testSubjects.click('uptimeMonitorToggleMapBtn');
     },
-    hasRedirectInfo() {
+    async hasRedirectInfo() {
       return retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail('uptimeMonitorRedirectInfo');
       });
     },
-    hasRedirectInfoInPingList() {
-      testSubjects.click('uptimePingListExpandBtn');
-      return retry.tryForTime(30000, async () => {
+    async expandPingRow() {
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('uptimePingListExpandBtn'))
+          await testSubjects.click('uptimePingListExpandBtn');
+        else {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+        }
+      });
+    },
+    async hasRedirectInfoInPingList() {
+      await this.expandPingRow();
+      return retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeMonitorPingListRedirectInfo');
       });
     },
