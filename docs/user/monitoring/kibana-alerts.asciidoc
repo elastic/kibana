@@ -14,8 +14,7 @@ these alerts can search, detect, and alert on various conditions across the
 clusters. The alerts are visible alongside your existing {watcher} cluster
 alerts. You can view details about the alerts that are active and view health
 and performance data for {es}, {ls}, and Beats in real time, as well as
-analyze past performance. You can also modify active alerts in the
-*{stack-monitor-app}* app.
+analyze past performance. You can also modify active alerts.
 
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
