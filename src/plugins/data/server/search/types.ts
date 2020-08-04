@@ -41,7 +41,7 @@ export interface ISearchSetup {
   /**
    * Used internally for telemetry
    */
-  usage: SearchUsage;
+  usage?: SearchUsage;
 }
 
 export interface ISearchStart {

@@ -112,7 +112,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -175,7 +176,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -223,7 +225,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
