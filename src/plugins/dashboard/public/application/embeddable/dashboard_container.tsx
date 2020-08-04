@@ -168,27 +168,22 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     previousPanelState: DashboardPanelState<EmbeddableInput>,
     newPanelState: Partial<PanelState>
   ) {
-    // TODO: In the current infrastructure, embeddables in a container do not react properly to
-    // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
-    // until the container logic is fixed.
-    const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
-    finalPanels[newPanelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: newPanelId,
+    // Because the embeddable type can change, we have to operate at the container level here
+    return this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [previousPanelState.explicitInput.id]: {
+          ...previousPanelState,
+          ...newPanelState,
+          gridData: {
+            ...previousPanelState.gridData,
+          },
+          explicitInput: {
+            ...newPanelState.explicitInput,
+            id: previousPanelState.explicitInput.id,
+          },
+        },
       },
-      explicitInput: {
-        ...newPanelState.explicitInput,
-        id: newPanelId,
-      },
-    };
-    this.updateInput({
-      panels: finalPanels,
-      lastReloadRequestTime: new Date().getTime(),
     });
   }
 
