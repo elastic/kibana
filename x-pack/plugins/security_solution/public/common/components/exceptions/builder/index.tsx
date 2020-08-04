@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -24,9 +24,11 @@ import { BuilderButtonOptions } from './builder_button_options';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
 import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { State, exceptionsBuilderReducer } from './reducer';
-import { getDefaultEmptyEntry, getDefaultNestedEmptyEntry } from './helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import exceptionableFields from '../exceptionable_fields.json';
+import {
+  containsValueListEntry,
+  getDefaultEmptyEntry,
+  getDefaultNestedEmptyEntry,
+} from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -44,6 +46,7 @@ const MyButtonsContainer = styled(EuiFlexItem)`
 
 const initialState: State = {
   disableAnd: false,
+  disableNested: false,
   disableOr: false,
   andLogicIncluded: false,
   addNested: false,
@@ -82,12 +85,21 @@ export const ExceptionBuilder = ({
   onChange,
 }: ExceptionBuilderProps) => {
   const [
-    { exceptions, exceptionsToDelete, andLogicIncluded, disableAnd, disableOr, addNested },
+    {
+      exceptions,
+      exceptionsToDelete,
+      andLogicIncluded,
+      disableAnd,
+      disableNested,
+      disableOr,
+      addNested,
+    },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableOr: isOrDisabled,
+    disableNested: isNestedDisabled,
   });
 
   const setUpdateExceptions = useCallback(
@@ -230,17 +242,6 @@ export const ExceptionBuilder = ({
     setUpdateExceptions([...exceptions, { ...newException }]);
   }, [setUpdateExceptions, exceptions, listType, listId, listNamespaceType, ruleName]);
 
-  // Filters index pattern fields by exceptionable fields if list type is endpoint
-  const filterIndexPatterns = useMemo((): IIndexPattern => {
-    if (listType === 'endpoint') {
-      return {
-        ...indexPatterns,
-        fields: indexPatterns.fields.filter(({ name }) => exceptionableFields.includes(name)),
-      };
-    }
-    return indexPatterns;
-  }, [indexPatterns, listType]);
-
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
   // on the index, as a result, created a temporary id when new exception items are first
@@ -354,7 +355,7 @@ export const ExceptionBuilder = ({
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
-                indexPattern={filterIndexPatterns}
+                indexPattern={indexPatterns}
                 listType={listType}
                 addNested={addNested}
                 exceptionItemIndex={index}
@@ -362,6 +363,7 @@ export const ExceptionBuilder = ({
                 isOnlyItem={exceptions.length === 1}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onChangeExceptionItem={handleExceptionItemChange}
+                onlyShowListOperators={containsValueListEntry(exceptions)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -377,9 +379,9 @@ export const ExceptionBuilder = ({
           )}
           <EuiFlexItem grow={1}>
             <BuilderButtonOptions
-              isOrDisabled={disableOr}
+              isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
               isAndDisabled={disableAnd}
-              isNestedDisabled={isNestedDisabled}
+              isNestedDisabled={disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}

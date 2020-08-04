@@ -62,6 +62,8 @@ class LinksMenuUI extends Component {
     const timestamp = record.timestamp;
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval = parseInterval(customUrl.time_range);
+    const basePath = this.props.kibana.services.http.basePath.get();
+
     if (configuredUrlValue.includes('$earliest$')) {
       let earliestMoment = moment(timestamp);
       if (timeRangeInterval !== null) {
@@ -117,7 +119,7 @@ class LinksMenuUI extends Component {
           // Replace any tokens in the configured url_value with values from the source record,
           // and then open link in a new tab/window.
           const urlPath = replaceStringTokens(customUrl.url_value, record, true);
-          openCustomUrlWindow(urlPath, customUrl);
+          openCustomUrlWindow(urlPath, customUrl, basePath);
         })
         .catch((resp) => {
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
@@ -136,7 +138,7 @@ class LinksMenuUI extends Component {
       // Replace any tokens in the configured url_value with values from the source record,
       // and then open link in a new tab/window.
       const urlPath = getUrlForRecord(customUrl, record);
-      openCustomUrlWindow(urlPath, customUrl);
+      openCustomUrlWindow(urlPath, customUrl, basePath);
     }
   };
 

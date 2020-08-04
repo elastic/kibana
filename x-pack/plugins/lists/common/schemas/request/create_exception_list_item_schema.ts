@@ -29,7 +29,7 @@ import {
   nonEmptyEntriesArray,
 } from '../types';
 import { EntriesArray } from '../types/entries';
-import { DefaultUuid } from '../../siem_common_deps';
+import { DefaultUuid } from '../../shared_imports';
 
 export const createExceptionListItemSchema = t.intersection([
   t.exact(

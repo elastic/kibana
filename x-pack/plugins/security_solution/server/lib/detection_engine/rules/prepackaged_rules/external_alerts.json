@@ -6,7 +6,6 @@
   "index": [
     "apm-*-transaction*",
     "auditbeat-*",
-    "endgame-*",
     "filebeat-*",
     "logs-*",
     "packetbeat-*",

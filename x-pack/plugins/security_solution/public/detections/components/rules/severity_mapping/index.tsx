@@ -14,7 +14,8 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { noop } from 'lodash/fp';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import * as i18n from './translations';
 import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
@@ -27,10 +28,16 @@ import {
 } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { FieldComponent } from '../../../../common/components/autocomplete/field';
 import { AutocompleteFieldMatchComponent } from '../../../../common/components/autocomplete/field_value_match';
+import {
+  Severity,
+  SeverityMapping,
+  SeverityMappingItem,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
 
-const SeverityMappingParentContainer = styled(EuiFlexItem)`
-  max-width: 471px;
+const SeverityMappingEuiFormRow = styled(EuiFormRow)`
+  width: 468px;
 `;
+
 const NestedContent = styled.div`
   margin-left: 24px;
 `;
@@ -48,6 +55,7 @@ interface SeverityFieldProps {
   field: FieldHook;
   idAria: string;
   indices: IIndexPattern;
+  isDisabled: boolean;
   options: SeverityOptionItem[];
 }
 
@@ -56,83 +64,80 @@ export const SeverityField = ({
   field,
   idAria,
   indices,
+  isDisabled,
   options,
 }: SeverityFieldProps) => {
-  const [isSeverityMappingChecked, setIsSeverityMappingChecked] = useState(false);
-  const [initialFieldCheck, setInitialFieldCheck] = useState(true);
   const fieldValueInputWidth = 160;
 
-  useEffect(() => {
-    if (
-      !isSeverityMappingChecked &&
-      initialFieldCheck &&
-      (field.value as AboutStepSeverity).mapping?.length > 0
-    ) {
-      setIsSeverityMappingChecked(true);
-      setInitialFieldCheck(false);
-    }
-  }, [
-    field,
-    initialFieldCheck,
-    isSeverityMappingChecked,
-    setIsSeverityMappingChecked,
-    setInitialFieldCheck,
-  ]);
-
-  const handleFieldChange = useCallback(
-    (index: number, severity: string, [newField]: IFieldType[]): void => {
+  const handleFieldValueChange = useCallback(
+    (newMappingItems: SeverityMapping, index: number): void => {
       const values = field.value as AboutStepSeverity;
       field.setValue({
         value: values.value,
+        isMappingChecked: values.isMappingChecked,
         mapping: [
           ...values.mapping.slice(0, index),
-          {
-            ...values.mapping[index],
-            field: newField?.name ?? '',
-            operator: 'equals',
-            severity,
-          },
+          ...newMappingItems,
           ...values.mapping.slice(index + 1),
         ],
       });
     },
     [field]
+  );
+
+  const handleFieldChange = useCallback(
+    (index: number, severity: Severity, [newField]: IFieldType[]): void => {
+      const values = field.value as AboutStepSeverity;
+      const newMappingItems: SeverityMapping = [
+        {
+          ...values.mapping[index],
+          field: newField?.name ?? '',
+          value: newField != null ? values.mapping[index].value : '',
+          operator: 'equals',
+          severity,
+        },
+      ];
+      handleFieldValueChange(newMappingItems, index);
+    },
+    [field, handleFieldValueChange]
   );
 
   const handleFieldMatchValueChange = useCallback(
-    (index: number, severity: string, newMatchValue: string): void => {
+    (index: number, severity: Severity, newMatchValue: string): void => {
       const values = field.value as AboutStepSeverity;
-      field.setValue({
-        value: values.value,
-        mapping: [
-          ...values.mapping.slice(0, index),
-          {
-            ...values.mapping[index],
-            value: newMatchValue,
-            operator: 'equals',
-            severity,
-          },
-          ...values.mapping.slice(index + 1),
-        ],
-      });
+      const newMappingItems: SeverityMapping = [
+        {
+          ...values.mapping[index],
+          field: values.mapping[index].field,
+          value:
+            values.mapping[index].field != null && values.mapping[index].field !== ''
+              ? newMatchValue
+              : '',
+          operator: 'equals',
+          severity,
+        },
+      ];
+      handleFieldValueChange(newMappingItems, index);
     },
-    [field]
+    [field, handleFieldValueChange]
   );
 
-  const selectedState = useMemo(() => {
-    return (
-      (field.value as AboutStepSeverity).mapping?.map((mapping) => {
-        const [newSelectedField] = indices.fields.filter(
-          ({ name }) => mapping.field != null && mapping.field === name
-        );
-        return { field: newSelectedField, value: mapping.value };
-      }) ?? []
-    );
-  }, [field.value, indices]);
+  const getIFieldTypeFromFieldName = (
+    fieldName: string | undefined,
+    iIndexPattern: IIndexPattern
+  ): IFieldType | undefined => {
+    const [iFieldType] = iIndexPattern.fields.filter(({ name }) => fieldName === name);
+    return iFieldType;
+  };
 
-  const handleSeverityMappingSelected = useCallback(() => {
-    setIsSeverityMappingChecked(!isSeverityMappingChecked);
-  }, [isSeverityMappingChecked, setIsSeverityMappingChecked]);
+  const handleSeverityMappingChecked = useCallback(() => {
+    const values = field.value as AboutStepSeverity;
+    field.setValue({
+      value: values.value,
+      mapping: [...values.mapping],
+      isMappingChecked: !values.isMappingChecked,
+    });
+  }, [field]);
 
   const severityLabel = useMemo(() => {
     return (
@@ -149,12 +154,17 @@ export const SeverityField = ({
   const severityMappingLabel = useMemo(() => {
     return (
       <div>
-        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={handleSeverityMappingSelected}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="s"
+          onClick={!isDisabled ? handleSeverityMappingChecked : noop}
+        >
           <EuiFlexItem grow={false}>
             <EuiCheckbox
               id={`severity-mapping-override`}
-              checked={isSeverityMappingChecked}
-              onChange={handleSeverityMappingSelected}
+              checked={(field.value as AboutStepSeverity).isMappingChecked}
+              disabled={isDisabled}
+              onChange={handleSeverityMappingChecked}
             />
           </EuiFlexItem>
           <EuiFlexItem>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
@@ -165,7 +175,7 @@ export const SeverityField = ({
         </NestedContent>
       </div>
     );
-  }, [handleSeverityMappingSelected, isSeverityMappingChecked]);
+  }, [field.value, handleSeverityMappingChecked, isDisabled]);
 
   return (
     <EuiFlexGroup>
@@ -185,6 +195,7 @@ export const SeverityField = ({
             componentProps={{
               idAria: 'detectionEngineStepAboutRuleSeverity',
               'data-test-subj': 'detectionEngineStepAboutRuleSeverity',
+              isDisabled,
               euiFieldProps: {
                 fullWidth: false,
                 disabled: false,
@@ -195,12 +206,12 @@ export const SeverityField = ({
         </EuiFormRow>
       </EuiFlexItem>
 
-      <SeverityMappingParentContainer>
-        <EuiFormRow
+      <EuiFlexItem>
+        <SeverityMappingEuiFormRow
           label={severityMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
-            isSeverityMappingChecked ? (
+            (field.value as AboutStepSeverity).isMappingChecked ? (
               <NestedContent>{i18n.SEVERITY_MAPPING_DETAILS}</NestedContent>
             ) : (
               ''
@@ -214,7 +225,7 @@ export const SeverityField = ({
         >
           <NestedContent>
             <EuiSpacer size="s" />
-            {isSeverityMappingChecked && (
+            {(field.value as AboutStepSeverity).isMappingChecked && (
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -231,53 +242,72 @@ export const SeverityField = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {options.map((option, index) => (
-                  <EuiFlexItem key={option.value}>
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem>
-                        <FieldComponent
-                          placeholder={''}
-                          selectedField={selectedState[index]?.field ?? ''}
-                          isLoading={false}
-                          isClearable={false}
-                          isDisabled={false}
-                          indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
-                          onChange={handleFieldChange.bind(null, index, option.value)}
-                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
-                          aria-label={`detectionEngineStepAboutRuleSeverityMappingField${option.value}`}
-                        />
-                      </EuiFlexItem>
+                {(field.value as AboutStepSeverity).mapping.map(
+                  (severityMappingItem: SeverityMappingItem, index) => (
+                    <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                        <EuiFlexItem>
+                          <FieldComponent
+                            placeholder={''}
+                            selectedField={getIFieldTypeFromFieldName(
+                              severityMappingItem.field,
+                              indices
+                            )}
+                            isLoading={false}
+                            isDisabled={isDisabled}
+                            isClearable={false}
+                            indexPattern={indices}
+                            fieldInputWidth={fieldValueInputWidth}
+                            onChange={handleFieldChange.bind(
+                              null,
+                              index,
+                              severityMappingItem.severity
+                            )}
+                            data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
+                            aria-label={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
+                          />
+                        </EuiFlexItem>
 
-                      <EuiFlexItem>
-                        <AutocompleteFieldMatchComponent
-                          placeholder={''}
-                          selectedField={selectedState[index]?.field ?? ''}
-                          selectedValue={selectedState[index]?.value ?? ''}
-                          isDisabled={false}
-                          isLoading={false}
-                          isClearable={false}
-                          indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
-                          onChange={handleFieldMatchValueChange.bind(null, index, option.value)}
-                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
-                          aria-label={`detectionEngineStepAboutRuleSeverityMappingValue${option.value}`}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItemIconColumn grow={false}>
-                        <EuiIcon type={'sortRight'} />
-                      </EuiFlexItemIconColumn>
-                      <EuiFlexItemSeverityColumn grow={false}>
-                        {option.inputDisplay}
-                      </EuiFlexItemSeverityColumn>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
+                        <EuiFlexItem>
+                          <AutocompleteFieldMatchComponent
+                            placeholder={''}
+                            selectedField={getIFieldTypeFromFieldName(
+                              severityMappingItem.field,
+                              indices
+                            )}
+                            selectedValue={severityMappingItem.value}
+                            isClearable={false}
+                            isDisabled={isDisabled}
+                            isLoading={false}
+                            indexPattern={indices}
+                            fieldInputWidth={fieldValueInputWidth}
+                            onChange={handleFieldMatchValueChange.bind(
+                              null,
+                              index,
+                              severityMappingItem.severity
+                            )}
+                            data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
+                            aria-label={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItemIconColumn grow={false}>
+                          <EuiIcon type={'sortRight'} />
+                        </EuiFlexItemIconColumn>
+                        <EuiFlexItemSeverityColumn grow={false}>
+                          {
+                            options.find((o) => o.value === severityMappingItem.severity)
+                              ?.inputDisplay
+                          }
+                        </EuiFlexItemSeverityColumn>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )
+                )}
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </EuiFormRow>
-      </SeverityMappingParentContainer>
+        </SeverityMappingEuiFormRow>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -108,6 +108,7 @@ function getAlwaysFiringAlertType() {
     defaultActionGroupId: 'default',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
+      params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
     async executor(alertExecutorOptions) {

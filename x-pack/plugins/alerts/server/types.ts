@@ -100,6 +100,7 @@ export interface AlertType<
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
+    params?: ActionVariable[];
   };
 }
 
