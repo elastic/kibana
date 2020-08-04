@@ -250,8 +250,7 @@ export const getUpdatedEntriesOnDelete = (
   entryIndex: number,
   nestedParentIndex: number | null
 ): ExceptionsBuilderExceptionItem => {
-  const itemOfInterest: BuilderEntry =
-    exceptionItem.entries[nestedParentIndex != null ? nestedParentIndex : entryIndex];
+  const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
 
   if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
     const updatedEntryEntries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists> = [

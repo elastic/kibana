@@ -92,11 +92,12 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     return (
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
-          <BuilderAndBadgeComponent
-            entriesLength={exceptionItem.entries.length}
-            andLogicIncluded={andLogicIncluded}
-            exceptionItemIndex={exceptionItemIndex}
-          />
+          {andLogicIncluded && (
+            <BuilderAndBadgeComponent
+              entriesLength={exceptionItem.entries.length}
+              exceptionItemIndex={exceptionItemIndex}
+            />
+          )}
           <EuiFlexItem grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => (
