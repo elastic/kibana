@@ -15,7 +15,7 @@ import {
 } from './generate_breadcrumbs';
 
 /**
- * Small on-mount helper for setting Kibana's chrome breadcrumbs on any App Search view
+ * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
  * @see https://github.com/elastic/kibana/blob/master/src/core/public/chrome/chrome_service.tsx
  */
 
@@ -31,7 +31,7 @@ interface IRootBreadcrumbsProps {
 }
 type TBreadcrumbsProps = IBreadcrumbsProps | IRootBreadcrumbsProps;
 
-export const SetAppSearchBreadcrumbs: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
+export const SetAppSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
   const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
 
@@ -44,7 +44,7 @@ export const SetAppSearchBreadcrumbs: React.FC<TBreadcrumbsProps> = ({ text, isR
   return null;
 };
 
-export const SetWorkplaceSearchBreadcrumbs: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
+export const SetWorkplaceSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
   const history = useHistory();
   const { setBreadcrumbs } = useContext(KibanaContext) as IKibanaContext;
 

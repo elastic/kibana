@@ -10,9 +10,10 @@ import '../../__mocks__/react_router_history.mock';
 import { mountWithKibanaContext } from '../../__mocks__';
 
 jest.mock('./generate_breadcrumbs', () => ({ appSearchBreadcrumbs: jest.fn() }));
-import { appSearchBreadcrumbs, SetAppSearchBreadcrumbs } from './';
+import { appSearchBreadcrumbs } from './generate_breadcrumbs';
+import { SetAppSearchChrome } from './';
 
-describe('SetAppSearchBreadcrumbs', () => {
+describe('SetAppSearchChrome', () => {
   const setBreadcrumbs = jest.fn();
   const builtBreadcrumbs = [] as any;
   const appSearchBreadCrumbsInnerCall = jest.fn().mockReturnValue(builtBreadcrumbs);
@@ -23,8 +24,8 @@ describe('SetAppSearchBreadcrumbs', () => {
     jest.clearAllMocks();
   });
 
-  const mountSetAppSearchBreadcrumbs = (props: any) => {
-    return mountWithKibanaContext(<SetAppSearchBreadcrumbs {...props} />, {
+  const mountSetAppSearchChrome = (props: any) => {
+    return mountWithKibanaContext(<SetAppSearchChrome {...props} />, {
       http: {},
       enterpriseSearchUrl: 'http://localhost:3002',
       setBreadcrumbs,
@@ -32,7 +33,7 @@ describe('SetAppSearchBreadcrumbs', () => {
   };
 
   describe('when isRoot is false', () => {
-    const subject = () => mountSetAppSearchBreadcrumbs({ text: 'Page 1', isRoot: false });
+    const subject = () => mountSetAppSearchChrome({ text: 'Page 1', isRoot: false });
 
     it('calls appSearchBreadcrumbs to build breadcrumbs, then registers them with Kibana', () => {
       subject();
@@ -48,7 +49,7 @@ describe('SetAppSearchBreadcrumbs', () => {
   });
 
   describe('when isRoot is true', () => {
-    const subject = () => mountSetAppSearchBreadcrumbs({ text: 'Page 1', isRoot: true });
+    const subject = () => mountSetAppSearchChrome({ text: 'Page 1', isRoot: true });
 
     it('calls appSearchBreadcrumbs to build breadcrumbs with an empty breadcrumb, then registers them with Kibana', () => {
       subject();
