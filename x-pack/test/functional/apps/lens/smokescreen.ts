@@ -9,63 +9,31 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'header',
-    'common',
-    'visualize',
-    'dashboard',
-    'header',
-    'timePicker',
-    'lens',
-  ]);
+  const PageObjects = getPageObjects(['visualize', 'lens']);
   const find = getService('find');
-  const dashboardAddPanel = getService('dashboardAddPanel');
-  const elasticChart = getService('elasticChart');
-  const browser = getService('browser');
-  const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
-  const filterBar = getService('filterBar');
   const listingTable = getService('listingTable');
 
-  async function assertExpectedMetric(metricCount: string = '19,986') {
-    await PageObjects.lens.assertExactText(
-      '[data-test-subj="lns_metric_title"]',
-      'Maximum of bytes'
-    );
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metricCount);
-  }
-
-  async function assertExpectedTable() {
-    await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] thead .euiTableCellContent__text',
-      'Maximum of bytes'
-    );
-    await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValue"]',
-      '19,986'
-    );
-  }
-
-  async function assertExpectedChartTitleInEmbeddable(title: string) {
-    await PageObjects.lens.assertExactText(
-      `[data-test-subj="embeddablePanelHeading-${title}"]`,
-      title
-    );
+  async function assertExpectedMetric(title: string, metric: string) {
+    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_title"]', title);
+    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metric);
   }
 
   async function assertExpectedChartTitle(title: string) {
     await PageObjects.lens.assertExactText(`[data-test-subj="lns_ChartTitle"]`, title);
   }
 
-  async function assertExpectedTimerange() {
-    const time = await PageObjects.timePicker.getTimeConfig();
-    expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
-    expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
+  async function assertDatatableThText(text: string, index = 0) {
+    return PageObjects.lens.assertExactText(
+      `[data-test-subj="lnsDataTable"] thead th:nth-child(${index + 1}) .euiTableCellContent__text`,
+      text
+    );
   }
 
-  async function clickOnBarHistogram() {
-    const el = await elasticChart.getCanvas();
-    await browser.getActions().move({ x: 5, y: 5, origin: el._webElement }).click().perform();
+  async function assertDatatableCellText(text: string, rowIndex = 0, colIndex = 0) {
+    return PageObjects.lens.assertExactText(
+      `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${colIndex + 1})`,
+      text
+    );
   }
 
   describe('lens smokescreen tests', () => {
@@ -74,42 +42,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
+      await assertExpectedMetric('Maximum of bytes', '19,986');
     });
 
-    it('metric should be embeddable in dashboards', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('Artistpreviouslyknownaslens');
-      await find.clickByButtonText('Artistpreviouslyknownaslens');
-      await dashboardAddPanel.closeAddPanel();
-      await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
-    });
-
-    it('click on the bar in XYChart adds proper filters/timerange in dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
-      await find.clickByButtonText('lnsXYvis');
-      await dashboardAddPanel.closeAddPanel();
-      await PageObjects.lens.goToTimeRange();
-      await clickOnBarHistogram();
-
-      await retry.try(async () => {
-        await testSubjects.click('applyFiltersPopoverButton');
-        await testSubjects.missingOrFail('applyFiltersPopoverButton');
-      });
-
-      await assertExpectedChartTitleInEmbeddable('lnsXYvis');
-      await assertExpectedTimerange();
-      const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
-      expect(hasIpFilter).to.be(true);
-    });
-
-    it('should allow creation of lens visualizations', async () => {
+    it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -163,11 +99,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
+      await assertExpectedMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await assertExpectedTable();
+      await assertDatatableThText('Maximum of bytes');
+      await assertDatatableCellText('19,986', 0, 0);
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await assertExpectedMetric();
+      await assertExpectedMetric('Maximum of bytes', '19,986');
     });
 
     it('should switch from a multi-layer stacked bar to a multi-layer line chart', async () => {
@@ -241,6 +178,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await PageObjects.lens.getVisibleTextOfDimensionTrigger('lnsPie_sizeByDimensionPanel')
       ).to.eql('Average of bytes');
+    });
+
+    it('should allow creating a pie chart and switching to datatable', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('pie');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sliceByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+      await assertDatatableThText('@timestamp per 3 hours', 0);
+      await assertDatatableThText('Average of bytes', 1);
+      await assertDatatableCellText('2015-09-20 00:00', 0, 0);
+      await assertDatatableCellText('6,011.351', 0, 1);
     });
   });
 }
