@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "target"
+  ],
+  "compilerOptions": {
+    "declaration": false,
+  }
+}
