@@ -30,7 +30,6 @@ import EMS_TILES from '../__tests__/map/ems_mocks/sample_tiles.json';
 import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from '../__tests__/map/ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
-import { ORIGIN } from '../common/constants/origin';
 import { ServiceSettings } from './service_settings';
 
 describe('service_settings (FKA tile_map test)', function () {
@@ -53,11 +52,7 @@ describe('service_settings (FKA tile_map test)', function () {
     };
 
     const defaultTilemapConfig = {
-      deprecated: {
-        config: {
-          options: {},
-        },
-      },
+      options: {},
     };
     getInjectedVarFunc.mockImplementation(() => {
       return (param) => {
@@ -176,13 +171,8 @@ describe('service_settings (FKA tile_map test)', function () {
 
       it('should merge in tilemap url', async () => {
         tilemapConfigOptions = {
-          deprecated: {
-            isOverridden: true,
-            config: {
-              url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              options: { minZoom: 0, maxZoom: 20 },
-            },
-          },
+          url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          options: { minZoom: 0, maxZoom: 20 },
         };
         serviceSettings = makeServiceSettings();
 
@@ -266,13 +256,8 @@ describe('service_settings (FKA tile_map test)', function () {
           includeElasticMapsService: false,
         };
         tilemapConfigOptions = {
-          deprecated: {
-            isOverridden: true,
-            config: {
-              url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              options: { minZoom: 0, maxZoom: 20 },
-            },
-          },
+          url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          options: { minZoom: 0, maxZoom: 20 },
         };
         serviceSettings = makeServiceSettings();
         const tilemapServices = await serviceSettings.getTMSServices();

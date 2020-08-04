@@ -32,6 +32,7 @@ export class ServiceSettings {
     this.mapConfig = getInjectedVar('mapConfig');
     this.tilemapsConfig = getInjectedVar('tilemapsConfig');
     const kbnVersion = getInjectedVar('version');
+    this._hasTmsConfigured = typeof this.tilemapsConfig.url === 'string' && this.tilemapsConfig.url !== '';
 
     this._showZoomMessage = true;
     this._emsClient = new EMSClient({
@@ -55,13 +56,10 @@ export class ServiceSettings {
       linkify: true,
     });
 
-    // TMS attribution
-    const attributionFromConfig = _.escape(
-      markdownIt.render(this.tilemapsConfig.deprecated.config.options.attribution || '')
-    );
     // TMS Options
-    this.tmsOptionsFromConfig = _.assign({}, this.tilemapsConfig.deprecated.config.options, {
-      attribution: attributionFromConfig,
+    this.tmsOptionsFromConfig = _.assign({}, this.tilemapsConfig.options, {
+      attribution: _.escape(markdownIt.render(this.tilemapsConfig.options.attribution || '')),
+      url: this.tilemapsConfig.url,
     });
   }
 
@@ -124,7 +122,7 @@ export class ServiceSettings {
    */
   async getTMSServices() {
     let allServices = [];
-    if (this.tilemapsConfig.deprecated.isOverridden) {
+    if (this._hasTmsConfigured) {
       //use tilemap.* settings from yml
       const tmsService = _.cloneDeep(this.tmsOptionsFromConfig);
       tmsService.id = TMS_IN_YML_ID;
@@ -212,14 +210,12 @@ export class ServiceSettings {
     if (tmsServiceConfig.origin === ORIGIN.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
     } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
-      const config = this.tilemapsConfig.deprecated.config;
-      const attrs = _.pick(config, ['url', 'minzoom', 'maxzoom', 'attribution']);
+      const attrs = _.pick(this.tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
       return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
     } else {
       //this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
-        const config = this.tilemapsConfig.deprecated.config;
-        const attrs = _.pick(config, ['url', 'minzoom', 'maxzoom', 'attribution']);
+        const attrs = _.pick(this.tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
         return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
       } else {
         //assume ems
