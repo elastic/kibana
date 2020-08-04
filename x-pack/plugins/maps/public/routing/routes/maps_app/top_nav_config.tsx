@@ -7,7 +7,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from 'src/plugins/inspector/public';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import {
   getCoreChrome,
   getMapsCapabilities,
@@ -25,6 +24,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 // @ts-expect-error
 import { goToSpecifiedPath } from '../../maps_router';
 import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
+import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public';
 
 export function getTopNavConfig({
   savedMap,
@@ -44,7 +44,7 @@ export function getTopNavConfig({
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   setBreadcrumbs: () => void;
-  stateTransfer?: unknown;
+  stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
 }) {
   const topNavConfigs = [];
@@ -123,7 +123,7 @@ export function getTopNavConfig({
   if (hasSaveAndReturnConfig) {
     topNavConfigs.push({
       id: 'saveAndReturn',
-      label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
+      label: i18n.translate('xpack.maps.topNav.saveAndReturnButtonLabel', {
         defaultMessage: 'Save and return',
       }),
       emphasize: true,
@@ -131,7 +131,7 @@ export function getTopNavConfig({
       run: () => {
         onSave({
           newTitle: savedMap.title,
-          newDescription: savedMap.description,
+          newDescription: savedMap.description ? savedMap.description : '',
           newCopyOnSave: false,
           isTitleDuplicateConfirmed: false,
           returnToOrigin: true,

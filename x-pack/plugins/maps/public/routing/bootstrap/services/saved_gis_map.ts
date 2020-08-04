@@ -36,6 +36,7 @@ export interface ISavedGisMap extends SavedObject {
   layerListJSON?: string;
   mapStateJSON?: string;
   uiStateJSON?: string;
+  description?: string;
   getLayerList(): LayerDescriptor[];
   syncWithStore(): void;
 }
