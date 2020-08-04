@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './disallowed_syntax_plugin';
+export { usageProvider, SearchUsage } from './usage';
