@@ -12,7 +12,6 @@ import pluralize from 'pluralize';
 import copy from 'copy-to-clipboard';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
-import { functions as externalFunctions } from '../../../canvas_plugin_src/functions/external';
 import { ArgumentType } from '../../../types';
 import { notifyService } from '../../services';
 import { isValidDataUrl, DATATABLE_COLUMN_TYPES } from '../../../common/lib';
