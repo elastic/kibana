@@ -23,7 +23,7 @@ import {
   isSavedObjectEmbeddableInput,
   EmbeddableInput,
   IEmbeddable,
-} from '.';
+} from '../';
 import { SimpleSavedObject } from '../../../../../core/public';
 
 export class AttributeService<
@@ -65,4 +65,31 @@ export class AttributeService<
       return { attributes: newAttributes } as ValType;
     }
   }
+
+  inputIsRefType = (input: ValType | RefType): input is RefType => {
+    return isSavedObjectEmbeddableInput(input);
+  };
+
+  getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
+    if (!this.inputIsRefType(input)) {
+      return input;
+    }
+    const attributes = await this.unwrapAttributes(input);
+    return {
+      ...input,
+      savedObjectId: undefined,
+      attributes,
+    };
+  };
+
+  getInputAsRefType = async (input: ValType | RefType): Promise<RefType> => {
+    if (this.inputIsRefType(input)) {
+      return input;
+    }
+    const wrappedInput = await this.wrapAttributes(input.attributes, true);
+    return {
+      id: input.id,
+      ...wrappedInput,
+    } as RefType;
+  };
 }

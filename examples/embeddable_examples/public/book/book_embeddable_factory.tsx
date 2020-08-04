@@ -122,6 +122,6 @@ export class BookEmbeddableFactoryDefinition
         BookByReferenceInput
       >(this.type);
     }
-    return this.attributeService;
+    return this.attributeService!;
   }
 }

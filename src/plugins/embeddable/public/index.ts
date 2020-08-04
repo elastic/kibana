@@ -29,6 +29,8 @@ export {
   Adapters,
   AddPanelAction,
   AttributeService,
+  ReferenceOrValueEmbeddable,
+  isReferenceOrValueEmbeddable,
   ChartActionContext,
   Container,
   ContainerInput,

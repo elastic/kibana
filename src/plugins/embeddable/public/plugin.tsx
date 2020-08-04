@@ -49,7 +49,7 @@ import {
   isValueClickTriggerContext,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { AttributeService } from './lib/embeddables/attribute_service';
+import { AttributeService } from './lib';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 
 export interface EmbeddableSetupDependencies {
