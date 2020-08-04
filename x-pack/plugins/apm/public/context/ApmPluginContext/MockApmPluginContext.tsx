@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
+import { of } from 'rxjs';
 import { ApmPluginContext, ApmPluginContextValue } from '.';
-import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { createCallApmApi } from '../../services/rest/createCallApmApi';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -33,7 +34,11 @@ const uiSettings: Record<string, unknown> = {
 };
 
 const mockCore = {
+  application: {
+    capabilities: {},
+  },
   chrome: {
+    docTitle: { change: () => {} },
     setBreadcrumbs: () => {},
   },
   docLinks: {
@@ -45,6 +50,9 @@ const mockCore = {
       prepend: (path: string) => `/basepath${path}`,
     },
   },
+  i18n: {
+    Context: ({ children }: { children: ReactNode }) => children,
+  },
   notifications: {
     toasts: {
       addWarning: () => {},
@@ -53,6 +61,7 @@ const mockCore = {
   },
   uiSettings: {
     get: (key: string) => uiSettings[key],
+    get$: (key: string) => of(mockCore.uiSettings.get(key)),
   },
 };
 

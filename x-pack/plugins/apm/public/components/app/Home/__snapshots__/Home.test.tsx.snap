@@ -11,7 +11,13 @@ exports[`Home component should render services 1`] = `
         },
       },
       "core": Object {
+        "application": Object {
+          "capabilities": Object {},
+        },
         "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
           "setBreadcrumbs": [Function],
         },
         "docLinks": Object {
@@ -23,6 +29,9 @@ exports[`Home component should render services 1`] = `
             "prepend": [Function],
           },
         },
+        "i18n": Object {
+          "Context": [Function],
+        },
         "notifications": Object {
           "toasts": Object {
             "addDanger": [Function],
@@ -31,6 +40,7 @@ exports[`Home component should render services 1`] = `
         },
         "uiSettings": Object {
           "get": [Function],
+          "get$": [Function],
         },
       },
       "plugins": Object {},
@@ -54,7 +64,13 @@ exports[`Home component should render traces 1`] = `
         },
       },
       "core": Object {
+        "application": Object {
+          "capabilities": Object {},
+        },
         "chrome": Object {
+          "docTitle": Object {
+            "change": [Function],
+          },
           "setBreadcrumbs": [Function],
         },
         "docLinks": Object {
@@ -66,6 +82,9 @@ exports[`Home component should render traces 1`] = `
             "prepend": [Function],
           },
         },
+        "i18n": Object {
+          "Context": [Function],
+        },
         "notifications": Object {
           "toasts": Object {
             "addDanger": [Function],
@@ -74,6 +93,7 @@ exports[`Home component should render traces 1`] = `
         },
         "uiSettings": Object {
           "get": [Function],
+          "get$": [Function],
         },
       },
       "plugins": Object {},
