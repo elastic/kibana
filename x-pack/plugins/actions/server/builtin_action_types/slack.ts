@@ -111,15 +111,14 @@ async function slackExecutor(
       port: Number(proxyUrl.port),
       protocol: proxyUrl.protocol,
       headers: execOptions.proxySettings.proxyHeaders,
-      keepAlive: true,
       // do not fail on invalid certs
       rejectUnauthorized: execOptions.proxySettings.rejectUnauthorizedCertificates,
-      // secureProtocol: 'SSLv3_method',
     });
   }
 
   try {
     // https://slack.dev/node-slack-sdk/webhook
+    // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
       agent: proxyAgent,
     });
