@@ -21,6 +21,7 @@ import { EndpointAppContext } from '../../types';
 import { AgentService } from '../../../../../ingest_manager/server';
 import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
+import { findAgentIDsByStatus } from './support/agent_status';
 
 interface HitSource {
   _source: HostMetadata;
@@ -52,6 +53,21 @@ const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('metadata');
 };
 
+/* Filters that can be applied to the endpoint fetch route */
+export const endpointFilters = schema.object({
+  kql: schema.nullable(schema.string()),
+  host_status: schema.nullable(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.OFFLINE.toString()),
+        schema.literal(HostStatus.UNENROLLING.toString()),
+        schema.literal(HostStatus.ERROR.toString()),
+      ])
+    )
+  ),
+});
+
 export function registerEndpointRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const logger = getLogger(endpointAppContext);
   router.post(
@@ -76,10 +92,7 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
                 ])
               )
             ),
-            /**
-             * filter to be applied, it could be a kql expression or discrete filter to be implemented
-             */
-            filter: schema.nullable(schema.oneOf([schema.string()])),
+            filters: endpointFilters,
           })
         ),
       },
@@ -103,12 +116,21 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
           context.core.savedObjects.client
         );
 
+        const statusIDs = req.body?.filters?.host_status?.length
+          ? await findAgentIDsByStatus(
+              agentService,
+              context.core.savedObjects.client,
+              req.body?.filters?.host_status
+            )
+          : undefined;
+
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
           metadataIndexPattern,
           {
             unenrolledAgentIds: unenrolledAgentIds.concat(IGNORED_ELASTIC_AGENT_IDS),
+            statusAgentIDs: statusIDs,
           }
         );
 

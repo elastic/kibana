@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter, tap } from 'rxjs/operators';
+import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
@@ -92,15 +93,18 @@ export class SearchInterceptor {
 
   protected runSearch(
     request: IEsSearchRequest,
-    combinedSignal: AbortSignal,
+    signal: AbortSignal,
     strategy?: string
   ): Observable<IEsSearchResponse> {
+    const { id, ...searchRequest } = request;
+    const path = trimEnd(`/internal/search/${strategy || 'es'}/${id}`, '/');
+    const body = JSON.stringify(id != null ? {} : searchRequest);
     return from(
       this.deps.http.fetch({
-        path: `/internal/search/${strategy || 'es'}`,
         method: 'POST',
-        body: JSON.stringify(request),
-        signal: combinedSignal,
+        path,
+        body,
+        signal,
       })
     );
   }
@@ -124,13 +128,6 @@ export class SearchInterceptor {
       this.pendingCount$.next(++this.pendingCount);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
-        tap({
-          next: (e) => {
-            if (this.deps.usageCollector) {
-              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
-            }
-          },
-        }),
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();

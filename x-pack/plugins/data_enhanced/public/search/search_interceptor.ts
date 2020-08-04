@@ -89,9 +89,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
         // If the response indicates it is complete, stop polling and complete the observable
         if (!response.isRunning) {
-          if (this.deps.usageCollector && response.rawResponse) {
-            this.deps.usageCollector.trackSuccess(response.rawResponse.took);
-          }
           return EMPTY;
         }
 
