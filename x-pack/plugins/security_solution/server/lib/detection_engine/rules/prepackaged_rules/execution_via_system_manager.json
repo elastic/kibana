@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS Execution via System Manager",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.module:aws and event.dataset:aws.cloudtrail and event.provider:ssm.amazonaws.com and event.action:SendCommand and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-plugins.html"
@@ -23,7 +24,10 @@
   "severity": "low",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Logging",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

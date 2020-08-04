@@ -8,7 +8,6 @@ import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -102,7 +101,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     return (
       <>
         {indicesExist ? (
-          <StickyContainer>
+          <>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
               <SiemSearchBar indexPattern={indexPattern} id="global" />
@@ -207,7 +206,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                 setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               />
             </WrapperPage>
-          </StickyContainer>
+          </>
         ) : (
           <WrapperPage>
             <HeaderPage border title={detailName} />

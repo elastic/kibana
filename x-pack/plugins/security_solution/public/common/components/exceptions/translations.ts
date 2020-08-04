@@ -95,6 +95,13 @@ export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
   }
 );
 
+export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.noSearchResultsPromptBody',
+  {
+    defaultMessage: 'No search results found.',
+  }
+);
+
 export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
@@ -169,10 +176,17 @@ export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
 export const ADD_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToClipboard',
   {
-    defaultMessage: 'Add to clipboard',
+    defaultMessage: 'Comment',
   }
 );
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.exceptions.descriptionLabel', {
   defaultMessage: 'Description',
 });
+
+export const TOTAL_ITEMS_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.fetchTotalsError',
+  {
+    defaultMessage: 'Error getting exception item totals',
+  }
+);

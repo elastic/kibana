@@ -27,6 +27,7 @@ import {
   getEntryOnMatchAnyChange,
   getEntryOnListChange,
 } from './helpers';
+import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../../autocomplete/operators';
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -35,6 +36,7 @@ interface EntryItemProps {
   listType: ExceptionListType;
   addNested: boolean;
   onChange: (arg: BuilderEntry, i: number) => void;
+  onlyShowListOperators?: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -44,6 +46,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   addNested,
   showLabel,
   onChange,
+  onlyShowListOperators = false,
 }): JSX.Element => {
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
@@ -92,7 +95,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry);
+      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, listType);
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -107,6 +110,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isDisabled={indexPattern == null}
           onChange={handleFieldChange}
           data-test-subj="exceptionBuilderEntryField"
+          fieldInputWidth={275}
         />
       );
 
@@ -120,15 +124,18 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         return comboBox;
       }
     },
-    [handleFieldChange, indexPattern, entry]
+    [handleFieldChange, indexPattern, entry, listType]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    const operatorOptions = getOperatorOptions(
-      entry,
-      listType,
-      entry.field != null && entry.field.type === 'boolean'
-    );
+    const operatorOptions = onlyShowListOperators
+      ? EXCEPTION_OPERATORS_ONLY_LISTS
+      : getOperatorOptions(
+          entry,
+          listType,
+          entry.field != null && entry.field.type === 'boolean',
+          isFirst
+        );
     const comboBox = (
       <OperatorComponent
         placeholder={i18n.EXCEPTION_OPERATOR_PLACEHOLDER}
@@ -163,7 +170,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         return (
           <AutocompleteFieldMatchComponent
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
-            selectedField={entry.field}
+            selectedField={
+              entry.correspondingKeywordField != null
+                ? entry.correspondingKeywordField
+                : entry.field
+            }
             selectedValue={value}
             isDisabled={
               indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
@@ -181,7 +192,11 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         return (
           <AutocompleteFieldMatchAnyComponent
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
-            selectedField={entry.field}
+            selectedField={
+              entry.correspondingKeywordField != null
+                ? entry.correspondingKeywordField
+                : entry.field
+            }
             selectedValue={values}
             isDisabled={
               indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)
