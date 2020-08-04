@@ -14,6 +14,7 @@ import {
   getInspector,
   getToasts,
   getCoreI18n,
+  navigateToApp,
 } from '../../../kibana_services';
 import {
   SavedObjectSaveModalOrigin,
@@ -29,30 +30,96 @@ export function getTopNavConfig({
   savedMap,
   isOpenSettingsDisabled,
   isSaveDisabled,
-  closeFlyout,
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
   setBreadcrumbs,
+  stateTransfer,
   originatingApp,
 }: {
   savedMap: ISavedGisMap;
   isOpenSettingsDisabled: boolean;
   isSaveDisabled: boolean;
-  closeFlyout: () => void;
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
   setBreadcrumbs: () => void;
+  stateTransfer?: unknown;
   originatingApp?: string;
 }) {
   const topNavConfigs = [];
-
+  const isNewMap = !savedMap.id;
   const hasWritePermissions = getMapsCapabilities().save;
+  const hasSaveAndReturnConfig = hasWritePermissions && !isNewMap && originatingApp;
 
-  let hasSaveAndReturnConfig = false;
-  if (hasWritePermissions && savedMap.id && originatingApp) {
-    hasSaveAndReturnConfig = true;
+  async function onSave({
+    newDescription,
+    newTitle,
+    newCopyOnSave,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+    returnToOrigin,
+  }: OnSaveProps & { returnToOrigin: boolean }) {
+    const prevTitle = savedMap.title;
+    const prevDescription = savedMap.description;
+    savedMap.title = newTitle;
+    savedMap.description = newDescription;
+    savedMap.copyOnSave = newCopyOnSave;
+
+    let id;
+    try {
+      savedMap.syncWithStore();
+      id = await savedMap.save({
+        confirmOverwrite: false,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate,
+      });
+    } catch (err) {
+      getToasts().addDanger({
+        title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
+          defaultMessage: `Error saving '{title}'`,
+          values: { title: savedMap.title },
+        }),
+        text: err.message,
+        'data-test-subj': 'saveMapError',
+      });
+      // If the save wasn't successful, put the original values back.
+      savedMap.title = prevTitle;
+      savedMap.description = prevDescription;
+      return { error: err };
+    }
+
+    if (!id) {
+      return {};
+    }
+
+    getToasts().addSuccess({
+      title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
+        defaultMessage: `Saved '{title}'`,
+        values: { title: savedMap.title },
+      }),
+      'data-test-subj': 'saveMapSuccess',
+    });
+
+    getCoreChrome().docTitle.change(savedMap.title);
+    setBreadcrumbs();
+    goToSpecifiedPath(`/map/${id}${window.location.hash}`);
+
+    if (!!originatingApp && returnToOrigin) {
+      const newlyCreated = newCopyOnSave || isNewMap;
+      if (newlyCreated && stateTransfer) {
+        stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+          state: { id, type: MAP_SAVED_OBJECT_TYPE },
+        });
+      } else {
+        navigateToApp(originatingApp);
+      }
+    }
+
+    return { id };
+  }
+
+  if (hasSaveAndReturnConfig) {
     topNavConfigs.push({
       id: 'saveAndReturn',
       label: i18n.translate('xpack.maps.topNav.fullScreenButtonLabel', {
@@ -61,14 +128,13 @@ export function getTopNavConfig({
       emphasize: true,
       iconType: 'check',
       run: () => {
-        /* if (isSaveable && lastKnownDoc) {
-          runSave({
-            newTitle: lastKnownDoc.title,
-            newCopyOnSave: false,
-            isTitleDuplicateConfirmed: false,
-            returnToOrigin: true,
-          });
-        }*/
+        onSave({
+          newTitle: savedMap.title,
+          newDescription: savedMap.description,
+          newCopyOnSave: false,
+          isTitleDuplicateConfirmed: false,
+          returnToOrigin: true,
+        });
       },
       testId: 'mapSaveAndReturnButton',
     });
@@ -77,9 +143,13 @@ export function getTopNavConfig({
   if (hasWritePermissions) {
     topNavConfigs.push({
       id: 'save',
-      label: i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
-        defaultMessage: `save`,
-      }),
+      label: hasSaveAndReturnConfig
+        ? i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
+            defaultMessage: `save`,
+          }),
       description: i18n.translate('xpack.maps.topNav.saveMapDescription', {
         defaultMessage: `Save map`,
       }),
@@ -96,33 +166,6 @@ export function getTopNavConfig({
         }
       },
       run: () => {
-        const onSave = ({
-          newDescription,
-          newTitle,
-          newCopyOnSave,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        }: OnSaveProps) => {
-          const currentTitle = savedMap.title;
-          const currentDescription = savedMap.description;
-          savedMap.title = newTitle;
-          savedMap.description = newDescription;
-          savedMap.copyOnSave = newCopyOnSave;
-          const saveOptions: SavedObjectSaveOpts = {
-            confirmOverwrite: false,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          };
-          return doSave(savedMap, saveOptions, closeFlyout, setBreadcrumbs).then((response) => {
-            // If the save wasn't successful, put the original values back.
-            if (!response.id || response.error) {
-              savedMap.title = currentTitle;
-              savedMap.description = currentDescription;
-            }
-            return response;
-          });
-        };
-
         const saveModal = (
           <SavedObjectSaveModalOrigin
             originatingApp={originatingApp}
@@ -190,46 +233,4 @@ export function getTopNavConfig({
   );
 
   return topNavConfigs;
-}
-
-async function doSave(
-  savedMap: ISavedGisMap,
-  saveOptions: SavedObjectSaveOpts,
-  closeFlyout: () => void,
-  setBreadcrumbs: () => void
-) {
-  closeFlyout();
-  savedMap.syncWithStore();
-  let id;
-
-  try {
-    id = await savedMap.save(saveOptions);
-    getCoreChrome().docTitle.change(savedMap.title);
-  } catch (err) {
-    getToasts().addDanger({
-      title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
-        defaultMessage: `Error on saving '{title}'`,
-        values: { title: savedMap.title },
-      }),
-      text: err.message,
-      'data-test-subj': 'saveMapError',
-    });
-    return { error: err };
-  }
-
-  if (id) {
-    goToSpecifiedPath(`/map/${id}${window.location.hash}`);
-    setBreadcrumbs();
-
-    // coreStart.application.navigateToApp(originatingApp);
-
-    getToasts().addSuccess({
-      title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
-        defaultMessage: `Saved '{title}'`,
-        values: { title: savedMap.title },
-      }),
-      'data-test-subj': 'saveMapSuccess',
-    });
-  }
-  return { id };
 }

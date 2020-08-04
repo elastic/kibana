@@ -185,3 +185,8 @@ export const setEmbeddableService = (embeddableService) => {
 export const getEmbeddableService = () => {
   return _embeddableService;
 };
+
+export let navigateToApp;
+export function setNavigateToApp(_navigateToApp) {
+  navigateToApp = _navigateToApp;
+}

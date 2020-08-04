@@ -32,8 +32,10 @@ const App = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
+  const stateTransfer = getEmbeddableService()?.getStateTransfer(history);
+
   const { originatingApp } =
-    getEmbeddableService()?.getStateTransfer(history)?.getIncomingEditorState() || {};
+    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
 
   return (
     <I18nContext>
@@ -46,6 +48,7 @@ const App = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
                   originatingApp={originatingApp}
                 />
               )}
@@ -53,7 +56,13 @@ const App = ({ history, appBasePath, onAppLeave }) => {
             <Route
               exact
               path={`/map`}
-              render={() => <LoadMapAndRender onAppLeave={onAppLeave} />}
+              render={() => (
+                <LoadMapAndRender
+                  onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
+                  originatingApp={originatingApp}
+                />
+              )}
             />
             // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route

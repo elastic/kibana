@@ -303,11 +303,11 @@ export class MapsAppView extends React.Component {
       savedMap: this.props.savedMap,
       isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
       isSaveDisabled: this.props.isSaveDisabled,
-      closeFlyout: this.props.closeFlyout,
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
       setBreadcrumbs: this._setBreadcrumbs,
+      stateTransfer: this.props.stateTransfer,
       originatingApp: this.props.originatingApp,
     });
 

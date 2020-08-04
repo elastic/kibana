@@ -42,6 +42,7 @@ import {
   setUiSettings,
   setVisualizations,
   setEmbeddableService,
+  setNavigateToApp,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -115,6 +116,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
   setEmbeddableService(plugins.embeddable);
+  setNavigateToApp(core.application.navigateToApp);
 };
 
 /**

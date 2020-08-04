@@ -60,6 +60,7 @@ export const LoadMapAndRender = class extends React.Component {
       <MapsAppView
         savedMap={savedMap}
         onAppLeave={this.props.onAppLeave}
+        stateTransfer={this.props.stateTransfer}
         originatingApp={this.props.originatingApp}
       />
     ) : null;
