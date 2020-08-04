@@ -72,12 +72,14 @@ export function FieldButton({
 
   return (
     <div className={classes} {...rest}>
-      <button onClick={onClick} className="kbnFieldButton__content">
+      <button onClick={onClick} className="kbn-resetFocusState kbnFieldButton__content">
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
       </button>
-      {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
-      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+      <div className="kbnFieldButton__append">
+        {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+        {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
+      </div>
     </div>
   );
 }
