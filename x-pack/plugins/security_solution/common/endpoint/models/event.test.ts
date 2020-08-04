@@ -69,7 +69,7 @@ describe('Generated documents', () => {
       expect(isProcessRunning(event)).toBeTruthy();
     });
 
-    it('is not a running event when event.type is not start', () => {
+    it('is not a running event when event.type is only and end type', () => {
       const event: ResolverEvent = generator.generateEvent({
         eventType: ['end'],
       });
@@ -90,14 +90,14 @@ describe('Generated documents', () => {
       expect(isProcessRunning(event)).toBeFalsy();
     });
 
-    it('is a running event when event.type is info', () => {
+    it('is a running event when event.type contains info', () => {
       const event: ResolverEvent = generator.generateEvent({
         eventType: ['info'],
       });
       expect(isProcessRunning(event)).toBeTruthy();
     });
 
-    it('is a running event when event.type is change', () => {
+    it('is a running event when event.type contains change', () => {
       const event: ResolverEvent = generator.generateEvent({
         eventType: ['bogus', 'change'],
       });

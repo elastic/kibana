@@ -22,10 +22,13 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
   }
 
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
+    const paginationFields = this.pagination.buildQueryFields('endgame.serial_event_id');
     return {
       collapse: {
         field: 'endgame.unique_pid',
       },
+      size: paginationFields.size,
+      sort: paginationFields.sort,
       query: {
         bool: {
           filter: [
@@ -56,11 +59,11 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('endgame.serial_event_id'),
     };
   }
 
   protected query(entityIDs: string[]): JsonObject {
+    const paginationFields = this.pagination.buildQueryFieldsAsInterface('event.id');
     return {
       /**
        * Using collapse here will only return a single event per occurrence of a process.entity_id. The events are sorted
@@ -77,6 +80,9 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
       collapse: {
         field: 'process.entity_id',
       },
+      // do not set the search_after field because collapse does not work with it
+      size: paginationFields.size,
+      sort: paginationFields.sort,
       query: {
         bool: {
           filter: [
@@ -116,7 +122,6 @@ export class ChildrenQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('event.id'),
     };
   }
 

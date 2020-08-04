@@ -18,19 +18,18 @@
  */
 
 import { CoreSetup } from 'kibana/server';
-import { DataPluginStart } from '../../plugin';
 import { Usage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 
 export interface SearchUsage {
-  trackError(duration: number): Promise<void>;
+  trackError(): Promise<void>;
   trackSuccess(duration: number): Promise<void>;
 }
 
-export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchUsage {
+export function usageProvider(core: CoreSetup): SearchUsage {
   const getTracker = (eventType: keyof Usage) => {
-    return async (duration: number) => {
+    return async (duration?: number) => {
       const repository = await core
         .getStartServices()
         .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
@@ -52,17 +51,17 @@ export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchU
 
       attributes[eventType]++;
 
-      const averageDuration =
-        (duration + (attributes.averageDuration ?? 0)) /
-        ((attributes.errorCount ?? 0) + (attributes.successCount ?? 0));
-
-      const newAttributes = { ...attributes, averageDuration };
+      // Only track the average duration for successful requests
+      if (eventType === 'successCount') {
+        attributes.averageDuration =
+          ((duration ?? 0) + (attributes.averageDuration ?? 0)) / (attributes.successCount ?? 1);
+      }
 
       try {
         if (doesSavedObjectExist) {
-          await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, newAttributes);
+          await repository.update(SAVED_OBJECT_ID, SAVED_OBJECT_ID, attributes);
         } else {
-          await repository.create(SAVED_OBJECT_ID, newAttributes, { id: SAVED_OBJECT_ID });
+          await repository.create(SAVED_OBJECT_ID, attributes, { id: SAVED_OBJECT_ID });
         }
       } catch (e) {
         // Version conflict error, swallow
@@ -71,7 +70,7 @@ export function usageProvider(core: CoreSetup<object, DataPluginStart>): SearchU
   };
 
   return {
-    trackError: getTracker('errorCount'),
+    trackError: () => getTracker('errorCount')(),
     trackSuccess: getTracker('successCount'),
   };
 }

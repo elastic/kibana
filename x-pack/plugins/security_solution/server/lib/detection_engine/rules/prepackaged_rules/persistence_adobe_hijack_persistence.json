@@ -4,7 +4,8 @@
   ],
   "description": "Detects writing executable files that will be automatically launched by Adobe on launch.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
