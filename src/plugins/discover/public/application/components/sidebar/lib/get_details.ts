@@ -16,20 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { AppState } from '../../../angular/discover_state';
+
 // @ts-ignore
 import { fieldCalculator } from './field_calculator';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
-import { DiscoverServices } from '../../../../build_services';
+import { IndexPatternField } from '../../../../../../data/public';
 
-export function getDetails(
-  field: IndexPatternField,
-  indexPattern: IndexPattern,
-  state: AppState,
-  columns: string[],
-  hits: Array<Record<string, unknown>>,
-  services: DiscoverServices
-) {
+export function getDetails(field: IndexPatternField, hits: Array<Record<string, unknown>>) {
   const details = {
     ...fieldCalculator.getFieldValueCounts({
       hits,
@@ -37,7 +29,6 @@ export function getDetails(
       count: 5,
       grouped: false,
     }),
-    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {

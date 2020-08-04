@@ -129,11 +129,9 @@ export function DiscoverSidebar({
     [fieldFilterState]
   );
 
-  const getDetailsByField = useCallback(
-    (ipField: IndexPatternField) =>
-      getDetails(ipField, selectedIndexPattern, state, columns, hits, services),
-    [selectedIndexPattern, state, columns, hits, services]
-  );
+  const getDetailsByField = useCallback((ipField: IndexPatternField) => getDetails(ipField, hits), [
+    hits,
+  ]);
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
   const useShortDots = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
