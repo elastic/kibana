@@ -39,10 +39,7 @@ export const getAlertDetailsBreadcrumb = (
   name: string
 ): { text: string; href: string } => {
   return {
-    text: i18n.translate('xpack.triggersActionsUI.alertDetails.breadcrumbTitle', {
-      defaultMessage: '{name}',
-      values: { name },
-    }),
+    text: name,
     href: `${routeToAlertDetails.replace(':alertId', id)}`,
   };
 };
