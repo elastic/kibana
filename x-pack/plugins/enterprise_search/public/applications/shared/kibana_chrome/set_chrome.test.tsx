@@ -7,58 +7,78 @@
 import React from 'react';
 
 import '../../__mocks__/react_router_history.mock';
-import { mountWithKibanaContext } from '../../__mocks__';
+import { mockKibanaContext, mountWithKibanaContext } from '../../__mocks__';
 
-jest.mock('./generate_breadcrumbs', () => ({ appSearchBreadcrumbs: jest.fn() }));
-import { appSearchBreadcrumbs } from './generate_breadcrumbs';
-import { SetAppSearchChrome } from './';
+jest.mock('./generate_breadcrumbs', () => ({
+  appSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
+  workplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
+}));
+import { appSearchBreadcrumbs, workplaceSearchBreadcrumbs } from './generate_breadcrumbs';
+
+jest.mock('./generate_title', () => ({
+  appSearchTitle: jest.fn((title: any) => title),
+  workplaceSearchTitle: jest.fn((title: any) => title),
+}));
+import { appSearchTitle, workplaceSearchTitle } from './generate_title';
+
+import { SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
 
 describe('SetAppSearchChrome', () => {
-  const setBreadcrumbs = jest.fn();
-  const builtBreadcrumbs = [] as any;
-  const appSearchBreadCrumbsInnerCall = jest.fn().mockReturnValue(builtBreadcrumbs);
-  const appSearchBreadCrumbsOuterCall = jest.fn().mockReturnValue(appSearchBreadCrumbsInnerCall);
-  (appSearchBreadcrumbs as jest.Mock).mockImplementation(appSearchBreadCrumbsOuterCall);
-
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const mountSetAppSearchChrome = (props: any) => {
-    return mountWithKibanaContext(<SetAppSearchChrome {...props} />, {
-      http: {},
-      enterpriseSearchUrl: 'http://localhost:3002',
-      setBreadcrumbs,
-    });
-  };
-
-  describe('when isRoot is false', () => {
-    const subject = () => mountSetAppSearchChrome({ text: 'Page 1', isRoot: false });
-
-    it('calls appSearchBreadcrumbs to build breadcrumbs, then registers them with Kibana', () => {
-      subject();
-
-      // calls appSearchBreadcrumbs to build breadcrumbs with the target page and current location
-      expect(appSearchBreadCrumbsInnerCall).toHaveBeenCalledWith([
-        { text: 'Page 1', path: '/current-path' },
-      ]);
-
-      // then registers them with Kibana
-      expect(setBreadcrumbs).toHaveBeenCalledWith(builtBreadcrumbs);
-    });
+  afterEach(() => {
+    expect(appSearchBreadcrumbs).toHaveBeenCalled();
+    expect(appSearchTitle).toHaveBeenCalled();
   });
 
-  describe('when isRoot is true', () => {
-    const subject = () => mountSetAppSearchChrome({ text: 'Page 1', isRoot: true });
+  it('sets breadcrumbs and document title', () => {
+    mountWithKibanaContext(<SetAppSearchChrome text="Engines" />);
 
-    it('calls appSearchBreadcrumbs to build breadcrumbs with an empty breadcrumb, then registers them with Kibana', () => {
-      subject();
+    expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalledWith([
+      {
+        text: 'Engines',
+        path: '/current-path',
+      },
+    ]);
+    expect(mockKibanaContext.setDocTitle).toHaveBeenCalledWith(['Engines']);
+  });
 
-      // uses an empty bredcrumb
-      expect(appSearchBreadCrumbsInnerCall).toHaveBeenCalledWith([]);
+  it('sets empty breadcrumbs and document title when isRoot is true', () => {
+    mountWithKibanaContext(<SetAppSearchChrome isRoot />);
 
-      // then registers them with Kibana
-      expect(setBreadcrumbs).toHaveBeenCalledWith(builtBreadcrumbs);
-    });
+    expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalledWith([]);
+    expect(mockKibanaContext.setDocTitle).toHaveBeenCalledWith([]);
+  });
+});
+
+describe('SetWorkplaceSearchChrome', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    expect(workplaceSearchBreadcrumbs).toHaveBeenCalled();
+    expect(workplaceSearchTitle).toHaveBeenCalled();
+  });
+
+  it('sets breadcrumbs and document title', () => {
+    mountWithKibanaContext(<SetWorkplaceSearchChrome text="Sources" />);
+
+    expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalledWith([
+      {
+        text: 'Sources',
+        path: '/current-path',
+      },
+    ]);
+    expect(mockKibanaContext.setDocTitle).toHaveBeenCalledWith(['Sources']);
+  });
+
+  it('sets empty breadcrumbs and document title when isRoot is true', () => {
+    mountWithKibanaContext(<SetWorkplaceSearchChrome isRoot />);
+
+    expect(mockKibanaContext.setBreadcrumbs).toHaveBeenCalledWith([]);
+    expect(mockKibanaContext.setDocTitle).toHaveBeenCalledWith([]);
   });
 });
