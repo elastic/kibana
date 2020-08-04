@@ -8,7 +8,7 @@ potential issues in the {stack}. These alerts are preconfigured based on the
 best practices recommended by Elastic. However, you can tailor them to meet your 
 specific needs.
 
-When you open the *{stack-monitor-app}* app, the preconfigured {kib} alerts are
+When you open *{stack-monitor-app}*, the preconfigured {kib} alerts are
 created automatically. If you collect monitoring data from multiple clusters,
 these alerts can search, detect, and alert on various conditions across the
 clusters. The alerts are visible alongside your existing {watcher} cluster
