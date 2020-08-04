@@ -62,13 +62,16 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
       });
     },
     async expandPingRow() {
-      return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('uptimePingListExpandBtn'))
+      return retry.tryForTime(
+        60 * 1000,
+        async () => {
+          await testSubjects.existOrFail('uptimePingListExpandBtn');
           await testSubjects.click('uptimePingListExpandBtn');
-        else {
+        },
+        async () => {
           await testSubjects.click('superDatePickerApplyTimeButton');
         }
-      });
+      );
     },
     async hasRedirectInfoInPingList() {
       await this.expandPingRow();
