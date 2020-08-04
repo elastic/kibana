@@ -46,7 +46,7 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
       quote: {
         types: ['string'],
         help: argHelp.quote,
-        default: `'`,
+        default: `"'"`,
       },
       separator: {
         aliases: ['sep', 'delimiter'],

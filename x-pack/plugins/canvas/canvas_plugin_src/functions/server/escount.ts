@@ -39,7 +39,7 @@ export function escount(): ExpressionFunctionDefinition<
         types: ['string'],
         aliases: ['_', 'q'],
         help: argHelp.query,
-        default: '-_index:.kibana',
+        default: '"-_index:.kibana"',
       },
       index: {
         types: ['string'],
