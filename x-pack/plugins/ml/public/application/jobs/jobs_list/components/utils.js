@@ -370,7 +370,7 @@ function getUrlVars(url) {
   return vars;
 }
 
-export function getSelectedJobIdFromUrl(url) {
+export function getSelectedIdFromUrl(url) {
   const result = {};
   if (typeof url === 'string') {
     const isGroup = url.includes('groupId');

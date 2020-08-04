@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 
 import { ml } from '../../../../services/ml_api_service';
 import { JobGroup } from '../job_group';
-import { getGroupQueryText, getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
+import { getGroupQueryText, getSelectedIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
 
 import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,7 +54,7 @@ export class JobFilterBar extends Component {
 
   componentDidMount() {
     // If job id is selected in url, filter table to that id
-    const urlValues = getSelectedJobIdFromUrl(window.location.href);
+    const urlValues = getSelectedIdFromUrl(window.location.href);
     const defaultQueryText = urlValues.isGroup ? getGroupQueryText(urlValues.id) : urlValues.id;
 
     if (defaultQueryText !== undefined) {
