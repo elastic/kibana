@@ -28,7 +28,6 @@ import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-import { history, resetHistory } from '../utils/history';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
@@ -64,12 +63,12 @@ function App() {
 function ApmAppRoot({
   core,
   deps,
-  routerHistory,
+  history,
   config,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  routerHistory: typeof history;
+  history: AppMountParameters['history'];
   config: ConfigSchema;
 }) {
   const i18nCore = core.i18n;
@@ -93,7 +92,7 @@ function ApmAppRoot({
       >
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <i18nCore.Context>
-            <Router history={routerHistory}>
+            <Router history={history}>
               <LocationProvider>
                 <MatchedRouteProvider routes={routes}>
                   <UrlParamsProvider>
@@ -119,17 +118,11 @@ function ApmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element }: AppMountParameters,
+  { element, history }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  resetHistory();
   ReactDOM.render(
-    <ApmAppRoot
-      core={core}
-      deps={deps}
-      routerHistory={history}
-      config={config}
-    />,
+    <ApmAppRoot core={core} deps={deps} history={history} config={config} />,
     element
   );
   return () => {

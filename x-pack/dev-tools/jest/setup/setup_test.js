@@ -11,6 +11,3 @@
 
 import 'jest-styled-components';
 import '@testing-library/jest-dom';
-import { init as initApm } from '@elastic/apm-rum';
-
-initApm({ active: false, logLevel: 'error' });
