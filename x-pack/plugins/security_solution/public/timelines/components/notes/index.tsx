@@ -35,6 +35,7 @@ interface Props {
 const NotesPanel = styled(EuiPanel)`
   height: ${NOTES_PANEL_HEIGHT}px;
   width: ${NOTES_PANEL_WIDTH}px;
+  overflow-y: auto;
 
   & thead {
     display: none;
@@ -42,16 +43,6 @@ const NotesPanel = styled(EuiPanel)`
 `;
 
 NotesPanel.displayName = 'NotesPanel';
-
-const InMemoryTable: typeof EuiInMemoryTable & { displayName: string } = styled(
-  EuiInMemoryTable as React.ComponentType<EuiInMemoryTableProps<Note>>
-)`
-  overflow-x: hidden;
-  overflow-y: auto;
-  height: 220px;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
 export const Notes = React.memo<Props>(
@@ -76,7 +67,7 @@ export const Notes = React.memo<Props>(
             />
           )}
           <EuiSpacer size="s" />
-          <InMemoryTable
+          <EuiInMemoryTable
             data-test-subj="notes-table"
             items={getNotesByIds(noteIds)}
             columns={columns}
