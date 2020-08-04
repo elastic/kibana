@@ -109,7 +109,6 @@ describe('CSV Execute Job', function () {
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
         (uiConfigMock as any)[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           _default_: { id: 'string', params: {} },
         };
 

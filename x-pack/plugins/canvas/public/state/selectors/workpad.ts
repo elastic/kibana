@@ -495,7 +495,6 @@ export function getRenderedWorkpad(state: State) {
 
   const workpad = getWorkpad(state);
 
-  // eslint-disable-next-line no-unused-vars
   const { pages, variables, ...rest } = workpad;
 
   return {

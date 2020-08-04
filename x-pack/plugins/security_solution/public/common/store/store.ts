@@ -34,7 +34,6 @@ import { CoreStart } from '../../../../../../src/core/public';
 type ComposeType = typeof compose;
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
   }
 }

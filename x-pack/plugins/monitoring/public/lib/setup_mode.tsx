@@ -113,7 +113,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
         text,
       });
     });
-    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+    return toggleSetupMode(false);
   }
   notifySetupModeDataChange();
 
@@ -163,7 +163,7 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
-  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  setSetupModeMenuItem();
   notifySetupModeDataChange();
 
   if (inSetupMode) {
