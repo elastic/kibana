@@ -4,7 +4,8 @@
   ],
   "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from PowerShell.exe.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
