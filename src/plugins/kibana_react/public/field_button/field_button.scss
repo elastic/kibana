@@ -2,7 +2,8 @@
   @include euiFontSizeS;
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
-  position: relative;
+  display: flex;
+  align-items: center;
 
   &:focus-within,
   .euiPopover-isOpen & {
@@ -66,14 +67,15 @@
   }
 }
 
-.kbnFieldButton__fieldAction,
-.kbnFieldButton__infoIcon {
-  position: absolute;
-  top: 50%;
-  right: $euiSizeS;
-  transform: translateY(-50%);
-}
+.kbnFieldButton__append {
+  padding-right: $euiSizeS;
+  display: flex;
 
-.kbnFieldButton__infoIcon + .kbnFieldButton__fieldAction {
-  right: $euiSizeS * 4;
+  .kbnFieldButton__fieldAction + .kbnFieldButton__infoIcon {
+    padding-left: $euiSizeXS;
+  }
+
+  .kbnFieldButton__infoIcon {
+    flex-shrink: 0;
+  }
 }

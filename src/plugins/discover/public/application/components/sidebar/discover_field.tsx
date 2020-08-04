@@ -17,7 +17,13 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiKeyboardAccessible } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiKeyboardAccessible,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton, FieldButtonProps } from '../../../../../kibana_react/public';
