@@ -238,7 +238,6 @@ export const getTimelineStatus = (
   return duplicate ? TimelineStatus.active : timeline.status;
 };
 
-// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
