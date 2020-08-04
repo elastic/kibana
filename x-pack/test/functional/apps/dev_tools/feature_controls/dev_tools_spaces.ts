@@ -81,29 +81,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Dev Tools');
       });
 
-      it(`navigating to console shows 404`, async () => {
+      it(`navigating to console renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();
       });
 
-      it(`navigating to search profiler shows 404`, async () => {
+      it(`navigating to search profiler renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });
       });
 
-      it(`navigating to grok debugger shows 404`, async () => {
+      it(`navigating to grok debugger renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
         });

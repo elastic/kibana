@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
   describe('spaces feature controls', function () {
     this.tags(['skipFirefox']);
@@ -100,41 +101,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Canvas');
       });
 
-      it(`create new workpad returns a 404`, async () => {
+      it(`create new workpad renders not found screen`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
 
-      it(`edit workpad returns a 404`, async () => {
+      it(`edit workpad renders not found screen`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'canvas',
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
     });
   });

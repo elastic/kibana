@@ -77,11 +77,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Graph');
       });
 
-      it(`navigating to app shows 404`, async () => {
+      it(`navigating to app shows not found page`, async () => {
         await PageObjects.common.navigateToUrl('graph', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
-          ensureCurrentUrl: false,
+          useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();
       });

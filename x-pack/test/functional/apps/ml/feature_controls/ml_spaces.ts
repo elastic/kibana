@@ -64,11 +64,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Machine Learning');
       });
 
-      it(`navigating to app returns a 404`, async () => {
+      it(`navigating to app renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('ml', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
-          ensureCurrentUrl: false,
+          useActualUrl: true,
         });
 
         await PageObjects.error.expectNotFound();

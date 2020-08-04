@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
@@ -217,34 +218,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`renders a not found screen`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
 
-      it(`create new workpad returns a 404`, async () => {
+      it(`create new workpad renders a not found screen`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
     });
   });

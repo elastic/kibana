@@ -64,7 +64,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('uptime', '', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();

@@ -99,11 +99,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Discover');
       });
 
-      it(`shows 404`, async () => {
+      it(`renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
-          ensureCurrentUrl: false,
           useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();

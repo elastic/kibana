@@ -120,39 +120,36 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Dashboard');
       });
 
-      it(`create new dashboard shows 404`, async () => {
+      it(`create new dashboard renders not found page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
         await PageObjects.error.expectNotFound();
       });
 
-      it(`edit dashboard for object which doesn't exist shows 404`, async () => {
+      it(`edit dashboard for object which doesn't exist renders not found page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           createDashboardEditUrl('i-dont-exist'),
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
         await PageObjects.error.expectNotFound();
       });
 
-      it(`edit dashboard for object which exists shows 404`, async () => {
+      it(`edit dashboard for object which exists renders not found page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           createDashboardEditUrl('i-exist'),
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );

@@ -76,11 +76,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Stack Monitoring');
       });
 
-      it(`navigating to app returns a 404`, async () => {
+      it(`navigating to app renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('monitoring', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
-          ensureCurrentUrl: false,
         });
 
         await PageObjects.error.expectNotFound();

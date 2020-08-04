@@ -36,7 +36,6 @@ import {
 } from './check_saved_objects_privileges';
 import { AuthorizationMode, authorizationModeFactory } from './mode';
 import { privilegesFactory, PrivilegesService } from './privileges';
-import { initAppAuthorization } from './app_authorization';
 import { initAPIAuthorization } from './api_authorization';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
@@ -153,7 +152,6 @@ export class AuthorizationService {
     );
 
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
-    initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
     return authz;
   }

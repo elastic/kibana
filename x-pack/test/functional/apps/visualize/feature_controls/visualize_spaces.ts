@@ -86,35 +86,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Visualize');
       });
 
-      it(`create new visualization shows 404`, async () => {
+      it(`create new visualization shows not found page`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });
 
-      it(`edit visualization for object which doesn't exist shows 404`, async () => {
+      it(`edit visualization for object which doesn't exist shows not found page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
         await PageObjects.error.expectNotFound();
       });
 
-      it(`edit visualization for object which exists shows 404`, async () => {
+      it(`edit visualization for object which exists shows not found page`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-exist`,
           {
             basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );

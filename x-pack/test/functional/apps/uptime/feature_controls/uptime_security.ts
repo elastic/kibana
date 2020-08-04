@@ -175,7 +175,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`renders not found page`, async () => {
         await PageObjects.common.navigateToUrl('uptime', '', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();

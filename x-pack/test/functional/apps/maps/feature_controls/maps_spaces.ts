@@ -11,8 +11,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/38414
+  // FLAKY: https://github.com/elastic/kibana/issues/38759
   describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
@@ -78,20 +79,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it(`returns a 404`, async () => {
+      it(`renders a not found message`, async () => {
         await PageObjects.common.navigateToActualUrl('maps', '', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
     });
   });

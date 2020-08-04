@@ -428,17 +428,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_visualize_privileges_user');
       });
 
-      it(`landing page shows 404`, async () => {
+      it(`landing page shows not found page`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });
 
-      it(`edit page shows 404`, async () => {
+      it(`edit page shows not found page`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();

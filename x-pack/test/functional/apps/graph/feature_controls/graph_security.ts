@@ -182,10 +182,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Graph');
       });
 
-      it(`navigating to app displays a 404`, async () => {
+      it(`navigating to app displays not found page`, async () => {
         await PageObjects.common.navigateToUrl('graph', '', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          ensureCurrentUrl: true,
+          useActualUrl: true,
         });
 
         await PageObjects.error.expectNotFound();

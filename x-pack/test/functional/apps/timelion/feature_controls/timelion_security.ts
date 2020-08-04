@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -164,19 +165,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_timelion_privileges_user');
       });
 
-      it(`returns a 404`, async () => {
+      it(`renders a not found screen`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
-          ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
     });
   });

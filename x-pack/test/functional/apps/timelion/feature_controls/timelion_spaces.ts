@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
   describe('timelion', () => {
     before(async () => {
@@ -73,55 +74,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Timelion');
       });
 
-      it(`create new timelion returns a 404`, async () => {
+      it(`create new timelion renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
 
-      it(`edit timelion sheet which doesn't exist returns a 404`, async () => {
+      it(`edit timelion sheet which doesn't exist renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-dont-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
 
-      it(`edit timelion sheet which exists returns a 404`, async () => {
+      it(`edit timelion sheet which exists renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
-        expect(messageText).to.eql(
-          JSON.stringify({
-            statusCode: 404,
-            error: 'Not Found',
-            message: 'Not Found',
-          })
-        );
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
       });
     });
   });
