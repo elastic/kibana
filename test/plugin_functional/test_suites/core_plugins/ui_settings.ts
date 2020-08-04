@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('client plugins have access to registered settings', async () => {
       const settings = await browser.execute(() => {
-        return window.__coreProvider.setup.core.uiSettings.getAll().ui_settings_plugin;
+        return window._coreProvider.setup.core.uiSettings.getAll().ui_settings_plugin;
       });
 
       expect(settings).to.eql({
@@ -43,13 +43,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       const settingsValue = await browser.execute(() => {
-        return window.__coreProvider.setup.core.uiSettings.get('ui_settings_plugin');
+        return window._coreProvider.setup.core.uiSettings.get('ui_settings_plugin');
       });
 
       expect(settingsValue).to.be('2');
 
       const settingsValueViaObservables = await browser.executeAsync(async (callback) => {
-        window.__coreProvider.setup.core.uiSettings
+        window._coreProvider.setup.core.uiSettings
           .get$('ui_settings_plugin')
           .subscribe((v) => callback(v));
       });
