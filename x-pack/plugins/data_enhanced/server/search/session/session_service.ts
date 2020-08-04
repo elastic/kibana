@@ -14,6 +14,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
 } from '../../../../../../src/core/server';
 import {
   BACKGROUND_SESSION_STORE_DAYS,
@@ -23,6 +24,7 @@ import {
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
 import { SessionInfo, SessionKeys } from './types';
 import { SecurityPluginSetup } from '../../../../security/server';
+import { updateExpirationProvider } from '..';
 
 export const INMEM_TRACKING_TIMEOUT_SEC = 60;
 export const INMEM_TRACKING_INTERVAL = 2000;
@@ -35,8 +37,8 @@ export class SessionService {
 
   constructor(
     private readonly savedObjects: SavedObjectsServiceStart,
+    private readonly elasticsearch: ElasticsearchServiceStart,
     private readonly security: SecurityPluginSetup,
-    private readonly updateExpirationHandler: (searchId: string) => Promise<any>,
     private readonly logger: Logger
   ) {
     this.idMapping = new Map<string, SessionInfo>();
@@ -177,7 +179,7 @@ export class SessionService {
       if (res && !res.error) {
         sessionInfo.requests.forEach(async (searchId) => {
           try {
-            await this.updateExpirationHandler(searchId);
+            await sessionInfo.updateHandler(searchId);
           } catch (eUpdate) {
             this.logger.debug(
               `${sessionSavedObject.id} Error during expiration update. C'est la vie.`
@@ -234,6 +236,7 @@ export class SessionService {
     const user = this.security.authc.getCurrentUser(request);
     if (!user) return;
     const reqHashKey = this.getKey(user.email, requestParams);
+    const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
     let sessionIdsInfo = this.idMapping.get(sessionId);
     if (!sessionIdsInfo) {
       sessionIdsInfo = {
@@ -241,6 +244,7 @@ export class SessionService {
         requests: new Map(),
         insertTime: moment(),
         retryCount: 0,
+        updateHandler: updateExpirationProvider(esClient),
       };
     }
     sessionIdsInfo.requests.set(reqHashKey, searchId);

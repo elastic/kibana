@@ -13,6 +13,7 @@ import {
   SharedGlobalConfig,
   RequestHandlerContext,
   Logger,
+  ElasticsearchClient,
 } from '../../../../../src/core/server';
 import {
   ISearchOptions,
@@ -24,8 +25,8 @@ import {
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
+import { SessionService } from './session';
 
-type IEnhancedSearchContext = any;
 interface AsyncSearchResponse<T> {
   id: string;
   is_partial: boolean;
@@ -46,6 +47,7 @@ function isEnhancedEsSearchResponse(
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
+  sessionService: SessionService,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => {
@@ -64,7 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
       const response =
         request.indexType === 'rollup'
           ? await rollupSearch(caller, { ...request, params }, options)
-          : await asyncSearch(caller, { ...request, params }, options, context);
+          : await asyncSearch(caller, { ...request, params }, sessionService, options);
 
       if (
         usage &&
@@ -93,64 +95,20 @@ export const enhancedEsSearchStrategyProvider = (
   return { search, cancel };
 };
 
-function checkRequest(
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions,
-  context?: IEnhancedSearchContext
-): boolean {
-  return !!(
-    context &&
-    context.backgroundSearchService &&
-    options?.rawRequest &&
-    !!request.sessionId &&
-    !request.id
-  );
-}
-
-async function getBackgroundSession(
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions,
-  context?: IEnhancedSearchContext
-) {
-  if (checkRequest(request, options, context)) {
-    return await context.backgroundSearchService.getId(
-      options!.rawRequest,
-      request.sessionId,
-      request.params?.body
-    );
-  }
-}
-
-function trackBackgroundSearch(
-  request: IEnhancedEsSearchRequest,
-  asyncId: string,
-  options?: ISearchOptions,
-  context?: IEnhancedSearchContext
-) {
-  if (checkRequest(request, options, context)) {
-    context.backgroundSearchService.trackId(
-      options!.rawRequest,
-      request.sessionId,
-      request.params?.body,
-      asyncId
-    );
-  }
-}
-
-export function updateExpirationProvider(caller: LegacyAPICaller) {
+export function updateExpirationProvider(caller: ElasticsearchClient) {
   return async (searchId: string) => {
     const path = encodeURI(`/_async_search/${searchId}`);
 
     // Wait up to 1ms for the response to return
-    const query = toSnakeCase({
+    const querystring = toSnakeCase({
       waitForCompletionTimeout: '1ms',
       keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
     });
 
-    return caller('transport.request', {
+    return caller.transport.request({
       method: 'GET',
       path,
-      query,
+      querystring,
     });
   };
 }
@@ -158,15 +116,17 @@ export function updateExpirationProvider(caller: LegacyAPICaller) {
 async function asyncSearch(
   caller: LegacyAPICaller,
   request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions,
-  context?: IEnhancedSearchContext
+  sessionService: SessionService,
+  options?: ISearchOptions
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     ...request.params,
   };
 
-  // Distinguisj between an ID we retrieved from a session to an
-  const storedAsyncId = await getBackgroundSession(request, options, context);
+  // Distinguish between an ID we retrieved from a session to an
+  const storedAsyncId = request.sessionId
+    ? await sessionService.getId(options!.rawRequest!, request.sessionId, request.params?.body)
+    : undefined;
   const asyncId = request.id ? request.id : storedAsyncId;
 
   params.trackTotalHits = true; // Get the exact count of hits
@@ -185,6 +145,7 @@ async function asyncSearch(
     ...(asyncId
       ? {}
       : {
+          // TODO: REMOVE
           requestCache: false,
           waitForCompletionTimeout: '100ms',
         }),
@@ -200,8 +161,8 @@ async function asyncSearch(
   )) as AsyncSearchResponse<any>;
 
   // Track if ID wasn't recovered from a BG search
-  if (!storedAsyncId) {
-    trackBackgroundSearch(request, id, options, context);
+  if (!storedAsyncId && request.sessionId) {
+    sessionService.trackId(options!.rawRequest!, request.sessionId, request.params?.body, id);
   }
 
   return {

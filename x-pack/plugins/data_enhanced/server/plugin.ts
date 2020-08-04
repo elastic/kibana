@@ -17,7 +17,7 @@ import {
   PluginStart as DataPluginStart,
   usageProvider,
 } from '../../../../src/plugins/data/server';
-import { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './search';
+import { enhancedEsSearchStrategyProvider } from './search';
 import {
   SessionService,
   sessionMapping,
@@ -54,36 +54,38 @@ export class EnhancedDataServerPlugin
     this.logger = initializerContext.logger.get('data_enhanced');
   }
 
-  public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
+  public setup(core: CoreSetup<DataPluginStart, DataEnhancedStart>, deps: SetupDependencies) {
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
-    deps.data.search.registerSearchStrategy(
-      ES_SEARCH_STRATEGY,
-      enhancedEsSearchStrategyProvider(
-        this.initializerContext.config.legacy.globalConfig$,
-        this.logger,
-        usage
-      )
-    );
+    core.getStartServices().then(([, , selfStart]) => {
+      deps.data.search.registerSearchStrategy(
+        ES_SEARCH_STRATEGY,
+        enhancedEsSearchStrategyProvider(
+          this.initializerContext.config.legacy.globalConfig$,
+          selfStart.search.session,
+          this.logger,
+          usage
+        )
+      );
+    });
 
     // Background session registrations
     this.security = deps.security;
     core.savedObjects.registerType(sessionMapping);
-    core.http.registerRouteHandlerContext<'sessionService'>('sessionService', () => {
-      return this.sessionService;
-    });
     const router = core.http.createRouter();
     registerBackgroundSessionGetRoute(router);
     registerBackgroundSessionSaveRoute(router);
+
+    core.http.registerRouteHandlerContext('sessionService', () => {
+      return this.sessionService;
+    });
   }
 
   public start(core: CoreStart) {
-    const internalApiCaller = core.elasticsearch.legacy.client.callAsInternalUser;
-    const updateExpirationHandler = updateExpirationProvider(internalApiCaller);
     this.sessionService = new SessionService(
       core.savedObjects,
+      core.elasticsearch,
       this.security!,
-      updateExpirationHandler,
       this.logger
     );
 

@@ -7,7 +7,7 @@
 import { Moment } from 'moment';
 import { SessionService } from './session_service';
 
-declare module 'kibana/server' {
+declare module 'src/core/server' {
   interface RequestHandlerContext {
     sessionService?: SessionService;
   }
@@ -17,6 +17,7 @@ export interface SessionInfo {
   insertTime: Moment;
   userId: string;
   retryCount: number;
+  updateHandler: (searchId: string) => Promise<any>;
 }
 
 export interface SessionKeys {
