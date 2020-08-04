@@ -45,7 +45,7 @@ describe('timeseriesFetcher', () => {
           apmCustomLinkIndex: 'myIndex',
         },
       },
-      useAggregatedTransactions: false,
+      searchAggregatedTransactions: false,
     });
   });
 

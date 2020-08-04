@@ -19,13 +19,13 @@ export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 
 export async function getServices({
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const [items, hasLegacyData] = await Promise.all([
-    getServicesItems({ setup, useAggregatedTransactions }),
+    getServicesItems({ setup, searchAggregatedTransactions }),
     getLegacyDataStatus(setup),
   ]);
 

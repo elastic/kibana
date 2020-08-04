@@ -8,21 +8,23 @@ import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getServiceCount({
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { apmEventClient, start, end } = setup;
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

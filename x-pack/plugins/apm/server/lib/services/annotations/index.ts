@@ -11,7 +11,7 @@ import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
   serviceName,
   environment,
   annotationsClient,
@@ -21,7 +21,7 @@ export async function getServiceAnnotations({
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
   annotationsClient?: ScopedAnnotationsClient;
   apiCaller: LegacyAPICaller;
   logger: Logger;
@@ -32,7 +32,7 @@ export async function getServiceAnnotations({
     setup,
     serviceName,
     environment,
-    useAggregatedTransactions,
+    searchAggregatedTransactions,
   });
 
   const storedAnnotations = annotationsClient

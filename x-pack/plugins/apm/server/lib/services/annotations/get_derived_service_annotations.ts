@@ -16,25 +16,25 @@ import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_e
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../../helpers/aggregated_transactions';
 
 export async function getDerivedServiceAnnotations({
   setup,
   serviceName,
   environment,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getDocumentTypeFilterForAggregatedTransactions(
-      useAggregatedTransactions
+      searchAggregatedTransactions
     ),
     ...getEnvironmentUiFilterES(environment),
   ];
@@ -45,7 +45,7 @@ export async function getDerivedServiceAnnotations({
         apm: {
           events: [
             getProcessorEventForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           ],
         },
@@ -76,7 +76,7 @@ export async function getDerivedServiceAnnotations({
         apm: {
           events: [
             getProcessorEventForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           ],
         },

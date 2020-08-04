@@ -13,7 +13,7 @@ import { createAnomalyDetectionJobs } from '../../lib/anomaly_detection/create_a
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../lib/environments/get_all_environments';
 import { hasLegacyJobs } from '../../lib/anomaly_detection/has_legacy_jobs';
-import { getUseAggregatedTransactions } from '../../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get ML anomaly detection jobs for each environment
 export const anomalyDetectionJobsRoute = createRoute(() => ({
@@ -73,11 +73,13 @@ export const anomalyDetectionEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return await getAllEnvironments({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
       includeMissing: true,
     });
   },

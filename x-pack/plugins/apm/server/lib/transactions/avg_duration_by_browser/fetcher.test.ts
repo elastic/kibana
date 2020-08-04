@@ -23,7 +23,7 @@ describe('fetcher', () => {
     await fetcher({
       serviceName: 'testServiceName',
       setup,
-      useAggregatedTransactions: false,
+      searchAggregatedTransactions: false,
     });
 
     expect(search).toHaveBeenCalled();

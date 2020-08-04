@@ -46,7 +46,7 @@ export async function getHasAggregatedTransactions({
   return false;
 }
 
-export async function getUseAggregatedTransactions({
+export async function getSearchAggregatedTransactions({
   config,
   start,
   end,
@@ -57,31 +57,31 @@ export async function getUseAggregatedTransactions({
   end?: number;
   apmEventClient: APMEventClient;
 }): Promise<boolean> {
-  return config['xpack.apm.useAggregatedTransactions']
+  return config['xpack.apm.searchAggregatedTransactions']
     ? await getHasAggregatedTransactions({ start, end, apmEventClient })
     : false;
 }
 
 export function getTransactionDurationFieldForAggregatedTransactions(
-  useAggregatedTransactions: boolean
+  searchAggregatedTransactions: boolean
 ) {
-  return useAggregatedTransactions
+  return searchAggregatedTransactions
     ? TRANSACTION_DURATION_HISTOGRAM
     : TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForAggregatedTransactions(
-  useAggregatedTransactions: boolean
+  searchAggregatedTransactions: boolean
 ) {
-  return useAggregatedTransactions
+  return searchAggregatedTransactions
     ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
     : [];
 }
 
 export function getProcessorEventForAggregatedTransactions(
-  useAggregatedTransactions: boolean
+  searchAggregatedTransactions: boolean
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
-  return useAggregatedTransactions
+  return searchAggregatedTransactions
     ? ProcessorEvent.metric
     : ProcessorEvent.transaction;
 }

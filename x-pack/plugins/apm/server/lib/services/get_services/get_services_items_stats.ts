@@ -18,7 +18,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../../helpers/aggregated_transactions';
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -28,13 +28,13 @@ const getDeltaAsMinutes = (setup: ServicesItemsSetup) =>
 interface AggregationParams {
   setup: ServicesItemsSetup;
   projection: ServicesItemsProjection;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }
 
 export const getTransactionDurationAverages = async ({
   setup,
   projection,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient } = setup;
 
@@ -42,7 +42,9 @@ export const getTransactionDurationAverages = async ({
     mergeProjection(projection, {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
         ],
       },
       body: {
@@ -52,7 +54,7 @@ export const getTransactionDurationAverages = async ({
             filter: [
               ...projection.body.query.bool.filter,
               ...getDocumentTypeFilterForAggregatedTransactions(
-                useAggregatedTransactions
+                searchAggregatedTransactions
               ),
             ],
           },
@@ -67,7 +69,7 @@ export const getTransactionDurationAverages = async ({
               average: {
                 avg: {
                   field: getTransactionDurationFieldForAggregatedTransactions(
-                    useAggregatedTransactions
+                    searchAggregatedTransactions
                   ),
                 },
               },
@@ -134,14 +136,16 @@ export const getAgentNames = async ({
 export const getTransactionRates = async ({
   setup,
   projection,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: AggregationParams) => {
   const { apmEventClient } = setup;
   const response = await apmEventClient.search(
     mergeProjection(projection, {
       apm: {
         events: [
-          getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
         ],
       },
       body: {
@@ -151,7 +155,7 @@ export const getTransactionRates = async ({
             filter: [
               ...projection.body.query.bool.filter,
               ...getDocumentTypeFilterForAggregatedTransactions(
-                useAggregatedTransactions
+                searchAggregatedTransactions
               ),
             ],
           },
@@ -166,7 +170,7 @@ export const getTransactionRates = async ({
               count: {
                 value_count: {
                   field: getTransactionDurationFieldForAggregatedTransactions(
-                    useAggregatedTransactions
+                    searchAggregatedTransactions
                   ),
                 },
               },

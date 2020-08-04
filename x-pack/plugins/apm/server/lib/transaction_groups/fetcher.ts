@@ -32,13 +32,13 @@ interface TopTransactionOptions {
   serviceName: string;
   transactionType: string;
   transactionName?: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }
 
 interface TopTraceOptions {
   type: 'top_traces';
   transactionName?: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }
 
 export type Options = TopTransactionOptions | TopTraceOptions;
@@ -147,7 +147,7 @@ export async function transactionGroupsFetcher(
   const params = {
     request,
     setup,
-    useAggregatedTransactions: options.useAggregatedTransactions,
+    searchAggregatedTransactions: options.searchAggregatedTransactions,
   };
 
   const [counts, averages, sums, percentiles] = await Promise.all([

@@ -10,7 +10,7 @@ import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
@@ -19,9 +19,11 @@ export const tracesRoute = createRoute(() => ({
   },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
     return getTransactionGroupList(
-      { type: 'top_traces', useAggregatedTransactions },
+      { type: 'top_traces', searchAggregatedTransactions },
       setup
     );
   },

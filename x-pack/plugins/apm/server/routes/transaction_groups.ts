@@ -15,7 +15,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getTransactionAvgDurationByBrowser } from '../lib/transactions/avg_duration_by_browser';
 import { getTransactionAvgDurationByCountry } from '../lib/transactions/avg_duration_by_country';
 import { getTransactionSampleForGroup } from '../lib/transaction_groups/get_transaction_sample_for_group';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
 import { getParsedUiFilters } from '../lib/helpers/convert_ui_filters/get_parsed_ui_filters';
 
@@ -38,14 +38,16 @@ export const transactionGroupsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { transactionType } = context.params.query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionGroupList(
       {
         type: 'top_transactions',
         serviceName,
         transactionType,
-        useAggregatedTransactions,
+        searchAggregatedTransactions,
       },
       setup
     );
@@ -79,14 +81,16 @@ export const transactionGroupsChartsRoute = createRoute(() => ({
 
     const uiFilters = getParsedUiFilters({ uiFilters: uiFiltersJson, logger });
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionCharts({
       serviceName,
       transactionType,
       transactionName,
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
       logger,
       uiFilters,
     });
@@ -183,12 +187,14 @@ export const transactionGroupsAvgDurationByBrowser = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { transactionName } = context.params.query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionAvgDurationByBrowser({
       serviceName,
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
       transactionName,
     });
   },
@@ -211,13 +217,15 @@ export const transactionGroupsAvgDurationByCountry = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { transactionName } = context.params.query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionAvgDurationByCountry({
       serviceName,
       transactionName,
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
   },
 }));

@@ -25,7 +25,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
-} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../helpers/aggregated_transactions';
 import { getErrorRate } from '../transaction_groups/get_error_rate';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
@@ -33,13 +33,13 @@ interface Options {
   setup: Setup & SetupTimeRange;
   environment?: string;
   serviceName: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }
 
 interface TaskParameters {
   environment?: string;
   filter: ESFilter[];
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
   minutes: number;
   serviceName?: string;
   setup: Setup;
@@ -48,7 +48,7 @@ interface TaskParameters {
 export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
   uiFilters,
 }: Options & { serviceName: string; uiFilters: UIFilters }) {
   const { start, end } = setup;
@@ -63,7 +63,7 @@ export async function getServiceMapServiceNodeInfo({
   const taskParams = {
     environment: uiFilters.environment,
     filter,
-    useAggregatedTransactions,
+    searchAggregatedTransactions,
     minutes,
     serviceName,
     setup,
@@ -112,7 +112,7 @@ async function getTransactionStats({
   setup,
   filter,
   minutes,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: TaskParameters): Promise<{
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
@@ -122,7 +122,9 @@ async function getTransactionStats({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -132,7 +134,7 @@ async function getTransactionStats({
           filter: [
             ...filter,
             ...getDocumentTypeFilterForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
             {
               terms: {
@@ -150,14 +152,14 @@ async function getTransactionStats({
         duration: {
           avg: {
             field: getTransactionDurationFieldForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           },
         },
         count: {
           value_count: {
             field: getTransactionDurationFieldForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           },
         },

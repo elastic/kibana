@@ -26,7 +26,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         uiFilters: { environment },
         setup,
         serviceName,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({
@@ -71,7 +71,7 @@ describe('getServiceMapServiceNodeInfo', () => {
         uiFilters: { environment },
         setup,
         serviceName,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({

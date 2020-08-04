@@ -10,7 +10,7 @@ import { getTransactionCoordinates } from '../lib/observability_overview/get_tra
 import { hasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export const observabilityOverviewHasDataRoute = createRoute(() => ({
   path: '/api/apm/observability_overview/has_data',
@@ -28,16 +28,18 @@ export const observabilityOverviewRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { bucketSize } = context.params.query;
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     const serviceCountPromise = getServiceCount({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
     const transactionCoordinatesPromise = getTransactionCoordinates({
       setup,
       bucketSize,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
 
     const [serviceCount, transactionCoordinates] = await Promise.all([

@@ -25,18 +25,18 @@ export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: ServicesItemsSetup;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const params = {
     projection: getServicesProjection({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     }),
     setup,
-    useAggregatedTransactions,
+    searchAggregatedTransactions,
   };
 
   const [

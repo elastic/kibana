@@ -12,23 +12,25 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
-} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../helpers/aggregated_transactions';
 
 export async function getServiceTransactionTypes({
   setup,
   serviceName,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, apmEventClient } = setup;
 
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -37,7 +39,7 @@ export async function getServiceTransactionTypes({
         bool: {
           filter: [
             ...getDocumentTypeFilterForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
             { range: rangeFilter(start, end) },

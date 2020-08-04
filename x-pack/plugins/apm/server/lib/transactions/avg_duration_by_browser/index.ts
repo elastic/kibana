@@ -16,7 +16,7 @@ import { transformer } from './transformer';
 export interface Options {
   serviceName: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
   transactionName?: string;
 }
 

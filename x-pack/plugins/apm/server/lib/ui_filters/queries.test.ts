@@ -22,7 +22,7 @@ describe('ui filter queries', () => {
       getEnvironments({
         setup,
         serviceName: 'foo',
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       })
     );
 
@@ -33,7 +33,7 @@ describe('ui filter queries', () => {
     mock = await inspectSearchParams((setup) =>
       getEnvironments({
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       })
     );
 

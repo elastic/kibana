@@ -26,7 +26,7 @@ describe('services queries', () => {
       getServiceAgentName({
         serviceName: 'foo',
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       })
     );
 
@@ -38,7 +38,7 @@ describe('services queries', () => {
       getServiceTransactionTypes({
         serviceName: 'foo',
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
       })
     );
 
@@ -47,7 +47,7 @@ describe('services queries', () => {
 
   it('fetches the service items', async () => {
     mock = await inspectSearchParams((setup) =>
-      getServicesItems({ setup, useAggregatedTransactions: false })
+      getServicesItems({ setup, searchAggregatedTransactions: false })
     );
 
     const allParams = mock.spy.mock.calls.map((call) => call[0]);

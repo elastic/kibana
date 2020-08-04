@@ -11,17 +11,17 @@ import {
   SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 export async function getAllEnvironments({
   serviceName,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
   includeMissing = false,
 }: {
   serviceName?: string;
   setup: Setup;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
   includeMissing?: boolean;
 }) {
   const { apmEventClient } = setup;
@@ -34,7 +34,9 @@ export async function getAllEnvironments({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
         ProcessorEvent.error,
         ProcessorEvent.metric,
       ],

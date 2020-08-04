@@ -21,18 +21,18 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../../helpers/aggregated_transactions';
 
 export async function getTransactionAvgDurationByCountry({
   setup,
   serviceName,
   transactionName,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   transactionName?: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { uiFiltersES, apmEventClient, start, end } = setup;
   const transactionNameFilter = transactionName
@@ -41,7 +41,9 @@ export async function getTransactionAvgDurationByCountry({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -56,7 +58,7 @@ export async function getTransactionAvgDurationByCountry({
             { range: rangeFilter(start, end) },
             ...uiFiltersES,
             ...getDocumentTypeFilterForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           ],
         },
@@ -71,14 +73,14 @@ export async function getTransactionAvgDurationByCountry({
             count: {
               value_count: {
                 field: getTransactionDurationFieldForAggregatedTransactions(
-                  useAggregatedTransactions
+                  searchAggregatedTransactions
                 ),
               },
             },
             avg_duration: {
               avg: {
                 field: getTransactionDurationFieldForAggregatedTransactions(
-                  useAggregatedTransactions
+                  searchAggregatedTransactions
                 ),
               },
             },

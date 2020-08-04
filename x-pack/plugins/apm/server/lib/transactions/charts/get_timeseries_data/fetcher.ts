@@ -23,7 +23,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
-} from '../../../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../../../helpers/aggregated_transactions';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -31,13 +31,13 @@ export function timeseriesFetcher({
   transactionType,
   transactionName,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES, apmEventClient } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
@@ -46,7 +46,7 @@ export function timeseriesFetcher({
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
-      useAggregatedTransactions
+      searchAggregatedTransactions
     ),
     ...uiFiltersES,
   ];
@@ -63,7 +63,9 @@ export function timeseriesFetcher({
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -81,14 +83,14 @@ export function timeseriesFetcher({
             avg: {
               avg: {
                 field: getTransactionDurationFieldForAggregatedTransactions(
-                  useAggregatedTransactions
+                  searchAggregatedTransactions
                 ),
               },
             },
             pct: {
               percentiles: {
                 field: getTransactionDurationFieldForAggregatedTransactions(
-                  useAggregatedTransactions
+                  searchAggregatedTransactions
                 ),
                 percents: [95, 99],
                 hdr: { number_of_significant_value_digits: 2 },
@@ -99,7 +101,7 @@ export function timeseriesFetcher({
         overall_avg_duration: {
           avg: {
             field: getTransactionDurationFieldForAggregatedTransactions(
-              useAggregatedTransactions
+              searchAggregatedTransactions
             ),
           },
         },
@@ -117,7 +119,7 @@ export function timeseriesFetcher({
                 count: {
                   value_count: {
                     field: getTransactionDurationFieldForAggregatedTransactions(
-                      useAggregatedTransactions
+                      searchAggregatedTransactions
                     ),
                   },
                 },

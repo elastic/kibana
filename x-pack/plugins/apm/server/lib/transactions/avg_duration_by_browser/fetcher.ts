@@ -20,13 +20,17 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../../helpers/aggregated_transactions';
 
 export type ESResponse = PromiseReturnType<typeof fetcher>;
 
 export function fetcher(options: Options) {
   const { end, apmEventClient, start, uiFiltersES } = options.setup;
-  const { serviceName, useAggregatedTransactions, transactionName } = options;
+  const {
+    serviceName,
+    searchAggregatedTransactions,
+    transactionName,
+  } = options;
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const transactionNameFilter = transactionName
@@ -38,7 +42,7 @@ export function fetcher(options: Options) {
     { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
     { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
-      useAggregatedTransactions
+      searchAggregatedTransactions
     ),
     ...uiFiltersES,
     ...transactionNameFilter,
@@ -47,7 +51,9 @@ export function fetcher(options: Options) {
   const params = {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -78,7 +84,7 @@ export function fetcher(options: Options) {
                 avg_duration: {
                   avg: {
                     field: getTransactionDurationFieldForAggregatedTransactions(
-                      useAggregatedTransactions
+                      searchAggregatedTransactions
                     ),
                   },
                 },

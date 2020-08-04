@@ -16,7 +16,7 @@ import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
 import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export const servicesRoute = createRoute(() => ({
   path: '/api/apm/services',
@@ -26,11 +26,13 @@ export const servicesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     const services = await getServices({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
 
     return services;
@@ -48,12 +50,14 @@ export const serviceAgentNameRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getServiceAgentName({
       serviceName,
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
   },
 }));
@@ -72,7 +76,9 @@ export const serviceTransactionTypesRoute = createRoute(() => ({
     return getServiceTransactionTypes({
       serviceName,
       setup,
-      useAggregatedTransactions: await getUseAggregatedTransactions(setup),
+      searchAggregatedTransactions: await getSearchAggregatedTransactions(
+        setup
+      ),
     });
   },
 }));
@@ -111,17 +117,20 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    const [annotationsClient, useAggregatedTransactions] = await Promise.all([
+    const [
+      annotationsClient,
+      searchAggregatedTransactions,
+    ] = await Promise.all([
       context.plugins.observability?.getScopedAnnotationsClient(
         context,
         request
       ),
-      getUseAggregatedTransactions(setup),
+      getSearchAggregatedTransactions(setup),
     ]);
 
     return getServiceAnnotations({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
       serviceName,
       environment,
       annotationsClient,

@@ -54,7 +54,7 @@ describe('transaction queries', () => {
         transactionName: undefined,
         transactionType: undefined,
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
         uiFilters: {},
       })
@@ -69,7 +69,7 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: undefined,
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
         uiFilters: {},
       })
@@ -84,7 +84,7 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: 'baz',
         setup,
-        useAggregatedTransactions: false,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
         uiFilters: {},
       })

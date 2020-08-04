@@ -14,23 +14,25 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../helpers/aggregated_transactions';
 
 export async function getTransactionCoordinates({
   setup,
   bucketSize,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange;
   bucketSize: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }): Promise<Coordinates[]> {
   const { apmEventClient, start, end } = setup;
 
   const { aggregations } = await apmEventClient.search({
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
@@ -51,7 +53,7 @@ export async function getTransactionCoordinates({
             count: {
               value_count: {
                 field: getTransactionDurationFieldForAggregatedTransactions(
-                  useAggregatedTransactions
+                  searchAggregatedTransactions
                 ),
               },
             },

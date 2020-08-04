@@ -28,7 +28,7 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
-            useAggregatedTransactions: false,
+            searchAggregatedTransactions: false,
           }),
         {
           mockResponse: () => noVersions,
@@ -47,7 +47,7 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
-            useAggregatedTransactions: false,
+            searchAggregatedTransactions: false,
           }),
         {
           mockResponse: () => oneVersion,
@@ -71,7 +71,7 @@ describe('getServiceAnnotations', () => {
             setup,
             serviceName: 'foo',
             environment: 'bar',
-            useAggregatedTransactions: false,
+            searchAggregatedTransactions: false,
           }),
         {
           mockResponse: () => responses.shift(),

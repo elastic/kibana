@@ -22,7 +22,7 @@ import {
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
-import { getUseAggregatedTransactions } from '../../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(() => ({
@@ -200,10 +200,12 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
   path: '/api/apm/settings/agent-configuration/services',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
     return await getServiceNames({
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
   },
 }));
@@ -217,12 +219,14 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return await getEnvironments({
       serviceName,
       setup,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
   },
 }));

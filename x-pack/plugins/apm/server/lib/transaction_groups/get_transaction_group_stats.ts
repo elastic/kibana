@@ -7,12 +7,12 @@ import { merge } from 'lodash';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
 import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
-import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
 interface MetricParams {
   request: TransactionGroupRequestBase;
   setup: TransactionGroupSetup;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }
 
 type BucketKey = string | Record<string, string>;
@@ -35,13 +35,13 @@ function mergeRequestWithAggs<
 export async function getAverages({
   request,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     avg: {
       avg: {
         field: getTransactionDurationFieldForAggregatedTransactions(
-          useAggregatedTransactions
+          searchAggregatedTransactions
         ),
       },
     },
@@ -62,13 +62,13 @@ export async function getAverages({
 export async function getCounts({
   request,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     count: {
       value_count: {
         field: getTransactionDurationFieldForAggregatedTransactions(
-          useAggregatedTransactions
+          searchAggregatedTransactions
         ),
       },
     },
@@ -89,13 +89,13 @@ export async function getCounts({
 export async function getSums({
   request,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     sum: {
       sum: {
         field: getTransactionDurationFieldForAggregatedTransactions(
-          useAggregatedTransactions
+          searchAggregatedTransactions
         ),
       },
     },
@@ -116,13 +116,13 @@ export async function getSums({
 export async function getPercentiles({
   request,
   setup,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     p95: {
       percentiles: {
         field: getTransactionDurationFieldForAggregatedTransactions(
-          useAggregatedTransactions
+          searchAggregatedTransactions
         ),
         hdr: { number_of_significant_value_digits: 2 },
         percents: [95],

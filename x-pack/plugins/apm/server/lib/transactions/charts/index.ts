@@ -28,7 +28,7 @@ export async function getTransactionCharts(options: {
   transactionType: string | undefined;
   transactionName: string | undefined;
   setup: Setup & SetupTimeRange & SetupUIFilters;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
   logger: Logger;
   uiFilters: UIFilters;
 }) {

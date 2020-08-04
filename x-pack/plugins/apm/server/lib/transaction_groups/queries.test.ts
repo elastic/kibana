@@ -25,7 +25,7 @@ describe('transaction group queries', () => {
           type: 'top_transactions',
           serviceName: 'foo',
           transactionType: 'bar',
-          useAggregatedTransactions: false,
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize
@@ -43,7 +43,7 @@ describe('transaction group queries', () => {
       transactionGroupsFetcher(
         {
           type: 'top_traces',
-          useAggregatedTransactions: false,
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize

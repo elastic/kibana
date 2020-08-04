@@ -30,7 +30,7 @@ import { uiFiltersRt, rangeRt } from './default_api_types';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { getServiceNodesProjection } from '../projections/service_nodes';
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
-import { getUseAggregatedTransactions } from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { APMRequestHandlerContext } from './typings';
 
 export const uiFiltersEnvironmentsRoute = createRoute(() => ({
@@ -46,9 +46,15 @@ export const uiFiltersEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
-    return getEnvironments({ setup, serviceName, useAggregatedTransactions });
+    return getEnvironments({
+      setup,
+      serviceName,
+      searchAggregatedTransactions,
+    });
   },
 }));
 
@@ -119,9 +125,11 @@ function createLocalFiltersRoute<
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
   getProjection: async ({ context, setup }) => {
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
-    return getServicesProjection({ setup, useAggregatedTransactions });
+    return getServicesProjection({ setup, searchAggregatedTransactions });
   },
   queryRt: t.type({}),
 });
@@ -131,7 +139,9 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionGroupsProjection({
       setup,
@@ -140,7 +150,7 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
         transactionType,
         serviceName,
         transactionName,
-        useAggregatedTransactions,
+        searchAggregatedTransactions,
       },
     });
   },
@@ -158,11 +168,13 @@ export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
 export const tracesLocalFiltersRoute = createLocalFiltersRoute({
   path: '/api/apm/ui_filters/local_filters/traces',
   getProjection: async ({ setup, context }) => {
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionGroupsProjection({
       setup,
-      options: { type: 'top_traces', useAggregatedTransactions },
+      options: { type: 'top_traces', searchAggregatedTransactions },
     });
   },
   queryRt: t.type({}),
@@ -173,14 +185,16 @@ export const transactionsLocalFiltersRoute = createLocalFiltersRoute({
   getProjection: async ({ context, setup, query }) => {
     const { transactionType, serviceName, transactionName } = query;
 
-    const useAggregatedTransactions = await getUseAggregatedTransactions(setup);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
 
     return getTransactionsProjection({
       setup,
       transactionType,
       serviceName,
       transactionName,
-      useAggregatedTransactions,
+      searchAggregatedTransactions,
     });
   },
   queryRt: t.type({

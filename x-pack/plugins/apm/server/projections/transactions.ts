@@ -18,20 +18,20 @@ import { rangeFilter } from '../../common/utils/range_filter';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
-} from '../lib/helpers/aggregated_transactions/get_use_aggregated_transaction';
+} from '../lib/helpers/aggregated_transactions';
 
 export function getTransactionsProjection({
   setup,
   serviceName,
   transactionName,
   transactionType,
-  useAggregatedTransactions,
+  searchAggregatedTransactions,
 }: {
   setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
-  useAggregatedTransactions: boolean;
+  searchAggregatedTransactions: boolean;
 }) {
   const { start, end, uiFiltersES } = setup;
 
@@ -53,7 +53,7 @@ export function getTransactionsProjection({
       ...serviceNameFilter,
       ...uiFiltersES,
       ...getDocumentTypeFilterForAggregatedTransactions(
-        useAggregatedTransactions
+        searchAggregatedTransactions
       ),
     ],
   };
@@ -61,7 +61,9 @@ export function getTransactionsProjection({
   return {
     apm: {
       events: [
-        getProcessorEventForAggregatedTransactions(useAggregatedTransactions),
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
       ],
     },
     body: {
