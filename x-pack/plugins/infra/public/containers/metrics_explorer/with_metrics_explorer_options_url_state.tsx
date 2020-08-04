@@ -96,7 +96,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 
   const OptionsOptional = t.partial({
     limit: t.number,
-    groupBy: t.string,
+    groupBy: t.union([t.string, t.array(t.string)]),
     filterQuery: t.string,
     source: t.string,
   });
