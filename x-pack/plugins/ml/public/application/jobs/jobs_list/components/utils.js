@@ -371,14 +371,24 @@ function getUrlVars(url) {
 }
 
 export function getSelectedJobIdFromUrl(url) {
+  const result = {};
   if (typeof url === 'string') {
+    const isGroup = url.includes('groupId');
+
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+    if (url.includes('mlManagement') && (url.includes('jobId') || isGroup)) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
-      return decodedJson.jobId;
+
+      result.id = isGroup ? decodedJson.groupId : decodedJson.jobId;
+      result.isGroup = isGroup;
     }
   }
+  return result;
+}
+
+export function getGroupQueryText(groupId) {
+  return `groups:(${groupId})`;
 }
 
 export function clearSelectedJobIdFromUrl(url) {
