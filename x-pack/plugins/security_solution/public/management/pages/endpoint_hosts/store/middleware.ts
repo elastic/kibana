@@ -34,11 +34,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({ pattern: metadataIndexPattern });
-    const indexPattern: IIndexPattern[] = {
+    const indexPattern: IIndexPattern = {
       title: metadataIndexPattern,
       fields,
     };
-    return indexPattern;
+    return [indexPattern];
   }
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
