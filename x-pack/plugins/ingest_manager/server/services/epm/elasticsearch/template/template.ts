@@ -413,13 +413,13 @@ const updateExistingIndex = async ({
     // if update fails, rollover data stream
   } catch (err) {
     try {
-      const path = `/${dataStreamName}/_rollover`;
+      const path = `/${datastreamName}/_rollover`;
       await callCluster('transport.request', {
         method: 'POST',
         path,
       });
     } catch (error) {
-      throw new Error(`cannot rollover data stream ${dataStreamName}`);
+      throw new Error(`cannot rollover data stream ${datastreamName}`);
     }
   }
   // update settings after mappings was successful to ensure
