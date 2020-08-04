@@ -50,7 +50,7 @@ export const buildSeverityFromMapping = ({
       // Till then, explicit parsing of event.severity (long) to number. If not ECS, this could be
       // another datatype, but until we can lookup datatype we must assume number for the Elastic
       // Endpoint Security rule to function correctly
-      let parsedMappingValue = mapping.value;
+      let parsedMappingValue: string | number = mapping.value;
       if (mapping.field === 'event.severity') {
         parsedMappingValue = Math.floor(Number(parsedMappingValue));
       }
