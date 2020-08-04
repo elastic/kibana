@@ -5,8 +5,16 @@
  */
 
 import React from 'react';
+import { IStyleProperty } from '../../properties/style_property';
 
-export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
+interface Props {
+  isLinesOnly: boolean;
+  isPointsOnly: boolean;
+  styles: Array<IStyleProperty<any>>;
+  symbolId: string;
+}
+
+export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }: Props) {
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
