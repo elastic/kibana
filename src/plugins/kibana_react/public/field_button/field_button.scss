@@ -2,7 +2,13 @@
   @include euiFontSizeS;
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  &:focus-within,
+  .euiPopover-isOpen & {
+    @include euiFocusRing;
+  }
 }
 
 .kbnFieldButton--isDraggable {
@@ -34,6 +40,8 @@
 }
 
 .kbnFieldButton__content {
+  width: 100%;
+  text-align: left;
   border-radius: $euiBorderRadius - 1px;
   padding: $euiSizeS;
   display: flex;
@@ -56,5 +64,18 @@
   .kbnFieldButton__fieldIcon {
     margin-top: $euiSizeXS / 2;
     margin-right: $euiSizeXS / 2;
+  }
+}
+
+.kbnFieldButton__append {
+  padding-right: $euiSizeS;
+  display: flex;
+
+  .kbnFieldButton__fieldAction + .kbnFieldButton__infoIcon {
+    padding-left: $euiSizeXS;
+  }
+
+  .kbnFieldButton__infoIcon {
+    flex-shrink: 0;
   }
 }

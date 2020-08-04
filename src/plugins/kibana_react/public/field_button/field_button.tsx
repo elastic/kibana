@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode } from 'react';
+
 import classNames from 'classnames';
+import React, { ReactNode } from 'react';
 import './field_button.scss';
+import { OneOf } from '@elastic/eui';
 
 export interface FieldButtonProps {
   isOpen?: boolean;
@@ -29,6 +31,7 @@ export interface FieldButtonProps {
   isDraggable?: boolean;
   size?: ButtonSize;
   className?: string;
+  onClick?: () => void;
 }
 
 /**
@@ -56,6 +59,7 @@ export function FieldButton({
   fieldAction,
   className,
   isDraggable = false,
+  onClick,
   ...rest
 }: FieldButtonProps) {
   const classes = classNames(
@@ -68,11 +72,13 @@ export function FieldButton({
 
   return (
     <div className={classes} {...rest}>
-      <div className="kbnFieldButton__content">
+      <button onClick={onClick} className="kbn-resetFocusState kbnFieldButton__content">
         <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
         <div className="kbnFieldButton__name">{fieldName}</div>
-        <div className="kbnFieldButton__fieldAction">{fieldAction}</div>
-        <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>
+      </button>
+      <div className="kbnFieldButton__append">
+        {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
+        {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
       </div>
     </div>
   );
