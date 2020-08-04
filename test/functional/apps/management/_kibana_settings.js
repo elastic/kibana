@@ -26,10 +26,10 @@ export default function ({ getService, getPageObjects }) {
 
   describe('kibana settings', function describeIndexTests() {
     before(async function () {
-      await PageObjects.settings.navigateTo();
+      // await PageObjects.settings.navigateTo();
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.createIndexPattern('logstash-*');
+      // await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
     });
 
@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('when false, dashboard state is unhashed', async function () {
-        await PageObjects.settings.removeLogstashIndexPatternIfExist();
-        await PageObjects.settings.createIndexPattern('logstash-*');
+        // await PageObjects.settings.removeLogstashIndexPatternIfExist();
+        // await PageObjects.settings.createIndexPattern('logstash-*');
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

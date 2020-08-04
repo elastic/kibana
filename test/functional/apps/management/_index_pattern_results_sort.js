@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
     describe('field list pagination', function () {
-      const EXPECTED_FIELD_COUNT = 89;
+      const EXPECTED_FIELD_COUNT = 86;
 
       before(async function () {
         await PageObjects.settings.createIndexPattern();
