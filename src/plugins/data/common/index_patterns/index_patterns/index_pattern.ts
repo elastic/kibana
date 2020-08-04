@@ -581,6 +581,23 @@ export class IndexPattern implements IIndexPattern {
 
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
+
+    // preserve user entered displayName
+    if (this.fields) {
+      const displayNameMap = new Map();
+      for (const field of this.fields) {
+        if (field.displayName) {
+          displayNameMap.set(field.name, field.displayName);
+        }
+      }
+
+      for (const field of fields) {
+        if (displayNameMap.has(field.name)) {
+          field.displayName = displayNameMap.get(field.name);
+        }
+      }
+    }
+
     const scripted = this.getScriptedFields();
     const all = fields.concat(scripted);
     await this.initFields(all);

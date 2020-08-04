@@ -39,9 +39,8 @@ export default function ({ getService, getPageObjects }) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
-      log.debug('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
@@ -292,6 +291,16 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemAdd('_score');
         const currentUrlWithoutScore = await browser.getCurrentUrl();
         expect(currentUrlWithoutScore).not.to.contain('_score');
+      });
+      it('should add a field with displayName, sort by it, display it correctly', async function () {
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.clickFieldListItemAdd('referer');
+        await PageObjects.discover.clickFieldSort('referer');
+        expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
+        expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('referer');
       });
     });
   });

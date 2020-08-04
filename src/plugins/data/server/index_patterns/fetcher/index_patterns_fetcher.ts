@@ -24,6 +24,7 @@ import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError 
 export interface FieldDescriptor {
   aggregatable: boolean;
   name: string;
+  displayName?: string;
   readFromDocValues: boolean;
   searchable: boolean;
   type: string;
