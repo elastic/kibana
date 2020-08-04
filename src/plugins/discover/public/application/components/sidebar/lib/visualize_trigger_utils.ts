@@ -20,11 +20,11 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '../../../../../../ui_actions/public';
-import { getUiActions } from '../../../../kibana_services';
+import { getUiActions, getServices } from '../../../../kibana_services';
 import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 function getTrigger(type: string) {
-  return type === KBN_FIELD_TYPES.GEO_POINT || KBN_FIELD_TYPES.GEO_SHAPE
+  return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
     ? VISUALIZE_GEO_FIELD_TRIGGER
     : VISUALIZE_FIELD_TRIGGER;
 }
@@ -64,6 +64,7 @@ export async function isFieldVisualizable(
     return false;
   }
   const trigger = getTrigger(field.type);
+  const services = getServices();
   const compatibleActions = await getCompatibleActions(field.name, indexPatternId, trigger);
-  return compatibleActions > 0 && field.visualizable;
+  return compatibleActions > 0 && field.visualizable && services.capabilities.visualize.show;
 }
