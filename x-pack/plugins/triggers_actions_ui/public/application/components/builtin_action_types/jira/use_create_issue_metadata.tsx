@@ -35,6 +35,7 @@ export interface UseCreateIssueMetadata {
   prioritiesSelectOptions: EuiSelectOption[];
   hasDescription: boolean;
   hasLabels: boolean;
+  isLoading: boolean;
 }
 
 export const useCreateIssueMetadata = ({
@@ -42,6 +43,7 @@ export const useCreateIssueMetadata = ({
   actionConnector,
   selectedIssueType,
 }: Props): UseCreateIssueMetadata => {
+  const [isLoading, setIsLoading] = useState(true);
   const [issueTypes, setIssueTypes] = useState<IssueTypes>({});
   const [issueTypesSelectOptions, setIssueTypesSelectOptions] = useState<EuiSelectOption[]>([]);
   const [prioritiesSelectOptions, setPrioritiesSelectOptions] = useState<EuiSelectOption[]>([]);
@@ -63,18 +65,21 @@ export const useCreateIssueMetadata = ({
   useEffect(() => {
     let cancel = false;
     const fetchData = async () => {
+      setIsLoading(true);
       const res = await getCreateIssueMetadata({
         http,
         connectorId: actionConnector.id,
       });
 
       if (!cancel) {
+        setIsLoading(false);
         setIssueTypes(res.data.issueTypes);
       }
     };
     fetchData();
     return () => {
       cancel = true;
+      setIsLoading(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [http, actionConnector]);
@@ -117,5 +122,6 @@ export const useCreateIssueMetadata = ({
     prioritiesSelectOptions,
     hasDescription,
     hasLabels,
+    isLoading,
   };
 };
