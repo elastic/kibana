@@ -112,9 +112,9 @@ interface CreateTimelineProps {
   isImmutable?: boolean;
 }
 
-/** allow override means overriding by current username,
- * disallow override means keep the original username.
- * override = false only happens when import timeline templates,
+/** allow overrideNotesOwner means overriding by current username,
+ * disallow overrideNotesOwner means keep the original username.
+ * overrideNotesOwner = false only happens when import timeline templates,
  * as we want to keep the original creator for notes
  **/
 export const createTimelines = async ({
