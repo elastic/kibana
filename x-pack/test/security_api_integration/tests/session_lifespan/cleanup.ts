@@ -27,17 +27,17 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session' })).hits.total.value;
+    return (await es.search({ index: '.kibana_security_session*' })).hits.total.value;
   }
 
   describe('Session Lifespan cleanup', () => {
     before(async () => {
-      await es.cluster.health({ index: '.kibana_security_session', waitForStatus: 'green' });
+      await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
     });
 
     beforeEach(async () => {
       await es.deleteByQuery({
-        index: '.kibana_security_session',
+        index: '.kibana_security_session*',
         q: '*',
         waitForCompletion: true,
         refresh: true,

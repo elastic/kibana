@@ -10,25 +10,15 @@ import { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
   readonly clusterClient: ILegacyClusterClient;
-  readonly indexName: string;
+  readonly kibanaIndexName: string;
   readonly config: Pick<ConfigType, 'session'>;
   readonly logger: Logger;
 }
 
 /**
- * Alias of the Elasticsearch index that is used to store user session information.
- */
-export const SESSION_INDEX_ALIAS = '.kibana_security_session';
-
-/**
  * Version of the current session index template.
  */
-export const SESSION_INDEX_TEMPLATE_VERSION = 1;
-
-/**
- * Name of the current session index template.
- */
-export const SESSION_INDEX_TEMPLATE_NAME = `${SESSION_INDEX_ALIAS}_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
+const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
  * Returns index template that is used for the current version of the session index.
@@ -58,7 +48,6 @@ export function getSessionIndexTemplate(indexName: string) {
         content: { type: 'binary' },
       },
     },
-    aliases: { [SESSION_INDEX_ALIAS]: {} },
   });
 }
 
@@ -127,6 +116,11 @@ interface SessionIndexValueMetadata {
 
 export class SessionIndex {
   /**
+   * Name of the index to store session information in.
+   */
+  private readonly indexName = `${this.options.kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`;
+
+  /**
    * Timeout after which session with the expired idle timeout _may_ be removed from the index
    * during regular cleanup routine.
    */
@@ -158,7 +152,7 @@ export class SessionIndex {
       const response = await this.options.clusterClient.callAsInternalUser('get', {
         id: sid,
         ignore: [404],
-        index: SESSION_INDEX_ALIAS,
+        index: this.indexName,
       });
 
       const docNotFound = response.found === false;
@@ -202,7 +196,7 @@ export class SessionIndex {
         // But we can reduce probability of getting into a weird state when session is being created
         // while session index is missing for some reason. This way we'll recreate index with a
         // proper name and alias. But this will only work if we still have a proper index template.
-        index: this.options.indexName,
+        index: this.indexName,
         body: sessionValueToStore,
         refresh: 'wait_for',
       });
@@ -223,7 +217,7 @@ export class SessionIndex {
     try {
       const response = await this.options.clusterClient.callAsInternalUser('index', {
         id: sid,
-        index: SESSION_INDEX_ALIAS,
+        index: this.indexName,
         body: sessionValueToStore,
         ifSeqNo: metadata.sequenceNumber,
         ifPrimaryTerm: metadata.primaryTerm,
@@ -262,7 +256,7 @@ export class SessionIndex {
       // over any updates that could happen in the meantime.
       await this.options.clusterClient.callAsInternalUser('delete', {
         id: sid,
-        index: SESSION_INDEX_ALIAS,
+        index: this.indexName,
         refresh: 'wait_for',
         ignore: [404],
       });
@@ -280,13 +274,14 @@ export class SessionIndex {
       return await this.indexInitialization;
     }
 
+    const sessionIndexTemplateName = `${this.options.kibanaIndexName}_security_session_index_template_${SESSION_INDEX_TEMPLATE_VERSION}`;
     return (this.indexInitialization = new Promise(async (resolve) => {
       // Check if required index template exists.
       let indexTemplateExists = false;
       try {
         indexTemplateExists = await this.options.clusterClient.callAsInternalUser(
           'indices.existsTemplate',
-          { name: SESSION_INDEX_TEMPLATE_NAME }
+          { name: sessionIndexTemplateName }
         );
       } catch (err) {
         this.options.logger.error(
@@ -301,8 +296,8 @@ export class SessionIndex {
       } else {
         try {
           await this.options.clusterClient.callAsInternalUser('indices.putTemplate', {
-            name: SESSION_INDEX_TEMPLATE_NAME,
-            body: getSessionIndexTemplate(this.options.indexName),
+            name: sessionIndexTemplateName,
+            body: getSessionIndexTemplate(this.indexName),
           });
           this.options.logger.debug('Successfully created session index template.');
         } catch (err) {
@@ -316,7 +311,7 @@ export class SessionIndex {
       let indexExists = false;
       try {
         indexExists = await this.options.clusterClient.callAsInternalUser('indices.exists', {
-          index: this.options.indexName,
+          index: this.indexName,
         });
       } catch (err) {
         this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
@@ -329,7 +324,7 @@ export class SessionIndex {
       } else {
         try {
           await this.options.clusterClient.callAsInternalUser('indices.create', {
-            index: this.options.indexName,
+            index: this.indexName,
           });
           this.options.logger.debug('Successfully created session index.');
         } catch (err) {
@@ -378,7 +373,7 @@ export class SessionIndex {
 
     try {
       const response = await this.options.clusterClient.callAsInternalUser('deleteByQuery', {
-        index: SESSION_INDEX_ALIAS,
+        index: this.indexName,
         refresh: 'wait_for',
         ignore: [409, 404],
         body: { query: { bool: { should: deleteQueries } } },

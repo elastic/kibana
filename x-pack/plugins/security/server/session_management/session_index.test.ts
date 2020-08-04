@@ -6,12 +6,7 @@
 
 import { ILegacyClusterClient } from '../../../../../src/core/server';
 import { ConfigSchema, createConfig } from '../config';
-import {
-  getSessionIndexTemplate,
-  SESSION_INDEX_ALIAS,
-  SESSION_INDEX_TEMPLATE_NAME,
-  SessionIndex,
-} from './session_index';
+import { getSessionIndexTemplate, SessionIndex } from './session_index';
 
 import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { sessionIndexMock } from './session_index.mock';
@@ -20,11 +15,12 @@ describe('Session index', () => {
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let sessionIndex: SessionIndex;
   const indexName = '.kibana_some_tenant_security_session_1';
+  const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
     const sessionIndexOptions = {
       logger: loggingSystemMock.createLogger(),
-      indexName,
+      kibanaIndexName: '.kibana_some_tenant',
       config: createConfig(ConfigSchema.validate({}), loggingSystemMock.createLogger(), {
         isTLSEnabled: false,
       }),
@@ -37,7 +33,7 @@ describe('Session index', () => {
   describe('#initialize', () => {
     function assertExistenceChecksPerformed() {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.existsTemplate', {
-        name: SESSION_INDEX_TEMPLATE_NAME,
+        name: indexTemplateName,
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.exists', {
         index: getSessionIndexTemplate(indexName).index_patterns,
@@ -92,7 +88,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(4);
       assertExistenceChecksPerformed();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.putTemplate', {
-        name: SESSION_INDEX_TEMPLATE_NAME,
+        name: indexTemplateName,
         body: expectedIndexTemplate,
       });
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.create', {
@@ -116,7 +112,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(3);
       assertExistenceChecksPerformed();
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('indices.putTemplate', {
-        name: SESSION_INDEX_TEMPLATE_NAME,
+        name: indexTemplateName,
         body: getSessionIndexTemplate(indexName),
       });
     });
@@ -180,7 +176,7 @@ describe('Session index', () => {
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('deleteByQuery', {
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         refresh: 'wait_for',
         ignore: [409, 404],
         body: {
@@ -199,7 +195,7 @@ describe('Session index', () => {
     it('when only `lifespan` is configured', async () => {
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        indexName,
+        kibanaIndexName: '.kibana_some_tenant',
         config: createConfig(
           ConfigSchema.validate({ session: { lifespan: 456 } }),
           loggingSystemMock.createLogger(),
@@ -212,7 +208,7 @@ describe('Session index', () => {
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('deleteByQuery', {
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         refresh: 'wait_for',
         ignore: [409, 404],
         body: {
@@ -233,7 +229,7 @@ describe('Session index', () => {
       const idleTimeout = 123;
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        indexName,
+        kibanaIndexName: '.kibana_some_tenant',
         config: createConfig(
           ConfigSchema.validate({ session: { idleTimeout } }),
           loggingSystemMock.createLogger(),
@@ -246,7 +242,7 @@ describe('Session index', () => {
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('deleteByQuery', {
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         refresh: 'wait_for',
         ignore: [409, 404],
         body: {
@@ -267,7 +263,7 @@ describe('Session index', () => {
       const idleTimeout = 123;
       sessionIndex = new SessionIndex({
         logger: loggingSystemMock.createLogger(),
-        indexName,
+        kibanaIndexName: '.kibana_some_tenant',
         config: createConfig(
           ConfigSchema.validate({ session: { idleTimeout, lifespan: 456 } }),
           loggingSystemMock.createLogger(),
@@ -280,7 +276,7 @@ describe('Session index', () => {
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('deleteByQuery', {
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         refresh: 'wait_for',
         ignore: [409, 404],
         body: {
@@ -349,7 +345,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('get', {
         id: 'some-sid',
         ignore: [404],
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
       });
     });
   });
@@ -454,7 +450,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(2);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('index', {
         id: sid,
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         body: sessionValue,
         ifSeqNo: 456,
         ifPrimaryTerm: 123,
@@ -489,7 +485,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('index', {
         id: sid,
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         body: sessionValue,
         ifSeqNo: 456,
         ifPrimaryTerm: 123,
@@ -513,7 +509,7 @@ describe('Session index', () => {
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('delete', {
         id: 'some-long-sid',
-        index: SESSION_INDEX_ALIAS,
+        index: indexName,
         refresh: 'wait_for',
         ignore: [404],
       });

@@ -10,7 +10,7 @@ import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../tas
 import { ConfigType } from '../config';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { SessionCookie } from './session_cookie';
-import { SessionIndex, SESSION_INDEX_TEMPLATE_VERSION } from './session_index';
+import { SessionIndex } from './session_index';
 import { Session } from './session';
 
 export interface SessionManagementServiceSetupParams {
@@ -64,7 +64,7 @@ export class SessionManagementService {
     this.sessionIndex = new SessionIndex({
       config,
       clusterClient,
-      indexName: `${kibanaIndexName}_security_session_${SESSION_INDEX_TEMPLATE_VERSION}`,
+      kibanaIndexName,
       logger: this.logger.get('index'),
     });
 
