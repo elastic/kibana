@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { getCurrentBreadcrumb } from '../../../lib/breadcrumb';
+import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import {
@@ -77,8 +77,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getCurrentBreadcrumb('alertDetails')]);
-    chrome.docTitle.change(getCurrentDocTitle('alertDetails'));
+    setBreadcrumbs([
+      getAlertingSectionBreadcrumb('alerts'),
+      getAlertDetailsBreadcrumb(alert.id, alert.name),
+    ]);
+    chrome.docTitle.change(getCurrentDocTitle('alerts'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
