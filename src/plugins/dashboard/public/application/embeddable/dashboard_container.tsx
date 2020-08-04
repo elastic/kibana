@@ -168,24 +168,22 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     previousPanelState: DashboardPanelState<EmbeddableInput>,
     newPanelState: Partial<PanelState>
   ) {
-    this.untilEmbeddableLoaded(previousPanelState.explicitInput.id).then(() => {
-      // Because the embeddable type can change, we have to operate at the container level here
-      return this.updateInput({
-        panels: {
-          ...this.input.panels,
-          [previousPanelState.explicitInput.id]: {
-            ...previousPanelState,
-            ...newPanelState,
-            gridData: {
-              ...previousPanelState.gridData,
-            },
-            explicitInput: {
-              ...newPanelState.explicitInput,
-              id: previousPanelState.explicitInput.id,
-            },
+    // Because the embeddable type can change, we have to operate at the container level here
+    return this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [previousPanelState.explicitInput.id]: {
+          ...previousPanelState,
+          ...newPanelState,
+          gridData: {
+            ...previousPanelState.gridData,
+          },
+          explicitInput: {
+            ...newPanelState.explicitInput,
+            id: previousPanelState.explicitInput.id,
           },
         },
-      });
+      },
     });
   }
 
