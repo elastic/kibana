@@ -18,6 +18,7 @@
  */
 
 import { getInjectedVarFunc } from '../kibana_services';
+import { ORIGIN } from '../common/constants/origin';
 
 jest.mock('../kibana_services', () => ({
   getInjectedVarFunc: jest.fn(),
