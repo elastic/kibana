@@ -32,8 +32,8 @@ type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
 
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
-  public method: methodType;
-  public payload?: payloadType;
+  public method: MethodType;
+  public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
   constructor({ method, payload }: IMockRouterProps) {
