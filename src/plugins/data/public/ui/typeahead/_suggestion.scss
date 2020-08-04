@@ -8,6 +8,7 @@ $kbnTypeaheadTypes: (
 
 .kbnTypeahead {
   position: relative;
+  opacity: 0;
 
   .kbnTypeahead__popover {
     max-height: inherit;

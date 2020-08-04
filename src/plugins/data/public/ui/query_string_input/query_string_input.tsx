@@ -562,6 +562,8 @@ export class QueryStringInputUI extends Component<Props, State> {
     });
   };
 
+  closeSuggestionsList = () => this.setState({ isSuggestionsVisible: false, index: null });
+
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
       'aria-controls': 'kbnTypeahead__items',
@@ -646,6 +648,7 @@ export class QueryStringInputUI extends Component<Props, State> {
             onClick={this.onClickSuggestion}
             onMouseEnter={this.onMouseEnterSuggestion}
             loadMore={this.increaseLimit}
+            closeList={this.closeSuggestionsList}
             queryBarRect={this.queryBarDivRefInstance.current?.getBoundingClientRect()}
             dropdownHeight={this.props.dropdownHeight}
           />
