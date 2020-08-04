@@ -5,13 +5,24 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-
+// @ts-expect-error
 import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
-export class SymbolIcon extends Component {
-  state = {
-    imgDataUrl: undefined,
+interface Props {
+  symbolId: string;
+  fill?: string;
+  stroke?: string;
+}
+
+interface State {
+  imgDataUrl: string | null;
+}
+
+export class SymbolIcon extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  state: State = {
+    imgDataUrl: null,
   };
 
   componentDidMount() {
@@ -44,12 +55,7 @@ export class SymbolIcon extends Component {
       return null;
     }
 
-    const {
-      symbolId, // eslint-disable-line no-unused-vars
-      fill, // eslint-disable-line no-unused-vars
-      stroke, // eslint-disable-line no-unused-vars
-      ...rest
-    } = this.props;
+    const { symbolId, fill, stroke, ...rest } = this.props;
 
     return (
       <img
@@ -62,9 +68,3 @@ export class SymbolIcon extends Component {
     );
   }
 }
-
-SymbolIcon.propTypes = {
-  symbolId: PropTypes.string.isRequired,
-  fill: PropTypes.string,
-  stroke: PropTypes.string,
-};
