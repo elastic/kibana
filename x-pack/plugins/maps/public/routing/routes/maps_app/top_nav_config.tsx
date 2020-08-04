@@ -74,6 +74,11 @@ export function getTopNavConfig({
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       });
+      // id not returned when save fails because of duplicate title check.
+      // return and let user confirm duplicate title.
+      if (!id) {
+        return {};
+      }
     } catch (err) {
       getToasts().addDanger({
         title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
@@ -87,10 +92,6 @@ export function getTopNavConfig({
       savedMap.title = prevTitle;
       savedMap.description = prevDescription;
       return { error: err };
-    }
-
-    if (!id) {
-      return {};
     }
 
     getToasts().addSuccess({

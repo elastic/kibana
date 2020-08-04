@@ -145,6 +145,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async clickSaveAndReturnButton() {
+      await testSubjects.click('mapSaveAndReturnButton');
+    }
+
     async expectMissingSaveButton() {
       await testSubjects.missingOrFail('mapSaveButton');
     }
