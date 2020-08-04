@@ -142,10 +142,6 @@ describe('Field', function () {
     }).toThrow();
 
     expect(() => {
-      field.displayName = 'newDisplayName';
-    }).toThrow();
-
-    expect(() => {
       field.$$spec = ({ a: 'b' } as unknown) as FieldSpec;
     }).toThrow();
   });

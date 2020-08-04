@@ -7,6 +7,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 10,
+      "displayName": "bytes",
       "esTypes": Array [
         "long",
       ],
@@ -29,6 +30,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 20,
+      "displayName": "ssl",
       "esTypes": Array [
         "boolean",
       ],
@@ -46,6 +48,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
+      "displayName": "@timestamp",
       "esTypes": Array [
         "date",
       ],
@@ -63,6 +66,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 30,
+      "displayName": "time",
       "esTypes": Array [
         "date",
       ],
@@ -80,6 +84,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "@tags",
       "esTypes": Array [
         "keyword",
       ],
@@ -97,6 +102,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "utc_time",
       "esTypes": Array [
         "date",
       ],
@@ -114,6 +120,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "phpmemory",
       "esTypes": Array [
         "integer",
       ],
@@ -131,6 +138,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "ip",
       "esTypes": Array [
         "ip",
       ],
@@ -148,6 +156,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "request_body",
       "esTypes": Array [
         "attachment",
       ],
@@ -165,6 +174,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "point",
       "esTypes": Array [
         "geo_point",
       ],
@@ -182,6 +192,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "area",
       "esTypes": Array [
         "geo_shape",
       ],
@@ -199,6 +210,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "hashed",
       "esTypes": Array [
         "murmur3",
       ],
@@ -216,6 +228,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "geo.coordinates",
       "esTypes": Array [
         "geo_point",
       ],
@@ -233,6 +246,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "extension",
       "esTypes": Array [
         "text",
       ],
@@ -250,6 +264,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "extension.keyword",
       "esTypes": Array [
         "keyword",
       ],
@@ -271,6 +286,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "machine.os",
       "esTypes": Array [
         "text",
       ],
@@ -288,6 +304,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "machine.os.raw",
       "esTypes": Array [
         "keyword",
       ],
@@ -309,6 +326,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "geo.src",
       "esTypes": Array [
         "keyword",
       ],
@@ -326,6 +344,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "_id",
       "esTypes": Array [
         "_id",
       ],
@@ -343,6 +362,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "_type",
       "esTypes": Array [
         "_type",
       ],
@@ -360,6 +380,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "_source",
       "esTypes": Array [
         "_source",
       ],
@@ -377,6 +398,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "non-filterable",
       "esTypes": Array [
         "text",
       ],
@@ -394,6 +416,7 @@ Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "non-sortable",
       "esTypes": Array [
         "text",
       ],
@@ -411,6 +434,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "custom_user_field",
       "esTypes": Array [
         "conflict",
       ],
@@ -428,6 +452,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "script string",
       "esTypes": Array [
         "text",
       ],
@@ -445,6 +470,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "script number",
       "esTypes": Array [
         "long",
       ],
@@ -462,6 +488,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "script date",
       "esTypes": Array [
         "date",
       ],
@@ -479,6 +506,7 @@ Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
+      "displayName": "script murmur3",
       "esTypes": Array [
         "murmur3",
       ],
