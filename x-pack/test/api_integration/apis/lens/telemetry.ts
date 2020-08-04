@@ -194,7 +194,7 @@ export default ({ getService }: FtrProviderContext) => {
         bar_stacked: 1,
         lnsPie: 1,
       });
-      expect(results.saved_overall_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(3);
 
       await esArchiver.unload('lens/basic');
     });

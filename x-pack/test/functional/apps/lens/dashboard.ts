@@ -51,7 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('applyFiltersPopoverButton');
       });
 
-      await PageObjects.lens.assertChartTitle('lnsXYvis');
+      await PageObjects.lens.assertExactText(
+        '[data-test-subj="embeddablePanelHeading-lnsXYvis"]',
+        'lnsXYvis'
+      );
       const time = await PageObjects.timePicker.getTimeConfig();
       expect(time.start).to.equal('Sep 21, 2015 @ 09:00:00.000');
       expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');

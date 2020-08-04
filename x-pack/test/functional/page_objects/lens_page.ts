@@ -190,6 +190,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchLayerSeriesType(seriesType: string) {
       await retry.try(async () => {
         await testSubjects.click('lns_layer_settings');
+        await testSubjects.exists(`lnsXY_seriesType-${seriesType}`);
       });
 
       return await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
@@ -235,6 +236,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Gets text of the specified datatable header cell
+     *
+     * @param index - index of th element in datatable
+     */
+    async getDatatableThText(index = 0) {
+      return find
+        .byCssSelector(
+          `[data-test-subj="lnsDataTable"] thead th:nth-child(${
+            index + 1
+          }) .euiTableCellContent__text`
+        )
+        .then((el) => el.getVisibleText());
+    },
+
+    /**
+     * Gets text of the specified datatable cell
+     *
+     * @param rowIndex - index of row of the cell
+     * @param colIndex - index of column of the cell
+     */
+    async getDatatableCellText(rowIndex = 0, colIndex = 0) {
+      return find
+        .byCssSelector(
+          `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
+            colIndex + 1
+          })`
+        )
+        .then((el) => el.getVisibleText());
+    },
+
+    /**
      * Asserts that metric has expected title and count
      *
      * @param title - expected title
@@ -245,44 +277,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
     },
 
-    /**
-     * Asserts expected chart title
-     *
-     * @param title - expected title
-     */
-    async assertChartTitle(title: string) {
-      await this.assertExactText(`[data-test-subj="lns_ChartTitle"]`, title);
-    },
-
-    /**
-     * Asserts that datatable th element has expected text
-     *
-     * @param text - the expected text
-     * @param index - index of th element in datatable
-     */
-    async assertDatatableThText(text: string, index = 0) {
-      return this.assertExactText(
-        `[data-test-subj="lnsDataTable"] thead th:nth-child(${
-          index + 1
-        }) .euiTableCellContent__text`,
-        text
-      );
-    },
-
-    /**
-     * Asserts that the specified datatable cell has expected text
-     *
-     * @param text - the expected text
-     * @param rowIndex - index of row of the cell
-     * @param colIndex - index of column of the cell
-     */
-    async assertDatatableCellText(text: string, rowIndex = 0, colIndex = 0) {
-      return this.assertExactText(
-        `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
-          colIndex + 1
-        })`,
-        text
-      );
     },
   });
 }

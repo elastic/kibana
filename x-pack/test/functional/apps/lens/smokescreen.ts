@@ -78,8 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.assertDatatableThText('Maximum of bytes');
-      await PageObjects.lens.assertDatatableCellText('19,986', 0, 0);
+      expect(await PageObjects.lens.getDatatableThText()).to.eql('Maximum of bytes');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
       await PageObjects.lens.switchToVisualization('lnsMetric');
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
     });
@@ -116,9 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('donut');
-      await PageObjects.lens.assertChartTitle('lnsXYvis');
-      // TODO: to check if chart is valid, we check dimension panel
-      // - once we have access to check if chart renders properly, we should make assertions based on chart
+
+      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
         'Top values of ip'
       );
@@ -127,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await PageObjects.lens.switchToVisualization('bar');
-      await PageObjects.lens.assertChartTitle('lnsXYvis');
+      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
     });
 
     it('should allow seamless transition from bar chart to line chart using layer chart switch', async () => {
@@ -136,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchLayerSeriesType('line');
-      await PageObjects.lens.assertChartTitle('lnsXYvis');
+      expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
     });
 
     it('should allow seamless transition from pie chart to treemap chart', async () => {
@@ -175,10 +174,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      await PageObjects.lens.assertDatatableThText('@timestamp per 3 hours', 0);
-      await PageObjects.lens.assertDatatableThText('Average of bytes', 1);
-      await PageObjects.lens.assertDatatableCellText('2015-09-20 00:00', 0, 0);
-      await PageObjects.lens.assertDatatableCellText('6,011.351', 0, 1);
+
+      expect(await PageObjects.lens.getDatatableThText()).to.eql('@timestamp per 3 hours');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
+      expect(await PageObjects.lens.getDatatableThText(1)).to.eql('Average of bytes');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
   });
 }
