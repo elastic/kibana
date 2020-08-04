@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,11 +20,11 @@ import { PHASE_NODE_ATTRS } from '../../../../constants';
 import { LearnMoreLink } from '../../../components/learn_more_link';
 import { ErrableFormRow } from '../../form_errors';
 import { useLoadNodes } from '../../../../services/api';
+import { NodeAttrsDetails } from '../node_attrs_details';
 
 interface Props {
   phase: string;
   setPhaseData: (dataKey: string, value: any) => void;
-  showNodeDetailsFlyout: (nodeAttrs: any) => void;
   errors: any;
   phaseData: any;
   isShowingErrors: boolean;
@@ -48,12 +48,15 @@ const learnMoreLink = (
 export const NodeAllocation: React.FunctionComponent<Props> = ({
   phase,
   setPhaseData,
-  showNodeDetailsFlyout,
   errors,
   phaseData,
   isShowingErrors,
 }) => {
   const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
+
+  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
+    null
+  );
 
   if (isLoading) {
     return (
@@ -162,7 +165,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
           data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
           flush="left"
           iconType="eye"
-          onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+          onClick={() => setSelectedNodeAttrsForDetails(phaseData[PHASE_NODE_ATTRS])}
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
@@ -172,6 +175,13 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
       ) : null}
       {learnMoreLink}
       <EuiSpacer size="m" />
+
+      {selectedNodeAttrsForDetails ? (
+        <NodeAttrsDetails
+          selectedNodeAttrs={selectedNodeAttrsForDetails}
+          close={() => setSelectedNodeAttrsForDetails(null)}
+        />
+      ) : null}
     </Fragment>
   );
 };
