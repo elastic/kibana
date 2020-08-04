@@ -35,7 +35,7 @@ describe(`VegaParser.parseAsync`, () => {
     await vp.parseAsync();
 
     expect(
-      vp.error.startsWith('The input spec does not specify a "$schema":URL property')
+      vp.error.startsWith('Your specification requires a "$schema" field with a valid URL')
     ).toBeTruthy();
   });
 });

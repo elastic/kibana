@@ -121,13 +121,16 @@ export class VegaParser {
       if (!spec.$schema) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
-            defaultMessage: `The input spec does not specify a {schemaParam}:URL property.
-The URL for the Vega schema:
- {schemaUrl}/[library]/[version].json
- [library] can be vega or vega-lite
- [version] defines the version of the library for which you get the schema.
-This link does not need to be accessible, and will only be used for describing Vega code.`,
-            values: { schemaParam: '"$schema"', schemaUrl: 'https://vega.github.io/schema' },
+            defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
+[Vega]({vegaSchemaUrl}) or
+[Vega-Lite]({vegaLiteSchemaUrl}).
+The URL is an identifier only. Kibana and your browser will never access this URL.`,
+            values: {
+              schemaParam: '"$schema"',
+              vegaLiteSchemaUrl: 'https://vega.github.io/vega-lite/docs/spec.html#top-level',
+              vegaSchemaUrl:
+                'https://vega.github.io/vega/docs/specification/#top-level-specification-properties',
+            },
           })
         );
       }
