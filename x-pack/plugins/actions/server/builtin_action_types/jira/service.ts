@@ -16,6 +16,7 @@ import {
   JiraSecretConfigurationType,
   Fields,
   CreateCommentParams,
+  ResponseError,
 } from './types';
 
 import * as i18n from './translations';
@@ -58,6 +59,13 @@ export const createExternalService = (
     return commentUrl.replace('{issueId}', issueId);
   };
 
+  const createErrorMessage = (errors: ResponseError) => {
+    return Object.entries(errors).reduce((errorMessage, [, value]) => {
+      const msg = errorMessage.length > 0 ? `${errorMessage} ${value}` : value;
+      return msg;
+    }, '');
+  };
+
   const getIncident = async (id: string) => {
     try {
       const res = await request({
@@ -72,7 +80,12 @@ export const createExternalService = (
       return { ...rest, ...fields };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get incident with id ${id}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response.data.errors)}`
+        )
       );
     }
   };
@@ -125,7 +138,12 @@ export const createExternalService = (
       };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to create incident. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
+            error.response.data.errors
+          )}`
+        )
       );
     }
   };
@@ -153,7 +171,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to update incident with id ${incidentId}. Error: ${error.message}`
+          `Unable to update incident with id ${incidentId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response.data.errors)}`
         )
       );
     }
@@ -179,7 +199,9 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${error.message}`
+          `Unable to create comment at incident with id ${incidentId}. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response.data.errors)}`
         )
       );
     }
@@ -241,7 +263,12 @@ export const createExternalService = (
       return { issueTypes: [] };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get create issue metadata. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get create issue metadata. Error: ${
+            error.message
+          } Reason: ${createErrorMessage(error.response.data.errors)}`
+        )
       );
     }
   };
@@ -257,7 +284,12 @@ export const createExternalService = (
       return { ...res.data };
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get capabilities. Error: ${error.message}`)
+        getErrorMessage(
+          i18n.NAME,
+          `Unable to get capabilities. Error: ${error.message} Reason: ${createErrorMessage(
+            error.response.data.errors
+          )}`
+        )
       );
     }
   };

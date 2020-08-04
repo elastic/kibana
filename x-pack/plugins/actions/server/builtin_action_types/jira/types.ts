@@ -138,3 +138,6 @@ export interface ExternalServiceApi {
 export interface Fields {
   [key: string]: string | string[] | { name: string } | { key: string };
 }
+export interface ResponseError {
+  [k: string]: string;
+}
