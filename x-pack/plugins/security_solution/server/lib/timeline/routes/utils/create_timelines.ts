@@ -45,44 +45,56 @@ export const savePinnedEvents = (
     )
   );
 
+const getNewNote = async (
+  frameworkRequest: FrameworkRequest,
+  note: NoteResult,
+  timelineSavedObjectId: string,
+  overrideOwner: boolean
+): Promise<SavedNote> => {
+  let savedNote = note;
+  try {
+    savedNote = await noteLib.getNote(frameworkRequest, note.noteId);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
+  return overrideOwner
+    ? {
+        eventId: note.eventId,
+        note: note.note,
+        timelineId: timelineSavedObjectId,
+      }
+    : {
+        eventId: savedNote.eventId,
+        note: savedNote.note,
+        created: savedNote.created,
+        createdBy: savedNote.createdBy,
+        updated: savedNote.updated,
+        updatedBy: savedNote.updatedBy,
+        timelineId: timelineSavedObjectId,
+      };
+};
+
 export const saveNotes = async (
   frameworkRequest: FrameworkRequest,
   timelineSavedObjectId: string,
   timelineVersion?: string | null,
   existingNoteIds?: string[],
   newNotes?: NoteResult[],
-  overideNotes: boolean = true
+  overrideOwner: boolean = true
 ) => {
   return Promise.all(
     newNotes?.map(async (note) => {
-      let savedNote = note;
-
-      try {
-        savedNote = await noteLib.getNote(frameworkRequest, note.noteId);
-        // eslint-disable-next-line no-empty
-      } catch (e) {}
-
-      const newNote: SavedNote = overideNotes
-        ? {
-            eventId: note.eventId,
-            note: note.note,
-            timelineId: timelineSavedObjectId,
-          }
-        : {
-            eventId: savedNote.eventId,
-            note: savedNote.note,
-            created: savedNote.created,
-            createdBy: savedNote.createdBy,
-            updated: savedNote.updated,
-            updatedBy: savedNote.updatedBy,
-            timelineId: timelineSavedObjectId,
-          };
+      const newNote = await getNewNote(
+        frameworkRequest,
+        note,
+        timelineSavedObjectId,
+        overrideOwner
+      );
       return noteLib.persistNote(
         frameworkRequest,
-        overideNotes ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
+        overrideOwner ? existingNoteIds?.find((nId) => nId === note.noteId) ?? null : null,
         timelineVersion ?? null,
         newNote,
-        overideNotes
+        overrideOwner
       );
     }) ?? []
   );
@@ -93,7 +105,7 @@ interface CreateTimelineProps {
   timeline: SavedTimeline;
   timelineSavedObjectId?: string | null;
   timelineVersion?: string | null;
-  overideNotes?: boolean;
+  overrideNotesOwner?: boolean;
   pinnedEventIds?: string[] | null;
   notes?: NoteResult[];
   existingNoteIds?: string[];
@@ -114,7 +126,7 @@ export const createTimelines = async ({
   notes = [],
   existingNoteIds = [],
   isImmutable,
-  overideNotes = true,
+  overrideNotesOwner = true,
 }: CreateTimelineProps): Promise<ResponseTimeline> => {
   const responseTimeline = await saveTimelines(
     frameworkRequest,
@@ -145,7 +157,7 @@ export const createTimelines = async ({
         newTimelineVersion,
         existingNoteIds,
         notes,
-        overideNotes
+        overrideNotesOwner
       ),
     ];
   }
