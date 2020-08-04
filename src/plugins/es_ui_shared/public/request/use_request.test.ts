@@ -80,7 +80,7 @@ describe('useRequest hook', () => {
         sinon.assert.calledWith(deserializer, getSuccessResponse().data);
       });
 
-      it('processes data', async () => {
+      it('provides the data return value', async () => {
         const { setupSuccessRequest, completeRequest, hookResult } = helpers;
         setupSuccessRequest({ deserializer: () => 'intercepted' });
         await completeRequest();
