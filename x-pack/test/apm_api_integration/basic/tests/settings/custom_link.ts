@@ -7,11 +7,13 @@ import URL from 'url';
 import expect from '@kbn/expect';
 import { CustomLink } from '../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import expectedTransaction from './expectation/custom_links_transaction.json';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = getService('supertestAsApmReadUser');
   const supertestWrite = getService('supertestAsApmWriteUser');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
 
   function searchCustomLinks(filters?: any) {
     const path = URL.format({
@@ -138,6 +140,17 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       }));
       expect(status).to.equal(200);
       expect(body).to.eql([]);
+    });
+
+    describe('transaction', () => {
+      before(() => esArchiver.load('8.0.0'));
+      after(() => esArchiver.unload('8.0.0'));
+
+      it('fetches a transaction sample', async () => {
+        const response = await supertestRead.get(`/api/apm/settings/custom_links/transaction`);
+        expect(response.status).to.be(200);
+        expect(response.body).to.eql(expectedTransaction);
+      });
     });
   });
 }
