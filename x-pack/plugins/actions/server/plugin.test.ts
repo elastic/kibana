@@ -34,6 +34,7 @@ describe('Actions Plugin', () => {
         enabledActionTypes: ['*'],
         whitelistedHosts: ['*'],
         preconfigured: {},
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -192,6 +193,7 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
+        rejectUnauthorizedCertificates: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

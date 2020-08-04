@@ -111,8 +111,10 @@ async function slackExecutor(
       port: Number(proxyUrl.port),
       protocol: proxyUrl.protocol,
       headers: execOptions.proxySettings.proxyHeaders,
+      keepAlive: true,
       // do not fail on invalid certs
-      rejectUnauthorized: false,
+      rejectUnauthorized: execOptions.proxySettings.rejectUnauthorizedCertificates,
+      // secureProtocol: 'SSLv3_method',
     });
   }
 

@@ -5,7 +5,7 @@
  */
 
 import axios from 'axios';
-import { addTimeZoneToDate, throwIfNotAlive, request, patch, getErrorMessage } from './axios_utils';
+import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 
@@ -18,26 +18,6 @@ describe('addTimeZoneToDate', () => {
   test('adds timezone correctly', () => {
     const date = addTimeZoneToDate('2020-04-14T15:01:55.456Z', 'PST');
     expect(date).toBe('2020-04-14T15:01:55.456Z PST');
-  });
-});
-
-describe('throwIfNotAlive ', () => {
-  test('throws correctly when status is invalid', async () => {
-    expect(() => {
-      throwIfNotAlive(404, 'application/json');
-    }).toThrow('Instance is not alive.');
-  });
-
-  test('throws correctly when content is invalid', () => {
-    expect(() => {
-      throwIfNotAlive(200, 'application/html');
-    }).toThrow('Instance is not alive.');
-  });
-
-  test('do NOT throws with custom validStatusCodes', async () => {
-    expect(() => {
-      throwIfNotAlive(404, 'application/json', [404]);
-    }).not.toThrow('Instance is not alive.');
   });
 });
 
@@ -88,16 +68,6 @@ describe('request', () => {
       headers: { 'content-type': 'application/json' },
       data: { incidentId: '123' },
     });
-  });
-
-  test('it throws correctly', async () => {
-    axiosMock.mockImplementation(() => ({
-      status: 404,
-      headers: { 'content-type': 'application/json' },
-      data: { incidentId: '123' },
-    }));
-
-    await expect(request({ axios, url: '/test' })).rejects.toThrow();
   });
 });
 

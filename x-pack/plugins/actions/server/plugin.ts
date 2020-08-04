@@ -294,6 +294,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
       proxyUrl: actionsConfig.proxyUrl,
       proxyHeaders: actionsConfig.proxyHeaders,
+      rejectUnauthorizedCertificates: actionsConfig.rejectUnauthorizedCertificates,
     });
 
     taskRunnerFactory!.initialize({

@@ -140,4 +140,5 @@ export interface ActionTaskExecutorParams {
 export interface ProxySettings {
   proxyUrl: string;
   proxyHeaders?: Record<string, string>;
+  rejectUnauthorizedCertificates: boolean;
 }

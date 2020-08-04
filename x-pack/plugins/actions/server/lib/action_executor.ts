@@ -31,6 +31,7 @@ export interface ActionExecutorContext {
   preconfiguredActions: PreConfiguredAction[];
   proxyUrl?: string;
   proxyHeaders?: Record<string, string>;
+  rejectUnauthorizedCertificates: boolean;
 }
 
 export interface ExecuteOptions {
@@ -83,6 +84,7 @@ export class ActionExecutor {
       getActionsClientWithRequest,
       proxyUrl,
       proxyHeaders,
+      rejectUnauthorizedCertificates,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -134,6 +136,7 @@ export class ActionExecutor {
       proxySettings = {
         proxyUrl,
         proxyHeaders,
+        rejectUnauthorizedCertificates,
       };
     }
 

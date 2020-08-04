@@ -34,6 +34,7 @@ export const configSchema = schema.object({
   }),
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  rejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
