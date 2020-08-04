@@ -77,7 +77,6 @@ export const createSourcesResolvers = (
     status: InfraSourceStatusResolver;
   };
   InfraSourceLogColumn: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __resolveType(
       logColumn: InfraSourceLogColumn
     ):
@@ -115,7 +114,6 @@ export const createSourcesResolvers = (
     },
   },
   InfraSourceLogColumn: {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __resolveType(logColumn) {
       if (SavedSourceConfigurationTimestampColumnRuntimeType.is(logColumn)) {
         return 'InfraSourceTimestampLogColumn';

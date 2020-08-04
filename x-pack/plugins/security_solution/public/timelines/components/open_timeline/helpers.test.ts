@@ -909,13 +909,11 @@ describe('helpers', () => {
     test('it returns timeline with __typename removed when it exists', () => {
       const mockTimeline = {
         ...mockTimelineResult,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: 'something, something',
       };
       const result = omitTypenameInTimeline(mockTimeline);
       const expectedTimeline = {
         ...mockTimeline,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __typename: undefined,
       };
 

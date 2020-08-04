@@ -33,7 +33,6 @@ export abstract class Type<V> {
   public readonly type: V = null! as V;
 
   // used for the `isConfigSchema` typeguard
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   public readonly __isKbnConfigSchemaType = true;
 
   /**

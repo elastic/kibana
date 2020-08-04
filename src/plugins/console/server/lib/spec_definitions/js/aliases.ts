@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 export const aliases = (specService: SpecDefinitionsService) => {
   const aliasRules = {
     filter: {},

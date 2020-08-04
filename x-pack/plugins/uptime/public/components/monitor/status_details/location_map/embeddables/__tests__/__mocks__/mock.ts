@@ -11,7 +11,6 @@ export const mockDownPointsLayer = {
   label: 'Down Locations',
   sourceDescriptor: {
     type: 'GEOJSON_FILE',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __featureCollection: {
       features: [
         {
@@ -80,7 +79,6 @@ export const mockUpPointsLayer = {
   label: 'Up Locations',
   sourceDescriptor: {
     type: 'GEOJSON_FILE',
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __featureCollection: {
       features: [
         {
@@ -154,7 +152,6 @@ export const mockLayerList = [
     sourceDescriptor: {
       id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854c',
       type: 'GEOJSON_FILE',
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __featureCollection: lowPolyLayerFeatures,
     },
     visible: true,

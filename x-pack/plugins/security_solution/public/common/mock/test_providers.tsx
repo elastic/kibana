@@ -112,7 +112,6 @@ export const useFormFieldMock = (options?: Partial<FieldHook>): FieldHook => {
     clearErrors: jest.fn(),
     validate: jest.fn(),
     reset: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __serializeOutput: jest.fn(),
     ...options,
   };

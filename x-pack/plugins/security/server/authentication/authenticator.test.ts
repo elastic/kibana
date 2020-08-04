@@ -108,7 +108,6 @@ describe('Authenticator', () => {
     it('fails if any of the user specified provider uses reserved __http__ name.', () => {
       expect(
         () =>
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           new Authenticator(getMockOptions({ providers: { basic: { __http__: { order: 0 } } } }))
       ).toThrowError('Provider name "__http__" is reserved.');
     });

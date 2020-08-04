@@ -21,7 +21,6 @@ export const mockFormHook = {
   /* Returns a list of all errors in the form */
   getErrors: jest.fn(),
   reset: jest.fn(),
-  /* eslint-disable @typescript-eslint/naming-convention */
   __options: {},
   __formData$: {},
   __addField: jest.fn(),
@@ -29,7 +28,6 @@ export const mockFormHook = {
   __validateFields: jest.fn(),
   __updateFormDataAt: jest.fn(),
   __readFieldConfigFromSchema: jest.fn(),
-  /* eslint-enable @typescript-eslint/naming-convention */
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getFormMock = (sampleData: any) => ({

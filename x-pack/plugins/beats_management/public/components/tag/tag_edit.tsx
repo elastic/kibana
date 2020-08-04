@@ -152,9 +152,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <div>
               <ConfigList
                 onTableChange={this.props.onConfigListChange}
-                configs={
-                  configuration_blocks // eslint-disable-line @typescript-eslint/naming-convention
-                }
+                configs={configuration_blocks}
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
                     this.props.onConfigRemoved(block);

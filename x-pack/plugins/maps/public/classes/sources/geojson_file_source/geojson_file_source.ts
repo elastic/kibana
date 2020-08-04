@@ -38,7 +38,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
   ): GeojsonFileSourceDescriptor {
     return {
       type: GeojsonFileSource.type,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       __featureCollection: getFeatureCollection(geoJson),
       name,
     };

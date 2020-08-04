@@ -262,7 +262,6 @@ export const getSpatialFiltersLayer = createSelector(
         id: SPATIAL_FILTERS_LAYER_ID,
         visible: settings.showSpatialFilters,
         alpha: settings.spatialFiltersAlpa,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [
           {
             dataId: SOURCE_DATA_REQUEST_ID,

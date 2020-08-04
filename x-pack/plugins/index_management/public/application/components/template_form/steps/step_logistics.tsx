@@ -118,7 +118,6 @@ interface LogisticsForm {
 }
 
 interface LogisticsFormInternal extends LogisticsForm {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __internal__: {
     addMeta: boolean;
   };
@@ -134,7 +133,6 @@ interface Props {
 function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
   return {
     ...formData,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __internal__: {
       addMeta: Boolean(formData._meta && Object.keys(formData._meta).length),
     },
@@ -142,7 +140,6 @@ function formDeserializer(formData: LogisticsForm): LogisticsFormInternal {
 }
 
 function formSerializer(formData: LogisticsFormInternal): LogisticsForm {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { __internal__, ...rest } = formData;
   return rest;
 }
@@ -304,10 +301,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               }
             >
               <FormDataProvider pathsToWatch="__internal__.addMeta">
-                {({
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
-                  '__internal__.addMeta': addMeta,
-                }) => {
+                {({ '__internal__.addMeta': addMeta }) => {
                   return (
                     addMeta && (
                       <UseField

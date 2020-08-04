@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const filters: Record<string, any> = {};
 
 filters.and = {

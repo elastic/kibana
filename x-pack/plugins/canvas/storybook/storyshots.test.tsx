@@ -51,7 +51,6 @@ jest.mock('../canvas_plugin_src/renderers/shape/shapes', () => ({
 // Mock react-datepicker dep used by eui to avoid rendering the entire large component
 jest.mock('@elastic/eui/packages/react-datepicker', () => {
   return {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __esModule: true,
     default: 'ReactDatePicker',
   };

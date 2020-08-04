@@ -61,7 +61,6 @@ export class SavedObjectsSerializer {
    *  @param {SavedObjectsRawDoc} doc - The raw ES document to be converted to saved object format.
    */
   public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _id, _source, _seq_no, _primary_term } = doc;
     const { type, namespace, namespaces } = _source;
 

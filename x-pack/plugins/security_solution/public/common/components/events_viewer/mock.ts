@@ -55,14 +55,11 @@ export const mockEventViewerResponse = [
             pageInfo: {
               endCursor: null,
               hasNextPage: true,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               __typename: 'PageInfo',
             },
             edges: [],
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             __typename: 'TimelineData',
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           __typename: 'Source',
         },
       },

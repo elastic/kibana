@@ -40,9 +40,7 @@ jest.mock('./services', () => {
   const service = new (require('../common/service/expressions_services').ExpressionsService as any)();
 
   const moduleMock = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __execution: undefined,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __getLastExecution: () => moduleMock.__execution,
     getInterpreter: () => {
       return {

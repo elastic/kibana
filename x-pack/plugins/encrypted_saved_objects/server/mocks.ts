@@ -10,7 +10,6 @@ import { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from 
 function createEncryptedSavedObjectsSetupMock() {
   return {
     registerType: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     __legacyCompat: { registerLegacyAPI: jest.fn() },
     usingEphemeralEncryptionKey: true,
     createMigration: jest.fn(),

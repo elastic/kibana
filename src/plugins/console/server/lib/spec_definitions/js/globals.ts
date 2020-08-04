@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
 const highlightOptions = {
   boundary_chars: {},
   boundary_max_scan: 20,

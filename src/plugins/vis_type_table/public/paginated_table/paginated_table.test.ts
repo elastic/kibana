@@ -84,7 +84,6 @@ describe('Table Vis - Paginated table', () => {
   beforeEach(angular.mock.module('kibana/table_vis'));
 
   beforeEach(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     angular.mock.inject((_$rootScope_: IRootScopeService, _$compile_: ICompileService) => {
       $rootScope = _$rootScope_;
       $compile = _$compile_;

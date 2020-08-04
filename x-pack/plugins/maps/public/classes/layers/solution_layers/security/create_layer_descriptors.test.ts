@@ -24,7 +24,6 @@ describe('createLayerDescriptor', () => {
   test('amp index', () => {
     expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
@@ -131,7 +130,6 @@ describe('createLayerDescriptor', () => {
         visible: true,
       },
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
@@ -238,7 +236,6 @@ describe('createLayerDescriptor', () => {
         visible: true,
       },
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
@@ -357,7 +354,6 @@ describe('createLayerDescriptor', () => {
   test('non-apm index', () => {
     expect(createSecurityLayerDescriptors('id', 'filebeat-*')).toEqual([
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
@@ -464,7 +460,6 @@ describe('createLayerDescriptor', () => {
         visible: true,
       },
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',
@@ -571,7 +566,6 @@ describe('createLayerDescriptor', () => {
         visible: true,
       },
       {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         __dataRequests: [],
         alpha: 0.75,
         id: '12345',

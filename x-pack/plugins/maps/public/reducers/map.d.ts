@@ -70,6 +70,5 @@ export type MapState = {
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   __rollbackSettings: MapSettings | null;
 };
