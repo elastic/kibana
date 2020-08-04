@@ -68,8 +68,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('when false, dashboard state is unhashed', async function () {
-        // await PageObjects.settings.removeLogstashIndexPatternIfExist();
-        // await PageObjects.settings.createIndexPattern('logstash-*');
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

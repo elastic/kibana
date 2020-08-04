@@ -22,9 +22,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  // const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings']);
-  // const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
   const es = getService('legacyEs');
@@ -56,10 +54,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         method: 'POST',
         body: { user: 'matt', message: 20 },
       });
-      // await new Promise((r) => setTimeout(r, 300000));
       await testSubjects.click('refreshIndicesButton');
       await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
-      // test when there's an existing pattern
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     it(`doesn't show read-only badge`, async () => {
