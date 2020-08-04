@@ -40,7 +40,7 @@ export const buildSeverityFromMapping = ({
     let severityMatch: SeverityMappingItem | undefined;
 
     // Sort the SeverityMapping from low to high, so last match (highest severity) is used
-    const severityMappingSorted = severityMapping?.sort(
+    const severityMappingSorted = severityMapping.sort(
       (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
     );
 
