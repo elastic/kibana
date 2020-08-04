@@ -48,8 +48,6 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
-    // TODO: remove this later on
-    if (!embeddable.enhancements) return false;
     return this.getEventCount(embeddable) > 0;
   };
 
