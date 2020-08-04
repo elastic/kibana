@@ -42,7 +42,7 @@ export class BundleRefModule extends Module {
     return false;
   }
 
-  build(a: any, b: any, c: any, d: any, callback: () => void) {
+  build(_: any, __: any, ___: any, ____: any, callback: () => void) {
     this.built = true;
     this.buildMeta = {};
     this.buildInfo = {};

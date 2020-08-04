@@ -7,7 +7,12 @@ const semver = require('semver');
 const PKG = require('../../package.json');
 
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
-const allowedNamePrefixRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
+
+// The current implementation excluded all the variables matching the regexp.
+// We should remove it as soon as multiple underscores are supported by the linter.
+// https://github.com/typescript-eslint/typescript-eslint/issues/1712
+// Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
+const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
@@ -102,7 +107,7 @@ module.exports = {
               selector: 'default',
               format: ['camelCase'],
               filter: {
-                regex: allowedNamePrefixRegexp,
+                regex: allowedNameRegexp,
                 match: false
               }
             },
@@ -114,11 +119,9 @@ module.exports = {
                 'PascalCase', // React.FunctionComponent =
               ],
               filter: {
-                // Doesn't work unless duplicated in 'default'
-                regex: allowedNamePrefixRegexp,
+                regex: allowedNameRegexp,
                 match: false
               }
-              // leadingUnderscore: 'allow',
             },
             {
               selector: 'parameter',
@@ -126,10 +129,8 @@ module.exports = {
                 'camelCase',
                 'PascalCase',
               ],
-              // leadingUnderscore: 'allow'
               filter: {
-                // Doesn't work unless duplicated in 'default'
-                regex: allowedNamePrefixRegexp,
+                regex: allowedNameRegexp,
                 match: false
               }
             },
@@ -141,10 +142,8 @@ module.exports = {
                 'snake_case', // keys in elasticsearch requests / responses
                 'UPPER_CASE'
               ],
-              // leadingUnderscore: 'allow',
               filter: {
-                // Doesn't work unless duplicated in 'default'
-                regex: allowedNamePrefixRegexp,
+                regex: allowedNameRegexp,
                 match: false
               }
             },
@@ -154,10 +153,8 @@ module.exports = {
                 'camelCase',
                 'PascalCase' // React.FunctionComponent =
               ],
-              // leadingUnderscore: 'allow'
               filter: {
-                // Doesn't work unless duplicated in 'default'
-                regex: allowedNamePrefixRegexp,
+                regex: allowedNameRegexp,
                 match: false
               }
             },
