@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
       // await PageObjects.settings.navigateTo();
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      // await PageObjects.settings.createIndexPattern('logstash-*');
+      await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
     });
 
