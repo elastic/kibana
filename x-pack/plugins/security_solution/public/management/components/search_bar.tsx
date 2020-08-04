@@ -7,9 +7,8 @@
 import React, { memo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
-import { Query } from 'src/plugins/data/public';
 import styled from 'styled-components';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { Query, SearchBar } from '../../../../../../src/plugins/data/public/';
 import { urlFromQueryParams } from '../pages/endpoint_hosts/view/url_from_query_params';
 import { useHostSelector } from '../pages/endpoint_hosts/view/hooks';
 import * as selectors from '../pages/endpoint_hosts/store/selectors';
@@ -26,14 +25,6 @@ export const AdminSearchBar = memo(() => {
   const queryParams = useHostSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useHostSelector(selectors.patterns);
   const searchBarQuery = useHostSelector(selectors.searchBarQuery);
-
-  const {
-    services: {
-      data: {
-        ui: { SearchBar },
-      },
-    },
-  } = useKibana();
 
   const onQuerySubmit = useCallback(
     (params: { query?: Query }) => {

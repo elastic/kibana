@@ -34,11 +34,11 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({ pattern: metadataIndexPattern });
-    const indexPattern: IIndexPattern = {
+    const indexPattern: IIndexPattern[] = {
       title: metadataIndexPattern,
       fields,
     };
-    return [indexPattern];
+    return indexPattern;
   }
 
   return ({ getState, dispatch }) => (next) => async (action) => {
@@ -87,10 +87,17 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
             });
           });
 
+        let decodedQuery;
+        if (adminQuery !== undefined) {
+          decodedQuery = (decode(adminQuery) as unknown) as Query;
+        } else {
+          decodedQuery = { query: '', language: 'kuery' };
+        }
+
         hostResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filters: { kql: adminQuery ? ((decode(adminQuery) as unknown) as Query).query : '' },
+            filters: { kql: decodedQuery.query },
           }),
         });
         hostResponse.request_page_index = Number(pageIndex);
