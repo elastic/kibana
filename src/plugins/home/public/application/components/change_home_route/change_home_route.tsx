@@ -20,8 +20,6 @@
 import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HOME_APP_BASE_PATH } from '../../../../common/constants';
-import { getServices } from '../../kibana_services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 
 export const ChangeHomeRoute: FC = () => (
