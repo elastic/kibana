@@ -17,13 +17,14 @@
  * under the License.
  */
 
+import { PathLike } from 'fs';
 import { run } from '../run';
 import { parseSourceOfTruth } from './parse';
 import { sourceOfTruth as sot } from './owners_source_of_truth';
 import { flush } from './flush';
 import { ToolingLog } from '../tooling_log';
 
-const codeownersPath: string | undefined = process.env.CODEOWNERS_PATH;
+const codeownersPath = process.env.CODEOWNERS_PATH;
 const description = `
 
 Create .github/CODEOWNERS file from authoritative source
@@ -33,7 +34,7 @@ Create .github/CODEOWNERS file from authoritative source
 export const buildPathsMap = () => parseSourceOfTruth(sot as []);
 
 export const defineCodeOwners = () => {
-  run(({ log }) => flush(codeownersPath)(log as ToolingLog)(buildPathsMap()), {
+  run(({ log }) => flush(codeownersPath as PathLike)(log as ToolingLog)(buildPathsMap()), {
     description,
   });
 };
