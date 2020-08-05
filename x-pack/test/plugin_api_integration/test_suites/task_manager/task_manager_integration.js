@@ -28,8 +28,7 @@ export default function ({ getService }) {
   const testHistoryIndex = '.kibana_task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
-  // FLAKY: https://github.com/elastic/kibana/issues/71390
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(
       async () => await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200)
     );
@@ -65,6 +64,14 @@ export default function ({ getService }) {
       return supertest
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function ensureTasksIndexRefreshed() {
+      return supertest
+        .get(`/api/ensure_tasks_index_refreshed`)
+        .send({})
         .expect(200)
         .then((response) => response.body);
     }
@@ -404,7 +411,7 @@ export default function ({ getService }) {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `30m` },
-        params: { failWith: 'error on run now', failOn: 3 },
+        params: { failWith: 'this task was meant to fail!', failOn: 3 },
       });
 
       await retry.try(async () => {
@@ -415,10 +422,13 @@ export default function ({ getService }) {
 
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(1);
+        expect(task.status).to.eql('idle');
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
       });
+
+      await ensureTasksIndexRefreshed();
 
       // second run should still be successful
       const successfulRunNowResult = await runTaskNow({
@@ -429,14 +439,20 @@ export default function ({ getService }) {
       await retry.try(async () => {
         const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(2);
+        expect(task.status).to.eql('idle');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // third run should fail
       const failedRunNowResult = await runTaskNow({
         id: originalTask.id,
       });
 
-      expect(failedRunNowResult).to.eql({ id: originalTask.id, error: `Error: error on run now` });
+      expect(failedRunNowResult).to.eql({
+        id: originalTask.id,
+        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
+      });
 
       await retry.try(async () => {
         expect(
@@ -479,7 +495,12 @@ export default function ({ getService }) {
         expect(
           docs.filter((taskDoc) => taskDoc._source.taskId === longRunningTask.id).length
         ).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('running');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // first runNow should fail
       const failedRunNowResult = await runTaskNow({
@@ -496,7 +517,12 @@ export default function ({ getService }) {
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('idle');
       });
+
+      await ensureTasksIndexRefreshed();
 
       // second runNow should be successful
       const successfulRunNowResult = runTaskNow({

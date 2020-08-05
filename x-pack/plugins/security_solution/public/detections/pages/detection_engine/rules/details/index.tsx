@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks, complexity */
+/* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
@@ -21,11 +21,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
-import { useWindowSize } from 'react-use';
 
-import { globalHeaderHeightPx } from '../../../../../app/home';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
@@ -66,7 +63,6 @@ import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
-import { EVENTS_VIEWER_HEADER_HEIGHT } from '../../../../../common/components/events_viewer/events_viewer';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { State } from '../../../../../common/store';
 import { InputsRange } from '../../../../../common/store/inputs/model';
@@ -81,15 +77,10 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import { DEFAULT_INDEX_PATTERN, FILTERS_GLOBAL_HEIGHT } from '../../../../../../common/constants';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionIdentifiers } from '../../../../../shared_imports';
-import {
-  getEventsViewerBodyHeight,
-  MIN_EVENTS_VIEWER_BODY_HEIGHT,
-} from '../../../../../timelines/components/timeline/body/helpers';
-import { footerHeight } from '../../../../../timelines/components/timeline/footer';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
@@ -167,7 +158,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-  const { height: windowHeight } = useWindowSize();
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
@@ -257,7 +247,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
@@ -328,13 +317,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         lists: ExceptionIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
-        (acc, { id, list_id, namespace_type, type }) => {
+        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
           const { allowedExceptionListTypes, lists } = acc;
           const shouldAddEndpoint =
             type === ExceptionListTypeEnum.ENDPOINT &&
             !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
           return {
-            lists: [...lists, { id, listId: list_id, namespaceType: namespace_type, type }],
+            lists: [...lists, { id, listId, namespaceType, type }],
             allowedExceptionListTypes: shouldAddEndpoint
               ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
               : allowedExceptionListTypes,
@@ -364,12 +353,9 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
       {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal
-            globalFullScreen={globalFullScreen}
-            show={showGlobalFilters({ globalFullScreen, graphEventId })}
-          >
+          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
@@ -507,17 +493,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     timelineId={TimelineId.detectionsRulesDetailsPage}
                     canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
-                    eventsViewerBodyHeight={
-                      globalFullScreen
-                        ? getEventsViewerBodyHeight({
-                            footerHeight,
-                            headerHeight: EVENTS_VIEWER_HEADER_HEIGHT,
-                            kibanaChromeHeight: globalHeaderHeightPx,
-                            otherContentHeight: FILTERS_GLOBAL_HEIGHT,
-                            windowHeight,
-                          })
-                        : MIN_EVENTS_VIEWER_BODY_HEIGHT
-                    }
                     hasIndexWrite={hasIndexWrite ?? false}
                     from={from}
                     loading={loading}
@@ -542,7 +517,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

@@ -100,10 +100,12 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
             id,
             revision,
             inputs,
+            /* eslint-disable @typescript-eslint/naming-convention */
             created_by,
             created_at,
             updated_by,
             updated_at,
+            /* eslint-enable @typescript-eslint/naming-convention */
             ...restOfPackageConfig
           } = packageConfigData.item;
           // Remove `compiled_stream` from all stream info, we assign this after saving
@@ -114,6 +116,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
               return {
                 ...restOfInput,
                 streams: streams.map((stream) => {
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
