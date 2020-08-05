@@ -310,9 +310,9 @@ const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
 [%collapsible]
 ====
 
-Previously, workpad templates could be added through the Canvas API client side.
-Workpad templates are now stored as saved objects, so there is no API needed for adding them.
-Any additional templates can simply be added through `SavedObject` management.
+Previously, workpad templates were added through the Canvas API client side.
+Workpad templates are now stored as saved objects, so an API is no longer required for adding them.
+You can add now templates through `SavedObject` management.
 
 *via https://github.com/elastic/kibana/pull/69438[#69438]*
 
@@ -334,7 +334,7 @@ following API methods from the `data.search` plugin:
 ====
 
 [[breaking_79_doclinks]]
-.DocLinks API exposed from start only
+.DocLinks API moved from `setup` to `start`
 [%collapsible]
 ====
 
@@ -349,8 +349,7 @@ The docLinks service API exposed from the `setup` contract has been moved to the
 [%collapsible]
 ====
 
-Plugins may now customize the logging configuration for their plugin's
-logging context on the fly.
+Plugins can now customize the logging configuration on the fly.
 
 ```ts
 import { of } from 'rxjs';
@@ -371,29 +370,30 @@ core.logging.configure(of(
 ====
 
 [[breaking_79_developer_guide]]
-.Developer guide updated
+.Developer guide restructured
 [%collapsible]
 ====
 
-The developer guide includes the following improvements:
-* Migrates CONTRIBUTING.md content into asciidoc
-* Moves CONTRIBUTING content into our developer guide
-* Cleans up the developer guide, removing outdated content, creating
-a https://github.com/elastic/kibana/issues/41833#issuecomment-646195319[structure proposed
+The <<development,developer guide>> includes the following improvements:
+
+* Migrates CONTRIBUTING.md content into AsciiDoc
+* Moves CONTRIBUTING content into the developer guide
+* Removes https://github.com/elastic/kibana/issues/67782[outdated content]
+* Creates
+https://github.com/elastic/kibana/issues/41833#issuecomment-646195319[the structure proposed
 in this issue]
-* Fixes https://github.com/elastic/kibana/issues/67782[this issue]
 
 *via https://github.com/elastic/kibana/pull/67764[#67764]*
 
 ====
 
 [[breaking_79_es_api]]
-.{es} API exposed from **setup** contract is deprecated
+.{es} API exposed from `setup` contract is deprecated
 [%collapsible]
 ====
 
-The {es} API exposed from the **setup** contract is not available
-and will be deleted without any notice. Please, switch to the **core start** API instead.
+The {es} API exposed from the `setup` contract is not available
+and will be deleted without any notice. Use the core start API instead.
 
 ```typescript
 // before
@@ -416,7 +416,7 @@ setup(core: CoreSetup) {
 [%collapsible]
 ====
 
-The API reference docs for `state_sync` and `state_containers` available here:
+The API reference docs for `state_sync` and `state_containers` are available:
 
 * https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
 * https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
@@ -430,8 +430,8 @@ The API reference docs for `state_sync` and `state_containers` available here:
 [%collapsible]
 ====
 
-The Elasticsearch service no longer provides separate `data` & `admin` clients.
-The Elasticsearch service client is marked as deprecated and will superseded by a new one.
+The Elasticsearch service no longer provides separate `data` and `admin` clients.
+The Elasticsearch service client is marked as deprecated and is superseded by a new one.
 
 ```diff
 // in route handler
@@ -458,7 +458,7 @@ setup(core){
 ====
 
 [[breaking_79_licensing]]
-.Licensing uses {es} from start contract
+.Licensing now uses {es} from start contract
 [%collapsible]
 ====
 
@@ -486,52 +486,49 @@ start(core, plugins){
 [%collapsible]
 ====
 
-The Actions SavedObject type `action` is now a hidden type.
-Interaction with it requires that you tell your SavedObjectsClient to include
-the `action` hidden type which can be done as follows:
+Interaction with the Actions SavedObject type requires
+you to tell your `SavedObjectsClient` to include
+the `action` hidden type as follows:
 
-```
+```ts
 core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] })
 ```
 
-We prefer that you do not and use the `ActionsClient` as
-that is the only way to ensure the correct authorization of user interactions with actions.
+Do not circumvent the authorization model by accessing these objects directly.
+Use the `AlertsClient` instead.
 
 *via https://github.com/elastic/kibana/pull/67109[#67109]*
 
 ====
 
 [[breaking_79_saved_objects_client]]
-.Saved objects can accept a list of types
+.Saved objects now include support fo hidden types
 [%collapsible]
 ====
+
+**Saved objects**
 
 The SavedObjectClient's `getScopedClient`, `createScopedRepository` and
 `createInternalRepository` can now take a list of types to include in the underlying repository.
 
-This can be used to create a client that has access to hidden types, like so:
+You can use this to create a client that has access to hidden types:
 
-```
+```ts
 core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['hiddenType'] })
 ```
 
-This would create a SavedObjects client scoped to a user by the specified
+This creates a `SavedObjects` client scoped to a user by the specified
 request with access to a hidden type called `hiddenType`.
 
-====
+**Encrypted saved objects**
 
-[[breaking_79_eso_plugin]]
-.The EncryptedSavedObject plugin no longer exposes a single client
-[%collapsible]
-====
-
-The EncryptedSavedObject plugin no longer exposes a single client as part of its
+The `EncryptedSavedObject` plugin no longer exposes a single client as part of its
 `Start` contract. Instead it exposes a `getClient` API that exposes the client API.
-This `getClient` can now also specify a list of hidden types to gain access to which are hidden by default.
+The `getClient` can also specify a list of hidden types to gain access to which are hidden by default.
 
-For example, given a {kib} Platform plugin which has specified `encryptedSavedObjects` as a `Setup` dependency:
+For example, given a {kib} platform plugin that has specified `encryptedSavedObjects` as a `Setup` dependency:
 
-```
+```ts
 const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient(['hiddenType']);
 return encryptedSavedObjectsClient.getDecryptedAsInternalUser('hiddenType',  '123',   { namespace: 'some-namespace' });
 ```
@@ -541,29 +538,27 @@ return encryptedSavedObjectsClient.getDecryptedAsInternalUser('hiddenType',  '12
 ====
 
 [[breaking_79_alerting_api]]
-.The alerting API changed
+.The `alerting` plugin was renamed `alerts` to follow the {kib} styleguide
 [%collapsible]
 ====
 
-The alerting API endpoints urls, bodies and params were changed to follow the {kib} styleguide.
+This includes the following API changes:
 
-Renamed `alerting` plugin to `alerts`.
-
-* Changed actions `BASE_ALERT_API_PATH` to ` '/api/alerts'` - according to styleguide it should keep structure `/api/plugin_id`
+* Changed actions `BASE_ALERT_API_PATH` to ` '/api/alerts'` because according to the styleguide, it should keep the structure `/api/plugin_id`
 * Changed endpoint `/api/alert/_find` just to `/api/alerts/_find`
 * Changed `/types` to `/list_alert_types`
-* Changes POST `/api/alert` to POST `/api/alerts/alert`
-* Changed GET `/api/alert/{id} ` to GET   ` /api/alerts/alert/{id}`
-* Changed PUT  `/api/alert/{id} `  PUT  `/api/alerts/alert/{id}`
+* Changed POST `/api/alert` to POST `/api/alerts/alert`
+* Changed GET `/api/alert/{id}` to GET ` /api/alerts/alert/{id}`
+* Changed PUT  `/api/alert/{id}` to PUT `/api/alerts/alert/{id}`
 * Changed DELETE `/api/alert/{id}` to DELETE `/api/alerts/alert/{id}`
-* Changed GET  `/api/alert/{id}/state`   to GET   `/api/alerts/alert/{id}/state`
-* Changed POST  `/api/alert/{id}/_enable`   to POST   `/api/alerts/alert/{id}/_enable`
-* Changed POST  `/api/alert/{id}/_disable `   to POST   `/api/alerts/alert/{id}/_disable `
-* Changed POST  `/api/alert/{id}/_mute_all `   to POST   `/api/alerts/alert/{id}/_mute_all `
-* Changed POST  `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`   to POST   `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`
-* Changed POST  `/api/alert/{id}/_unmute_all `   to POST   `/api/alerts/alert/{id}/_unmute_all `
-* Changed POST  `/api/alert/{id}/_update_api_key `   to POST   `/api/alerts/alert/{id}/_update_api_key `
-* Changed POST  `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute `   to POST   `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute `
+* Changed GET  `/api/alert/{id}/state` to GET `/api/alerts/alert/{id}/state`
+* Changed POST `/api/alert/{id}/_enable` to POST `/api/alerts/alert/{id}/_enable`
+* Changed POST `/api/alert/{id}/_disable` to POST `/api/alerts/alert/{id}/_disable`
+* Changed POST `/api/alert/{id}/_mute_all` to POST `/api/alerts/alert/{id}/_mute_all`
+* Changed POST `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute` to POST `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute`
+* Changed POST `/api/alert/{id}/_unmute_all` to POST `/api/alerts/alert/{id}/_unmute_all`
+* Changed POST `/api/alert/{id}/_update_api_key` to POST `/api/alerts/alert/{id}/_update_api_key`
+* Changed POST `/api/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute` to POST `/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`
 
 *via https://github.com/elastic/kibana/pull/66838[#66838]*
 
@@ -571,47 +566,46 @@ Renamed `alerting` plugin to `alerts`.
 ====
 
 [[breaking_79_new_management_api]]
-.Implements New Platform API in Management
+.The new platform API is now implemented in Management
 [%collapsible]
 ====
 
 This change:
 
-* Refactors out use of registerLegacyApp and uses react-router-dom for routing
-* Implements management landing page and sidebar in Management plugin,
-its currently implemented here - src/legacy/core_plugins/kibana/public/management/index.js
-* Removes legacy API from src/plugins/management/public/plugin.ts and related code
+* Refactors out use of `registerLegacyApp` and uses react-router-dom for routing.
+* Implements a landing page and sidebar in the Management plugin.
+* Removes the legacy API from src/plugins/management/public/plugin.ts and related code.
 
 *via https://github.com/elastic/kibana/pull/66781[#66781]*
 
 ====
 
 [[breaking_79_alert_hidden]]
-.The Alerting SavedObject type `alert` is now a hidden type.
+.The Alerting SavedObject type `alert` is now a hidden type
 [%collapsible]
 ====
 
-The Alerting SavedObject type `alert` is now a hidden type.
-Interaction with it requires that you tell your `SavedObjectsClient` to include the `alert` hidden
-type, which can be done as follows:
+Interaction with the Alerting SavedObject type requires you
+to tell your `SavedObjectsClient` to include the `alert` hidden
+type as follows:
 
 ```
 core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] })
 ```
 
-We prefer that you do not and use the `AlertsClient` as that is the only way to
-ensure the correct authorization of user interactions with alerts.
+Do not circumvent the authorization model by accessing these objects directly.
+Use the AlertsClient instead.
 
 *via https://github.com/elastic/kibana/pull/66719[#66719]*
 
 ====
 
 [[breaking_79_oss_features]]
-.OSS features registration moved to KP
+.OSS features registration moved to Kibana platform
 [%collapsible]
 ====
 
-{kib} now allows the `Features` plugin `getFeatures` method to be called within the Start lifecycle.
+{kib} now allows the `getFeatures` plugin method to be called within the start lifecycle.
 
 *via https://github.com/elastic/kibana/pull/66524[#66524]*
 
@@ -622,8 +616,8 @@ ensure the correct authorization of user interactions with alerts.
 [%collapsible]
 ====
 
-SavedObject registration in the legacy platform is no longer supported.
-Your plugin must be moved to the {kib} platform in order to use SavedObjects.
+
+To use SavedObjects, you must move your plugin to the {kib} platform.
 
 ```js
 // before in the legacy plugin
@@ -660,12 +654,12 @@ export class MyPlugin implements Plugin {
 [%collapsible]
 ====
 
-Links from an application to another are now automatically handled by the {kib} platform
+Links from one application to another are now automatically handled by the {kib} platform
 to perform the navigation without a full page refresh and the need to
 manually add a click handler to call `application.navigateToApp`.
 
-If needed, this behavior can be disabled by adding the `data-disable-core-navigation`
-attribute on the link (`a`) element or any of it's parent.
+If needed, you can disable this behavior by adding the `data-disable-core-navigation`
+attribute on the link (`a`) element or any of its parent.
 
 This feature is not enabled for legacy applications.
 
@@ -674,7 +668,7 @@ This feature is not enabled for legacy applications.
 ====
 
 [[breaking_79_field_formatters]]
-.Field Format Editors API migrated to Kibana Platform
+.Field format editors API migrated to Kibana Platform
 [%collapsible]
 ====
 
@@ -732,7 +726,7 @@ const fns = exp.findFunction<MyFnExpressionFunctionDefinition>('myFn');
 Applications that are mounted via the `core.application.register`
 interface from the legacy `ui/new_platform` module are now mounted inside a
 new `div` inside of the `<div class="application />` node rather than directly inside that node.
-This makes the legacy bridge consistent with how true KP applications are mounted.
+This makes the legacy bridge consistent with how true {kib} platform applications are mounted.
 
 *via https://github.com/elastic/kibana/pull/63930[#63930]*
 ====
