@@ -276,8 +276,20 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   });
 
   $scope.setIndexPattern = async (id) => {
-    await replaceUrlAppState({ index: id });
-    $route.reload();
+    const nextIndexPattern = await indexPatterns.get(id);
+    if (nextIndexPattern) {
+      const nextColumns = $scope.state.columns.filter((column) =>
+        nextIndexPattern.fields.getByName(column)
+      );
+      const nextSort = getSortArray($scope.state.sort, nextIndexPattern);
+      const nextState = {
+        index: id,
+        columns: nextColumns.length ? nextColumns : ['_source'],
+        sort: nextSort,
+      };
+      await replaceUrlAppState(nextState);
+      $route.reload();
+    }
   };
 
   // update data source when filters update
