@@ -11,7 +11,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  TriggerContextMapping,
+} from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
   TimeRange,
@@ -97,6 +100,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+  }
+
+  supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [APPLY_FILTER_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
