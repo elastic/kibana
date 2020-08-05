@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kibana_usage_collection Runs the setup method without issues 1`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 2`] = `true`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 3`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 4`] = `false`;
+
+exports[`kibana_usage_collection Runs the setup method without issues 5`] = `false`;

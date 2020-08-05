@@ -35,7 +35,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
   };
 
   componentDidMount() {
-    this.loadingCountSubscription = this.props.loadingCount$.subscribe(count => {
+    this.loadingCountSubscription = this.props.loadingCount$.subscribe((count) => {
       this.setState({
         visible: count > 0,
       });

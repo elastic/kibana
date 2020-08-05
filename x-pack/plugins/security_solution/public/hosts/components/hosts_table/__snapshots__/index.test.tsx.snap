@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
+<HostsTable
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "host": Object {
+            "name": Array [
+              "elrond.elstc.co",
+            ],
+            "os": Object {
+              "name": Array [
+                "Ubuntu",
+              ],
+              "version": Array [
+                "18.04.1 LTS (Bionic Beaver)",
+              ],
+            },
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "cloud": Object {
+            "instance": Object {
+              "id": Array [
+                "423232333829362673777",
+              ],
+            },
+            "machine": Object {
+              "type": Array [
+                "custom-4-16384",
+              ],
+            },
+            "provider": Array [
+              "gce",
+            ],
+            "region": Array [
+              "us-east-1",
+            ],
+          },
+          "host": Object {
+            "name": Array [
+              "siem-kibana",
+            ],
+            "os": Object {
+              "name": Array [
+                "Debian GNU/Linux",
+              ],
+              "version": Array [
+                "9 (stretch)",
+              ],
+            },
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  id="hostsQuery"
+  indexPattern={
+    Object {
+      "fields": Array [
+        Object {
+          "aggregatable": true,
+          "name": "@timestamp",
+          "searchable": true,
+          "type": "date",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "@version",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.ephemeral_id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.hostname",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.id",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test1",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test2",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test3",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test4",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test5",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test6",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test7",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "agent.test8",
+          "searchable": true,
+          "type": "string",
+        },
+        Object {
+          "aggregatable": true,
+          "name": "host.name",
+          "searchable": true,
+          "type": "string",
+        },
+      ],
+      "title": "filebeat-*,auditbeat-*,packetbeat-*",
+    }
+  }
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={4}
+  type="page"
+/>
+`;

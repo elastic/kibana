@@ -182,6 +182,22 @@ describe('run tests CLI', () => {
       expect(exitMock).not.toHaveBeenCalled();
     });
 
+    it('accepts network throttle option', async () => {
+      global.process.argv.push('--throttle');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).toHaveBeenCalledWith(1);
+    });
+
+    it('accepts headless option', async () => {
+      global.process.argv.push('--headless');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).toHaveBeenCalledWith(1);
+    });
+
     it('accepts extra server options', async () => {
       global.process.argv.push('--', '--server.foo=bar');
 

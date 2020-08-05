@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  registerHelpers
-} from './elasticsearch';
+export { registerHelpers } from './elasticsearch';
 
-export {
-  getRandomString,
-} from './random';
+export { getRandomString } from './random';

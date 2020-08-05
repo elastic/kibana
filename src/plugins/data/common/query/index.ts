@@ -17,4 +17,7 @@
  * under the License.
  */
 
+export * from './filter_manager';
+export * from './timefilter';
 export * from './types';
+export * from './is_query';

@@ -32,6 +32,7 @@ export interface KFetchQuery {
 export interface KFetchOptions extends HttpRequestInit {
   pathname: string;
   query?: KFetchQuery;
+  asSystemRequest?: boolean;
 }
 
 export interface KFetchKibanaOptions {
@@ -59,7 +60,7 @@ export function createKfetch(http: HttpSetup) {
         .then(({ pathname, ...restOptions }) =>
           http.fetch(pathname, { ...restOptions, prependBasePath })
         )
-        .catch(err => {
+        .catch((err) => {
           throw new KFetchError(err.response || { statusText: err.message }, err.body);
         })
     );

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { services as commonServices } from '../common/services';
 import { services as apiIntegrationServices } from '../api_integration/services';
 
 export const services = {
-  es: apiIntegrationServices.es,
+  ...commonServices,
+  legacyEs: apiIntegrationServices.legacyEs,
   esSupertest: apiIntegrationServices.esSupertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };

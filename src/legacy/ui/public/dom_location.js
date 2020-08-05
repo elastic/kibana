@@ -29,6 +29,6 @@ export function DomLocationProvider($window) {
 
     set href(val) {
       return ($window.location.href = val);
-    }
+    },
   };
 }

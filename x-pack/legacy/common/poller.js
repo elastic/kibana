@@ -7,7 +7,6 @@
 import _ from 'lodash';
 
 export class Poller {
-
   constructor(options) {
     this.functionToPoll = options.functionToPoll; // Must return a Promise
     this.successFunction = options.successFunction || _.noop;
@@ -34,14 +33,17 @@ export class Poller {
 
         this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis);
       })
-      .catch(e => {
+      .catch((e) => {
         this.errorFunction(e);
         if (!this._isRunning) {
           return;
         }
 
         if (this.continuePollingOnError) {
-          this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis * this.pollFrequencyErrorMultiplier);
+          this._timeoutId = setTimeout(
+            this._poll.bind(this),
+            this.pollFrequencyInMillis * this.pollFrequencyErrorMultiplier
+          );
         } else {
           this.stop();
         }

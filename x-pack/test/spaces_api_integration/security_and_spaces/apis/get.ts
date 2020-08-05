@@ -56,7 +56,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-    ].forEach(scenario => {
+    ].forEach((scenario) => {
       getTest(`user with no access`, {
         currentSpaceId: scenario.spaceId,
         spaceId: scenario.spaceId,
@@ -183,7 +183,7 @@ export default function getSpaceTestSuite({ getService }: TestInvoker) {
             dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
           },
         },
-      ].forEach(scenario => {
+      ].forEach((scenario) => {
         getTest(`rbac user with all globally`, {
           currentSpaceId: scenario.spaceId,
           spaceId: scenario.otherSpaceId,

@@ -24,16 +24,16 @@ import '..';
 import { EventsProvider } from '../../../events';
 
 describe('listen component', function () {
-
   let $rootScope;
   let Events;
 
-
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
-    $rootScope = $injector.get('$rootScope');
-    Events = Private(EventsProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector, Private) {
+      $rootScope = $injector.get('$rootScope');
+      Events = Private(EventsProvider);
+    })
+  );
 
   it('exposes the $listen method on all scopes', function () {
     expect($rootScope.$listen).to.be.a('function');

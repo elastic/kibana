@@ -1,0 +1,30 @@
+.mapLayerControl {
+  @include euiScrollBar;
+  overflow-y: auto;
+  // sass-lint:disable-block no-important
+  flex-basis: auto !important; // Fixes IE and ensures the layer items are visible
+  padding-bottom: $euiSizeS + 1px;
+  border-top: 1px solid $euiColorLightestShade;
+}
+
+.mapLayerControl__addLayerButton {
+  flex-shrink: 0;
+}
+
+.mapLayerControl__addLayerButton,
+.mapLayerControl__openLayerTOCButton {
+  pointer-events: all;
+
+  &:enabled,
+  &:enabled:hover,
+  &:enabled:focus {
+    @include euiBottomShadowLarge;
+  }
+}
+
+.mapLayerControl__openLayerTOCButton,
+.mapLayerControl__closeLayerTOCButton {
+  @include size($euiSizeXL);
+  // sass-lint:disable-block no-important
+  background-color: $euiColorEmptyShade !important; // During all states
+}

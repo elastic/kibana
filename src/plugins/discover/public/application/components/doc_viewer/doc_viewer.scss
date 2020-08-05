@@ -1,0 +1,71 @@
+.kbnDocViewerTable {
+  margin-top: $euiSizeS;
+}
+
+.kbnDocViewer {
+  pre,
+  .kbnDocViewer__value {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    color: $euiColorFullShade;
+    vertical-align: top;
+    padding-top: 2px;
+  }
+  .kbnDocViewer__field {
+    padding-top: 8px;
+  }
+
+  .dscFieldName {
+    color: $euiColorDarkShade;
+  }
+
+  td,
+  pre {
+    font-family: $euiCodeFontFamily;
+  }
+
+  tr:first-child td {
+    border-top-color: transparent;
+  }
+
+  tr:hover {
+    .kbnDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.kbnDocViewer__buttons,
+.kbnDocViewer__field {
+  white-space: nowrap;
+}
+.kbnDocViewer__buttons {
+  width: 60px;
+
+  // Show all icons if one is focused,
+  // IE doesn't support, but the fallback is just the focused button becomes visible
+  &:focus-within {
+    .kbnDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.kbnDocViewer__field {
+  width: 160px;
+}
+
+.kbnDocViewer__actionButton {
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.kbnDocViewer__warning {
+  margin-right: $euiSizeS;
+}
+

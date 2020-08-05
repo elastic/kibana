@@ -15,8 +15,7 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY_MAX_RESPONSE_TIME = `${SUBJ_SUMMARY} > maxResponseTime`;
   const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
-  return new class KibanaSummaryStatus {
-
+  return new (class KibanaSummaryStatus {
     async getContent() {
       return {
         instances: await testSubjects.getVisibleText(SUBJ_SUMMARY_INSTANCES),
@@ -27,6 +26,5 @@ export function MonitoringKibanaSummaryStatusProvider({ getService }) {
         health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
-
-  };
+  })();
 }

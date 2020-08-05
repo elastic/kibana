@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ManagedTable component should render a page-full of items, with defaults 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "field": "name",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "age",
+        "name": "Age",
+        "render": [Function],
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "age": 43,
+        "name": "Becky",
+      },
+      Object {
+        "age": 29,
+        "name": "Jess",
+      },
+      Object {
+        "age": 31,
+        "name": "Thomas",
+      },
+    ]
+  }
+  noItemsMessage="No items found"
+  onChange={[Function]}
+  pagination={
+    Object {
+      "hidePerPageOptions": true,
+      "pageIndex": 0,
+      "pageSize": 10,
+      "totalItemCount": 3,
+    }
+  }
+  responsive={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "name",
+      },
+    }
+  }
+  tableLayout="fixed"
+/>
+`;
+
+exports[`ManagedTable component should render when specifying initial values 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "field": "name",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "field": "age",
+        "name": "Age",
+        "render": [Function],
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "age": 29,
+        "name": "Jess",
+      },
+    ]
+  }
+  noItemsMessage="No items found"
+  onChange={[Function]}
+  pagination={
+    Object {
+      "hidePerPageOptions": false,
+      "pageIndex": 1,
+      "pageSize": 2,
+      "totalItemCount": 3,
+    }
+  }
+  responsive={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "desc",
+        "field": "age",
+      },
+    }
+  }
+  tableLayout="fixed"
+/>
+`;

@@ -21,22 +21,27 @@ import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metad
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
+    getServerBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
-    getCapabilities: jest.fn(),
     getCspConfig: jest.fn(),
     getLegacyMode: jest.fn(),
+    getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
     getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
   };
-  setupContract.getCapabilities.mockReturnValue({} as any);
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getLegacyMode.mockReturnValue(true);
+  setupContract.getAnonymousStatusPage.mockReturnValue(false);
   setupContract.getLegacyMetadata.mockReturnValue({
+    app: {
+      id: 'foo',
+      title: 'Foo App',
+    },
     nav: [],
     uiSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },

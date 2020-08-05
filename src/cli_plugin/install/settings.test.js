@@ -17,18 +17,14 @@
  * under the License.
  */
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import { resolve } from 'path';
 import { parseMilliseconds, parse } from './settings';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('command line option parsing', function () {
-
       describe('parseMilliseconds function', function () {
-
         it('should return 0 for an empty string', function () {
           const value = '';
           const result = parseMilliseconds(value);
@@ -78,11 +74,9 @@ describe('kibana cli', function () {
           const result = parseMilliseconds('9minutes');
           expect(result).toBe(9 * 1000 * 60);
         });
-
       });
 
       describe('parse function', function () {
-
         const command = 'plugin name';
         let options = {};
         const kbnPackage = { version: 1234 };
@@ -91,7 +85,6 @@ describe('kibana cli', function () {
         });
 
         describe('timeout option', function () {
-
           it('should default to 0 (milliseconds)', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -104,11 +97,9 @@ describe('kibana cli', function () {
 
             expect(settings.timeout).toBe(1234);
           });
-
         });
 
         describe('quiet option', function () {
-
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -121,11 +112,9 @@ describe('kibana cli', function () {
 
             expect(settings.quiet).toBe(true);
           });
-
         });
 
         describe('silent option', function () {
-
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -138,11 +127,9 @@ describe('kibana cli', function () {
 
             expect(settings.silent).toBe(true);
           });
-
         });
 
         describe('config option', function () {
-
           it('should default to ZLS', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -155,11 +142,9 @@ describe('kibana cli', function () {
 
             expect(settings.config).toBe('foo bar baz');
           });
-
         });
 
         describe('pluginDir option', function () {
-
           it('should default to plugins', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -172,36 +157,30 @@ describe('kibana cli', function () {
 
             expect(settings.pluginDir).toBe('foo bar baz');
           });
-
         });
 
         describe('command value', function () {
-
           it('should set settings.plugin property', function () {
             const settings = parse(command, options, kbnPackage);
 
             expect(settings.plugin).toBe(command);
           });
-
         });
 
         describe('urls collection', function () {
-
           it('should populate the settings.urls property', function () {
             const settings = parse(command, options, kbnPackage);
 
             const expected = [
               command,
-              `https://artifacts.elastic.co/downloads/kibana-plugins/${command}/${command}-1234.zip`
+              `https://artifacts.elastic.co/downloads/kibana-plugins/${command}/${command}-1234.zip`,
             ];
 
             expect(settings.urls).toEqual(expected);
           });
-
         });
 
         describe('workingPath value', function () {
-
           it('should set settings.workingPath property', function () {
             options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
@@ -209,11 +188,9 @@ describe('kibana cli', function () {
 
             expect(settings.workingPath).toBe(expected);
           });
-
         });
 
         describe('tempArchiveFile value', function () {
-
           it('should set settings.tempArchiveFile property', function () {
             options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
@@ -221,11 +198,9 @@ describe('kibana cli', function () {
 
             expect(settings.tempArchiveFile).toBe(expected);
           });
-
         });
 
         describe('tempPackageFile value', function () {
-
           it('should set settings.tempPackageFile property', function () {
             options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
@@ -233,13 +208,8 @@ describe('kibana cli', function () {
 
             expect(settings.tempPackageFile).toBe(expected);
           });
-
         });
-
       });
-
     });
-
   });
-
 });

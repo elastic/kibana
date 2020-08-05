@@ -19,23 +19,23 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
-import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
+import { EuiScreenReaderOnly, keys } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-// @ts-ignore
-import { KuiButton } from '@kbn/ui-framework/components';
-
-interface Props {
+export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
 }
 
-class ExitFullScreenButtonUi extends PureComponent<Props> {
+import './index.scss';
+
+class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
-    if (e.keyCode === keyCodes.ESCAPE) {
+    if (e.key === keys.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 
@@ -53,29 +53,41 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
             })}
           </p>
         </EuiScreenReaderOnly>
-        <div className="dshExitFullScreenButton">
-          <KuiButton
-            type="hollow"
+        <div>
+          <button
             aria-label={i18n.translate(
-              'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
+              'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel',
               {
                 defaultMessage: 'Exit full screen mode',
               }
             )}
-            className="dshExitFullScreenButton__mode"
+            className="dshExitFullScreenButton"
             onClick={this.props.onExitFullScreenMode}
+            data-test-subj="exitFullScreenModeLogo"
           >
-            <span
-              className="dshExitFullScreenButton__logo"
-              data-test-subj="exitFullScreenModeLogo"
-            />
-            <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
-              {i18n.translate('kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel', {
-                defaultMessage: 'Exit full screen',
-              })}
-              <span className="kuiIcon fa fa-angle-left" />
-            </span>
-          </KuiButton>
+            <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoElastic" size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
+                <div>
+                  <EuiText size="s" className="dshExitFullScreenButton__text">
+                    <p>
+                      {i18n.translate(
+                        'kibana-react.exitFullScreenButton.exitFullScreenModeButtonText',
+                        {
+                          defaultMessage: 'Exit full screen',
+                        }
+                      )}
+                    </p>
+                  </EuiText>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="fullScreen" className="dshExitFullScreenButton__icon" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </button>
         </div>
       </div>
     );

@@ -21,7 +21,6 @@
  * Generates file transfer progress messages
  */
 export default class Progress {
-
   constructor(logger) {
     const self = this;
 
@@ -42,9 +41,9 @@ export default class Progress {
     if (!this.totalSize) return;
 
     this.runningTotal += size;
-    let newDotCount = Math.round(this.runningTotal / this.totalSize * 100 / 5);
+    let newDotCount = Math.round(((this.runningTotal / this.totalSize) * 100) / 5);
     if (newDotCount > 20) newDotCount = 20;
-    for (let i = 0; i < (newDotCount - this.dotCount); i++) {
+    for (let i = 0; i < newDotCount - this.dotCount; i++) {
       this.logger.log('.', true);
     }
     this.dotCount = newDotCount;
@@ -53,5 +52,4 @@ export default class Progress {
   complete() {
     this.logger.log(`Transfer complete`, false);
   }
-
 }

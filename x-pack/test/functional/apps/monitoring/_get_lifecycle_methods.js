@@ -6,12 +6,12 @@
 
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['monitoring', 'timePicker']);
-  const noData = getService('monitoringNoData');
+  const security = getService('security');
+  const PageObjects = getPageObjects(['monitoring', 'timePicker', 'security']);
   let _archive;
 
   return {
-    async setup(archive, { from, to }) {
+    async setup(archive, { from, to, useSuperUser = false }) {
       _archive = archive;
 
       const kibanaServer = getService('kibanaServer');
@@ -23,8 +23,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({});
 
-      await PageObjects.monitoring.navigateTo();
-      await noData.isOnNoDataPage();
+      await PageObjects.monitoring.navigateTo(useSuperUser);
 
       // pause autorefresh in the time filter because we don't wait any ticks,
       // and we don't want ES to log a warning when data gets wiped out
@@ -33,8 +32,10 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
-    tearDown() {
+    async tearDown() {
+      await PageObjects.security.forceLogout();
+      await security.user.delete('basic_monitoring_user');
       return esArchiver.unload(_archive);
-    }
+    },
   };
 };

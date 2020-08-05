@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { cloneDeep, get, has, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { cloneDeep, get, has } from 'lodash';
 
+import { getFlattenedObject } from '../../utils';
 import { Config, ConfigPath } from './';
 
 /**
@@ -41,24 +43,10 @@ export class ObjectToConfigAdapter implements Config {
   }
 
   public getFlattenedPaths() {
-    return [...flattenObjectKeys(this.rawConfig)];
+    return Object.keys(getFlattenedObject(this.rawConfig));
   }
 
   public toRaw() {
     return cloneDeep(this.rawConfig);
-  }
-}
-
-function* flattenObjectKeys(
-  obj: { [key: string]: any },
-  path: string = ''
-): IterableIterator<string> {
-  if (typeof obj !== 'object' || obj === null) {
-    yield path;
-  } else {
-    for (const [key, value] of Object.entries(obj)) {
-      const newPath = path !== '' ? `${path}.${key}` : key;
-      yield* flattenObjectKeys(value, newPath);
-    }
   }
 }

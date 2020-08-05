@@ -22,9 +22,11 @@ export class FeaturesService {
     });
   }
 
-  public async get(): Promise<Features> {
+  public async get({ ignoreValidLicenses } = { ignoreValidLicenses: false }): Promise<Features> {
     this.log.debug('requesting /api/features to get the features');
-    const response = await this.axios.get('/api/features');
+    const response = await this.axios.get(
+      `/api/features?ignoreValidLicenses=${ignoreValidLicenses}`
+    );
 
     if (response.status !== 200) {
       throw new Error(
@@ -38,7 +40,7 @@ export class FeaturesService {
       (acc: Features, feature: any) => ({
         ...acc,
         [feature.id]: {
-          navLinkId: feature.navLinkId,
+          app: feature.app,
         },
       }),
       {}

@@ -20,16 +20,11 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { requiredProps, takeMountedSnapshot } from '../../../test';
-import {
-  KuiListingTable,
-} from './listing_table';
+import { KuiListingTable } from './listing_table';
 
 const getProps = (customProps) => {
   const defaultProps = {
-    header: [
-      'Breed',
-      'Description'
-    ],
+    header: ['Breed', 'Description'],
     rows: [
       {
         id: '1',

@@ -1,0 +1,11 @@
+{
+  "id": "graph",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["licensing", "data", "navigation", "savedObjects", "kibanaLegacy"],
+  "optionalPlugins": ["home", "features"],
+  "configPath": ["xpack", "graph"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "home"]
+}

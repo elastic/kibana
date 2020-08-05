@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { useFormContext } from '../form_context';
 
 interface Props {
   path: string;
   initialNumberOfItems?: number;
+  readDefaultValueOnForm?: boolean;
   children: (args: {
     items: ArrayItem[];
     addItem: () => void;
@@ -52,9 +53,15 @@ export interface ArrayItem {
  *
  * Look at the README.md for some examples.
  */
-export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
+export const UseArray = ({
+  path,
+  initialNumberOfItems,
+  readDefaultValueOnForm = true,
+  children,
+}: Props) => {
+  const didMountRef = useRef(false);
   const form = useFormContext();
-  const defaultValues = form.getFieldDefaultValue(path) as any[];
+  const defaultValues = readDefaultValueOnForm && (form.getFieldDefaultValue(path) as any[]);
   const uniqueId = useRef(0);
 
   const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
@@ -76,28 +83,42 @@ export const UseArray = ({ path, initialNumberOfItems, children }: Props) => {
 
   const [items, setItems] = useState<ArrayItem[]>(initialState);
 
-  const updatePaths = (_rows: ArrayItem[]) =>
-    _rows.map(
-      (row, index) =>
-        ({
-          ...row,
-          path: `${path}[${index}]`,
-        } as ArrayItem)
-    );
+  const updatePaths = useCallback(
+    (_rows: ArrayItem[]) => {
+      return _rows.map(
+        (row, index) =>
+          ({
+            ...row,
+            path: `${path}[${index}]`,
+          } as ArrayItem)
+      );
+    },
+    [path]
+  );
 
   const addItem = () => {
-    setItems(previousItems => {
+    setItems((previousItems) => {
       const itemIndex = previousItems.length;
       return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
   };
 
   const removeItem = (id: number) => {
-    setItems(previousItems => {
-      const updatedItems = previousItems.filter(item => item.id !== id);
+    setItems((previousItems) => {
+      const updatedItems = previousItems.filter((item) => item.id !== id);
       return updatePaths(updatedItems);
     });
   };
+
+  useEffect(() => {
+    if (didMountRef.current) {
+      setItems((prev) => {
+        return updatePaths(prev);
+      });
+    } else {
+      didMountRef.current = true;
+    }
+  }, [path, updatePaths]);
 
   return children({ items, addItem, removeItem });
 };

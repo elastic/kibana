@@ -5,14 +5,12 @@
  */
 
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { getTelemetryOptIn } from '../../../telemetry/server';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
 
   const withXpackInfo = async () => ({
     ...originalInjectedVars,
-    telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
   });
 
@@ -22,12 +20,16 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
   }
 
   // not enough license info to make decision one way or another
-  if (!xpackInfo.isAvailable() || !xpackInfo.feature('security').getLicenseCheckResults()) {
+  if (!xpackInfo.isAvailable()) {
     return originalInjectedVars;
   }
 
   // request is not authenticated
-  if (!await server.newPlatform.setup.plugins.security.authc.isAuthenticated(KibanaRequest.from(request))) {
+  if (
+    !(await server.newPlatform.setup.plugins.security.authc.isAuthenticated(
+      KibanaRequest.from(request)
+    ))
+  ) {
     return originalInjectedVars;
   }
 

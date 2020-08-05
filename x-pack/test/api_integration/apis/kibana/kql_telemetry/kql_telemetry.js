@@ -39,7 +39,6 @@ export default function ({ getService }) {
             expect(body.success).to.be(true);
           });
       });
-
     });
   });
 }

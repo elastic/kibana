@@ -17,42 +17,33 @@
  * under the License.
  */
 
-import { IAction } from './actions/i_action';
-import { ITrigger } from './triggers/i_trigger';
+import { ActionInternal } from './actions/action_internal';
+import { TriggerInternal } from './triggers/trigger_internal';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
+import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
+import type { ApplyGlobalFilterActionContext } from '../../data/public';
 
-export { IAction } from './actions';
-export { ITrigger } from './triggers/i_trigger';
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
+export type ActionRegistry = Map<string, ActionInternal>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
-export type TExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
+const DEFAULT_TRIGGER = '';
 
-export type TGetActionsCompatibleWithTrigger = <C>(
-  triggerId: string,
-  context: C
-) => Promise<IAction[]>;
+export type TriggerId = keyof TriggerContextMapping;
 
-export interface IUiActionsApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: TExecuteTriggerActions;
-  getTrigger: (id: string) => ITrigger;
-  getTriggerActions: (id: string) => IAction[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<IAction<C>>>;
-  registerAction: (action: IAction) => void;
-  registerTrigger: (trigger: ITrigger) => void;
+export type BaseContext = object;
+export type TriggerContext = BaseContext;
+
+export interface TriggerContextMapping {
+  [DEFAULT_TRIGGER]: TriggerContext;
+  [SELECT_RANGE_TRIGGER]: RangeSelectContext;
+  [VALUE_CLICK_TRIGGER]: ValueClickContext;
+  [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
 }
 
-export interface IUiActionsDependencies {
-  actions: IActionRegistry;
-  triggers: ITriggerRegistry;
+const DEFAULT_ACTION = '';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
 }
-
-export interface IUiActionsDependenciesInternal extends IUiActionsDependencies {
-  api: Readonly<Partial<IUiActionsApi>>;
-}
-
-export type IUiActionsApiPure = {
-  [K in keyof IUiActionsApi]: (deps: IUiActionsDependenciesInternal) => IUiActionsApi[K];
-};
-
-export type ITriggerRegistry = Map<string, ITrigger>;
-export type IActionRegistry = Map<string, IAction>;

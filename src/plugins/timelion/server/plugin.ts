@@ -17,39 +17,81 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { ConfigSchema } from './config';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { TimelionConfigType } from './config';
 
-/**
- * Describes public Timelion plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
-}
+export class TimelionPlugin implements Plugin {
+  constructor(context: PluginInitializerContext<TimelionConfigType>) {}
 
-/**
- * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
- */
-export class Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  public setup(core: CoreSetup) {
+    core.capabilities.registerProvider(() => ({
+      timelion: {
+        save: true,
+      },
+    }));
+    core.savedObjects.registerType({
+      name: 'timelion-sheet',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          description: { type: 'text' },
+          hits: { type: 'integer' },
+          kibanaSavedObjectMeta: {
+            properties: {
+              searchSourceJSON: { type: 'text' },
+            },
+          },
+          timelion_chart_height: { type: 'integer' },
+          timelion_columns: { type: 'integer' },
+          timelion_interval: { type: 'keyword' },
+          timelion_other_interval: { type: 'keyword' },
+          timelion_rows: { type: 'integer' },
+          timelion_sheet: { type: 'text' },
+          title: { type: 'text' },
+          version: { type: 'integer' },
+        },
+      },
+    });
 
-  public async setup(): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
-      .pipe(first())
-      .toPromise();
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
+    core.uiSettings.register({
+      'timelion:showTutorial': {
+        name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
+          defaultMessage: 'Show tutorial',
+        }),
+        value: false,
+        description: i18n.translate('timelion.uiSettings.showTutorialDescription', {
+          defaultMessage: 'Should I show the tutorial by default when entering the timelion app?',
+        }),
+        category: ['timelion'],
+        schema: schema.boolean(),
+      },
+      'timelion:default_columns': {
+        name: i18n.translate('timelion.uiSettings.defaultColumnsLabel', {
+          defaultMessage: 'Default columns',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultColumnsDescription', {
+          defaultMessage: 'Number of columns on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+      'timelion:default_rows': {
+        name: i18n.translate('timelion.uiSettings.defaultRowsLabel', {
+          defaultMessage: 'Default rows',
+        }),
+        value: 2,
+        description: i18n.translate('timelion.uiSettings.defaultRowsDescription', {
+          defaultMessage: 'Number of rows on a timelion sheet by default',
+        }),
+        category: ['timelion'],
+        schema: schema.number(),
+      },
+    });
   }
-
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
-
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
-  }
+  start() {}
+  stop() {}
 }

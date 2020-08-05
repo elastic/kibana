@@ -1,0 +1,16 @@
+{
+  "id": "dashboardMode",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "dashboard_mode"
+  ],
+  "optionalPlugins": ["security"],
+  "requiredPlugins": [
+    "kibanaLegacy",
+    "dashboard"
+  ],
+  "server": true,
+  "ui": true
+}

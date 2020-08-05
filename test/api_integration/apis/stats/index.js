@@ -22,4 +22,3 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./stats'));
   });
 }
-

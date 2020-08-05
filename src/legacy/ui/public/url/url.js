@@ -22,8 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
-uiModules.get('kibana/url')
-  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
+uiModules.get('kibana/url').service('kbnUrl', function (Private, $injector) {
+  //config is not directly used but registers global event listeners to kbnUrl to function
+  $injector.get('config');
+  return Private(KbnUrlProvider);
+});
 
 export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   /**
@@ -116,8 +119,9 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
         throw new Error(
           i18n.translate('common.ui.url.replacementFailedErrorMessage', {
             defaultMessage: 'Replacement failed, unresolved expression: {expr}',
-            values: { expr }
-          }));
+            values: { expr },
+          })
+        );
       }
 
       return encodeURIComponent($parse(expr)(paramObj));
@@ -189,7 +193,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
   self._changeLocation = function (type, url, paramObj, replace, appState) {
     const prev = {
       path: $location.path(),
-      search: $location.search()
+      search: $location.search(),
     };
 
     url = self.eval(url, paramObj);
@@ -202,7 +206,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
 
     const next = {
       path: $location.path(),
-      search: $location.search()
+      search: $location.search(),
     };
 
     if ($injector.has('$route')) {

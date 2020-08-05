@@ -41,20 +41,27 @@ export interface TestBed<T = string> {
    *
    * @example
    *
-    ```ts
+    ```typescript
     find('nameInput');
     // or more specific,
     // "nameInput" is a child of "myForm"
     find('myForm.nameInput');
     ```
    */
-  find: (testSubject: T) => ReactWrapper<any>;
+  find: (testSubject: T, reactWrapper?: ReactWrapper) => ReactWrapper<any>;
   /**
    * Update the props of the mounted component
    *
    * @param updatedProps The updated prop object
    */
   setProps: (updatedProps: any) => void;
+  /**
+   * Helper to wait until an element appears in the DOM as hooks updates cycles are tricky.
+   * Useful when loading a component that fetches a resource from the server
+   * and we need to wait for the data to be fetched (and bypass any "loading" state).
+   */
+  waitFor: (testSubject: T, count?: number) => Promise<void>;
+  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
@@ -74,6 +81,33 @@ export interface TestBed<T = string> {
       isAsync?: boolean
     ) => Promise<void> | void;
     /**
+     * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
+     * For the <EuiSuperSelect /> you need to mock it like this
+     *
+     ```typescript
+    jest.mock('@elastic/eui', () => {
+      const original = jest.requireActual('@elastic/eui');
+
+      return {
+        ...original,
+        EuiSuperSelect: (props: any) => (
+          <input
+            data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+            value={props.valueOfSelected}
+            onChange={(e) => {
+              props.onChange(e.target.value);
+            }}
+          />
+        ),
+      };
+    });
+     ```
+     * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
+     * @param value The value to set
+     * @param doUpdateComponent Call component.update() after changing the select value
+     */
+    setSelectValue: (select: T | ReactWrapper, value: string, doUpdateComponent?: boolean) => void;
+    /**
      * Select or unselect a form checkbox.
      *
      * @param dataTestSubject The test subject of the checkbox (can be a nested path. e.g. "myForm.mySelect").
@@ -85,7 +119,7 @@ export interface TestBed<T = string> {
      *
      * @param switchTestSubject The test subject of the EuiSwitch (can be a nested path. e.g. "myForm.mySwitch").
      */
-    toggleEuiSwitch: (switchTestSubject: T) => void;
+    toggleEuiSwitch: (switchTestSubject: T, isChecked?: boolean) => void;
     /**
      * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
      * in order to register the value set. This helpers automatically does that.
@@ -129,7 +163,12 @@ export interface MemoryRouterConfig {
   /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
   initialIndex?: number;
   /** The route **path** for the mounted component (defaults to `"/"`) */
-  componentRoutePath?: string;
+  componentRoutePath?: string | string[];
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }
+
+/**
+ * Utility type: extracts returned type from a Promise.
+ */
+export type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;

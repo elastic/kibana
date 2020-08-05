@@ -13,34 +13,33 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
 
-  describe('Monitoring is turned off', () => {
+  describe('Monitoring is turned off', function () {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.monitoring.navigateTo();
+      await PageObjects.monitoring.navigateTo(true);
       await noData.isOnNoDataPage();
     });
 
     after(async () => {
       // turn off collection
       const disableCollection = {
-        'persistent':
-        {
+        persistent: {
           xpack: {
             monitoring: {
               collection: {
-                enabled: false
-              }
-            }
-          }
-        }
+                enabled: false,
+              },
+            },
+          },
+        },
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await esSupertest.delete('/.monitoring-*').expect(200);
     });
 
-    it('Monitoring enabled', async function ()  {
+    it('Monitoring enabled', async function () {
       await noData.enableMonitoring();
       await retry.try(async () => {
         expect(await noData.isMonitoringEnabled()).to.be(true);

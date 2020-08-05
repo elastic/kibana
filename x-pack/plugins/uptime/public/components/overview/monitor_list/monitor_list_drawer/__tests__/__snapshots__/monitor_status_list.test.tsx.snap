@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusList component renders checks 1`] = `
+<Fragment>
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "Unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCallOut
+    color="warning"
+  >
+    <FormattedMessage
+      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+      id="xpack.uptime.monitorList.drawer.missingLocation"
+      values={
+        Object {
+          "link": <LocationLink />,
+        }
+      }
+    />
+  </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`MonitorStatusList component renders null in place of child status with missing ip 1`] = `
+<Fragment>
+  <MonitorStatusRow
+    locationNames={
+      Set {
+        "Unnamed-location",
+      }
+    }
+    status="down"
+  />
+  <MonitorStatusRow
+    locationNames={Set {}}
+    status="up"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCallOut
+    color="warning"
+  >
+    <FormattedMessage
+      defaultMessage="Some heartbeat instances do not have a location defined. {link} to your heartbeat configuration."
+      id="xpack.uptime.monitorList.drawer.missingLocation"
+      values={
+        Object {
+          "link": <LocationLink />,
+        }
+      }
+    />
+  </EuiCallOut>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

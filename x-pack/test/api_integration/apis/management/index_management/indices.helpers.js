@@ -10,7 +10,8 @@ export const registerHelpers = ({ supertest }) => {
   const executeActionOnIndices = (index, urlParam, args) => {
     const indices = Array.isArray(index) ? index : [index];
 
-    return supertest.post(`${API_BASE_PATH}/indices/${urlParam}`)
+    return supertest
+      .post(`${API_BASE_PATH}/indices/${urlParam}`)
       .set('kbn-xsrf', 'xxx')
       .send({ indices, ...args });
   };
@@ -35,11 +36,8 @@ export const registerHelpers = ({ supertest }) => {
 
   const list = () => supertest.get(`${API_BASE_PATH}/indices`);
 
-  const reload = (indexNames) => (
-    supertest.post(`${API_BASE_PATH}/indices/reload`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ indexNames })
-  );
+  const reload = (indexNames) =>
+    supertest.post(`${API_BASE_PATH}/indices/reload`).set('kbn-xsrf', 'xxx').send({ indexNames });
 
   return {
     closeIndex,

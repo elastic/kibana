@@ -33,7 +33,7 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    ...extraParams
+    ...extraParams,
   };
 }
 
@@ -41,9 +41,7 @@ function createStubKbnServer(extraParams) {
   return {
     plugins: [],
     config: {
-      get: sinon.stub()
-        .withArgs('server.basePath')
-        .returns('')
+      get: sinon.stub().withArgs('server.basePath').returns(''),
     },
     server: {},
     ...extraParams,
@@ -100,7 +98,7 @@ describe('ui apps / UiApp', () => {
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -151,7 +149,7 @@ describe('ui apps / UiApp', () => {
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -160,7 +158,7 @@ describe('ui apps / UiApp', () => {
     /*
      * The "hidden" and "listed" flags have an bound relationship. The "hidden"
      * flag gets cast to a boolean value, and the "listed" flag is dependent on
-      * "hidden"
+     * "hidden"
      */
     describe('hidden flag', () => {
       describe('is cast to boolean value', () => {

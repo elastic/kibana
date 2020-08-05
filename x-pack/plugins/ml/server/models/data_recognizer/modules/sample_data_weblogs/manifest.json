@@ -1,0 +1,45 @@
+{
+  "id": "sample_data_weblogs",
+  "title": "Kibana sample data web logs",
+  "description": "Find anomalies in Kibana sample web logs data.",
+  "type": "Sample Dataset",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "kibana_sample_data_logs",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "event.dataset": "sample_web_logs" } }]
+    }
+  },
+  "jobs": [
+    {
+      "id": "low_request_rate",
+      "file": "low_request_rate.json"
+    },
+    {
+      "id": "response_code_rates",
+      "file": "response_code_rates.json"
+    },
+    {
+      "id": "url_scanning",
+      "file": "url_scanning.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-low_request_rate",
+      "file": "datafeed_low_request_rate.json",
+      "job_id": "low_request_rate"
+    },
+    {
+      "id": "datafeed-response_code_rates",
+      "file": "datafeed_response_code_rates.json",
+      "job_id": "response_code_rates"
+    },
+    {
+      "id": "datafeed-url_scanning",
+      "file": "datafeed_url_scanning.json",
+      "job_id": "url_scanning"
+    }
+  ],
+  "kibana": {}
+}

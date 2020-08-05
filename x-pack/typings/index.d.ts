@@ -10,9 +10,16 @@ declare module '*.html' {
   export default template;
 }
 
-declare module 'lodash/internal/toPath' {
-  function toPath(value: string | string[]): string[];
-  export = toPath;
+declare module '*.png' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.svg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
 }
 
 type MethodKeysOf<T> = {
@@ -23,14 +30,9 @@ type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 
 declare module 'axios/lib/adapters/xhr';
 
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-
-type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
-} &
-  T;
+type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};
 
 // allow JSON files to be imported directly without lint errors
 // see: https://github.com/palantir/tslint/issues/1264#issuecomment-228433367

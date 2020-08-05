@@ -27,7 +27,13 @@ import {
 } from './types';
 import { validateReferences } from './validate_references';
 
-export async function resolveImportErrors({
+/**
+ * Resolve and return saved object import errors.
+ * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed informations.
+ *
+ * @public
+ */
+export async function resolveSavedObjectsImportErrors({
   readStream,
   objectLimit,
   retries,
@@ -93,7 +99,7 @@ export async function resolveImportErrors({
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite),
     ];
-    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
+    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
@@ -103,7 +109,7 @@ export async function resolveImportErrors({
       ...errorAccumulator,
       ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
     ];
-    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
+    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
   }
 
   return {

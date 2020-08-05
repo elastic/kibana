@@ -21,7 +21,8 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { initChromeXsrfApi } from '../xsrf';
-import { version } from '../../../../../utils/package_json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { version } from '../../../../../../core/server/utils/package_json';
 
 describe('chrome xsrf apis', function () {
   const sandbox = sinon.createSandbox();

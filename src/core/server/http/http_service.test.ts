@@ -24,26 +24,29 @@ import { BehaviorSubject } from 'rxjs';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
-import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { ConfigService, Env } from '../config';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { config as cspConfig } from '../csp';
 
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
 const env = Env.createDefault(getEnvOptions());
 const coreId = Symbol();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
-    new BehaviorSubject<Config>(
-      new ObjectToConfigAdapter({
-        server: value,
-      })
-    ),
+    {
+      getConfig$: () =>
+        new BehaviorSubject({
+          server: value,
+        }),
+    },
     env,
     logger
   );
   configService.setSchema(config.path, config.schema);
+  configService.setSchema(cspConfig.path, cspConfig.schema);
   return configService;
 };
 const contextSetup = contextServiceMock.createSetupContract();
@@ -156,7 +159,7 @@ test('logs error if already set up', async () => {
 
   await service.setup(setupDeps);
 
-  expect(loggingServiceMock.collect(logger).warn).toMatchSnapshot();
+  expect(loggingSystemMock.collect(logger).warn).toMatchSnapshot();
 });
 
 test('stops http server', async () => {

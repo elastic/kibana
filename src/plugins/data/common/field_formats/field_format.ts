@@ -17,13 +17,22 @@
  * under the License.
  */
 
-import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
+import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
+import {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  FieldFormatInstanceType,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
+  IFieldFormatMetaParams,
+} from './types';
+import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
+import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
-import { htmlContentTypeSetup, textContentTypeSetup } from './content_types';
-
-const DEFAULT_CONTEXT_TYPE = 'text';
+const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export abstract class FieldFormat {
   /**
@@ -43,21 +52,48 @@ export abstract class FieldFormat {
    * @property {string} - Field Format Type
    * @private
    */
-  static fieldType: string;
+  static fieldType: string | string[];
 
   /**
    * @property {FieldFormatConvert}
    * @private
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
    */
-  _convert: FieldFormatConvert = FieldFormat.setupContentType(this, get(this, '_convert', {}));
+  convertObject: FieldFormatConvert | undefined;
+
+  /**
+   * @property {htmlConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  htmlConvert: HtmlContextTypeConvert | undefined;
+
+  /**
+   * @property {textConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  textConvert: TextContextTypeConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
    * @private
    */
-  type: any = this.constructor;
+  public type: any = this.constructor;
 
-  constructor(public _params: any = {}) {}
+  protected readonly _params: any;
+  protected getConfig: FieldFormatsGetConfigFn | undefined;
+
+  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: FieldFormatsGetConfigFn) {
+    this._params = _params;
+
+    if (getConfig) {
+      this.getConfig = getConfig;
+    }
+  }
 
   /**
    * Convert a raw value to a formatted string
@@ -69,11 +105,15 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(
+    value: any,
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
+    options?: HtmlContextTypeOptions | TextContextTypeOptions
+  ): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
-      return converter.call(this, value);
+      return converter.call(this, value, options);
     }
 
     return value;
@@ -86,13 +126,13 @@ export abstract class FieldFormat {
    * @public
    */
   getConverterFor(
-    contentType: ContentType = DEFAULT_CONTEXT_TYPE
-  ): FieldFormatConvertFunction | null {
-    if (this._convert) {
-      return this._convert[contentType];
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
+  ): FieldFormatConvertFunction {
+    if (!this.convertObject) {
+      this.convertObject = this.setupContentType();
     }
 
-    return null;
+    return this.convertObject[contentType];
   }
 
   /**
@@ -145,7 +185,7 @@ export abstract class FieldFormat {
 
     const params = transform(
       this._params,
-      (uniqParams, val, param) => {
+      (uniqParams: any, val, param) => {
         if (param && val !== get(defaultsParams, param)) {
           uniqParams[param] = val;
         }
@@ -159,33 +199,18 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction) {
-    return createCustomFieldFormat(FieldFormat.toConvertObject(convertFn));
+  static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
+    return createCustomFieldFormat(convertFn);
   }
 
-  private static setupContentType(
-    fieldFormat: IFieldFormat,
-    convert: FieldFormatConvert | FieldFormatConvertFunction
-  ): FieldFormatConvert {
-    const convertObject = FieldFormat.toConvertObject(convert);
-
+  setupContentType(): FieldFormatConvert {
     return {
-      ...textContentTypeSetup(fieldFormat, convertObject),
-      ...htmlContentTypeSetup(fieldFormat, convertObject),
+      text: textContentTypeSetup(this, this.textConvert),
+      html: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
 
-  private static toConvertObject(
-    convert: FieldFormatConvert | FieldFormatConvertFunction
-  ): FieldFormatConvert {
-    if (isFunction(convert)) {
-      return {
-        [DEFAULT_CONTEXT_TYPE]: convert,
-      };
-    }
-    return convert;
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
   }
 }
-
-export type FieldFormatConvert = { [key: string]: Function } | FieldFormatConvertFunction;
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;

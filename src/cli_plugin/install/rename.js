@@ -31,7 +31,8 @@ export function renamePlugin(workingPath, finalPath) {
         // Retry for up to retryTime seconds
         const windowsEPERM = process.platform === 'win32' && err.code === 'EPERM';
         const retryAvailable = Date.now() - start < retryTime;
-        if (windowsEPERM && retryAvailable) return delay(rename, retryDelay, workingPath, finalPath, retry);
+        if (windowsEPERM && retryAvailable)
+          return delay(rename, retryDelay, workingPath, finalPath, retry);
         reject(err);
       }
       resolve();

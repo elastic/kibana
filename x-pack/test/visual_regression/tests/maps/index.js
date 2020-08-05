@@ -15,10 +15,9 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.load('maps/data');
       await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1600, 1000);
-
     });
 
     after(async () => {

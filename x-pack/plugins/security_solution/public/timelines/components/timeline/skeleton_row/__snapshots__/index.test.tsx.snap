@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SkeletonRow it renders 1`] = `
+<Row>
+  <Cell
+    key="0"
+  />
+  <Cell
+    key="1"
+  />
+  <Cell
+    key="2"
+  />
+  <Cell
+    key="3"
+  />
+</Row>
+`;

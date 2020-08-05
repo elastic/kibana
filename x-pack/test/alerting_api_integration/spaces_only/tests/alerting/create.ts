@@ -6,13 +6,19 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+  getConsumerUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('create', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -27,25 +33,64 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
     }
 
     it('should handle create alert request appropriately', async () => {
-      const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send({
+          name: 'MY action',
+          actionTypeId: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
 
-      expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body).to.eql({
         id: response.body.id,
-        actions: [],
+        name: 'abc',
+        tags: ['foo'],
+        actions: [
+          {
+            id: createdAction.id,
+            actionTypeId: createdAction.actionTypeId,
+            group: 'default',
+            params: {},
+          },
+        ],
         enabled: true,
         alertTypeId: 'test.noop',
-        alertTypeParams: {},
+        consumer: 'alertsFixture',
+        params: {},
         createdBy: null,
-        interval: '10s',
+        schedule: { interval: '1m' },
         scheduledTaskId: response.body.scheduledTaskId,
         updatedBy: null,
+        apiKeyOwner: null,
         throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        createdAt: response.body.createdAt,
+        updatedAt: response.body.updatedAt,
       });
+      expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+
       expect(typeof response.body.scheduledTaskId).to.be('string');
       const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
       expect(taskRecord.type).to.eql('task');
@@ -54,16 +99,41 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         alertId: response.body.id,
         spaceId: Spaces.space1.id,
       });
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: response.body.id,
+      });
+    });
+
+    it('should handle create alert request appropriately when consumer is unknown', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ consumer: 'some consumer patrick invented' }));
+
+      expect(response.status).to.eql(403);
+      expect(response.body).to.eql({
+        error: 'Forbidden',
+        message: getConsumerUnauthorizedErrorMessage(
+          'create',
+          'test.noop',
+          'some consumer patrick invented'
+        ),
+        statusCode: 403,
+      });
     });
 
     it('should handle create alert request appropriately when an alert is disabled ', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ enabled: false }));
 
-      expect(response.statusCode).to.eql(200);
-      objectRemover.add(Spaces.space1.id, response.body.id, 'alert');
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'alert', 'alerts');
       expect(response.body.scheduledTaskId).to.eql(undefined);
     });
   });

@@ -35,11 +35,11 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     runComplete = true;
   });
 
-  lifecycle.on('cleanup', () => {
+  lifecycle.cleanup.add(() => {
     if (!runComplete) runner.abort();
   });
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const respond = () => resolve(runner.failures);
 
     // if there are no tests, mocha.run() is sync

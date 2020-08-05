@@ -19,11 +19,11 @@ describe('license_pre_routing_factory', () => {
           xpack_main: {
             info: {
               feature: () => ({
-                getLicenseCheckResults: () => mockLicenseCheckResults
-              })
-            }
-          }
-        }
+                getLicenseCheckResults: () => mockLicenseCheckResults,
+              }),
+            },
+          },
+        },
       };
     });
 
@@ -37,11 +37,11 @@ describe('license_pre_routing_factory', () => {
     describe('status is invalid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          status: LICENSE_STATUS_INVALID
+          status: LICENSE_STATUS_INVALID,
         };
       });
 
-      it ('replies with 403', () => {
+      it('replies with 403', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
         expect(() => licensePreRouting(stubRequest)).to.throwException((response) => {
@@ -55,11 +55,11 @@ describe('license_pre_routing_factory', () => {
     describe('status is valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          status: LICENSE_STATUS_VALID
+          status: LICENSE_STATUS_VALID,
         };
       });
 
-      it ('replies with nothing', () => {
+      it('replies with nothing', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
         const response = licensePreRouting(stubRequest);

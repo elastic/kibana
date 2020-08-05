@@ -1,0 +1,13 @@
+.spcCopyToSpaceResultDetails {
+  margin-top: $euiSizeS;
+  padding-left: $euiSizeL;
+}
+
+.spcCopyToSpaceResultDetails__row {
+  margin-bottom: $euiSizeXS;
+}
+
+.spcCopyToSpaceResultDetails__savedObjectName {
+  // Constrains name to the flex item, and allows for truncation when necessary
+  min-width: 0;
+}

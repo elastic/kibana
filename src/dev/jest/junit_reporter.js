@@ -18,12 +18,11 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 
-import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata } from '@kbn/test';
+import { escapeCdata, makeJunitReportPath } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
@@ -46,7 +45,7 @@ export default class JestJUnitReporter {
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
-    if (!process.env.CI || !results.testResults.length) {
+    if (!process.env.CI || process.env.DISABLE_JUNIT_REPORTER || !results.testResults.length) {
       return;
     }
 
@@ -59,8 +58,8 @@ export default class JestJUnitReporter {
       { skipNullAttributes: true }
     );
 
-    const msToIso = ms => (ms ? new Date(ms).toISOString().slice(0, -5) : undefined);
-    const msToSec = ms => (ms ? (ms / 1000).toFixed(3) : undefined);
+    const msToIso = (ms) => (ms ? new Date(ms).toISOString().slice(0, -5) : undefined);
+    const msToSec = (ms) => (ms ? (ms / 1000).toFixed(3) : undefined);
 
     root.att({
       name: 'jest',
@@ -72,7 +71,7 @@ export default class JestJUnitReporter {
     });
 
     // top level test results are the files/suites
-    results.testResults.forEach(suite => {
+    results.testResults.forEach((suite) => {
       const suiteEl = root.ele('testsuite', {
         name: relative(rootDirectory, suite.testFilePath),
         timestamp: msToIso(suite.perfStats.start),
@@ -86,14 +85,14 @@ export default class JestJUnitReporter {
       // nested in there are the tests in that file
       const relativePath = dirname(relative(rootDirectory, suite.testFilePath));
       const classname = `${reportName}.${relativePath.replace(/\./g, '·')}`;
-      suite.testResults.forEach(test => {
+      suite.testResults.forEach((test) => {
         const testEl = suiteEl.ele('testcase', {
           classname,
           name: [...test.ancestorTitles, test.title].join(' '),
           time: msToSec(test.duration),
         });
 
-        test.failureMessages.forEach(message => {
+        test.failureMessages.forEach((message) => {
           testEl.ele('failure').dat(escapeCdata(message));
         });
 
@@ -103,21 +102,9 @@ export default class JestJUnitReporter {
       });
     });
 
-    const reportPath = resolve(
-      rootDirectory,
-      'target/junit',
-      process.env.JOB || '.',
-      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
-    );
-
-    const reportXML = root.end({
-      pretty: true,
-      indent: '  ',
-      newline: '\n',
-      spacebeforeslash: '',
-    });
-
-    mkdirp.sync(dirname(reportPath));
+    const reportPath = makeJunitReportPath(rootDirectory, reportName);
+    const reportXML = root.end();
+    mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
   }
 }

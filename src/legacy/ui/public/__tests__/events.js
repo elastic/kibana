@@ -34,11 +34,13 @@ describe('Events', function () {
   let eventsInstance;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector, Private) {
-    Promise = $injector.get('Promise');
-    Events = Private(EventsProvider);
-    eventsInstance = new Events();
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector, Private) {
+      Promise = $injector.get('Promise');
+      Events = Private(EventsProvider);
+      eventsInstance = new Events();
+    })
+  );
 
   it('should handle on events', function () {
     const obj = new Events();
@@ -85,11 +87,10 @@ describe('Events', function () {
     expect(obj._listeners).to.have.property('test');
     obj.off('test', handler1);
 
-    return obj.emit('test', 'Hello World')
-      .then(function () {
-        sinon.assert.calledOnce(handler2);
-        sinon.assert.notCalled(handler1);
-      });
+    return obj.emit('test', 'Hello World').then(function () {
+      sinon.assert.calledOnce(handler2);
+      sinon.assert.notCalled(handler1);
+    });
   });
 
   it('should clear a all handlers when off is called for an event', function () {
@@ -100,10 +101,9 @@ describe('Events', function () {
     obj.off('test');
     expect(obj._listeners).to.not.have.property('test');
 
-    return obj.emit('test', 'Hello World')
-      .then(function () {
-        sinon.assert.notCalled(handler1);
-      });
+    return obj.emit('test', 'Hello World').then(function () {
+      sinon.assert.notCalled(handler1);
+    });
   });
 
   it('should handle multiple identical emits in the same tick', function () {
@@ -111,20 +111,14 @@ describe('Events', function () {
     const handler1 = sinon.stub();
 
     obj.on('test', handler1);
-    const emits = [
-      obj.emit('test', 'one'),
-      obj.emit('test', 'two'),
-      obj.emit('test', 'three')
-    ];
+    const emits = [obj.emit('test', 'one'), obj.emit('test', 'two'), obj.emit('test', 'three')];
 
-    return Promise
-      .all(emits)
-      .then(function () {
-        expect(handler1.callCount).to.be(emits.length);
-        expect(handler1.getCall(0).calledWith('one')).to.be(true);
-        expect(handler1.getCall(1).calledWith('two')).to.be(true);
-        expect(handler1.getCall(2).calledWith('three')).to.be(true);
-      });
+    return Promise.all(emits).then(function () {
+      expect(handler1.callCount).to.be(emits.length);
+      expect(handler1.getCall(0).calledWith('one')).to.be(true);
+      expect(handler1.getCall(1).calledWith('two')).to.be(true);
+      expect(handler1.getCall(2).calledWith('three')).to.be(true);
+    });
   });
 
   it('should handle emits from the handler', function () {
@@ -140,14 +134,9 @@ describe('Events', function () {
 
     obj.on('test', handler1);
 
-    return Promise
-      .all([
-        obj.emit('test'),
-        secondEmit.promise
-      ])
-      .then(function () {
-        expect(handler1.callCount).to.be(2);
-      });
+    return Promise.all([obj.emit('test'), secondEmit.promise]).then(function () {
+      expect(handler1.callCount).to.be(2);
+    });
   });
 
   it('should only emit to handlers registered before emit is called', function () {
@@ -156,48 +145,33 @@ describe('Events', function () {
     const handler2 = sinon.stub();
 
     obj.on('test', handler1);
-    const emits = [
-      obj.emit('test', 'one'),
-      obj.emit('test', 'two'),
-      obj.emit('test', 'three')
-    ];
-
+    const emits = [obj.emit('test', 'one'), obj.emit('test', 'two'), obj.emit('test', 'three')];
 
     return Promise.all(emits).then(function () {
       expect(handler1.callCount).to.be(emits.length);
 
       obj.on('test', handler2);
 
-      const emits2 = [
-        obj.emit('test', 'four'),
-        obj.emit('test', 'five'),
-        obj.emit('test', 'six')
-      ];
+      const emits2 = [obj.emit('test', 'four'), obj.emit('test', 'five'), obj.emit('test', 'six')];
 
-      return Promise.all(emits2)
-        .then(function () {
-          expect(handler1.callCount).to.be(emits.length + emits2.length);
-          expect(handler2.callCount).to.be(emits2.length);
-        });
+      return Promise.all(emits2).then(function () {
+        expect(handler1.callCount).to.be(emits.length + emits2.length);
+        expect(handler2.callCount).to.be(emits2.length);
+      });
     });
   });
 
   it('should pass multiple arguments from the emitter', function () {
     const obj = new Events();
     const handler = sinon.stub();
-    const payload = [
-      'one',
-      { hello: 'tests' },
-      null
-    ];
+    const payload = ['one', { hello: 'tests' }, null];
 
     obj.on('test', handler);
 
-    return obj.emit('test', payload[0], payload[1], payload[2])
-      .then(function () {
-        expect(handler.callCount).to.be(1);
-        expect(handler.calledWithExactly(payload[0], payload[1], payload[2])).to.be(true);
-      });
+    return obj.emit('test', payload[0], payload[1], payload[2]).then(function () {
+      expect(handler.callCount).to.be(1);
+      expect(handler.calledWithExactly(payload[0], payload[1], payload[2])).to.be(true);
+    });
   });
 
   it('should preserve the scope of the handler', function () {
@@ -211,10 +185,9 @@ describe('Events', function () {
     handler.getVal = _.constant(expected);
 
     obj.on('test', handler);
-    return obj.emit('test')
-      .then(function () {
-        expect(testValue).to.equal(expected);
-      });
+    return obj.emit('test').then(function () {
+      expect(testValue).to.equal(expected);
+    });
   });
 
   it('should always emit in the same order', function () {
@@ -224,25 +197,23 @@ describe('Events', function () {
     obj.on('block', _.partial(handler, 'block'));
     obj.on('last', _.partial(handler, 'last'));
 
-    return Promise
-      .all([
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('block'),
-        obj.emit('last')
-      ])
-      .then(function () {
-        expect(handler.callCount).to.be(10);
-        handler.args.forEach(function (args, i) {
-          expect(args[0]).to.be(i < 9 ? 'block' : 'last');
-        });
+    return Promise.all([
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('block'),
+      obj.emit('last'),
+    ]).then(function () {
+      expect(handler.callCount).to.be(10);
+      handler.args.forEach(function (args, i) {
+        expect(args[0]).to.be(i < 9 ? 'block' : 'last');
       });
+    });
   });
 
   it('calls emitted handlers asynchronously', (done) => {

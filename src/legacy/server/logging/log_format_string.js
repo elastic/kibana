@@ -22,15 +22,7 @@ import chalk from 'chalk';
 
 import LogFormat from './log_format';
 
-const statuses = [
-  'err',
-  'info',
-  'error',
-  'warning',
-  'fatal',
-  'status',
-  'debug'
-];
+const statuses = ['err', 'info', 'error', 'warning', 'fatal', 'status', 'debug'];
 
 const typeColors = {
   log: 'white',
@@ -49,8 +41,6 @@ const typeColors = {
   optmzr: 'white',
   manager: 'green',
   optimize: 'magentaBright',
-  'optimize:dynamic_dll_plugin': 'magentaBright',
-  'optimize:watch_cache': 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',
 };
@@ -77,7 +67,7 @@ export default class KbnLoggerStringFormat extends LogFormat {
         return `1${tag}`;
       })
       .reduce(function (s, t) {
-        return s + `[${ color(t)(t) }]`;
+        return s + `[${color(t)(t)}]`;
       }, '');
 
     return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;

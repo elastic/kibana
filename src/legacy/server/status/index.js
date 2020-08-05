@@ -19,23 +19,19 @@
 
 import ServerStatus from './server_status';
 import { Metrics } from './lib/metrics';
-import { registerStatusPage, registerStatusApi, registerStatsApi } from './routes';
-import { getOpsStatsCollector } from './collectors';
+import { registerStatusApi, registerStatsApi } from './routes';
 import Oppsy from 'oppsy';
 import { cloneDeep } from 'lodash';
 import { getOSInfo } from './lib/get_os_info';
 
 export function statusMixin(kbnServer, server, config) {
   kbnServer.status = new ServerStatus(kbnServer.server);
-
-  const statsCollector = getOpsStatsCollector(server, kbnServer);
-  const { collectorSet } = server.usage;
-  collectorSet.register(statsCollector);
+  const { usageCollection } = server.newPlatform.setup.plugins;
 
   const metrics = new Metrics(config, server);
 
   const oppsy = new Oppsy(server);
-  oppsy.on('ops', event => {
+  oppsy.on('ops', (event) => {
     // Oppsy has a bad race condition that will modify this data before
     // we ship it off to the buffer. Let's create our copy first.
     event = cloneDeep(event);
@@ -45,7 +41,9 @@ export function statusMixin(kbnServer, server, config) {
 
       // captures (performs transforms on) the latest event data and stashes
       // the metrics for status/stats API payload
-      metrics.capture(event).then(data => { kbnServer.metrics = data; });
+      metrics.capture(event).then((data) => {
+        kbnServer.metrics = data;
+      });
     });
   });
   oppsy.start(config.get('ops.interval'));
@@ -55,9 +53,8 @@ export function statusMixin(kbnServer, server, config) {
   });
 
   // init routes
-  registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(kbnServer, server, config);
+  registerStatsApi(usageCollection, server, config, kbnServer);
 
   // expore shared functionality
   server.decorate('server', 'getOSInfo', getOSInfo);

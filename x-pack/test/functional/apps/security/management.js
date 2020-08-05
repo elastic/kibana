@@ -5,13 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  USERS_PATH,
-  EDIT_USERS_PATH,
-  ROLES_PATH,
-  EDIT_ROLES_PATH,
-  CLONE_ROLES_PATH,
-} from '../../../../legacy/plugins/security/public/views/management/management_urls';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -19,14 +12,22 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function () {
+  const USERS_PATH = 'security/users';
+  const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
+
+  const ROLES_PATH = 'security/roles';
+  const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
+  const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
+
+  // FLAKY: https://github.com/elastic/kibana/issues/61173
+  describe.skip('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
       await PageObjects.settings.navigateTo();
 

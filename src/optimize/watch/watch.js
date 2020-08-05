@@ -19,8 +19,7 @@
 
 import { isWorker } from 'cluster';
 
-export default async kbnServer => {
-
+export default async (kbnServer) => {
   if (!isWorker) {
     throw new Error(`watch optimization is only available when using the "--dev" cli flag`);
   }
@@ -33,7 +32,7 @@ export default async kbnServer => {
    *   while the optimizer is running
    *
    * server: this process runs the entire kibana server and proxies
-   *   all requests for /bundles/* or /built_assets/dlls/* to the optmzr process
+   *   all requests for /bundles/* to the optmzr process
    *
    * @param  {string} process.env.kbnWorkerType
    */
@@ -49,5 +48,4 @@ export default async kbnServer => {
     default:
       throw new Error(`unknown kbnWorkerType "${process.env.kbnWorkerType}"`);
   }
-
 };

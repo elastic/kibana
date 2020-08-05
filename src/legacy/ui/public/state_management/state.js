@@ -29,36 +29,43 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import rison from 'rison-node';
-import { applyDiff } from '../utils/diff_object';
 import { EventsProvider } from '../events';
 import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
-import { callEach } from '../utils/function';
-
 import {
-  createStateHash,
-  HashedItemStoreSingleton,
+  hashedItemStore,
   isStateHash,
-} from './state_storage';
+  createStateHash,
+  applyDiff,
+} from '../../../../plugins/kibana_utils/public';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
+export function StateProvider(
+  Private,
+  $rootScope,
+  $location,
+  stateManagementConfig,
+  config,
+  kbnUrl,
+  $injector
+) {
   const Events = Private(EventsProvider);
 
+  const isDummyRoute = () =>
+    $injector.has('$route') &&
+    $injector.get('$route').current &&
+    $injector.get('$route').current.outerAngularWrapperRoute;
+
   createLegacyClass(State).inherits(Events);
-  function State(
-    urlParam,
-    defaults,
-    hashedItemStore = HashedItemStoreSingleton
-  ) {
+  function State(urlParam, defaults, _hashedItemStore = hashedItemStore) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._hashedItemStore = hashedItemStore;
+    this._hashedItemStore = _hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
-    this._cleanUpListeners = _.partial(callEach, [
+    this._cleanUpListeners = [
       // partial route update, no app reload
       $rootScope.$on('$routeUpdate', () => {
         this.fetch();
@@ -76,8 +83,8 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
         if (this._persistAcrossApps) {
           this.fetch();
         }
-      })
-    ]);
+      }),
+    ];
 
     // Initialize the State with fetch
     this.fetch();
@@ -104,9 +111,11 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
-        defaultMessage: 'Unable to parse URL'
-      }));
+      toastNotifications.addDanger(
+        i18n.translate('common.ui.stateManagement.unableToParseUrlErrorMessage', {
+          defaultMessage: 'Unable to parse URL',
+        })
+      );
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -137,7 +146,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     let stash = this._readFromURL();
 
-    // nothing to read from the url? save if ordered to persist
+    // nothing to read from the url? save if ordered to persist, but only if it's not on a wrapper route
     if (stash === null) {
       if (this._persistAcrossApps) {
         return this.save();
@@ -150,7 +159,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     // apply diff to state from stash, will change state in place via side effect
     const diffResults = applyDiff(this, stash);
 
-    if (diffResults.keys.length) {
+    if (!isDummyRoute() && diffResults.keys.length) {
       this.emit('fetch_with_changes', diffResults.keys);
     }
   };
@@ -161,6 +170,10 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.save = function (replace) {
     if (!stateManagementConfig.enabled) {
+      return;
+    }
+
+    if (isDummyRoute()) {
       return;
     }
 
@@ -228,7 +241,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.destroy = function () {
     this.off(); // removes all listeners
-    this._cleanUpListeners(); // Removes the $routeUpdate listener
+
+    // Removes the $routeUpdate listener
+    this._cleanUpListeners.forEach((listener) => listener(this));
   };
 
   State.prototype.setDefaults = function (defaults) {
@@ -245,9 +260,12 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      toastNotifications.addDanger(i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
-        defaultMessage: 'Unable to completely restore the URL, be sure to use the share functionality.'
-      }));
+      toastNotifications.addDanger(
+        i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+          defaultMessage:
+            'Unable to completely restore the URL, be sure to use the share functionality.',
+        })
+      );
     }
 
     return JSON.parse(json);
@@ -284,9 +302,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     // We need to strip out Angular-specific properties.
     const json = angular.toJson(state);
-    const hash = createStateHash(json, hash => {
-      return this._hashedItemStore.getItem(hash);
-    });
+    const hash = createStateHash(json);
     const isItemSet = this._hashedItemStore.setItem(hash, json);
 
     if (isItemSet) {
@@ -294,15 +310,19 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    const message = i18n.translate('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
-      defaultMessage: 'Kibana is unable to store history items in your session ' +
-        `because it is full and there don't seem to be items any items safe ` +
-        'to delete.\n\n' +
-        'This can usually be fixed by moving to a fresh tab, but could ' +
-        'be caused by a larger issue. If you are seeing this message regularly, ' +
-        'please file an issue at {gitHubIssuesUrl}.',
-      values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' }
-    });
+    const message = i18n.translate(
+      'common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage',
+      {
+        defaultMessage:
+          'Kibana is unable to store history items in your session ' +
+          `because it is full and there don't seem to be items any items safe ` +
+          'to delete.\n\n' +
+          'This can usually be fixed by moving to a fresh tab, but could ' +
+          'be caused by a larger issue. If you are seeing this message regularly, ' +
+          'please file an issue at {gitHubIssuesUrl}.',
+        values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' },
+      }
+    );
     fatalError(new Error(message));
   };
 
@@ -314,6 +334,26 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     return this._urlParam;
   };
 
-  return State;
+  /**
+   * Returns an object with each property name and value corresponding to the entries in this collection
+   * excluding fields started from '$', '_' and all methods
+   *
+   * @return {object}
+   */
+  State.prototype.toObject = function () {
+    return _.omitBy(this, (value, key) => {
+      return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
+    });
+  };
 
+  /** Alias for method 'toObject'
+   *
+   * @obsolete Please use 'toObject' method instead
+   * @return {object}
+   */
+  State.prototype.toJSON = function () {
+    return this.toObject();
+  };
+
+  return State;
 }

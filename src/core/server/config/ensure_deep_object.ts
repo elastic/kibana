@@ -31,22 +31,19 @@ export function ensureDeepObject(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(item => ensureDeepObject(item));
+    return obj.map((item) => ensureDeepObject(item));
   }
 
-  return Object.keys(obj).reduce(
-    (fullObject, propertyKey) => {
-      const propertyValue = obj[propertyKey];
-      if (!propertyKey.includes(separator)) {
-        fullObject[propertyKey] = ensureDeepObject(propertyValue);
-      } else {
-        walk(fullObject, propertyKey.split(separator), propertyValue);
-      }
+  return Object.keys(obj).reduce((fullObject, propertyKey) => {
+    const propertyValue = obj[propertyKey];
+    if (!propertyKey.includes(separator)) {
+      fullObject[propertyKey] = ensureDeepObject(propertyValue);
+    } else {
+      walk(fullObject, propertyKey.split(separator), propertyValue);
+    }
 
-      return fullObject;
-    },
-    {} as any
-  );
+    return fullObject;
+  }, {} as any);
 }
 
 function walk(obj: any, keys: string[], value: any) {

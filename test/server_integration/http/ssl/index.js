@@ -22,8 +22,7 @@ export default function ({ getService }) {
 
   describe('kibana server with ssl', () => {
     it('handles requests using ssl', async () => {
-      await supertest.get('/')
-        .expect(302);
+      await supertest.get('/').expect(302);
     });
   });
 }

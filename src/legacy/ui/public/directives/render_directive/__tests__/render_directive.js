@@ -28,31 +28,32 @@ let $rootScope;
 let $compile;
 
 describe('render_directive', function () {
-
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    $rootScope = $injector.get('$rootScope');
-    $compile = $injector.get('$compile');
-    init = function init(markup = '', definition = {}) {
-      const $parentScope = $rootScope;
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      $rootScope = $injector.get('$rootScope');
+      $compile = $injector.get('$compile');
+      init = function init(markup = '', definition = {}) {
+        const $parentScope = $rootScope;
 
-      // create the markup
-      const $elem = angular.element('<render-directive>');
-      $elem.html(markup);
-      if (definition !== null) {
-        $parentScope.definition = definition;
-        $elem.attr('definition', 'definition');
-      }
+        // create the markup
+        const $elem = angular.element('<render-directive>');
+        $elem.html(markup);
+        if (definition !== null) {
+          $parentScope.definition = definition;
+          $elem.attr('definition', 'definition');
+        }
 
-      // compile the directive
-      $compile($elem)($parentScope);
-      $parentScope.$apply();
+        // compile the directive
+        $compile($elem)($parentScope);
+        $parentScope.$apply();
 
-      const $directiveScope = $elem.isolateScope();
+        const $directiveScope = $elem.isolateScope();
 
-      return { $parentScope, $directiveScope, $elem };
-    };
-  }));
+        return { $parentScope, $directiveScope, $elem };
+      };
+    })
+  );
 
   describe('directive requirements', function () {
     it('should throw if not given a definition', function () {
@@ -102,8 +103,8 @@ describe('render_directive', function () {
         scope: {
           two: '=twoWayProp',
           attr: '@',
-          expr: '&expr'
-        }
+          expr: '&expr',
+        },
       };
       $parentScope.parentTwoWay = true;
       $parentScope.parentExpression = function () {

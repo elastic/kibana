@@ -1,0 +1,31 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "date_nanos_custom_timestamp",
+    "mappings": {
+      "properties": {
+        "test": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "timestamp": {
+          "format": "yyyy-MM-dd HH:mm:ss.SSSSSS",
+          "type": "date_nanos"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

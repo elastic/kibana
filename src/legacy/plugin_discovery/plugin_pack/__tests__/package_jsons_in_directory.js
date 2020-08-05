@@ -24,10 +24,7 @@ import expect from '@kbn/expect';
 
 import { createPackageJsonsInDirectory$ } from '../package_jsons_in_directory';
 
-import {
-  PLUGINS_DIR,
-  assertInvalidDirectoryError,
-} from './utils';
+import { PLUGINS_DIR, assertInvalidDirectoryError } from './utils';
 
 describe('plugin discovery/packs in directory', () => {
   describe('createPackageJsonsInDirectory$()', () => {
@@ -40,40 +37,41 @@ describe('plugin discovery/packs in directory', () => {
         await check(error);
       }
 
-      it('undefined path', () => checkError(undefined, error => {
-        assertInvalidDirectoryError(error);
-        expect(error.message).to.contain('path must be a string');
-      }));
-      it('relative path', () => checkError('my/plugins', error => {
-        assertInvalidDirectoryError(error);
-        expect(error.message).to.contain('path must be absolute');
-      }));
-      it('./relative path', () => checkError('./my/pluginsd', error => {
-        assertInvalidDirectoryError(error);
-        expect(error.message).to.contain('path must be absolute');
-      }));
-      it('non-existent path', () => checkError(resolve(PLUGINS_DIR, 'notreal'), error => {
-        assertInvalidDirectoryError(error);
-        expect(error.message).to.contain('no such file or directory');
-      }));
-      it('path to a file', () => checkError(resolve(PLUGINS_DIR, 'index.js'), error => {
-        assertInvalidDirectoryError(error);
-        expect(error.message).to.contain('not a directory');
-      }));
+      it('undefined path', () =>
+        checkError(undefined, (error) => {
+          assertInvalidDirectoryError(error);
+          expect(error.message).to.contain('path must be a string');
+        }));
+      it('relative path', () =>
+        checkError('my/plugins', (error) => {
+          assertInvalidDirectoryError(error);
+          expect(error.message).to.contain('path must be absolute');
+        }));
+      it('./relative path', () =>
+        checkError('./my/pluginsd', (error) => {
+          assertInvalidDirectoryError(error);
+          expect(error.message).to.contain('path must be absolute');
+        }));
+      it('non-existent path', () =>
+        checkError(resolve(PLUGINS_DIR, 'notreal'), (error) => {
+          assertInvalidDirectoryError(error);
+          expect(error.message).to.contain('no such file or directory');
+        }));
+      it('path to a file', () =>
+        checkError(resolve(PLUGINS_DIR, 'index.js'), (error) => {
+          assertInvalidDirectoryError(error);
+          expect(error.message).to.contain('not a directory');
+        }));
     });
 
     it('includes child errors for invalid packageJsons within a valid directory', async () => {
       const results = await createPackageJsonsInDirectory$(PLUGINS_DIR).pipe(toArray()).toPromise();
 
-      const errors = results
-        .map(result => result.error)
-        .filter(Boolean);
+      const errors = results.map((result) => result.error).filter(Boolean);
 
-      const packageJsons = results
-        .map(result => result.packageJson)
-        .filter(Boolean);
+      const packageJsons = results.map((result) => result.packageJson).filter(Boolean);
 
-      packageJsons.forEach(pack => expect(pack).to.be.an(Object));
+      packageJsons.forEach((pack) => expect(pack).to.be.an(Object));
       // there should be one result for each item in PLUGINS_DIR
       expect(results).to.have.length(8);
       // three of the fixtures are errors of some sort

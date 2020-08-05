@@ -20,12 +20,26 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SavedQueryManagementComponentProvider({ getService }: FtrProviderContext) {
+export function SavedQueryManagementComponentProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const config = getService('config');
+  const PageObjects = getPageObjects(['common']);
 
   class SavedQueryManagementComponent {
+    public async getCurrentlyLoadedQueryID() {
+      await this.openSavedQueryManagementComponent();
+      try {
+        return await testSubjects.getVisibleText('~saved-query-list-item-selected');
+      } catch {
+        return undefined;
+      }
+    }
+
     public async saveNewQuery(
       name: string,
       description: string,
@@ -95,7 +109,7 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
     public async deleteSavedQuery(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.click(`~delete-saved-query-${title}-button`);
-      await testSubjects.click('confirmModalConfirmButton');
+      await PageObjects.common.clickConfirmOnModal();
     }
 
     async clearCurrentlyLoadedQuery() {
@@ -118,15 +132,17 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.setValue('saveQueryFormDescription', description);
 
       const currentIncludeFiltersValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'checked')) ===
+        (await testSubjects.getAttribute('saveQueryFormIncludeFiltersOption', 'aria-checked')) ===
         'true';
       if (currentIncludeFiltersValue !== includeFilters) {
         await testSubjects.click('saveQueryFormIncludeFiltersOption');
       }
 
       const currentIncludeTimeFilterValue =
-        (await testSubjects.getAttribute('saveQueryFormIncludeTimeFilterOption', 'checked')) ===
-        'true';
+        (await testSubjects.getAttribute(
+          'saveQueryFormIncludeTimeFilterOption',
+          'aria-checked'
+        )) === 'true';
       if (currentIncludeTimeFilterValue !== includeTimeFilter) {
         await testSubjects.click('saveQueryFormIncludeTimeFilterOption');
       }
@@ -137,6 +153,12 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
     async savedQueryExistOrFail(title: string) {
       await this.openSavedQueryManagementComponent();
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);
+    }
+
+    async savedQueryTextExist(text: string) {
+      await this.openSavedQueryManagementComponent();
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql(text);
     }
 
     async savedQueryMissingOrFail(title: string) {
@@ -151,14 +173,21 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
+      await retry.waitFor('saved query management popover to have any text', async () => {
+        await testSubjects.click('saved-query-management-popover-button');
+        const queryText = await testSubjects.getVisibleText('saved-query-management-popover');
+        return queryText.length > 0;
+      });
     }
 
     async closeSavedQueryManagementComponent() {
       const isOpenAlready = await testSubjects.exists('saved-query-management-popover');
       if (!isOpenAlready) return;
 
-      await testSubjects.click('saved-query-management-popover-button');
+      await retry.try(async () => {
+        await testSubjects.click('saved-query-management-popover-button');
+        await testSubjects.missingOrFail('saved-query-management-popover');
+      });
     }
 
     async openSaveCurrentQueryModal() {
@@ -166,7 +195,9 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
 
       await retry.try(async () => {
         await testSubjects.click('saved-query-management-save-button');
-        await testSubjects.existOrFail('saveQueryForm');
+        await testSubjects.existOrFail('saveQueryForm', {
+          timeout: config.get('timeouts.waitForExists'),
+        });
       });
     }
 

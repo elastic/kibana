@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /* Steps for version conflict test
  1. Create index pattern
  2. Click on  scripted field and fill in the values
@@ -32,19 +31,17 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
   const log = getService('log');
-
 
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
-
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
@@ -56,11 +53,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
-        }
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.src":{"id":"number"}}' } },
+        },
       });
       log.debug(JSON.stringify(response));
       expect(response.result).to.be('updated');
@@ -83,11 +79,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
-          'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }
-        }
+          doc: { 'index-pattern': { fieldFormatMap: '{"geo.dest":{"id":"number"}}' } },
+        },
       });
       log.debug(JSON.stringify(response));
       expect(response.result).to.be('updated');

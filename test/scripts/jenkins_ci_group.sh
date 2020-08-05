@@ -1,33 +1,42 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup_oss.sh
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+if [[ -z "$CODE_COVERAGE" ]]; then
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+
+  if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
+    source test/scripts/jenkins_build_kbn_sample_panel_action.sh
+    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+    yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+    yarn run grunt run:interpreterFunctionalTestsRelease;
+  fi
 else
-  source src/dev/ci_setup/setup_env.sh
-fi
+  echo " -> Running Functional tests with code coverage"
+  export NODE_OPTIONS=--max_old_space_size=8192
 
-export TEST_BROWSER_HEADLESS=1
+  echo " -> making hard link clones"
+  cd ..
+  cp -RlP kibana "kibana${CI_GROUP}"
+  cd "kibana${CI_GROUP}"
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  yarn run grunt functionalTests:ensureAllTestsInCiGroup;
-  node scripts/build --debug --oss;
-else
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_WORKER_NUMBER}
-  cp -R "$installDir" "$destDir"
+  echo " -> running tests from the clone folder"
+  #yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --exclude-tag "skipCoverage" || true;
 
-  export KIBANA_INSTALL_DIR="$destDir"
-fi
+  if [[ -d target/kibana-coverage/functional ]]; then
+    echo " -> replacing kibana${CI_GROUP} with kibana in json files"
+    sed -i "s|kibana${CI_GROUP}|kibana|g" target/kibana-coverage/functional/*.json
+    echo " -> copying coverage to the original folder"
+    mkdir -p ../kibana/target/kibana-coverage/functional
+    mv target/kibana-coverage/functional/* ../kibana/target/kibana-coverage/functional/
+  fi
 
-checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
+  echo " -> moving junit output, silently fail in case of no report"
+  mkdir -p ../kibana/target/junit
+  mv target/junit/* ../kibana/target/junit/ || echo "copying junit failed"
 
-if [ "$CI_GROUP" == "1" ]; then
-  # build kbn_tp_sample_panel_action
-  cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
-  checks-reporter-with-killswitch "Build kbn_tp_sample_panel_action" yarn build;
-  cd -;
-  yarn run grunt run:pluginFunctionalTestsRelease --from=source;
-  yarn run grunt run:interpreterFunctionalTestsRelease;
+  echo " -> copying screenshots and html for failures"
+  cp -r test/functional/screenshots/* ../kibana/test/functional/screenshots/ || echo "copying screenshots failed"
+  cp -r test/functional/failure_debug ../kibana/test/functional/ || echo "copying html failed"
 fi

@@ -33,6 +33,16 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
   ).toThrowErrorMatchingSnapshot();
 });
 
+test('`schema` throws if `root` logger does not have "default" appender configured.', () => {
+  expect(() =>
+    config.schema.validate({
+      root: {
+        appenders: ['console'],
+      },
+    })
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('`getParentLoggerContext()` returns correct parent context name.', () => {
   expect(LoggingConfig.getParentLoggerContext('a.b.c')).toEqual('a.b');
   expect(LoggingConfig.getParentLoggerContext('a.b')).toEqual('a');
@@ -46,12 +56,16 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
   expect(LoggingConfig.getLoggerContext([])).toEqual('root');
 });
 
-test('correctly fills in default `appenders` config.', () => {
+test('correctly fills in default config.', () => {
   const configValue = new LoggingConfig(config.schema.validate({}));
 
-  expect(configValue.appenders.size).toBe(1);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
+    kind: 'console',
+    layout: { kind: 'pattern', highlight: true },
+  });
+  expect(configValue.appenders.get('console')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern', highlight: true },
   });
@@ -65,16 +79,11 @@ test('correctly fills in custom `appenders` config.', () => {
           kind: 'console',
           layout: { kind: 'pattern' },
         },
-        file: {
-          kind: 'file',
-          layout: { kind: 'pattern' },
-          path: 'path',
-        },
       },
     })
   );
 
-  expect(configValue.appenders.size).toBe(3);
+  expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
     kind: 'console',
@@ -84,12 +93,6 @@ test('correctly fills in custom `appenders` config.', () => {
   expect(configValue.appenders.get('console')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern' },
-  });
-
-  expect(configValue.appenders.get('file')).toEqual({
-    kind: 'file',
-    layout: { kind: 'pattern' },
-    path: 'path',
   });
 });
 
@@ -167,4 +170,128 @@ test('fails if loggers use unknown appenders.', () => {
   });
 
   expect(() => new LoggingConfig(validateConfig)).toThrowErrorMatchingSnapshot();
+});
+
+describe('extend', () => {
+  it('adds new appenders', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        appenders: {
+          file2: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    expect([...mergedConfigValue.appenders.keys()]).toEqual([
+      'default',
+      'console',
+      'file1',
+      'file2',
+    ]);
+  });
+
+  it('overrides appenders', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'pattern' },
+            path: 'path',
+          },
+        },
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        appenders: {
+          file1: {
+            kind: 'file',
+            layout: { kind: 'json' },
+            path: 'updatedPath',
+          },
+        },
+      })
+    );
+
+    expect(mergedConfigValue.appenders.get('file1')).toEqual({
+      kind: 'file',
+      layout: { kind: 'json' },
+      path: 'updatedPath',
+    });
+  });
+
+  it('adds new loggers', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins',
+            level: 'warn',
+          },
+        ],
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins.pid',
+            level: 'trace',
+          },
+        ],
+      })
+    );
+
+    expect([...mergedConfigValue.loggers.keys()]).toEqual(['root', 'plugins', 'plugins.pid']);
+  });
+
+  it('overrides loggers', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            context: 'plugins',
+            level: 'warn',
+          },
+        ],
+      })
+    );
+
+    const mergedConfigValue = configValue.extend(
+      config.schema.validate({
+        loggers: [
+          {
+            appenders: ['console'],
+            context: 'plugins',
+            level: 'trace',
+          },
+        ],
+      })
+    );
+
+    expect(mergedConfigValue.loggers.get('plugins')).toEqual({
+      appenders: ['console'],
+      context: 'plugins',
+      level: 'trace',
+    });
+  });
 });

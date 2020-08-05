@@ -17,14 +17,36 @@
  * under the License.
  */
 
-export const log = {
-  /**
-   * Log something to the console. Ideally we would use a real logger in
-   * kbn-pm, but that's a pretty big change for now.
-   * @param  ...args
-   */
-  write(...args: any[]) {
-    // eslint-disable-next-line no-console
-    console.log(...args);
-  },
-};
+import {
+  ToolingLog,
+  ToolingLogTextWriter,
+  LogLevel,
+  parseLogLevel,
+  ParsedLogLevel,
+} from '@kbn/dev-utils/tooling_log';
+
+class Log extends ToolingLog {
+  private logLevel!: ParsedLogLevel;
+
+  constructor() {
+    super();
+    this.setLogLevel('info');
+  }
+
+  setLogLevel(level: LogLevel) {
+    this.logLevel = parseLogLevel(level);
+    this.setWriters([
+      new ToolingLogTextWriter({
+        level: this.logLevel.name,
+        writeTo: process.stdout,
+      }),
+    ]);
+  }
+
+  wouldLogLevel(level: LogLevel) {
+    return this.logLevel.flags[level];
+  }
+}
+
+export const log = new Log();
+export { LogLevel, Log };

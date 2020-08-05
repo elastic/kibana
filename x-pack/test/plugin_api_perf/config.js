@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }) {
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -39,10 +39,10 @@ export default async function ({ readConfigFile }) {
           '..',
           'plugin_api_integration',
           'plugins',
-          'task_manager'
+          'sample_task_plugin'
         )}`,
         ...plugins.map(
-          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+          (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),
       ],
     },

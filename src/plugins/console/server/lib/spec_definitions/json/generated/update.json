@@ -1,0 +1,28 @@
+{
+  "update": {
+    "url_params": {
+      "wait_for_active_shards": "",
+      "_source": [],
+      "_source_excludes": [],
+      "_source_includes": [],
+      "lang": "painless",
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
+      "retry_on_conflict": "0",
+      "routing": "",
+      "timeout": "",
+      "if_seq_no": "",
+      "if_primary_term": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_update/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html"
+  }
+}

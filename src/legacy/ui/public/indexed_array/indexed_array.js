@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { inflector } from './inflector';
-import { organizeBy } from '../utils/collection';
+import { organizeBy } from './helpers/organize_by';
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);
 const inflectIndex = inflector('by');
@@ -42,7 +42,7 @@ const OPT_NAMES = ['index', 'group', 'order', 'initialSet', 'immutable'];
  */
 
 export class IndexedArray {
-  static OPT_NAMES = OPT_NAMES
+  static OPT_NAMES = OPT_NAMES;
 
   constructor(config) {
     config = _.pick(config || {}, OPT_NAMES);
@@ -52,7 +52,7 @@ export class IndexedArray {
 
     this._indexNames = _.union(
       this._setupIndex(config.group, inflectIndex, organizeByIndexedArray(config)),
-      this._setupIndex(config.index, inflectIndex, _.indexBy),
+      this._setupIndex(config.index, inflectIndex, _.keyBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
         return [...raw].sort((itemA, itemB) => {
           const a = pluckValue(itemA);
@@ -94,15 +94,33 @@ export class IndexedArray {
   }
 
   // wrappers for mutable Array methods
-  copyWithin(...args) { return this._mutation('copyWithin', args); }
-  fill(...args) { return this._mutation('fill', args); }
-  pop(...args) { return this._mutation('pop', args); }
-  push(...args) { return this._mutation('push', args); }
-  reverse(...args) { return this._mutation('reverse', args); }
-  shift(...args) { return this._mutation('shift', args); }
-  sort(...args) { return this._mutation('sort', args); }
-  splice(...args) { return this._mutation('splice', args); }
-  unshift(...args) { return this._mutation('unshift', args); }
+  copyWithin(...args) {
+    return this._mutation('copyWithin', args);
+  }
+  fill(...args) {
+    return this._mutation('fill', args);
+  }
+  pop(...args) {
+    return this._mutation('pop', args);
+  }
+  push(...args) {
+    return this._mutation('push', args);
+  }
+  reverse(...args) {
+    return this._mutation('reverse', args);
+  }
+  shift(...args) {
+    return this._mutation('shift', args);
+  }
+  sort(...args) {
+    return this._mutation('sort', args);
+  }
+  splice(...args) {
+    return this._mutation('splice', args);
+  }
+  unshift(...args) {
+    return this._mutation('unshift', args);
+  }
 
   /**
    *  If this instance of IndexedArray is not mutable, throw an error
@@ -149,7 +167,7 @@ export class IndexedArray {
     // shortcut for empty props
     if (!props || props.length === 0) return;
 
-    return props.map(prop => {
+    return props.map((prop) => {
       const indexName = inflect(prop);
       const getIndexValueFromItem = pathGetter.partial(prop).value();
       let cache;
@@ -158,7 +176,7 @@ export class IndexedArray {
         enumerable: false,
         configurable: false,
 
-        set: val => {
+        set: (val) => {
           // can't set any value other than the CLEAR_CACHE constant
           if (val === CLEAR_CACHE) {
             cache = false;
@@ -172,7 +190,7 @@ export class IndexedArray {
           }
 
           return cache;
-        }
+        },
       });
 
       return indexName;
@@ -186,7 +204,7 @@ export class IndexedArray {
    * @return {undefined}
    */
   _clearIndices() {
-    this._indexNames.forEach(name => {
+    this._indexNames.forEach((name) => {
       this[name] = CLEAR_CACHE;
     });
   }
@@ -196,19 +214,22 @@ export class IndexedArray {
 // See https://babeljs.io/docs/usage/caveats/
 Object.setPrototypeOf(IndexedArray.prototype, Array.prototype);
 
-
 // Similar to `organizeBy` but returns IndexedArrays instead of normal Arrays.
 function organizeByIndexedArray(config) {
   return (...args) => {
     const grouped = organizeBy(...args);
 
-    return _.reduce(grouped, (acc, value, group) => {
-      acc[group] = new IndexedArray({
-        ...config,
-        initialSet: value
-      });
+    return _.reduce(
+      grouped,
+      (acc, value, group) => {
+        acc[group] = new IndexedArray({
+          ...config,
+          initialSet: value,
+        });
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
   };
 }

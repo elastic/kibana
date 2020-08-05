@@ -35,14 +35,10 @@ export function cGroups(hierarchy) {
     '4:hugetlb:/',
     '3:perf_event:/',
     '2:cpu,cpuacct,cpuset:/' + hierarchy,
-    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope'
+    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope',
   ].join('\n');
 
-  const cpuStatContents = [
-    'nr_periods 0',
-    'nr_throttled 10',
-    'throttled_time 20'
-  ].join('\n');
+  const cpuStatContents = ['nr_periods 0', 'nr_throttled 10', 'throttled_time 20'].join('\n');
 
   return {
     hierarchy,
@@ -56,7 +52,7 @@ export function cGroups(hierarchy) {
       [`${cpuDir}/cpu.cfs_period_us`]: '100000',
       [`${cpuDir}/cpu.cfs_quota_us`]: '5000',
       [`${cpuDir}/cpu.stat`]: cpuStatContents,
-    }
+    },
   };
 }
 
@@ -70,11 +66,11 @@ class FSError extends Error {
 
 let _mockFiles = Object.create({});
 
-export const setMockFiles = mockFiles => {
+export const setMockFiles = (mockFiles) => {
   _mockFiles = Object.create({});
   if (mockFiles) {
     const files = Object.keys(mockFiles);
-    for(const file of files) {
+    for (const file of files) {
       _mockFiles[file] = mockFiles[file];
     }
   }

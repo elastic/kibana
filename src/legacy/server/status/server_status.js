@@ -21,7 +21,8 @@ import _ from 'lodash';
 
 import * as states from './states';
 import Status from './status';
-import { pkg } from '../../utils/package_json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { pkg } from '../../../core/server/utils';
 
 export default class ServerStatus {
   constructor(server) {
@@ -56,9 +57,7 @@ export default class ServerStatus {
   }
 
   getForPluginId(pluginId) {
-    return _.find(this._created, s =>
-      s.plugin && s.plugin.id === pluginId
-    );
+    return _.find(this._created, (s) => s.plugin && s.plugin.id === pluginId);
   }
 
   getState(id) {
@@ -78,11 +77,11 @@ export default class ServerStatus {
       // take all created status objects
       .values(this._created)
       // get the state descriptor for each status
-      .map(status => states.get(status.state))
+      .map((status) => states.get(status.state))
       // reduce to the state with the highest severity, defaulting to green
-      .reduce((a, b) => a.severity > b.severity ? a : b, states.get('green'));
+      .reduce((a, b) => (a.severity > b.severity ? a : b), states.get('green'));
 
-    const statuses = _.where(this._created, { state: state.id });
+    const statuses = _.filter(this._created, { state: state.id });
     const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);
 
     return {
@@ -96,7 +95,7 @@ export default class ServerStatus {
   }
 
   isGreen() {
-    return (this.overall().state === 'green');
+    return this.overall().state === 'green';
   }
 
   notGreen() {
@@ -111,7 +110,7 @@ export default class ServerStatus {
   toJSON() {
     return {
       overall: this.overall(),
-      statuses: _.values(this._created)
+      statuses: _.values(this._created),
     };
   }
 }

@@ -28,5 +28,5 @@
  */
 export const createTypeReducer = (reducer) => (acc, spec, type, pluginSpec) => ({
   ...acc,
-  [type]: reducer(acc[type], spec, type, pluginSpec)
+  [type]: reducer(acc[type], spec, type, pluginSpec),
 });

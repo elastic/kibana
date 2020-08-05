@@ -30,14 +30,14 @@ import { createInterface } from 'readline';
 export function confirm(question, options = {}) {
   const rl = createInterface({
     input: options.input || process.stdin,
-    output: options.output || process.stdout
+    output: options.output || process.stdout,
   });
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const defaultValue = options.default ? true : false;
     const defaultPrompt = defaultValue ? 'Y/n' : 'y/N';
 
-    rl.question(`${question} [${defaultPrompt}] `, input => {
+    rl.question(`${question} [${defaultPrompt}] `, (input) => {
       let value = defaultValue;
 
       if (input != null && input !== '') {
@@ -65,7 +65,7 @@ export function question(question, options = {}) {
   const questionPrompt = `${question}: `;
   const rl = createInterface({ input, output });
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     input.on('data', (char) => {
       char = char + '';
 
@@ -85,7 +85,7 @@ export function question(question, options = {}) {
       }
     });
 
-    rl.question(questionPrompt, value => {
+    rl.question(questionPrompt, (value) => {
       resolve(value);
     });
   });

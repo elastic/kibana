@@ -23,34 +23,55 @@ import {
   mockLegacyService,
   mockPluginsService,
   mockConfigService,
-} from './index.test.mocks';
+  mockSavedObjectsService,
+  mockContextService,
+  mockEnsureValidConfiguration,
+  mockUiSettingsService,
+  mockRenderingService,
+  mockMetricsService,
+  mockStatusService,
+  mockLoggingService,
+  mockAuditTrailService,
+} from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Env, Config, ObjectToConfigAdapter } from './config';
+import { Env } from './config';
 import { Server } from './server';
 
 import { getEnvOptions } from './config/__mocks__/env';
-import { loggingServiceMock } from './logging/logging_service.mock';
+import { loggingSystemMock } from './logging/logging_system.mock';
+import { rawConfigServiceMock } from './config/raw_config_service.mock';
 
 const env = new Env('.', getEnvOptions());
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
+const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  mockPluginsService.discover.mockResolvedValue({
+    pluginTree: new Map(),
+    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
+  });
 });
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-const config$ = new BehaviorSubject<Config>(new ObjectToConfigAdapter({}));
 test('sets up services on "setup"', async () => {
-  const server = new Server(config$, env, logger);
+  const server = new Server(rawConfigService, env, logger);
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.setup).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockRenderingService.setup).not.toHaveBeenCalled();
+  expect(mockMetricsService.setup).not.toHaveBeenCalled();
+  expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -58,10 +79,42 @@ test('sets up services on "setup"', async () => {
   expect(mockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.setup).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.setup).toHaveBeenCalledTimes(1);
+  expect(mockSavedObjectsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockRenderingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.setup).toHaveBeenCalledTimes(1);
+});
+
+test('injects legacy dependency to context#setup()', async () => {
+  const server = new Server(rawConfigService, env, logger);
+
+  const pluginA = Symbol();
+  const pluginB = Symbol();
+  const pluginDependencies = new Map<symbol, symbol[]>([
+    [pluginA, []],
+    [pluginB, [pluginA]],
+  ]);
+  mockPluginsService.discover.mockResolvedValue({
+    pluginTree: pluginDependencies,
+    uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
+  });
+
+  await server.setup();
+
+  expect(mockContextService.setup).toHaveBeenCalledWith({
+    pluginDependencies: new Map([
+      [pluginA, []],
+      [pluginB, [pluginA]],
+      [mockLegacyService.legacyId, [pluginA, pluginB]],
+    ]),
+  });
 });
 
 test('runs services on "start"', async () => {
-  const server = new Server(config$, env, logger);
+  const server = new Server(rawConfigService, env, logger);
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
@@ -70,22 +123,31 @@ test('runs services on "start"', async () => {
 
   expect(mockHttpService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.start).not.toHaveBeenCalled();
+  expect(mockMetricsService.start).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.start).not.toHaveBeenCalled();
+
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
+  expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
+  expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
   mockConfigService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 
-  const server = new Server(config$, env, logger);
+  const server = new Server(rawConfigService, env, logger);
 
   await expect(server.setup()).resolves.toBeDefined();
 });
 
 test('stops services on "stop"', async () => {
-  const server = new Server(config$, env, logger);
+  const server = new Server(rawConfigService, env, logger);
 
   await server.setup();
 
@@ -93,6 +155,12 @@ test('stops services on "stop"', async () => {
   expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.stop).not.toHaveBeenCalled();
+  expect(mockMetricsService.stop).not.toHaveBeenCalled();
+  expect(mockStatusService.stop).not.toHaveBeenCalled();
+  expect(mockLoggingService.stop).not.toHaveBeenCalled();
+  expect(mockAuditTrailService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -100,18 +168,50 @@ test('stops services on "stop"', async () => {
   expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
+  expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
+  expect(mockUiSettingsService.stop).toHaveBeenCalledTimes(1);
+  expect(mockMetricsService.stop).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
+  expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
+  expect(mockAuditTrailService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't setup core services if config validation fails`, async () => {
-  mockConfigService.setSchema.mockImplementation(() => {
-    throw new Error('invalid config');
+  mockConfigService.validate.mockImplementationOnce(() => {
+    return Promise.reject(new Error('invalid config'));
   });
-  const server = new Server(config$, env, logger);
-  await expect(server.setupConfigSchemas()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"invalid config"`
-  );
+  const server = new Server(rawConfigService, env, logger);
+  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
+
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockRenderingService.setup).not.toHaveBeenCalled();
+  expect(mockMetricsService.setup).not.toHaveBeenCalled();
+  expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
+});
+
+test(`doesn't setup core services if legacy config validation fails`, async () => {
+  mockEnsureValidConfiguration.mockImplementation(() => {
+    throw new Error('Unknown configuration keys');
+  });
+
+  const server = new Server(rawConfigService, env, logger);
+
+  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Unknown configuration keys"`
+  );
+
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockPluginsService.setup).not.toHaveBeenCalled();
+  expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
+  expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockMetricsService.setup).not.toHaveBeenCalled();
+  expect(mockStatusService.setup).not.toHaveBeenCalled();
+  expect(mockLoggingService.setup).not.toHaveBeenCalled();
 });

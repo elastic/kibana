@@ -22,96 +22,140 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { once } from 'lodash';
-import { MappingProperties } from '../../mappings';
-import { SavedObjectsSchema, SavedObjectsSchemaDefinition } from '../../schema';
-import { SavedObjectsManagementDefinition } from '../../management';
-import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
-import { docValidator } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator, LogFn } from '../core';
+import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { BehaviorSubject } from 'rxjs';
+
+import { Logger } from '../../../logging';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
+import { docValidator, PropertyValidators } from '../../validation';
+import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
+import { MigrationEsClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
-import { Config } from '../../../config';
-export interface KbnServer {
-  server: Server;
-  version: string;
-  ready: () => Promise<any>;
-  uiExports: {
-    savedObjectMappings: any[];
-    savedObjectMigrations: any;
-    savedObjectValidations: any;
-    savedObjectSchemas: SavedObjectsSchemaDefinition;
-    savedObjectsManagement: SavedObjectsManagementDefinition;
-  };
+import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
+
+export interface KibanaMigratorOptions {
+  client: MigrationEsClient;
+  typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectsConfig: SavedObjectsMigrationConfigType;
+  kibanaConfig: KibanaConfigType;
+  kibanaVersion: string;
+  logger: Logger;
+  savedObjectValidations: PropertyValidators;
 }
 
-interface Server {
-  log: LogFn;
-  config: () => {
-    get: {
-      (path: 'kibana.index' | 'migrations.scrollDuration'): string;
-      (path: 'migrations.batchSize' | 'migrations.pollInterval'): number;
-    };
-  };
-  plugins: { elasticsearch: ElasticsearchPlugin | undefined };
-}
+export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 
-interface ElasticsearchPlugin {
-  getCluster: (name: 'admin') => { callWithInternalUser: CallCluster };
-  waitUntilReady: () => Promise<any>;
+export interface KibanaMigratorStatus {
+  status: MigrationStatus;
+  result?: MigrationResult[];
 }
 
 /**
  * Manages the shape of mappings and documents in the Kibana index.
- *
- * @export
- * @class KibanaMigrator
  */
 export class KibanaMigrator {
+  private readonly client: MigrationEsClient;
+  private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
+  private readonly documentMigrator: VersionedTransformer;
+  private readonly kibanaConfig: KibanaConfigType;
+  private readonly log: Logger;
+  private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
+  private readonly serializer: SavedObjectsSerializer;
+  private migrationResult?: Promise<MigrationResult[]>;
+  private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
+    status: 'waiting',
+  });
+  private readonly activeMappings: IndexMapping;
+
   /**
-   * Migrates the mappings and documents in the Kibana index. This will run only
+   * Creates an instance of KibanaMigrator.
+   */
+  constructor({
+    client,
+    typeRegistry,
+    kibanaConfig,
+    savedObjectsConfig,
+    savedObjectValidations,
+    kibanaVersion,
+    logger,
+  }: KibanaMigratorOptions) {
+    this.client = client;
+    this.kibanaConfig = kibanaConfig;
+    this.savedObjectsConfig = savedObjectsConfig;
+    this.typeRegistry = typeRegistry;
+    this.serializer = new SavedObjectsSerializer(this.typeRegistry);
+    this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
+    this.log = logger;
+    this.documentMigrator = new DocumentMigrator({
+      kibanaVersion,
+      typeRegistry,
+      validateDoc: docValidator(savedObjectValidations || {}),
+      log: this.log,
+    });
+    // Building the active mappings (and associated md5sums) is an expensive
+    // operation so we cache the result
+    this.activeMappings = buildActiveMappings(this.mappingProperties);
+  }
+
+  /**
+   * Migrates the mappings and documents in the Kibana index. By default, this will run only
    * once and subsequent calls will return the result of the original call.
    *
-   * @returns
-   * @memberof KibanaMigrator
+   * @param rerun - If true, method will run a new migration when called again instead of
+   * returning the result of the initial migration. This should only be used when factors external
+   * to Kibana itself alter the kibana index causing the saved objects mappings or data to change
+   * after the Kibana server performed the initial migration.
+   *
+   * @remarks When the `rerun` parameter is set to true, no checks are performed to ensure that no migration
+   * is currently running. Chained or concurrent calls to `runMigrations({ rerun: true })` can lead to
+   * multiple migrations running at the same time. When calling with this parameter, it's expected that the calling
+   * code should ensure that the initial call resolves before calling the function again.
+   *
+   * @returns - A promise which resolves once all migrations have been applied.
+   *    The promise resolves with an array of migration statuses, one for each
+   *    elasticsearch index which was migrated.
    */
-  public awaitMigration = once(async () => {
-    const { server } = this.kbnServer;
-
-    // Wait until the plugins have been found an initialized...
-    await this.kbnServer.ready();
-
-    // We can't do anything if the elasticsearch plugin has been disabled.
-    if (!server.plugins.elasticsearch) {
-      server.log(
-        ['warning', 'migration'],
-        'The elasticsearch plugin is disabled. Skipping migrations.'
-      );
-      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
+    Array<{ status: string }>
+  > {
+    if (this.migrationResult === undefined || rerun) {
+      this.status$.next({ status: 'running' });
+      this.migrationResult = this.runMigrationsInternal().then((result) => {
+        this.status$.next({ status: 'completed', result });
+        return result;
+      });
     }
 
-    // Wait until elasticsearch is green...
-    await server.plugins.elasticsearch.waitUntilReady();
+    return this.migrationResult;
+  }
 
-    const config = server.config() as Config;
-    const kibanaIndexName = config.get('kibana.index');
+  public getStatus$() {
+    return this.status$.asObservable();
+  }
+
+  private runMigrationsInternal() {
+    const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      config,
       kibanaIndexName,
       indexMap: this.mappingProperties,
-      schema: this.schema,
+      registry: this.typeRegistry,
     });
 
-    const migrators = Object.keys(indexMap).map(index => {
+    const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
-        batchSize: config.get('migrations.batchSize'),
-        callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
+        batchSize: this.savedObjectsConfig.batchSize,
+        client: this.client,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
         mappingProperties: indexMap[index].typeMappings,
-        pollInterval: config.get('migrations.pollInterval'),
-        scrollDuration: config.get('migrations.scrollDuration'),
+        pollInterval: this.savedObjectsConfig.pollInterval,
+        scrollDuration: this.savedObjectsConfig.scrollDuration,
         serializer: this.serializer,
         // Only necessary for the migrator of the kibana index.
         obsoleteIndexTemplatePattern:
@@ -120,63 +164,24 @@ export class KibanaMigrator {
       });
     });
 
-    if (migrators.length === 0) {
-      throw new Error(`Migrations failed to run, no mappings found or Kibana is not "ready".`);
-    }
-
-    return Promise.all(migrators.map(migrator => migrator.migrate()));
-  });
-
-  private kbnServer: KbnServer;
-  private documentMigrator: VersionedTransformer;
-  private mappingProperties: MappingProperties;
-  private log: LogFn;
-  private serializer: SavedObjectsSerializer;
-  private readonly schema: SavedObjectsSchema;
-
-  /**
-   * Creates an instance of KibanaMigrator.
-   *
-   * @param opts
-   * @prop {KbnServer} kbnServer - An instance of the Kibana server object.
-   * @memberof KibanaMigrator
-   */
-  constructor({ kbnServer }: { kbnServer: KbnServer }) {
-    this.kbnServer = kbnServer;
-
-    this.schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
-    this.serializer = new SavedObjectsSerializer(this.schema);
-
-    this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
-
-    this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
-
-    this.documentMigrator = new DocumentMigrator({
-      kibanaVersion: kbnServer.version,
-      migrations: kbnServer.uiExports.savedObjectMigrations || {},
-      validateDoc: docValidator(kbnServer.uiExports.savedObjectValidations || {}),
-      log: this.log,
-    });
+    return Promise.all(migrators.map((migrator) => migrator.migrate()));
   }
 
   /**
    * Gets all the index mappings defined by Kibana's enabled plugins.
    *
-   * @returns
-   * @memberof KibanaMigrator
    */
-  public getActiveMappings() {
-    return buildActiveMappings({ properties: this.mappingProperties });
+  public getActiveMappings(): IndexMapping {
+    return this.activeMappings;
   }
 
   /**
    * Migrates an individual doc to the latest version, as defined by the plugin migrations.
    *
-   * @param {RawSavedObjectDoc} doc
-   * @returns {RawSavedObjectDoc}
-   * @memberof KibanaMigrator
+   * @param doc - The saved object to migrate
+   * @returns `doc` with all registered migrations applied.
    */
-  public migrateDocument(doc: RawSavedObjectDoc): RawSavedObjectDoc {
+  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc);
   }
 }
@@ -185,12 +190,15 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-function mergeProperties(mappings: any[]): MappingProperties {
-  return mappings.reduce((acc, { pluginId, properties }) => {
-    const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
+export function mergeTypes(types: SavedObjectsType[]): SavedObjectsTypeMappingDefinitions {
+  return types.reduce((acc, { name: type, mappings }) => {
+    const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {
-      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${duplicate}".`);
+      throw new Error(`Type ${type} is already defined.`);
     }
-    return Object.assign(acc, properties);
+    return {
+      ...acc,
+      [type]: mappings,
+    };
   }, {});
 }

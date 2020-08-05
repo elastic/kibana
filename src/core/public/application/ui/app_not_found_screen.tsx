@@ -22,7 +22,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const AppNotFound = () => (
-  <EuiPage style={{ minHeight: '100%' }}>
+  <EuiPage style={{ minHeight: '100%' }} data-test-subj="appNotFoundPageContent">
     <EuiPageBody>
       <EuiPageContent verticalPosition="center" horizontalPosition="center">
         <EuiEmptyPrompt

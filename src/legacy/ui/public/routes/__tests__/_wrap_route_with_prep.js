@@ -24,7 +24,6 @@ import ngMock from 'ng_mock';
 import _ from 'lodash';
 import '../../private';
 
-
 let routes;
 
 describe('wrapRouteWithPrep fn', function () {
@@ -53,16 +52,14 @@ describe('wrapRouteWithPrep fn', function () {
         $injector = _$injector_;
       });
 
-
-      routes
-        .addSetupWork(function () {
-          return new Promise(function (resolve) {
-            setTimeout(function () {
-              setupComplete = true;
-              resolve();
-            }, delaySetup);
-          });
+      routes.addSetupWork(function () {
+        return new Promise(function (resolve) {
+          setTimeout(function () {
+            setupComplete = true;
+            resolve();
+          }, delaySetup);
         });
+      });
 
       routes
         .when('/', {
@@ -70,24 +67,27 @@ describe('wrapRouteWithPrep fn', function () {
             test: function () {
               expect(setupComplete).to.be(true);
               userWorkComplete = true;
-            }
-          }
+            },
+          },
         })
         .config({
-          when: function (p, _r) { route = _r; }
+          when: function (p, _r) {
+            route = _r;
+          },
         });
 
       return new Promise(function (resolve, reject) {
         setTimeout(function () {
-          Promise.all(_.map(route.resolve, function (fn) {
-            return $injector.invoke(fn);
-          }))
+          Promise.all(
+            _.map(route.resolve, function (fn) {
+              return $injector.invoke(fn);
+            })
+          )
             .then(function () {
               expect(setupComplete).to.be(true);
               expect(userWorkComplete).to.be(true);
             })
             .then(resolve, reject);
-
         }, delayUserWork);
       });
     };
@@ -97,7 +97,10 @@ describe('wrapRouteWithPrep fn', function () {
 
   it('does not call user work when setup fails', new SchedulingTest({ failSetup: true }));
 
-  it('calls all user work even if it is not initialized until after setup is complete', new SchedulingTest({
-    delayUserWork: false
-  }));
+  it(
+    'calls all user work even if it is not initialized until after setup is complete',
+    new SchedulingTest({
+      delayUserWork: false,
+    })
+  );
 });

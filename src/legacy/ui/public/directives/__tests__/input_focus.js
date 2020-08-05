@@ -21,6 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import '../input_focus';
+import uiRoutes from 'ui/routes';
 
 describe('Input focus directive', function () {
   let $compile;
@@ -32,15 +33,19 @@ describe('Input focus directive', function () {
   let selectedText;
   const inputValue = 'Input Text Value';
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {
-    $compile = _$compile_;
-    $rootScope = _$rootScope_;
-    $timeout = _$timeout_;
+  uiRoutes.enable();
 
-    $el = $('<div>');
-    $el.appendTo('body');
-  }));
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(
+    ngMock.inject(function (_$compile_, _$rootScope_, _$timeout_) {
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+      $timeout = _$timeout_;
+
+      $el = $('<div>');
+      $el.appendTo('body');
+    })
+  );
 
   afterEach(function () {
     $el.remove();
@@ -55,13 +60,9 @@ describe('Input focus directive', function () {
     $timeout.flush();
     selectedEl = document.activeElement;
     if (selectedEl.value) {
-      selectedText = selectedEl.value.slice(
-        selectedEl.selectionStart,
-        selectedEl.selectionEnd
-      );
+      selectedText = selectedEl.value.slice(selectedEl.selectionStart, selectedEl.selectionEnd);
     }
   }
-
 
   it('should focus the input', function () {
     renderEl('<input type="text" ng-model="value" input-focus />');

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 function upFirst(str, total) {
   return str.charAt(0).toUpperCase() + (total ? str.substr(1).toLowerCase() : str.substr(1));
 }
@@ -41,7 +40,7 @@ export function inflector(prefix, postfix) {
       inflected = key
         .split('.')
         .map(function (step, i) {
-          return (i === 0) ? step : upFirst(step, true);
+          return i === 0 ? step : upFirst(step, true);
         })
         .join('');
     } else {

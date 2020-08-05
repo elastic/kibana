@@ -18,10 +18,7 @@
  */
 
 import { Schema } from 'joi';
-import { cloneDeep, get, has } from 'lodash';
-
-// @ts-ignore internal lodash module is not typed
-import toPath from 'lodash/internal/toPath';
+import { cloneDeepWith, get, has, toPath } from 'lodash';
 
 import { schema } from './schema';
 
@@ -58,7 +55,7 @@ export class Config {
     this[$values] = value;
   }
 
-  public has(key: string) {
+  public has(key: string | string[]) {
     function recursiveHasCheck(
       remainingPath: string[],
       values: Record<string, any>,
@@ -109,12 +106,12 @@ export class Config {
     return recursiveHasCheck(path, this[$values], schema);
   }
 
-  public get(key: string, defaultValue?: any) {
+  public get(key: string | string[], defaultValue?: any) {
     if (!this.has(key)) {
       throw new Error(`Unknown config key "${key}"`);
     }
 
-    return cloneDeep(get(this[$values], key, defaultValue), v => {
+    return cloneDeepWith(get(this[$values], key, defaultValue), (v) => {
       if (typeof v === 'function') {
         return v;
       }
@@ -122,7 +119,7 @@ export class Config {
   }
 
   public getAll() {
-    return cloneDeep(this[$values], v => {
+    return cloneDeepWith(this[$values], (v) => {
       if (typeof v === 'function') {
         return v;
       }

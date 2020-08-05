@@ -19,8 +19,16 @@
 
 import { UiApp } from './ui_app';
 
-export function uiAppsMixin(kbnServer, server) {
+/**
+ * @typedef {import('../../server/kbn_server').default} KbnServer
+ */
 
+/**
+ *
+ * @param {KbnServer} kbnServer
+ * @param {KbnServer['server']} server
+ */
+export function uiAppsMixin(kbnServer, server) {
   const { uiAppSpecs = [] } = kbnServer.uiExports;
   const existingIds = new Set();
   const appsById = new Map();
@@ -46,20 +54,14 @@ export function uiAppsMixin(kbnServer, server) {
   });
 
   server.decorate('server', 'getAllUiApps', () => kbnServer.uiApps.slice(0));
-  server.decorate('server', 'getUiAppById', id => appsById.get(id));
-  server.decorate('server', 'getHiddenUiAppById', id => hiddenAppsById.get(id));
-
-  const injectedVarProviders = [];
-  server.decorate('server', 'injectUiAppVars', (appId, provider) => {
-    injectedVarProviders.push({ appId, provider });
-  });
-
-  server.decorate('server', 'getInjectedUiAppVars', async (appId) => {
-    return await injectedVarProviders
-      .filter(p => p.appId === appId)
-      .reduce(async (acc, { provider }) => ({
-        ...await acc,
-        ...await provider(server)
-      }), {});
-  });
+  server.decorate('server', 'getUiAppById', (id) => appsById.get(id));
+  server.decorate('server', 'getHiddenUiAppById', (id) => hiddenAppsById.get(id));
+  server.decorate('server', 'injectUiAppVars', (appId, provider) =>
+    kbnServer.newPlatform.__internals.legacy.injectUiAppVars(appId, provider)
+  );
+  server.decorate(
+    'server',
+    'getInjectedUiAppVars',
+    async (appId) => await kbnServer.newPlatform.__internals.legacy.getInjectedUiAppVars(appId)
+  );
 }

@@ -18,6 +18,81 @@
  */
 
 import { savedObjectsMixin } from './saved_objects_mixin';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { convertLegacyTypes } from '../../../core/server/saved_objects/utils';
+import { SavedObjectTypeRegistry } from '../../../core/server';
+import { coreMock } from '../../../core/server/mocks';
+
+const mockConfig = {
+  get: jest.fn().mockReturnValue('anything'),
+};
+
+const savedObjectMappings = [
+  {
+    pluginId: 'testtype',
+    properties: {
+      testtype: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  {
+    pluginId: 'testtype2',
+    properties: {
+      doc1: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+      doc2: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  {
+    pluginId: 'secretPlugin',
+    properties: {
+      hiddentype: {
+        properties: {
+          secret: { type: 'keyword' },
+        },
+      },
+    },
+  },
+];
+
+const savedObjectSchemas = {
+  hiddentype: {
+    hidden: true,
+  },
+  doc1: {
+    indexPattern: 'other-index',
+  },
+};
+
+const savedObjectTypes = convertLegacyTypes(
+  {
+    savedObjectMappings,
+    savedObjectSchemas,
+    savedObjectMigrations: {},
+  },
+  mockConfig
+);
+
+const typeRegistry = new SavedObjectTypeRegistry();
+savedObjectTypes.forEach((type) => typeRegistry.registerType(type));
+
+const migrator = mockKibanaMigrator.create({
+  types: savedObjectTypes,
+});
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
@@ -28,11 +103,12 @@ describe('Saved Objects Mixin', () => {
     'kibana.index': 'kibana.index',
     'savedObjects.maxImportExportSize': 10000,
   };
-  const stubConfig = jest.fn(key => {
+  const stubConfig = jest.fn((key) => {
     return config[key];
   });
 
   beforeEach(() => {
+    const clientProvider = savedObjectsClientProviderMock.create();
     mockServer = {
       log: jest.fn(),
       route: jest.fn(),
@@ -54,7 +130,23 @@ describe('Saved Objects Mixin', () => {
         },
       },
     };
+
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+
     mockKbnServer = {
+      newPlatform: {
+        __internals: {
+          kibanaMigrator: migrator,
+          savedObjectsClientProvider: clientProvider,
+        },
+        setup: {
+          core: coreMock.createSetup(),
+        },
+        start: {
+          core: coreStart,
+        },
+      },
       server: mockServer,
       ready: () => {},
       pluginSpecs: {
@@ -63,51 +155,8 @@ describe('Saved Objects Mixin', () => {
         },
       },
       uiExports: {
-        savedObjectSchemas: {
-          hiddentype: {
-            hidden: true,
-          },
-          doc1: {
-            indexPattern: 'other-index',
-          },
-        },
-        savedObjectMappings: [
-          {
-            pluginId: 'testtype',
-            properties: {
-              testtype: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          {
-            pluginId: 'testtype2',
-            properties: {
-              doc1: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-              doc2: {
-                properties: {
-                  name: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          {
-            pluginId: 'secretPlugin',
-            properties: {
-              hiddentype: {
-                properties: {
-                  secret: { type: 'keyword' },
-                },
-              },
-            },
-          },
-        ],
+        savedObjectMappings,
+        savedObjectSchemas,
       },
     };
   });
@@ -122,101 +171,25 @@ describe('Saved Objects Mixin', () => {
         'kibanaMigrator',
         expect.any(Object)
       );
-      expect(mockServer.decorate).toHaveBeenCalledTimes(2);
+      expect(mockServer.decorate).toHaveBeenCalledTimes(1);
       expect(mockServer.route).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Routes', () => {
-    it('should create 11 routes', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(11);
-    });
-    it('should add POST /api/saved_objects/_bulk_create', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_bulk_create', method: 'POST' })
-      );
-    });
-    it('should add POST /api/saved_objects/_bulk_get', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_bulk_get', method: 'POST' })
-      );
-    });
-    it('should add POST /api/saved_objects/{type}/{id?}', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/{type}/{id?}', method: 'POST' })
-      );
-    });
-    it('should add DELETE /api/saved_objects/{type}/{id}', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'DELETE' })
-      );
-    });
-    it('should add GET /api/saved_objects/_find', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_find', method: 'GET' })
-      );
-    });
-    it('should add GET /api/saved_objects/{type}/{id}', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'GET' })
-      );
-    });
-    it('should add PUT /api/saved_objects/{type}/{id}', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' })
-      );
-    });
-    it('should add GET /api/saved_objects/_export', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_export', method: 'POST' })
-      );
-    });
-    it('should add POST /api/saved_objects/_import', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_import', method: 'POST' })
-      );
-    });
-    it('should add POST /api/saved_objects/_resolve_import_errors', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/api/saved_objects/_resolve_import_errors',
-          method: 'POST',
-        })
-      );
-    });
-    it('should add POST /api/saved_objects/_log_legacy_import', () => {
-      savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(
-        expect.objectContaining({ path: '/api/saved_objects/_log_legacy_import', method: 'POST' })
-      );
     });
   });
 
   describe('Saved object service', () => {
     let service;
 
-    beforeEach(() => {
-      savedObjectsMixin(mockKbnServer, mockServer);
+    beforeEach(async () => {
+      await savedObjectsMixin(mockKbnServer, mockServer);
       const call = mockServer.decorate.mock.calls.filter(
         ([objName, methodName]) => objName === 'server' && methodName === 'savedObjects'
       );
       service = call[0][2];
     });
 
-    it('should return all but hidden types', () => {
+    it('should return all but hidden types', async () => {
       expect(service).toBeDefined();
-      expect(service.types).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+      expect(service.types).toEqual(['testtype', 'doc1', 'doc2']);
     });
 
     const mockCallEs = jest.fn();
@@ -230,16 +203,12 @@ describe('Saved Objects Mixin', () => {
       it('should create a repository without hidden types', () => {
         const repository = service.getSavedObjectsRepository(mockCallEs);
         expect(repository).toBeDefined();
-        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with a unique list of allowed types', () => {
-        const repository = service.getSavedObjectsRepository(mockCallEs, [
-          'config',
-          'config',
-          'config',
-        ]);
-        expect(repository._allowedTypes).toEqual(['config', 'testtype', 'doc1', 'doc2']);
+        const repository = service.getSavedObjectsRepository(mockCallEs, ['doc1', 'doc1', 'doc1']);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2']);
       });
 
       it('should create a repository with extraTypes minus duplicate', () => {
@@ -247,13 +216,7 @@ describe('Saved Objects Mixin', () => {
           'hiddentype',
           'hiddentype',
         ]);
-        expect(repository._allowedTypes).toEqual([
-          'config',
-          'testtype',
-          'doc1',
-          'doc2',
-          'hiddentype',
-        ]);
+        expect(repository._allowedTypes).toEqual(['testtype', 'doc1', 'doc2', 'hiddentype']);
       });
 
       it('should not allow a repository without a callCluster function', () => {
@@ -264,9 +227,8 @@ describe('Saved Objects Mixin', () => {
     });
 
     describe('get client', () => {
-      it('should return a valid client object', () => {
-        const client = service.getScopedSavedObjectsClient();
-        expect(client).toBeDefined();
+      it('should have a method to get the client', () => {
+        expect(service).toHaveProperty('getScopedSavedObjectsClient');
       });
 
       it('should have a method to set the client factory', () => {
@@ -287,21 +249,6 @@ describe('Saved Objects Mixin', () => {
         expect(() => {
           service.addScopedSavedObjectsClientWrapperFactory({});
         }).not.toThrowError();
-      });
-
-      it('should call underlining callCluster', async () => {
-        stubCallCluster.mockImplementation(method => {
-          if (method === 'indices.get') {
-            return { status: 404 };
-          } else if (method === 'indices.getAlias') {
-            return { status: 404 };
-          } else if (method === 'cat.templates') {
-            return [];
-          }
-        });
-        const client = await service.getScopedSavedObjectsClient();
-        await client.create('testtype');
-        expect(stubCallCluster).toHaveBeenCalled();
       });
     });
 

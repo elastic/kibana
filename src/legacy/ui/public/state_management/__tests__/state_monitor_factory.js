@@ -19,17 +19,13 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
+import { EventEmitter } from 'events';
 import { cloneDeep } from 'lodash';
 import { stateMonitorFactory } from '../state_monitor_factory';
-import { SimpleEmitter } from '../../utils/simple_emitter';
 
 describe('stateMonitorFactory', function () {
   const noop = () => {};
-  const eventTypes = [
-    'save_with_changes',
-    'reset_with_changes',
-    'fetch_with_changes',
-  ];
+  const eventTypes = ['save_with_changes', 'reset_with_changes', 'fetch_with_changes'];
 
   let mockState;
 
@@ -39,7 +35,7 @@ describe('stateMonitorFactory', function () {
   }
 
   function createMockState(state = {}) {
-    const mockState = new SimpleEmitter();
+    const mockState = new EventEmitter();
     setState(mockState, state, false);
     return mockState;
   }

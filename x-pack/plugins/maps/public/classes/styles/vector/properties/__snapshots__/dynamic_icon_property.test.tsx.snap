@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderLegendDetailRow Should render categorical legend with breaks 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        content="foobar_label"
+        delay="regular"
+        position="top"
+        title="Icon"
+      >
+        <EuiText
+          className="eui-textTruncate"
+          size="xs"
+          style={
+            Object {
+              "maxWidth": "180px",
+            }
+          }
+        >
+          <small>
+            <strong>
+              foobar_label
+            </strong>
+          </small>
+        </EuiText>
+      </EuiToolTip>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    direction="column"
+    gutterSize="none"
+  >
+    <EuiFlexItem
+      key="0"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="US_format"
+        styleName="icon"
+        symbolId="circle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="CN_format"
+        styleName="icon"
+        symbolId="marker"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="2"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label={
+          <EuiTextColor
+            color="secondary"
+          >
+            Other
+          </EuiTextColor>
+        }
+        styleName="icon"
+        symbolId="square"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

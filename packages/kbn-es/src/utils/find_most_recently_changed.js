@@ -32,7 +32,7 @@ exports.findMostRecentlyChanged = function findMostRecentlyChanged(pattern) {
     throw new TypeError(`Pattern must be absolute, got ${pattern}`);
   }
 
-  const ctime = path => fs.statSync(path).ctime.getTime();
+  const ctime = (path) => fs.statSync(path).ctime.getTime();
 
   return glob
     .sync(pattern)

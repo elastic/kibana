@@ -17,16 +17,16 @@
  * under the License.
  */
 
-
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple } from '../../../core_plugins/kibana_react/public/markdown';
+import { MarkdownSimple } from '../../../../plugins/kibana_react/public';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../../../../plugins/kibana_utils/public';
 import { uiModules } from '../modules';
 
-uiModules.get('kibana/url')
-  .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
+uiModules.get('kibana/url').service('redirectWhenMissing', function (Private) {
+  return Private(RedirectWhenMissingProvider);
+});
 
 export function RedirectWhenMissingProvider(kbnUrl, Promise) {
   /**
@@ -59,7 +59,7 @@ export function RedirectWhenMissingProvider(kbnUrl, Promise) {
 
       toastNotifications.addWarning({
         title: i18n.translate('common.ui.url.savedObjectIsMissingNotificationMessage', {
-          defaultMessage: 'Saved object is missing'
+          defaultMessage: 'Saved object is missing',
         }),
         text: <MarkdownSimple>{error.message}</MarkdownSimple>,
       });

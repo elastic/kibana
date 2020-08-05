@@ -20,7 +20,6 @@
 import _ from 'lodash';
 
 export function BoundToConfigObjProvider(config) {
-
   /**
    * Create an object with properties that may be bound to config values.
    * The input object is basically cloned unless one of it's own properties
@@ -53,5 +52,4 @@ export function BoundToConfigObjProvider(config) {
   }
 
   return BoundToConfigObj;
-
 }

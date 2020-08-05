@@ -25,14 +25,13 @@ describe('UiNavLink', () => {
   describe('constructor', () => {
     it('initializes the object properties as expected', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
         euiIconType: 'discoverApp',
         hidden: true,
-        disabled: true
+        disabled: true,
       };
 
       const link = new UiNavLink(spec);
@@ -46,19 +45,20 @@ describe('UiNavLink', () => {
         euiIconType: spec.euiIconType,
         hidden: spec.hidden,
         disabled: spec.disabled,
+        category: undefined,
 
         // defaults
         linkToLastSubUrl: true,
-        tooltip: ''
+        disableSubUrlTracking: undefined,
+        tooltip: '',
       });
     });
 
     it('initializes the order property to 0 when order is not specified in the spec', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -67,12 +67,11 @@ describe('UiNavLink', () => {
 
     it('initializes the linkToLastSubUrl property to false when false is specified in the spec', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
-        linkToLastSubUrl: false
+        url: '/app/discover#/',
+        linkToLastSubUrl: false,
       };
       const link = new UiNavLink(spec);
 
@@ -81,11 +80,10 @@ describe('UiNavLink', () => {
 
     it('initializes the linkToLastSubUrl property to true by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -94,11 +92,10 @@ describe('UiNavLink', () => {
 
     it('initializes the hidden property to false by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -107,11 +104,10 @@ describe('UiNavLink', () => {
 
     it('initializes the disabled property to false by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 
@@ -120,11 +116,10 @@ describe('UiNavLink', () => {
 
     it('initializes the tooltip property to an empty string by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
-        url: '/app/kibana#/discover',
-        icon: 'plugins/kibana/assets/discover.svg',
+        url: '/app/discover#/',
       };
       const link = new UiNavLink(spec);
 

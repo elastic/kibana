@@ -17,17 +17,13 @@
  * under the License.
  */
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import { parse } from './settings';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('command line option parsing', function () {
-
       describe('parse function', function () {
-
         const command = 'plugin name';
         let options = {};
         const kbnPackage = { version: 1234 };
@@ -36,7 +32,6 @@ describe('kibana cli', function () {
         });
 
         describe('quiet option', function () {
-
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -49,11 +44,9 @@ describe('kibana cli', function () {
 
             expect(settings.quiet).toBe(true);
           });
-
         });
 
         describe('silent option', function () {
-
           it('should default to false', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -66,11 +59,9 @@ describe('kibana cli', function () {
 
             expect(settings.silent).toBe(true);
           });
-
         });
 
         describe('config option', function () {
-
           it('should default to ZLS', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -83,11 +74,9 @@ describe('kibana cli', function () {
 
             expect(settings.config).toBe('foo bar baz');
           });
-
         });
 
         describe('pluginDir option', function () {
-
           it('should default to plugins', function () {
             const settings = parse(command, options, kbnPackage);
 
@@ -100,23 +89,16 @@ describe('kibana cli', function () {
 
             expect(settings.pluginDir).toBe('foo bar baz');
           });
-
         });
 
         describe('command value', function () {
-
           it('should set settings.plugin property', function () {
             const settings = parse(command, options, kbnPackage);
 
             expect(settings.plugin).toBe(command);
           });
-
         });
-
       });
-
     });
-
   });
-
 });

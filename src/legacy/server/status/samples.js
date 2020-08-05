@@ -27,7 +27,7 @@ function Samples(max) {
 
 Samples.prototype.add = function (sample) {
   const vals = this.vals;
-  const length = this.length = Math.min(this.length + 1, this.max);
+  const length = (this.length = Math.min(this.length + 1, this.max));
 
   _.forOwn(sample, function (val, name) {
     if (val == null) val = null;

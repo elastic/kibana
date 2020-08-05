@@ -1,0 +1,25 @@
+{
+  "id": "reporting",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": [
+    "security",
+    "usageCollection"
+  ],
+  "configPath": ["xpack", "reporting"],
+  "requiredPlugins": [
+    "data",
+    "home",
+    "management",
+    "licensing",
+    "uiActions",
+    "embeddable",
+    "share"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "kibanaReact",
+    "discover"
+  ]
+}

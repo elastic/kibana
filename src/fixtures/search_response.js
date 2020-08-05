@@ -25,11 +25,11 @@ export default {
   _shards: {
     total: 144,
     successful: 144,
-    failed: 0
+    failed: 0,
   },
   hits: {
     total: 49487,
     max_score: 1.0,
-    hits: hits
-  }
+    hits: hits,
+  },
 };

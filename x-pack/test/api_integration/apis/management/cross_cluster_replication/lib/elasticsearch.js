@@ -19,17 +19,16 @@ export const registerHelpers = (es) => {
   };
 
   const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
+    indicesCreated = indicesCreated.filter((i) => i !== index);
     return es.indices.delete({ index });
   };
 
-  const deleteAllIndices = () => (
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
-  );
+  const deleteAllIndices = () =>
+    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
-  return ({
+  return {
     createIndex,
     deleteIndex,
     deleteAllIndices,
-  });
+  };
 };

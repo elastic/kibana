@@ -31,7 +31,7 @@ exports.normalizeWhitespace = function normalizeWhitespace(string) {
   return string.replace(/\s+/g, ' ');
 };
 
-exports.init = function(context, program, initStep) {
+exports.init = function (context, program, initStep) {
   try {
     return initStep();
   } catch (error) {

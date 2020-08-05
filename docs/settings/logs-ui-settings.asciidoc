@@ -1,14 +1,14 @@
 [role="xpack"]
 [[logs-ui-settings-kb]]
-=== Logs UI settings in Kibana
+=== Logs settings in {kib}
 ++++
-<titleabbrev>Logs UI settings</titleabbrev>
+<titleabbrev>Logs settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use the Logs UI. It is enabled by default.
+You do not need to configure any settings to use the Logs app in {kib}. It is enabled by default.
 
 [float]
 [[general-logs-ui-settings-kb]]
-==== General Logs UI settings
+==== General Logs settings
 
 include::general-infra-logs-ui-settings.asciidoc[]

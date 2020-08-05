@@ -25,9 +25,11 @@ describe('Registry', function () {
   let Private;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      Private = $injector.get('Private');
+    })
+  );
 
   it('is technically a function', function () {
     const reg = uiRegistry();
@@ -45,7 +47,7 @@ describe('Registry', function () {
 
     it('applies the filter function if one is specified', function () {
       const reg = uiRegistry({
-        filter: item => item.value % 2 === 0 // register only even numbers
+        filter: (item) => item.value % 2 === 0, // register only even numbers
       });
 
       reg.register(() => ({ value: 17 }));
@@ -79,7 +81,7 @@ describe('Registry', function () {
       const reg = uiRegistry({
         constructor: function () {
           return { mods: (self = this) };
-        }
+        },
       });
 
       const modules = Private(reg);
@@ -91,7 +93,7 @@ describe('Registry', function () {
   describe('spec.name', function () {
     it('sets the displayName of the registry and the name param on the final instance', function () {
       const reg = uiRegistry({
-        name: 'visTypes'
+        name: 'visTypes',
       });
 
       expect(reg).to.have.property('displayName', '[registry visTypes]');
@@ -106,7 +108,7 @@ describe('Registry', function () {
       const reg = uiRegistry({
         constructor: function () {
           i = i + 1;
-        }
+        },
       });
 
       Private(reg);
@@ -119,7 +121,7 @@ describe('Registry', function () {
       const reg = uiRegistry({
         constructor: function () {
           return { mods: (self = this) };
-        }
+        },
       });
 
       const modules = Private(reg);
@@ -132,8 +134,8 @@ describe('Registry', function () {
     it('is called with the registered providers and defines the initial set of values in the registry', () => {
       const reg = uiRegistry({
         invokeProviders(providers) {
-          return providers.map(i => i * 1000);
-        }
+          return providers.map((i) => i * 1000);
+        },
       });
 
       reg.register(1);
@@ -142,9 +144,11 @@ describe('Registry', function () {
       expect(Private(reg).toJSON()).to.eql([1000, 2000, 3000]);
     });
     it('does not get assigned as a property of the registry', () => {
-      expect(uiRegistry({
-        invokeProviders() {}
-      })).to.not.have.property('invokeProviders');
+      expect(
+        uiRegistry({
+          invokeProviders() {},
+        })
+      ).to.not.have.property('invokeProviders');
     });
   });
 
@@ -153,7 +157,7 @@ describe('Registry', function () {
       const reg = uiRegistry({
         someMethod: function () {
           return this;
-        }
+        },
       });
 
       const modules = Private(reg);

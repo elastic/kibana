@@ -11,7 +11,7 @@ import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     copyToSpaceTest,
@@ -24,7 +24,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
-    originSpaces.forEach(spaceId => {
+    originSpaces.forEach((spaceId) => {
       copyToSpaceTest(`from the ${spaceId} space`, {
         spaceId,
         tests: {

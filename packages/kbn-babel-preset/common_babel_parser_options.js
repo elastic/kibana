@@ -24,10 +24,12 @@ module.exports = {
   plugins: [
     'asyncGenerators',
     'classProperties',
+    'classPrivateProperties',
+    'classPrivateMethods',
     'dynamicImport',
     'exportDefaultFrom',
     'exportNamespaceFrom',
     'objectRestSpread',
-    'throwExpressions'
+    'throwExpressions',
   ],
 };

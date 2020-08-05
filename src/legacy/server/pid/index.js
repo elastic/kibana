@@ -19,11 +19,11 @@
 
 import _ from 'lodash';
 import Boom from 'boom';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import { unlinkSync as unlink } from 'fs';
-const writeFile = Promise.promisify(require('fs').writeFile);
+const writeFile = Bluebird.promisify(require('fs').writeFile);
 
-export default Promise.method(function (kbnServer, server, config) {
+export default Bluebird.method(function (kbnServer, server, config) {
   const path = config.get('pid.file');
   if (!path) return;
 
@@ -36,7 +36,7 @@ export default Promise.method(function (kbnServer, server, config) {
       const message = `pid file already exists at ${path}`;
       const metadata = {
         path: path,
-        pid: pid
+        pid: pid,
       };
 
       if (config.get('pid.exclusive')) {
@@ -48,10 +48,9 @@ export default Promise.method(function (kbnServer, server, config) {
       return writeFile(path, pid);
     })
     .then(function () {
-
       server.logWithMetadata(['pid', 'debug'], `wrote pid file to ${path}`, {
         path: path,
-        pid: pid
+        pid: pid,
       });
 
       const clean = _.once(function () {
@@ -59,7 +58,8 @@ export default Promise.method(function (kbnServer, server, config) {
       });
 
       process.once('exit', clean); // for "natural" exits
-      process.once('SIGINT', function () { // for Ctrl-C exits
+      process.once('SIGINT', function () {
+        // for Ctrl-C exits
         clean();
 
         // resend SIGINT

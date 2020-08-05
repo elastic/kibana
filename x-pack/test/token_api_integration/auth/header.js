@@ -6,7 +6,7 @@
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   async function createToken() {
     const { access_token: accessToken } = await es.shield.getAccessToken({
@@ -14,7 +14,7 @@ export default function ({ getService }) {
         grant_type: 'password',
         username: 'elastic',
         password: 'changeme',
-      }
+      },
     });
 
     return accessToken;
@@ -25,7 +25,7 @@ export default function ({ getService }) {
       const token = await createToken();
 
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${token}`)
         .expect(200);
@@ -36,14 +36,14 @@ export default function ({ getService }) {
 
       // try it once
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${token}`)
         .expect(200);
 
       // try it again to verity it isn't invalidated after a single request
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${token}`)
         .expect(200);
@@ -51,7 +51,7 @@ export default function ({ getService }) {
 
     it('rejects invalid access token via authorization Bearer header', async () => {
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', 'Bearer notreal')
         .expect(401);
@@ -64,10 +64,10 @@ export default function ({ getService }) {
 
       // Access token expiration is set to 15s for API integration tests.
       // Let's wait for 20s to make sure token expires.
-      await new Promise(resolve => setTimeout(() => resolve(), 20000));
+      await new Promise((resolve) => setTimeout(() => resolve(), 20000));
 
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${token}`)
         .expect(401);

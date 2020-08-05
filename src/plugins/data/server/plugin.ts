@@ -17,12 +17,88 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '../../../core/server';
+import { ConfigSchema } from '../config';
+import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
+import { ISearchSetup, ISearchStart } from './search';
+import { SearchService } from './search/search_service';
+import { QueryService } from './query/query_service';
+import { ScriptsService } from './scripts';
+import { KqlTelemetryService } from './kql_telemetry';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+import { AutocompleteService } from './autocomplete';
+import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { getUiSettings } from './ui_settings';
 
-export class DataServerPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
-  public setup(core: CoreSetup) {}
-  public start(core: CoreStart) {}
+export interface DataPluginSetup {
+  search: ISearchSetup;
+  fieldFormats: FieldFormatsSetup;
+}
+
+export interface DataPluginStart {
+  search: ISearchStart;
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: IndexPatternsServiceStart;
+}
+
+export interface DataPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+}
+
+export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart> {
+  private readonly searchService: SearchService;
+  private readonly scriptsService: ScriptsService;
+  private readonly kqlTelemetryService: KqlTelemetryService;
+  private readonly autocompleteService: AutocompleteService;
+  private readonly indexPatterns = new IndexPatternsService();
+  private readonly fieldFormats = new FieldFormatsService();
+  private readonly queryService = new QueryService();
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.logger = initializerContext.logger.get('data');
+    this.searchService = new SearchService(initializerContext, this.logger);
+    this.scriptsService = new ScriptsService();
+    this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
+    this.autocompleteService = new AutocompleteService(initializerContext);
+  }
+
+  public setup(
+    core: CoreSetup<object, DataPluginStart>,
+    { usageCollection }: DataPluginSetupDependencies
+  ) {
+    this.indexPatterns.setup(core);
+    this.scriptsService.setup(core);
+    this.queryService.setup(core);
+    this.autocompleteService.setup(core);
+    this.kqlTelemetryService.setup(core, { usageCollection });
+
+    core.uiSettings.register(getUiSettings());
+
+    return {
+      search: this.searchService.setup(core, { usageCollection }),
+      fieldFormats: this.fieldFormats.setup(),
+    };
+  }
+
+  public start(core: CoreStart) {
+    const fieldFormats = this.fieldFormats.start();
+    return {
+      search: this.searchService.start(),
+      fieldFormats,
+      indexPatterns: this.indexPatterns.start(core, {
+        fieldFormats,
+        logger: this.logger.get('indexPatterns'),
+      }),
+    };
+  }
+
   public stop() {}
 }
 

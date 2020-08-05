@@ -1,0 +1,7 @@
+{
+  "async_search.submit": {
+    "data_autocomplete_rules": {
+      "__scope_link": "search"
+    }
+  }
+}

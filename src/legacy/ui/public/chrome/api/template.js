@@ -19,7 +19,6 @@
 
 // eslint-disable-next-line import/no-default-export
 export default function (chrome, internals) {
-
   /**
    * ui/chrome Template API
    *
@@ -73,6 +72,4 @@ export default function (chrome, internals) {
     internals.rootController = controllerName + (as ? ' as ' + as : '');
     return chrome;
   };
-
-
 }

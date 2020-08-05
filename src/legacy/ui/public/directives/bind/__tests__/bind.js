@@ -20,15 +20,16 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 describe('$scope.$bind', function () {
-
   let $rootScope;
   let $scope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    $rootScope = $injector.get('$rootScope');
-    $scope = $rootScope.$new();
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      $rootScope = $injector.get('$rootScope');
+      $scope = $rootScope.$new();
+    })
+  );
 
   it('exposes $bind on all scopes', function () {
     expect($rootScope.$bind).to.be.a('function');
@@ -38,7 +39,7 @@ describe('$scope.$bind', function () {
     expect($isoScope).to.have.property('$bind', $rootScope.$bind);
   });
 
-  it('sets up binding from a parent scope to it\'s child', function () {
+  it("sets up binding from a parent scope to it's child", function () {
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
     expect($scope.localVal).to.be('foo');

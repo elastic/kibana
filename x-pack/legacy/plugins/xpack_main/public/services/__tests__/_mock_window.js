@@ -15,9 +15,9 @@ export const mockWindow = {
     },
     removeItem(key) {
       delete items[key];
-    }
+    },
   },
   location: {
-    pathname: ''
-  }
+    pathname: '',
+  },
 };

@@ -20,17 +20,14 @@
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const chance = getService('chance');
+  const randomness = getService('randomness');
 
   describe('params', () => {
     before(() => esArchiver.load('index_patterns/basic_index'));
     after(() => esArchiver.unload('index_patterns/basic_index'));
 
     it('requires a pattern query param', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({})
-        .expect(400));
+      supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));
 
     it('accepts a JSON formatted meta_fields query param', () =>
       supertest
@@ -63,8 +60,8 @@ export default function ({ getService }) {
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
-          pattern: chance.word(),
-          [chance.word()]: chance.word(),
+          pattern: randomness.word(),
+          [randomness.word()]: randomness.word(),
         })
         .expect(400));
   });

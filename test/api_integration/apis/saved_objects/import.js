@@ -73,7 +73,7 @@ export default function ({ getService }) {
                     title: 'logstash-*',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -81,7 +81,7 @@ export default function ({ getService }) {
                     title: 'Count of requests',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                   {
                     id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
@@ -89,7 +89,7 @@ export default function ({ getService }) {
                     title: 'Requests',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                 ],
               });
@@ -113,12 +113,15 @@ export default function ({ getService }) {
         });
 
         it('should return 200 when trying to import unsupported types', async () => {
-          const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
+          const fileBuffer = Buffer.from(
+            '{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}',
+            'utf8'
+          );
           await supertest
             .post('/api/saved_objects/_import')
             .attach('file', fileBuffer, 'export.ndjson')
             .expect(200)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -149,7 +152,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Can\'t import more than 10000 objects',
+                message: "Can't import more than 10000 objects",
               });
             });
         });

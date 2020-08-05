@@ -26,21 +26,24 @@ const TEST_STEP_SIZE = 3;
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
   describe('context view for date_nanos', () => {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': TEST_INDEX_PATTERN });
+      await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos');
+    after(async function unloadMakelogs() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
     it('displays predessors - anchor - successors in right order ', async function () {
@@ -49,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       const expectedRowsText = [
         'Sep 18, 2019 @ 06:50:13.000000000-2',
         'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011'
+        'Sep 19, 2015 @ 06:50:13.0001000011',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });
@@ -68,10 +71,9 @@ export default function ({ getService, getPageObjects }) {
         'Sep 18, 2019 @ 06:50:13.000000001-1',
         'Sep 18, 2019 @ 06:50:13.000000000-2',
         'Sep 18, 2019 @ 06:50:12.999999999-3',
-        'Sep 19, 2015 @ 06:50:13.0001000011'
+        'Sep 19, 2015 @ 06:50:13.0001000011',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
-
     });
   });
 }

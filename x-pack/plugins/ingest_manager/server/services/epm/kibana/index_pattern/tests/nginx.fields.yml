@@ -1,0 +1,120 @@
+- name: nginx.access
+  type: group
+  description: >
+    Contains fields for the Nginx access logs.
+  fields:
+    - name: group_disabled
+      type: group
+      enabled: false
+      fields:
+        - name: message
+          type: text
+    - name: remote_ip_list
+      type: array
+      description: >
+        An array of remote IP addresses. It is a list because it is common to include, besides the client
+        IP address, IP addresses from headers like `X-Forwarded-For`.
+        Real source IP is restored to `source.ip`.
+
+    - name: body_sent.bytes
+      type: alias
+      path: http.response.body.bytes
+      migration: true
+    - name: user_name
+      type: alias
+      path: user.name
+      migration: true
+    - name: method
+      type: alias
+      path: http.request.method
+      migration: true
+    - name: url
+      type: alias
+      path: url.original
+      migration: true
+    - name: http_version
+      type: alias
+      path: http.version
+      migration: true
+    - name: response_code
+      type: alias
+      path: http.response.status_code
+      migration: true
+    - name: referrer
+      type: alias
+      path: http.request.referrer
+      migration: true
+    - name: agent
+      type: alias
+      path: user_agent.original
+      migration: true
+
+    - name: user_agent
+      type: group
+      fields:
+        - name: device
+          type: alias
+          path: user_agent.device.name
+          migration: true
+        - name: name
+          type: alias
+          path: user_agent.name
+          migration: true
+        - name: os
+          type: alias
+          path: user_agent.os.full_name
+          migration: true
+        - name: os_name
+          type: alias
+          path: user_agent.os.name
+          migration: true
+        - name: original
+          type: alias
+          path: user_agent.original
+          migration: true
+
+    - name: geoip
+      type: group
+      fields:
+        - name: continent_name
+          type: alias
+          path: source.geo.continent_name
+          migration: true
+        - name: country_iso_code
+          type: alias
+          path: source.geo.country_iso_code
+          migration: true
+        - name: location
+          type: alias
+          path: source.geo.location
+          migration: true
+        - name: region_name
+          type: alias
+          path: source.geo.region_name
+          migration: true
+        - name: city_name
+          type: alias
+          path: source.geo.city_name
+          migration: true
+        - name: region_iso_code
+          type: alias
+          path: source.geo.region_iso_code
+          migration: true
+
+- name: source
+  type: group
+  fields: 
+    - name: geo
+      type: group
+      fields:
+        - name: continent_name
+          type: text
+- name: country
+  type: ""
+  multi_fields: 
+    - name: keyword
+      type: keyword
+    - name: text
+      type: text
+- name: nginx
+  type: group

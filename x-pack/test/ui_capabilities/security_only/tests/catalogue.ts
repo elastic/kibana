@@ -7,17 +7,14 @@
 import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
   describe('catalogue', () => {
-    UserScenarios.forEach(scenario => {
+    UserScenarios.forEach((scenario) => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: {
@@ -35,15 +32,26 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             break;
           }
           case 'all':
-          case 'read':
-          case 'dual_privileges_all':
-          case 'dual_privileges_read': {
+          case 'dual_privileges_all': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
             // everything except ml and monitoring is enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
+          case 'read':
+          case 'dual_privileges_read': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything except ml and monitoring and enterprise search is enabled
+            const exceptions = ['ml', 'monitoring', 'appSearch', 'workplaceSearch'];
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
@@ -63,8 +71,11 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // only foo is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           default:
             throw new UnreachableError(scenario);

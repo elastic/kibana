@@ -7,8 +7,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('apis', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('apis', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./oidc_auth'));
   });

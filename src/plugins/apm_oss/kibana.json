@@ -1,0 +1,11 @@
+{
+  "id": "apmOss",
+  "version": "8.0.0",
+  "server": true,
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "apm_oss"
+  ],
+  "ui": true,
+  "requiredPlugins": ["home"]
+}

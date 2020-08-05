@@ -10,21 +10,17 @@ import expect from '@kbn/expect';
 import { replaceInjectedVars } from '../replace_injected_vars';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 
-const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
+const buildRequest = (path = '/app/kibana') => {
   const get = sinon.stub();
-  if (telemetryOptedIn === null) {
-    get.withArgs('telemetry', 'telemetry').rejects(new Error('not found exception'));
-  } else {
-    get.withArgs('telemetry', 'telemetry').resolves({ attributes: { enabled: telemetryOptedIn } });
-  }
 
   return {
     path,
     route: { settings: {} },
+    headers: {},
     raw: {
       req: {
-        socket: {}
-      }
+        socket: {},
+      },
     },
     getSavedObjectsClient: () => {
       return {
@@ -34,10 +30,10 @@ const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
         errors: {
           isNotFoundError: (error) => {
             return error.message === 'not found exception';
-          }
-        }
+          },
+        },
       };
-    }
+    },
   };
 };
 
@@ -50,9 +46,8 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
 
@@ -73,9 +68,8 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -89,41 +83,38 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
 
   it('respects the telemetry opt-in document when opted-out', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(false);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
 
   it('respects the telemetry opt-in document when opted-in', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = buildRequest(true);
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: true,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -137,9 +128,8 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: false,
       xpackInitialInfo: {
-        b: 1
+        b: 1,
       },
     });
   });
@@ -165,7 +155,10 @@ describe('replaceInjectedVars uiExport', () => {
   });
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
-    const originalInjectedVars = { a: 1, uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } } };
+    const originalInjectedVars = {
+      a: 1,
+      uiCapabilities: { navLinks: { foo: true }, bar: { baz: true }, catalogue: { cfoo: true } },
+    };
     const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
@@ -174,26 +167,15 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      telemetryOptedIn: null,
       xpackInitialInfo: undefined,
       uiCapabilities: {
         navLinks: { foo: true },
         bar: { baz: true },
         catalogue: {
           cfoo: true,
-        }
+        },
       },
     });
-  });
-
-  it('sends the originalInjectedVars if the license check result is not available', async () => {
-    const originalInjectedVars = { a: 1 };
-    const request = buildRequest();
-    const server = mockServer();
-    server.plugins.xpack_main.info.feature().getLicenseCheckResults.returns(undefined);
-
-    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
-    expect(newVars).to.eql(originalInjectedVars);
   });
 });
 
@@ -204,37 +186,39 @@ function mockServer() {
   return {
     newPlatform: {
       setup: {
-        plugins: { security: { authc: { isAuthenticated: sinon.stub().returns(true) } } }
-      }
+        plugins: { security: { authc: { isAuthenticated: sinon.stub().returns(true) } } },
+      },
     },
     plugins: {
       security: {},
       xpack_main: {
-        getFeatures: () => [{
-          id: 'mockFeature',
-          name: 'Mock Feature',
-          privileges: {
-            all: {
-              app: [],
-              savedObject: {
-                all: [],
-                read: [],
+        getFeatures: () => [
+          {
+            id: 'mockFeature',
+            name: 'Mock Feature',
+            privileges: {
+              all: {
+                app: [],
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: ['mockFeatureCapability'],
               },
-              ui: ['mockFeatureCapability']
-            }
-          }
-        }],
+            },
+          },
+        ],
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({
-            getLicenseCheckResults
+            getLicenseCheckResults,
           }),
           license: {
-            isOneOf: sinon.stub().returns(false)
+            isOneOf: sinon.stub().returns(false),
           },
-          toJSON: () => ({ b: 1 })
-        }
-      }
-    }
+          toJSON: () => ({ b: 1 }),
+        },
+      },
+    },
   };
 }

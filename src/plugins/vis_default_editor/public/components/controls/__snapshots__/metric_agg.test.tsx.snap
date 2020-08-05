@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricAggParamEditor should be rendered with default set of props 1`] = `
+<EuiFormRow
+  compressed={true}
+  describedByIds={Array []}
+  display="row"
+  fullWidth={true}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={false}
+  label="Metric"
+  labelType="label"
+>
+  <EuiSelect
+    compressed={true}
+    data-test-subj="visEditorSubAggMetric1"
+    fullWidth={true}
+    isInvalid={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "hidden": true,
+          "text": "",
+          "value": "EMPTY_VALUE",
+        },
+      ]
+    }
+    value="EMPTY_VALUE"
+  />
+</EuiFormRow>
+`;

@@ -13,7 +13,8 @@ function extractCausedByChain(causedBy = {}, accumulator = []) {
     accumulator.push(reason);
   }
 
-  if (caused_by) { // eslint-disable-line camelcase
+  // eslint-disable-next-line camelcase
+  if (caused_by) {
     return extractCausedByChain(caused_by, accumulator);
   }
 
@@ -28,10 +29,7 @@ function extractCausedByChain(causedBy = {}, accumulator = []) {
  * @return Object Boom error response
  */
 export function wrapEsError(err, statusCodeToMessageMap = {}) {
-  const {
-    statusCode,
-    response,
-  } = err;
+  const { statusCode, response } = err;
 
   const {
     error: {

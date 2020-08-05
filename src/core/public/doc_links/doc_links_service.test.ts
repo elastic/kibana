@@ -25,9 +25,9 @@ describe('DocLinksService#start()', () => {
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
     const service = new DocLinksService();
-    const start = service.start({ injectedMetadata });
-    expect(start.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(start.links.kibana).toEqual(
+    const api = service.start({ injectedMetadata });
+    expect(api.DOC_LINK_VERSION).toEqual('test-branch');
+    expect(api.links.kibana).toEqual(
       'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
     );
   });

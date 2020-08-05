@@ -24,6 +24,7 @@ const createStartContractMock = () => {
     client: {
       create: jest.fn(),
       bulkCreate: jest.fn(),
+      bulkUpdate: jest.fn(),
       delete: jest.fn(),
       bulkGet: jest.fn(),
       find: jest.fn(),
@@ -44,7 +45,7 @@ const createMock = () => {
   return mocked;
 };
 
-export const savedObjectsMock = {
+export const savedObjectsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

@@ -27,9 +27,10 @@ export interface KbnFieldTypeOptions {
 
 /** @public **/
 export enum ES_FIELD_TYPES {
-  _TYPE = '_type',
   _ID = '_id',
+  _INDEX = '_index',
   _SOURCE = '_source',
+  _TYPE = '_type',
 
   STRING = 'string',
   TEXT = 'text',
@@ -58,6 +59,8 @@ export enum ES_FIELD_TYPES {
   ATTACHMENT = 'attachment',
   TOKEN_COUNT = 'token_count',
   MURMUR3 = 'murmur3',
+
+  HISTOGRAM = 'histogram',
 }
 
 /** @public **/
@@ -76,4 +79,5 @@ export enum KBN_FIELD_TYPES {
   CONFLICT = 'conflict',
   OBJECT = 'object',
   NESTED = 'nested',
+  HISTOGRAM = 'histogram',
 }

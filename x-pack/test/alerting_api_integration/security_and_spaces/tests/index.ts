@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService, SecurityService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
@@ -14,12 +13,12 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  const securityService: SecurityService = getService('security');
-  const spacesService: SpacesService = getService('spaces');
+  const securityService = getService('security');
+  const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
-  describe('alerting api integration security and spaces enabled', function() {
-    this.tags('ciGroup1');
+  describe('alerting api integration security and spaces enabled', function () {
+    this.tags('ciGroup5');
 
     before(async () => {
       for (const space of Spaces) {
@@ -32,7 +31,7 @@ export default function alertingApiIntegrationTests({
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {

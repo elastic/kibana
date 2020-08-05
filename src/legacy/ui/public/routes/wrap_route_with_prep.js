@@ -32,7 +32,7 @@ export function wrapRouteWithPrep(route, setup) {
   const resolve = {
     __prep__: function ($injector) {
       return $injector.invoke(setup.doWork, setup, { userWork });
-    }
+    },
   };
 
   // send each user resolve to the userWork queue, which will prevent it from running before the
@@ -50,4 +50,3 @@ export function wrapRouteWithPrep(route, setup) {
   // we're copied everything over so now overwrite
   route.resolve = resolve;
 }
-

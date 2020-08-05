@@ -1,6 +1,15 @@
 {
   "id": "expressions",
   "version": "kibana",
-  "server": false,
-  "ui": true
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "bfetch"
+  ],
+  "extraPublicDirs": ["common", "common/fonts"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "inspector",
+    "data"
+  ]
 }

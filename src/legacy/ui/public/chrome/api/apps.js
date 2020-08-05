@@ -22,7 +22,6 @@ import { resolve } from 'url';
 
 // eslint-disable-next-line import/no-default-export
 export default function (chrome, internals) {
-
   if (get(internals, 'app.navLink.url')) {
     internals.app.navLink.url = resolve(window.location.href, internals.app.navLink.url);
   }
@@ -35,9 +34,10 @@ export default function (chrome, internals) {
   } catch (error) {
     throw new Error(
       'Kibana requires access to sessionStorage, and it looks like ' +
-      'your browser is restricting it. If you\'re ' +
-      'using Safari with private browsing enabled, you can solve this ' +
-      'problem by disabling private browsing, or by using another browser.');
+        "your browser is restricting it. If you're " +
+        'using Safari with private browsing enabled, you can solve this ' +
+        'problem by disabling private browsing, or by using another browser.'
+    );
   }
 
   /**

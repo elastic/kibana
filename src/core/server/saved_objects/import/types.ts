@@ -107,11 +107,17 @@ export interface SavedObjectsImportResponse {
  * @public
  */
 export interface SavedObjectsImportOptions {
+  /** The stream of {@link SavedObject | saved objects} to import */
   readStream: Readable;
+  /** The maximum number of object to import */
   objectLimit: number;
+  /** if true, will override existing object if present */
   overwrite: boolean;
+  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
+  /** the list of allowed types to import */
   supportedTypes: string[];
+  /** if specified, will import in given namespace, else will import as global object */
   namespace?: string;
 }
 
@@ -120,10 +126,16 @@ export interface SavedObjectsImportOptions {
  * @public
  */
 export interface SavedObjectsResolveImportErrorsOptions {
+  /** The stream of {@link SavedObject | saved objects} to resolve errors from */
   readStream: Readable;
+  /** The maximum number of object to import */
   objectLimit: number;
+  /** client to use to perform the import operation */
   savedObjectsClient: SavedObjectsClientContract;
+  /** saved object import references to retry */
   retries: SavedObjectsImportRetry[];
+  /** the list of allowed types to import */
   supportedTypes: string[];
+  /** if specified, will import in given namespace */
   namespace?: string;
 }

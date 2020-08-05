@@ -17,9 +17,14 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  readFileSync: jest.fn(),
-}));
+jest.mock('fs', () => {
+  const original = jest.requireActual('fs');
+  return {
+    // Hapi Inert patches native methods
+    ...original,
+    readFileSync: jest.fn(),
+  };
+});
 
 import supertest from 'supertest';
 import { Request, ResponseToolkit } from 'hapi';
@@ -29,10 +34,8 @@ import { defaultValidationErrorHandler, HapiValidationError, getServerOptions } 
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
 const emptyOutput = {
   statusCode: 400,
@@ -74,14 +77,14 @@ describe('defaultValidationErrorHandler', () => {
 });
 
 describe('timeouts', () => {
-  const logger = loggingServiceMock.create();
+  const logger = loggingSystemMock.create();
   const server = new HttpServer(logger, 'foo');
   const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
   test('closes sockets on timeout', async () => {
     const router = new Router('', logger.get(), enhanceWithContext);
     router.get({ path: '/a', validate: false }, async (context, req, res) => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       return res.ok({});
     });
     router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
@@ -90,6 +93,7 @@ describe('timeouts', () => {
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
+      compression: { enabled: true },
     } as HttpConfig);
     registerRouter(router);
 
@@ -97,9 +101,7 @@ describe('timeouts', () => {
 
     expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
 
-    await supertest(innerServer.listener)
-      .get('/b')
-      .expect(200);
+    await supertest(innerServer.listener).get('/b').expect(200);
   });
 
   afterAll(async () => {
@@ -121,22 +123,22 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`
-            Object {
-              "ca": undefined,
-              "cert": "content-some-certificate-path",
-              "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
-              "honorCipherOrder": true,
-              "key": "content-some-key-path",
-              "passphrase": undefined,
-              "rejectUnauthorized": false,
-              "requestCert": false,
-              "secureOptions": 67108864,
-            }
-        `);
+      Object {
+        "ca": undefined,
+        "cert": "content-some-certificate-path",
+        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "honorCipherOrder": true,
+        "key": "content-some-key-path",
+        "passphrase": undefined,
+        "rejectUnauthorized": false,
+        "requestCert": false,
+        "secureOptions": 67108864,
+      }
+    `);
   });
 
   it('properly configures TLS with client authentication', () => {
@@ -150,7 +152,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
-      Env.createDefault(getEnvOptions())
+      {} as any
     );
 
     expect(getServerOptions(httpConfig).tls).toMatchInlineSnapshot(`

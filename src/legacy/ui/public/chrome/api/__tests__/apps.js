@@ -32,7 +32,7 @@ describe('Chrome API :: apps', function () {
 
       it('appCount = 1', function () {
         const chrome = {};
-        setup(chrome, { nav: [ { url: '/' } ] });
+        setup(chrome, { nav: [{ url: '/' }] });
         expect(chrome.getShowAppsLink()).to.equal(false);
       });
     });
@@ -40,26 +40,26 @@ describe('Chrome API :: apps', function () {
     describe('defaults to true if there are two or more apps', function () {
       it('appCount = 2', function () {
         const chrome = {};
-        setup(chrome, { nav: [ { url: '/' }, { url: '/2' } ] });
+        setup(chrome, { nav: [{ url: '/' }, { url: '/2' }] });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
 
       it('appCount = 3', function () {
         const chrome = {};
-        setup(chrome, { nav: [ { url: '/' }, { url: '/2' }, { url: '/3' } ] });
+        setup(chrome, { nav: [{ url: '/' }, { url: '/2' }, { url: '/3' }] });
         expect(chrome.getShowAppsLink()).to.equal(true);
       });
     });
 
     it('is chainable', function () {
       const chrome = {};
-      setup(chrome, { nav: [ { url: '/' } ] });
+      setup(chrome, { nav: [{ url: '/' }] });
       expect(chrome.setShowAppsLink(true)).to.equal(chrome);
     });
 
     it('can be changed', function () {
       const chrome = {};
-      setup(chrome, { nav: [ { url: '/' } ] });
+      setup(chrome, { nav: [{ url: '/' }] });
 
       expect(chrome.setShowAppsLink(true).getShowAppsLink()).to.equal(true);
       expect(chrome.getShowAppsLink()).to.equal(true);

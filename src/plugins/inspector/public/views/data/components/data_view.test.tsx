@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { getDataViewDescription } from '../index';
-import { DataAdapter } from '../../../adapters/data';
+import { DataAdapter } from '../../../../common/adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { UiSettingsClientContract } from '../../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 jest.mock('../lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
@@ -31,7 +31,7 @@ describe('Inspector Data View', () => {
   let DataView: any;
 
   beforeEach(() => {
-    const uiSettings = {} as UiSettingsClientContract;
+    const uiSettings = {} as IUiSettingsClient;
 
     DataView = getDataViewDescription(uiSettings);
   });
@@ -51,13 +51,13 @@ describe('Inspector Data View', () => {
     });
 
     it('should render loading state', () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
 
       expect(component).toMatchSnapshot();
     });
 
     it('should render empty state', async () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />);
+      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
       const tabularLoader = Promise.resolve(null);
       adapters.data.setTabularLoader(() => tabularLoader);
       await tabularLoader;

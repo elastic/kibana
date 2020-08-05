@@ -5,6 +5,13 @@
  */
 
 export const REQUIRED_ROLES = ['beats_admin'];
-export const REQUIRED_LICENSES = ['standard', 'gold', 'trial', 'platinum'];
-export const LICENSES = ['oss', 'basic', 'standard', 'gold', 'trial', 'platinum'];
-export type LicenseType = 'oss' | 'basic' | 'trial' | 'standard' | 'basic' | 'gold' | 'platinum';
+export const REQUIRED_LICENSES = ['standard', 'gold', 'trial', 'platinum', 'enterprise'];
+export const LICENSES = ['oss', 'basic', 'standard', 'gold', 'trial', 'platinum', 'enterprise'];
+export type LicenseType =
+  | 'oss'
+  | 'basic'
+  | 'trial'
+  | 'standard'
+  | 'gold'
+  | 'platinum'
+  | 'enterprise';

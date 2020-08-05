@@ -98,7 +98,7 @@ export function uiRegistry(spec) {
         : newProviders.map(Private);
 
       if (filter && _.isFunction(filter)) {
-        set = set.filter(item => filter(item));
+        set = set.filter((item) => filter(item));
       }
 
       return set;

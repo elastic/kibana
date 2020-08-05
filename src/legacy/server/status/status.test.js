@@ -144,5 +144,4 @@ describe('Status class', function () {
   testState('green');
   testState('yellow');
   testState('red');
-
 });

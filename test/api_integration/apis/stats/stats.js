@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-const assertStatsAndMetrics = body => {
+const assertStatsAndMetrics = (body) => {
   expect(body.kibana.name).to.be.a('string');
   expect(body.kibana.uuid).to.be.a('string');
   expect(body.kibana.host).to.be.a('string');
@@ -145,4 +145,3 @@ export default function ({ getService }) {
     });
   });
 }
-

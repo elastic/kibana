@@ -28,7 +28,7 @@ describe('Status wrapAuthConfig', () => {
       path: '/status',
       handler: function (request, h) {
         return h.response();
-      }
+      },
     };
   });
 

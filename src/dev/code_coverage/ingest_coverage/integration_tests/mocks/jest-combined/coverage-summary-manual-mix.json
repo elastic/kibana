@@ -1,0 +1,28 @@
+{
+  "/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js": {
+    "lines": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "functions": {
+      "total": 1,
+      "covered": 1,
+      "skipped": 0,
+      "pct": 100
+    },
+    "statements": {
+      "total": 4,
+      "covered": 4,
+      "skipped": 0,
+      "pct": 100
+    },
+    "branches": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  }
+}

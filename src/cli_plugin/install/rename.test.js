@@ -36,15 +36,14 @@ describe('plugin folder rename', function () {
   it('should rethrow any exceptions', function () {
     renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
       cb({
-        code: 'error'
+        code: 'error',
       });
     });
 
-    return renamePlugin('/foo/bar', '/bar/foo')
-      .catch(function (err) {
-        expect(err.code).toBe('error');
-        expect(renameStub.callCount).toBe(1);
-      });
+    return renamePlugin('/foo/bar', '/bar/foo').catch(function (err) {
+      expect(err.code).toBe('error');
+      expect(renameStub.callCount).toBe(1);
+    });
   });
 
   it('should resolve if there are no errors', function () {
@@ -57,7 +56,7 @@ describe('plugin folder rename', function () {
         expect(renameStub.callCount).toBe(1);
       })
       .catch(function () {
-        throw new Error('We shouldn\'t have any errors');
+        throw new Error("We shouldn't have any errors");
       });
   });
 
@@ -66,7 +65,7 @@ describe('plugin folder rename', function () {
     beforeEach(function () {
       platform = Object.getOwnPropertyDescriptor(process, 'platform');
       Object.defineProperty(process, 'platform', {
-        value: 'win32'
+        value: 'win32',
       });
     });
     afterEach(function () {
@@ -76,14 +75,13 @@ describe('plugin folder rename', function () {
     it('should retry on Windows EPERM errors for up to 3 seconds', function () {
       renameStub = sinon.stub(fs, 'rename').callsFake((from, to, cb) => {
         cb({
-          code: 'EPERM'
+          code: 'EPERM',
         });
       });
-      return renamePlugin('/foo/bar', '/bar/foo')
-        .catch(function (err) {
-          expect(err.code).toBe('EPERM');
-          expect(renameStub.callCount).toBeGreaterThan(1);
-        });
+      return renamePlugin('/foo/bar', '/bar/foo').catch(function (err) {
+        expect(err.code).toBe('EPERM');
+        expect(renameStub.callCount).toBeGreaterThan(1);
+      });
     }, 5000);
   });
 });

@@ -25,11 +25,13 @@ describe('deprecation', function () {
   describe('createTransform', function () {
     it(`doesn't modify settings parameter`, function () {
       const settings = {
-        original: true
+        original: true,
       };
-      const deprecations = [(settings) => {
-        settings.original = false;
-      }];
+      const deprecations = [
+        (settings) => {
+          settings.original = false;
+        },
+      ];
       createTransform(deprecations)(settings);
       expect(settings.original).to.be(true);
     });

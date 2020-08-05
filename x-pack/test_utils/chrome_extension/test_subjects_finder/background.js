@@ -10,16 +10,18 @@ chrome.runtime.onInstalled.addListener(function () {
 
   chrome.declarativeContent.onPageChanged.removeRules(undefined, () => {
     // Only activate the plugin on localhost
-    chrome.declarativeContent.onPageChanged.addRules([{
-      conditions: [
-        new chrome.declarativeContent.PageStateMatcher({
-          pageUrl: { hostEquals: 'localhost' },
-        }),
-        new chrome.declarativeContent.PageStateMatcher({
-          pageUrl: { hostEquals: 'kibana-dev' },
-        })
-      ],
-      actions: [new chrome.declarativeContent.ShowPageAction()]
-    }]);
+    chrome.declarativeContent.onPageChanged.addRules([
+      {
+        conditions: [
+          new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: { hostEquals: 'localhost' },
+          }),
+          new chrome.declarativeContent.PageStateMatcher({
+            pageUrl: { hostEquals: 'kibana-dev' },
+          }),
+        ],
+        actions: [new chrome.declarativeContent.ShowPageAction()],
+      },
+    ]);
   });
 });

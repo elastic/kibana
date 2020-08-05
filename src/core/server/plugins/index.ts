@@ -17,7 +17,12 @@
  * under the License.
  */
 
-export { PluginsService, PluginsServiceSetup, PluginsServiceStart } from './plugins_service';
+export {
+  PluginsService,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  UiPlugins,
+} from './plugins_service';
 export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';

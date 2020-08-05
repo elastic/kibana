@@ -8,10 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function navLinksTests({ getService }: FtrProviderContext) {
@@ -25,7 +22,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
       navLinksBuilder = new NavLinksBuilder(features);
     });
 
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
@@ -41,14 +38,26 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             break;
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
-          case 'dual_privileges_read at everything_space':
-          case 'global_read at everything_space':
-          case 'everything_space_all at everything_space':
-          case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
+            );
+            break;
+          case 'everything_space_all at everything_space':
+          case 'global_read at everything_space':
+          case 'dual_privileges_read at everything_space':
+          case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(
+                'ml',
+                'monitoring',
+                'enterpriseSearch',
+                'appSearch',
+                'workplaceSearch'
+              )
             );
             break;
           case 'superuser at nothing_space':
@@ -58,10 +67,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'global_read at nothing_space':
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('navLinks');
-            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
-            break;
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':
@@ -70,10 +75,9 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
           case 'everything_space_read at nothing_space':
           case 'nothing_space_all at everything_space':
           case 'nothing_space_read at everything_space':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(
-              GetUICapabilitiesFailureReason.RedirectedToSpaceSelector
-            );
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           default:
             throw new UnreachableError(scenario);

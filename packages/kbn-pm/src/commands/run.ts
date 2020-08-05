@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import chalk from 'chalk';
-
+import { CliError } from '../utils/errors';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
 import { topologicallyBatchProjects } from '../utils/projects';
@@ -32,20 +31,19 @@ export const RunCommand: ICommand = {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
     if (extraArgs.length === 0) {
-      log.write(chalk.red.bold('\nNo script specified'));
-      process.exit(1);
+      throw new CliError('No script specified');
     }
 
     const scriptName = extraArgs[0];
     const scriptArgs = extraArgs.slice(1);
 
-    log.write(
-      chalk.bold(`\nRunning script [${chalk.green(scriptName)}] in batched topological order\n`)
-    );
-
-    await parallelizeBatches(batchedProjects, async pkg => {
-      if (pkg.hasScript(scriptName)) {
-        await pkg.runScriptStreaming(scriptName, scriptArgs);
+    await parallelizeBatches(batchedProjects, async (project) => {
+      if (project.hasScript(scriptName)) {
+        log.info(`[${project.name}] running "${scriptName}" script`);
+        await project.runScriptStreaming(scriptName, {
+          args: scriptArgs,
+        });
+        log.success(`[${project.name}] complete`);
       }
     });
   },

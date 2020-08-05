@@ -18,6 +18,7 @@
  */
 
 import { Duration } from 'moment';
+import { Stream } from 'stream';
 
 import { ByteSizeValue } from './byte_size_value';
 import { ContextReference, Reference, SiblingReference } from './references';
@@ -26,6 +27,7 @@ import {
   ArrayOptions,
   ArrayType,
   BooleanType,
+  BufferType,
   ByteSizeOptions,
   ByteSizeType,
   ConditionalType,
@@ -42,6 +44,7 @@ import {
   ObjectType,
   ObjectTypeOptions,
   Props,
+  NullableProps,
   RecordOfOptions,
   RecordOfType,
   StringOptions,
@@ -52,10 +55,13 @@ import {
   UnionType,
   URIOptions,
   URIType,
+  StreamType,
 } from './types';
 
-export { ObjectType, TypeOf, Type };
+export { ObjectType, TypeOf, Type, Props, NullableProps };
 export { ByteSizeValue } from './byte_size_value';
+export { SchemaTypeError, ValidationError } from './errors';
+export { isConfigSchema } from './typeguards';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -63,6 +69,14 @@ function any(options?: TypeOptions<any>) {
 
 function boolean(options?: TypeOptions<boolean>): Type<boolean> {
   return new BooleanType(options);
+}
+
+function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
+  return new BufferType(options);
+}
+
+function stream(options?: TypeOptions<Stream>): Type<Stream> {
+  return new StreamType(options);
 }
 
 function string(options?: StringOptions): Type<string> {
@@ -188,6 +202,7 @@ export const schema = {
   any,
   arrayOf,
   boolean,
+  buffer,
   byteSize,
   conditional,
   contextRef,
@@ -201,6 +216,7 @@ export const schema = {
   object,
   oneOf,
   recordOf,
+  stream,
   siblingRef,
   string,
   uri,

@@ -23,6 +23,27 @@ declare module '*.html' {
   export default template;
 }
 
+declare module '*.png' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.svg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+// allow JSON files to be imported directly without lint errors
+// see: https://github.com/palantir/tslint/issues/1264#issuecomment-228433367
+// and: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#arbitrary-expressions-are-forbidden-in-export-assignments-in-ambient-contexts
+declare module '*.json' {
+  const json: any;
+  // eslint-disable-next-line import/no-default-export
+  export default json;
+}
+
 type MethodKeysOf<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];
@@ -37,3 +58,7 @@ type DeeplyMockedKeys<T> = {
     : DeeplyMockedKeys<T[P]>;
 } &
   T;
+
+type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};

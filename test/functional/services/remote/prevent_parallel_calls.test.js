@@ -24,11 +24,11 @@ it('only calls fn when previous call is complete, ignores when filter returns tr
 
   async function foo(arg) {
     orderOfEvents.push(`called with ${arg}`);
-    await new Promise(resolve => setTimeout(resolve, arg));
+    await new Promise((resolve) => setTimeout(resolve, arg));
     orderOfEvents.push(`resolved with ${arg}`);
   }
 
-  const serialized = preventParallelCalls(foo, arg => arg === 0);
+  const serialized = preventParallelCalls(foo, (arg) => arg === 0);
 
   await Promise.all([
     serialized(100),

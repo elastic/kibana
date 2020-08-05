@@ -32,7 +32,7 @@ import {
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
-  callee => `
+  (callee) => `
 ${callee}('plugin_1.id_1', {
   values: {
     key: 'value',
@@ -64,14 +64,14 @@ describe('i18n utils', () => {
 
   test('should detect i18n translate function call', () => {
     let source = i18nTranslateSources[0];
-    let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    let expressionStatementNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isExpressionStatement(node)
     );
 
     expect(isI18nTranslateFunction(expressionStatementNode.expression)).toBe(true);
 
     source = i18nTranslateSources[1];
-    expressionStatementNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    expressionStatementNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isExpressionStatement(node)
     );
 
@@ -79,9 +79,9 @@ describe('i18n utils', () => {
   });
 
   test('should detect object property with defined key', () => {
-    const objectExpresssionNode = [...traverseNodes(parse(objectPropertySource).program.body)].find(
-      node => isObjectExpression(node)
-    );
+    const objectExpresssionNode = [
+      ...traverseNodes(parse(objectPropertySource).program.body),
+    ].find((node) => isObjectExpression(node));
     const [objectExpresssionProperty] = objectExpresssionNode.properties;
 
     expect(isPropertyWithKey(objectExpresssionProperty, 'id')).toBe(true);
@@ -165,9 +165,7 @@ describe('i18n utils', () => {
     const defaultMessage = 'Test message {first, plural, one {{second}} other {{third}}}';
     const messageId = 'namespace.message.id';
 
-    expect(() =>
-      checkValuesProperty(valuesKeys, defaultMessage, messageId)
-    ).not.toThrow();
+    expect(() => checkValuesProperty(valuesKeys, defaultMessage, messageId)).not.toThrow();
   });
 
   test(`should throw on wrong nested ICU message`, () => {
@@ -185,7 +183,7 @@ describe('i18n utils', () => {
 i18n('namespace.id', {
   defaultMessage: 'Very ' + 'long ' + 'concatenated ' + 'string',
 });`;
-    const objectProperty = [...traverseNodes(parse(source).program.body)].find(node =>
+    const objectProperty = [...traverseNodes(parse(source).program.body)].find((node) =>
       isObjectProperty(node)
     );
 

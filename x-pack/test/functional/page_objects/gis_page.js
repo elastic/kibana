@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { APP_ID } from '../../../plugins/maps/common/constants';
 
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
@@ -16,13 +17,13 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const renderable = getService('renderable');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
   }
 
   class GisPage {
-
     constructor() {
       this.basePath = '';
     }
@@ -87,8 +88,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
-      const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
+        const tableOfContents = await testSubjects.find('mapLayerTOC');
         await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
@@ -132,8 +133,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openNewMap() {
       log.debug(`Open new Map`);
 
-      await this.gotoMapListingPage();
-      await testSubjects.click('newMapLink');
+      // Navigate directly because we don't need to go through the map listing
+      // page. The listing page is skipped if there are no saved objects
+      await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
+      await renderable.waitForRender();
     }
 
     async saveMap(name) {
@@ -160,7 +163,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('mapsListingPage');
+      const exists = await testSubjects.exists('mapsListingPage', { timeout: 3500 });
       return exists;
     }
 
@@ -198,7 +201,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -210,16 +213,20 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
       log.debug(`getMapCountWithName: ${name}`);
       await this.searchForMapWithName(name);
-      const links = await find.allByLinkText(name);
-      return links.length;
+      const buttons = await find.allByButtonText(name);
+      return buttons.length;
+    }
+
+    async isSetViewPopoverOpen() {
+      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
     }
 
     async openSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (!isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (!isOpenAfterClick) {
             throw new Error('set view popover not opened');
           }
@@ -228,11 +235,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async closeSetViewPopover() {
-      const isOpen = await testSubjects.exists('mapSetViewForm');
+      const isOpen = await this.isSetViewPopoverOpen();
       if (isOpen) {
         await retry.try(async () => {
           await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await testSubjects.exists('mapSetViewForm');
+          const isOpenAfterClick = await this.isSetViewPopoverOpen();
           if (isOpenAfterClick) {
             throw new Error('set view popover not closed');
           }
@@ -241,7 +248,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async setView(lat, lon, zoom) {
-      log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
+      log.debug(
+        `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
+      );
       await this.openSetViewPopover();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
@@ -260,7 +269,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
-        zoom: parseFloat(zoom)
+        zoom: parseFloat(zoom),
       };
     }
 
@@ -310,14 +319,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async disableApplyGlobalQuery() {
-      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
-      const isSelected = await element.isSelected();
-      if(isSelected) {
+      const isSelected = await testSubjects.getAttribute(
+        'mapLayerPanelApplyGlobalQueryCheckbox',
+        'aria-checked'
+      );
+      if (isSelected === 'true') {
         await retry.try(async () => {
           log.debug(`disabling applyGlobalQuery`);
           await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
-          const isStillSelected = await element.isSelected();
-          if (isStillSelected) {
+          const isStillSelected = await testSubjects.getAttribute(
+            'mapLayerPanelApplyGlobalQueryCheckbox',
+            'aria-checked'
+          );
+          if (isStillSelected === 'true') {
             throw new Error('applyGlobalQuery not disabled');
           }
         });
@@ -326,7 +340,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
-      return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
+      return await testSubjects.exists(
+        `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
+      );
     }
 
     async hasFilePickerLoadedFile(fileName) {
@@ -376,6 +392,27 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async closeOrCancelLayer(layerName) {
+      log.debug(`Close or cancel layer add`);
+      const cancelExists = await testSubjects.exists('layerAddCancelButton');
+      const closeExists = await testSubjects.exists('layerPanelCancelButton');
+      if (cancelExists) {
+        log.debug(`Cancel layer add.`);
+        await testSubjects.click('layerAddCancelButton');
+      } else if (closeExists) {
+        log.debug(`Close layer add.`);
+        await testSubjects.click('layerPanelCancelButton');
+      } else {
+        log.debug(`No need to close or cancel.`);
+        return;
+      }
+
+      await this.waitForLayerAddPanelClosed();
+      if (layerName) {
+        await this.waitForLayerDeleted(layerName);
+      }
+    }
+
     async importFileButtonEnabled() {
       log.debug(`Check "Import file" button enabled`);
       const importFileButton = await testSubjects.find('importFileButton');
@@ -418,9 +455,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCodeBlockParsedJson(dataTestSubjName) {
       log.debug(`Get parsed code block for ${dataTestSubjName}`);
-      const indexRespCodeBlock = await find.byCssSelector(
-        `[data-test-subj="${dataTestSubjName}"]`
-      );
+      const indexRespCodeBlock = await testSubjects.find(`${dataTestSubjName}`);
       const indexRespJson = await indexRespCodeBlock.getAttribute('innerText');
       return JSON.parse(indexRespJson);
     }
@@ -439,7 +474,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
       const filterEditorContainer = await testSubjects.find('mapFilterEditor');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      const queryBarInFilterEditor = await testSubjects.findDescendant(
+        'queryInput',
+        filterEditorContainer
+      );
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
       await retry.try(async () => {
@@ -458,7 +496,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapJoinWhereExpressionButton');
       const filterEditorContainer = await testSubjects.find('mapJoinWhereFilterEditor');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      const queryBarInFilterEditor = await testSubjects.findDescendant(
+        'queryInput',
+        filterEditorContainer
+      );
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
       await input.clearValue();
@@ -474,13 +515,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async selectGeoJsonUploadSource() {
       log.debug(`Select upload geojson source`);
-      await testSubjects.click('uploadedGeoJson');
+      await testSubjects.click('uploadGeoJson');
     }
 
     async uploadJsonFileForIndexing(path) {
-      log.debug(`Setting the path on the file input`);
-      const input = await find.byCssSelector('.euiFilePicker__input');
-      await input.type(path);
+      await PageObjects.common.setFileInputPath(path);
       log.debug(`File selected`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -562,7 +601,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       let mapboxStyle;
       try {
         mapboxStyle = JSON.parse(mapboxStyleJson);
-      } catch(err) {
+      } catch (err) {
         throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
       }
       return mapboxStyle;
@@ -586,7 +625,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
       await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
-      await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
+      await PageObjects.common.sleep(refreshInterval + refreshInterval / 2);
       await PageObjects.timePicker.pauseAutoRefresh();
       await this.waitForLayersToLoad();
     }
@@ -602,6 +641,40 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error('Tooltip is not locked at position');
         }
       });
+    }
+
+    async setStyleByValue(styleName, fieldName) {
+      await testSubjects.selectValue(`staticDynamicSelect_${styleName}`, 'DYNAMIC');
+      await comboBox.set(`styleFieldSelect_${styleName}`, fieldName);
+    }
+
+    async selectCustomColorRamp(styleName) {
+      // open super select menu
+      await testSubjects.click(`colorMapSelect_${styleName}`);
+      // Click option
+      await testSubjects.click(`colorMapSelectOption_CUSTOM_COLOR_MAP`);
+    }
+
+    async getCategorySuggestions() {
+      return await comboBox.getOptionsList(`colorStopInput1`);
+    }
+
+    async enableAutoFitToBounds() {
+      await testSubjects.click('openSettingsButton');
+      const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
+      if (!isEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('autoFitToDataBoundsSwitch');
+          const ensureEnabled = await testSubjects.getAttribute(
+            'autoFitToDataBoundsSwitch',
+            'checked'
+          );
+          if (!ensureEnabled) {
+            throw new Error('autoFitToDataBoundsSwitch is not enabled');
+          }
+        });
+      }
+      await testSubjects.click('mapSettingSubmitButton');
     }
   }
   return new GisPage();

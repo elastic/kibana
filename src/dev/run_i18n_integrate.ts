@@ -88,7 +88,7 @@ run(
           new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
-        title: 'Intregrating Locale File',
+        title: 'Integrating Locale File',
         task: async ({ messages, config }) => {
           await integrateLocaleFiles(messages, {
             sourceFileName: source,
@@ -108,6 +108,7 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
+      process.exitCode = 0;
     } catch (error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
@@ -117,10 +118,12 @@ run(
         log.error(error);
       }
     }
+    process.exit();
   },
   {
     flags: {
       allowUnexpected: true,
+      guessTypesForUnexpectedFlags: true,
     },
   }
 );

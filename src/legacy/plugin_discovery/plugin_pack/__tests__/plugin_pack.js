@@ -53,9 +53,9 @@ describe('plugin discovery/plugin pack', () => {
       pack.getPluginSpecs();
       sinon.assert.calledOnce(provider);
       sinon.assert.calledWithExactly(provider, {
-        Plugin: sinon.match(Class => {
+        Plugin: sinon.match((Class) => {
           return Class.prototype instanceof PluginSpec;
-        }, 'Subclass of PluginSpec')
+        }, 'Subclass of PluginSpec'),
       });
     });
 
@@ -68,7 +68,7 @@ describe('plugin discovery/plugin pack', () => {
       const pack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: ({ Plugin }) => new Plugin({})
+        provider: ({ Plugin }) => new Plugin({}),
       });
 
       const specs = pack.getPluginSpecs();
@@ -81,10 +81,7 @@ describe('plugin discovery/plugin pack', () => {
       const pack = new PluginPack({
         path: '/dev/null',
         pkg: { name: 'foo', version: 'kibana' },
-        provider: ({ Plugin }) => [
-          new Plugin({}),
-          new Plugin({}),
-        ]
+        provider: ({ Plugin }) => [new Plugin({}), new Plugin({})],
       });
 
       const specs = pack.getPluginSpecs();
@@ -101,7 +98,7 @@ describe('plugin discovery/plugin pack', () => {
         pkg: { name: 'foo', version: 'kibana' },
         provider: (api) => {
           OtherPluginSpecClass = api.Plugin;
-        }
+        },
       });
 
       // call getPluginSpecs() on other pack to get it's api.Plugin class
@@ -120,7 +117,7 @@ describe('plugin discovery/plugin pack', () => {
       ];
 
       for (const pack of badPacks) {
-        expect(() => pack.getPluginSpecs()).to.throwError(error => {
+        expect(() => pack.getPluginSpecs()).to.throwError((error) => {
           expect(error.message).to.contain('unexpected plugin export');
         });
       }

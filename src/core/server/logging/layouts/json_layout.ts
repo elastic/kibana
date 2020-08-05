@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import moment from 'moment-timezone';
+import { merge } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
@@ -45,19 +47,28 @@ export class JsonLayout implements Layout {
 
     return {
       message: error.message,
-      name: error.name,
-      stack: error.stack,
+      type: error.name,
+      stack_trace: error.stack,
     };
   }
 
   public format(record: LogRecord): string {
-    return JSON.stringify({
-      '@timestamp': record.timestamp.toISOString(),
-      context: record.context,
-      error: JsonLayout.errorToSerializableObject(record.error),
-      level: record.level.id.toUpperCase(),
-      message: record.message,
-      meta: record.meta,
-    });
+    return JSON.stringify(
+      merge(
+        {
+          '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+          message: record.message,
+          error: JsonLayout.errorToSerializableObject(record.error),
+          log: {
+            level: record.level.id.toUpperCase(),
+            logger: record.context,
+          },
+          process: {
+            pid: record.pid,
+          },
+        },
+        record.meta
+      )
+    );
   }
 }

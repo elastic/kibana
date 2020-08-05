@@ -1,0 +1,37 @@
+{
+  "id": "apm",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "features",
+    "apmOss",
+    "data",
+    "home",
+    "licensing",
+    "triggers_actions_ui"
+  ],
+  "optionalPlugins": [
+    "cloud",
+    "usageCollection",
+    "taskManager",
+    "actions",
+    "alerts",
+    "observability",
+    "security",
+    "ml"
+  ],
+  "server": true,
+  "ui": true,
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
+  "extraPublicDirs": [
+    "public/style/variables"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "observability"
+  ]
+}

@@ -32,7 +32,9 @@ describe('url prependPath', function () {
     });
 
     it('if it is an absolute url', function () {
-      expect(prependPath('http://www.hithere.com/howareyou', 'welcome')).to.be('http://www.hithere.com/howareyou');
+      expect(prependPath('http://www.hithere.com/howareyou', 'welcome')).to.be(
+        'http://www.hithere.com/howareyou'
+      );
     });
 
     it('if it does not start with a /', function () {
@@ -66,7 +68,9 @@ describe('url prependPath', function () {
     });
 
     it('when pathname that ends with a file', function () {
-      expect(prependPath('/are/delicious/index.html', 'donuts')).to.be('donuts/are/delicious/index.html');
+      expect(prependPath('/are/delicious/index.html', 'donuts')).to.be(
+        'donuts/are/delicious/index.html'
+      );
     });
 
     it('when it is only a slash', function () {

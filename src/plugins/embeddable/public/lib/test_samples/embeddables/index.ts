@@ -23,6 +23,5 @@ export * from './filterable_container';
 export * from './filterable_container_factory';
 export * from './filterable_embeddable';
 export * from './filterable_embeddable_factory';
-export * from './hello_world';
 export * from './hello_world_container';
 export * from './hello_world_container_component';

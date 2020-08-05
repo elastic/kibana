@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import path from 'path';
 import { TestInvoker } from './lib/types';
 // @ts-ignore
-import { EsProvider } from './services/es';
+import { LegacyEsProvider } from './services/legacy_es';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -26,7 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
       },
       xpack: {
-        api: await readConfigFile(require.resolve('../../api_integration/config.js')),
+        api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
       },
     };
 
@@ -34,7 +33,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
-        es: EsProvider,
+        legacyEs: LegacyEsProvider,
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
@@ -67,7 +66,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

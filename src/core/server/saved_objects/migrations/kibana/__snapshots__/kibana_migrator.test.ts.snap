@@ -4,11 +4,11 @@ exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core pr
 Object {
   "_meta": Object {
     "migrationMappingPropertyHashes": Object {
-      "amap": "625b32086eb1d1203564cf85062dd22e",
-      "bmap": "625b32086eb1d1203564cf85062dd22e",
-      "config": "87aca8fdb053154f11383fce3dbf3edf",
+      "amap": "510f1f0adb69830cf8a1c5ce2923ed82",
+      "bmap": "510f1f0adb69830cf8a1c5ce2923ed82",
       "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
       "namespace": "2f4316de49999235636386fe51dc06c1",
+      "namespaces": "2f4316de49999235636386fe51dc06c1",
       "references": "7997cf5a56cc02bdc9c93361bde732b0",
       "type": "2f4316de49999235636386fe51dc06c1",
       "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
@@ -17,16 +17,16 @@ Object {
   "dynamic": "strict",
   "properties": Object {
     "amap": Object {
-      "type": "text",
+      "properties": Object {
+        "field": Object {
+          "type": "text",
+        },
+      },
     },
     "bmap": Object {
-      "type": "text",
-    },
-    "config": Object {
-      "dynamic": "true",
       "properties": Object {
-        "buildNum": Object {
-          "type": "keyword",
+        "field": Object {
+          "type": "text",
         },
       },
     },
@@ -35,6 +35,9 @@ Object {
       "type": "object",
     },
     "namespace": Object {
+      "type": "keyword",
+    },
+    "namespaces": Object {
       "type": "keyword",
     },
     "references": Object {

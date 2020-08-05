@@ -27,13 +27,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 
 import { I18nStart } from '../../i18n';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayBannersStart } from './banners_service';
 
 interface StartDeps {
   banners: OverlayBannersStart;
   i18n: I18nStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /**
@@ -63,7 +63,7 @@ export class UserBannerService {
 
       id = banners.replace(
         id,
-        el => {
+        (el) => {
           ReactDOM.render(
             <i18n.Context>
               <EuiCallOut

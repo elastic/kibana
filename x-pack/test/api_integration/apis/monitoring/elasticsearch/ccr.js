@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/ccr';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',
-      max: '2018-09-19T23:59:59.000Z'
+      max: '2018-09-19T23:59:59.000Z',
     };
 
     before('load archive', () => {

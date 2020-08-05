@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }) {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-
     });
 
     beforeEach(async () => {
@@ -42,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.increasePopularity();
     });
 
-    afterEach(async () =>  {
+    afterEach(async () => {
       await PageObjects.settings.controlChangeCancel();
       await PageObjects.settings.removeIndexPattern();
       // Cancel saving the popularity change (we didn't make a change in this case, just checking the value)

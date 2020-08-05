@@ -1,0 +1,52 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load() // load from the Jenkins instance
+
+kibanaPipeline(timeoutMinutes: 240) {
+  catchErrors {
+    def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+    withEnv([
+      "TIME_STAMP=${timestamp}",
+      'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
+    ]) {
+      workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
+        catchError {
+          kibanaCoverage.runTests()
+          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
+          handleIngestion(TIME_STAMP)
+        }
+        handleFail()
+      }
+    }
+    kibanaPipeline.sendMail()
+  }
+}
+
+def handleIngestion(timestamp) {
+  def previousSha = handlePreviousSha()
+  kibanaPipeline.downloadCoverageArtifacts()
+  kibanaCoverage.prokLinks("### Process HTML Links")
+  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+  kibanaCoverage.generateReports("### Merge coverage reports")
+  kibanaCoverage.uploadCombinedReports()
+  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
+  kibanaCoverage.uploadCoverageStaticSite(timestamp)
+}
+
+def handlePreviousSha() {
+  def previous = kibanaCoverage.downloadPrevious('### Download OLD Previous')
+  kibanaCoverage.uploadPrevious('### Upload NEW Previous')
+  return previous
+}
+
+def handleFail() {
+  def buildStatus = buildUtils.getBuildStatus()
+  if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED' && buildStatus != 'UNSTABLE') {
+    slackNotifications.sendFailedBuild(
+      channel: '#kibana-qa',
+      username: 'Kibana QA'
+    )
+  }
+}
+

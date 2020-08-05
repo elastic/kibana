@@ -27,7 +27,7 @@ export function WorkQueue() {
   Object.defineProperty(q, 'length', {
     get: function () {
       return work.length;
-    }
+    },
   });
 
   const resolve = function (defers) {

@@ -77,6 +77,7 @@ module.exports = {
                   anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
                 },
                 allowSameFolder: { type: 'boolean' },
+                errorMessage: { type: 'string' },
               },
               additionalProperties: false,
             },
@@ -125,6 +126,10 @@ module.exports = {
     }
 
     return {
+      ExportNamedDeclaration(node) {
+        if (!node.source) return;
+        checkForRestrictedImportPath(node.source.value, node.source);
+      },
       ImportDeclaration(node) {
         checkForRestrictedImportPath(node.source.value, node.source);
       },

@@ -16,9 +16,10 @@ export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex:
   </MemoryRouter>
 );
 
-export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
-  WrappedComponent: ComponentType
-) => {
+export const WithRoute = (
+  componentRoutePath: string | string[] = '/',
+  onRouter = (router: any) => {}
+) => (WrappedComponent: ComponentType) => {
   // Create a class component that will catch the router
   // and forward it to our "onRouter()" handler.
   const CatchRouter = withRouter(
@@ -38,7 +39,7 @@ export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => 
   return (props: any) => (
     <Route
       path={componentRoutePath}
-      render={routerProps => <CatchRouter {...routerProps} {...props} />}
+      render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
     />
   );
 };
@@ -53,7 +54,7 @@ interface Router {
 export const reactRouterMock: Router = {
   history: {
     push: () => {},
-    createHref: location => location.pathname!,
+    createHref: (location) => location.pathname!,
     location: {
       pathname: '',
       search: '',

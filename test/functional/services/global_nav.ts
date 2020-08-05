@@ -32,6 +32,10 @@ export function GlobalNavProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('headerGlobalNav > logo');
     }
 
+    public async clickNewsfeed(): Promise<void> {
+      return await testSubjects.click('headerGlobalNav > newsfeed');
+    }
+
     public async exists(): Promise<boolean> {
       return await testSubjects.exists('headerGlobalNav');
     }

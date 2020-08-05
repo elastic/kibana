@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiHostsComponent render it should render KpiHostDetailsData 1`] = `
+<EuiFlexGroup>
+  <StatItemsComponent
+    description="User authentications"
+    enableAreaChart={true}
+    enableBarChart={true}
+    fields={
+      Array [
+        Object {
+          "color": "#54B399",
+          "description": "success",
+          "icon": "check",
+          "key": "authSuccess",
+          "name": "Succ.",
+          "value": null,
+        },
+        Object {
+          "color": "#E7664C",
+          "description": "fail",
+          "icon": "cross",
+          "key": "authFailure",
+          "name": "Fail",
+          "value": null,
+        },
+      ]
+    }
+    grow={1}
+    index={0}
+    key="authentication"
+  />
+  <StatItemsComponent
+    description="Unique IPs"
+    enableAreaChart={true}
+    enableBarChart={true}
+    fields={
+      Array [
+        Object {
+          "color": "#D36086",
+          "description": "source",
+          "icon": "visMapCoordinate",
+          "key": "uniqueSourceIps",
+          "name": "Src.",
+          "value": null,
+        },
+        Object {
+          "color": "#9170B8",
+          "description": "destination",
+          "icon": "visMapCoordinate",
+          "key": "uniqueDestinationIps",
+          "name": "Dest.",
+          "value": null,
+        },
+      ]
+    }
+    grow={1}
+    index={1}
+    key="uniqueIps"
+  />
+</EuiFlexGroup>
+`;
+
+exports[`kpiHostsComponent render it should render KpiHostsData 1`] = `
+<EuiFlexGroup>
+  <StatItemsComponent
+    description="Hosts"
+    enableAreaChart={true}
+    fields={
+      Array [
+        Object {
+          "color": "#6092C0",
+          "icon": "storage",
+          "key": "hosts",
+          "value": null,
+        },
+      ]
+    }
+    grow={2}
+    index={0}
+    key="hosts"
+  />
+  <StatItemsComponent
+    description="User authentications"
+    enableAreaChart={true}
+    enableBarChart={true}
+    fields={
+      Array [
+        Object {
+          "color": "#54B399",
+          "description": "success",
+          "icon": "check",
+          "key": "authSuccess",
+          "name": "Succ.",
+          "value": null,
+        },
+        Object {
+          "color": "#E7664C",
+          "description": "fail",
+          "icon": "cross",
+          "key": "authFailure",
+          "name": "Fail",
+          "value": null,
+        },
+      ]
+    }
+    grow={4}
+    index={1}
+    key="authentication"
+  />
+  <StatItemsComponent
+    description="Unique IPs"
+    enableAreaChart={true}
+    enableBarChart={true}
+    fields={
+      Array [
+        Object {
+          "color": "#D36086",
+          "description": "source",
+          "icon": "visMapCoordinate",
+          "key": "uniqueSourceIps",
+          "name": "Src.",
+          "value": null,
+        },
+        Object {
+          "color": "#9170B8",
+          "description": "destination",
+          "icon": "visMapCoordinate",
+          "key": "uniqueDestinationIps",
+          "name": "Dest.",
+          "value": null,
+        },
+      ]
+    }
+    grow={4}
+    index={2}
+    key="uniqueIps"
+  />
+</EuiFlexGroup>
+`;
+
+exports[`kpiHostsComponent render it should render spinner if it is loading 1`] = `
+<FlexGroupSpinner
+  alignItems="center"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="xl"
+    />
+  </EuiFlexItem>
+</FlexGroupSpinner>
+`;

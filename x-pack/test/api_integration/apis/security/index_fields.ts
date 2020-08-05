@@ -7,14 +7,14 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Index Fields', () => {
-    describe('GET /api/security/v1/fields/{query}', () => {
+    describe('GET /internal/security/fields/{query}', () => {
       it('should return a list of available index mapping fields', async () => {
         await supertest
-          .get('/api/security/v1/fields/.kibana')
+          .get('/internal/security/fields/.kibana')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200)
@@ -27,7 +27,7 @@ export default function({ getService }: FtrProviderContext) {
               'space.name',
             ];
 
-            sampleOfExpectedFields.forEach(field => expect(response.body).to.contain(field));
+            sampleOfExpectedFields.forEach((field) => expect(response.body).to.contain(field));
           });
       });
     });

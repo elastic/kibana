@@ -28,9 +28,11 @@ describe('Binder class', function () {
   let $scope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($rootScope) {
-    $scope = $rootScope.$new();
-  }));
+  beforeEach(
+    ngMock.inject(function ($rootScope) {
+      $scope = $rootScope.$new();
+    })
+  );
 
   describe('Constructing with a $scope', function () {
     it('accepts a $scope and listens for $destroy', function () {
@@ -53,7 +55,7 @@ describe('Binder class', function () {
       const binder = new Binder();
       const emitter = {
         on: sinon.stub(),
-        removeListener: sinon.stub()
+        removeListener: sinon.stub(),
       };
       const handler = sinon.stub();
 

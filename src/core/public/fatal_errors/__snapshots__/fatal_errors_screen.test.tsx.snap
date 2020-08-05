@@ -1,20 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`rendering render matches snapshot 1`] = `
+exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "minHeight": "100vh",
     }
   }
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <EuiPageContent
       horizontalPosition="center"
-      panelPaddingSize="l"
       verticalPosition="center"
     >
       <EuiEmptyPrompt

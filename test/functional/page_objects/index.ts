@@ -17,39 +17,28 @@
  * under the License.
  */
 
-// @ts-ignore not TS yet
 import { CommonPageProvider } from './common_page';
-// @ts-ignore not TS yet
 import { ConsolePageProvider } from './console_page';
-// @ts-ignore not TS yet
 import { ContextPageProvider } from './context_page';
-// @ts-ignore not TS yet
 import { DashboardPageProvider } from './dashboard_page';
-// @ts-ignore not TS yet
 import { DiscoverPageProvider } from './discover_page';
-// @ts-ignore not TS yet
 import { ErrorPageProvider } from './error_page';
-// @ts-ignore not TS yet
 import { HeaderPageProvider } from './header_page';
-// @ts-ignore not TS yet
 import { HomePageProvider } from './home_page';
-// @ts-ignore not TS yet
-import { MonitoringPageProvider } from './monitoring_page';
-// @ts-ignore not TS yet
-import { PointSeriesPageProvider } from './point_series_page';
-// @ts-ignore not TS yet
+import { NewsfeedPageProvider } from './newsfeed_page';
 import { SettingsPageProvider } from './settings_page';
-// @ts-ignore not TS yet
 import { SharePageProvider } from './share_page';
-// @ts-ignore not TS yet
-import { ShieldPageProvider } from './shield_page';
-// @ts-ignore not TS yet
-import { TimePickerPageProvider } from './time_picker';
-// @ts-ignore not TS yet
+import { LoginPageProvider } from './login_page';
+import { TimePickerProvider } from './time_picker';
 import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
-// @ts-ignore not TS yet
 import { VisualizePageProvider } from './visualize_page';
+import { VisualizeEditorPageProvider } from './visualize_editor_page';
+import { VisualizeChartPageProvider } from './visualize_chart_page';
+import { TileMapPageProvider } from './tile_map_page';
+import { TagCloudPageProvider } from './tag_cloud_page';
+import { VegaChartPageProvider } from './vega_chart_page';
+import { SavedObjectsPageProvider } from './management/saved_objects_page';
 
 export const pageObjects = {
   common: CommonPageProvider,
@@ -60,13 +49,18 @@ export const pageObjects = {
   error: ErrorPageProvider,
   header: HeaderPageProvider,
   home: HomePageProvider,
-  monitoring: MonitoringPageProvider,
-  pointSeries: PointSeriesPageProvider,
+  newsfeed: NewsfeedPageProvider,
   settings: SettingsPageProvider,
   share: SharePageProvider,
-  shield: ShieldPageProvider,
+  login: LoginPageProvider,
   timelion: TimelionPageProvider,
-  timePicker: TimePickerPageProvider,
+  timePicker: TimePickerProvider,
   visualBuilder: VisualBuilderPageProvider,
   visualize: VisualizePageProvider,
+  visEditor: VisualizeEditorPageProvider,
+  visChart: VisualizeChartPageProvider,
+  tileMap: TileMapPageProvider,
+  tagCloud: TagCloudPageProvider,
+  vegaChart: VegaChartPageProvider,
+  savedObjects: SavedObjectsPageProvider,
 };

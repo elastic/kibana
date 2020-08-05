@@ -27,7 +27,9 @@ describe('extractAppPathAndId', function () {
       const basePath = '/gza';
       const absoluteUrl = 'http://www.test.com:5601/gza/app/appId#appPathIsHere?query=here';
       it('extracts app path', function () {
-        expect(extractAppPathAndId(absoluteUrl, basePath).appPath).to.be('appPathIsHere?query=here');
+        expect(extractAppPathAndId(absoluteUrl, basePath).appPath).to.be(
+          'appPathIsHere?query=here'
+        );
       });
 
       it('extracts app id', function () {
@@ -74,7 +76,9 @@ describe('extractAppPathAndId', function () {
       const basePath = '/gza';
       const rootRelativePath = '/gza/app/appId#appPathIsHere?query=here';
       it('extracts app path', function () {
-        expect(extractAppPathAndId(rootRelativePath, basePath).appPath).to.be('appPathIsHere?query=here');
+        expect(extractAppPathAndId(rootRelativePath, basePath).appPath).to.be(
+          'appPathIsHere?query=here'
+        );
       });
 
       it('extracts app id', function () {
@@ -115,5 +119,4 @@ describe('extractAppPathAndId', function () {
       });
     });
   });
-
 });

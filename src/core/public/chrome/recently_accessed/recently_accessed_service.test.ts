@@ -55,11 +55,11 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    // @ts-ignore
+    // @ts-expect-error
     window.localStorage = new LocalStorageMock();
   });
   beforeEach(() => localStorage.clear());
-  // @ts-ignore
+  // @ts-expect-error
   afterAll(() => (window.localStorage = originalLocalStorage));
 
   const getStart = async () => {
@@ -106,10 +106,7 @@ describe('RecentlyAccessed#start()', () => {
     const stop$ = new Subject();
     const observedValues$ = recentlyAccessed
       .get$()
-      .pipe(
-        bufferCount(3),
-        takeUntil(stop$)
-      )
+      .pipe(bufferCount(3), takeUntil(stop$))
       .toPromise();
     recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
     recentlyAccessed.add('/app/item2', 'Item 2', 'item2');

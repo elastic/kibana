@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import {
   EuiButton,
@@ -30,15 +31,27 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { OverlayStart } from '../../overlays';
+import { OverlayStart } from 'kibana/public';
+import { I18nStart } from '../../i18n';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
+  i18nContext: () => I18nStart['Context'];
 }
+
+interface RequestError extends Error {
+  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+}
+
+const isRequestError = (e: Error | RequestError): e is RequestError => {
+  if ('body' in e) {
+    return e.body?.attributes?.error?.caused_by !== undefined;
+  }
+  return false;
+};
 
 /**
  * This should instead be replaced by the overlay service once it's available.
@@ -50,33 +63,59 @@ function showErrorDialog({
   title,
   error,
   openModal,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal'>) {
+  i18nContext,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18nContext'>) {
+  const I18nContext = i18nContext();
+  let text = '';
+
+  if (isRequestError(error)) {
+    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
+    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
+  }
+
+  if (error.stack) {
+    text += error.stack;
+  }
+
   const modal = openModal(
-    <React.Fragment>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-        {error.stack && (
-          <React.Fragment>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable={true} paddingSize="s">
-              {error.stack}
-            </EuiCodeBlock>
-          </React.Fragment>
-        )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton onClick={() => modal.close()} fill>
-          <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
-        </EuiButton>
-      </EuiModalFooter>
-    </React.Fragment>
+    mount(
+      <React.Fragment>
+        <I18nContext>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            {text && (
+              <React.Fragment>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable={true} paddingSize="s">
+                  {text}
+                </EuiCodeBlock>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={() => modal.close()} fill>
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </I18nContext>
+      </React.Fragment>
+    )
   );
 }
 
-export function ErrorToast({ title, error, toastMessage, openModal }: ErrorToastProps) {
+export function ErrorToast({
+  title,
+  error,
+  toastMessage,
+  openModal,
+  i18nContext,
+}: ErrorToastProps) {
   return (
     <React.Fragment>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
@@ -84,7 +123,7 @@ export function ErrorToast({ title, error, toastMessage, openModal }: ErrorToast
         <EuiButton
           size="s"
           color="danger"
-          onClick={() => showErrorDialog({ title, error, openModal })}
+          onClick={() => showErrorDialog({ title, error, openModal, i18nContext })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"
@@ -95,3 +134,8 @@ export function ErrorToast({ title, error, toastMessage, openModal }: ErrorToast
     </React.Fragment>
   );
 }
+
+const mount = (component: React.ReactElement) => (container: HTMLElement) => {
+  ReactDOM.render(component, container);
+  return () => ReactDOM.unmountComponentAtNode(container);
+};

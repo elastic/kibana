@@ -20,13 +20,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  KuiToolBarFooter,
-  KuiToolBarText,
-  KuiToolBarFooterSection,
-} from '../../';
-
-
+import { KuiToolBarFooter, KuiToolBarText, KuiToolBarFooterSection } from '../../';
 
 export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
   const renderText = () => {
@@ -40,19 +34,13 @@ export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
   let pagerSection;
 
   if (pager) {
-    pagerSection = (
-      <KuiToolBarFooterSection>
-        {pager}
-      </KuiToolBarFooterSection>
-    );
+    pagerSection = <KuiToolBarFooterSection>{pager}</KuiToolBarFooterSection>;
   }
 
   return (
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
-        <KuiToolBarText>
-          {renderText()}
-        </KuiToolBarText>
+        <KuiToolBarText>{renderText()}</KuiToolBarText>
       </KuiToolBarFooterSection>
 
       {pagerSection}

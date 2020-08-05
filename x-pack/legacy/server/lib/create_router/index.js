@@ -7,12 +7,12 @@ import Boom from 'boom';
 import { callWithRequestFactory } from './call_with_request_factory';
 import { isEsErrorFactory as createIsEsError } from './is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from './error_wrappers';
-import { licensePreRoutingFactory } from'./license_pre_routing_factory';
+import { licensePreRoutingFactory } from './license_pre_routing_factory';
 
 export { wrapEsError, wrapUnknownError, wrapCustomError } from './error_wrappers';
 
 // Sometimes consumers will need to check if errors are ES errors, too.
-export const isEsErrorFactory = server => {
+export const isEsErrorFactory = (server) => {
   return createIsEsError(server);
 };
 
@@ -45,7 +45,7 @@ export const createRouter = (server, pluginId, apiBasePath = '', config) => {
   };
 
   // Decorate base router with HTTP methods.
-  return (['get', 'post', 'put', 'delete', 'patch'].reduce((router, methodName) => {
+  return ['get', 'post', 'put', 'delete', 'patch'].reduce((router, methodName) => {
     router[methodName] = (subPath, handler) => {
       const method = methodName.toUpperCase();
       const path = apiBasePath + subPath;
@@ -53,9 +53,9 @@ export const createRouter = (server, pluginId, apiBasePath = '', config) => {
         path,
         method,
         handler: requestHandler(handler),
-        config: { pre: [ licensePreRouting ] }
+        config: { pre: [licensePreRouting] },
       });
     };
     return router;
-  }, {}));
+  }, {});
 };

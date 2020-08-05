@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function serverExtensionsMixin(kbnServer, server) {
   /**
    *  Decorate all request objects with a new method, `methodName`,

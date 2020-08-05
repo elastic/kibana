@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
@@ -52,23 +52,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_all_role'),
           security.user.delete('global_infrastructure_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+      it('shows metrics navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
         it(`shows 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -91,7 +89,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -106,12 +104,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -121,9 +121,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`metrics page is visible`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/infrastructure/metrics/host/demo-stack-redis-01',
+          '/detail/host/demo-stack-redis-01',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -167,23 +168,21 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_infrastructure_read_role'),
           security.user.delete('global_infrastructure_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+      it('shows metrics navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Metrics', 'Stack Management']);
       });
 
       describe('infrastructure landing page without data', () => {
         it(`doesn't show 'Change source configuration' button`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -206,7 +205,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`shows Wafflemap`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -221,12 +220,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
           it(`does not show link to view logs`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+            const link = await testSubjects.find('~viewLogsContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
 
           it(`does not show link to view apm traces`, async () => {
             await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-            await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+            const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+            expect(await link.isEnabled()).to.be(false);
           });
         });
 
@@ -236,9 +237,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`metrics page is visible`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
-          '/infrastructure/metrics/host/demo-stack-redis-01',
+          '/detail/host/demo-stack-redis-01',
+          undefined,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
@@ -300,7 +302,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`context menu allows user to view logs`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -366,7 +368,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`context menu allows user to view APM traces`, async () => {
-          await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
+          await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
@@ -416,55 +418,24 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_infrastructure_privileges_user');
       });
 
-      it(`doesn't show infrastructure navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.not.contain(['Infrastructure']);
+      it(`doesn't show metrics navlink`, async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`infrastructure root renders not found page`, async () => {
+      it(`metrics app is inaccessible and returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('infraOps', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure home page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure landing page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure snapshot page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/inventory', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`metrics page renders not found page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'infraOps',
-          '/metrics/host/demo-stack-redis-01',
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
+        const messageText = await PageObjects.common.getBodyText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
         );
-        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });

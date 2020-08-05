@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { InjectedIntl as _InjectedIntl } from 'react-intl';
+export type InjectedIntl = _InjectedIntl;
+
 export {
   intlShape,
-  InjectedIntl,
   FormattedDate,
   FormattedTime,
   FormattedRelative,

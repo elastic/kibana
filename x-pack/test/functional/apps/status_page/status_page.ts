@@ -12,13 +12,13 @@ export default function statusPageFunctonalTests({
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
 
-  describe('Status Page', function() {
-    this.tags('smoke');
+  describe('Status Page', function () {
+    this.tags(['skipCloud', 'includeFirefox']);
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => await esArchiver.unload('empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.statusPage.navigateToPage();
       await PageObjects.statusPage.expectStatusPage();
     });

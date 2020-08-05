@@ -114,7 +114,6 @@ describe('ServerStatus class', function () {
     });
   });
 
-
   describe('#toJSON()', function () {
     it('serializes to overall status and individuals', function () {
       const pluginOne = { id: 'one', version: '1.0.0' };
@@ -135,7 +134,7 @@ describe('ServerStatus class', function () {
       expect(json.overall.state).toEqual(serverStatus.overall().state);
       expect(json.statuses).toHaveLength(4);
 
-      const out = status => find(json.statuses, { id: status.id });
+      const out = (status) => find(json.statuses, { id: status.id });
       expect(out(service)).toHaveProperty('state', 'green');
       expect(out(p1)).toHaveProperty('state', 'yellow');
       expect(out(p2)).toHaveProperty('state', 'red');
@@ -143,5 +142,4 @@ describe('ServerStatus class', function () {
       expect(out(p3).id).not.toContain('undefined');
     });
   });
-
 });

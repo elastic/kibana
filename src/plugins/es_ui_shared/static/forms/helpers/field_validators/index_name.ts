@@ -17,13 +17,10 @@
  * under the License.
  */
 
-// Note: we can't import from "ui/indices" as the TS Type definition don't exist
-// import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+import { indices } from '../../../../public';
 import { ValidationFunc } from '../../hook_form_lib';
 import { startsWith, containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
-
-const INDEX_ILLEGAL_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', '*'];
 
 export const indexNameField = (i18n: any) => (
   ...args: Parameters<ValidationFunc>
@@ -51,7 +48,9 @@ export const indexNameField = (i18n: any) => (
     };
   }
 
-  const { charsFound, doesContain } = containsChars(INDEX_ILLEGAL_CHARACTERS)(value as string);
+  const { charsFound, doesContain } = containsChars(indices.INDEX_ILLEGAL_CHARACTERS_VISIBLE)(
+    value as string
+  );
   if (doesContain) {
     return {
       message: i18n.translate('esUi.forms.fieldValidation.indexNameInvalidCharactersError', {

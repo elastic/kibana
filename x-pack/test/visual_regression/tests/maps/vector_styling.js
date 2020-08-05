@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }) {
       it('should symbolize points as icons with expected color, size, and orientation', async () => {
         await visualTesting.snapshot();
       });
-
     });
 
     describe('dynamic coloring', () => {
@@ -29,11 +28,9 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.closeLegend();
       });
 
-      // eslint-disable-next-line max-len
       it('should symbolize fill color with custom steps from join value and border color with dynamic color ramp from prop value', async () => {
         await visualTesting.snapshot();
       });
-
     });
 
     describe('dynamic line coloring', () => {
@@ -43,11 +40,9 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.closeLegend();
       });
 
-      // eslint-disable-next-line max-len
       it('should symbolize pew pew lines', async () => {
         await visualTesting.snapshot();
       });
-
     });
   });
 }

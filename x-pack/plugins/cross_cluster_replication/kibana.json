@@ -1,0 +1,22 @@
+{
+  "id": "crossClusterReplication",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management",
+    "remoteClusters",
+    "indexManagement"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
+  "configPath": ["xpack", "ccr"],
+  "requiredBundles": [
+    "kibanaReact",
+    "esUiShared",
+    "data"
+  ]
+}

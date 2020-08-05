@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/ContainerStyle simple 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "fontSize": 0,
+      }
+    }
+  >
+    <div
+      className="euiPopover euiPopover--anchorLeftCenter"
+      container={null}
+      id="color-picker-popover"
+      onKeyDown={[Function]}
+      onMouseDown={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <button
+          aria-label="Container style white"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          style={
+            Object {
+              "fontSize": 0,
+            }
+          }
+          type="button"
+        >
+          <div
+            className="canvasColorDot"
+          >
+            <div
+              className="canvasColorDot__background canvasCheckered"
+            />
+            <div
+              className="canvasColorDot__foreground"
+              style={
+                Object {
+                  "background": "#fff",
+                }
+              }
+            />
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "fontSize": 0,
+      }
+    }
+  >
+    <div
+      className="euiPopover euiPopover--anchorLeftCenter"
+      container={null}
+      id="color-picker-popover"
+      onKeyDown={[Function]}
+      onMouseDown={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <button
+          aria-label="Container style white"
+          className="euiLink euiLink--primary"
+          onClick={[Function]}
+          style={
+            Object {
+              "fontSize": 0,
+            }
+          }
+          type="button"
+        >
+          <div
+            className="canvasColorDot"
+          >
+            <div
+              className="canvasColorDot__background canvasCheckered"
+            />
+            <div
+              className="canvasColorDot__foreground"
+              style={
+                Object {
+                  "background": "#fff",
+                }
+              }
+            />
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

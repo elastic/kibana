@@ -30,4 +30,5 @@ export interface LogRecord {
   message: string;
   error?: Error;
   meta?: { [name: string]: any };
+  pid: number;
 }

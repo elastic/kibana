@@ -19,6 +19,8 @@
 
 import { Request, Server } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
+// @ts-expect-error no TS definitions
+import Statehood from 'statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
@@ -34,17 +36,37 @@ export interface SessionStorageCookieOptions<T> {
    */
   name: string;
   /**
-   * A key used to encrypt a cookie value. Should be at least 32 characters long.
+   * A key used to encrypt a cookie's value. Should be at least 32 characters long.
    */
   encryptionKey: string;
   /**
-   * Function called to validate a cookie content.
+   * Function called to validate a cookie's decrypted value.
    */
-  validate: (sessionValue: T) => boolean | Promise<boolean>;
+  validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
   /**
    * Flag indicating whether the cookie should be sent only via a secure connection.
    */
   isSecure: boolean;
+  /**
+   * Defines SameSite attribute of the Set-Cookie Header.
+   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+   */
+  sameSite?: 'Strict' | 'Lax' | 'None';
+}
+
+/**
+ * Return type from a function to validate cookie contents.
+ * @public
+ */
+export interface SessionCookieValidationResult {
+  /**
+   * Whether the cookie is valid or not.
+   */
+  isValid: boolean;
+  /**
+   * The "Path" attribute of the cookie; if the cookie is invalid, this is used to clear it.
+   */
+  path?: string;
 }
 
 class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
@@ -85,6 +107,12 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
   }
 }
 
+function validateOptions(options: SessionStorageCookieOptions<any>) {
+  if (options.sameSite === 'None' && options.isSecure !== true) {
+    throw new Error('"SameSite: None" requires Secure connection');
+  }
+}
+
 /**
  * Creates SessionStorage factory, which abstract the way of
  * session storage implementation and scoping to the incoming requests.
@@ -98,18 +126,53 @@ export async function createCookieSessionStorageFactory<T>(
   cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
+  validateOptions(cookieOptions);
+
+  function clearInvalidCookie(req: Request | undefined, path: string = basePath || '/') {
+    // if the cookie did not include the 'path' attribute in the session value, it is a legacy cookie
+    // we will assume that the cookie was created with the current configuration
+    log.debug('Clearing invalid session cookie');
+    // need to use Hapi toolkit to clear cookie with defined options
+    if (req) {
+      (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
+    }
+  }
+
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
     cookie: cookieOptions.name,
     password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T) => ({ valid: await cookieOptions.validate(session) }),
+    validateFunc: async (req, session: T | T[]) => {
+      const result = cookieOptions.validate(session);
+      if (!result.isValid) {
+        clearInvalidCookie(req, result.path);
+      }
+      return { valid: result.isValid };
+    },
     isSecure: cookieOptions.isSecure,
     path: basePath,
-    clearInvalid: true,
+    clearInvalid: false,
     isHttpOnly: true,
-    isSameSite: false,
+    isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
   });
+
+  // A hack to support SameSite: 'None'.
+  // Remove it after update Hapi to v19 that supports SameSite: 'None' out of the box.
+  if (cookieOptions.sameSite === 'None') {
+    log.debug('Patching Statehood.prepareValue');
+    const originalPrepareValue = Statehood.prepareValue;
+    Statehood.prepareValue = function kibanaStatehoodPrepareValueWrapper(
+      name: string,
+      value: unknown,
+      options: any
+    ) {
+      if (name === cookieOptions.name) {
+        options.isSameSite = cookieOptions.sameSite;
+      }
+      return originalPrepareValue(name, value, options);
+    };
+  }
 
   return {
     asScoped(request: KibanaRequest) {

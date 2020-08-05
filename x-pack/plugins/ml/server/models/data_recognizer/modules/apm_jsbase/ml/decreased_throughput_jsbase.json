@@ -1,0 +1,37 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "apm"
+  ],
+  "description": "APM JSBase: Identifies periods during which the application is processing fewer requests than normal.",
+  "analysis_config": {
+    "summary_count_field_name": "doc_count",
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "low throughput",
+        "function": "low_count"
+      }
+    ],
+    "influencers": [
+      "service.name"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "10mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-apm-jsbase",
+    "custom_urls": [
+      {
+        "url_name": "APM",
+        "time_range": "2h",
+        "url_value": "apm#/services?rangeFrom=$earliest$&rangeTo=$latest$&refreshPaused=true&refreshInterval=0&kuery=&transactionType=request"
+      }
+    ]
+  }
+}

@@ -37,7 +37,9 @@ export function ApplyScopeBindingsProvider($parse) {
           $scope.$bind(local, attr);
           break;
         case '=?':
-          throw new Error('<render-directive> does not currently support optional two-way bindings.');
+          throw new Error(
+            '<render-directive> does not currently support optional two-way bindings.'
+          );
           break;
         case '&':
           if (attr) {
@@ -51,7 +53,7 @@ export function ApplyScopeBindingsProvider($parse) {
           break;
         case '@':
           $scope[local] = attr;
-          $attrs.$observe(attribute, v => $scope[local] = v);
+          $attrs.$observe(attribute, (v) => ($scope[local] = v));
           break;
       }
     });

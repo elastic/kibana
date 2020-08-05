@@ -35,7 +35,7 @@ run(
     // Assert if the found licenses in the production
     // packages are valid
     assertLicensesValid({
-      packages: packages.filter(pkg => !pkg.isDevOnly),
+      packages: packages.filter((pkg) => !pkg.isDevOnly),
       validLicenses: LICENSE_WHITELIST,
     });
     log.success('All production dependency licenses are allowed');
@@ -44,7 +44,7 @@ run(
     // if the dev flag is found
     if (flags.dev) {
       assertLicensesValid({
-        packages: packages.filter(pkg => pkg.isDevOnly),
+        packages: packages.filter((pkg) => pkg.isDevOnly),
         validLicenses: LICENSE_WHITELIST.concat(DEV_ONLY_LICENSE_WHITELIST),
       });
       log.success('All development dependency licenses are allowed');

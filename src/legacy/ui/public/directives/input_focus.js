@@ -31,6 +31,6 @@ module.directive('inputFocus', function ($parse, $timeout) {
           if (attrs.inputFocus === 'select') $elem.select();
         });
       }
-    }
+    },
   };
 });

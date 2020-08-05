@@ -23,10 +23,7 @@ export default function ({ getService }) {
       });
 
       it('should load multiple clusters', async () => {
-        const { body } = await supertest
-          .get('/api/settings')
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
+        const { body } = await supertest.get('/api/settings').set('kbn-xsrf', 'xxx').expect(200);
         expect(body.cluster_uuid.length > 1).to.eql(true);
         expect(body.settings.kibana.uuid.length > 0).to.eql(true);
         expect(body.settings.kibana.name.length > 0).to.eql(true);
@@ -40,4 +37,3 @@ export default function ({ getService }) {
     });
   });
 }
-

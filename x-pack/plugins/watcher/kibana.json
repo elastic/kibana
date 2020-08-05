@@ -1,0 +1,18 @@
+{
+  "id": "watcher",
+  "configPath": ["xpack", "watcher"],
+  "version": "kibana",
+  "requiredPlugins": [
+    "home",
+    "licensing",
+    "management",
+    "charts",
+    "data"
+  ],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact"
+  ]
+}

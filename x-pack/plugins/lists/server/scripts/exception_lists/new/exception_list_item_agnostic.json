@@ -1,0 +1,36 @@
+{
+  "list_id": "endpoint_list",
+  "item_id": "endpoint_list_item",
+  "_tags": ["endpoint", "process", "malware", "os:linux"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample agnostic endpoint type exception",
+  "name": "Sample Endpoint Exception List",
+  "namespace_type": "agnostic",
+  "entries": [
+    {
+      "field": "actingProcess.file.signer",
+      "operator": "included",
+      "type": "match",
+      "value": "Elastic, N.V."
+    },
+    {
+      "field": "file.signature",
+      "type": "nested",
+      "entries": [
+        {
+          "field": "signer",
+          "type": "match",
+          "operator": "included",
+          "value": "Evil"
+        },
+        {
+          "field": "trusted",
+          "type": "match",
+          "operator": "included",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "services": [
+    {
+      "id": "tiles_v2",
+      "name": "Elastic Maps Tile Service",
+      "manifest": "https://tiles.foobar/v7.6/manifest",
+      "type": "tms"
+    },
+    {
+      "id": "geo_layers",
+      "name": "Elastic Maps Vector Service",
+      "manifest": "https://files.foobar/v7.6/manifest",
+      "type": "file"
+    }
+  ]
+}

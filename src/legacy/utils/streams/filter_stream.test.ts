@@ -31,47 +31,47 @@ describe('createFilterStream()', () => {
     await createPromiseFromStreams([createListStream(['a', 'b', 'c']), createFilterStream(filter)]);
 
     expect(filter).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "a",
-    ],
-    Array [
-      "b",
-    ],
-    Array [
-      "c",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": true,
-    },
-    Object {
-      "type": "return",
-      "value": true,
-    },
-    Object {
-      "type": "return",
-      "value": true,
-    },
-  ],
-}
-`);
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "a",
+          ],
+          Array [
+            "b",
+          ],
+          Array [
+            "c",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": true,
+          },
+          Object {
+            "type": "return",
+            "value": true,
+          },
+          Object {
+            "type": "return",
+            "value": true,
+          },
+        ],
+      }
+    `);
   });
 
   test('send the filtered values on the output stream', async () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
-      createFilterStream<number>(n => n % 2 === 0),
+      createFilterStream<number>((n) => n % 2 === 0),
       createConcatStream([]),
     ]);
 
     expect(result).toMatchInlineSnapshot(`
-Array [
-  2,
-]
-`);
+      Array [
+        2,
+      ]
+    `);
   });
 });

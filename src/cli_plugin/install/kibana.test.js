@@ -17,24 +17,21 @@
  * under the License.
  */
 
-jest.mock('fs', () => ({
-  statSync: jest.fn().mockImplementation(() => require('fs').statSync),
-  unlinkSync: jest.fn().mockImplementation(() => require('fs').unlinkSync),
-  mkdirSync: jest.fn().mockImplementation(() => require('fs').mkdirSync),
-}));
-
 import sinon from 'sinon';
 import Logger from '../lib/logger';
 import { join } from 'path';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
+import del from 'del';
 import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
 
+jest.spyOn(fs, 'statSync');
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('kibana', function () {
       const testWorkingPath = join(__dirname, '.test.data.kibana');
       const tempArchiveFilePath = join(testWorkingPath, 'archive.part');
@@ -45,17 +42,16 @@ describe('kibana cli', function () {
         tempArchiveFile: tempArchiveFilePath,
         plugin: 'test-plugin',
         version: '1.0.0',
-        plugins: [ { name: 'foo' } ],
-        pluginDir
+        plugins: [{ name: 'foo' }],
+        pluginDir,
       };
 
       const logger = new Logger(settings);
 
       describe('assertVersion', function () {
-
         beforeEach(function () {
-          rimraf.sync(testWorkingPath);
-          mkdirp.sync(testWorkingPath);
+          del.sync(testWorkingPath);
+          fs.mkdirSync(testWorkingPath, { recursive: true });
           sinon.stub(logger, 'log');
           sinon.stub(logger, 'error');
         });
@@ -63,7 +59,7 @@ describe('kibana cli', function () {
         afterEach(function () {
           logger.log.restore();
           logger.error.restore();
-          rimraf.sync(testWorkingPath);
+          del.sync(testWorkingPath);
         });
 
         it('should succeed with exact match', function () {
@@ -72,7 +68,9 @@ describe('kibana cli', function () {
             tempArchiveFile: tempArchiveFilePath,
             plugin: 'test-plugin',
             version: '5.0.0-SNAPSHOT',
-            plugins: [ { name: 'foo', path: join(testWorkingPath, 'foo'), kibanaVersion: '5.0.0-SNAPSHOT' } ]
+            plugins: [
+              { name: 'foo', path: join(testWorkingPath, 'foo'), kibanaVersion: '5.0.0-SNAPSHOT' },
+            ],
           };
 
           expect(() => assertVersion(settings)).not.toThrow();
@@ -125,14 +123,14 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if the plugin already exists.', function () {
-          fs.statSync = jest.fn().mockImplementationOnce(() => true);
+          fs.statSync.mockImplementationOnce(() => true);
           existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).toMatch(/already exists/);
           expect(process.exit.called).toBe(true);
         });
 
         it('should not throw an error if the plugin does not exist.', function () {
-          fs.statSync = jest.fn().mockImplementationOnce(() => {
+          fs.statSync.mockImplementationOnce(() => {
             throw { code: 'ENOENT' };
           });
           existingInstall(settings, logger);

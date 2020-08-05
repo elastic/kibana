@@ -20,9 +20,11 @@
 function makeComponentName(str, usePrefix = true) {
   const words = str.split('_');
 
-  const componentName = words.map(function (word) {
-    return upperCaseFirstLetter(word);
-  }).join('');
+  const componentName = words
+    .map(function (word) {
+      return upperCaseFirstLetter(word);
+    })
+    .join('');
 
   return `${usePrefix ? 'Kui' : ''}${componentName}`;
 }

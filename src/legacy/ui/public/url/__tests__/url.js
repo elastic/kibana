@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
@@ -45,12 +44,12 @@ function init() {
   ngMock.module('kibana/url', 'kibana', function ($provide, PrivateProvider) {
     $provide.service('$route', function () {
       return {
-        reload: _.noop
+        reload: _.noop,
       };
     });
 
     appState = new StubAppState();
-    PrivateProvider.swap(AppStateProvider, $decorate => {
+    PrivateProvider.swap(AppStateProvider, ($decorate) => {
       const AppState = $decorate();
       AppState.getAppState = () => appState;
       return AppState;
@@ -66,7 +65,6 @@ function init() {
 }
 
 describe('kbnUrl', function () {
-
   beforeEach(function () {
     init();
   });
@@ -76,8 +74,8 @@ describe('kbnUrl', function () {
       $location.url('/url');
       $route.current = {
         $$route: {
-          regex: /.*/
-        }
+          regex: /.*/,
+        },
       };
 
       sinon.stub($rootScope, '$on');
@@ -93,8 +91,8 @@ describe('kbnUrl', function () {
       $location.url('/url');
       $route.current = {
         $$route: {
-          regex: /.*/
-        }
+          regex: /.*/,
+        },
       };
 
       const unbind = sinon.stub();
@@ -115,8 +113,8 @@ describe('kbnUrl', function () {
       $location.url('/url');
       $route.current = {
         $$route: {
-          regex: /.*/
-        }
+          regex: /.*/,
+        },
       };
       $route.reload = sinon.stub();
 
@@ -136,8 +134,8 @@ describe('kbnUrl', function () {
       $location.url('/url');
       $route.current = {
         $$route: {
-          regex: /.*/
-        }
+          regex: /.*/,
+        },
       };
       $route.reload = sinon.stub();
 
@@ -207,18 +205,26 @@ describe('kbnUrl', function () {
       // build url by piecing together these parts
       const urlParts = ['/', '/', '?', '&', '#'];
       // make sure it can parse templates with weird spacing
-      const wrappers = [ ['{{', '}}'], ['{{ ', ' }}'], ['{{', '  }}'], ['{{    ', '}}'], ['{{    ', '         }}']];
+      const wrappers = [
+        ['{{', '}}'],
+        ['{{ ', ' }}'],
+        ['{{', '  }}'],
+        ['{{    ', '}}'],
+        ['{{    ', '         }}'],
+      ];
       // make sure filters are evaluated via angular expressions
       const objIndex = 4; // used to case one replace as an object
       const filters = ['', 'uppercase', '', 'uppercase', ''];
 
       // the words (template keys) used must all be unique
-      const words = _.uniq(faker.Lorem.words(10)).slice(0, urlParts.length).map(function (word, i) {
-        if (filters[i].length) {
-          return word + '|' + filters[i];
-        }
-        return word;
-      });
+      const words = _.uniq(faker.Lorem.words(10))
+        .slice(0, urlParts.length)
+        .map(function (word, i) {
+          if (filters[i].length) {
+            return word + '|' + filters[i];
+          }
+          return word;
+        });
 
       const replacements = faker.Lorem.words(urlParts.length).map(function (word, i) {
         // make selected replacement into an object
@@ -260,9 +266,9 @@ describe('kbnUrl', function () {
       kbnUrl.change(url, {
         that: {
           is: {
-            substituted: 'test'
-          }
-        }
+            substituted: 'test',
+          },
+        },
       });
 
       expect($location.url()).to.be('/some/thing/test');
@@ -429,10 +435,7 @@ describe('kbnUrl', function () {
       const hash = 'hash';
       const newPath = '/new/location';
 
-      $location
-        .path(path)
-        .search(search)
-        .hash(hash);
+      $location.path(path).search(search).hash(hash);
 
       // verify the starting state
       expect($location.path()).to.be(path);
@@ -465,15 +468,15 @@ describe('kbnUrl', function () {
       $route.current = {
         $$route: {
           regexp: /^\/is-current-route\/(\d+)/,
-          reloadOnSearch: true
-        }
+          reloadOnSearch: true,
+        },
       };
 
       prev = { path: '/is-current-route/1', search: {} };
       next = { path: '/is-current-route/1', search: {} };
     });
 
-    it('returns false if the passed url doesn\'t match the current route', function () {
+    it("returns false if the passed url doesn't match the current route", function () {
       next.path = '/not current';
       expect(kbnUrl._shouldForceReload(next, prev, $route)).to.be(false);
     });

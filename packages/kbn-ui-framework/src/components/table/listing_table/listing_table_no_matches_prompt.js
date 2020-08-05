@@ -19,17 +19,12 @@
 
 import React from 'react';
 
-import {
-  KuiEmptyTablePromptPanel,
-  KuiTableInfo,
-} from '../../';
+import { KuiEmptyTablePromptPanel, KuiTableInfo } from '../../';
 
 export function KuiListingTableNoMatchesPrompt() {
   return (
     <KuiEmptyTablePromptPanel>
-      <KuiTableInfo>
-        No items matched your search.
-      </KuiTableInfo>
+      <KuiTableInfo>No items matched your search.</KuiTableInfo>
     </KuiEmptyTablePromptPanel>
   );
 }

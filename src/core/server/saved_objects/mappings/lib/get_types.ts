@@ -23,5 +23,5 @@ import { IndexMapping } from '../types';
  *  Get the names of the types defined in the EsMappingsDsl
  */
 export function getTypes(mappings: IndexMapping) {
-  return Object.keys(mappings).filter(type => type !== '_default_');
+  return Object.keys(mappings).filter((type) => type !== '_default_');
 }

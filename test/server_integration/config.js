@@ -18,7 +18,7 @@
  */
 
 import {
-  KibanaSupertestProvider,
+  createKibanaSupertestProvider,
   KibanaSupertestWithoutAuthProvider,
   ElasticsearchSupertestProvider,
 } from './services';
@@ -29,16 +29,14 @@ export default async function ({ readConfigFile }) {
 
   return {
     services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      retry: commonConfig.get('services.retry'),
-      supertest: KibanaSupertestProvider,
+      ...commonConfig.get('services'),
+      supertest: createKibanaSupertestProvider(),
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,
     },
     servers: commonConfig.get('servers'),
     junit: {
-      reportName: 'Integration Tests'
+      reportName: 'Integration Tests',
     },
     esTestCluster: commonConfig.get('esTestCluster'),
     kbnTestServer: {

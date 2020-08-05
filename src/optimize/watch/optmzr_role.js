@@ -17,45 +17,41 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 import WatchServer from './watch_server';
 import WatchOptimizer, { STATUS } from './watch_optimizer';
-import { DllCompiler } from '../dynamic_dll_plugin';
-import { WatchCache } from './watch_cache';
+import { getNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
-  const logWithMetadata = (tags, message, metadata) => kibanaHapiServer.logWithMetadata(tags, message, metadata);
+  const logWithMetadata = (tags, message, metadata) =>
+    kibanaHapiServer.logWithMetadata(tags, message, metadata);
 
   const watchOptimizer = new WatchOptimizer({
     logWithMetadata,
     uiBundles: kbnServer.uiBundles,
-    discoveredPlugins: kbnServer.newPlatform.setup.core.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),
     prebuild: config.get('optimize.watchPrebuild'),
-    watchCache: new WatchCache({
-      logWithMetadata,
-      outputPath: config.get('path.data'),
-      dllsPath: DllCompiler.getRawDllConfig().outputPath,
-      cachePath: resolve(kbnServer.uiBundles.getCacheDirectory(), '../'),
-    }),
   });
 
   const server = new WatchServer(
     config.get('optimize.watchHost'),
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
-    watchOptimizer
+    watchOptimizer,
+    getNpUiPluginPublicDirs(kbnServer),
+    kbnServer.newPlatform.env.packageInfo.buildNum.toString()
   );
 
   watchOptimizer.status$.subscribe({
     next(status) {
-      process.send(['OPTIMIZE_STATUS', {
-        success: status.type === STATUS.SUCCESS
-      }]);
-    }
+      process.send([
+        'OPTIMIZE_STATUS',
+        {
+          success: status.type === STATUS.SUCCESS,
+        },
+      ]);
+    },
   });
 
   let ready = false;
@@ -68,7 +64,6 @@ export default async (kbnServer, kibanaHapiServer, config) => {
   process.on('message', (msg) => {
     if (msg && msg.optimizeReady === '?') sendReady();
   });
-
 
   sendReady();
 

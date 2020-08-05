@@ -1,0 +1,59 @@
+[[most-frequent]]
+== Most frequently used visualizations
+
+The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>.
+
+The most frequently used visualizations include:
+
+* Line, area, and bar charts
+* Pie chart
+* Data table
+* Metric, goal, and gauge
+* Tag cloud
+
+[[metric-chart]]
+
+[float]
+=== Configure your visualization
+
+You configure visualizations using the default editor. Each visualization supports different configurations of the metrics and buckets.
+
+For example, a bar chart allows you to add an x-axis:
+
+[role="screenshot"]
+image::images/add-bucket.png["",height=478]
+
+A common configuration for the x-axis is to use a {es} {ref}/search-aggregations-bucket-datehistogram-aggregation.html[date histogram] aggregation:
+
+[role="screenshot"]
+image::images/visualize-date-histogram.png[]
+
+To see your changes, click *Apply changes* image:images/apply-changes-button.png[]
+
+If it's supported by the visualization, you can add more buckets. In this example we have
+added a
+{es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms] aggregation on the field
+`geo.src` to show the top 5 sources of log traffic.
+
+[role="screenshot"]
+image::images/visualize-date-histogram-split-1.png[]
+
+The new aggregation is added after the first one, so the result shows
+the top 5 sources of traffic per 3 hours. If you want to change the aggregation order, you can do
+so by dragging:
+
+[role="screenshot"]
+image::images/visualize-drag-reorder.png["",width=366]
+
+The visualization
+now shows the top 5 sources of traffic overall, and compares them in 3 hour increments:
+
+[role="screenshot"]
+image::images/visualize-date-histogram-split-2.png[]
+
+For more information about how aggregations are used in visualizations, see <<supported-aggregations, supported aggregations>>.
+
+Each visualization also has its own customization options. Most visualizations allow you to customize the color of a specific series:
+
+[role="screenshot"]
+image::images/color-picker.png[An array of color dots that users can select,height=267]

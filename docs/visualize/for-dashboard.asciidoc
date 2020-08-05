@@ -1,0 +1,67 @@
+[[for-dashboard]]
+== Dashboard tools
+
+Visualize comes with controls and Markdown tools that you can add to dashboards for an interactive experience.
+
+[float]
+[[controls]]
+=== Controls
+experimental[]
+
+The controls tool enables you to add interactive inputs
+on a dashboard.
+
+You can add two types of interactive inputs:
+
+* *Options list* &mdash; Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation. For example, use the options list on the sample flight dashboard when you want to filter the data by origin city and destination city.
+
+* *Range slider* &mdash; Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation. For example, use the range slider when you want to filter the sample flight dashboard by a specific average ticket price.
+
+[role="screenshot"]
+image::images/dashboard-controls.png[]
+
+[float]
+[[controls-options]]
+==== Controls options
+
+Configure the settings that apply to the interactive inputs on a dashboard.
+
+. Click *Options*, then configure the following:
+
+* *Update {kib} filters on each change* &mdash; When selected, all interactive inputs create filters that refresh the dashboard. When unselected, {kib} filters are created only when you click *Apply changes*.
+
+* *Use time filter* &mdash; When selected, the aggregations that generate the options list and time range are connected to the <<set-time-filter,time filter>>.
+
+* *Pin filters to global state* &mdash; When selected, all filters created by interacting with the inputs are automatically pinned.
+
+. Click *Update*.
+
+[float]
+[[markdown-widget]]
+=== Markdown
+
+The Markdown tool is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard.
+
+Markdown is helpful when you want to include important information, instructions, and images on your dashboard.
+
+For information about GitHub-flavored Markdown text, click *Help*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]

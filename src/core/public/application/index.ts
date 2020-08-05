@@ -19,15 +19,31 @@
 
 export { ApplicationService } from './application_service';
 export { Capabilities } from './capabilities';
+export { ScopedHistory } from './scoped_history';
 export {
   App,
   AppBase,
+  AppMount,
+  AppMountDeprecated,
   AppUnmount,
   AppMountContext,
   AppMountParameters,
+  AppStatus,
+  AppNavLinkStatus,
+  AppUpdatableFields,
+  AppUpdater,
   ApplicationSetup,
   ApplicationStart,
-  // Internal types
-  InternalApplicationStart,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
   LegacyApp,
+  NavigateToAppOptions,
+  PublicAppInfo,
+  PublicLegacyAppInfo,
+  // Internal types
+  InternalApplicationSetup,
+  InternalApplicationStart,
 } from './types';

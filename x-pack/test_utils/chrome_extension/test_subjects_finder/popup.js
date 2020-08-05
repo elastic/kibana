@@ -13,7 +13,7 @@
 //   );
 // };
 
-const isTrackingTestSubjects = () => (
+const isTrackingTestSubjects = () =>
   new Promise((resolve) => {
     chrome.tabs.executeScript(
       undefined,
@@ -22,8 +22,7 @@ const isTrackingTestSubjects = () => (
         resolve(result);
       }
     );
-  })
-);
+  });
 
 const onStartTracking = () => {
   document.body.classList.add('is-tracking');
@@ -33,73 +32,70 @@ const onStopTracking = () => {
   document.body.classList.remove('is-tracking');
 };
 
-chrome.storage.sync.get(['outputType', 'domTreeRoot', 'depth'], async ({ outputType, domTreeRoot, depth }) => {
-  const domRootInput = document.getElementById('domRootInput');
-  const outputTypeSelect = document.getElementById('outputTypeSelect');
-  const depthInput = document.getElementById('depthInput');
-  const startTrackButton = document.getElementById('startTrackingButton');
-  const stopTrackButton = document.getElementById('stopTrackingButton');
+chrome.storage.sync.get(
+  ['outputType', 'domTreeRoot', 'depth'],
+  async ({ outputType, domTreeRoot, depth }) => {
+    const domRootInput = document.getElementById('domRootInput');
+    const outputTypeSelect = document.getElementById('outputTypeSelect');
+    const depthInput = document.getElementById('depthInput');
+    const startTrackButton = document.getElementById('startTrackingButton');
+    const stopTrackButton = document.getElementById('stopTrackingButton');
 
-  const isTracking = await isTrackingTestSubjects();
+    const isTracking = await isTrackingTestSubjects();
 
-  // UI state
-  if (isTracking) {
-    document.body.classList.add('is-tracking');
-  } else {
-    document.body.classList.remove('is-tracking');
-  }
-
-  // FORM state
-  if (domTreeRoot) {
-    domRootInput.value = domTreeRoot;
-  }
-
-  if (depth) {
-    depthInput.value = depth;
-  }
-
-  document.querySelectorAll('#outputTypeSelect option').forEach((node) => {
-    if (node.value === outputType) {
-      node.setAttribute('selected', 'selected');
+    // UI state
+    if (isTracking) {
+      document.body.classList.add('is-tracking');
+    } else {
+      document.body.classList.remove('is-tracking');
     }
-  });
 
-  // FORM events
-  domRootInput.addEventListener('change', (e) => {
-    const { value } = e.target;
-    chrome.storage.sync.set({ domTreeRoot: value });
-  });
-
-  depthInput.addEventListener('change', (e) => {
-    const { value } = e.target;
-    if (value) {
-      chrome.storage.sync.set({ depth: value });
+    // FORM state
+    if (domTreeRoot) {
+      domRootInput.value = domTreeRoot;
     }
-  });
 
-  outputTypeSelect.addEventListener('change', (e) => {
-    const { value } = e.target;
-    chrome.storage.sync.set({ outputType: value });
-  });
+    if (depth) {
+      depthInput.value = depth;
+    }
 
-  startTrackButton.addEventListener('click', () => {
-    onStartTracking();
+    document.querySelectorAll('#outputTypeSelect option').forEach((node) => {
+      if (node.value === outputType) {
+        node.setAttribute('selected', 'selected');
+      }
+    });
 
-    chrome.tabs.executeScript(
-      undefined,
-      { file: 'start_tracking_test_subjects.js' },
-    );
-  });
+    // FORM events
+    domRootInput.addEventListener('change', (e) => {
+      const { value } = e.target;
+      chrome.storage.sync.set({ domTreeRoot: value });
+    });
 
-  stopTrackButton.addEventListener('click', () => {
-    onStopTracking();
+    depthInput.addEventListener('change', (e) => {
+      const { value } = e.target;
+      if (value) {
+        chrome.storage.sync.set({ depth: value });
+      }
+    });
 
-    chrome.tabs.executeScript(
-      undefined,
-      { file: 'stop_tracking_test_subjects.js' },
-    );
-  });
-});
+    outputTypeSelect.addEventListener('change', (e) => {
+      const { value } = e.target;
+      chrome.storage.sync.set({ outputType: value });
+    });
+
+    startTrackButton.addEventListener('click', () => {
+      onStartTracking();
+
+      chrome.tabs.executeScript(undefined, { file: 'start_tracking_test_subjects.js' });
+    });
+
+    stopTrackButton.addEventListener('click', () => {
+      onStopTracking();
+
+      chrome.tabs.executeScript(undefined, { file: 'stop_tracking_test_subjects.js' });
+    });
+  }
+);
 
 chrome.runtime.onMessage.addListener((request) => {
   if (request === 'TRACK_SUBJECTS_ERROR') {

@@ -26,10 +26,10 @@ import chalk from 'chalk';
 
 import treeKill from 'tree-kill';
 import { promisify } from 'util';
-const treeKillAsync = promisify(treeKill);
+const treeKillAsync = promisify((...args: [number, string, any]) => treeKill(...args));
 
 import { ToolingLog } from '../tooling_log';
-import { observeLines } from './observe_lines';
+import { observeLines } from '../stdio';
 import { createCliError } from './errors';
 
 const SECOND = 1000;
@@ -87,6 +87,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     cwd,
     env,
     stdio: ['pipe', 'pipe', 'pipe'],
+    preferLocal: true,
   });
 
   if (stdin) {
@@ -99,9 +100,9 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
 
   const outcome$: Rx.Observable<number | null> = Rx.race(
     // observe first exit event
-    Rx.fromEvent(childProcess, 'exit').pipe(
+    Rx.fromEvent<[number]>(childProcess, 'exit').pipe(
       take(1),
-      map(([code]: [number]) => {
+      map(([code]) => {
         if (stopCalled) {
           return null;
         }
@@ -117,7 +118,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     // observe first error event
     Rx.fromEvent(childProcess, 'error').pipe(
       take(1),
-      mergeMap(err => Rx.throwError(err))
+      mergeMap((err) => Rx.throwError(err))
     )
   ).pipe(share());
 
@@ -125,7 +126,7 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     observeLines(childProcess.stdout),
     observeLines(childProcess.stderr)
   ).pipe(
-    tap(line => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
+    tap((line) => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
     share()
   );
 

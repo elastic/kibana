@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import _ from 'lodash';
 import expect from '@kbn/expect';
 import { IndexedArray } from '..';
@@ -27,12 +26,12 @@ const users = [
   { name: 'John', id: 6, username: 'beast', group: 'admins' },
   { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
-  { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
+  { name: 'Mary', id: 55, username: 'sheep', group: 'editor' },
 ];
 
 // this is how we used to accomplish this, before IndexedArray
-users.byName = _.indexBy(users, 'name');
-users.byUsername = _.indexBy(users, 'username');
+users.byName = _.keyBy(users, 'name');
+users.byUsername = _.keyBy(users, 'username');
 users.byGroup = _.groupBy(users, 'group');
 users.inIdOrder = _.sortBy(users, 'id');
 
@@ -55,7 +54,7 @@ describe('IndexedArray', function () {
     });
 
     it('clones to an object', function () {
-      expect(_.isPlainObject(_.clone(reg))).to.be(true);
+      expect(_.isObject(_.clone(reg))).to.be(true);
       expect(Array.isArray(_.clone(reg))).to.be(false);
     });
   });
@@ -63,7 +62,7 @@ describe('IndexedArray', function () {
   describe('Indexing', function () {
     it('provides the initial set', function () {
       const reg = new IndexedArray({
-        initialSet: [1, 2, 3]
+        initialSet: [1, 2, 3],
       });
 
       expect(reg).to.have.length(3);
@@ -76,7 +75,7 @@ describe('IndexedArray', function () {
     it('indexes the initial set', function () {
       const reg = new IndexedArray({
         index: ['username'],
-        initialSet: users
+        initialSet: users,
       });
 
       expect(reg).to.have.property('byUsername');
@@ -92,7 +91,7 @@ describe('IndexedArray', function () {
       const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
-        initialSet: otherUsers
+        initialSet: otherUsers,
       });
 
       // add the first
@@ -112,7 +111,7 @@ describe('IndexedArray', function () {
       const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
-        initialSet: users
+        initialSet: users,
       });
 
       // remove the last
@@ -122,9 +121,13 @@ describe('IndexedArray', function () {
       // indexed lists should be updated
       expect(reg).to.have.length(expectedCount);
 
-      const sumOfGroups = _.reduce(reg.byGroup, function (note, group) {
-        return note + group.length;
-      }, 0);
+      const sumOfGroups = _.reduce(
+        reg.byGroup,
+        function (note, group) {
+          return note + group.length;
+        },
+        0
+      );
       expect(sumOfGroups).to.eql(expectedCount);
     });
 
@@ -132,12 +135,12 @@ describe('IndexedArray', function () {
       const reg = new IndexedArray({
         group: ['group'],
         order: ['id'],
-        initialSet: users
+        initialSet: users,
       });
 
       reg.remove({ name: 'John' });
 
-      expect(_.eq(reg.raw, reg.slice(0))).to.be(true);
+      expect(_.isEqual(reg.raw, reg.slice(0))).to.be(true);
       expect(reg.length).to.be(3);
       expect(reg[0].name).to.be('Anon');
     });
@@ -147,7 +150,9 @@ describe('IndexedArray', function () {
 
       // collect and shuffle the ids available
       let ids = [];
-      _.times(rawUsers.length, function (i) { ids.push(i); });
+      _.times(rawUsers.length, function (i) {
+        ids.push(i);
+      });
       ids = _.shuffle(ids);
 
       // move something here
@@ -155,11 +160,13 @@ describe('IndexedArray', function () {
       // from here
       const fromI = ids.shift();
       // do the move
-      const move = function (arr) { arr.splice(toI, 0, arr.splice(fromI, 1)[0]); };
+      const move = function (arr) {
+        arr.splice(toI, 0, arr.splice(fromI, 1)[0]);
+      };
 
       const reg = new IndexedArray({
         index: ['username'],
-        initialSet: rawUsers
+        initialSet: rawUsers,
       });
 
       const index = reg.byUsername;
@@ -176,7 +183,7 @@ describe('IndexedArray', function () {
       const reg = new IndexedArray({
         index: ['title'],
         order: ['title'],
-        initialSet: [{ title: 'APM' }, { title: 'Advanced Settings' }]
+        initialSet: [{ title: 'APM' }, { title: 'Advanced Settings' }],
       });
 
       const ordered = reg.inTitleOrder;
@@ -188,7 +195,7 @@ describe('IndexedArray', function () {
       const reg = new IndexedArray({
         index: ['id'],
         order: ['id'],
-        initialSet: users
+        initialSet: users,
       });
 
       const ordered = reg.inIdOrder;

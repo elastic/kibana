@@ -20,6 +20,7 @@
 import * as React from 'react';
 import { KibanaServices } from '../context/types';
 import { KibanaReactNotifications } from './types';
+import { toMountPoint } from '../util';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {
   const show: KibanaReactNotifications['toasts']['show'] = ({
@@ -34,8 +35,8 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
       throw new TypeError('Could not show notification as notifications service is not available.');
     }
     services.notifications!.toasts.add({
-      title,
-      text: <>{body || null}</>,
+      title: toMountPoint(title),
+      text: toMountPoint(<>{body || null}</>),
       color,
       iconType,
       toastLifeTimeMs,
@@ -43,13 +44,13 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     });
   };
 
-  const success: KibanaReactNotifications['toasts']['success'] = input =>
+  const success: KibanaReactNotifications['toasts']['success'] = (input) =>
     show({ color: 'success', iconType: 'check', ...input });
 
-  const warning: KibanaReactNotifications['toasts']['warning'] = input =>
+  const warning: KibanaReactNotifications['toasts']['warning'] = (input) =>
     show({ color: 'warning', iconType: 'help', ...input });
 
-  const danger: KibanaReactNotifications['toasts']['danger'] = input =>
+  const danger: KibanaReactNotifications['toasts']['danger'] = (input) =>
     show({ color: 'danger', iconType: 'alert', ...input });
 
   const notifications: KibanaReactNotifications = {

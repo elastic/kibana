@@ -5,43 +5,47 @@
  */
 
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
-import { services as kibanaCommonServices } from '../../../../test/common/services';
-
-import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/services';
+import { services as commonServices } from '../../common/services';
 
 // @ts-ignore not ts yet
-import { EsProvider } from './es';
+import { LegacyEsProvider } from './legacy_es';
 // @ts-ignore not ts yet
 import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 // @ts-ignore not ts yet
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
-// @ts-ignore not ts yet
+
 import { UsageAPIProvider } from './usage_api';
 import {
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
 } from './infraops_graphql_client';
-import { SiemGraphQLClientProvider, SiemGraphQLClientFactoryProvider } from './siem_graphql_client';
+import {
+  SecuritySolutionGraphQLClientProvider,
+  SecuritySolutionGraphQLClientFactoryProvider,
+} from './security_solution_graphql_client';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
+import { InfraLogSourceConfigurationProvider } from './infra_log_source_configuration';
+import { MachineLearningProvider } from './ml';
+import { IngestManagerProvider } from '../../common/services/ingest_manager';
+import { TransformProvider } from './transform';
 
 export const services = {
-  chance: kibanaApiIntegrationServices.chance,
+  ...commonServices,
+
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
 
-  esArchiver: kibanaCommonServices.esArchiver,
-  kibanaServer: kibanaCommonServices.kibanaServer,
-  retry: kibanaCommonServices.retry,
-
-  es: EsProvider,
+  legacyEs: LegacyEsProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
   infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
   infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
-  security: SecurityServiceProvider,
-  siemGraphQLClient: SiemGraphQLClientProvider,
-  siemGraphQLClientFactory: SiemGraphQLClientFactoryProvider,
-  spaces: SpacesServiceProvider,
+  infraLogSourceConfiguration: InfraLogSourceConfigurationProvider,
+  securitySolutionGraphQLClient: SecuritySolutionGraphQLClientProvider,
+  securitySolutionGraphQLClientFactory: SecuritySolutionGraphQLClientFactoryProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
+  ml: MachineLearningProvider,
+  ingestManager: IngestManagerProvider,
+  transform: TransformProvider,
 };

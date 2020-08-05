@@ -29,11 +29,17 @@ describe('work queue', function () {
   let Promise;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_Promise_) {
-    Promise = _Promise_;
-  }));
-  beforeEach(function () { queue = new WorkQueue(); });
-  afterEach(function () { queue.empty(); });
+  beforeEach(
+    ngMock.inject(function (_Promise_) {
+      Promise = _Promise_;
+    })
+  );
+  beforeEach(function () {
+    queue = new WorkQueue();
+  });
+  afterEach(function () {
+    queue.empty();
+  });
 
   describe('#push', function () {
     it('adds to the interval queue', function () {

@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JobSwitch renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  justifyContent="spaceAround"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <StaticSwitch
+      checked={false}
+      data-test-subj="job-switch"
+      disabled={false}
+      label=""
+      onChange={[Function]}
+      showLabel={false}
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

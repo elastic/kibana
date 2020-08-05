@@ -27,10 +27,12 @@ describe('State Management', function () {
   let AppState;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (_$rootScope_, _$location_, Private) {
-    $rootScope = _$rootScope_;
-    AppState = Private(AppStateProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function (_$rootScope_, _$location_, Private) {
+      $rootScope = _$rootScope_;
+      AppState = Private(AppStateProvider);
+    })
+  );
 
   describe('App State', function () {
     let appState;
@@ -47,7 +49,7 @@ describe('State Management', function () {
     it('should use passed in params', function () {
       const params = {
         test: true,
-        mock: false
+        mock: false,
       };
 
       appState = new AppState(params);

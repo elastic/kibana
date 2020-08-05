@@ -40,6 +40,7 @@ function render(props: ErrorToastProps = {}) {
       error={props.error || new Error('error message')}
       title={props.title || 'An error occured'}
       toastMessage={props.toastMessage || 'This is the toast message'}
+      i18nContext={() => ({ children }) => <React.Fragment>{children}</React.Fragment>}
     />
   );
 }

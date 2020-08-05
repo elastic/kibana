@@ -1,28 +1,39 @@
 [role="xpack"]
 [[xpack-ml]]
-== {ml-cap}
+= {ml-cap}
 
-As datasets increase in size and complexity, the human effort required to
+[partintro]
+--
+As data sets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
 cyber attacks, or business issues becomes impractical. Elastic {ml-features}
 such as {anomaly-detect} and {oldetection} make it easier to notice suspicious
 activities with minimal human interference.
 
-If you have a basic license, you can use the *Data Visualizer* to learn more
-about your data. In particular, if your data is stored in {es} and contains a
-time field, you can use the *Data Visualizer* to identify possible fields for
-{anomaly-detect}:
+{kib} includes a free *{data-viz}* to learn more about your data. In particular,
+if your data is stored in {es} and contains a time field, you can use the
+*{data-viz}* to identify possible fields for {anomaly-detect}:
 
 [role="screenshot"]
-image::user/ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample flight data]
+image::user/ml/images/ml-data-visualizer-sample.jpg[{data-viz} for sample flight data]
 
-experimental[] You can also upload a CSV, NDJSON, or log file (up to 100 MB in 
-size). The *Data Visualizer* identifies the file format and field mappings. You 
-can then optionally import that data into an {es} index.  
+experimental[] You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
+identifies the file format and field mappings. You can then optionally import
+that data into an {es} index. To change the default file size limit, see
+<<kibana-ml-settings>>.
 
-[float]
+You need the following permissions to use the {data-viz} with file upload:
+
+* cluster privileges: `monitor`, `manage_ingest_pipelines`
+* index privileges: `read`, `manage`, `index`
+
+For more information, see {ref}/security-privileges.html[Security privileges] 
+and {ml-docs}/setup.html[Set up {ml-features}].
+
+--
+
 [[xpack-ml-anomalies]]
-=== {anomaly-detect-cap}
+== {anomaly-detect-cap}
 
 The Elastic {ml} {anomaly-detect} feature automatically models the normal
 behavior of your time series data — learning trends, periodicity, and more — in
@@ -36,20 +47,20 @@ create {anomaly-jobs} and manage jobs and {dfeeds} from the *Job Management*
 pane: 
 
 [role="screenshot"]
-image::user/ml/images/ml-job-management.jpg[Job Management]
+image::user/ml/images/ml-job-management.png[Job Management]
 
 You can use the *Settings* pane to create and edit 
-{stack-ov}/ml-calendars.html[calendars] and the filters that are used in 
-{stack-ov}/ml-rules.html[custom rules]:
+{ml-docs}/ml-calendars.html[calendars] and the filters that are used in 
+{ml-docs}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
-image::user/ml/images/ml-settings.jpg[Calendar Management]
+image::user/ml/images/ml-settings.png[Calendar Management]
 
 The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
 {anomaly-jobs}. For example:
 
 [role="screenshot"]
-image::user/ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
+image::user/ml/images/ml-single-metric-viewer.png[Single Metric Viewer]
 
 You can optionally add annotations by drag-selecting a period of time in
 the *Single Metric Viewer* and adding a description. For example, you can add an
@@ -57,12 +68,12 @@ explanation for anomalies in that time period or provide notes about what is
 occurring in your operational environment at that time:
 
 [role="screenshot"]
-image::user/ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
+image::user/ml/images/ml-annotations-list.png[Single Metric Viewer with annotations]
 
 In some circumstances, annotations are also added automatically. For example, if
 the {anomaly-job} detects that there is missing data, it annotates the affected 
 time period. For more information, see 
-{stack-ov}/ml-delayed-data-detection.html[Handling delayed data]. The 
+{ml-docs}/ml-delayed-data-detection.html[Handling delayed data]. The 
 *Job Management* pane shows the full list of annotations for each job.
 
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your web 
@@ -71,22 +82,23 @@ browser so that it does not block pop-up windows or create an exception for your
 
 For more information about the {anomaly-detect} feature, see
 https://www.elastic.co/what-is/elastic-stack-machine-learning[{ml-cap} in the {stack}]
-and {stack-ov}/xpack-ml.html[{ml-cap} {anomaly-detect}].
+and {ml-docs}/xpack-ml.html[{ml-cap} {anomaly-detect}].
 
-[float]
 [[xpack-ml-dfanalytics]]
-=== {dfanalytics-cap}
+== {dfanalytics-cap}
+
+experimental[]
 
 The Elastic {ml} {dfanalytics} feature enables you to analyze your data using
-{oldetection} and {regression} algorithms and generate new indices that contain
-the results alongside your source data. 
+{classification}, {oldetection}, and {regression} algorithms and generate new
+indices that contain the results alongside your source data. 
 
 If you have a license that includes the {ml-features}, you can create
-{oldetection} {dfanalytics-jobs} and view their results on the *Analytics* page
-in {kib}. For example:
+{dfanalytics-jobs} and view their results on the *Data Frame Analytics* page in
+{kib}. For example:
 
 [role="screenshot"]
-image::user/ml/images/outliers.jpg[{oldetection-cap} results in {kib}]
+image::user/ml/images/outliers.png[{oldetection-cap} results in {kib}]
 
 For more information about the {dfanalytics} feature, see 
-{stack-ov}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].
+{ml-docs}/ml-dfanalytics.html[{ml-cap} {dfanalytics}].

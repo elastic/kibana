@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditConditionLink renders for a condition using actual 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText>
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="condition-edit-value-field"
+    grow={false}
+  >
+    <EuiFieldNumber
+      aria-label="Enter numeric value for condition"
+      compressed={true}
+      onChange={[Function]}
+      placeholder="Enter value"
+      value={210}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLink
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
+    </EuiLink>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`EditConditionLink renders for a condition using diff from typical 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText>
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="condition-edit-value-field"
+    grow={false}
+  >
+    <EuiFieldNumber
+      aria-label="Enter numeric value for condition"
+      compressed={true}
+      onChange={[Function]}
+      placeholder="Enter value"
+      value={208.8}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLink
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
+    </EuiLink>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`EditConditionLink renders for a condition using typical 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText>
+      <FormattedMessage
+        defaultMessage="Update rule condition from {conditionValue} to"
+        id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+        values={
+          Object {
+            "conditionValue": 5,
+          }
+        }
+      />
+    </EuiText>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="condition-edit-value-field"
+    grow={false}
+  >
+    <EuiFieldNumber
+      aria-label="Enter numeric value for condition"
+      compressed={true}
+      onChange={[Function]}
+      placeholder="Enter value"
+      value={1.23}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLink
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Update"
+        id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+        values={Object {}}
+      />
+    </EuiLink>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

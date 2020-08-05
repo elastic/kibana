@@ -1,0 +1,95 @@
+
+$badgeSize: $euiSize * 5.5;
+
+// Profile details treeview
+
+.prfDevTool__profileTree {
+
+  &__shardDetails--dim small {
+    color: $euiColorDarkShade;
+  }
+
+  &__shardDetails {
+    line-height: 1;
+    overflow-wrap: break-word;
+
+    h3 {
+      font-size: $euiSize;
+    }
+
+    &:disabled {
+      text-decoration: none !important;
+      cursor: default;
+    }
+  }
+
+  &__shard {
+    border: none;
+
+    &__header-flex-item {
+      align-self: center;
+    }
+  }
+
+  &__index {
+    width: 100%;
+    padding: $euiSize $euiSizeS;
+  }
+
+  &__indexDetails {
+    align-self: center;
+  }
+
+  &__tvRow--last {
+    cursor: pointer;
+  }
+
+  &__tvRow,
+  &__tvHeader {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  &__tvHeader {
+    @include euiFontSizeXS;
+    color: $euiColorDarkShade;
+  }
+
+  &__time,
+  &__totalTime,
+  &__percentage {
+    width: $badgeSize;
+  }
+
+  // BADGES (and those used for progress)
+  &__badge {
+    border: none;
+    display: block;
+    // Force text to always be dark on top of white -> pink color
+    color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
+  }
+
+  &__panel {
+    border-bottom: $euiBorderThin;
+  }
+
+  &__panelBody {
+    margin-top: $euiSizeS;
+    margin-left: $euiSizeL;
+  }
+
+  &__cell {
+    display: table-cell;
+    vertical-align: middle;
+    padding: $euiSizeXS;
+
+    &:first-of-type {
+      padding-left: 0;
+    }
+
+    &:last-of-type {
+      padding-right: 0;
+    }
+  }
+}

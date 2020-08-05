@@ -16,28 +16,89 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FieldFormat } from './field_format';
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
-export type ContentType = 'html' | 'text';
-
-/** @public **/
-export { IFieldFormat } from './field_format';
+export type FieldFormatsContentType = 'html' | 'text';
 
 /** @internal **/
-export type HtmlConventTypeConvert = (
-  value: any,
-  field?: any,
-  hit?: Record<string, any>,
-  meta?: any
-) => string;
+export interface HtmlContextTypeOptions {
+  field?: any;
+  hit?: Record<string, any>;
+}
 
 /** @internal **/
-export type TextContextTypeConvert = (value: any) => string;
+export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
 
 /** @internal **/
-export type FieldFormatConvertFunction = HtmlConventTypeConvert | TextContextTypeConvert;
+export type TextContextTypeOptions = Record<string, any>;
+
+/** @internal **/
+export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
+
+/** @internal **/
+export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTypeConvert;
 
 /** @internal **/
 export interface FieldFormatConvert {
-  [key: string]: FieldFormatConvertFunction;
+  text: TextContextTypeConvert;
+  html: HtmlContextTypeConvert;
 }
+
+/** @public **/
+export enum FIELD_FORMAT_IDS {
+  _SOURCE = '_source',
+  BOOLEAN = 'boolean',
+  BYTES = 'bytes',
+  COLOR = 'color',
+  CUSTOM = 'custom',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  DURATION = 'duration',
+  IP = 'ip',
+  NUMBER = 'number',
+  PERCENT = 'percent',
+  RELATIVE_DATE = 'relative_date',
+  STATIC_LOOKUP = 'static_lookup',
+  STRING = 'string',
+  TRUNCATE = 'truncate',
+  URL = 'url',
+}
+
+export interface FieldFormatConfig {
+  id: FieldFormatId;
+  params: Record<string, any>;
+  es?: boolean;
+}
+
+export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+
+export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+
+/**
+ * @string id type is needed for creating custom converters.
+ */
+export type FieldFormatId = FIELD_FORMAT_IDS | string;
+
+/** @internal **/
+export type FieldFormatInstanceType = (new (
+  params?: any,
+  getConfig?: FieldFormatsGetConfigFn
+) => FieldFormat) & {
+  // Static properties:
+  id: FieldFormatId;
+  title: string;
+  fieldType: string | string[];
+};
+
+export interface IFieldFormatMetaParams {
+  [key: string]: any;
+  parsedUrl?: {
+    origin: string;
+    pathname?: string;
+    basePath?: string;
+  };
+}
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

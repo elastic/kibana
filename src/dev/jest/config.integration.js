@@ -33,7 +33,5 @@ export default {
     'default',
     ['<rootDir>/src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/dev/jest/setup/after_env.integration.js'
-  ]
+  setupFilesAfterEnv: ['<rootDir>/src/dev/jest/setup/after_env.integration.js'],
 };

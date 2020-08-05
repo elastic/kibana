@@ -26,28 +26,42 @@ import { safeLoad } from 'js-yaml';
 
 const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
 const TEST_TAGS = safeLoad(JOBS_YAML)
-  .JOB
-  .filter(id => id.startsWith('kibana-ciGroup'))
-  .map(id => id.replace(/^kibana-/, ''));
+  .JOB.filter((id) => id.startsWith('kibana-ciGroup'))
+  .map((id) => id.replace(/^kibana-/, ''));
+
+const getDefaultArgs = (tag) => {
+  return [
+    'scripts/functional_tests',
+    '--include-tag',
+    tag,
+    '--config',
+    'test/functional/config.js',
+    '--config',
+    'test/ui_capabilities/newsfeed_err/config.ts',
+    // '--config', 'test/functional/config.firefox.js',
+    '--bail',
+    '--debug',
+    '--config',
+    'test/new_visualize_flow/config.js',
+  ];
+};
 
 export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
   return {
     // include a run task for each test group
-    ...TEST_TAGS.reduce((acc, tag) => ({
-      ...acc,
-      [`functionalTests_${tag}`]: {
-        cmd: process.execPath,
-        args: [
-          'scripts/functional_tests',
-          '--include-tag', tag,
-          '--config', 'test/functional/config.js',
-          // '--config', 'test/functional/config.firefox.js',
-          '--bail',
-          '--debug',
-          '--kibana-install-dir', kibanaInstallDir,
-        ],
-      }
-    }), {}),
+    ...TEST_TAGS.reduce(
+      (acc, tag) => ({
+        ...acc,
+        [`functionalTests_${tag}`]: {
+          cmd: process.execPath,
+          args: [
+            ...getDefaultArgs(tag),
+            ...(!!process.env.CODE_COVERAGE ? [] : ['--kibana-install-dir', kibanaInstallDir]),
+          ],
+        },
+      }),
+      {}
+    ),
   };
 }
 
@@ -58,12 +72,14 @@ grunt.registerTask(
     const done = this.async();
 
     try {
-      const stats = JSON.parse(await execa.stderr(process.execPath, [
+      const result = await execa(process.execPath, [
         'scripts/functional_test_runner',
-        ...TEST_TAGS.map(tag => `--include-tag=${tag}`),
-        '--config', 'test/functional/config.js',
-        '--test-stats'
-      ]));
+        ...TEST_TAGS.map((tag) => `--include-tag=${tag}`),
+        '--config',
+        'test/functional/config.js',
+        '--test-stats',
+      ]);
+      const stats = JSON.parse(result.stderr);
 
       if (stats.excludedTests.length > 0) {
         grunt.fail.fatal(`

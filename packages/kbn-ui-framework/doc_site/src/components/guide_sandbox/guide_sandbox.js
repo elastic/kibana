@@ -17,21 +17,14 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import {
-  getIsSandbox,
-} from '../../store';
+import { getIsSandbox } from '../../store';
 
-import {
-  openSandbox,
-  closeSandbox,
-} from '../../actions';
+import { openSandbox, closeSandbox } from '../../actions';
 
 function mapStateToProps(state) {
   return {
@@ -49,7 +42,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 class GuideSandboxComponent extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.openSandbox();
   }
 
@@ -58,11 +51,7 @@ class GuideSandboxComponent extends Component {
   }
 
   render() {
-    return (
-      <div className="guideSandbox">
-        {this.props.children}
-      </div>
-    );
+    return <div className="guideSandbox">{this.props.children}</div>;
   }
 }
 

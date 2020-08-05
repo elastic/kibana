@@ -10,13 +10,15 @@ export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
-    const cookie = (response.headers['set-cookie'] || []).find(header => header.startsWith('sid='));
+    const cookie = (response.headers['set-cookie'] || []).find((header) =>
+      header.startsWith('sid=')
+    );
     return cookie ? request.cookie(cookie) : undefined;
   }
 
   async function createSessionCookie() {
     const response = await supertest
-      .post('/api/security/v1/login')
+      .post('/internal/security/login')
       .set('kbn-xsrf', 'true')
       .send({ username: 'elastic', password: 'changeme' });
 
@@ -33,7 +35,7 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       await supertest
-        .get('/api/security/v1/logout')
+        .get('/api/security/logout')
         .set('cookie', cookie.cookieString())
         .expect(302)
         .expect('location', '/login?msg=LOGGED_OUT');
@@ -43,7 +45,7 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       const response = await supertest
-        .get('/api/security/v1/logout')
+        .get('/api/security/logout')
         .set('cookie', cookie.cookieString());
 
       const newCookie = extractSessionCookie(response);
@@ -59,13 +61,11 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       // destroy it
-      await supertest
-        .get('/api/security/v1/logout')
-        .set('cookie', cookie.cookieString());
+      await supertest.get('/api/security/logout').set('cookie', cookie.cookieString());
 
       // verify that the cookie no longer works
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(400);

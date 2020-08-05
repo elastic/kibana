@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -28,14 +28,6 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
-
-interface Driver {
-  driver: WebDriver;
-  By: typeof By;
-  Key: IKey;
-  until: typeof until;
-  LegacyActionSequence: any;
-}
 
 interface TypeOptions {
   charByChar: boolean;
@@ -53,20 +45,18 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By: typeof By = this.webDriver.By;
-  private Keys: IKey = this.webDriver.Key;
-  private driver: WebDriver = this.webDriver.driver;
-  public LegacyAction: any = this.webDriver.LegacyActionSequence;
-  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
+  private By = By;
+  private Keys = Key;
+  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
     locator: By | null,
-    webDriver: Driver,
+    driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
-    browserType: string
+    browserType: Browsers
   ): WebElementWrapper {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -75,7 +65,7 @@ export class WebElementWrapper {
     return new WebElementWrapper(
       webElement,
       locator,
-      webDriver,
+      driver,
       timeout,
       fixedHeaderHeight,
       logger,
@@ -86,11 +76,11 @@ export class WebElementWrapper {
   constructor(
     public _webElement: WebElement,
     private locator: By | null,
-    private webDriver: Driver,
+    private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
-    private browserType: string
+    private browserType: Browsers
   ) {}
 
   private async _findWithCustomTimeout(
@@ -98,11 +88,11 @@ export class WebElementWrapper {
     timeout?: number
   ) {
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: timeout });
+      await this.driver.manage().setTimeouts({ implicit: timeout });
     }
     const elements = await findFunction();
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
     }
     return elements;
   }
@@ -111,7 +101,7 @@ export class WebElementWrapper {
     return WebElementWrapper.create(
       otherWebElement,
       locator,
-      this.webDriver,
+      this.driver,
       this.timeout,
       this.fixedHeaderHeight,
       this.logger,
@@ -120,7 +110,7 @@ export class WebElementWrapper {
   }
 
   private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
-    return otherWebElements.map(e => this._wrap(e));
+    return otherWebElements.map((e) => this._wrap(e));
   }
 
   private async retryCall<T>(
@@ -149,10 +139,8 @@ export class WebElementWrapper {
     }
   }
 
-  private getActions(): any {
-    return this.isW3CEnabled
-      ? (this.driver as any).actions()
-      : (this.driver as any).actions({ bridge: true });
+  private getActions() {
+    return this.driver.actions();
   }
 
   /**
@@ -225,6 +213,17 @@ export class WebElementWrapper {
   }
 
   /**
+   * Check if webelement wrapper has a specific class.
+   *
+   * @return {Promise<boolean>}
+   */
+  public async elementHasClass(className: string): Promise<boolean> {
+    const classes: string = await this._webElement.getAttribute('class');
+
+    return classes.includes(className);
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
@@ -234,7 +233,7 @@ export class WebElementWrapper {
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
     await this.retryCall(async function clearValue(wrapper) {
-      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+      if (wrapper.isChromium || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
         await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
       } else {
@@ -256,7 +255,7 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      if (this.browserType === Browsers.Chrome) {
+      if (this.isChromium) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper) {
           await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
@@ -309,7 +308,7 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
+  public async pressKeys<T extends typeof Key>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     await this.retryCall(async function pressKeys(wrapper) {
@@ -390,7 +389,7 @@ export class WebElementWrapper {
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getPosition(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
@@ -403,7 +402,7 @@ export class WebElementWrapper {
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getSize(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
@@ -416,22 +415,11 @@ export class WebElementWrapper {
   public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .perform();
     });
   }
 
@@ -443,27 +431,15 @@ export class WebElementWrapper {
    * @param { xOffset: 0, yOffset: 0 } options Optional
    * @return {Promise<void>}
    */
-  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }): Promise<void> {
+  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.isW3CEnabled) {
-        await wrapper
-          .getActions()
-          .move({ x: 0, y: 0 })
-          .perform();
-        await wrapper
-          .getActions()
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      } else {
-        await wrapper
-          .getActions()
-          .pause(wrapper.getActions().mouse)
-          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-          .click()
-          .perform();
-      }
+      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper
+        .getActions()
+        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+        .click()
+        .perform();
     });
   }
 
@@ -473,13 +449,10 @@ export class WebElementWrapper {
    * @param {WebElementWrapper} element
    * @return {Promise<void>}
    */
-  public async doubleClick(): Promise<void> {
+  public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper
-        .getActions()
-        .doubleClick(wrapper._webElement)
-        .perform();
+      await wrapper.getActions().doubleClick(wrapper._webElement).perform();
     });
   }
 
@@ -512,6 +485,40 @@ export class WebElementWrapper {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
           async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
+          timeout
+        )
+      );
+    });
+  }
+
+  /**
+   * Gets the first element inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper>}
+   */
+  public async findByTestSubject(selector: string) {
+    return await this.retryCall(async function find(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
+        wrapper.By.css(selector)
+      );
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @param {number} timeout
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  public async findAllByTestSubject(selector: string, timeout?: number) {
+    return await this.retryCall(async function findAll(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () =>
+            await wrapper._webElement.findElements(wrapper.By.css(testSubjSelector(selector))),
           timeout
         )
       );
@@ -679,7 +686,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await (this.driver.manage() as any).setTimeouts({ implicit: 1000 });
+    await this.driver.manage().setTimeouts({ implicit: 1000 });
     await this.driver.wait(
       async () => {
         const found = await this._webElement.findElements(this.By.css(selector));
@@ -688,7 +695,7 @@ export class WebElementWrapper {
       this.timeout,
       `The element with ${selector} selector was still present after ${this.timeout} sec.`
     );
-    await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+    await this.driver.manage().setTimeouts({ implicit: this.timeout });
   }
 
   /**
@@ -744,7 +751,7 @@ export class WebElementWrapper {
    */
   public async takeScreenshot(): Promise<Buffer> {
     const screenshot = await this.driver.takeScreenshot();
-    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const buffer = Buffer.from(screenshot, 'base64');
     const { width, height, x, y } = await this.getPosition();
     const windowWidth: number = await this.driver.executeScript(
       'return window.document.body.clientWidth'

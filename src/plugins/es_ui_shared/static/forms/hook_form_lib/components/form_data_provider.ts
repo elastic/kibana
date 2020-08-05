@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { FormData } from '../types';
-import { Subscription } from '../lib';
 import { useFormContext } from '../form_context';
 
 interface Props {
@@ -28,14 +27,14 @@ interface Props {
   pathsToWatch?: string | string[];
 }
 
-export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
-  const [formData, setFormData] = useState<FormData>({});
-  const previousState = useRef<FormData>({});
-  const subscription = useRef<Subscription | null>(null);
+export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
   const form = useFormContext();
+  const { subscribe } = form;
+  const previousRawData = useRef<FormData>(form.__getFormData$().value);
+  const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
-  useEffect(() => {
-    subscription.current = form.__formData$.current.subscribe(data => {
+  const onFormData = useCallback(
+    ({ data: { raw } }) => {
       // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
@@ -43,19 +42,22 @@ export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
-        if (valuesToWatchArray.some(value => previousState.current[value] !== data[value])) {
-          previousState.current = data;
-          setFormData(data);
+
+        if (valuesToWatchArray.some((value) => previousRawData.current[value] !== raw[value])) {
+          previousRawData.current = raw;
+          setFormData(raw);
         }
       } else {
-        setFormData(data);
+        setFormData(raw);
       }
-    });
+    },
+    [pathsToWatch]
+  );
 
-    return () => {
-      subscription.current!.unsubscribe();
-    };
-  }, [pathsToWatch]);
+  useEffect(() => {
+    const subscription = subscribe(onFormData);
+    return subscription.unsubscribe;
+  }, [subscribe, onFormData]);
 
   return children(formData);
-};
+});

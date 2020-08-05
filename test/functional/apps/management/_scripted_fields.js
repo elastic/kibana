@@ -43,7 +43,14 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'settings',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
 
   describe('scripted fields', function () {
     this.tags(['skipFirefox']);
@@ -59,8 +66,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.clickIndexPatternLogstash();
-      await PageObjects.settings.removeIndexPattern();
+      await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
     it('should not allow saving of invalid scripts', async function () {
@@ -78,7 +84,6 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-
     describe('testing regression for issue #33251', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
@@ -90,9 +95,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         const script = `1`;
-        await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
+        await PageObjects.settings.addScriptedField(
+          scriptedPainlessFieldName,
+          'painless',
+          'number',
+          null,
+          '1',
+          script
+        );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
         });
 
         for (let i = 0; i < 3; i++) {
@@ -103,7 +117,6 @@ export default function ({ getService, getPageObjects }) {
         }
       });
     });
-
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
@@ -118,15 +131,24 @@ export default function ({ getService, getPageObjects }) {
         const script = `if (doc['machine.ram'].size() == 0) return -1;
           else return doc['machine.ram'].value / (1024 * 1024 * 1024);
         `;
-        await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
+        await PageObjects.settings.addScriptedField(
+          scriptedPainlessFieldName,
+          'painless',
+          'number',
+          null,
+          '1',
+          script
+        );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
         });
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -154,9 +176,27 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        const expectedChartValues = [ ['14', '31'], ['10', '29'], ['7', '24'], ['11', '24'], ['12', '23'],
-          ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
-          ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
+        const expectedChartValues = [
+          ['14', '31'],
+          ['10', '29'],
+          ['7', '24'],
+          ['11', '24'],
+          ['12', '23'],
+          ['20', '23'],
+          ['19', '21'],
+          ['6', '20'],
+          ['17', '20'],
+          ['30', '20'],
+          ['13', '19'],
+          ['18', '18'],
+          ['16', '17'],
+          ['5', '16'],
+          ['8', '16'],
+          ['15', '14'],
+          ['3', '13'],
+          ['2', '12'],
+          ['9', '10'],
+          ['4', '9'],
         ];
         await filterBar.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
@@ -178,17 +218,24 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        await PageObjects.settings
-          .addScriptedField(scriptedPainlessFieldName2, 'painless', 'string', null, '1',
-            'if (doc[\'response.raw\'].value == \'200\') { return \'good\'} else { return \'bad\'}');
+        await PageObjects.settings.addScriptedField(
+          scriptedPainlessFieldName2,
+          'painless',
+          'string',
+          null,
+          '1',
+          "if (doc['response.raw'].value == '200') { return 'good'} else { return 'bad'}"
+        );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
         });
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -201,7 +248,6 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
-
         });
       });
 
@@ -223,7 +269,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.open();
         await inspector.expectTableData([
           ['good', '359'],
-          ['bad', '27']
+          ['bad', '27'],
         ]);
       });
     });
@@ -238,17 +284,24 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        await PageObjects.settings
-          .addScriptedField(scriptedPainlessFieldName2, 'painless', 'boolean', null, '1',
-            'doc[\'response.raw\'].value == \'200\'');
+        await PageObjects.settings.addScriptedField(
+          scriptedPainlessFieldName2,
+          'painless',
+          'boolean',
+          null,
+          '1',
+          "doc['response.raw'].value == '200'"
+        );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
         });
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 06:31:44.000';
-        const toTime = '2015-09-18 18:31:44.000';
+        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
+        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -261,7 +314,6 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
-
         });
       });
 
@@ -283,7 +335,7 @@ export default function ({ getService, getPageObjects }) {
         await inspector.open();
         await inspector.expectTableData([
           ['true', '359'],
-          ['false', '27']
+          ['false', '27'],
         ]);
       });
     });
@@ -298,18 +350,24 @@ export default function ({ getService, getPageObjects }) {
         const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
         await PageObjects.settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
-        await PageObjects.settings
-          .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
-            { format: 'date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
-            'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
+        await PageObjects.settings.addScriptedField(
+          scriptedPainlessFieldName2,
+          'painless',
+          'date',
+          { format: 'date', datePattern: 'YYYY-MM-DD HH:00' },
+          '1',
+          "doc['utc_time'].value.getMillis() + (1000) * 60 * 60"
+        );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+            startingCount + 1
+          );
         });
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = '2015-09-17 19:22:00.000';
-        const toTime = '2015-09-18 07:00:00.000';
+        const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
+        const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -327,8 +385,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
+        await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
+        await PageObjects.discover.clickFieldListPlusFilter(
+          scriptedPainlessFieldName2,
+          '1442531297065'
+        );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {

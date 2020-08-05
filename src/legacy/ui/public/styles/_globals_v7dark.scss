@@ -1,0 +1,12 @@
+// v7dark global scope
+//
+// prepended to all .scss imports (from JS, when v7dark theme selected) and
+// legacy uiExports.styleSheetPaths when any dark theme is selected
+
+@import '@elastic/eui/src/themes/eui/eui_colors_dark';
+
+@import '@elastic/eui/src/global_styling/functions/index';
+@import '@elastic/eui/src/global_styling/variables/index';
+@import '@elastic/eui/src/global_styling/mixins/index';
+
+@import './mixins';

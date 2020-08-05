@@ -21,13 +21,14 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
 describe('Private module loader', function () {
-
   let Private;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    Private = $injector.get('Private');
-  }));
+  beforeEach(
+    ngMock.inject(function ($injector) {
+      Private = $injector.get('Private');
+    })
+  );
 
   it('accepts a provider that will be called to init a module', function () {
     const football = {};
@@ -126,7 +127,7 @@ describe('Private module loader', function () {
 
       function Provider2($decorate) {
         return {
-          instance1: $decorate()
+          instance1: $decorate(),
         };
       }
 

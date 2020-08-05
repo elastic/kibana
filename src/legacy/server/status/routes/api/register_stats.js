@@ -19,9 +19,10 @@
 
 import Joi from 'joi';
 import boom from 'boom';
-import { i18n }  from '@kbn/i18n';
+import { defaultsDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
-import { KIBANA_STATS_TYPE } from '../../constants';
+import { getKibanaInfoForStats } from '../../lib';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
   defaultMessage: 'Stats are not ready yet. Please try again later.',
@@ -29,7 +30,7 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
 
 /*
  * API for Kibana meta info and accumulated operations stats
- * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
+ * Including ?extended in the query string fetches Elasticsearch cluster_uuid and usageCollection data
  *   - Requests to set isExtended = true
  *       GET /api/stats?extended=true
  *       GET /api/stats?extended
@@ -37,19 +38,29 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
  *   - Any other value causes a statusCode 400 response (Bad Request)
  * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
-export function registerStatsApi(kbnServer, server, config) {
+export function registerStatsApi(usageCollection, server, config, kbnServer) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
-  const { collectorSet } = server.usage;
 
-  const getClusterUuid = async callCluster => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+  const getClusterUuid = async (callCluster) => {
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
-  const getUsage = async callCluster => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
-    return collectorSet.toObject(usage);
+  const getUsage = async (callCluster) => {
+    const usage = await usageCollection.bulkFetchUsage(callCluster);
+    return usageCollection.toObject(usage);
   };
+
+  let lastMetrics = null;
+  /* kibana_stats gets singled out from the collector set as it is used
+   * for health-checking Kibana and fetch does not rely on fetching data
+   * from ES */
+  server.newPlatform.start.core.metrics.getOpsMetrics$().subscribe((metrics) => {
+    lastMetrics = {
+      ...metrics,
+      timestamp: new Date().toISOString(),
+    };
+  });
 
   server.route(
     wrapAuth({
@@ -61,20 +72,21 @@ export function registerStatsApi(kbnServer, server, config) {
             extended: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false'),
             exclude_usage: Joi.string().valid('', 'true', 'false'),
-          })
+          }),
         },
         tags: ['api'],
       },
       async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
-        const shouldGetUsage = req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
+        const shouldGetUsage =
+          req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
 
         let extended;
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
-          const collectorsReady = await collectorSet.areAllCollectorsReady();
+          const collectorsReady = await usageCollection.areAllCollectorsReady();
 
           if (shouldGetUsage && !collectorsReady) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
@@ -82,7 +94,7 @@ export function registerStatsApi(kbnServer, server, config) {
 
           const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
-            const [ usage, clusterUuid ] = await Promise.all([
+            const [usage, clusterUuid] = await Promise.all([
               usagePromise,
               getClusterUuid(callCluster),
             ]);
@@ -98,23 +110,20 @@ export function registerStatsApi(kbnServer, server, config) {
                 if (usageKey === 'kibana') {
                   accum = {
                     ...accum,
-                    ...usage[usageKey]
+                    ...usage[usageKey],
                   };
-                }
-                else if (usageKey === 'reporting') {
+                } else if (usageKey === 'reporting') {
                   accum = {
                     ...accum,
                     xpack: {
                       ...accum.xpack,
-                      reporting: usage[usageKey]
+                      reporting: usage[usageKey],
                     },
                   };
-                }
-                else {
-                  accum = {
-                    ...accum,
-                    [usageKey]: usage[usageKey]
-                  };
+                } else {
+                  // I don't think we need to it this for the above conditions, but do it for most as it will
+                  // match the behavior done in monitoring/bulk_uploader
+                  defaultsDeep(accum, { [usageKey]: usage[usageKey] });
                 }
 
                 return accum;
@@ -124,11 +133,10 @@ export function registerStatsApi(kbnServer, server, config) {
                 usage: modifiedUsage,
                 clusterUuid,
               };
-            }
-            else {
-              extended = collectorSet.toApiFieldNames({
+            } else {
+              extended = usageCollection.toApiFieldNames({
                 usage: modifiedUsage,
-                clusterUuid
+                clusterUuid,
               });
             }
           } catch (e) {
@@ -136,15 +144,15 @@ export function registerStatsApi(kbnServer, server, config) {
           }
         }
 
-        /* kibana_stats gets singled out from the collector set as it is used
-         * for health-checking Kibana and fetch does not rely on fetching data
-         * from ES */
-        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-        if (!await kibanaStatsCollector.isReady()) {
+        if (!lastMetrics) {
           return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
-        let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
+        const kibanaStats = usageCollection.toApiFieldNames({
+          ...lastMetrics,
+          kibana: getKibanaInfoForStats(server, kbnServer),
+          last_updated: new Date().toISOString(),
+          collection_interval_in_millis: config.get('ops.interval'),
+        });
 
         return {
           ...kibanaStats,

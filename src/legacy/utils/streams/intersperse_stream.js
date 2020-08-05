@@ -59,6 +59,6 @@ export function createIntersperseStream(intersperseChunk) {
       } catch (err) {
         callback(err);
       }
-    }
+    },
   });
 }

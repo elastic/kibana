@@ -13,7 +13,7 @@ describe('injectXPackInfoSignature()', () => {
     constructor() {
       super();
       this.output = {
-        headers: {}
+        headers: {},
       };
 
       this.headers = {};
@@ -27,7 +27,7 @@ describe('injectXPackInfoSignature()', () => {
     mockXPackInfo = sinon.stub({
       isAvailable() {},
       getSignature() {},
-      refreshNow() {}
+      refreshNow() {},
     });
   });
 
@@ -46,7 +46,11 @@ describe('injectXPackInfoSignature()', () => {
       };
 
       const mockResponse = new MockErrorResponse();
-      const response = await injectXPackInfoSignature(mockXPackInfo, { response: mockResponse }, fakeH);
+      const response = await injectXPackInfoSignature(
+        mockXPackInfo,
+        { response: mockResponse },
+        fakeH
+      );
 
       expect(mockResponse.headers).to.eql({});
       expect(mockResponse.output.headers).to.eql({});
@@ -67,11 +71,15 @@ describe('injectXPackInfoSignature()', () => {
       };
 
       const mockResponse = new MockErrorResponse();
-      const response = await injectXPackInfoSignature(mockXPackInfo, { response: mockResponse }, fakeH);
+      const response = await injectXPackInfoSignature(
+        mockXPackInfo,
+        { response: mockResponse },
+        fakeH
+      );
 
       expect(mockResponse.headers).to.eql({});
       expect(mockResponse.output.headers).to.eql({
-        'kbn-xpack-sig': 'new-signature'
+        'kbn-xpack-sig': 'new-signature',
       });
       expect(response).to.be(fakeH.continue);
     });
@@ -83,7 +91,11 @@ describe('injectXPackInfoSignature()', () => {
       mockXPackInfo.getSignature.returns('this-should-never-be-set');
 
       const mockResponse = { headers: {}, output: { headers: {} } };
-      const response = await injectXPackInfoSignature(mockXPackInfo, { response: mockResponse }, fakeH);
+      const response = await injectXPackInfoSignature(
+        mockXPackInfo,
+        { response: mockResponse },
+        fakeH
+      );
 
       expect(mockResponse.headers).to.eql({});
       expect(mockResponse.output.headers).to.eql({});
@@ -96,10 +108,14 @@ describe('injectXPackInfoSignature()', () => {
       mockXPackInfo.getSignature.returns('available-signature');
 
       const mockResponse = { headers: {}, output: { headers: {} } };
-      const response = await injectXPackInfoSignature(mockXPackInfo, { response: mockResponse }, fakeH);
+      const response = await injectXPackInfoSignature(
+        mockXPackInfo,
+        { response: mockResponse },
+        fakeH
+      );
 
       expect(mockResponse.headers).to.eql({
-        'kbn-xpack-sig': 'available-signature'
+        'kbn-xpack-sig': 'available-signature',
       });
       expect(mockResponse.output.headers).to.eql({});
       sinon.assert.notCalled(mockXPackInfo.refreshNow);

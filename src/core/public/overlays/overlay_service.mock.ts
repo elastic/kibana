@@ -18,17 +18,17 @@
  */
 import { OverlayService, OverlayStart } from './overlay_service';
 import { overlayBannersServiceMock } from './banners/banners_service.mock';
+import { overlayFlyoutServiceMock } from './flyout/flyout_service.mock';
+import { overlayModalServiceMock } from './modal/modal_service.mock';
 
 const createStartContractMock = () => {
+  const overlayStart = overlayModalServiceMock.createStartContract();
   const startContract: DeeplyMockedKeys<OverlayStart> = {
-    openFlyout: jest.fn(),
-    openModal: jest.fn(),
+    openFlyout: overlayFlyoutServiceMock.createStartContract().open,
+    openModal: overlayStart.open,
+    openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
   };
-  startContract.openModal.mockReturnValue({
-    close: jest.fn(),
-    onClose: Promise.resolve(),
-  });
   return startContract;
 };
 

@@ -15,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
-      max: '2018-08-31T13:59:49.104Z'
+      max: '2018-08-31T13:59:49.104Z',
     };
 
     before('load archive', () => {

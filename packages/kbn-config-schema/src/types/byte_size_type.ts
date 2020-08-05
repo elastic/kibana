@@ -61,13 +61,9 @@ export class ByteSizeType extends Type<ByteSizeValue> {
       case 'bytes.parse':
         return new SchemaTypeError(message, path);
       case 'bytes.min':
-        return `Value is [${value.toString()}] ([${value.toString(
-          'b'
-        )}]) but it must be equal to or greater than [${limit.toString()}]`;
+        return `Value must be equal to or greater than [${limit.toString()}]`;
       case 'bytes.max':
-        return `Value is [${value.toString()}] ([${value.toString(
-          'b'
-        )}]) but it must be equal to or less than [${limit.toString()}]`;
+        return `Value must be equal to or less than [${limit.toString()}]`;
     }
   }
 }

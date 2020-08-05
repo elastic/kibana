@@ -17,7 +17,7 @@
  * under the License.
  */
 
-interface Defer<T> {
+export interface Defer<T> {
   promise: Promise<T>;
   resolve(value: T): void;
   reject(reason: Error): void;

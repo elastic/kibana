@@ -20,35 +20,37 @@
 import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuProvider } from './apps_menu';
-import { BrowserProvider } from './browser';
+import {
+  BrowserProvider,
+  FailureDebuggingProvider,
+  FindProvider,
+  ScreenshotsProvider,
+  SnapshotsProvider,
+  TestSubjectsProvider,
+} from './common';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
+  DashboardReplacePanelProvider,
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
 import { EmbeddingProvider } from './embedding';
-import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
-import { FindProvider } from './find';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
-import { ScreenshotsProvider } from './screenshots';
-import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
-import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
-import { VisualizeListingTableProvider } from './visualize_listing_table';
+import { PieChartProvider, ElasticChartProvider } from './visualizations';
+import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
+import { KibanaSupertestProvider } from './supertest';
 
 export const services = {
   ...commonServiceProviders,
@@ -64,8 +66,9 @@ export const services = {
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,
-  visualizeListingTable: VisualizeListingTableProvider,
+  listingTable: ListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
+  dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
@@ -79,4 +82,6 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  elasticChart: ElasticChartProvider,
+  supertest: KibanaSupertestProvider,
 };

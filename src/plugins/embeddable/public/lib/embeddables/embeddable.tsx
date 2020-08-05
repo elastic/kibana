@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isEqual, cloneDeep } from 'lodash';
+
+import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { Adapters } from '../types';
+import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
-import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { ViewMode } from '../types';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { TriggerContextMapping } from '../ui_actions';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
@@ -31,6 +32,10 @@ export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+  static runtimeId: number = 0;
+
+  public readonly runtimeId = Embeddable.runtimeId++;
+
   public readonly parent?: IContainer;
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
@@ -46,8 +51,7 @@ export abstract class Embeddable<
   // to update input when the parent changes.
   private parentSubscription?: Rx.Subscription;
 
-  // TODO: Rename to destroyed.
-  private destoyed: boolean = false;
+  private destroyed: boolean = false;
 
   constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
@@ -118,7 +122,7 @@ export abstract class Embeddable<
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {
-    if (this.destoyed) {
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     if (this.parent) {
@@ -130,7 +134,7 @@ export abstract class Embeddable<
   }
 
   public render(domNode: HTMLElement | Element): void {
-    if (this.destoyed) {
+    if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }
     return;
@@ -150,7 +154,11 @@ export abstract class Embeddable<
    * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
    */
   public destroy(): void {
-    this.destoyed = true;
+    this.destroyed = true;
+
+    this.input$.complete();
+    this.output$.complete();
+
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
@@ -188,5 +196,9 @@ export abstract class Embeddable<
     });
 
     this.onResetInput(newInput);
+  }
+
+  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [];
   }
 }

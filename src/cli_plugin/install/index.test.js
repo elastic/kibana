@@ -21,16 +21,21 @@ import sinon from 'sinon';
 import index from './index';
 
 describe('kibana cli', function () {
-
   describe('plugin installer', function () {
-
     describe('commander options', function () {
-
       const program = {
-        command: function () { return program; },
-        description: function () { return program; },
-        option: function () { return program; },
-        action: function () { return program; }
+        command: function () {
+          return program;
+        },
+        description: function () {
+          return program;
+        },
+        option: function () {
+          return program;
+        },
+        action: function () {
+          return program;
+        },
       };
 
       it('should define the command', function () {
@@ -54,13 +59,7 @@ describe('kibana cli', function () {
       it('should define the command line options', function () {
         const spy = sinon.spy(program, 'option');
 
-        const options = [
-          /-q/,
-          /-s/,
-          /-c/,
-          /-t/,
-          /-d/
-        ];
+        const options = [/-q/, /-s/, /-c/, /-t/, /-d/];
 
         index(program);
 
@@ -86,9 +85,6 @@ describe('kibana cli', function () {
 
         program.action.restore();
       });
-
     });
-
   });
-
 });

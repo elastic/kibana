@@ -9,10 +9,11 @@ import rison from 'rison-node';
 import { parseKibanaState } from '../parse_kibana_state';
 
 const stateIndices = {
-  'global': '_g',
-  'app': '_a',
+  global: '_g',
+  app: '_a',
 };
-const globalTime = '(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))';
+const globalTime =
+  '(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))';
 
 describe('Kibana state', function () {
   describe('type checking', function () {

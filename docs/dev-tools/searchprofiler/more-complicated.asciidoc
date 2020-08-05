@@ -25,11 +25,11 @@ POST test/_bulk
 // CONSOLE
 --
 
-. From the {searchprofiler}, enter "test" in the Index field above the query editor to restrict profiled 
+. From the {searchprofiler}, enter "test" in the *Index* field to restrict profiled
 queries to the `test` index.
 
 . Replace the default `match_all` query in the query editor with a query that has two sub-query
-components and includes a simple aggregation, like the example below.
+components and includes a simple aggregation:
 +
 --
 [source,js]
@@ -66,7 +66,7 @@ components and includes a simple aggregation, like the example below.
 // NOTCONSOLE
 --
 
-. Click *Profile* to profile the query and visualize the results. 
+. Click *Profile* to profile the query and visualize the results.
 . Select the shard to view the query details.
 +
 [role="screenshot"]
@@ -100,5 +100,5 @@ Select the name of the shard to view the aggregation details and timing breakdow
 image::dev-tools/searchprofiler/images/gs10.png["Drilling into the first shard's details"]
 
 For more information about how the {searchprofiler} works, how timings are calculated, and
-how to interpret various results, see 
+how to interpret various results, see
 {ref}/search-profile.html#profiling-queries[Profiling queries].

@@ -22,13 +22,7 @@
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import { ToolBarPager } from './tool_bar_pager';
 import toolBarPagerSource from '!!raw-loader!./tool_bar_pager'; // eslint-disable-line import/default
@@ -38,21 +32,22 @@ import { PagerButtons } from './pager_buttons';
 import pagerButtonsSource from '!!raw-loader!./pager_buttons'; // eslint-disable-line import/default
 const pagerButtonsHtml = renderToHtml(PagerButtons);
 
-export default props => (
+export default (props) => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Pager"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: toolBarPagerSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: toolBarPagerHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: toolBarPagerSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: toolBarPagerHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Use the Pager in a tool bar.
-      </GuideText>
+      <GuideText>Use the Pager in a tool bar.</GuideText>
 
       <GuideDemo>
         <ToolBarPager />
@@ -61,17 +56,18 @@ export default props => (
 
     <GuideSection
       title="Pager Buttons"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: pagerButtonsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: pagerButtonsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: pagerButtonsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: pagerButtonsHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Use the Pager Buttons to navigate through a set of items.
-      </GuideText>
+      <GuideText>Use the Pager Buttons to navigate through a set of items.</GuideText>
 
       <GuideDemo>
         <PagerButtons />

@@ -1,0 +1,107 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": ".reporting-2020.04.19",
+    "mappings": {
+      "properties": {
+        "attempts": {
+          "type": "short"
+        },
+        "browser_type": {
+          "type": "keyword"
+        },
+        "completed_at": {
+          "type": "date"
+        },
+        "created_at": {
+          "type": "date"
+        },
+        "created_by": {
+          "type": "keyword"
+        },
+        "jobtype": {
+          "type": "keyword"
+        },
+        "kibana_id": {
+          "type": "keyword"
+        },
+        "kibana_name": {
+          "type": "keyword"
+        },
+        "max_attempts": {
+          "type": "short"
+        },
+        "meta": {
+          "properties": {
+            "layout": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "objectType": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "output": {
+          "properties": {
+            "content": {
+              "enabled": false,
+              "type": "object"
+            },
+            "content_type": {
+              "type": "keyword"
+            },
+            "csv_contains_formulas": {
+              "type": "boolean"
+            },
+            "max_size_reached": {
+              "type": "boolean"
+            },
+            "size": {
+              "type": "long"
+            }
+          }
+        },
+        "payload": {
+          "enabled": false,
+          "type": "object"
+        },
+        "priority": {
+          "type": "byte"
+        },
+        "process_expiration": {
+          "type": "date"
+        },
+        "started_at": {
+          "type": "date"
+        },
+        "status": {
+          "type": "keyword"
+        },
+        "timeout": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

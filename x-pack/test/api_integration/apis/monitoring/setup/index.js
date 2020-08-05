@@ -5,7 +5,10 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Setup', () => {
+  describe('Setup', function () {
+    // Setup mode is not supported in cloud
+    this.tags(['skipCloud']);
+
     loadTestFile(require.resolve('./collection'));
   });
 }

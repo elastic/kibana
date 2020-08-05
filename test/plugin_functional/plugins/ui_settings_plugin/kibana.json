@@ -1,0 +1,8 @@
+{
+  "id": "ui_settings_plugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["ui_settings_plugin"],
+  "server": true,
+  "ui": false
+}

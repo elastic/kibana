@@ -30,12 +30,14 @@ describe('Config service', () => {
   let $rootScope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(($injector) => {
-    config = $injector.get('config');
-    uiSettings = chrome.getUiSettingsClient();
-    $q = $injector.get('$q');
-    $rootScope = $injector.get('$rootScope');
-  }));
+  beforeEach(
+    ngMock.inject(($injector) => {
+      config = $injector.get('config');
+      uiSettings = chrome.getUiSettingsClient();
+      $q = $injector.get('$q');
+      $rootScope = $injector.get('$rootScope');
+    })
+  );
 
   describe('#getAll', () => {
     it('calls uiSettings.getAll()', () => {
@@ -110,11 +112,11 @@ describe('Config service', () => {
     it('strips $$-prefixed properties from plain objects', () => {
       config.set('dateFormat:scaled', {
         foo: 'bar',
-        $$bax: 'box'
+        $$bax: 'box',
       });
 
       expect(config.get('dateFormat:scaled')).to.eql({
-        foo: 'bar'
+        foo: 'bar',
       });
     });
   });

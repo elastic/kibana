@@ -27,20 +27,20 @@ describe('server/plugins/callPluginHook', () => {
         id: 'foo',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['bar', 'baz']
+        requiredIds: ['bar', 'baz'],
       },
       {
         id: 'bar',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: []
+        requiredIds: [],
       },
       {
         id: 'baz',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['bar']
-      }
+        requiredIds: ['bar'],
+      },
     ];
 
     await callPluginHook('init', plugins, 'foo', []);
@@ -48,11 +48,7 @@ describe('server/plugins/callPluginHook', () => {
     sinon.assert.calledOnce(foo.init);
     sinon.assert.calledTwice(bar.init);
     sinon.assert.calledOnce(baz.init);
-    sinon.assert.callOrder(
-      bar.init,
-      baz.init,
-      foo.init,
-    );
+    sinon.assert.callOrder(bar.init, baz.init, foo.init);
   });
 
   it('throws meaningful error when required plugin is missing', async () => {
@@ -61,7 +57,7 @@ describe('server/plugins/callPluginHook', () => {
         id: 'foo',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['bar']
+        requiredIds: ['bar'],
       },
     ];
 
@@ -79,19 +75,19 @@ describe('server/plugins/callPluginHook', () => {
         id: 'foo',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['bar']
+        requiredIds: ['bar'],
       },
       {
         id: 'bar',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['baz']
+        requiredIds: ['baz'],
       },
       {
         id: 'baz',
         init: sinon.spy(),
         preInit: sinon.spy(),
-        requiredIds: ['foo']
+        requiredIds: ['foo'],
       },
     ];
 

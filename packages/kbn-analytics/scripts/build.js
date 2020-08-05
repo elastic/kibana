@@ -31,7 +31,7 @@ const padRight = (width, str) =>
 
 run(
   async ({ log, flags }) => {
-    await withProcRunner(log, async proc => {
+    await withProcRunner(log, async (proc) => {
       log.info('Deleting old output');
       await del(BUILD_DIR);
 
@@ -43,7 +43,7 @@ run(
 
       log.info(`Starting babel and typescript${flags.watch ? ' in watch mode' : ''}`);
       await Promise.all([
-        ...['web', 'node'].map(subTask =>
+        ...['web', 'node'].map((subTask) =>
           proc.run(padRight(10, `babel:${subTask}`), {
             cmd: 'babel',
             args: [
@@ -55,7 +55,9 @@ run(
               '--extensions',
               '.ts,.js,.tsx',
               ...(flags.watch ? ['--watch'] : ['--quiet']),
-              ...(flags['source-maps'] ? ['--source-map', 'inline'] : []),
+              ...(!flags['source-maps'] || !!process.env.CODE_COVERAGE
+                ? []
+                : ['--source-maps', 'inline']),
             ],
             wait: true,
             env: {

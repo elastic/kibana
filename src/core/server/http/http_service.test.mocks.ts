@@ -27,3 +27,7 @@ jest.mock('./http_server', () => {
     HttpServer: mockHttpServer,
   };
 });
+
+jest.mock('./lifecycle_handlers', () => ({
+  registerCoreHandlers: jest.fn(),
+}));

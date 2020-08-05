@@ -1,0 +1,111 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "ft_ihp_outlier",
+    "mappings": {
+      "properties": {
+        "1stFlrSF": {
+          "type": "integer"
+        },
+        "BsmtFinSF1": {
+          "type": "integer"
+        },
+        "BsmtQual": {
+          "type": "integer"
+        },
+        "CentralAir": {
+          "type": "keyword"
+        },
+        "Condition2": {
+          "type": "keyword"
+        },
+        "Electrical": {
+          "type": "keyword"
+        },
+        "ExterQual": {
+          "type": "integer"
+        },
+        "Exterior1st": {
+          "type": "keyword"
+        },
+        "Exterior2nd": {
+          "type": "keyword"
+        },
+        "Fireplaces": {
+          "type": "integer"
+        },
+        "FullBath": {
+          "type": "integer"
+        },
+        "GarageArea": {
+          "type": "integer"
+        },
+        "GarageCars": {
+          "type": "integer"
+        },
+        "GarageFinish": {
+          "type": "keyword"
+        },
+        "GarageType": {
+          "type": "keyword"
+        },
+        "GrLivArea": {
+          "type": "integer"
+        },
+        "Heating": {
+          "type": "keyword"
+        },
+        "HeatingQC": {
+          "type": "integer"
+        },
+        "KitchenQual": {
+          "type": "integer"
+        },
+        "MasVnrArea": {
+          "type": "integer"
+        },
+        "Neighborhood": {
+          "type": "keyword"
+        },
+        "OverallQual": {
+          "type": "integer"
+        },
+        "PoolQC": {
+          "type": "integer"
+        },
+        "RoofMatl": {
+          "type": "keyword"
+        },
+        "SaleCondition": {
+          "type": "keyword"
+        },
+        "SalePrice": {
+          "type": "float"
+        },
+        "SaleType": {
+          "type": "keyword"
+        },
+        "TotRmsAbvGrd": {
+          "type": "integer"
+        },
+        "TotalBsmtSF": {
+          "type": "integer"
+        },
+        "YearBuilt": {
+          "type": "integer"
+        },
+        "YearRemodAdd": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

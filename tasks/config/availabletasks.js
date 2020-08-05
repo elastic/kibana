@@ -23,10 +23,10 @@ module.exports = function (grunt) {
       tasks: {
         options: {
           filter: 'exclude',
-          tasks: ['availabletasks', 'tasks']
-        }
-      }
-    }
+          tasks: ['availabletasks', 'tasks'],
+        },
+      },
+    },
   };
   grunt.registerTask('tasks', ['availabletasks']);
   grunt.config.merge(config);

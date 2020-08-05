@@ -22,15 +22,15 @@ import { fromNode } from 'bluebird';
 import { get, once } from 'lodash';
 
 export default (kbnServer, server, config) => {
-
   server.route(
     createProxyBundlesRoute({
       host: config.get('optimize.watchHost'),
-      port: config.get('optimize.watchPort')
+      port: config.get('optimize.watchPort'),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
     })
   );
 
-  return fromNode(cb => {
+  return fromNode((cb) => {
     const timeout = setTimeout(() => {
       cb(new Error('Timeout waiting for the optimizer to become ready'));
     }, config.get('optimize.watchProxyTimeout'));
@@ -54,5 +54,4 @@ export default (kbnServer, server, config) => {
       }
     });
   });
-
 };

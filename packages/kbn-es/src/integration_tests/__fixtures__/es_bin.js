@@ -34,6 +34,8 @@ if (!start) {
 let serverUrl;
 const server = createServer(
   {
+    // Note: the integration uses the ES_P12_PATH, but that keystore contains
+    // the same key/cert as ES_KEY_PATH and ES_CERT_PATH
     key: ssl ? fs.readFileSync(ES_KEY_PATH) : undefined,
     cert: ssl ? fs.readFileSync(ES_CERT_PATH) : undefined,
   },
@@ -69,7 +71,7 @@ const delayServerClose = () => {
 server.on('request', delayServerClose);
 server.on('listening', delayServerClose);
 
-server.listen(0, '127.0.0.1', function() {
+server.listen(0, '127.0.0.1', function () {
   const { port, address: hostname } = server.address();
   serverUrl = new URL(
     formatUrl({

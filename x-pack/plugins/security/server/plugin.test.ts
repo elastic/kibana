@@ -4,73 +4,131 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
+import { of } from 'rxjs';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { ILegacyCustomClusterClient } from '../../../../src/core/server';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
+import { Plugin, PluginSetupDependencies } from './plugin';
 
-import { Plugin } from './plugin';
-import { ClusterClient, CoreSetup } from '../../../../src/core/server';
+import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
 
 describe('Security Plugin', () => {
   let plugin: Plugin;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
-  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
+  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
+  let mockClusterClient: jest.Mocked<ILegacyCustomClusterClient>;
+  let mockDependencies: PluginSetupDependencies;
   beforeEach(() => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
         cookieName: 'sid',
-        sessionTimeout: 1500,
-        authc: { providers: ['saml', 'token'], saml: { realm: 'saml1' } },
+        session: {
+          idleTimeout: 1500,
+          lifespan: null,
+        },
+        audit: { enabled: false },
+        authc: {
+          selector: { enabled: false },
+          providers: ['saml', 'token'],
+          saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
+          http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
+        },
       })
     );
 
     mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.http.isTlsEnabled = true;
+    mockCoreSetup.http.getServerInfo.mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
-    mockClusterClient = elasticsearchServiceMock.createClusterClient();
-    mockCoreSetup.elasticsearch.createClient.mockReturnValue(
-      (mockClusterClient as unknown) as jest.Mocked<ClusterClient>
-    );
+    mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
+    mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
+
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      await expect(plugin.setup(mockCoreSetup)).resolves.toMatchInlineSnapshot(`
+      await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
+                "audit": Object {
+                  "getLogger": [Function],
+                },
                 "authc": Object {
+                  "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
+                  "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
+                  "invalidateAPIKeyAsInternalUser": [Function],
                   "isAuthenticated": [Function],
-                  "login": [Function],
-                  "logout": [Function],
                 },
-                "config": Object {
-                  "authc": Object {
-                    "providers": Array [
-                      "saml",
-                      "token",
-                    ],
+                "authz": Object {
+                  "actions": Actions {
+                    "alerting": AlertingActions {
+                      "prefix": "alerting:version:",
+                    },
+                    "api": ApiActions {
+                      "prefix": "api:version:",
+                    },
+                    "app": AppActions {
+                      "prefix": "app:version:",
+                    },
+                    "login": "login:",
+                    "savedObject": SavedObjectActions {
+                      "prefix": "saved_object:version:",
+                    },
+                    "space": SpaceActions {
+                      "prefix": "space:version:",
+                    },
+                    "ui": UIActions {
+                      "prefix": "ui:version:",
+                    },
+                    "version": "version:version",
+                    "versionNumber": "version",
                   },
-                  "cookieName": "sid",
-                  "secureCookies": true,
-                  "sessionTimeout": 1500,
+                  "checkPrivilegesDynamicallyWithRequest": [Function],
+                  "checkPrivilegesWithRequest": [Function],
+                  "mode": Object {
+                    "useRbacForRequest": [Function],
+                  },
                 },
-                "registerLegacyAPI": [Function],
+                "license": Object {
+                  "features$": Observable {
+                    "_isScalar": false,
+                    "operator": MapOperator {
+                      "project": [Function],
+                      "thisArg": undefined,
+                    },
+                    "source": Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    },
+                  },
+                  "getFeatures": [Function],
+                  "isEnabled": [Function],
+                },
+                "registerSpacesService": [Function],
               }
             `);
     });
 
     it('properly creates cluster client instance', async () => {
-      await plugin.setup(mockCoreSetup);
+      await plugin.setup(mockCoreSetup, mockDependencies);
 
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
-        plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
+      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
+        plugins: [elasticsearchClientPlugin],
       });
     });
   });
 
   describe('stop()', () => {
-    beforeEach(async () => await plugin.setup(mockCoreSetup));
+    beforeEach(async () => await plugin.setup(mockCoreSetup, mockDependencies));
 
     it('properly closes cluster client instance', async () => {
       expect(mockClusterClient.close).not.toHaveBeenCalled();

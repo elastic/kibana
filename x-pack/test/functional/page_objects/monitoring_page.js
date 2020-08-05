@@ -5,13 +5,30 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'security', 'login', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+  const security = getService('security');
+  const find = getService('find');
 
-  return new class MonitoringPage {
-    async navigateTo() {
+  return new (class MonitoringPage {
+    async navigateTo(useSuperUser = false) {
+      // always create this because our tear down tries to delete it
+      await security.user.create('basic_monitoring_user', {
+        password: 'monitoring_user_password',
+        roles: ['monitoring_user', 'kibana_admin'],
+        full_name: 'basic monitoring',
+      });
+
+      if (!useSuperUser) {
+        await PageObjects.security.forceLogout();
+        await PageObjects.login.login('basic_monitoring_user', 'monitoring_user_password');
+      }
       await PageObjects.common.navigateToApp('monitoring');
+    }
+
+    async getWelcome() {
+      const el = await find.byCssSelector('.euiCallOut--primary', 10000 * 10);
+      return await el.getVisibleText();
     }
 
     async getAccessDeniedMessage() {
@@ -23,19 +40,9 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async assertTableNoData(subj) {
-      await retry.try(async () => {
-        if (!await testSubjects.exists(subj)) {
-          throw new Error('Expected to find the no data message');
-        }
-      });
-    }
-
-    async assertEuiTableNoData(subj) {
-      await retry.try(async () => {
-        if (await testSubjects.exists(subj)) {
-          throw new Error('Expected to find the no data message');
-        }
-      });
+      if (!(await testSubjects.exists(subj))) {
+        throw new Error('Expected to find the no data message');
+      }
     }
 
     async tableGetRows(subj) {
@@ -50,11 +57,13 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async tableSetFilter(subj, text) {
-      return await testSubjects.setValue(subj, text);
+      await testSubjects.setValue(subj, text);
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async tableClearFilter(subj) {
       return await testSubjects.setValue(subj, ' \uE003'); // space and backspace to trigger onChange event
     }
-  };
+  })();
 }

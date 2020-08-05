@@ -22,7 +22,10 @@ var resolve = require('path').resolve;
 // this must happen before `require('@babel/register')` and can't be changed
 // once the module has been loaded
 if (!process.env.BABEL_CACHE_PATH) {
-  process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../../data/optimize/.babel_register_cache.json');
+  process.env.BABEL_CACHE_PATH = resolve(
+    __dirname,
+    '../../../data/optimize/.babel_register_cache.json'
+  );
 }
 
 // paths that @babel/register should ignore
@@ -69,8 +72,6 @@ if (global.__BUILT_WITH_BABEL__) {
 require('@babel/register')({
   ignore,
   babelrc: false,
-  presets: [
-    require.resolve('@kbn/babel-preset/node_preset')
-  ],
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
   extensions: ['.js', '.ts', '.tsx'],
 });

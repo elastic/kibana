@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
-module.exports = methods => {
+module.exports = (methods) => {
   return methods;
 };

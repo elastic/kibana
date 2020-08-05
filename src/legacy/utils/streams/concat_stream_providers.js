@@ -55,7 +55,7 @@ export function concatStreamProviders(sourceProviders, options = {}) {
       // pipe the source to the destination but only proxy the
       // end event if this is the last source
       .pipe(destination, { end: isLast });
-  }());
+  })();
 
   return destination;
 }

@@ -1,29 +1,29 @@
 [role="xpack"]
 [[maps-search]]
-== Searching your data
+== Search geographic data
 
-**Elastic Maps** embeds the search bar for real-time search.
+Maps embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
-Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] to the right of layer name in the legend.
+Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source
+** Documents
 
-** Grid aggregation source
+** Clusters and grid
 
-** <<terms-join>>. The search context is applied to both the terms join and the vector source when the vector source is provided by Elasticsearch documents.
+** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source
+* <<heatmap-layer>>
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]
 
 [role="xpack"]
 [[maps-create-filter-from-map]]
-=== Creating filters from your map
+=== Create filters from a map
 
 You can create two types of filters by interacting with your map:
 
@@ -39,7 +39,7 @@ A spatial filter narrows search results to documents that either intersect with,
 You can create spatial filters in two ways:
 
 * Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
-* Click *Filter by geometry* in a tooltip, and then use the feature's geometry for the spatial filter.
+* Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
 +
 [role="screenshot"]
 image::maps/images/create_spatial_filter.png[]
@@ -55,14 +55,14 @@ Spatial filters have the following properties:
 ==== Phrase filters
 
 A phrase filter narrows search results to documents that contain the specified text.
-You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a feature tooltip.
+You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a <<maps-vector-tooltip-locking, locked tooltip>>.
 
 [role="screenshot"]
 image::maps/images/create_phrase_filter.png[]
 
 [role="xpack"]
 [[maps-layer-based-filtering]]
-=== Filtering a single layer
+=== Filter a single layer
 
 You can apply a search request to individual layers by setting `Filters` in the layer details panel.
 Click the *Add filter* button to add a filter to a layer.
@@ -74,7 +74,7 @@ image::maps/images/layer_search.png[]
 
 [role="xpack"]
 [[maps-search-across-multiple-indices]]
-=== Searching across multiple indices
+=== Search across multiple indices
 
 Your map might contain multiple {es} indices.
 This can occur when your map contains two or more layers with {es} sources from different indices.
@@ -85,14 +85,17 @@ The most common cause for empty layers are searches for a field that exists in o
 
 [float]
 [[maps-disable-search-for-layer]]
-==== Disable search for layer
+==== Disable search for a layer
 
-To prevent the global search bar from applying search context to a layer, clear the *Apply global filter to layer* checkbox in Layer settings.
-Disabling the search context applies to the layer source and all <<terms-join, term joins>> configured for the layer.
+You can prevent the search bar from applying search context to a layer by configuring the following:
+
+* In *Filtering*, clear the *Apply global filter to layer data* checkbox to turn off the global search context for the layer source.
+
+* In *Term joins*, clear the *Apply global filter to join* checkbox to turn off the global search context for the <<terms-join, term join>>.
 
 [float]
 [[maps-add-index-search]]
-==== Use _index in your search
+==== Use _index in a search
 
 Add {ref}/mapping-index-field.html[_index] to your search to include documents from indices that do not contain a search field.
 

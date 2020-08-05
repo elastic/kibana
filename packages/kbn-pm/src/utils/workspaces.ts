@@ -48,7 +48,7 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
   for (const pattern of workspacesPathsPatterns) {
     if (pattern.startsWith('!')) {
       const pathToRemove = path.join(rootPath, pattern.slice(1), 'package.json');
-      workspaceProjectsPaths = workspaceProjectsPaths.filter(p => p !== pathToRemove);
+      workspaceProjectsPaths = workspaceProjectsPaths.filter((p) => p !== pathToRemove);
     }
   }
 
@@ -56,7 +56,7 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
 }
 
 export async function copyWorkspacePackages(rootPath: string): Promise<void> {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
 
   for (const project of projects.values()) {

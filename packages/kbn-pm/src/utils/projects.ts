@@ -27,6 +27,7 @@ import { workspacePackagePaths } from './workspaces';
 
 const glob = promisify(globSync);
 
+/** a Map of project names to Project instances */
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
 export interface IProjectsOptions {
@@ -136,7 +137,9 @@ export function topologicallyBatchProjects(
   const batches = [];
 
   if (batchByWorkspace) {
-    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
+    const workspaceRootProject = Array.from(projectsToBatch.values()).find(
+      (p) => p.isWorkspaceRoot
+    );
 
     if (!workspaceRootProject) {
       throw new CliError(`There was no yarn workspace root found.`);
@@ -166,7 +169,7 @@ export function topologicallyBatchProjects(
     const batch = [];
     for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName)!;
-      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
+      const needsDependenciesBatched = projectDeps.some((dep) => projectsLeftToBatch.has(dep.name));
 
       if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName)!);
@@ -187,7 +190,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(project => projectsLeftToBatch.delete(project.name));
+    batch.forEach((project) => projectsLeftToBatch.delete(project.name));
   }
 
   return batches;
@@ -198,7 +201,7 @@ export function includeTransitiveProjects(
   allProjects: ProjectMap,
   { onlyProductionDependencies = false } = {}
 ) {
-  const dependentProjects: ProjectMap = new Map();
+  const projectsWithDependents: ProjectMap = new Map();
 
   // the current list of packages we are expanding using breadth-first-search
   const toProcess = [...subsetOfProjects];
@@ -210,14 +213,14 @@ export function includeTransitiveProjects(
       ? project.productionDependencies
       : project.allDependencies;
 
-    Object.keys(dependencies).forEach(dep => {
+    Object.keys(dependencies).forEach((dep) => {
       if (allProjects.has(dep)) {
         toProcess.push(allProjects.get(dep)!);
       }
     });
 
-    dependentProjects.set(project.name, project);
+    projectsWithDependents.set(project.name, project);
   }
 
-  return dependentProjects;
+  return projectsWithDependents;
 }

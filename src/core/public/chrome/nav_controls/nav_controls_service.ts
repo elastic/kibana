@@ -20,11 +20,12 @@
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { MountPoint } from '../../types';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
-  mount(targetDomElement: HTMLElement): () => void;
+  mount: MountPoint;
 }
 
 /**
@@ -73,12 +74,12 @@ export class NavControlsService {
 
       getLeft$: () =>
         navControlsLeft$.pipe(
-          map(controls => sortBy([...controls.values()], 'order')),
+          map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
       getRight$: () =>
         navControlsRight$.pipe(
-          map(controls => sortBy([...controls.values()], 'order')),
+          map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
     };

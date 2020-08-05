@@ -26,7 +26,7 @@ describe('KibanaParsedUrl', function () {
     const kibanaParsedUrl = new KibanaParsedUrl({
       basePath: '/hi',
       appId: 'bye',
-      appPath: 'visualize?hi=there&bye'
+      appPath: 'visualize?hi=there&bye',
     });
     expect(kibanaParsedUrl.getHashedAppPath()).to.be('#visualize?hi=there&bye');
   });
@@ -35,7 +35,7 @@ describe('KibanaParsedUrl', function () {
     const kibanaParsedUrl = new KibanaParsedUrl({
       basePath: '/hi',
       appId: 'appId',
-      appPath: 'dashboard?edit=123'
+      appPath: 'dashboard?edit=123',
     });
     expect(kibanaParsedUrl.getAppRootPath()).to.be('/app/appId#dashboard?edit=123');
   });
@@ -45,7 +45,7 @@ describe('KibanaParsedUrl', function () {
       const kibanaParsedUrl = new KibanaParsedUrl({
         basePath: '/base',
         appId: 'appId',
-        appPath: 'visualize?hi=there&bye'
+        appPath: 'visualize?hi=there&bye',
       });
       expect(kibanaParsedUrl.getRootRelativePath()).to.be('/base/app/appId#visualize?hi=there&bye');
     });
@@ -65,7 +65,8 @@ describe('KibanaParsedUrl', function () {
           port,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
-          'http://www.test.com:5601/base/app/appId#visualize?hi=there&bye');
+          'http://www.test.com:5601/base/app/appId#visualize?hi=there&bye'
+        );
       });
 
       it('returns the absolute url when there are no query parameters', function () {
@@ -77,7 +78,8 @@ describe('KibanaParsedUrl', function () {
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
-          'http://www.test.com/base/app/appId#visualize');
+          'http://www.test.com/base/app/appId#visualize'
+        );
       });
 
       it('returns the absolute url when the are query parameters', function () {
@@ -89,7 +91,8 @@ describe('KibanaParsedUrl', function () {
           protocol,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
-          'http://www.test.com/base/app/appId#visualize?hi=bye&tata');
+          'http://www.test.com/base/app/appId#visualize?hi=bye&tata'
+        );
       });
     });
   });
@@ -98,7 +101,7 @@ describe('KibanaParsedUrl', function () {
     it('getRootRelativePath', function () {
       const kibanaParsedUrl = new KibanaParsedUrl({
         appId: 'appId',
-        appPath: 'visualize?hi=there&bye'
+        appPath: 'visualize?hi=there&bye',
       });
       expect(kibanaParsedUrl.getRootRelativePath()).to.be('/app/appId#visualize?hi=there&bye');
     });
@@ -114,10 +117,11 @@ describe('KibanaParsedUrl', function () {
           appPath: 'visualize?hi=there&bye',
           hostname,
           protocol,
-          port
+          port,
         });
         expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
-          'http://www.test.com:5601/app/appId#visualize?hi=there&bye');
+          'http://www.test.com:5601/app/appId#visualize?hi=there&bye'
+        );
       });
 
       it('returns the absolute url when there are no query parameters', function () {
@@ -137,7 +141,9 @@ describe('KibanaParsedUrl', function () {
           hostname,
           protocol,
         });
-        expect(kibanaParsedUrl.getAbsoluteUrl()).to.be('http://www.test.com/app/appId#visualize?hi=bye&tata');
+        expect(kibanaParsedUrl.getAbsoluteUrl()).to.be(
+          'http://www.test.com/app/appId#visualize?hi=bye&tata'
+        );
       });
     });
   });
@@ -157,12 +163,20 @@ describe('KibanaParsedUrl', function () {
     });
 
     it('returns the global state when it is the last parameter', function () {
-      const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi?notg=something&_g=(thisismyglobalstate)' });
+      const url = new KibanaParsedUrl({
+        basePath,
+        appId,
+        appPath: '/hi?notg=something&_g=(thisismyglobalstate)',
+      });
       expect(url.getGlobalState()).to.be('(thisismyglobalstate)');
     });
 
     it('returns the global state when it is the first parameter', function () {
-      const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi?_g=(thisismyglobalstate)&hi=bye' });
+      const url = new KibanaParsedUrl({
+        basePath,
+        appId,
+        appPath: '/hi?_g=(thisismyglobalstate)&hi=bye',
+      });
       expect(url.getGlobalState()).to.be('(thisismyglobalstate)');
     });
   });
@@ -184,7 +198,11 @@ describe('KibanaParsedUrl', function () {
     });
 
     it('updates the global state when a string is passed in', function () {
-      const url = new KibanaParsedUrl({ basePath, appId, appPath: '/hi?notg=something&_g=oldstate' });
+      const url = new KibanaParsedUrl({
+        basePath,
+        appId,
+        appPath: '/hi?notg=something&_g=oldstate',
+      });
       url.setGlobalState('newstate');
       expect(url.getGlobalState()).to.be('newstate');
     });

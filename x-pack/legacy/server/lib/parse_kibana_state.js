@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isPlainObject, omit, get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { isPlainObject, omit, get } from 'lodash';
 import rison from 'rison-node';
 
 const stateTypeKeys = {
-  'global': '_g',
-  'app': '_a',
+  global: '_g',
+  app: '_a',
 };
 
 class KibanaState {
@@ -21,7 +22,7 @@ class KibanaState {
     const queryValue = query[propId];
 
     this.exists = Boolean(queryValue);
-    this.state = (queryValue) ? rison.decode(queryValue) : {};
+    this.state = queryValue ? rison.decode(queryValue) : {};
     this.type = type;
   }
 

@@ -20,4 +20,5 @@
 export enum Browsers {
   Chrome = 'chrome',
   Firefox = 'firefox',
+  ChromiumEdge = 'msedge',
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Option } from '@elastic/eui/src/components/selectable/types';
+import { EuiSelectableOption } from '@elastic/eui';
 
 import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { hasMinLengthArray } from '../../../validators/array';
@@ -42,7 +42,7 @@ export const minSelectableSelectionField = ({
 
   // We need to convert all the options from the multi selectable component, to the
   // an actual Array of selection _before_ validating the Array length.
-  return hasMinLengthArray(total)(optionsToSelectedValue(value as Option[]))
+  return hasMinLengthArray(total)(optionsToSelectedValue(value as EuiSelectableOption[]))
     ? undefined
     : {
         code: 'ERR_MIN_SELECTION',

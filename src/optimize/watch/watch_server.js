@@ -17,17 +17,18 @@
  * under the License.
  */
 
-
 import { Server } from 'hapi';
 import { registerHapiPlugins } from '../../legacy/server/http/register_hapi_plugins';
 
 export default class WatchServer {
-  constructor(host, port, basePath, optimizer) {
+  constructor(host, port, basePath, optimizer, npUiPluginPublicDirs, buildHash) {
     this.basePath = basePath;
     this.optimizer = optimizer;
+    this.npUiPluginPublicDirs = npUiPluginPublicDirs;
+    this.buildHash = buildHash;
     this.server = new Server({
       host: host,
-      port: port
+      port: port,
     });
 
     registerHapiPlugins(this.server);
@@ -35,7 +36,12 @@ export default class WatchServer {
 
   async init() {
     await this.optimizer.init();
-    this.optimizer.bindToServer(this.server, this.basePath);
+    this.optimizer.bindToServer(
+      this.server,
+      this.basePath,
+      this.npUiPluginPublicDirs,
+      this.buildHash
+    );
     await this.server.start();
   }
 }

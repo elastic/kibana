@@ -19,7 +19,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/singlecluster-green-gold';
       const timeRange = {
         min: '2017-08-23T21:29:35Z',
-        max: '2017-08-23T21:47:25Z'
+        max: '2017-08-23T21:47:25Z',
       };
       const codePaths = ['all'];
 

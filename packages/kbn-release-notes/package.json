@@ -1,0 +1,23 @@
+{
+  "name": "@kbn/release-notes",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "scripts": {
+    "kbn:bootstrap": "tsc",
+    "kbn:watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@kbn/dev-utils": "1.0.0",
+    "axios": "^0.19.2",
+    "cheerio": "0.22.0",
+    "dedent": "^0.7.0",
+    "graphql": "^14.0.0",
+    "graphql-tag": "^2.10.3",
+    "terminal-link": "^2.1.1"
+  },
+  "devDependencies": {
+    "markdown-it": "^10.0.0",
+    "typescript": "3.9.5"
+  }
+}

@@ -20,19 +20,19 @@
 /**
  * @name Events
  *
- * @extends SimpleEmitter
+ * @extends EventEmitter
  */
 
 import _ from 'lodash';
+import { EventEmitter } from 'events';
 import { fatalError } from './notify';
-import { SimpleEmitter } from './utils/simple_emitter';
 import { createLegacyClass } from './utils/legacy_class';
 import { createDefer } from 'ui/promises';
 
 const location = 'EventEmitter';
 
 export function EventsProvider(Promise) {
-  createLegacyClass(Events).inherits(SimpleEmitter);
+  createLegacyClass(Events).inherits(EventEmitter);
   function Events() {
     Events.Super.call(this);
     this._listeners = {};
@@ -51,7 +51,7 @@ export function EventsProvider(Promise) {
     }
 
     const listener = {
-      handler: handler
+      handler: handler,
     };
     this._listeners[name].push(listener);
 
@@ -61,12 +61,12 @@ export function EventsProvider(Promise) {
         rebuildDefer();
 
         // we ignore the completion of handlers, just watch for unhandled errors
-        Promise.resolve(handler.apply(handler, args)).catch(error => fatalError(error, location));
+        Promise.resolve(handler.apply(handler, args)).catch((error) => fatalError(error, location));
 
         // indicate to bluebird not to worry about this promise being a "runaway"
         return null;
       });
-    }());
+    })();
 
     return this;
   };
@@ -79,6 +79,7 @@ export function EventsProvider(Promise) {
    */
   Events.prototype.off = function (name, handler) {
     if (!name && !handler) {
+      this._listeners = {};
       return this.removeAllListeners();
     }
 
@@ -106,20 +107,20 @@ export function EventsProvider(Promise) {
    */
   Events.prototype.emit = function (name) {
     const self = this;
-    const args = _.rest(arguments);
+    const args = _.tail(arguments);
 
     if (!self._listeners[name]) {
       return self._emitChain;
     }
 
     return Promise.map(self._listeners[name], function (listener) {
-      return self._emitChain = self._emitChain.then(function () {
+      return (self._emitChain = self._emitChain.then(function () {
         // Double check that off wasn't called after an emit, but before this is fired.
         if (!self._listeners[name] || self._listeners[name].indexOf(listener) < 0) return;
 
         listener.defer.resolve(args);
         return listener.resolved;
-      });
+      }));
     });
   };
 
@@ -130,7 +131,7 @@ export function EventsProvider(Promise) {
    * @return {array[function]}
    */
   Events.prototype.listeners = function (name) {
-    return _.pluck(this._listeners[name], 'handler');
+    return _.map(this._listeners[name], 'handler');
   };
 
   return Events;

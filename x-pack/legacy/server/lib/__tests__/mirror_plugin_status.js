@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { mirrorPluginStatus } from '../mirror_plugin_status';
 
 describe('mirror_plugin_status', () => {
-
   class MockPluginStatus extends EventEmitter {
     constructor() {
       super();
@@ -30,10 +29,18 @@ describe('mirror_plugin_status', () => {
       this.emit('change', prevState, prevMessage, this.state, this.message);
     }
 
-    red(message) { this._changeState('red', message); }
-    yellow(message) { this._changeState('yellow', message); }
-    green(message) { this._changeState('green', message); }
-    uninitialized(message) { this._changeState('uninitialized', message); }
+    red(message) {
+      this._changeState('red', message);
+    }
+    yellow(message) {
+      this._changeState('yellow', message);
+    }
+    green(message) {
+      this._changeState('green', message);
+    }
+    uninitialized(message) {
+      this._changeState('uninitialized', message);
+    }
   }
 
   class MockPlugin {
@@ -66,7 +73,6 @@ describe('mirror_plugin_status', () => {
   });
 
   describe('should only mirror specific downstream plugin statuses to corresponding upstream plugin statuses: ', () => {
-
     beforeEach(() => {
       mirrorPluginStatus(upstreamPlugin, downstreamPlugin, 'yellow', 'red');
     });

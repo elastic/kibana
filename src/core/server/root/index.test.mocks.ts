@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
-export const logger = loggingServiceMock.create();
-jest.doMock('../logging/logging_service', () => ({
-  LoggingService: jest.fn(() => logger),
+import { loggingSystemMock } from '../logging/logging_system.mock';
+export const logger = loggingSystemMock.create();
+jest.doMock('../logging/logging_system', () => ({
+  LoggingSystem: jest.fn(() => logger),
 }));
 
 import { configServiceMock } from '../config/config_service.mock';
@@ -29,8 +29,14 @@ jest.doMock('../config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
+import { rawConfigServiceMock } from '../config/raw_config_service.mock';
+export const rawConfigService = rawConfigServiceMock.create();
+jest.doMock('../config/raw_config_service', () => ({
+  RawConfigService: jest.fn(() => rawConfigService),
+}));
+
 export const mockServer = {
-  setupConfigSchemas: jest.fn(),
+  setupCoreConfig: jest.fn(),
   setup: jest.fn(),
   stop: jest.fn(),
   configService,

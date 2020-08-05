@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 
 export async function sassMixin(kbnServer, server, config) {
   if (process.env.kbnWorkerType === 'optmzr') {
@@ -48,26 +50,22 @@ export async function sassMixin(kbnServer, server, config) {
     scssBundles = await buildAll({
       styleSheets: kbnServer.uiExports.styleSheetPaths,
       log,
-      buildDir: fromRoot('built_assets/css')
+      buildDir: fromRoot('built_assets/css'),
     });
 
-    scssBundles.forEach(bundle => {
-      bundle.includedFiles.forEach(file => trackedFiles.add(file));
+    scssBundles.forEach((bundle) => {
+      bundle.includedFiles.forEach((file) => trackedFiles.add(file));
       server.log(['info', 'scss'], `Compiled CSS: ${bundle.sourcePath} (theme=${bundle.theme})`);
     });
-  } catch(error) {
+  } catch (error) {
     const { message, line, file } = error;
     if (!file) {
       throw error;
     }
 
     trackedFiles.add(file);
-    server.log(
-      ['error', 'scss'],
-      `${message}${line ? ` on line ${line} of ${file}` : ''}`
-    );
+    server.log(['error', 'scss'], `${message}${line ? ` on line ${line} of ${file}` : ''}`);
   }
-
 
   /**
    * Setup Watchers
@@ -90,33 +88,32 @@ export async function sassMixin(kbnServer, server, config) {
     server.log(['debug', 'scss'], `${path} triggered ${event}`);
 
     // build bundles containing the changed file
-    await Promise.all(scssBundles.map(async bundle => {
-      try {
-        if (await bundle.buildIfIncluded(path)) {
-          server.log(['info', 'scss'], `Compiled ${bundle.sourcePath} due to change in ${path}`);
-        }
-        // if the bundle rebuilt, includedFiles is the new set; otherwise includedFiles is unchanged and remains tracked
-        bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));
-      } catch(error) {
-        const { message, line, file } = error;
-        if (!file) {
-          throw error;
-        }
+    await Promise.all(
+      scssBundles.map(async (bundle) => {
+        try {
+          if (await bundle.buildIfIncluded(path)) {
+            server.log(['info', 'scss'], `Compiled ${bundle.sourcePath} due to change in ${path}`);
+          }
+          // if the bundle rebuilt, includedFiles is the new set; otherwise includedFiles is unchanged and remains tracked
+          bundle.includedFiles.forEach((file) => currentlyTrackedFiles.add(file));
+        } catch (error) {
+          const { message, line, file } = error;
+          if (!file) {
+            throw error;
+          }
 
-        currentlyTrackedFiles.add(file);
-        server.log(
-          ['error', 'scss'],
-          `${message}${line ? ` on line ${line} of ${file}` : ''}`
-        );
-      }
-    }, []));
+          currentlyTrackedFiles.add(file);
+          server.log(['error', 'scss'], `${message}${line ? ` on line ${line} of ${file}` : ''}`);
+        }
+      }, [])
+    );
 
     /**
      * update watchers
      */
 
     // un-watch files no longer included in any bundle
-    trackedFiles.forEach(file => {
+    trackedFiles.forEach((file) => {
       if (currentlyTrackedFiles.has(file)) {
         return;
       }
@@ -126,7 +123,7 @@ export async function sassMixin(kbnServer, server, config) {
     });
 
     // watch files not previously included in any bundle
-    currentlyTrackedFiles.forEach(file => {
+    currentlyTrackedFiles.forEach((file) => {
       if (trackedFiles.has(file)) {
         return;
       }

@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../kbn_accessible_click';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 
 describe('kbnAccessibleClick directive', () => {
   let $compile;
@@ -30,10 +30,12 @@ describe('kbnAccessibleClick directive', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(function (_$compile_, _$rootScope_) {
-    $compile = _$compile_;
-    $rootScope = _$rootScope_;
-  }));
+  beforeEach(
+    ngMock.inject(function (_$compile_, _$rootScope_) {
+      $compile = _$compile_;
+      $rootScope = _$rootScope_;
+    })
+  );
 
   describe('throws an error', () => {
     it('when the element is a button', () => {
@@ -47,7 +49,9 @@ describe('kbnAccessibleClick directive', () => {
       const html = `<a href="#" kbn-accessible-click></a>`;
       expect(() => {
         $compile(html)($rootScope);
-      }).to.throwError(/kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./);
+      }).to.throwError(
+        /kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./
+      );
     });
 
     it(`when the element doesn't have an ng-click`, () => {
@@ -108,14 +112,14 @@ describe('kbnAccessibleClick directive', () => {
 
     it(`on ENTER keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keyCodes.ENTER;
+      e.key = keys.ENTER;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });
 
     it(`on SPACE keyup`, () => {
       const e = angular.element.Event('keyup'); // eslint-disable-line new-cap
-      e.keyCode = keyCodes.SPACE;
+      e.key = keys.SPACE;
       element.trigger(e);
       sinon.assert.calledOnce(scope.handleClick);
     });

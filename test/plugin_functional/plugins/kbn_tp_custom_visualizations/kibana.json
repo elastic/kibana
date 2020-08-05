@@ -1,0 +1,10 @@
+{
+  "id": "kbn_tp_custom_visualizations",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "visualizations"
+  ],
+  "server": false,
+  "ui": true
+}

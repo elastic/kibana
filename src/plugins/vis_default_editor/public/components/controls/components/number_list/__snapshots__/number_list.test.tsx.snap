@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NumberList should be rendered with default set of props 1`] = `
+<Fragment>
+  <NumberRow
+    autoFocus={false}
+    disableDelete={false}
+    isInvalid={false}
+    labelledbyId="numberList"
+    model={
+      Object {
+        "id": "122",
+        "isInvalid": false,
+        "value": 1,
+      }
+    }
+    onBlur={[MockFunction]}
+    onChange={[Function]}
+    onDelete={[Function]}
+    range={
+      NumberListRange {
+        "max": 10,
+        "maxInclusive": true,
+        "min": 1,
+        "minInclusive": true,
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <NumberRow
+    autoFocus={true}
+    disableDelete={false}
+    isInvalid={false}
+    labelledbyId="numberList"
+    model={
+      Object {
+        "id": "123",
+        "isInvalid": false,
+        "value": 2,
+      }
+    }
+    onBlur={[MockFunction]}
+    onChange={[Function]}
+    onDelete={[Function]}
+    range={
+      NumberListRange {
+        "max": 10,
+        "maxInclusive": true,
+        "min": 1,
+        "minInclusive": true,
+      }
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexItem>
+    <EuiButtonEmpty
+      iconType="plusInCircleFilled"
+      onClick={[Function]}
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Add {unitName}"
+        id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
+        values={
+          Object {
+            "unitName": "value",
+          }
+        }
+      />
+    </EuiButtonEmpty>
+  </EuiFlexItem>
+</Fragment>
+`;

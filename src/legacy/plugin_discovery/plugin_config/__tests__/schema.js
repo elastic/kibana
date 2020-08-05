@@ -30,10 +30,11 @@ describe('plugin discovery/schema', () => {
         name: 'test',
         version: 'kibana',
       },
-      provider: ({ Plugin }) => new Plugin({
-        configPrefix: 'foo.bar.baz',
-        config: configProvider,
-      }),
+      provider: ({ Plugin }) =>
+        new Plugin({
+          configPrefix: 'foo.bar.baz',
+          config: configProvider,
+        }),
     })
       .getPluginSpecs()
       .pop();
@@ -55,7 +56,7 @@ describe('plugin discovery/schema', () => {
       expect(schema).to.be.an('object');
       expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
-        enabled: true
+        enabled: true,
       });
     });
 
@@ -64,7 +65,7 @@ describe('plugin discovery/schema', () => {
       expect(schema).to.be.an('object');
       expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
-        enabled: true
+        enabled: true,
       });
     });
 
@@ -73,7 +74,7 @@ describe('plugin discovery/schema', () => {
       expect(schema).to.be.an('object');
       expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
-        enabled: true
+        enabled: true,
       });
     });
   });
@@ -84,7 +85,7 @@ describe('plugin discovery/schema', () => {
       expect(schema).to.be.an('object');
       expect(schema).to.have.property('validate').a('function');
       expect(schema.validate({}).value).to.eql({
-        enabled: false
+        enabled: false,
       });
     });
   });

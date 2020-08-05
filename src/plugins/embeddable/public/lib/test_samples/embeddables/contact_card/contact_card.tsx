@@ -17,23 +17,24 @@
  * under the License.
  */
 import React from 'react';
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
+import { EmbeddableContext } from '../../../triggers';
+
+declare module '../../../../../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [CONTACT_USER_TRIGGER]: EmbeddableContext;
+  }
+}
 
 interface Props {
   embeddable: ContactCardEmbeddable;
-  execTrigger: TExecuteTriggerActions;
+  execTrigger: UiActionsStart['executeTriggerActions'];
 }
 
 interface State {
@@ -78,7 +79,6 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
   emitContactTrigger = () => {
     this.props.execTrigger(CONTACT_USER_TRIGGER, {
       embeddable: this.props.embeddable,
-      triggerContext: {},
     });
   };
 
@@ -96,7 +96,12 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
 
   render() {
     return (
-      <EuiCard textAlign="left" title={this.state.fullName} footer={this.getCardFooterContent()} />
+      <EuiCard
+        textAlign="left"
+        title={this.state.fullName}
+        footer={this.getCardFooterContent()}
+        description=""
+      />
     );
   }
 }

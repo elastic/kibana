@@ -16,17 +16,13 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-green-gold', {
-          from: '2017-08-23 21:29:35.267',
-          to: '2017-08-23 21:47:25.556',
+          from: 'Aug 23, 2017 @ 21:29:35.267',
+          to: 'Aug 23, 2017 @ 21:47:25.556',
         });
       });
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because there are resolved alerts in the time range', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has no ML line, because license is Gold', async () => {
@@ -71,17 +67,13 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
       });
 
       after(async () => {
         await tearDown();
-      });
-
-      it('shows alerts panel, because cluster status is Yellow', async () => {
-        expect(await overview.doesClusterAlertsExist()).to.be(true);
       });
 
       it('elasticsearch panel has ML, because license is Platinum', async () => {
@@ -121,8 +113,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-basic', {
-          from: '2017-08-29 17:55:43.879',
-          to: '2017-08-29 18:01:34.958',
+          from: 'Aug 29, 2017 @ 17:55:43.879',
+          to: 'Aug 29, 2017 @ 18:01:34.958',
         });
       });
 

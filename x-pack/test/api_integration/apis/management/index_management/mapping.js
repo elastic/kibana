@@ -11,12 +11,9 @@ import { registerHelpers } from './mapping.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
-  const {
-    createIndex,
-    cleanUp: cleanUpEsResources
-  } = initElasticsearchHelpers(es);
+  const { createIndex, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
   const { getIndexMapping } = registerHelpers({ supertest });
 
@@ -26,16 +23,16 @@ export default function ({ getService }) {
     it('should fetch the index mapping', async () => {
       const mappings = {
         properties: {
-          total: { type: 'long'  },
-          tag: { type: 'keyword'  },
-          createdAt: { type: 'date'  },
-        }
+          total: { type: 'long' },
+          tag: { type: 'keyword' },
+          createdAt: { type: 'date' },
+        },
       };
       const index = await createIndex(undefined, { mappings });
 
       const { body } = await getIndexMapping(index).expect(200);
 
-      expect(body.mapping).to.eql(mappings);
+      expect(body.mappings).to.eql(mappings);
     });
   });
 }

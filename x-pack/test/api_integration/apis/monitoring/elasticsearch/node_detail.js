@@ -18,7 +18,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
-      max: '2017-10-05T20:35:12.000Z'
+      max: '2017-10-05T20:35:12.000Z',
     };
 
     before('load archive', () => {
@@ -31,12 +31,14 @@ export default function ({ getService }) {
 
     it('should summarize node with metrics', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jxcP6ue7eRCieNNitFTT0EA')
+        .post(
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jUT5KdxfRbORSCWkb5zjmA'
+        )
         .set('kbn-xsrf', 'xxx')
         .send({
           timeRange,
           is_advanced: false,
-          showSystemIndices: false
+          showSystemIndices: false,
         })
         .expect(200);
 

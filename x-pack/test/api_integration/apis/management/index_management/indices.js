@@ -11,13 +11,13 @@ import { registerHelpers } from './indices.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndex,
     catIndex,
     indexStats,
-    cleanUp: cleanUpEsResources
+    cleanUp: cleanUpEsResources,
   } = initElasticsearchHelpers(es);
 
   const {
@@ -94,17 +94,17 @@ export default function ({ getService }) {
         const index = await createIndex();
 
         const indices1 = await catIndex(undefined, 'i');
-        expect(indices1.map(index => index.i)).to.contain(index);
+        expect(indices1.map((index) => index.i)).to.contain(index);
 
         await deleteIndex([index]).expect(200);
 
         const indices2 = await catIndex(undefined, 'i');
-        expect(indices2.map(index => index.i)).not.to.contain(index);
+        expect(indices2.map((index) => index.i)).not.to.contain(index);
       });
 
       it('should require index or indices to be provided', async () => {
         const { body } = await deleteIndex().expect(400);
-        expect(body.message).to.contain('index / indices is missing');
+        expect(body.message).to.contain('expected value of type [string]');
       });
     });
 
@@ -144,7 +144,7 @@ export default function ({ getService }) {
 
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
-        await forceMerge(index, { max_num_segments: 1 }).expect(200);
+        await forceMerge(index, { maxNumSegments: 1 }).expect(200);
       });
     });
 
@@ -184,6 +184,7 @@ export default function ({ getService }) {
         const { body } = await list().expect(200);
         const expectedKeys = [
           'health',
+          'hidden',
           'status',
           'name',
           'uuid',
@@ -193,12 +194,16 @@ export default function ({ getService }) {
           'size',
           'isFrozen',
           'aliases',
+          // Cloud disables CCR, so wouldn't expect follower indices.
+          'isFollowerIndex', // data enricher
           'ilm', // data enricher
           'isRollupIndex', // data enricher
-          // Cloud disables CCR, so wouldn't expect follower indices.
-          'isFollowerIndex' // data enricher
         ];
-        expect(Object.keys(body[0])).to.eql(expectedKeys);
+        // We need to sort the keys before comparing then, because race conditions
+        // can cause enrichers to register in non-deterministic order.
+        const sortedExpectedKeys = expectedKeys.sort();
+        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
 
@@ -210,6 +215,7 @@ export default function ({ getService }) {
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
+            'hidden',
             'status',
             'name',
             'uuid',
@@ -219,12 +225,16 @@ export default function ({ getService }) {
             'size',
             'isFrozen',
             'aliases',
+            // Cloud disables CCR, so wouldn't expect follower indices.
+            'isFollowerIndex', // data enricher
             'ilm', // data enricher
             'isRollupIndex', // data enricher
-            // Cloud disables CCR, so wouldn't expect follower indices.
-            'isFollowerIndex' // data enricher
           ];
-          expect(Object.keys(body[0])).to.eql(expectedKeys);
+          // We need to sort the keys before comparing then, because race conditions
+          // can cause enrichers to register in non-deterministic order.
+          const sortedExpectedKeys = expectedKeys.sort();
+          const sortedReceivedKeys = Object.keys(body[0]).sort();
+          expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });
       });

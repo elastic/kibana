@@ -36,10 +36,10 @@ run(async ({ log }) => {
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to to final ignores
       '**/node_modules',
-    ]
+    ],
   });
 
-  const files = paths.map(path => new File(path));
+  const files = paths.map((path) => new File(path));
 
   await checkFileCasing(log, files);
 });

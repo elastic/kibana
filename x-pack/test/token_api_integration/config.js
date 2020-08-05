@@ -5,13 +5,14 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
     testFiles: [require.resolve('./auth')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services: {
-      es: xPackAPITestsConfig.get('services.es'),
+      legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
@@ -32,7 +33,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--xpack.security.authc.providers=[\"token\"]',
+        '--xpack.security.authc.providers=["token"]',
       ],
     },
   };
