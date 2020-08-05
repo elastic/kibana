@@ -41,14 +41,14 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
-export const PROJECT_KEY_LABEL = i18n.translate(
+export const ORG_ID_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.orgId',
   {
     defaultMessage: 'Organization ID',
   }
 );
 
-export const PROJECT_KEY_REQUIRED = i18n.translate(
+export const ORG_ID_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requiredOrgIdTextField',
   {
     defaultMessage: 'Organization ID is required',
