@@ -13,7 +13,10 @@ import {
 } from '../../../../../../../src/plugins/dashboard/public';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../ui_actions_enhanced/public';
+import {
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+  SerializedEvent,
+} from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import {
   ApplyGlobalFilterActionContext,
@@ -26,6 +29,7 @@ import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_uti
 import { StartDependencies } from '../../../plugin';
 import { Config, FactoryContext } from './types';
 import { SearchInput } from '../../../../../../../src/plugins/discover/public';
+import { SavedObjectReference } from '../../../../../../../src/core/types';
 
 export interface Params {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
@@ -121,5 +125,30 @@ export class DashboardToDashboardDrilldown
     }
 
     return this.params.getDashboardUrlGenerator().createUrl(state);
+  };
+
+  public telemetry = () => ({});
+
+  public extract = (state: SerializedEvent) => {
+    return {
+      references: [
+        {
+          id: `${state.id}-dashboardId`,
+          type: 'dashboard',
+          value: state.dashboardId,
+        },
+      ],
+      state: {
+        ...state,
+        dashboardId: `${state.id}-dashboardId`,
+      },
+    };
+  };
+
+  public inject = (state: SerializedEvent, references: SavedObjectReference[]) => {
+    return {
+      ...state,
+      dashboardId: references.find((r) => r.id === `${state.id}-dashboardId`).value,
+    };
   };
 }
