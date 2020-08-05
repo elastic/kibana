@@ -9,12 +9,13 @@ import { useEffect, useState } from 'react';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useUiSetting$ } from '../../../lib/kibana';
-import { checkRecognizer, getJobsSummary, getModules } from '../api';
+import { useUiSetting$, useHttp } from '../../../lib/kibana';
+import { checkRecognizer, getModules } from '../api';
 import { SiemJob } from '../types';
 import { createSiemJobs } from './use_siem_jobs_helpers';
 import { useMlCapabilities } from './use_ml_capabilities';
-import * as i18n from './translations';
+import * as i18n from '../../ml/translations';
+import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
@@ -38,6 +39,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
   const [loading, setLoading] = useState(true);
   const mlCapabilities = useMlCapabilities();
   const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const http = useHttp();
   const { addError } = useAppToasts();
 
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
@@ -53,7 +55,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
         try {
           // Batch fetch all installed jobs, ML modules, and check which modules are compatible with siemDefaultIndex
           const [jobSummaryData, modulesData, compatibleModules] = await Promise.all([
-            getJobsSummary(abortCtrl.signal),
+            getJobsSummary({ http, signal: abortCtrl.signal }),
             getModules({ signal: abortCtrl.signal }),
             checkRecognizer({
               indexPatternName: siemDefaultIndex,
@@ -82,7 +84,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchData, isMlAdmin, siemDefaultIndex, addError]);
+  }, [refetchData, isMlAdmin, siemDefaultIndex, addError, http]);
 
   return { isLicensed, isMlAdmin, jobs, loading };
 };

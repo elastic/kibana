@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuditMessageBase } from '../../../../../ml/public';
-import { MlError } from '../ml/types';
+import { MlError, JobSummary } from '../ml/types';
 
 export interface Group {
   id: string;
@@ -96,28 +95,6 @@ export interface MlSetupArgs {
   jobIdErrorFilter: string[];
   groups: string[];
   prefix?: string;
-}
-
-/**
- * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
- */
-export interface JobSummary {
-  auditMessage?: AuditMessageBase;
-  datafeedId: string;
-  datafeedIndices: string[];
-  datafeedState: string;
-  description: string;
-  earliestTimestampMs?: number;
-  latestResultsTimestampMs?: number;
-  groups: string[];
-  hasDatafeed: boolean;
-  id: string;
-  isSingleMetricViewerJob: boolean;
-  jobState: string;
-  latestTimestampMs?: number;
-  memory_status: string;
-  nodeName?: string;
-  processed_record_count: number;
 }
 
 export interface Detector {

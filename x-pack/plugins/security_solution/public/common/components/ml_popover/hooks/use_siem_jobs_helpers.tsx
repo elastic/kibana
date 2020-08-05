@@ -4,14 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AugmentedSiemJobFields,
-  JobSummary,
-  Module,
-  ModuleJob,
-  RecognizerModule,
-  SiemJob,
-} from '../types';
+import { JobSummary } from '../../ml/types';
+import { AugmentedSiemJobFields, Module, ModuleJob, RecognizerModule, SiemJob } from '../types';
 import { mlModules } from '../ml_modules';
 
 /**

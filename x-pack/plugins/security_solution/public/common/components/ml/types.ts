@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Influencer } from '../../../../../ml/public';
+import { AuditMessageBase, Influencer } from '../../../../../ml/public';
 
 import { HostsType } from '../../../hosts/store/model';
 import { NetworkType } from '../../../network/store/model';
@@ -104,4 +104,26 @@ export interface MlError {
   path?: string;
   query?: {};
   body?: string;
+}
+
+/**
+ * Representation of an ML Job as returned from the `ml/jobs/jobs_summary` API
+ */
+export interface JobSummary {
+  auditMessage?: AuditMessageBase;
+  datafeedId: string;
+  datafeedIndices: string[];
+  datafeedState: string;
+  description: string;
+  earliestTimestampMs?: number;
+  latestResultsTimestampMs?: number;
+  groups: string[];
+  hasDatafeed: boolean;
+  id: string;
+  isSingleMetricViewerJob: boolean;
+  jobState: string;
+  latestTimestampMs?: number;
+  memory_status: string;
+  nodeName?: string;
+  processed_record_count: number;
 }
