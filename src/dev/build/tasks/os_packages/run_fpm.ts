@@ -132,7 +132,6 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
     // copy package configurations
-    `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
   ];
 
