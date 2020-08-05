@@ -33,6 +33,7 @@ import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/a
 import { AccessDeniedPage } from '../access_denied_page';
 
 interface Tab {
+  'data-test-subj': string;
   id: string;
   name: string;
   content: any;
@@ -41,6 +42,7 @@ interface Tab {
 function getTabs(isMlEnabledInSpace: boolean): Tab[] {
   return [
     {
+      'data-test-subj': 'mlStackManagementJobsListAnomalyDetectionTab',
       id: 'anomaly_detection_jobs',
       name: i18n.translate('xpack.ml.management.jobsList.anomalyDetectionTab', {
         defaultMessage: 'Anomaly detection',
@@ -53,6 +55,7 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
       ),
     },
     {
+      'data-test-subj': 'mlStackManagementJobsListAnalyticsTab',
       id: 'analytics_jobs',
       name: i18n.translate('xpack.ml.management.jobsList.analyticsTab', {
         defaultMessage: 'Analytics',
@@ -135,7 +138,10 @@ export const JobsListPage: FC<{
     <I18nContext>
       <KibanaContextProvider services={{ ...coreStart }}>
         <Router history={history}>
-          <EuiPageContent id="kibanaManagementMLSection">
+          <EuiPageContent
+            id="kibanaManagementMLSection"
+            data-test-subj="mlPageStackManagementJobsList"
+          >
             <EuiTitle size="l">
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
