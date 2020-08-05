@@ -142,7 +142,7 @@ export class UiActionsService {
     triggerId: T,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: Action<TriggerContextMapping[T]>
+    action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T]>
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);

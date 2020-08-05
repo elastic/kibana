@@ -51,6 +51,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
+      trigger: null,
     });
     expect(result).toBe(true);
   });
@@ -66,6 +67,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
+      trigger: null,
     });
     expect(result).toBe(false);
   });
@@ -119,6 +121,7 @@ describe('execute()', () => {
       await action.execute({
         embeddable,
         filters: ['FILTER' as any],
+        trigger: null,
       });
 
       expect(root.updateInput).toHaveBeenCalledTimes(1);

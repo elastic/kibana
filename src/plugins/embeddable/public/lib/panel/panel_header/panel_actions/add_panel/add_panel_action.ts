@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { Action } from 'src/plugins/ui_actions/public';
+import { UiActionsActionDefinition as ActionDefinition } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
 import { ViewMode } from '../../../../types';
@@ -30,7 +30,7 @@ interface ActionContext {
   embeddable: IContainer;
 }
 
-export class AddPanelAction implements Action<ActionContext> {
+export class AddPanelAction implements ActionDefinition<ActionContext> {
   public readonly type = ACTION_ADD_PANEL;
   public readonly id = ACTION_ADD_PANEL;
 
@@ -52,12 +52,14 @@ export class AddPanelAction implements Action<ActionContext> {
     return 'plusInCircleFilled';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible(context: ActionContext) {
+    const { embeddable } = context;
     return embeddable.getIsContainer() && embeddable.getInput().viewMode === ViewMode.EDIT;
   }
 
-  public async execute({ embeddable }: ActionContext) {
-    if (!embeddable.getIsContainer() || !(await this.isCompatible({ embeddable }))) {
+  public async execute(context: ActionContext) {
+    const { embeddable } = context;
+    if (!embeddable.getIsContainer() || !(await this.isCompatible(context))) {
       throw new Error('Context is incompatible');
     }
 

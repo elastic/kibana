@@ -37,7 +37,7 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
   /**
    * Trigger that caused this action
    */
-  trigger?: Trigger;
+  trigger: Trigger | null;
 }
 
 /**
@@ -87,6 +87,7 @@ async function buildEuiContextMenuPanelItems({
     items[index] = await convertPanelActionToContextMenuItem({
       action,
       actionContext: context,
+      trigger,
       closeMenu,
     });
   });
@@ -104,16 +105,25 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
 }: {
   action: Action<Context>;
   actionContext: Context;
-  trigger?: Trigger;
+  trigger: Trigger | null;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.MenuItem
       ? React.createElement(uiToReactComponent(action.MenuItem), {
-          context: actionContext,
+          context: {
+            ...actionContext,
+            trigger,
+          },
         })
-      : action.getDisplayName(actionContext),
-    icon: action.getIconType(actionContext),
+      : action.getDisplayName({
+          ...actionContext,
+          trigger,
+        }),
+    icon: action.getIconType({
+      ...actionContext,
+      trigger,
+    }),
     panel: _.get(action, 'childContextMenuPanel.id'),
     'data-test-subj': `embeddablePanelAction-${action.id}`,
   };

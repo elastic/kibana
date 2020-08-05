@@ -20,7 +20,7 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
+import { buildContextMenuForActions, UiActionsService, Action, createAction } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
@@ -306,7 +306,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.application,
         this.props.stateTransfer
       ),
-    ];
+    ].map(createAction);
 
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
@@ -314,6 +314,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       actions: sortedActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
+        trigger: null,
       })),
       closeMenu: this.closeMyContextMenuPanel,
     });

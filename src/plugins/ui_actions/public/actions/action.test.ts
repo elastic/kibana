@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createAction } from '../../../ui_actions/public';
+import { ActionExecutionContext, createAction } from '../../../ui_actions/public';
 import { ActionType } from '../types';
 
 const sayHelloAction = createAction({
@@ -29,11 +29,17 @@ const sayHelloAction = createAction({
 });
 
 test('action is not compatible based on context', async () => {
-  const isCompatible = await sayHelloAction.isCompatible({ amICompatible: false });
+  const isCompatible = await sayHelloAction.isCompatible({
+    amICompatible: false,
+    trigger: null,
+  } as ActionExecutionContext);
   expect(isCompatible).toBe(false);
 });
 
 test('action is compatible based on context', async () => {
-  const isCompatible = await sayHelloAction.isCompatible({ amICompatible: true });
+  const isCompatible = await sayHelloAction.isCompatible({
+    amICompatible: true,
+    trigger: null,
+  } as ActionExecutionContext);
   expect(isCompatible).toBe(true);
 });
