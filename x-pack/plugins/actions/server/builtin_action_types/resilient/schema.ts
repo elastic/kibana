@@ -5,18 +5,65 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ExternalIncidentServiceConfiguration } from '../case/schema';
+import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from './case_schema';
 
-export const ResilientPublicConfiguration = {
+export const ExternalIncidentServiceConfiguration = {
+  apiUrl: schema.string(),
   orgId: schema.string(),
-  ...ExternalIncidentServiceConfiguration,
+  // TODO: to remove - set it optional for the current stage to support Case implementation
+  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
+  isCaseOwned: schema.maybe(schema.boolean()),
 };
 
-export const ResilientPublicConfigurationSchema = schema.object(ResilientPublicConfiguration);
+export const ExternalIncidentServiceConfigurationSchema = schema.object(
+  ExternalIncidentServiceConfiguration
+);
 
-export const ResilientSecretConfiguration = {
+export const ExternalIncidentServiceSecretConfiguration = {
   apiKeyId: schema.string(),
   apiKeySecret: schema.string(),
 };
 
-export const ResilientSecretConfigurationSchema = schema.object(ResilientSecretConfiguration);
+export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
+  ExternalIncidentServiceSecretConfiguration
+);
+
+export const ExecutorSubActionSchema = schema.oneOf([
+  schema.literal('getIncident'),
+  schema.literal('pushToService'),
+  schema.literal('handshake'),
+]);
+
+export const ExecutorSubActionPushParamsSchema = schema.object({
+  savedObjectId: schema.string(),
+  title: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  issueType: schema.nullable(schema.string()),
+  severityCode: schema.nullable(schema.string()),
+  // TODO: remove later  - need for support Case push multiple comments
+  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  ...EntityInformation,
+});
+
+export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
+  externalId: schema.string(),
+});
+
+// Reserved for future implementation
+export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
+
+export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getIncident'),
+    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('handshake'),
+    subActionParams: ExecutorSubActionHandshakeParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('pushToService'),
+    subActionParams: ExecutorSubActionPushParamsSchema,
+  }),
+]);
