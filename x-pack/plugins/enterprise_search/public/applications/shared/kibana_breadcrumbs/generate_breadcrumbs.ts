@@ -7,6 +7,12 @@
 import { EuiBreadcrumb } from '@elastic/eui';
 import { History } from 'history';
 
+import {
+  ENTERPRISE_SEARCH_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
+} from '../../../../common/constants';
+
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 /**
@@ -44,14 +50,20 @@ export type TBreadcrumbs = IGenerateBreadcrumbProps[];
 export const enterpriseSearchBreadcrumbs = (history: History) => (
   breadcrumbs: TBreadcrumbs = []
 ) => [
-  generateBreadcrumb({ text: 'Enterprise Search' }),
+  generateBreadcrumb({ text: ENTERPRISE_SEARCH_PLUGIN.NAME }),
   ...breadcrumbs.map(({ text, path }: IGenerateBreadcrumbProps) =>
     generateBreadcrumb({ text, path, history })
   ),
 ];
 
 export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([{ text: 'App Search', path: '/' }, ...breadcrumbs]);
+  enterpriseSearchBreadcrumbs(history)([
+    { text: APP_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
 
 export const workplaceSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([{ text: 'Workplace Search', path: '/' }, ...breadcrumbs]);
+  enterpriseSearchBreadcrumbs(history)([
+    { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
