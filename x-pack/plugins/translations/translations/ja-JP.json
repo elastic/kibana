@@ -2791,6 +2791,8 @@
     "kbn.advancedSettings.storeUrlTitle": "セッションストレージに URL を格納",
     "kbn.advancedSettings.themeVersionText": "現在のバージョンと次のバージョンのKibanaで使用されるテーマを切り替えます。この設定を適用するにはページの更新が必要です。",
     "kbn.advancedSettings.themeVersionTitle": "テーマバージョン",
+    "kbn.advancedSettings.timepicker.timeDefaultsText": "時間フィルターが選択されずに Kibana が起動した際に使用される時間フィルターです",
+    "kbn.advancedSettings.timepicker.timeDefaultsTitle": "デフォルトのタイムピッカー",
     "kbn.advancedSettings.visualization.showRegionMapWarningsText": "用語がマップの形に合わない場合に地域マップに警告を表示するかどうかです。",
     "kbn.advancedSettings.visualization.showRegionMapWarningsTitle": "地域マップに警告を表示",
     "kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText": "ディメンションの説明",
