@@ -44,9 +44,7 @@ interface Metadata {
  * A simple mock dataAccessLayer possible that returns a tree with 0 ancestors and 2 direct children. 1 related event is returned. The parameter to `entities` is ignored.
  */
 export function oneAncestorTwoChildren(
-  {
-    withRelatedEvents,
-  }: { withRelatedEvents: Parameters<typeof withRelatedEventsOnOrigin>[1] | null } = {
+  { withRelatedEvents }: { withRelatedEvents: Iterable<[string, string]> | null } = {
     withRelatedEvents: null,
   }
 ): { dataAccessLayer: DataAccessLayer; metadata: Metadata } {

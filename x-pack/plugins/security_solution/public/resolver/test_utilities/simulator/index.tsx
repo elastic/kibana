@@ -221,14 +221,8 @@ export class Simulator {
   }
 
   /**
-   * For a render of the Enzyme wrapper (may help update if other concerns have effected the render). May be useful for debugging.
-   */
-  public updateWrapper() {
-    return this.wrapper.update();
-  }
-
-  /**
    * Dump all contents of the outer ReactWrapper (to be `console.log`ged as appropriate)
+   * This will include both DOM (div, span, etc.) and React/JSX (MyComponent, MyGrid, etc.)
    */
   public debugWrapper() {
     return this.wrapper.debug();
@@ -242,6 +236,7 @@ export class Simulator {
   public processNodeRelatedEventButton(entityID: string): ReactWrapper {
     return this.processNodeElements({ entityID }).findWhere(
       (wrapper) =>
+        // Filter out React components
         typeof wrapper.type() === 'string' &&
         wrapper.prop('data-test-subj') === 'resolver:submenu:button'
     );

@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import uuid from 'uuid';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 
 /**
@@ -15,11 +13,13 @@ export function mockRelatedEvent({
   timestamp,
   category,
   type,
+  id,
 }: {
   entityID: string;
   timestamp: number;
   category: string;
   type: string;
+  id?: string;
 }): EndpointEvent {
   return {
     '@timestamp': timestamp,
@@ -27,7 +27,7 @@ export function mockRelatedEvent({
       kind: 'event',
       type,
       category,
-      id: uuid.v4(),
+      id: id ?? 'xyz',
     },
     process: {
       entity_id: entityID,
