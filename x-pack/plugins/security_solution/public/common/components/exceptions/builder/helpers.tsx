@@ -33,7 +33,6 @@ import {
   EmptyNestedEntry,
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import exceptionableFields from '../exceptionable_fields.json';
 
 /**
@@ -248,22 +247,22 @@ export const getFormattedBuilderEntries = (
 export const getUpdatedEntriesOnDelete = (
   exceptionItem: ExceptionsBuilderExceptionItem,
   entryIndex: number,
-  nestedEntryIndex: number | null
+  nestedParentIndex: number | null
 ): ExceptionsBuilderExceptionItem => {
-  const itemOfInterest: BuilderEntry = exceptionItem.entries[entryIndex];
+  const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
 
-  if (nestedEntryIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
+  if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
     const updatedEntryEntries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists> = [
-      ...itemOfInterest.entries.slice(0, nestedEntryIndex),
-      ...itemOfInterest.entries.slice(nestedEntryIndex + 1),
+      ...itemOfInterest.entries.slice(0, entryIndex),
+      ...itemOfInterest.entries.slice(entryIndex + 1),
     ];
 
     if (updatedEntryEntries.length === 0) {
       return {
         ...exceptionItem,
         entries: [
-          ...exceptionItem.entries.slice(0, entryIndex),
-          ...exceptionItem.entries.slice(entryIndex + 1),
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
         ],
       };
     } else {
@@ -277,9 +276,9 @@ export const getUpdatedEntriesOnDelete = (
       return {
         ...exceptionItem,
         entries: [
-          ...exceptionItem.entries.slice(0, entryIndex),
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
           updatedItemOfInterest,
-          ...exceptionItem.entries.slice(entryIndex + 1),
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
         ],
       };
     }

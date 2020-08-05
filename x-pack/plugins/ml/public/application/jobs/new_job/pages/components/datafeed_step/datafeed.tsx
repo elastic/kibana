@@ -11,6 +11,7 @@ import { QueryInput } from './components/query';
 import { QueryDelayInput } from './components/query_delay';
 import { FrequencyInput } from './components/frequency';
 import { ScrollSizeInput } from './components/scroll_size';
+import { ResetQueryButton } from './components/reset_query';
 import { TimeField } from './components/time_field';
 import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
@@ -46,6 +47,7 @@ export const DatafeedStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =
               <TimeField />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <ResetQueryButton />
           <WizardNav next={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)} nextActive={nextActive}>
             <JsonEditorFlyout
               isDisabled={false}

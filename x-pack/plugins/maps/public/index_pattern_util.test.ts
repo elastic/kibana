@@ -68,6 +68,7 @@ describe('Gold+ licensing', () => {
 
   describe('basic license', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('./kibana_services').getIsGoldPlus = () => false;
     });
 
@@ -90,6 +91,7 @@ describe('Gold+ licensing', () => {
 
   describe('gold license', () => {
     beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('./kibana_services').getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {
