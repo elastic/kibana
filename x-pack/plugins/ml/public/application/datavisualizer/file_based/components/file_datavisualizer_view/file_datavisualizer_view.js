@@ -28,6 +28,7 @@ import {
 } from '../utils';
 
 import { MODE } from './constants';
+const DEFAULT_LINES_TO_SAMPLE = 1000;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -55,7 +56,9 @@ export class FileDataVisualizerView extends Component {
 
     this.overrides = {};
     this.previousOverrides = {};
-    this.originalSettings = {};
+    this.originalSettings = {
+      linesToSample: DEFAULT_LINES_TO_SAMPLE,
+    };
     this.maxFileUploadBytes = getMaxBytes();
   }
 
@@ -129,7 +132,7 @@ export class FileDataVisualizerView extends Component {
       const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
-      this.previousOverrides = this.overrides;
+      this.previousOverrides = overrides;
       this.overrides = {};
 
       if (serverSettings.format === 'xml') {
@@ -185,9 +188,8 @@ export class FileDataVisualizerView extends Component {
         serverError: error,
       });
 
-      // as long as the previous overrides are different to the current overrides,
       // reload the results with the previous overrides
-      if (overrides !== undefined && isEqual(this.previousOverrides, overrides) === false) {
+      if (isRetry === false) {
         this.setState({
           loading: true,
           loaded: false,
@@ -244,6 +246,11 @@ export class FileDataVisualizerView extends Component {
   };
 
   onCancel = () => {
+    this.overrides = {};
+    this.previousOverrides = {};
+    this.originalSettings = {
+      linesToSample: DEFAULT_LINES_TO_SAMPLE,
+    };
     this.changeMode(MODE.READ);
     this.onFilePickerChange([]);
   };
@@ -276,8 +283,12 @@ export class FileDataVisualizerView extends Component {
     return (
       <div>
         {mode === MODE.READ && (
-          <React.Fragment>
-            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
+          <>
+            {!loading && !loaded && (
+              <>
+                <AboutPanel onFilePickerChange={this.onFilePickerChange} />
+              </>
+            )}
 
             {loading && <LoadingPanel />}
 
@@ -286,10 +297,14 @@ export class FileDataVisualizerView extends Component {
             )}
 
             {fileCouldNotBeRead && loading === false && (
-              <React.Fragment>
-                <FileCouldNotBeRead error={serverError} loaded={loaded} />
+              <>
+                <FileCouldNotBeRead
+                  error={serverError}
+                  loaded={loaded}
+                  showEditFlyout={() => this.showEditFlyout()}
+                />
                 <EuiSpacer size="l" />
-              </React.Fragment>
+              </>
             )}
 
             {loaded && (
@@ -326,10 +341,10 @@ export class FileDataVisualizerView extends Component {
             )}
 
             <BottomPadding />
-          </React.Fragment>
+          </>
         )}
         {mode === MODE.IMPORT && (
-          <React.Fragment>
+          <>
             <ImportView
               results={results}
               fileName={fileName}
@@ -350,7 +365,7 @@ export class FileDataVisualizerView extends Component {
             )}
 
             <BottomPadding />
-          </React.Fragment>
+          </>
         )}
       </div>
     );
@@ -360,10 +375,10 @@ export class FileDataVisualizerView extends Component {
 function BottomPadding() {
   // padding for the BottomBar
   return (
-    <React.Fragment>
+    <>
       <EuiSpacer size="m" />
       <EuiSpacer size="l" />
       <EuiSpacer size="l" />
-    </React.Fragment>
+    </>
   );
 }
