@@ -468,6 +468,7 @@ export class TaskStore {
 
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
@@ -483,6 +484,7 @@ export class TaskStore {
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;
     return {
       total,

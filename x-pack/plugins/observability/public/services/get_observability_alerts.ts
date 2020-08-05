@@ -23,7 +23,6 @@ export async function getObservabilityAlerts({ core }: { core: AppMountContext['
 
     return data.filter(({ consumer }) => allowedConsumers.includes(consumer));
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Error while fetching alerts', e);
     return [];
   }
