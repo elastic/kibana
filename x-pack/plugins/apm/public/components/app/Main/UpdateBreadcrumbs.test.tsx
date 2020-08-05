@@ -60,29 +60,32 @@ describe('UpdateBreadcrumbs', () => {
       'rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0'
     );
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual([
-      {
-        text: 'APM',
-        href:
-          '#/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-      },
-      {
-        text: 'Services',
-        href:
-          '#/services?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-      },
-      {
-        text: 'opbeans-node',
-        href:
-          '#/services/opbeans-node?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-      },
-      {
-        text: 'Errors',
-        href:
-          '#/services/opbeans-node/errors?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
-      },
-      { text: 'myGroupId', href: undefined },
-    ]);
+    expect(breadcrumbs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'APM',
+          href:
+            '/basepath/app/apm/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        }),
+        expect.objectContaining({
+          text: 'Services',
+          href:
+            '/basepath/app/apm/services?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        }),
+        expect.objectContaining({
+          text: 'opbeans-node',
+          href:
+            '/basepath/app/apm/services/opbeans-node?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        }),
+        expect.objectContaining({
+          text: 'Errors',
+          href:
+            '/basepath/app/apm/services/opbeans-node/errors?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+        }),
+        expect.objectContaining({ text: 'myGroupId', href: undefined }),
+      ])
+    );
+
     expect(changeTitle).toHaveBeenCalledWith([
       'myGroupId',
       'Errors',
@@ -95,12 +98,23 @@ describe('UpdateBreadcrumbs', () => {
   it('/services/:serviceName/errors', () => {
     mountBreadcrumb('/services/opbeans-node/errors');
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
-      { text: 'Errors', href: undefined },
-    ]);
+    expect(breadcrumbs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'APM',
+          href: '/basepath/app/apm/?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'Services',
+          href: '/basepath/app/apm/services?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'opbeans-node',
+          href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+        }),
+        expect.objectContaining({ text: 'Errors', href: undefined }),
+      ])
+    );
     expect(changeTitle).toHaveBeenCalledWith([
       'Errors',
       'opbeans-node',
@@ -112,12 +126,24 @@ describe('UpdateBreadcrumbs', () => {
   it('/services/:serviceName/transactions', () => {
     mountBreadcrumb('/services/opbeans-node/transactions');
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
-      { text: 'Transactions', href: undefined },
-    ]);
+    expect(breadcrumbs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'APM',
+          href: '/basepath/app/apm/?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'Services',
+          href: '/basepath/app/apm/services?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'opbeans-node',
+          href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+        }),
+        expect.objectContaining({ text: 'Transactions', href: undefined }),
+      ])
+    );
+
     expect(changeTitle).toHaveBeenCalledWith([
       'Transactions',
       'opbeans-node',
@@ -132,16 +158,33 @@ describe('UpdateBreadcrumbs', () => {
       'transactionName=my-transaction-name'
     );
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
-      {
-        text: 'Transactions',
-        href: '#/services/opbeans-node/transactions?kuery=myKuery',
-      },
-      { text: 'my-transaction-name', href: undefined },
-    ]);
+
+    expect(breadcrumbs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'APM',
+          href: '/basepath/app/apm/?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'Services',
+          href: '/basepath/app/apm/services?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'opbeans-node',
+          href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'Transactions',
+          href:
+            '/basepath/app/apm/services/opbeans-node/transactions?kuery=myKuery',
+        }),
+        expect.objectContaining({
+          text: 'my-transaction-name',
+          href: undefined,
+        }),
+      ])
+    );
+
     expect(changeTitle).toHaveBeenCalledWith([
       'my-transaction-name',
       'Transactions',
