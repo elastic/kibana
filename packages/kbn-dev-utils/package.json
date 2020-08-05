@@ -20,6 +20,7 @@
     "normalize-path": "^3.0.0",
     "moment": "^2.24.0",
     "rxjs": "^6.5.5",
+    "strip-ansi": "^6.0.0",
     "tree-kill": "^1.2.2",
     "tslib": "^2.0.0"
   },

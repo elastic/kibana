@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
 import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -28,7 +28,7 @@ export function RumOverview() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
-      projection: PROJECTION.RUM_OVERVIEW,
+      projection: Projection.rumOverview,
     };
 
     return config;

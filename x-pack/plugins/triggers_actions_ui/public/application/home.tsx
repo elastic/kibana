@@ -22,10 +22,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { Section, routeToConnectors, routeToAlerts } from './constants';
-import { getCurrentBreadcrumb } from './lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
+import { hasShowActionsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
@@ -45,23 +45,17 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities);
-  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
   }> = [];
 
-  if (canShowAlerts) {
-    tabs.push({
-      id: 'alerts',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.alertsTabTitle"
-          defaultMessage="Alerts"
-        />
-      ),
-    });
-  }
+  tabs.push({
+    id: 'alerts',
+    name: (
+      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+    ),
+  });
 
   if (canShowActions) {
     tabs.push({
@@ -81,7 +75,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getCurrentBreadcrumb(section || 'home')]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, setBreadcrumbs]);
 
@@ -151,17 +145,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               )}
             />
           )}
-          {canShowAlerts && (
-            <Route
-              exact
-              path={routeToAlerts}
-              component={() => (
-                <HealthCheck docLinks={docLinks} http={http}>
-                  <AlertsList />
-                </HealthCheck>
-              )}
-            />
-          )}
+          <Route
+            exact
+            path={routeToAlerts}
+            component={() => (
+              <HealthCheck docLinks={docLinks} http={http}>
+                <AlertsList />
+              </HealthCheck>
+            )}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

@@ -4,7 +4,8 @@
   ],
   "description": "Identifies msxsl.exe making a network connection. This may indicate adversarial activity as msxsl.exe is often leveraged by adversaries to execute malicious scripts and evade detection.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
