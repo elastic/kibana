@@ -13,6 +13,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
   mlCommon: MlCommon
 ) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertJobDescriptionEditInputExists() {
@@ -54,9 +55,17 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       });
       await this.assertJobMmlEditValue(mml);
     },
+
+    async assertAnalyticsEditFlyoutMissing() {
+      await testSubjects.missingOrFail('analyticsEditFlyoutUpdateButton');
+    },
+
     async updateAnalyticsJob() {
       await testSubjects.existOrFail('analyticsEditFlyoutUpdateButton');
       await testSubjects.click('analyticsEditFlyoutUpdateButton');
+      await retry.tryForTime(5000, async () => {
+        await this.assertAnalyticsEditFlyoutMissing();
+      });
     },
   };
 }
