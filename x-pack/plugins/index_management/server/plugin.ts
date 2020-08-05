@@ -84,7 +84,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       },
       privileges: [
         {
-          requiredClusterPrivileges: ['monitor'],
+          requiredClusterPrivileges: ['monitor', 'manage_templates'],
           ui: [],
         },
       ],
