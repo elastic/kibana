@@ -267,7 +267,7 @@ export const PingListComponent = (props: Props) => {
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <h4>
           <FormattedMessage id="xpack.uptime.pingList.checkHistoryTitle" defaultMessage="History" />
         </h4>

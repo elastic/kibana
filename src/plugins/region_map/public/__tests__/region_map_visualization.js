@@ -111,12 +111,8 @@ describe('RegionMapsVisualizationTests', function () {
         emsLandingPageUrl: '',
       };
       const tilemapsConfig = {
-        deprecated: {
-          config: {
-            options: {
-              attribution: '123',
-            },
-          },
+        options: {
+          attribution: '123',
         },
       };
       const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);

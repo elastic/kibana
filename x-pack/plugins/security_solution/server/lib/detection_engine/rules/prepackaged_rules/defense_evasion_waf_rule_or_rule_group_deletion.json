@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS WAF Rule or Rule Group Deletion",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.module:aws and event.dataset:aws.cloudtrail and event.action:(DeleteRule or DeleteRuleGroup) and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf/delete-rule-group.html",
@@ -24,7 +25,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Network",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

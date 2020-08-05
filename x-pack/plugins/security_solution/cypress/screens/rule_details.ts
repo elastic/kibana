@@ -26,6 +26,8 @@ export const ANOMALY_SCORE = 1;
 
 export const DEFINITION_CUSTOM_QUERY = 1;
 
+export const DEFINITION_THRESHOLD = 4;
+
 export const DEFINITION_TIMELINE = 3;
 
 export const DEFINITION_INDEX_PATTERNS =
