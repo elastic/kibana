@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -53,7 +53,7 @@ export function LayerPanel(
   const { framePublicAPI, layerId, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
 
-  React.useEffect(() => {
+  useEffect(() => {
     setPopoverState(initialPopoverState);
   }, [props.activeVisualizationId]);
 
