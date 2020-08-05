@@ -59,9 +59,9 @@ export interface EndpointState {
 /**
  * Query params on the host page parsed from the URL
  */
-export interface HostIndexUIQueryParams {
-  /** Selected host id shows host details flyout */
-  selected_host?: string;
+export interface EndpointIndexUIQueryParams {
+  /** Selected endpoint id shows host details flyout */
+  selected_endpoint?: string;
   /** How many items to show in list */
   page_size?: string;
   /** Which page to show */

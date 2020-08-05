@@ -7,7 +7,7 @@
 import { createStore, Dispatch, Store } from 'redux';
 import { EndpointState } from '../types';
 import { listData } from './selectors';
-import { mockHostResultList } from './mock_host_result_list';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 
@@ -22,7 +22,7 @@ describe('EndpointList store concerns', () => {
   const loadDataToStore = () => {
     dispatch({
       type: 'serverReturnedEndpointList',
-      payload: mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
+      payload: mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
     });
   };
 
@@ -56,7 +56,7 @@ describe('EndpointList store concerns', () => {
     });
 
     test('it handles `serverReturnedEndpointList', () => {
-      const payload = mockHostResultList({
+      const payload = mockEndpointResultList({
         request_page_size: 1,
         request_page_index: 1,
         total: 10,

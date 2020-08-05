@@ -185,7 +185,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // call the host details api
-      const { selected_host: selectedHost } = uiQueryParams(state);
+      const { selected_endpoint: selectedHost } = uiQueryParams(state);
       try {
         const response = await coreStart.http.get<HostInfo>(
           `/api/endpoint/metadata/${selectedHost}`

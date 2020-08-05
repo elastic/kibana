@@ -16,7 +16,7 @@ import {
 } from './constants';
 import { AdministrationSubTab } from '../types';
 import { appendSearch } from '../../common/components/link_to/helpers';
-import { HostIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -32,15 +32,15 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
 ) => string = querystring.stringify;
 
 /** Make `selected_host` required */
-type HostDetailsUrlProps = Omit<HostIndexUIQueryParams, 'selected_host'> &
-  Required<Pick<HostIndexUIQueryParams, 'selected_host'>>;
+type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
+  Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 
 export const getEndpointListPath = (
-  props: { name: 'default' | 'endpointList' } & HostIndexUIQueryParams,
+  props: { name: 'default' | 'endpointList' } & EndpointIndexUIQueryParams,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
-  const urlQueryParams = querystringStringify<HostIndexUIQueryParams, typeof queryParams>(
+  const urlQueryParams = querystringStringify<EndpointIndexUIQueryParams, typeof queryParams>(
     queryParams
   );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
@@ -54,15 +54,17 @@ export const getEndpointListPath = (
 };
 
 export const getEndpointDetailsPath = (
-  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & HostIndexUIQueryParams &
-    HostDetailsUrlProps,
+  props: { name: 'endpointDetails' | 'endpointPolicyResponse' } & EndpointIndexUIQueryParams &
+    EndpointDetailsUrlProps,
   search?: string
 ) => {
   const { name, ...queryParams } = props;
   queryParams.show = (props.name === 'endpointPolicyResponse'
     ? 'policy_response'
-    : '') as HostIndexUIQueryParams['show'];
-  const urlQueryParams = querystringStringify<HostDetailsUrlProps, typeof queryParams>(queryParams);
+    : '') as EndpointIndexUIQueryParams['show'];
+  const urlQueryParams = querystringStringify<EndpointDetailsUrlProps, typeof queryParams>(
+    queryParams
+  );
   const urlSearch = `${urlQueryParams && !isEmpty(search) ? '&' : ''}${search ?? ''}`;
 
   return `${generatePath(MANAGEMENT_ROUTING_ENDPOINTS_PATH, {

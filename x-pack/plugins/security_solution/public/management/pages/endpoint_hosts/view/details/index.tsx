@@ -19,7 +19,7 @@ import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { useHostSelector } from '../hooks';
+import { useEndpointSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import {
   uiQueryParams,
@@ -45,12 +45,12 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const toasts = useToasts();
-  const queryParams = useHostSelector(uiQueryParams);
-  const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
-  const details = useHostSelector(detailsData);
-  const loading = useHostSelector(detailsLoading);
-  const error = useHostSelector(detailsError);
-  const show = useHostSelector(showView);
+  const queryParams = useEndpointSelector(uiQueryParams);
+  const { selected_endpoint: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
+  const details = useEndpointSelector(detailsData);
+  const loading = useEndpointSelector(detailsLoading);
+  const error = useEndpointSelector(detailsError);
+  const show = useEndpointSelector(showView);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
@@ -110,12 +110,12 @@ EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const { show, ...queryParams } = useHostSelector(uiQueryParams);
-  const responseConfig = useHostSelector(policyResponseConfigurations);
-  const responseActions = useHostSelector(policyResponseActions);
-  const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
-  const loading = useHostSelector(policyResponseLoading);
-  const error = useHostSelector(policyResponseError);
+  const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
+  const responseConfig = useEndpointSelector(policyResponseConfigurations);
+  const responseActions = useEndpointSelector(policyResponseActions);
+  const responseAttentionCount = useEndpointSelector(policyResponseFailedOrWarningActionCount);
+  const loading = useEndpointSelector(policyResponseLoading);
+  const error = useEndpointSelector(policyResponseError);
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const [detailsUri, detailsRoutePath] = useMemo(
     () => [
@@ -123,13 +123,13 @@ const PolicyResponseFlyoutPanel = memo<{
         getEndpointListPath({
           name: 'endpointList',
           ...queryParams,
-          selected_host: hostMeta.host.id,
+          selected_endpoint: hostMeta.host.id,
         })
       ),
       getEndpointListPath({
         name: 'endpointList',
         ...queryParams,
-        selected_host: hostMeta.host.id,
+        selected_endpoint: hostMeta.host.id,
       }),
     ],
     [hostMeta.host.id, formatUrl, queryParams]

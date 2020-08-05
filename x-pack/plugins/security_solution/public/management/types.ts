@@ -18,7 +18,7 @@ export type ManagementStoreGlobalNamespace = 'management';
 export type ManagementState = CombinedState<{
   policyList: PolicyListState;
   policyDetails: PolicyDetailsState;
-  hosts: EndpointState;
+  endpoints: EndpointState;
 }>;
 
 /**

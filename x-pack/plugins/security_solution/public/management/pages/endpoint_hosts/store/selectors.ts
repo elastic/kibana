@@ -14,7 +14,7 @@ import {
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
 } from '../../../../../common/endpoint/types';
-import { EndpointState, HostIndexUIQueryParams } from '../types';
+import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
@@ -122,16 +122,16 @@ export const isOnHostPage = (state: Immutable<EndpointState>) => {
 
 export const uiQueryParams: (
   state: Immutable<EndpointState>
-) => Immutable<HostIndexUIQueryParams> = createSelector(
+) => Immutable<EndpointIndexUIQueryParams> = createSelector(
   (state: Immutable<EndpointState>) => state.location,
   (location: Immutable<EndpointState>['location']) => {
-    const data: HostIndexUIQueryParams = { page_index: '0', page_size: '10' };
+    const data: EndpointIndexUIQueryParams = { page_index: '0', page_size: '10' };
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
 
-      const keys: Array<keyof HostIndexUIQueryParams> = [
-        'selected_host',
+      const keys: Array<keyof EndpointIndexUIQueryParams> = [
+        'selected_endpoint',
         'page_size',
         'page_index',
         'show',
@@ -173,7 +173,7 @@ export const uiQueryParams: (
 
 export const hasSelectedHost: (state: Immutable<EndpointState>) => boolean = createSelector(
   uiQueryParams,
-  ({ selected_host: selectedHost }) => {
+  ({ selected_endpoint: selectedHost }) => {
     return selectedHost !== undefined;
   }
 );

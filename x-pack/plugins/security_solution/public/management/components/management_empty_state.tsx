@@ -116,7 +116,7 @@ const PolicyEmptyState = React.memo<{
   );
 });
 
-const HostsEmptyState = React.memo<{
+const EndpointsEmptyState = React.memo<{
   loading: boolean;
   onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled: boolean;
@@ -265,7 +265,7 @@ const ManagementEmptyState = React.memo<{
 });
 
 PolicyEmptyState.displayName = 'PolicyEmptyState';
-HostsEmptyState.displayName = 'HostsEmptyState';
+EndpointsEmptyState.displayName = 'HostsEmptyState';
 ManagementEmptyState.displayName = 'ManagementEmptyState';
 
-export { PolicyEmptyState, HostsEmptyState };
+export { PolicyEmptyState, EndpointsEmptyState as HostsEmptyState };

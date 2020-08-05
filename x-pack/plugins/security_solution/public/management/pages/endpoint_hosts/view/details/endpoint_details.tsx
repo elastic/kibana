@@ -19,7 +19,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useAgentDetailsIngestUrl } from '../hooks';
+import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -30,7 +30,7 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
-import { HostPolicyLink } from '../components/host_policy_link';
+import { EndpointPolicyLink } from '../components/host_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -58,8 +58,8 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
     appId: ingestAppId,
     appPath: agentDetailsAppPath,
   } = useAgentDetailsIngestUrl(agentId);
-  const queryParams = useHostSelector(uiQueryParams);
-  const policyStatus = useHostSelector(
+  const queryParams = useEndpointSelector(uiQueryParams);
+  const policyStatus = useEndpointSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
@@ -83,19 +83,19 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
 
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { selected_host, show, ...currentUrlParams } = queryParams;
+    const { selected_endpoint, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
         getEndpointDetailsPath({
           name: 'endpointPolicyResponse',
           ...currentUrlParams,
-          selected_host: details.host.id,
+          selected_endpoint: details.host.id,
         })
       ),
       getEndpointDetailsPath({
         name: 'endpointPolicyResponse',
         ...currentUrlParams,
-        selected_host: details.host.id,
+        selected_endpoint: details.host.id,
       }),
     ];
   }, [details.host.id, formatUrl, queryParams]);
@@ -110,7 +110,10 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
       onDoneNavigateTo: [
         'securitySolution:administration',
         {
-          path: getEndpointDetailsPath({ name: 'endpointDetails', selected_host: details.host.id }),
+          path: getEndpointDetailsPath({
+            name: 'endpointDetails',
+            selected_endpoint: details.host.id,
+          }),
         },
       ],
     },
@@ -126,12 +129,12 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         }),
         description: (
           <>
-            <HostPolicyLink
+            <EndpointPolicyLink
               policyId={details.Endpoint.policy.applied.id}
               data-test-subj="policyDetailsValue"
             >
               {details.Endpoint.policy.applied.name}
-            </HostPolicyLink>
+            </EndpointPolicyLink>
           </>
         ),
       },

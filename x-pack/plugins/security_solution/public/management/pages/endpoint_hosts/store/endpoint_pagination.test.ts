@@ -18,35 +18,35 @@ import { endpointMiddlewareFactory } from './middleware';
 import { endpointListReducer } from './reducer';
 
 import { uiQueryParams } from './selectors';
-import { mockHostResultList } from './mock_host_result_list';
-import { HostState, HostIndexUIQueryParams } from '../types';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
+import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
 import { getEndpointListPath } from '../../../common/routing';
 
-describe('host list pagination: ', () => {
+describe('endpoint list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let history: History<AppLocation['state']>;
   let store: Store;
-  let queryParams: () => HostIndexUIQueryParams;
+  let queryParams: () => EndpointIndexUIQueryParams;
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let actionSpyMiddleware;
   const getEndpointListApiResponse = (): HostResultList => {
-    return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
 
-  let historyPush: (params: HostIndexUIQueryParams) => void;
+  let historyPush: (params: EndpointIndexUIQueryParams) => void;
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart();
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     history = createBrowserHistory();
     const middleware = endpointMiddlewareFactory(fakeCoreStart, depsStart);
-    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(endpointListReducer, applyMiddleware(middleware, actionSpyMiddleware));
 
     history.listen((location) => {
@@ -55,12 +55,12 @@ describe('host list pagination: ', () => {
 
     queryParams = () => uiQueryParams(store.getState());
 
-    historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
+    historyPush = (nextQueryParams: EndpointIndexUIQueryParams): void => {
       return history.push(getEndpointListPath({ name: 'endpointList', ...nextQueryParams }));
     };
   });
 
-  describe('when the user enteres the host list for the first time', () => {
+  describe('when the user enteres the endpoint list for the first time', () => {
     it('the api is called with page_index and page_size defaulting to 0 and 10 respectively', async () => {
       const apiResponse = getEndpointListApiResponse();
       fakeHttpServices.post.mockResolvedValue(apiResponse);

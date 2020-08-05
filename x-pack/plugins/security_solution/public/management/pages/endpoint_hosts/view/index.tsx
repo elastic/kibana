@@ -27,7 +27,7 @@ import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { useHostSelector } from './hooks';
+import { useEndpointSelector } from './hooks';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -48,8 +48,8 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
-import { HostAction } from '../store/action';
-import { HostPolicyLink } from './components/host_policy_link';
+import { EndpointAction } from '../store/action';
+import { EndpointPolicyLink } from './components/host_policy_link';
 
 const EndpointListNavLink = memo<{
   name: string;
@@ -90,10 +90,10 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     hostsExist,
-  } = useHostSelector(selector);
+  } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
-  const dispatch = useDispatch<(a: HostAction) => void>();
+  const dispatch = useDispatch<(a: EndpointAction) => void>();
 
   const paginationSetup = useMemo(() => {
     return {
@@ -198,7 +198,7 @@ export const EndpointList = () => {
             {
               ...queryParams,
               name: 'endpointDetails',
-              selected_host: id,
+              selected_endpoint: id,
             },
             search
           );
@@ -244,13 +244,13 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <HostPolicyLink
+            <EndpointPolicyLink
               policyId={policy.id}
               className="eui-textTruncate"
               data-test-subj="policyNameCellLink"
             >
               {policy.name}
-            </HostPolicyLink>
+            </EndpointPolicyLink>
           );
         },
       },
@@ -263,7 +263,7 @@ export const EndpointList = () => {
           const toRoutePath = getEndpointDetailsPath({
             name: 'endpointPolicyResponse',
             ...queryParams,
-            selected_host: item.metadata.host.id,
+            selected_endpoint: item.metadata.host.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
