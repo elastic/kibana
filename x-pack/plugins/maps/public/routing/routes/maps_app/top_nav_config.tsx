@@ -36,6 +36,7 @@ export function getTopNavConfig({
   setBreadcrumbs,
   stateTransfer,
   originatingApp,
+  cutOriginatingAppConnection,
 }: {
   savedMap: ISavedGisMap;
   isOpenSettingsDisabled: boolean;
@@ -46,6 +47,7 @@ export function getTopNavConfig({
   setBreadcrumbs: () => void;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  cutOriginatingAppConnection: () => void;
 }) {
   const topNavConfigs = [];
   const isNewMap = !savedMap.id;
@@ -106,6 +108,10 @@ export function getTopNavConfig({
     setBreadcrumbs();
     goToSpecifiedPath(`/map/${id}${window.location.hash}`);
 
+    if (newCopyOnSave && !returnToOrigin) {
+      cutOriginatingAppConnection();
+    }
+
     if (!!originatingApp && returnToOrigin) {
       const newlyCreated = newCopyOnSave || isNewMap;
       if (newlyCreated && stateTransfer) {
@@ -130,11 +136,12 @@ export function getTopNavConfig({
       iconType: 'check',
       run: () => {
         onSave({
-          newTitle: savedMap.title,
+          newTitle: savedMap.title ? savedMap.title : '',
           newDescription: savedMap.description ? savedMap.description : '',
           newCopyOnSave: false,
           isTitleDuplicateConfirmed: false,
           returnToOrigin: true,
+          onTitleDuplicate: () => {},
         });
       },
       testId: 'mapSaveAndReturnButton',
