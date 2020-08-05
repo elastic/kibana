@@ -245,14 +245,14 @@ export type Matrix3 = readonly [
   number
 ];
 
-type eventSubtypeFull =
+type EventSubtypeFull =
   | 'creation_event'
   | 'fork_event'
   | 'exec_event'
   | 'already_running'
   | 'termination_event';
 
-type eventTypeFull = 'process_event';
+type EventTypeFull = 'process_event';
 
 /**
  * The 'events' which contain process data and are used to model Resolver.
@@ -263,8 +263,8 @@ export interface ProcessEvent {
   readonly machine_id: string;
   readonly data_buffer: {
     timestamp_utc: string;
-    event_subtype_full: eventSubtypeFull;
-    event_type_full: eventTypeFull;
+    event_subtype_full: EventSubtypeFull;
+    event_type_full: EventTypeFull;
     node_id: number;
     source_id?: number;
     process_name: string;

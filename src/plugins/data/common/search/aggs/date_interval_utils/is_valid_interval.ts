@@ -23,7 +23,7 @@ import { leastCommonInterval } from './least_common_interval';
 // When base interval is set, check for least common interval and allow
 // input the value is the same. This means that the input interval is a
 // multiple of the base interval.
-function _parseWithBase(value: string, baseInterval: string) {
+function parseWithBase(value: string, baseInterval: string) {
   try {
     const interval = leastCommonInterval(baseInterval, value);
     return interval === value.replace(/\s/g, '');
@@ -34,7 +34,7 @@ function _parseWithBase(value: string, baseInterval: string) {
 
 export function isValidInterval(value: string, baseInterval?: string) {
   if (baseInterval) {
-    return _parseWithBase(value, baseInterval);
+    return parseWithBase(value, baseInterval);
   } else {
     return isValidEsInterval(value);
   }
