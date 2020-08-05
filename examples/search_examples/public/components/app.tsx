@@ -88,7 +88,6 @@ export const SearchExamplesApp = ({
   http,
   basename,
   notifications,
-  uiSettings,
   savedObjectsClient,
   navigation,
   data,
