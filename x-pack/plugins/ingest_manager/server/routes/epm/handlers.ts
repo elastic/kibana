@@ -146,9 +146,11 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const installPackageHandler: RequestHandler<TypeOf<
-  typeof InstallPackageRequestSchema.params
->> = async (context, request, response) => {
+export const installPackageHandler: RequestHandler<
+  TypeOf<typeof InstallPackageRequestSchema.params>,
+  undefined,
+  TypeOf<typeof InstallPackageRequestSchema.body>
+> = async (context, request, response) => {
   const logger = appContextService.getLogger();
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
@@ -159,6 +161,7 @@ export const installPackageHandler: RequestHandler<TypeOf<
       savedObjectsClient,
       pkgkey,
       callCluster,
+      force: request.body?.force,
     });
     const body: InstallPackageResponse = {
       response: res,

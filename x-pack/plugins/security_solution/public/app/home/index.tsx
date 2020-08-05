@@ -27,7 +27,6 @@ const SecuritySolutionAppWrapper = styled.div`
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 const Main = styled.main`
-  position: relative;
   overflow: auto;
   flex: 1;
 `;
