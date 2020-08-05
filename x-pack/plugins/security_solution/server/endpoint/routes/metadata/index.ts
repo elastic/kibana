@@ -241,7 +241,7 @@ async function mapToHostResultList(
   searchResponse: SearchResponse<HostMetadataDetails>,
   metadataRequestContext: MetadataRequestContext
 ): Promise<HostResultList> {
-  const totalNumberOfHosts = searchResponse.hits?.total || 0;
+  const totalNumberOfHosts = searchResponse.hits?.total.value || 0;
   if (searchResponse.hits.hits.length > 0) {
     return {
       request_page_size: queryParams.size,
