@@ -26,7 +26,11 @@ export const SetupGuide: React.FC = () => {
       standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
-      <SetBreadcrumbs text="Setup Guide" />
+      <SetBreadcrumbs
+        text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+          defaultMessage: 'Setup Guide',
+        })}
+      />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
       <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">

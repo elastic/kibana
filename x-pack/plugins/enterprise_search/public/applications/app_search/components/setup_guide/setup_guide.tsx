@@ -22,7 +22,11 @@ export const SetupGuide: React.FC = () => (
     standardAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#standard"
     elasticsearchNativeAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
   >
-    <SetBreadcrumbs text="Setup Guide" />
+    <SetBreadcrumbs
+      text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+        defaultMessage: 'Setup Guide',
+      })}
+    />
     <SendTelemetry action="viewed" metric="setup_guide" />
 
     <a
