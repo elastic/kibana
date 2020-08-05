@@ -57,12 +57,12 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     },
 
     async assertAnalyticsEditFlyoutMissing() {
-      await testSubjects.missingOrFail('analyticsEditFlyoutUpdateButton');
+      await testSubjects.missingOrFail('mlAnalyticsEditFlyout');
     },
 
     async updateAnalyticsJob() {
-      await testSubjects.existOrFail('analyticsEditFlyoutUpdateButton');
-      await testSubjects.click('analyticsEditFlyoutUpdateButton');
+      await testSubjects.existOrFail('mlAnalyticsEditFlyoutUpdateButton');
+      await testSubjects.click('mlAnalyticsEditFlyoutUpdateButton');
       await retry.tryForTime(5000, async () => {
         await this.assertAnalyticsEditFlyoutMissing();
       });

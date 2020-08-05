@@ -91,7 +91,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async openEditFlyout(analyticsId: string) {
       await this.openRowActions(analyticsId);
       await testSubjects.click('mlAnalyticsJobEditButton');
-      await testSubjects.existOrFail('analyticsEditFlyout', { timeout: 5000 });
+      await testSubjects.existOrFail('mlAnalyticsEditFlyout', { timeout: 5000 });
     }
 
     async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
