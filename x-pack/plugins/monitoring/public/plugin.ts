@@ -128,7 +128,7 @@ export class MonitoringPlugin
       UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
       JSON.stringify(refreshInterval)
     );
-    uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
+    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
   }
 
   private getExternalConfig() {

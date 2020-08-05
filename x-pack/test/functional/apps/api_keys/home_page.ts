@@ -31,10 +31,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Loads the app', async () => {
       await security.testUser.setRoles(['test_api_keys']);
       log.debug('Checking for section header');
-      const headerText = await pageObjects.apiKeys.noAPIKeysHeading();
-      expect(headerText).to.be('No API keys');
-      const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
-      expect(await goToConsoleButton.isDisplayed()).to.be(true);
+      const headers = await testSubjects.findAll('noApiKeysHeader');
+      if (headers.length > 0) {
+        expect(await headers[0].getVisibleText()).to.be('No API keys');
+        const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
+        expect(await goToConsoleButton.isDisplayed()).to.be(true);
+      } else {
+        // page may already contain EiTable with data, then check API Key Admin text
+        const description = await pageObjects.apiKeys.getApiKeyAdminDesc();
+        expect(description).to.be('You are an API Key administrator.');
+      }
     });
   });
 };
