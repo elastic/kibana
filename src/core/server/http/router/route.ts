@@ -152,7 +152,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
     /**
      * Milliseconds to receive the payload
      */
-    payload?: number;
+    payload?: Method extends 'get' | 'options' ? undefined : number;
 
     /**
      * Milliseconds the socket can be idle before it's closed

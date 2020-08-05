@@ -1038,39 +1038,6 @@ describe('timeout options', () => {
         });
     });
 
-    test('GET routes ignore the specified payload timeout', async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
-
-      const router = new Router('', logger, enhanceWithContext);
-      router.get(
-        {
-          path: '/',
-          validate: false,
-          options: {
-            timeout: {
-              payload: 300000,
-            },
-          },
-        },
-        (context, req, res) => {
-          try {
-            return res.ok({
-              body: {
-                timeout: req.route.options.timeout,
-              },
-            });
-          } catch (err) {
-            return res.internalError({ body: err.message });
-          }
-        }
-      );
-      registerRouter(router);
-      await server.start();
-      await supertest(innerServer.listener).get('/').expect(200, {
-        timeout: {},
-      });
-    });
-
     test('DELETE routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
 

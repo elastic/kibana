@@ -454,27 +454,6 @@ describe('Options', () => {
         await expect(result).resolves.toHaveProperty('status', 408);
       });
 
-      it('should timeout if configured with a small timeout value for a GET', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.get(
-          // Note: There is a bug within Hapi Server where it cannot set the payload timeout for a GET call but it also cannot configure a timeout less than the payload body
-          // so the least amount of possible time to configure the timeout is 10 seconds.
-          { path: '/a', validate: false, options: { timeout: { payload: 100000 } } },
-          async (context, req, res) => {
-            // Cause a wait of 20 seconds to cause the socket hangup
-            await new Promise((resolve) => setTimeout(resolve, 200000));
-            return res.ok({});
-          }
-        );
-        router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
-        await server.start();
-
-        expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
-        await supertest(innerServer.listener).get('/b').expect(200, {});
-      });
-
       it('should not timeout if configured with a 5 minute timeout value for a POST', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -510,18 +489,6 @@ describe('Options', () => {
         );
         await server.start();
         await supertest(innerServer.listener).delete('/a').expect(200, {});
-      });
-
-      it('should not timeout if configured with a 5 minute timeout value for a GET', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.get(
-          { path: '/a', validate: false, options: { timeout: { payload: 300000 } } },
-          async (context, req, res) => res.ok({})
-        );
-        await server.start();
-        await supertest(innerServer.listener).get('/a').expect(200, {});
       });
     });
   });
