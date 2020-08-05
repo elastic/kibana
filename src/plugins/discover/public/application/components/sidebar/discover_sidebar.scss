@@ -43,7 +43,7 @@
 
 .dscSidebarItem {
   &:hover,
-  &:focus {
+  &:focus-within {
     .dscSidebarItem__action {
       opacity: 1;
     }
