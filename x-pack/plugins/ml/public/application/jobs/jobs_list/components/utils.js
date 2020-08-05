@@ -369,32 +369,31 @@ function getUrlVars(url) {
   });
   return vars;
 }
-
 export function getSelectedIdFromUrl(url) {
   const result = {};
   if (typeof url === 'string') {
-    const isGroup = url.includes('groupId');
+    const isGroup = url.includes('groupIds');
 
     url = decodeURIComponent(url);
     if (url.includes('mlManagement') && (url.includes('jobId') || isGroup)) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
 
-      result.id = isGroup ? decodedJson.groupId : decodedJson.jobId;
+      result.ids = isGroup ? decodedJson.groupIds : [decodedJson.jobId];
       result.isGroup = isGroup;
     }
   }
   return result;
 }
 
-export function getGroupQueryText(groupId) {
-  return `groups:(${groupId})`;
+export function getGroupQueryText(groupIds) {
+  return `groups:(${groupIds.join(' or ')})`;
 }
 
 export function clearSelectedJobIdFromUrl(url) {
   if (typeof url === 'string') {
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
+    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
       const urlParams = getUrlVars(url);
       const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);

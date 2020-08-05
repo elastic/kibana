@@ -3,6 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export function getSelectedIdFromUrl(str: string): { id: string; isGroup: boolean };
-export function getGroupQueryText(str: string): string;
+export function getSelectedIdFromUrl(str: string): { ids: string[]; isGroup: boolean };
+export function getGroupQueryText(arr: string[]): string;
 export function clearSelectedJobIdFromUrl(str: string): void;

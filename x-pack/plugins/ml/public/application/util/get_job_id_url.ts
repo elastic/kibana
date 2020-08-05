@@ -18,3 +18,16 @@ export function getJobIdUrl(tabId: string, jobId: string): string {
 
   return `${basePath.get()}/app/ml#/${tabId}${url}`;
 }
+
+export function getGroupIdsUrl(tabId: string, groupIds: string[]): string {
+  // Create url for filtering by group id(s) for kibana management table
+  // format: mlManagement=(groupIds:!(first_group_id,second_group_id))
+  const settings = {
+    groupIds,
+  };
+  const encoded = rison.encode(settings);
+  const url = `?mlManagement=${encoded}`;
+  const basePath = getBasePath();
+
+  return `${basePath.get()}/app/ml#/${tabId}${url}`;
+}

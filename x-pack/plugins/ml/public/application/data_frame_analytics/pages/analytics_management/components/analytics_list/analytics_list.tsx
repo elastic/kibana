@@ -105,8 +105,9 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
   useEffect(() => {
     if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
-      const { id: selectedIdFromUrl, isGroup } = getSelectedIdFromUrl(window.location.href);
-      if (selectedIdFromUrl !== undefined) {
+      const { ids, isGroup } = getSelectedIdFromUrl(window.location.href);
+      const selectedIdFromUrl = ids ?? ids[0];
+      if (selectedIdFromUrl) {
         setSelectedIdFromUrlInitialized(true);
         setSearchQueryText(isGroup ? getGroupQueryText(selectedIdFromUrl) : selectedIdFromUrl);
       }
