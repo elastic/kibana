@@ -49,7 +49,6 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  optimize: { enabled: false },
   migrations: { skip: true },
 };
 
