@@ -3,22 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { BuilderButtonOptions } from './builder_button_options';
+import { BuilderLogicButtons } from './logic_buttons';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|Exceptions|BuilderButtonOptions', module)
+storiesOf('Exceptions|BuilderLogicButtons', module)
   .add('and/or buttons', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -33,7 +34,7 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   })
   .add('nested button - isNested false', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -48,7 +49,7 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   })
   .add('nested button - isNested true', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -63,7 +64,7 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   })
   .add('and disabled', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -78,7 +79,7 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   })
   .add('or disabled', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled
         isNestedDisabled={false}
@@ -93,7 +94,7 @@ storiesOf('Components|Exceptions|BuilderButtonOptions', module)
   })
   .add('nested disabled', () => {
     return (
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled
