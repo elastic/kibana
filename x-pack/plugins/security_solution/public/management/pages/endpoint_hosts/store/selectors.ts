@@ -203,3 +203,9 @@ export const policyResponseStatus: (state: Immutable<HostState>) => string = cre
 export const nonExistingPolicies: (
   state: Immutable<HostState>
 ) => Immutable<HostState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
+
+/**
+ * Return boolean that indicates whether hosts exist
+ * @param state
+ */
+export const hostsExist: (state: Immutable<HostState>) => boolean = (state) => state.hostsExist;

@@ -10,7 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { defineDockerServersConfig } from '@kbn/test';
 
 // Docker image to use for Ingest Manager API integration tests.
-// This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit/48f3935a72b0c5aacc6fec8ef36d559b089a238b
+// This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit
 export const dockerImage =
   'docker.elastic.co/package-registry/distribution:f6b01daec8cfe355101e366de9941d35a4c3763e';
 
