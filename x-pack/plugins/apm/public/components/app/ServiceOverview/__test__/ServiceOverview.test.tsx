@@ -4,43 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ReactChild, FunctionComponent } from 'react';
 import { render, wait, waitForElement } from '@testing-library/react';
+import { CoreStart } from 'kibana/public';
+import React, { FunctionComponent, ReactChild } from 'react';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { ServiceOverview } from '..';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
 import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
 } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
+import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
+import * as urlParamsHooks from '../../../../hooks/useUrlParams';
+import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
 
-jest.mock('ui/new_platform');
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
 
 function wrapper({ children }: { children: ReactChild }) {
   return (
-    <MockApmPluginContextWrapper
-      value={
-        ({
-          ...mockApmPluginContextValue,
-          core: {
-            ...mockApmPluginContextValue.core,
-            http: { ...mockApmPluginContextValue.core.http, get: httpGet },
-            notifications: {
-              ...mockApmPluginContextValue.core.notifications,
-              toasts: {
-                ...mockApmPluginContextValue.core.notifications.toasts,
-                addWarning,
+    <KibanaReactContext.Provider>
+      <MockApmPluginContextWrapper
+        value={
+          ({
+            ...mockApmPluginContextValue,
+            core: {
+              ...mockApmPluginContextValue.core,
+              http: { ...mockApmPluginContextValue.core.http, get: httpGet },
+              notifications: {
+                ...mockApmPluginContextValue.core.notifications,
+                toasts: {
+                  ...mockApmPluginContextValue.core.notifications.toasts,
+                  addWarning,
+                },
               },
             },
-          },
-        } as unknown) as ApmPluginContextValue
-      }
-    >
-      {children}
-    </MockApmPluginContextWrapper>
+          } as unknown) as ApmPluginContextValue
+        }
+      >
+        {children}
+      </MockApmPluginContextWrapper>
+    </KibanaReactContext.Provider>
   );
 }
 

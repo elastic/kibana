@@ -13,9 +13,11 @@ import {
   render,
 } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import { CoreStart } from 'kibana/public';
 import { omit } from 'lodash';
 import React from 'react';
 import { Router } from 'react-router-dom';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { TransactionOverview } from '..';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
@@ -23,6 +25,10 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../../hooks/useFetcher';
 import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
 import { fromQuery } from '../../../shared/Links/url_helpers';
+
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
 
 const history = createMemoryHistory();
 jest.spyOn(history, 'push');
@@ -51,13 +57,15 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return render(
-    <MockApmPluginContextWrapper>
-      <Router history={history}>
-        <UrlParamsProvider>
-          <TransactionOverview />
-        </UrlParamsProvider>
-      </Router>
-    </MockApmPluginContextWrapper>
+    <KibanaReactContext.Provider>
+      <MockApmPluginContextWrapper>
+        <Router history={history}>
+          <UrlParamsProvider>
+            <TransactionOverview />
+          </UrlParamsProvider>
+        </Router>
+      </MockApmPluginContextWrapper>
+    </KibanaReactContext.Provider>
   );
 }
 

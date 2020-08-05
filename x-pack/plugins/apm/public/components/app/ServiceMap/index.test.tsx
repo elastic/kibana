@@ -5,11 +5,17 @@
  */
 
 import { render } from '@testing-library/react';
+import { CoreStart } from 'kibana/public';
 import React, { ReactNode } from 'react';
+import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
 import { License } from '../../../../../licensing/common/license';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { LicenseContext } from '../../../context/LicenseContext';
 import { ServiceMap } from './';
-import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
 
 const expiredLicense = new License({
   signature: 'test signature',
@@ -24,9 +30,11 @@ const expiredLicense = new License({
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
-    <LicenseContext.Provider value={expiredLicense}>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-    </LicenseContext.Provider>
+    <KibanaReactContext.Provider>
+      <LicenseContext.Provider value={expiredLicense}>
+        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      </LicenseContext.Provider>
+    </KibanaReactContext.Provider>
   );
 }
 
