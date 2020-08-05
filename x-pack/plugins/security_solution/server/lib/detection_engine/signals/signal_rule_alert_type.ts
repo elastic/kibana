@@ -428,8 +428,6 @@ export const signalRulesAlertType = ({
         });
         await ruleStatusService.error(message);
       }
-
-      return Promise.resolve(logger.error(message));
     },
   };
 };
