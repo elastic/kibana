@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -189,10 +189,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`logs app is inaccessible`, async () => {
         await PageObjects.common.navigateToActualUrl('infraLogs', '', {
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

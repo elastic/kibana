@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'error', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -77,31 +77,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`create new timelion renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
 
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
 
       it(`edit timelion sheet which doesn't exist renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-dont-exist', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
 
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
 
       it(`edit timelion sheet which exists renders not found`, async () => {
         await PageObjects.common.navigateToActualUrl('timelion', 'i-exist', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: false,
+          ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
 
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

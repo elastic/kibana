@@ -23,6 +23,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function ErrorPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   class ErrorPage {
     public async expectForbidden() {
@@ -37,7 +38,9 @@ export function ErrorPageProvider({ getPageObjects, getService }: FtrProviderCon
     }
 
     public async expectNotFound() {
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      return await retry.try(async () => {
+        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      });
     }
   }
 

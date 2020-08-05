@@ -9,7 +9,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects([
+    'common',
+    'error',
+    'timelion',
+    'header',
+    'security',
+    'spaceSelector',
+  ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
@@ -169,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('timelion', '', {
           shouldLoginIfPrompted: false,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

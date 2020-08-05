@@ -11,7 +11,7 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -426,8 +426,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`metrics app is inaccessible`, async () => {
         await PageObjects.common.navigateToActualUrl('infraOps', '', {
           shouldLoginIfPrompted: false,
+          ensureCurrentUrl: true,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

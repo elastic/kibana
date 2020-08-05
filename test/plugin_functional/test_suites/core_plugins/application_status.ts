@@ -38,7 +38,7 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'error']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      await PageObjects.error.expectNotFound();
       expect(await testSubjects.exists('appStatusApp')).to.eql(false);
     });
 

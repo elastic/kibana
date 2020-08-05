@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -83,8 +83,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('infraLogs', '', {
           shouldLoginIfPrompted: false,
           basePath: '/s/custom_space',
+          ensureCurrentUrl: true,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

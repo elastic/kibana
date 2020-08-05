@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'settings', 'security', 'maps']);
+  const PageObjects = getPageObjects(['common', 'error', 'settings', 'security', 'maps']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -270,8 +270,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`renders a not found message`, async () => {
         await PageObjects.common.navigateToActualUrl('maps', '', {
           shouldLoginIfPrompted: false,
+          ensureCurrentUrl: true,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });

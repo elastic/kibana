@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'maps', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+        await PageObjects.error.expectNotFound();
       });
     });
   });
