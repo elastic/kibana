@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
 
-import { FeatureCatalogueCategory } from '../../services';
+import { FeatureCatalogueCategory, FeatureCatalogueHomePageSection } from '../../services';
 
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
@@ -35,7 +35,6 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
-// TODO: Update tests
 describe('home', () => {
   let defaultProps;
 
@@ -93,42 +92,8 @@ describe('home', () => {
     expect(component).toMatchSnapshot();
   });
 
-  describe('directories', () => {
-    test('should render DATA directory entry in "Explore Data" panel', async () => {
-      const directoryEntry = {
-        id: 'dashboard',
-        title: 'Dashboard',
-        description: 'Display and share a collection of visualizations and saved searches.',
-        icon: 'dashboardApp',
-        path: 'dashboard_landing_page',
-        category: FeatureCatalogueCategory.DATA,
-      };
-
-      const component = await renderHome({
-        directories: [directoryEntry],
-      });
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('should render ADMIN directory entry in "Manage" panel', async () => {
-      const directoryEntry = {
-        id: 'index_patterns',
-        title: 'Index Patterns',
-        description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
-        icon: 'indexPatternApp',
-        path: 'index_management_landing_page',
-        category: FeatureCatalogueCategory.ADMIN,
-      };
-
-      const component = await renderHome({
-        directories: [directoryEntry],
-      });
-
-      expect(component).toMatchSnapshot();
-    });
-
-    test('should not render directory entry when showOnHomePage is false', async () => {
+  describe('header', () => {
+    test('should not render directory entry if no home page section is specified', async () => {
       const directoryEntry = {
         id: 'stack-management',
         title: 'Management',
@@ -140,6 +105,223 @@ describe('home', () => {
 
       const component = await renderHome({
         directories: [directoryEntry],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('directories', () => {
+    test('should not render directory entry if no home page section is specified', async () => {
+      const directoryEntry = {
+        id: 'stack-management',
+        title: 'Management',
+        description: 'Your center console for managing the Elastic Stack.',
+        icon: 'managementApp',
+        path: 'management_landing_page',
+        category: FeatureCatalogueCategory.ADMIN,
+      };
+
+      const component = await renderHome({
+        directories: [directoryEntry],
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+
+    describe('solutions section', () => {
+      test('should render the Kibana solution card in "solutions" section', async () => {
+        const directoryEntry = {
+          id: 'dashboard',
+          title: 'Dashboard',
+          description: 'Display and share a collection of visualizations and saved searches.',
+          icon: 'dashboardApp',
+          path: 'dashboard_landing_page',
+          category: FeatureCatalogueCategory.DATA,
+          homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+          solution: 'kibana',
+        };
+
+        const solutionEntry = {
+          id: 'kibana',
+          title: 'Kibana',
+          description: 'Visualize & analyze',
+          icon: 'logoKibana',
+          path: 'kibana_landing_page',
+        };
+
+        const component = await renderHome({
+          directories: [directoryEntry],
+          solutions: [solutionEntry],
+        });
+
+        expect(component).toMatchSnapshot();
+      });
+
+      test('should render the Kibana and other solution cards', async () => {
+        const directoryEntry1 = {
+          id: 'dashboard',
+          title: 'Dashboard',
+          description: 'Display and share a collection of visualizations and saved searches.',
+          icon: 'dashboardApp',
+          path: 'dashboard_landing_page',
+          category: FeatureCatalogueCategory.DATA,
+          homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+          solution: 'kibana',
+          order: 1,
+        };
+
+        const directoryEntry2 = {
+          id: 'feature-2',
+          title: 'Feature two',
+          description: 'Description of feature two',
+          icon: 'empty',
+          path: 'path-to-feature-two',
+          solution: 'solution-2',
+          category: FeatureCatalogueCategory.DATA,
+          homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+          order: 1,
+        };
+        const directoryEntry3 = {
+          id: 'feature-3',
+          title: 'Feature three',
+          description: 'Description of feature three',
+          icon: 'empty',
+          path: 'path-to-feature-three',
+          solution: 'solution-3',
+          category: FeatureCatalogueCategory.DATA,
+          homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+          order: 1,
+        };
+        const directoryEntry4 = {
+          id: 'feature-4',
+          title: 'Feature four',
+          description: 'Description of feature four',
+          icon: 'empty',
+          path: 'path-to-feature-four',
+          solution: 'solution-4',
+          category: FeatureCatalogueCategory.DATA,
+          homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+          order: 1,
+        };
+
+        const solutionEntry1 = {
+          id: 'kibana',
+          title: 'Kibana',
+          description: 'Visualize & analyze',
+          icon: 'logoKibana',
+          path: 'kibana_landing_page',
+          order: 1,
+        };
+        const solutionEntry2 = {
+          id: 'solution-2',
+          title: 'Solution two',
+          description: 'Description about solution two',
+          icon: 'empty',
+          path: 'path-to-solution-two',
+          order: 2,
+        };
+        const solutionEntry3 = {
+          id: 'solution-3',
+          title: 'Solution three',
+          description: 'Description about solution three',
+          icon: 'empty',
+          path: 'path-to-solution-three',
+          order: 3,
+        };
+        const solutionEntry4 = {
+          id: 'solution-4',
+          title: 'Solution four',
+          description: 'Description about solution four',
+          icon: 'empty',
+          path: 'path-to-solution-four',
+          order: 4,
+        };
+
+        const component = await renderHome({
+          directories: [directoryEntry1, directoryEntry2, directoryEntry3, directoryEntry4],
+          solutions: [solutionEntry1, solutionEntry2, solutionEntry3, solutionEntry4],
+        });
+
+        expect(component).toMatchSnapshot();
+      });
+    });
+
+    describe('add data section', () => {
+      test('should render directory entries in ADD_DATA section', async () => {
+        const component = await renderHome({
+          directories: [
+            {
+              category: 'data',
+              description: 'Ingest data from popular apps and services.',
+              homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
+              icon: 'indexOpen',
+              id: 'home_tutorial_directory',
+              order: 500,
+              path: 'path-to-tutorial-directory',
+              title: 'Ingest data',
+            },
+            {
+              category: 'admin',
+              description: 'Add and manage your fleet of Elastic Agents and integrations.',
+              homePageSection: FeatureCatalogueHomePageSection.ADD_DATA,
+              icon: 'logstashInput',
+              id: 'ingestManager',
+              order: 510,
+              path: 'path-to-ingest-manager',
+              title: 'Add Elastic Agent',
+            },
+          ],
+        });
+
+        expect(component).toMatchSnapshot();
+      });
+    });
+
+    describe('manage data section', () => {
+      test('should render directory entries in MANAGE_DATA section', async () => {
+        const component = await renderHome({
+          directories: [
+            {
+              category: 'admin',
+              description: 'Control who has access and what tasks they can perform.',
+              homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
+              icon: 'securityApp',
+              id: 'security',
+              order: 600,
+              path: 'path-to-security',
+              title: 'Protect your data',
+            },
+            {
+              category: 'admin',
+              description: 'Track the real-time health and performance of your deployment.',
+              homePageSection: FeatureCatalogueHomePageSection.MANAGE_DATA,
+              icon: 'monitoringApp',
+              id: 'monitoring',
+              order: 610,
+              path: 'path-to-monitoring',
+              title: 'Monitor the stack',
+            },
+          ],
+        });
+
+        expect(component).toMatchSnapshot();
+      });
+    });
+  });
+
+  describe('change home route', () => {
+    test('should render a link to change the default route in advanced settings if advanced settings is enabled', async () => {
+      const component = await renderHome({
+        directories: [
+          {
+            description: 'Change your settings',
+            icon: 'gear',
+            id: 'advanced_settings',
+            path: 'path-to-advanced_settings',
+            title: 'Advanced settings',
+          },
+        ],
       });
 
       expect(component).toMatchSnapshot();

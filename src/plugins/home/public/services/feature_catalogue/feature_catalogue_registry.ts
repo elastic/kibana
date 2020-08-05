@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Capabilities, AppCategory } from 'src/core/public';
+import { Capabilities } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 
 /** @public */

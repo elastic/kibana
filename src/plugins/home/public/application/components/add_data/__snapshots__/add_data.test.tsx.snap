@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddData render 1`] = `
+<div
+  className="homAddData"
+>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={1}
+    >
+      <EuiTitle
+        size="s"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Add your data"
+            id="home.addData.sectionTitle"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        flush="right"
+        href="#/tutorial_directory/sampleData"
+        iconType="tableDensityExpanded"
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Try our sample data"
+          id="home.addData.sampleDataButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <EuiFlexGroup
+    justifyContent="spaceAround"
+  >
+    <EuiFlexItem
+      className="homHome__synopsisItem"
+      key="home_tutorial_directory"
+    >
+      <Synopsis
+        description="Ingest data from popular apps and services."
+        iconType="indexOpen"
+        isBeta={false}
+        onClick={[Function]}
+        title="Ingest data"
+        url="/app/home#/tutorial_directory"
+        wrapInPanel={true}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homHome__synopsisItem"
+      key="ingestManager"
+    >
+      <Synopsis
+        description="Add and manage your fleet of Elastic Agents and integrations."
+        iconType="logstashInput"
+        isBeta={false}
+        onClick={[Function]}
+        title="Add Elastic Agent"
+        url="/app/ingestManager"
+        wrapInPanel={true}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="homHome__synopsisItem"
+      key="ml_file_data_visualizer"
+    >
+      <Synopsis
+        description="Import your own CSV, NDJSON, or log file"
+        iconType="importAction"
+        isBeta={false}
+        onClick={[Function]}
+        title="Upload a file"
+        url="/app/ml#/filedatavisualizer"
+        wrapInPanel={true}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

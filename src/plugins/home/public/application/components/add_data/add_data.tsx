@@ -20,12 +20,16 @@
 import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FeatureCatalogueEntry } from '../../services';
+import { createAppNavigationHandler } from '../app_navigation_handler';
+import { Synopsis } from '../synopsis';
 
 interface Props {
-  cards?: JSX.Element[];
+  addBasePath: (path: string) => string;
+  features: FeatureCatalogueEntry[];
 }
 
-export const AddData: FC<Props> = ({ sampleData, cards }) => (
+export const AddData: FC<Props> = ({ addBasePath, features }) => (
   <div className="homAddData">
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
       <EuiFlexItem grow={1}>
@@ -52,6 +56,19 @@ export const AddData: FC<Props> = ({ sampleData, cards }) => (
 
     <EuiSpacer />
 
-    <EuiFlexGroup justifyContent="spaceAround">{cards}</EuiFlexGroup>
+    <EuiFlexGroup justifyContent="spaceAround">
+      {features.map((feature) => (
+        <EuiFlexItem className="homHome__synopsisItem" key={feature.id}>
+          <Synopsis
+            onClick={createAppNavigationHandler(feature.path)}
+            description={feature.description}
+            iconType={feature.icon}
+            title={feature.title}
+            url={addBasePath(feature.path)}
+            wrapInPanel
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   </div>
 );
