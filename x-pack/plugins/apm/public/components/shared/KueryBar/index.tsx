@@ -4,24 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { uniqueId, startsWith } from 'lodash';
-import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-// @ts-expect-error
-import { Typeahead } from './Typeahead';
-import { getBoolFilter } from './get_bool_filter';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import { startsWith, uniqueId } from 'lodash';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import {
-  QuerySuggestion,
   esKuery,
   IIndexPattern,
+  QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { getBoolFilter } from './get_bool_filter';
+// @ts-expect-error
+import { Typeahead } from './Typeahead';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -38,6 +38,7 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 export function KueryBar() {
+  const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],
     isLoadingSuggestions: false,

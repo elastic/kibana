@@ -5,31 +5,32 @@
  */
 
 import { ApmRoute } from '@elastic/apm-rum-react';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
-import { ApmPluginSetupDeps } from '../plugin';
+import 'react-vis/dist/style.css';
+import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { ConfigSchema } from '../';
+import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+  useUiSetting$,
+} from '../../../../../src/plugins/kibana_react/public';
+import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
+import { routes } from '../components/app/Main/route_config';
+import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LocationProvider } from '../context/LocationContext';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
-import {
-  KibanaContextProvider,
-  useUiSetting$,
-} from '../../../../../src/plugins/kibana_react/public';
+import { ApmPluginSetupDeps } from '../plugin';
 import { px, units } from '../style/variables';
-import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { routes } from '../components/app/Main/route_config';
-import { ConfigSchema } from '..';
-import 'react-vis/dist/style.css';
 
 const MainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -79,36 +80,38 @@ function ApmAppRoot({
     plugins,
   };
   return (
-    <ApmPluginContext.Provider value={apmPluginContextValue}>
-      <AlertsContextProvider
-        value={{
-          http: core.http,
-          docLinks: core.docLinks,
-          capabilities: core.application.capabilities,
-          toastNotifications: core.notifications.toasts,
-          actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
-        }}
-      >
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <i18nCore.Context>
-            <Router history={history}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
-            </Router>
-          </i18nCore.Context>
-        </KibanaContextProvider>
-      </AlertsContextProvider>
-    </ApmPluginContext.Provider>
+    <RedirectAppLinks application={core.application}>
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <AlertsContextProvider
+          value={{
+            http: core.http,
+            docLinks: core.docLinks,
+            capabilities: core.application.capabilities,
+            toastNotifications: core.notifications.toasts,
+            actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
+            alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
+          }}
+        >
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <i18nCore.Context>
+              <Router history={history}>
+                <LocationProvider>
+                  <MatchedRouteProvider routes={routes}>
+                    <UrlParamsProvider>
+                      <LoadingIndicatorProvider>
+                        <LicenseProvider>
+                          <App />
+                        </LicenseProvider>
+                      </LoadingIndicatorProvider>
+                    </UrlParamsProvider>
+                  </MatchedRouteProvider>
+                </LocationProvider>
+              </Router>
+            </i18nCore.Context>
+          </KibanaContextProvider>
+        </AlertsContextProvider>
+      </ApmPluginContext.Provider>
+    </RedirectAppLinks>
   );
 }
 

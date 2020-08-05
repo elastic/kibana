@@ -35,7 +35,10 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
           text: value,
           href: isLastBreadcrumbItem
             ? undefined // makes the breadcrumb item not clickable
-            : getAPMHref(match.url, this.props.location.search),
+            : getAPMHref(
+                this.props.core.http.basePath.prepend(`/app/apm${match.url}`),
+                this.props.location.search
+              ),
         };
       }
     );

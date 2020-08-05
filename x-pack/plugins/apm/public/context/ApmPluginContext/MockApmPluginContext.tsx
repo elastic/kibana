@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { ReactNode } from 'react';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
@@ -36,6 +36,7 @@ const uiSettings: Record<string, unknown> = {
 const mockCore = {
   application: {
     capabilities: {},
+    currentAppId$: new Observable(),
   },
   chrome: {
     docTitle: { change: () => {} },

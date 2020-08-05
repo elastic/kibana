@@ -4,30 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
+  fireEvent,
+  getByDisplayValue,
+  getByText,
+  queryByDisplayValue,
   queryByLabelText,
   render,
-  getByText,
-  getByDisplayValue,
-  queryByDisplayValue,
-  fireEvent,
 } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { omit } from 'lodash';
-import { history } from '../../../../utils/history';
-import { TransactionOverview } from '..';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
-import * as useFetcherHook from '../../../../hooks/useFetcher';
-import { fromQuery } from '../../../shared/Links/url_helpers';
+import React from 'react';
 import { Router } from 'react-router-dom';
-import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
+import { TransactionOverview } from '..';
 import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import * as useFetcherHook from '../../../../hooks/useFetcher';
+import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
+import { fromQuery } from '../../../shared/Links/url_helpers';
 
+const history = createMemoryHistory();
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-jest.mock('ui/new_platform');
 function setup({
   urlParams,
   serviceTransactionTypes,

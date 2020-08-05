@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Location } from 'history';
+import { History, Location } from 'history';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -13,7 +14,13 @@ interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   location: Location;
-  toggleFlyout: ({ location }: { location: Location }) => void;
+  toggleFlyout: ({
+    history,
+    location,
+  }: {
+    history: History;
+    location: Location;
+  }) => void;
 }
 
 export function WaterfallFlyout({
@@ -22,6 +29,7 @@ export function WaterfallFlyout({
   location,
   toggleFlyout,
 }: Props) {
+  const history = useHistory();
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );
@@ -42,14 +50,14 @@ export function WaterfallFlyout({
           totalDuration={waterfall.duration}
           span={currentItem.doc}
           parentTransaction={parentTransaction}
-          onClose={() => toggleFlyout({ location })}
+          onClose={() => toggleFlyout({ history, location })}
         />
       );
     case 'transaction':
       return (
         <TransactionFlyout
           transaction={currentItem.doc}
-          onClose={() => toggleFlyout({ location })}
+          onClose={() => toggleFlyout({ history, location })}
           rootTransactionDuration={
             waterfall.rootTransaction?.transaction.duration.us
           }

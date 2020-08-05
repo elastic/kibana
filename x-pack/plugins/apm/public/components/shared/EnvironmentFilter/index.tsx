@@ -6,18 +6,20 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { History } from 'history';
 import React from 'react';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { history } from '../../../utils/history';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { useHistory } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
+import { ALL_OPTION, useEnvironments } from '../../../hooks/useEnvironments';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
+  history: History,
   location: ReturnType<typeof useLocation>,
   environment?: string
 ) {
@@ -66,6 +68,7 @@ function getOptions(environments: string[]) {
 }
 
 export function EnvironmentFilter() {
+  const history = useHistory();
   const location = useLocation();
   const { uiFilters, urlParams } = useUrlParams();
 
@@ -85,7 +88,7 @@ export function EnvironmentFilter() {
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL}
       onChange={(event) => {
-        updateEnvironmentUrl(location, event.target.value);
+        updateEnvironmentUrl(history, location, event.target.value);
       }}
       isLoading={status === 'loading'}
     />

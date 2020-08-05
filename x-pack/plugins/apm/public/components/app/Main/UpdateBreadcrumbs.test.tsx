@@ -64,22 +64,22 @@ describe('UpdateBreadcrumbs', () => {
       {
         text: 'APM',
         href:
-          '#/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+          '/basepath/app/apm/?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
       },
       {
         text: 'Services',
         href:
-          '#/services?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+          '/basepath/app/apm/services?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
       },
       {
         text: 'opbeans-node',
         href:
-          '#/services/opbeans-node?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+          '/basepath/app/apm/services/opbeans-node?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
       },
       {
         text: 'Errors',
         href:
-          '#/services/opbeans-node/errors?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
+          '/basepath/app/apm/services/opbeans-node/errors?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0',
       },
       { text: 'myGroupId', href: undefined },
     ]);
@@ -96,9 +96,12 @@ describe('UpdateBreadcrumbs', () => {
     mountBreadcrumb('/services/opbeans-node/errors');
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
     expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      { text: 'APM', href: '/basepath/app/apm/?kuery=myKuery' },
+      { text: 'Services', href: '/basepath/app/apm/services?kuery=myKuery' },
+      {
+        text: 'opbeans-node',
+        href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+      },
       { text: 'Errors', href: undefined },
     ]);
     expect(changeTitle).toHaveBeenCalledWith([
@@ -113,9 +116,12 @@ describe('UpdateBreadcrumbs', () => {
     mountBreadcrumb('/services/opbeans-node/transactions');
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
     expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      { text: 'APM', href: '/basepath/app/apm/?kuery=myKuery' },
+      { text: 'Services', href: '/basepath/app/apm/services?kuery=myKuery' },
+      {
+        text: 'opbeans-node',
+        href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+      },
       { text: 'Transactions', href: undefined },
     ]);
     expect(changeTitle).toHaveBeenCalledWith([
@@ -133,12 +139,16 @@ describe('UpdateBreadcrumbs', () => {
     );
     const breadcrumbs = setBreadcrumbs.mock.calls[0][0];
     expect(breadcrumbs).toEqual([
-      { text: 'APM', href: '#/?kuery=myKuery' },
-      { text: 'Services', href: '#/services?kuery=myKuery' },
-      { text: 'opbeans-node', href: '#/services/opbeans-node?kuery=myKuery' },
+      { text: 'APM', href: '/basepath/app/apm/?kuery=myKuery' },
+      { text: 'Services', href: '/basepath/app/apm/services?kuery=myKuery' },
+      {
+        text: 'opbeans-node',
+        href: '/basepath/app/apm/services/opbeans-node?kuery=myKuery',
+      },
       {
         text: 'Transactions',
-        href: '#/services/opbeans-node/transactions?kuery=myKuery',
+        href:
+          '/basepath/app/apm/services/opbeans-node/transactions?kuery=myKuery',
       },
       { text: 'my-transaction-name', href: undefined },
     ]);

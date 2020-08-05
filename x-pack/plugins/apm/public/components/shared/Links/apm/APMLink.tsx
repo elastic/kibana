@@ -5,11 +5,12 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { pick } from 'lodash';
 import React from 'react';
 import url from 'url';
-import { pick } from 'lodash';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { useLocation } from '../../../../hooks/useLocation';
-import { APMQueryParams, toQuery, fromQuery } from '../url_helpers';
+import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
@@ -41,13 +42,19 @@ export function getAPMHref(
   const nextSearch = fromQuery(nextQuery);
 
   return url.format({
-    pathname: '',
-    hash: `${path}?${nextSearch}`,
+    pathname: path,
+    search: nextSearch,
   });
 }
 
 export function APMLink({ path = '', query, ...rest }: Props) {
+  const { core } = useApmPluginContext();
   const { search } = useLocation();
-  const href = getAPMHref(path, search, query);
+  const href = getAPMHref(
+    core.http.basePath.prepend(`/app/apm${path}`),
+    search,
+    query
+  );
+
   return <EuiLink {...rest} href={href} />;
 }

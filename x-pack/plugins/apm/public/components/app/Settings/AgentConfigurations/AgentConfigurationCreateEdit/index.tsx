@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
-import React, { useState, useEffect, useCallback } from 'react';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FetcherResult } from '../../../../../hooks/useFetcher';
-import { history } from '../../../../../utils/history';
+import { History } from 'history';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-  AgentConfigurationIntake,
   AgentConfiguration,
+  AgentConfigurationIntake,
 } from '../../../../../../common/agent_configuration/configuration_types';
+import { FetcherResult } from '../../../../../hooks/useFetcher';
+import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 import { ServicePage } from './ServicePage/ServicePage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
-import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 type PageStep = 'choose-service-step' | 'choose-settings-step' | 'review-step';
 
@@ -30,7 +31,7 @@ function getInitialNewConfig(
   };
 }
 
-function setPage(pageStep: PageStep) {
+function setPage(pageStep: PageStep, history: History) {
   history.push({
     ...history.location,
     search: fromQuery({
@@ -68,6 +69,7 @@ export function AgentConfigurationCreateEdit({
   pageStep: PageStep;
   existingConfigResult?: FetcherResult<AgentConfiguration>;
 }) {
+  const history = useHistory();
   const existingConfig = existingConfigResult?.data;
   const isEditMode = Boolean(existingConfigResult);
   const [newConfig, setNewConfig] = useState<AgentConfigurationIntake>(
@@ -90,7 +92,7 @@ export function AgentConfigurationCreateEdit({
   useEffect(() => {
     // the user tried to edit the service of an existing config
     if (pageStep === 'choose-service-step' && isEditMode) {
-      setPage('choose-settings-step');
+      setPage('choose-settings-step', history);
     }
 
     // the user skipped the first step (select service)
@@ -99,9 +101,9 @@ export function AgentConfigurationCreateEdit({
       !isEditMode &&
       isEmpty(newConfig.service)
     ) {
-      setPage('choose-service-step');
+      setPage('choose-service-step', history);
     }
-  }, [isEditMode, newConfig, pageStep]);
+  }, [history, isEditMode, newConfig, pageStep]);
 
   const unsavedChanges = getUnsavedChanges({ newConfig, existingConfig });
 
@@ -135,7 +137,7 @@ export function AgentConfigurationCreateEdit({
           setNewConfig={setNewConfig}
           onClickNext={() => {
             resetSettings();
-            setPage('choose-settings-step');
+            setPage('choose-settings-step', history);
           }}
         />
       )}
@@ -144,7 +146,7 @@ export function AgentConfigurationCreateEdit({
         <SettingsPage
           status={existingConfigResult?.status}
           unsavedChanges={unsavedChanges}
-          onClickEdit={() => setPage('choose-service-step')}
+          onClickEdit={() => setPage('choose-service-step', history)}
           newConfig={newConfig}
           setNewConfig={setNewConfig}
           resetSettings={resetSettings}

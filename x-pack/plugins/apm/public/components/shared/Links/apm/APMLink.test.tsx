@@ -19,7 +19,7 @@ test('APMLink should produce the correct URL', async () => {
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"#/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+    `"/basepath/app/apm/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
   );
 });
 
@@ -33,7 +33,7 @@ test('APMLink should retain current kuery value if it exists', async () => {
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"#/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+    `"/basepath/app/apm/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
   );
 });
 
@@ -52,6 +52,6 @@ test('APMLink should overwrite current kuery value if new kuery value is provide
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"#/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`
+    `"/basepath/app/apm/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`
   );
 });
