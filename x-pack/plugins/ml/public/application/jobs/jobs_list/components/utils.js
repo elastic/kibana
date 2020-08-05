@@ -379,7 +379,7 @@ export function getSelectedIdFromUrl(url) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
 
-      result.ids = isGroup ? decodedJson.groupIds : [decodedJson.jobId];
+      result.ids = isGroup ? decodedJson.groupIds : decodedJson.jobId;
       result.isGroup = isGroup;
     }
   }

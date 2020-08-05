@@ -19,7 +19,7 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl } from '../../../../../util/get_job_id_url';
+import { getSelectedIdsUrl } from '../../../../../util/get_selected_ids_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
@@ -137,7 +137,7 @@ export const progressColumn = {
 };
 
 export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+  <EuiLink href={getSelectedIdsUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
 );
 
 export const useColumns = (
