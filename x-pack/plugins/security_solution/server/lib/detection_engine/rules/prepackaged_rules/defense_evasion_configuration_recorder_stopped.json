@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS Configuration Recorder Stopped",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:StopConfigurationRecorder and event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/configservice/stop-configuration-recorder.html",
@@ -24,7 +25,10 @@
   "severity": "high",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Monitoring",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

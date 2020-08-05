@@ -7,13 +7,13 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
-import { NonEmptyStringArray, NonEmptyStringArrayEncoded } from './non_empty_string_array';
+import { NonEmptyStringArray } from './non_empty_string_array';
 
 describe('non_empty_string_array', () => {
-  test('it should NOT validate "null"', () => {
-    const payload: NonEmptyStringArrayEncoded | null = null;
+  test('it should FAIL validation when given "null"', () => {
+    const payload: NonEmptyStringArray | null = null;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -23,8 +23,8 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "undefined"', () => {
-    const payload: NonEmptyStringArrayEncoded | undefined = undefined;
+  test('it should FAIL validation when given "undefined"', () => {
+    const payload: NonEmptyStringArray | undefined = undefined;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -34,8 +34,8 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate a single value of an empty string ""', () => {
-    const payload: NonEmptyStringArrayEncoded = '';
+  test('it should FAIL validation of single value of an empty string ""', () => {
+    const payload: NonEmptyStringArray = '';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -46,7 +46,7 @@ describe('non_empty_string_array', () => {
   });
 
   test('it should validate a single value of "a" into an array of size 1 of ["a"]', () => {
-    const payload: NonEmptyStringArrayEncoded = 'a';
+    const payload: NonEmptyStringArray = 'a';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -55,7 +55,7 @@ describe('non_empty_string_array', () => {
   });
 
   test('it should validate 2 values of "a,b" into an array of size 2 of ["a", "b"]', () => {
-    const payload: NonEmptyStringArrayEncoded = 'a,b';
+    const payload: NonEmptyStringArray = 'a,b';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -64,7 +64,7 @@ describe('non_empty_string_array', () => {
   });
 
   test('it should validate 3 values of "a,b,c" into an array of size 3 of ["a", "b", "c"]', () => {
-    const payload: NonEmptyStringArrayEncoded = 'a,b,c';
+    const payload: NonEmptyStringArray = 'a,b,c';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -72,7 +72,7 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual(['a', 'b', 'c']);
   });
 
-  test('it should NOT validate a number', () => {
+  test('it should FAIL validation of number', () => {
     const payload: number = 5;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -84,7 +84,7 @@ describe('non_empty_string_array', () => {
   });
 
   test('it should validate 3 values of "   a,   b,    c  " into an array of size 3 of ["a", "b", "c"] even though they have spaces', () => {
-    const payload: NonEmptyStringArrayEncoded = '   a,   b,    c  ';
+    const payload: NonEmptyStringArray = '   a,   b,    c  ';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 

@@ -199,7 +199,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     // },
 
     async assertDestIndexInputExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlAnalyticsCreateJobFlyoutDestinationIndexInput');
+      });
     },
 
     async assertDestIndexValue(expectedValue: string) {
@@ -333,18 +335,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToAdditionalOptionsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertAdditionalOptionsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertAdditionalOptionsStepActive();
+      });
     },
 
     async continueToDetailsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertDetailsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertDetailsStepActive();
+      });
     },
 
     async continueToCreateStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertCreateStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertCreateStepActive();
+      });
     },
 
     async assertModelMemoryInputExists() {
@@ -415,6 +423,35 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         expectedCheckState,
         `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertDestIndexSameAsIdSwitchExists() {
+      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch`, {
+        allowHidden: true,
+      });
+    },
+
+    async setDestIndexSameAsIdCheckState(checkState: boolean) {
+      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
+      }
+      await this.assertDestIndexSameAsIdCheckState(checkState);
     },
 
     async setCreateIndexPatternSwitchState(checkState: boolean) {

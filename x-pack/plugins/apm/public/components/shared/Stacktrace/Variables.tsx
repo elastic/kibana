@@ -23,7 +23,7 @@ interface Props {
   vars: IStackframe['vars'];
 }
 
-export const Variables = ({ vars }: Props) => {
+export function Variables({ vars }: Props) {
   if (!vars) {
     return null;
   }
@@ -46,4 +46,4 @@ export const Variables = ({ vars }: Props) => {
       </VariablesContainer>
     </React.Fragment>
   );
-};
+}

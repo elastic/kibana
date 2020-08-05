@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { EmptyStringArray, EmptyStringArrayEncoded } from './empty_string_array';
 
@@ -57,7 +57,7 @@ describe('empty_string_array', () => {
     expect(message.schema).toEqual(['a', 'b', 'c']);
   });
 
-  test('it should NOT validate a number', () => {
+  test('it should FAIL validation of number', () => {
     const payload: number = 5;
     const decoded = EmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
