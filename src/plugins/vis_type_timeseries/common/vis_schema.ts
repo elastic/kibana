@@ -233,6 +233,7 @@ export const panel = schema.object({
   legend_position: stringOptionalNullable,
   markdown: stringOptionalNullable,
   markdown_scrollbars: numberIntegerOptional,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   markdown_openLinksInNewTab: numberIntegerOptional,
   markdown_vertical_align: stringOptionalNullable,
   markdown_less: stringOptionalNullable,

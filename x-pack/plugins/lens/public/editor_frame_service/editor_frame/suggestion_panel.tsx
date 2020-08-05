@@ -71,6 +71,7 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -123,6 +124,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <EuiPanelFixed
         className={classNames('lnsSuggestionPanel__button', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'lnsSuggestionPanel__button-isSelected': selected,
         })}
         paddingSize="none"

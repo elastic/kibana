@@ -46,6 +46,7 @@ interface ReindexFlyoutState {
   currentFlyoutStep: ReindexFlyoutStep;
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const getOpenAndCloseIndexDocLink = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => (
   <EuiLink
     target="_blank"
