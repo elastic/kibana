@@ -7,12 +7,10 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
-import { MlApi } from './api';
 
 export function MachineLearningDataFrameAnalyticsEditProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon,
-  mlApi: MlApi
+  mlCommon: MlCommon
 ) {
   const testSubjects = getService('testSubjects');
 

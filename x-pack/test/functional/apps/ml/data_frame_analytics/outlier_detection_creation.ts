@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
 
-        it('displays details for the created job in the analytics table', async () => {
+        it('displays details for the edited job in the analytics table', async () => {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: editedDescription,

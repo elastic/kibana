@@ -48,11 +48,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     common,
     api
   );
-  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(
-    context,
-    common,
-    api
-  );
+  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, common);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, common);
