@@ -65,7 +65,7 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
       return retry.tryForTime(
         60 * 1000,
         async () => {
-          await testSubjects.existOrFail('uptimePingListExpandBtn');
+          await testSubjects.existOrFail('uptimePingListExpandBtn', { timeout: 1000 });
           await testSubjects.click('uptimePingListExpandBtn');
         },
         async () => {

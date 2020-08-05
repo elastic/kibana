@@ -7,6 +7,8 @@
 import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage, header } = getPageObjects(['uptime', 'header']);
   const uptime = getService('uptime');
@@ -48,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         'up'
       );
+      await delay(1000);
     });
 
     it('loads and goes to details page', async () => {
