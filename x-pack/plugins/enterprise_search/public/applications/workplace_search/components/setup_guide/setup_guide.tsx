@@ -9,8 +9,8 @@ import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
-
 import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import GettingStarted from '../../assets/getting_started.png';
@@ -21,9 +21,7 @@ const GETTING_STARTED_LINK_URL =
 export const SetupGuide: React.FC = () => {
   return (
     <SetupGuideLayout
-      productName={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
-        defaultMessage: 'Workplace Search',
-      })}
+      productName={WORKPLACE_SEARCH_PLUGIN.NAME}
       productEuiIcon="logoWorkplaceSearch"
       standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
