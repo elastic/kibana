@@ -250,13 +250,13 @@ describe('#stop()', () => {
     legacyPlatform.stop();
     expect(targetDomElement).toMatchInlineSnapshot(`
       <div>
-
-
+        
+            
         <h1>
           this should not be removed
         </h1>
-
-
+        
+          
       </div>
     `);
   });
