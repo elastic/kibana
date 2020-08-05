@@ -50,7 +50,7 @@ export interface ApmPluginSetupDeps {
   alerts?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
   observability?: ObservabilityPluginSetup;
@@ -75,9 +75,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
-    // TODO: Can this be removed now with homepage redesign work, or would it be a breaking change? APM is no longer displayed on the new home page design
-    pluginSetupDeps.home.environment.update({ apmUi: true });
-    pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    if (pluginSetupDeps.home) {
+      // TODO: Can this be removed now with homepage redesign work, or would it be a breaking change? APM is no longer displayed on the new home page design
+      pluginSetupDeps.home.environment.update({ apmUi: true });
+      pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
+    }
 
     if (plugins.observability) {
       plugins.observability.dashboard.register({

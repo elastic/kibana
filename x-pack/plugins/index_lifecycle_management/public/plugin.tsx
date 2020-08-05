@@ -51,7 +51,7 @@ export class IndexLifecycleManagementPlugin {
             chrome: { docTitle },
             i18n: { Context: I18nContext },
             docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-            application: { navigateToApp },
+            application: { navigateToApp, getUrlForApp },
           } = coreStart;
 
           docTitle.change(PLUGIN.TITLE);
@@ -62,7 +62,14 @@ export class IndexLifecycleManagementPlugin {
           );
 
           const { renderApp } = await import('./application');
-          const unmountAppCallback = renderApp(element, I18nContext, history, navigateToApp);
+
+          const unmountAppCallback = renderApp(
+            element,
+            I18nContext,
+            history,
+            navigateToApp,
+            getUrlForApp
+          );
 
           return () => {
             docTitle.reset();

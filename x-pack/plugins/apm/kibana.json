@@ -6,7 +6,6 @@
     "features",
     "apmOss",
     "data",
-    "home",
     "licensing",
     "triggers_actions_ui"
   ],
@@ -18,7 +17,8 @@
     "alerts",
     "observability",
     "security",
-    "ml"
+    "ml",
+    "home"
   ],
   "server": true,
   "ui": true,
@@ -32,6 +32,7 @@
   "requiredBundles": [
     "kibanaReact",
     "kibanaUtils",
-    "observability"
+    "observability",
+    "home"
   ]
 }

@@ -24,18 +24,20 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
     { http, getStartServices }: CoreSetup,
     { devTools, home, licensing }: AppPublicPluginDependencies
   ) {
-    home.featureCatalogue.register({
-      id: PLUGIN.id,
-      title: i18n.translate('xpack.searchProfiler.registryProviderTitle', {
-        defaultMessage: 'Search Profiler',
-      }),
-      description: i18n.translate('xpack.searchProfiler.registryProviderDescription', {
-        defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
-      }),
-      icon: 'searchProfilerApp',
-      path: '/app/dev_tools#/searchprofiler',
-      category: FeatureCatalogueCategory.ADMIN,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: PLUGIN.id,
+        title: i18n.translate('xpack.searchProfiler.registryProviderTitle', {
+          defaultMessage: 'Search Profiler',
+        }),
+        description: i18n.translate('xpack.searchProfiler.registryProviderDescription', {
+          defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
+        }),
+        icon: 'searchProfilerApp',
+        path: '/app/dev_tools#/searchprofiler',
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
 
     const devTool = devTools.register({
       id: 'searchprofiler',

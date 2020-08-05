@@ -16,21 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { FC, Fragment } from 'react';
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { FC } from 'react';
+import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FeatureCatalogueEntry } from '../../services';
+import { createAppNavigationHandler } from '../app_navigation_handler';
+import { Synopsis } from '../synopsis';
 
 interface Props {
-  cards: JSX.element[];
+  addBasePath: (path: string) => string;
+  features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ cards }) => (
-  <Fragment>
-    {cards.length > 1 ? (
-      <Fragment>
+export const ManageData: FC<Props> = ({ addBasePath, features }) => (
+  <>
+    {features.length > 1 ? (
+      <>
         <EuiHorizontalRule margin="xl" />
         <EuiSpacer size="s" />
-      </Fragment>
+      </>
     ) : null}
 
     <div className="homManageData">
@@ -43,8 +47,19 @@ export const ManageData: FC<Props> = ({ cards }) => (
       <EuiSpacer />
 
       <EuiFlexGroup className="homManageData__container" justifyContent="spaceAround" wrap>
-        {cards}
+        {features.map((feature) => (
+          <EuiFlexItem className="homHome__synopsisItem" key={feature.id}>
+            <Synopsis
+              onClick={createAppNavigationHandler(feature.path)}
+              description={feature.description}
+              iconType={feature.icon}
+              title={feature.title}
+              url={addBasePath(feature.path)}
+              wrapInPanel
+            />
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
     </div>
-  </Fragment>
+  </>
 );

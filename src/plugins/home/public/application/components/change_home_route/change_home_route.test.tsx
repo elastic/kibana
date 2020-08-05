@@ -17,12 +17,12 @@
  * under the License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeHomeRoute } from './change_home_route';
 
 describe('ChangeHomeRoute', () => {
   test('render', () => {
-    const component = shallow(<ChangeHomeRoute />);
+    const component = shallowWithIntl(<ChangeHomeRoute />);
     expect(component).toMatchSnapshot();
   });
 });

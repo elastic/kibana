@@ -3,64 +3,37 @@
 exports[`ChangeHomeRoute render 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  className="homPageFooter"
+  className="homPageFooter__mainAction"
   gutterSize="s"
-  justifyContent="spaceBetween"
+  responsive={false}
 >
   <EuiFlexItem
-    grow={1}
+    grow={false}
   >
-    <EuiFlexGroup
-      alignItems="center"
-      className="homPageFooter__mainAction"
-      gutterSize="s"
-      responsive={false}
+    <EuiText
+      color="subdued"
+      size="s"
     >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiText
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Would you prefer an alternate landing page? "
-              id="home.changeHomeRouteText"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButtonEmpty
-          iconType="home"
-          onClick={[Function]}
-          size="xs"
-        >
-          <FormattedMessage
-            defaultMessage="Change the landing page for this space"
-            id="home.changeHomeRouteLink"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <p>
+        <FormattedMessage
+          defaultMessage="Would you prefer an alternate landing page? "
+          id="home.changeHomeRouteText"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
     grow={false}
   >
     <EuiButtonEmpty
-      flush="right"
-      href="#/feature_directory"
-      iconType="apps"
+      iconType="home"
+      onClick={[Function]}
       size="xs"
     >
       <FormattedMessage
-        defaultMessage="View app directory"
-        id="home.appDirectory.appDirectoryButtonLabel"
+        defaultMessage="Change the landing page for this space"
+        id="home.changeHomeRouteLink"
         values={Object {}}
       />
     </EuiButtonEmpty>

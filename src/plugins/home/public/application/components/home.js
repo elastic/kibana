@@ -35,8 +35,7 @@ import { AddData } from './add_data';
 import { createAppNavigationHandler } from './app_navigation_handler';
 import { ChangeHomeRoute } from './change_home_route';
 import { ManageData } from './manage_data';
-import { SolutionsSection } from './solutions_section';
-import { Synopsis } from './synopsis';
+import { SolutionsPanel } from './solutions_panel';
 import { Welcome } from './welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -118,25 +117,10 @@ export class Home extends Component {
 
   findDirectoryById = (id) => this.props.directories.find((directory) => directory.id === id);
 
-  renderFeatureCard = (directory) =>
-    directory ? (
-      <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
-        <Synopsis
-          onClick={createAppNavigationHandler(directory.path)}
-          description={directory.description}
-          iconType={directory.icon}
-          title={directory.title}
-          url={this.props.addBasePath(directory.path)}
-          wrapInPanel
-        />
-      </EuiFlexItem>
-    ) : null;
-
-  renderFeatureCardsBySection = (section) =>
+  getFeaturesBySection = (section) =>
     this.props.directories
       .filter((directory) => directory.homePageSection === section)
-      .sort((directoryA, directoryB) => directoryA.order - directoryB.order)
-      .map(this.renderFeatureCard);
+      .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
     const { addBasePath, directories, solutions } = this.props;
@@ -145,16 +129,14 @@ export class Home extends Component {
     const stackManagement = this.findDirectoryById('stack-management');
     const advancedSettings = this.findDirectoryById('advanced_settings');
 
-    const addDataFeatureCards = this.renderFeatureCardsBySection(
-      FeatureCatalogueHomePageSection.ADD_DATA
-    );
-    const manageDataFeatureCards = this.renderFeatureCardsBySection(
+    const addDataFeatures = this.getFeaturesBySection(FeatureCatalogueHomePageSection.ADD_DATA);
+    const manageDataFeatures = this.getFeaturesBySection(
       FeatureCatalogueHomePageSection.MANAGE_DATA
     );
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
-    if (manageDataFeatureCards.length < 1 && devTools) {
-      manageDataFeatureCards.push(this.renderFeatureCard(devTools));
+    if (manageDataFeatures.length < 1 && devTools) {
+      manageDataFeatures.push(this.renderFeatureCard(devTools));
     }
 
     return (
@@ -213,26 +195,26 @@ export class Home extends Component {
         </div>
         <div className="homPageMainContainer">
           <main className="homPageMain" data-test-subj="homeApp">
-            <SolutionsSection
+            <SolutionsPanel
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}
             />
 
             {/* If there is only one card in each add and manage data section, this displays the two sections side by side */}
-            {addDataFeatureCards.length === 1 && manageDataFeatureCards.length === 1 ? (
+            {addDataFeatures.length === 1 && manageDataFeatures.length === 1 ? (
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <AddData cards={addDataFeatureCards} />
+                  <AddData addBasePath={addBasePath} features={addDataFeatures} />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <ManageData cards={manageDataFeatureCards} />
+                  <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
               <Fragment>
-                <AddData cards={addDataFeatureCards} />
-                <ManageData cards={manageDataFeatureCards} />
+                <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
               </Fragment>
             )}
 

@@ -26,7 +26,7 @@ export interface ObservabilityPluginSetup {
 }
 
 interface SetupPlugins {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export type ObservabilityPluginStart = void;

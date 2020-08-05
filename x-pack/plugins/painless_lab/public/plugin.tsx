@@ -31,18 +31,20 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
     { http, getStartServices, uiSettings }: CoreSetup,
     { devTools, home, licensing }: PluginDependencies
   ) {
-    home.featureCatalogue.register({
-      id: PLUGIN.id,
-      title: i18n.translate('xpack.painlessLab.registryProviderTitle', {
-        defaultMessage: 'Painless Lab (beta)',
-      }),
-      description: i18n.translate('xpack.painlessLab.registryProviderDescription', {
-        defaultMessage: 'Simulate and debug painless code.',
-      }),
-      icon: '',
-      path: '/app/dev_tools#/painless_lab',
-      category: FeatureCatalogueCategory.ADMIN,
-    });
+    if (home) {
+      home.featureCatalogue.register({
+        id: PLUGIN.id,
+        title: i18n.translate('xpack.painlessLab.registryProviderTitle', {
+          defaultMessage: 'Painless Lab (beta)',
+        }),
+        description: i18n.translate('xpack.painlessLab.registryProviderDescription', {
+          defaultMessage: 'Simulate and debug painless code.',
+        }),
+        icon: '',
+        path: '/app/dev_tools#/painless_lab',
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
 
     const devTool = devTools.register({
       id: 'painless_lab',

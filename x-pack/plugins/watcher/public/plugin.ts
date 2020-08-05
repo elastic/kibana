@@ -94,7 +94,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       path: '/app/management/insightsAndAlerting/watcher/watches',
     };
 
-    home.featureCatalogue.register(watcherHome);
+    if (home) {
+      home.featureCatalogue.register(watcherHome);
+    }
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
       // NOTE: We enable the plugin by default instead of disabling it by default because this

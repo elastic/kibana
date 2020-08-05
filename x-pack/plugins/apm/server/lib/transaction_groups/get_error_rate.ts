@@ -5,7 +5,6 @@
  */
 import { mean } from 'lodash';
 import {
-  PROCESSOR_EVENT,
   HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -31,7 +30,7 @@ export async function getErrorRate({
   transactionName?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -42,7 +41,6 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     { exists: { field: HTTP_RESPONSE_STATUS_CODE } },
     ...transactionNamefilter,
@@ -51,7 +49,9 @@ export async function getErrorRate({
   ];
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: { bool: { filter } },
@@ -68,7 +68,7 @@ export async function getErrorRate({
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
 
   const noHits = resp.hits.total.value === 0;
 

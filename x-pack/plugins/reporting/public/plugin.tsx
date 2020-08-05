@@ -84,7 +84,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       uiActions,
       share,
     }: {
-      home: HomePublicPluginSetup;
+      home?: HomePublicPluginSetup;
       management: ManagementSetup;
       licensing: LicensingPluginSetup;
       uiActions: UiActionsSetup;
@@ -102,43 +102,45 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
     const apiClient = new ReportingAPIClient(http);
     const action = new GetCsvReportPanelAction(core, license$);
 
-    home.featureCatalogue.register({
-      id: 'reporting',
-      title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
-        defaultMessage: 'Reporting',
-      }),
-      description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
-        defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
-      }),
-      icon: 'reportingApp',
-      path: '/app/management/insightsAndAlerting/reporting',
-      category: FeatureCatalogueCategory.ADMIN,
-    });
-    management.sections.section.insightsAndAlerting.registerApp({
-      id: 'reporting',
-      title: this.title,
-      order: 1,
-      mount: async (params) => {
-        const [start] = await getStartServices();
-        params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        ReactDOM.render(
-          <I18nProvider>
-            <ReportListing
-              toasts={toasts}
-              license$={license$}
-              pollConfig={this.config.poll}
-              redirect={start.application.navigateToApp}
-              apiClient={apiClient}
-            />
-          </I18nProvider>,
-          params.element
-        );
+    if (home) {
+      home.featureCatalogue.register({
+        id: 'reporting',
+        title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
+          defaultMessage: 'Reporting',
+        }),
+        description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
+          defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
+        }),
+        icon: 'reportingApp',
+        path: '/app/management/insightsAndAlerting/reporting',
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+      management.sections.section.insightsAndAlerting.registerApp({
+        id: 'reporting',
+        title: this.title,
+        order: 1,
+        mount: async (params) => {
+          const [start] = await getStartServices();
+          params.setBreadcrumbs([{ text: this.breadcrumbText }]);
+          ReactDOM.render(
+            <I18nProvider>
+              <ReportListing
+                toasts={toasts}
+                license$={license$}
+                pollConfig={this.config.poll}
+                redirect={start.application.navigateToApp}
+                apiClient={apiClient}
+              />
+            </I18nProvider>,
+            params.element
+          );
 
-        return () => {
-          ReactDOM.unmountComponentAtNode(params.element);
-        };
-      },
-    });
+          return () => {
+            ReactDOM.unmountComponentAtNode(params.element);
+          };
+        },
+      });
+    }
 
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 

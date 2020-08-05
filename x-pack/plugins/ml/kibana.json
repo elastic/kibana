@@ -10,7 +10,6 @@
     "data",
     "cloud",
     "features",
-    "home",
     "licensing",
     "usageCollection",
     "share",
@@ -19,6 +18,7 @@
     "kibanaLegacy"
   ],
   "optionalPlugins": [
+    "home",
     "security",
     "spaces",
     "management",
@@ -31,6 +31,7 @@
     "kibanaUtils",
     "kibanaReact",
     "dashboard",
-    "savedObjects"
+    "savedObjects",
+    "home"
   ]
 }

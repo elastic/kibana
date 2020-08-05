@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
+exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
 <div
   className="homPageContainer"
 >
@@ -61,70 +61,67 @@ exports[`home directories should not render directory entry when showOnHomePage 
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={
+          Array [
+            Object {
+              "description": "Change your settings",
+              "icon": "gear",
+              "id": "advanced_settings",
+              "path": "path-to-advanced_settings",
+              "title": "Advanced settings",
+            },
+          ]
+        }
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
+        <EuiFlexItem
+          grow={1}
         >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
-        />
-      </div>
+          <ChangeHomeRoute
+            defaultRoute="/app/home"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
 `;
 
-exports[`home directories should render ADMIN directory entry in "Manage" panel 1`] = `
+exports[`home directories add data section should render directory entries in ADD_DATA section 1`] = `
 <div
   className="homPageContainer"
 >
@@ -185,70 +182,99 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "data",
+              "description": "Ingest data from popular apps and services.",
+              "homePageSection": "add_data",
+              "icon": "indexOpen",
+              "id": "home_tutorial_directory",
+              "order": 500,
+              "path": "path-to-tutorial-directory",
+              "title": "Ingest data",
+            },
+            Object {
+              "category": "admin",
+              "description": "Add and manage your fleet of Elastic Agents and integrations.",
+              "homePageSection": "add_data",
+              "icon": "logstashInput",
+              "id": "ingestManager",
+              "order": 510,
+              "path": "path-to-ingest-manager",
+              "title": "Add Elastic Agent",
+            },
+          ]
+        }
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={
+          Array [
+            Object {
+              "category": "data",
+              "description": "Ingest data from popular apps and services.",
+              "homePageSection": "add_data",
+              "icon": "indexOpen",
+              "id": "home_tutorial_directory",
+              "order": 500,
+              "path": "path-to-tutorial-directory",
+              "title": "Ingest data",
+            },
+            Object {
+              "category": "admin",
+              "description": "Add and manage your fleet of Elastic Agents and integrations.",
+              "homePageSection": "add_data",
+              "icon": "logstashInput",
+              "id": "ingestManager",
+              "order": 510,
+              "path": "path-to-ingest-manager",
+              "title": "Add Elastic Agent",
+            },
+          ]
+        }
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
 `;
 
-exports[`home directories should render DATA directory entry in "Explore Data" panel 1`] = `
+exports[`home directories manage data section should render directory entries in MANAGE_DATA section 1`] = `
 <div
   className="homPageContainer"
 >
@@ -309,64 +335,670 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "admin",
+              "description": "Control who has access and what tasks they can perform.",
+              "homePageSection": "manage_data",
+              "icon": "securityApp",
+              "id": "security",
+              "order": 600,
+              "path": "path-to-security",
+              "title": "Protect your data",
+            },
+            Object {
+              "category": "admin",
+              "description": "Track the real-time health and performance of your deployment.",
+              "homePageSection": "manage_data",
+              "icon": "monitoringApp",
+              "id": "monitoring",
+              "order": 610,
+              "path": "path-to-monitoring",
+              "title": "Monitor the stack",
+            },
+          ]
+        }
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={
+          Array [
+            Object {
+              "category": "admin",
+              "description": "Control who has access and what tasks they can perform.",
+              "homePageSection": "manage_data",
+              "icon": "securityApp",
+              "id": "security",
+              "order": 600,
+              "path": "path-to-security",
+              "title": "Protect your data",
+            },
+            Object {
+              "category": "admin",
+              "description": "Track the real-time health and performance of your deployment.",
+              "homePageSection": "manage_data",
+              "icon": "monitoringApp",
+              "id": "monitoring",
+              "order": 610,
+              "path": "path-to-monitoring",
+              "title": "Monitor the stack",
+            },
+          ]
+        }
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`home directories should not render directory entry if no home page section is specified 1`] = `
+<div
+  className="homPageContainer"
+>
+  <div
+    className="homPageHeaderContainer"
+  >
+    <header
+      className="homPageHeader"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__title"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Welcome to {ELASTIC}!"
+                id="home.pageHeader.welcomeNoUserTitle"
+                values={
+                  Object {
+                    "ELASTIC": "Elastic",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
+          >
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                href="#/tutorial_directory"
+                iconType="plusInCircle"
+              >
+                Add data
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                iconType="gear"
+                onClick={[Function]}
+              >
+                Manage
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
+  </div>
+  <div
+    className="homPageMainContainer"
+  >
+    <main
+      className="homPageMain"
+      data-test-subj="homeApp"
+    >
+      <SolutionsSection
+        addBasePath={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "admin",
+              "description": "Your center console for managing the Elastic Stack.",
+              "icon": "managementApp",
+              "id": "stack-management",
+              "path": "management_landing_page",
+              "title": "Management",
+            },
+          ]
+        }
+      />
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <EuiHorizontalRule
+        margin="xl"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        />
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`home directories solutions section should render the Kibana and other solution cards 1`] = `
+<div
+  className="homPageContainer"
+>
+  <div
+    className="homPageHeaderContainer"
+  >
+    <header
+      className="homPageHeader"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__title"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Welcome to {ELASTIC}!"
+                id="home.pageHeader.welcomeNoUserTitle"
+                values={
+                  Object {
+                    "ELASTIC": "Elastic",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
+          >
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                href="#/tutorial_directory"
+                iconType="plusInCircle"
+              >
+                Add data
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
+  </div>
+  <div
+    className="homPageMainContainer"
+  >
+    <main
+      className="homPageMain"
+      data-test-subj="homeApp"
+    >
+      <SolutionsSection
+        addBasePath={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "data",
+              "description": "Display and share a collection of visualizations and saved searches.",
+              "homePageSection": "solution_panel",
+              "icon": "dashboardApp",
+              "id": "dashboard",
+              "order": 1,
+              "path": "dashboard_landing_page",
+              "solution": "kibana",
+              "title": "Dashboard",
+            },
+            Object {
+              "category": "data",
+              "description": "Description of feature two",
+              "homePageSection": "solution_panel",
+              "icon": "empty",
+              "id": "feature-2",
+              "order": 1,
+              "path": "path-to-feature-two",
+              "solution": "solution-2",
+              "title": "Feature two",
+            },
+            Object {
+              "category": "data",
+              "description": "Description of feature three",
+              "homePageSection": "solution_panel",
+              "icon": "empty",
+              "id": "feature-3",
+              "order": 1,
+              "path": "path-to-feature-three",
+              "solution": "solution-3",
+              "title": "Feature three",
+            },
+            Object {
+              "category": "data",
+              "description": "Description of feature four",
+              "homePageSection": "solution_panel",
+              "icon": "empty",
+              "id": "feature-4",
+              "order": 1,
+              "path": "path-to-feature-four",
+              "solution": "solution-4",
+              "title": "Feature four",
+            },
+          ]
+        }
+        solutions={
+          Array [
+            Object {
+              "description": "Visualize & analyze",
+              "icon": "logoKibana",
+              "id": "kibana",
+              "order": 1,
+              "path": "kibana_landing_page",
+              "title": "Kibana",
+            },
+            Object {
+              "description": "Description about solution two",
+              "icon": "empty",
+              "id": "solution-2",
+              "order": 2,
+              "path": "path-to-solution-two",
+              "title": "Solution two",
+            },
+            Object {
+              "description": "Description about solution three",
+              "icon": "empty",
+              "id": "solution-3",
+              "order": 3,
+              "path": "path-to-solution-three",
+              "title": "Solution three",
+            },
+            Object {
+              "description": "Description about solution four",
+              "icon": "empty",
+              "id": "solution-4",
+              "order": 4,
+              "path": "path-to-solution-four",
+              "title": "Solution four",
+            },
+          ]
+        }
+      />
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <EuiHorizontalRule
+        margin="xl"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        />
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`home directories solutions section should render the Kibana solution card in "solutions" section 1`] = `
+<div
+  className="homPageContainer"
+>
+  <div
+    className="homPageHeaderContainer"
+  >
+    <header
+      className="homPageHeader"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__title"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Welcome to {ELASTIC}!"
+                id="home.pageHeader.welcomeNoUserTitle"
+                values={
+                  Object {
+                    "ELASTIC": "Elastic",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
+          >
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                href="#/tutorial_directory"
+                iconType="plusInCircle"
+              >
+                Add data
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
+  </div>
+  <div
+    className="homPageMainContainer"
+  >
+    <main
+      className="homPageMain"
+      data-test-subj="homeApp"
+    >
+      <SolutionsSection
+        addBasePath={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "data",
+              "description": "Display and share a collection of visualizations and saved searches.",
+              "homePageSection": "solution_panel",
+              "icon": "dashboardApp",
+              "id": "dashboard",
+              "path": "dashboard_landing_page",
+              "solution": "kibana",
+              "title": "Dashboard",
+            },
+          ]
+        }
+        solutions={
+          Array [
+            Object {
+              "description": "Visualize & analyze",
+              "icon": "logoKibana",
+              "id": "kibana",
+              "path": "kibana_landing_page",
+              "title": "Kibana",
+            },
+          ]
+        }
+      />
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <EuiHorizontalRule
+        margin="xl"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        />
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </main>
+  </div>
+</div>
+`;
+
+exports[`home header should not render directory entry if no home page section is specified 1`] = `
+<div
+  className="homPageContainer"
+>
+  <div
+    className="homPageHeaderContainer"
+  >
+    <header
+      className="homPageHeader"
+    >
+      <EuiFlexGroup
+        gutterSize="none"
+      >
+        <EuiFlexItem
+          className="homPageHeader__title"
+        >
+          <EuiTitle
+            size="m"
+          >
+            <h1>
+              <FormattedMessage
+                defaultMessage="Welcome to {ELASTIC}!"
+                id="home.pageHeader.welcomeNoUserTitle"
+                values={
+                  Object {
+                    "ELASTIC": "Elastic",
+                  }
+                }
+              />
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiFlexGroup
+            alignItems="flexEnd"
+            className="homPageHeader__menu"
+          >
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                href="#/tutorial_directory"
+                iconType="plusInCircle"
+              >
+                Add data
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="homPageHeader__menuItem"
+            >
+              <EuiButtonEmpty
+                iconType="gear"
+                onClick={[Function]}
+              >
+                Manage
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </header>
+  </div>
+  <div
+    className="homPageMainContainer"
+  >
+    <main
+      className="homPageMain"
+      data-test-subj="homeApp"
+    >
+      <SolutionsSection
+        addBasePath={[Function]}
+        directories={
+          Array [
+            Object {
+              "category": "admin",
+              "description": "Your center console for managing the Elastic Stack.",
+              "icon": "managementApp",
+              "id": "stack-management",
+              "path": "management_landing_page",
+              "title": "Management",
+            },
+          ]
+        }
+      />
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <EuiHorizontalRule
+        margin="xl"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem
+          grow={1}
+        />
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -433,64 +1065,47 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -557,64 +1172,47 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -681,64 +1279,47 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -805,64 +1386,47 @@ exports[`home should render home component 1`] = `
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -929,64 +1493,47 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -1053,64 +1600,47 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>
@@ -1184,64 +1714,47 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       className="homPageMain"
       data-test-subj="homeApp"
     >
-      <SolutionsPanel
+      <SolutionsSection
         addBasePath={[Function]}
-        findDirectoryById={[Function]}
+        directories={Array []}
       />
-      <div
-        className="homAddData"
-      >
-        <EuiFlexGroup
-          alignItems="baseline"
-          justifyContent="spaceBetween"
-          responsive={false}
-        >
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiTitle
-              size="s"
-            >
-              <h3>
-                Add your data
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem
-            grow={1}
-          >
-            <EuiFlexGroup
-              justifyContent="spaceAround"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <AddData
+        addBasePath={[Function]}
+        features={Array []}
+      />
+      <ManageData
+        addBasePath={[Function]}
+        features={Array []}
+      />
       <EuiHorizontalRule
         margin="xl"
       />
-      <EuiSpacer
-        size="s"
-      />
-      <div
-        className="homManageData"
+      <EuiFlexGroup
+        alignItems="center"
+        className="homPageFooter"
+        gutterSize="s"
+        justifyContent="spaceBetween"
       >
-        <EuiTitle
-          size="s"
-        >
-          <h3>
-            Manage your data
-          </h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiFlexGroup
-          className="homManageData__container"
-          justifyContent="spaceAround"
-          wrap={true}
+        <EuiFlexItem
+          grow={1}
         />
-      </div>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonEmpty
+            flush="right"
+            href="#/feature_directory"
+            iconType="apps"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="View app directory"
+              id="home.appDirectory.appDirectoryButtonLabel"
+              values={Object {}}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </main>
   </div>
 </div>

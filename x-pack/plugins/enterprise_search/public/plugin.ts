@@ -29,7 +29,7 @@ export interface ClientConfigType {
   host?: string;
 }
 export interface PluginsSetup {
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
 }
 
@@ -76,50 +76,52 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    plugins.home.featureCatalogue.registerSolution({
-      id: 'enterpriseSearch',
-      title: 'Enterprise Search',
-      icon: 'logoEnterpriseSearch',
-      description: 'Search everything',
-      path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
-      order: 100,
-    });
+    if (plugins.home) {
+      plugins.home.featureCatalogue.registerSolution({
+        id: 'enterpriseSearch',
+        title: 'Enterprise Search',
+        icon: 'logoEnterpriseSearch',
+        description: 'Search everything',
+        path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
+        order: 100,
+      });
 
-    plugins.home.featureCatalogue.register({
-      id: 'enterpriseSearch-overview',
-      title: 'Enterprise Search overview',
-      icon: 'logoEnterpriseSearch',
-      description: 'Build a powerful search experience.',
-      path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
-      category: FeatureCatalogueCategory.DATA,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-      solution: 'enterpriseSearch',
-      order: 110,
-    });
+      plugins.home.featureCatalogue.register({
+        id: 'enterpriseSearch-overview',
+        title: 'Enterprise Search overview',
+        icon: 'logoEnterpriseSearch',
+        description: 'Build a powerful search experience.',
+        path: '/app/enterprise_search/app_search', // TODO: update this link to enterprise search landing page
+        category: FeatureCatalogueCategory.DATA,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        solution: 'enterpriseSearch',
+        order: 110,
+      });
 
-    plugins.home.featureCatalogue.register({
-      id: 'appSearch',
-      title: 'App Search',
-      icon: AppSearchLogo,
-      description: 'Connect your users to relevant data.',
-      path: '/app/enterprise_search/app_search',
-      category: FeatureCatalogueCategory.DATA,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-      solution: 'enterpriseSearch',
-      order: 120,
-    });
+      plugins.home.featureCatalogue.register({
+        id: 'appSearch',
+        title: 'App Search',
+        icon: AppSearchLogo,
+        description: 'Connect your users to relevant data.',
+        path: '/app/enterprise_search/app_search',
+        category: FeatureCatalogueCategory.DATA,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        solution: 'enterpriseSearch',
+        order: 120,
+      });
 
-    plugins.home.featureCatalogue.register({
-      id: 'workplaceSearch',
-      title: 'Workplace Search',
-      icon: WorkplaceSearchLogo,
-      description: 'Unify your team content.',
-      path: '/app/enterprise_search/workplace_search',
-      category: FeatureCatalogueCategory.DATA,
-      homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
-      solution: 'enterpriseSearch',
-      order: 130,
-    });
+      plugins.home.featureCatalogue.register({
+        id: 'workplaceSearch',
+        title: 'Workplace Search',
+        icon: WorkplaceSearchLogo,
+        description: 'Unify your team content.',
+        path: '/app/enterprise_search/workplace_search',
+        category: FeatureCatalogueCategory.DATA,
+        homePageSection: FeatureCatalogueHomePageSection.SOLUTION_PANEL,
+        solution: 'enterpriseSearch',
+        order: 130,
+      });
+    }
   }
 
   public start(core: CoreStart) {}

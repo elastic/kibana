@@ -4,13 +4,14 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "licensing",
-    "home",
     "devTools"
   ],
+  "optionalPlugins": ["home"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "grokdebugger"],
   "requiredBundles": [
-    "kibanaReact"
+    "kibanaReact",
+    "home"
   ]
 }
