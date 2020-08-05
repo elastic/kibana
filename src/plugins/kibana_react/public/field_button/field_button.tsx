@@ -19,18 +19,47 @@
 
 import './field_button.scss';
 import classNames from 'classnames';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
-export interface FieldButtonProps {
-  isActive?: boolean;
-  fieldIcon?: ReactNode;
+export interface FieldButtonProps extends HTMLAttributes<HtmlDivElement> {
+  /**
+   * Label for the button
+   */
   fieldName: ReactNode;
+  /**
+   * Icon representing the field type.
+   * Recommend using FieldIcon
+   */
+  fieldIcon?: ReactNode;
+  /**
+   * An optional node to place inside and at the end of the <button>
+   */
   fieldInfoIcon?: ReactNode;
+  /**
+   * An optional node to place outside of and to the right of the <button>
+   */
   fieldAction?: ReactNode;
+  /**
+   * Adds a forced focus ring to the whole component
+   */
+  isActive?: boolean;
+  /**
+   * Styles the component differently to indicate it is draggable
+   */
   isDraggable?: boolean;
+  /**
+   * Use the small size in condensed areas
+   */
   size?: ButtonSize;
   className?: string;
-  onClick?: () => void;
+  /**
+   * The component always renders a `<button>` and therefore will always need an `onClick`
+   */
+  onClick: () => void;
+  /**
+   * Pass more button props to the actual `<button>` element
+   */
+  buttonProps: ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 /**
@@ -59,6 +88,7 @@ export function FieldButton({
   className,
   isDraggable = false,
   onClick,
+  buttonProps,
   ...rest
 }: FieldButtonProps) {
   const classes = classNames(
@@ -69,16 +99,19 @@ export function FieldButton({
     className
   );
 
+  const buttonClasses = classNames(
+    'kbn-resetFocusState kbnFieldButton__button',
+    buttonProps && buttonProps.className
+  );
+
   return (
     <div className={classes} {...rest}>
-      <button onClick={onClick} className="kbn-resetFocusState kbnFieldButton__content">
+      <button onClick={onClick} {...buttonProps} className={buttonClasses}>
         {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
         {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
-      </button>
-      <div className="kbnFieldButton__append">
-        {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
         {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
-      </div>
+      </button>
+      {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
     </div>
   );
 }

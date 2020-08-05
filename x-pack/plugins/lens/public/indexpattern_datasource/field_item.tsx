@@ -222,12 +222,16 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
                 togglePopover();
               }
             }}
-            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
+              defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+              values: {
+                fieldName: field.name,
+                fieldType: field.type,
+              },
             })}
-            fieldInfoIcon={lensInfoIcon}
             fieldIcon={lensFieldIcon}
             fieldName={wrappableHighlightableFieldName}
+            fieldInfoIcon={lensInfoIcon}
           />
         </DragDrop>
       }
