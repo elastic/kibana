@@ -7,7 +7,7 @@ import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
-// @ts-ignore
+// @ts-expect-error
 import CustomPlot from '../CustomPlot';
 import {
   asDecimal,

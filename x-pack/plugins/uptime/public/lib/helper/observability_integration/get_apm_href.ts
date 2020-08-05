@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { addBasePath } from './add_base_path';
 import { MonitorSummary } from '../../../../common/runtime_types';
 
