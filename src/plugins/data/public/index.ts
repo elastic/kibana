@@ -344,7 +344,6 @@ export {
   extractSearchSourceReferences,
   FetchOptions,
   getEsPreference,
-  getSearchErrorType,
   getSearchParamsFromRequest,
   IEsSearchRequest,
   IEsSearchResponse,

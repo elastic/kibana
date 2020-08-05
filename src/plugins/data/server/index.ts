@@ -197,6 +197,9 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // search
+  IEsSearchRequest,
+  IEsSearchResponse,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -204,8 +207,6 @@ export {
 } from '../common';
 
 export {
-  IEsSearchRequest,
-  IEsSearchResponse,
   ISearchStrategy,
   ISearchOptions,
   ISearchSetup,
