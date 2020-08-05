@@ -18,7 +18,6 @@
  */
 
 import Fs from 'fs';
-import { resolve } from 'path';
 import { promisify } from 'util';
 
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
@@ -40,7 +39,6 @@ export default function (kibana) {
     },
 
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       uiSettingDefaults: getUiSettingDefaults(),
     },
 

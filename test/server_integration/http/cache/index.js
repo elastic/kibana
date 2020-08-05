@@ -37,10 +37,7 @@ export default function ({ getService }) {
     });
 
     it('allows the bootstrap bundles to be cached', async () => {
-      await supertest
-        .get('/bundles/app/any-old-id-works/bootstrap.js')
-        .expect('Cache-Control', 'must-revalidate')
-        .expect(200);
+      await supertest.get('/bootstrap.js').expect('Cache-Control', 'must-revalidate').expect(200);
     });
   });
 }

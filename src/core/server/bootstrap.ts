@@ -66,6 +66,12 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
+  if (cliArgs.optimize) {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Optimization no longer required.');
+    await shutdown();
+  }
+
   process.on('SIGHUP', () => reloadLoggingConfig());
 
   // This is only used by the LogRotator service
@@ -105,12 +111,6 @@ export async function bootstrap({
     await root.start();
   } catch (err) {
     await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
   }
 }
 

@@ -32,6 +32,7 @@ export default {
     '<rootDir>/src/cli_plugin',
     '<rootDir>/packages/kbn-test/target/functional_test_runner',
     '<rootDir>/src/dev',
+    '<rootDir>/src/optimize',
     '<rootDir>/src/legacy/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',

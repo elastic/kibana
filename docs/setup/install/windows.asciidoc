@@ -96,12 +96,6 @@ important data later on.
   | $KIBANA_HOME\data
  d|
 
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | $KIBANA_HOME\data\optimize
- d|
-
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
   | $KIBANA_HOME\plugins

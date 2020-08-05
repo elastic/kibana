@@ -32,7 +32,6 @@ out an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
 - If you would like to contribute code, please follow our [STYLEGUIDE.md](STYLEGUIDE.md).
-- Learn more about our UI code with [UI_SYSTEMS.md](src/legacy/ui/public/UI_SYSTEMS.md).
 - For all other questions, check out the [FAQ.md](FAQ.md) and
 [wiki](https://github.com/elastic/kibana/wiki).
 
