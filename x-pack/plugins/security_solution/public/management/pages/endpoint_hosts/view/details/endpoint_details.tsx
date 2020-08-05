@@ -234,4 +234,4 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
   );
 });
 
-EndpointDetails.displayName = 'HostDetails';
+EndpointDetails.displayName = 'EndpointDetails';

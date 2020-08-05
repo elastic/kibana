@@ -74,7 +74,7 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
  * API handlers for Host details based on a list of Host results.
  */
 const endpointListApiPathHandlerMocks = ({
-  endpointsResults: endpointResults = mockEndpointResultList({ total: 3 }).hosts,
+  endpointResults = mockEndpointResultList({ total: 3 }).hosts,
   epmPackages = [generator.generateEpmPackage()],
   endpointPackageConfigs = [],
   policyResponse = generator.generatePolicyResponse(),
