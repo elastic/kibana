@@ -12,7 +12,6 @@ import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/t
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import fake from './fake.json';
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -83,7 +82,7 @@ export function ResolverTreeFetcher(
         api.dispatch({
           type: 'serverReturnedResolverData',
           payload: {
-            result: fake,
+            result,
             databaseDocumentID: databaseDocumentIDToFetch,
           },
         });
