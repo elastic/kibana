@@ -159,12 +159,21 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.unsecuredSavedObjectsClient.update<RawAction>('action', id, {
-      actionTypeId,
-      name,
-      config: validatedActionTypeConfig as SavedObjectAttributes,
-      secrets: validatedActionTypeSecrets as SavedObjectAttributes,
-    });
+    const result = await this.unsecuredSavedObjectsClient.update<RawAction>(
+      'action',
+      id,
+      {
+        ...existingObject.attributes,
+        actionTypeId,
+        name,
+        config: validatedActionTypeConfig as SavedObjectAttributes,
+        secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+      },
+      {
+        references: existingObject.references,
+        version: existingObject.version,
+      }
+    );
 
     return {
       id,

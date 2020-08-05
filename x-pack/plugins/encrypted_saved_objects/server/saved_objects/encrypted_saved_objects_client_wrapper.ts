@@ -163,7 +163,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
 
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.bulkUpdate(encryptedObjects, options),
+      await this.options.baseClient.bulkCreate(encryptedObjects, {
+        ...options,
+        overwrite: true,
+      }),
       objects
     );
   }
@@ -222,9 +225,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           }
         )) as T,
         {
+          ...options,
           id,
           overwrite: true,
-          ...options,
         }
       ),
       attributes,

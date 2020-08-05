@@ -409,7 +409,7 @@ describe('#bulkUpdate', () => {
       saved_objects: [{ id: 'some-id', type: 'unknown-type', attributes, references: [] }],
     };
 
-    mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
+    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
 
     await expect(
       wrapper.bulkUpdate(
@@ -418,10 +418,10 @@ describe('#bulkUpdate', () => {
       )
     ).resolves.toEqual(mockedResponse);
 
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
       [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
-      {}
+      { overwrite: true }
     );
   });
 
@@ -461,7 +461,7 @@ describe('#bulkUpdate', () => {
       })),
     };
 
-    mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
+    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
 
     await expect(
       wrapper.bulkUpdate(
@@ -513,8 +513,8 @@ describe('#bulkUpdate', () => {
       { user: mockAuthenticatedUser() }
     );
 
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
       [
         {
           id: 'some-id',
@@ -537,7 +537,7 @@ describe('#bulkUpdate', () => {
           },
         },
       ],
-      {}
+      { overwrite: true }
     );
   });
 
@@ -557,7 +557,7 @@ describe('#bulkUpdate', () => {
       ];
       const options = { namespace };
 
-      mockBaseClient.bulkUpdate.mockResolvedValue({
+      mockBaseClient.bulkCreate.mockResolvedValue({
         saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
       });
 
@@ -587,8 +587,8 @@ describe('#bulkUpdate', () => {
         { user: mockAuthenticatedUser() }
       );
 
-      expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
         [
           {
             id: 'some-id',
@@ -603,7 +603,7 @@ describe('#bulkUpdate', () => {
             references: undefined,
           },
         ],
-        options
+        { ...options, overwrite: true }
       );
     };
 
@@ -621,7 +621,7 @@ describe('#bulkUpdate', () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     const failureReason = new Error('Something bad happened...');
-    mockBaseClient.bulkUpdate.mockRejectedValue(failureReason);
+    mockBaseClient.bulkCreate.mockRejectedValue(failureReason);
 
     await expect(
       wrapper.bulkUpdate(
@@ -630,10 +630,10 @@ describe('#bulkUpdate', () => {
       )
     ).rejects.toThrowError(failureReason);
 
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
       [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
-      {}
+      { overwrite: true }
     );
   });
 });
