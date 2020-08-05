@@ -256,7 +256,7 @@ export const SearchExamplesApp = ({
                           options={formatFieldsToComboBox(numericFields)}
                           selectedOptions={formatFieldToComboBox(selectedField)}
                           singleSelection={true}
-                          onChange={(option: any) => {
+                          onChange={(option) => {
                             const field = indexPattern.getFieldByName(option[0].label);
                             setSelectedField(field || null);
                           }}
