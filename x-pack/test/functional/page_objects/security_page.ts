@@ -331,6 +331,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split('\n').map((role) => role.trim()),
+          roleElements: await rolesElement.findAllByTagName('div'),
           reserved: isUserReserved,
           deprecated: isUserDeprecated,
         });

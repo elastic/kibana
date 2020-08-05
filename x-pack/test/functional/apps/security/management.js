@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { keyBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -149,7 +150,14 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.settings.navigateTo();
           await testSubjects.click('users');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          // await (await find.byPartialLinkText('kibana_dashboard_only_user')).click;
+          // for some reason I can't get a click by link text on 'kibana_dashboard_only_user' (or even on 'superuser') to work?!?!
+          // So intead, I get all the users in table keyed by username
+          const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+          // check that dashuser has both of these roles
+          expect(users.dashuser.roles).to.eql(['kibana_dashboard_only_user', 'logstash-readonly']);
+          // and click the first one (I think the test would pass as written regardless of the order of those roles)
+          await users.dashuser.roleElements[0].click();
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
