@@ -159,7 +159,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="severity"
               component={SeverityField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
+                dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
@@ -173,7 +173,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="riskScore"
               component={RiskScoreField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+                dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
                 indices: indexPatterns,
