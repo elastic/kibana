@@ -500,7 +500,7 @@ export default function ({ getService }) {
         expect(task.status).to.eql('running');
       });
 
-      await delay(1000);
+      await ensureTasksIndexRefreshed();
 
       // first runNow should fail
       const failedRunNowResult = await runTaskNow({
@@ -522,7 +522,7 @@ export default function ({ getService }) {
         expect(task.status).to.eql('idle');
       });
 
-      await delay(1000);
+      await ensureTasksIndexRefreshed();
 
       // second runNow should be successful
       const successfulRunNowResult = runTaskNow({
