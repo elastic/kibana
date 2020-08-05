@@ -139,6 +139,10 @@ let dataSearchService;
 export const setSearchService = (searchService) => (dataSearchService = searchService);
 export const getSearchService = () => dataSearchService;
 
+let dataQueryService;
+export const setQueryService = (queryService) => (dataQueryService = queryService);
+export const getQueryService = () => dataQueryService;
+
 let kibanaVersion;
 export const setKibanaVersion = (version) => (kibanaVersion = version);
 export const getKibanaVersion = () => kibanaVersion;

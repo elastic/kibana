@@ -19,7 +19,7 @@
 
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
-import { IndexPatternsContract } from '../../../plugins/data/public';
+import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -28,3 +28,7 @@ export const [getApplication, setApplication] = createGetterSetter<ApplicationSt
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
 );
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');

@@ -20,9 +20,7 @@ import rison from 'rison-node';
 import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../ui_actions/public';
-import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '../../../kibana_utils/public';
-import { DiscoverAppState } from '../../../discover/public';
-import { getApplication, getUISettings, getIndexPatterns } from '../services';
+import { getApplication, getUISettings, getIndexPatterns, getQueryService } from '../services';
 import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
@@ -38,9 +36,6 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
     const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
     const aggsTermSize = getUISettings().get(AGGS_TERMS_SIZE_SETTING);
     let agg;
-
-    const stateStorage: IKbnUrlStateStorage = createKbnUrlStateStorage();
-    const appStateFromUrl: DiscoverAppState | null = stateStorage.get('_a');
 
     // If we're visualizing a date field, and our index is time based (and thus has a time filter),
     // then run a date histogram
@@ -69,8 +64,8 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
       indexPattern: context.indexPatternId,
       type: 'histogram',
       _a: rison.encode({
-        filters: appStateFromUrl?.filters || [],
-        query: appStateFromUrl?.query,
+        filters: getQueryService().filterManager.getFilters() || [],
+        query: getQueryService().queryString.getQuery(),
         vis: {
           type: 'histogram',
           aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],

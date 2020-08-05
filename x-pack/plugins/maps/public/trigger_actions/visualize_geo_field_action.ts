@@ -9,12 +9,7 @@ import uuid from 'uuid/v4';
 import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import {
-  createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
-} from '../../../../../src/plugins/kibana_utils/public';
-import { DiscoverAppState } from '../../../../../src/plugins/discover/public';
-import { getApplication, getIndexPatternService } from '../kibana_services';
+import { getApplication, getIndexPatternService, getQueryService } from '../kibana_services';
 
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 
@@ -28,16 +23,14 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     const indexPattern = await getIndexPatternService().get(context.indexPatternId);
     const field = indexPattern.fields.find((fld) => fld.name === context.fieldName);
     const supportsClustering = field?.aggregatable;
-    const stateStorage: IKbnUrlStateStorage = createKbnUrlStateStorage();
-    const appStateFromUrl: DiscoverAppState | null = stateStorage.get('_a');
     // create initial layer descriptor
     const hasTooltips =
       context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
 
     const linkUrlParams = {
       _a: rison.encode({
-        filters: appStateFromUrl?.filters || [],
-        query: appStateFromUrl?.query,
+        filters: getQueryService().filterManager.getFilters() || [],
+        query: getQueryService().queryString.getQuery(),
       } as any),
       initialLayers: rison.encode({
         id: uuid(),

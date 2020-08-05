@@ -48,7 +48,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
 } from '../../ui_actions/public';
-import { setUISettings, setApplication, setIndexPatterns } from './services';
+import { setUISettings, setApplication, setIndexPatterns, setQueryService } from './services';
 import { visualizeFieldAction, ACTION_VISUALIZE_FIELD } from './actions/visualize_field_action';
 
 export interface VisualizePluginStartDependencies {
@@ -219,6 +219,7 @@ export class VisualizePlugin
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
+    setQueryService(plugins.data.query);
     plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 
