@@ -252,6 +252,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
+        if (oldStatePartial.index !== newStatePartial.index) {
+          //in case of index switch the route has currently to be reloaded, legacy
+          return;
+        }
+
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
