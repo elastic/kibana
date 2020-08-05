@@ -86,7 +86,16 @@ export const AlertPreview: React.FC<Props> = (props) => {
     } finally {
       setIsPreviewLoading(false);
     }
-  }, [alertParams, alertInterval, fetch, alertType, groupByDisplayName, previewLookbackInterval]);
+  }, [
+    alertParams,
+    alertInterval,
+    fetch,
+    alertType,
+    groupByDisplayName,
+    previewLookbackInterval,
+    alertThrottle,
+    showNoDataResults,
+  ]);
 
   const previewIntervalError = useMemo(() => {
     const intervalInSeconds = getIntervalInSeconds(alertInterval);
