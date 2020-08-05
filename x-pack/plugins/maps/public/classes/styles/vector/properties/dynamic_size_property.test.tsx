@@ -21,6 +21,7 @@ import { IField } from '../../../fields/field';
 import { Map as MbMap } from 'mapbox-gl';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];
@@ -46,9 +47,9 @@ const makeProperty = (
     options,
     VECTOR_STYLES.ICON_SIZE,
     field,
-    new MockLayer(mockStyle),
+    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
     () => {
-      return (x: string) => x + '_format';
+      return (value: string | number | undefined) => value + '_format';
     },
     false
   );
@@ -79,10 +80,11 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 0, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap & { getPaintPropertyCalls };
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 
+    // @ts-expect-error
     expect(mockMbMap.getPaintPropertyCalls()).toEqual([
       [
         'foobar',
@@ -114,10 +116,11 @@ describe('syncSize', () => {
       { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 100, max: 100 })
     );
-    const mockMbMap = (new MockMbMap() as unknown) as MbMap & { getPaintPropertyCalls };
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap;
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 
+    // @ts-expect-error
     expect(mockMbMap.getPaintPropertyCalls()).toEqual([
       [
         'foobar',

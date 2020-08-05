@@ -4,69 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Map as MbMap } from 'mapbox-gl';
+import React from 'react';
+import { EuiTextColor } from '@elastic/eui';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import { getOrdinalMbColorRampStops, getColorPalette } from '../../color_palettes';
-import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import {
   isCategoricalStopsInvalid,
   getOtherCategoryLabel,
+  // @ts-expect-error
 } from '../components/color/color_stops_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
-import { EuiTextColor } from '@elastic/eui';
+import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
+import { LegendProps } from './style_property';
 
 const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
-export class DynamicColorProperty extends DynamicStyleProperty {
-  syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
+export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
+  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
   }
 
-  syncIconColorWithMb(mbLayerId, mbMap) {
+  syncIconColorWithMb(mbLayerId: string, mbMap: MbMap) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'icon-color', color);
   }
 
-  syncHaloBorderColorWithMb(mbLayerId, mbMap) {
+  syncHaloBorderColorWithMb(mbLayerId: string, mbMap: MbMap) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);
   }
 
-  syncCircleStrokeWithMb(pointLayerId, mbMap, alpha) {
+  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncFillColorWithMb(mbLayerId, mbMap, alpha) {
+  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
 
-  syncLineColorWithMb(mbLayerId, mbMap, alpha) {
+  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'line-color', color);
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncLabelColorWithMb(mbLayerId, mbMap, alpha) {
+  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'text-color', color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);
   }
 
-  syncLabelBorderColorWithMb(mbLayerId, mbMap) {
+  syncLabelBorderColorWithMb(mbLayerId: string, mbMap: MbMap) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'text-halo-color', color);
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
       return false;
     }
 
@@ -87,12 +91,16 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   getNumberOfCategories() {
+    if (!this._options.colorCategory) {
+      return 0;
+    }
+
     const colors = getColorPalette(this._options.colorCategory);
     return colors ? colors.length : 0;
   }
 
   _getMbColor() {
-    if (!this._field || !this._field.getName()) {
+    if (!this._field || !this.getFieldName()) {
       return null;
     }
 
@@ -102,16 +110,19 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this._field.getName();
+    const targetName = this.getFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
         return null;
       }
 
-      const colorStops = this._options.customColorRamp.reduce((accumulatedStops, nextStop) => {
-        return [...accumulatedStops, nextStop.stop, nextStop.color];
-      }, []);
+      const colorStops: Array<number | string> = this._options.customColorRamp.reduce(
+        (accumulatedStops: Array<number | string>, nextStop: OrdinalColorStop) => {
+          return [...accumulatedStops, nextStop.stop, nextStop.color];
+        },
+        []
+      );
       const firstStopValue = colorStops[0];
       const lessThanFirstStopValue = firstStopValue - 1;
       return [
@@ -179,7 +190,9 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return EMPTY_STOPS;
     }
 
-    const colors = getColorPalette(this._options.colorCategory);
+    const colors = this._options.colorCategory
+      ? getColorPalette(this._options.colorCategory)
+      : null;
     if (!colors) {
       return EMPTY_STOPS;
     }
@@ -209,7 +222,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
     const { stops, defaultColor } = this._getColorPaletteStops();
     if (stops.length < 1) {
-      //occurs when no data
+      // occurs when no data
       return null;
     }
 
@@ -225,8 +238,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       mbStops.push(stop.color);
     }
 
-    mbStops.push(defaultColor); //last color is default color
-    return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
+    mbStops.push(defaultColor); // last color is default color
+    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
   }
 
   _getColorRampStops() {
@@ -246,7 +259,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     const colors = getColorPalette(this._options.color);
 
     if (rangeFieldMeta.delta === 0) {
-      //map to last color.
+      // map to last color.
       return [
         {
           color: colors[colors.length - 1],
@@ -277,10 +290,10 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
     const { stops, defaultColor } = this._getColorStops();
     const breaks = [];
-    stops.forEach(({ stop, color }) => {
+    stops.forEach(({ stop, color }: OrdinalColorStop) => {
       if (stop) {
         breaks.push({
           color,
