@@ -129,7 +129,6 @@ const metricBeatData = [
   'system.cpu.user.pct',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');

@@ -77,14 +77,14 @@ export const ADD_EXCEPTION_LABEL = i18n.translate(
 export const ADD_TO_ENDPOINT_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
   {
-    defaultMessage: 'Add to endpoint list',
+    defaultMessage: 'Add Endpoint exception',
   }
 );
 
 export const ADD_TO_DETECTIONS_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel',
   {
-    defaultMessage: 'Add to detections list',
+    defaultMessage: 'Add rule exception',
   }
 );
 
@@ -176,7 +176,7 @@ export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
 export const ADD_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToClipboard',
   {
-    defaultMessage: 'Add to clipboard',
+    defaultMessage: 'Comment',
   }
 );
 

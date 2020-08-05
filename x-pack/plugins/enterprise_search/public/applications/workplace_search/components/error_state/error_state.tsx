@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -20,11 +20,7 @@ export const ErrorState: React.FC = () => {
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageBody>
-        <ViewContentHeader
-          title={i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
-            defaultMessage: 'Workplace Search',
-          })}
-        />
+        <ViewContentHeader title={WORKPLACE_SEARCH_PLUGIN.NAME} />
         <EuiPageContent>
           <ErrorStatePrompt />
         </EuiPageContent>
