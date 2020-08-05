@@ -21,33 +21,30 @@ const MyFirstRowContainer = styled(EuiFlexItem)`
 interface BuilderAndBadgeProps {
   entriesLength: number;
   exceptionItemIndex: number;
-  andLogicIncluded: boolean;
 }
 
 export const BuilderAndBadgeComponent = React.memo<BuilderAndBadgeProps>(
-  ({ entriesLength, exceptionItemIndex, andLogicIncluded }) => {
+  ({ entriesLength, exceptionItemIndex }) => {
     const badge = <AndOrBadge includeAntennas type="and" />;
 
-    if (andLogicIncluded && entriesLength > 1 && exceptionItemIndex === 0) {
+    if (entriesLength > 1 && exceptionItemIndex === 0) {
       return (
         <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
           {badge}
         </MyFirstRowContainer>
       );
-    } else if (andLogicIncluded && entriesLength <= 1) {
+    } else if (entriesLength <= 1) {
       return (
         <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
           {badge}
         </MyInvisibleAndBadge>
       );
-    } else if (andLogicIncluded && entriesLength > 1) {
+    } else {
       return (
         <EuiFlexItem grow={false} data-test-subj="exceptionItemEntryAndBadge">
           {badge}
         </EuiFlexItem>
       );
-    } else {
-      return <></>;
     }
   }
 );

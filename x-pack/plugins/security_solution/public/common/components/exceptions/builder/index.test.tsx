@@ -27,7 +27,7 @@ jest.mock('../../../../common/lib/kibana');
 describe('ExceptionBuilderComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
 
-  beforeAll(() => {
+  beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
@@ -113,6 +113,8 @@ describe('ExceptionBuilderComponent', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
       'some ip'
     );
+
+    wrapper.unmount();
   });
 
   test('it displays "or", "and" and "add nested button" enabled', () => {
@@ -304,6 +306,8 @@ describe('ExceptionBuilderComponent', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
       'Search field value...'
     );
+
+    wrapper.unmount();
   });
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {

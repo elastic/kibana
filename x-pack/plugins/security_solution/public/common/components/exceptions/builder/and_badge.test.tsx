@@ -15,7 +15,7 @@ describe('BuilderAndBadgeComponent', () => {
   test('it renders exceptionItemEntryFirstRowAndBadge for very first exception item in builder', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={0} andLogicIncluded />
+        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={0} />
       </ThemeProvider>
     );
 
@@ -24,10 +24,10 @@ describe('BuilderAndBadgeComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it renders exceptionItemEntryInvisibleAndBadge if "andLogicIncluded" and "entriesLength" is 1 or less', () => {
+  test('it renders exceptionItemEntryInvisibleAndBadge if "entriesLength" is 1 or less', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <BuilderAndBadgeComponent entriesLength={1} exceptionItemIndex={0} andLogicIncluded />
+        <BuilderAndBadgeComponent entriesLength={1} exceptionItemIndex={0} />
       </ThemeProvider>
     );
 
@@ -36,33 +36,13 @@ describe('BuilderAndBadgeComponent', () => {
     ).toBeTruthy();
   });
 
-  test('it renders regular "and" badge if "entriesLength" is greater than 1,  "andLogicIncluded" is true, and "exceptionItemIndex" is not 0', () => {
+  test('it renders regular "and" badge if exception item is not the first one and includes more than one entry', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={1} andLogicIncluded />
+        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={1} />
       </ThemeProvider>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeTruthy();
-  });
-
-  test('it does not render a badge if "andLogicIncluded" is false', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <BuilderAndBadgeComponent
-          entriesLength={2}
-          exceptionItemIndex={1}
-          andLogicIncluded={false}
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemEntryInvisibleAndBadge"]').exists()
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemEntryFirstRowAndBadge"]').exists()
-    ).toBeFalsy();
   });
 });
