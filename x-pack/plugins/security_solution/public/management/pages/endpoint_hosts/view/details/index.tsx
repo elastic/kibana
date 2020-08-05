@@ -33,7 +33,7 @@ import {
   policyResponseError,
   policyResponseLoading,
 } from '../../store/selectors';
-import { HostDetails } from './host_details';
+import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
@@ -94,7 +94,7 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'details' && (
             <>
               <EuiFlyoutBody data-test-subj="hostDetailsFlyoutBody">
-                <HostDetails details={details} />
+                <EndpointDetails details={details} />
               </EuiFlyoutBody>
             </>
           )}

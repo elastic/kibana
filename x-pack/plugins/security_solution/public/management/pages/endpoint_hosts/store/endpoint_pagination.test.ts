@@ -13,7 +13,7 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
-import { hostMiddlewareFactory } from './middleware';
+import { endpointMiddlewareFactory } from './middleware';
 
 import { endpointListReducer } from './reducer';
 
@@ -45,7 +45,7 @@ describe('host list pagination: ', () => {
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     history = createBrowserHistory();
-    const middleware = hostMiddlewareFactory(fakeCoreStart, depsStart);
+    const middleware = endpointMiddlewareFactory(fakeCoreStart, depsStart);
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
     store = createStore(endpointListReducer, applyMiddleware(middleware, actionSpyMiddleware));
 
@@ -73,7 +73,7 @@ describe('host list pagination: ', () => {
           pathname: getEndpointListPath({ name: 'endpointList' }),
         },
       });
-      await waitForAction('serverReturnedHostList');
+      await waitForAction('serverReturnedEndpointList');
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [{ page_index: '0' }, { page_size: '10' }],

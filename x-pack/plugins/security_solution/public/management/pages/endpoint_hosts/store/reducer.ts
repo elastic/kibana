@@ -5,12 +5,12 @@
  */
 
 import { isOnHostPage, hasSelectedHost } from './selectors';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 
-export const initialHostListState: Immutable<HostState> = {
+export const initialEndpointListState: Immutable<EndpointState> = {
   hosts: [],
   pageSize: 10,
   pageIndex: 0,
@@ -33,11 +33,11 @@ export const initialHostListState: Immutable<HostState> = {
 };
 
 /* eslint-disable-next-line complexity */
-export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
-  state = initialHostListState,
+export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
+  state = initialEndpointListState,
   action
 ) => {
-  if (action.type === 'serverReturnedHostList') {
+  if (action.type === 'serverReturnedEndpointList') {
     const {
       hosts,
       total,
@@ -53,13 +53,13 @@ export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
       loading: false,
       error: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostList') {
+  } else if (action.type === 'serverFailedToReturnEndpointList') {
     return {
       ...state,
       error: action.payload,
       loading: false,
     };
-  } else if (action.type === 'serverReturnedHostNonExistingPolicies') {
+  } else if (action.type === 'serverReturnedEndpointNonExistingPolicies') {
     return {
       ...state,
       nonExistingPolicies: {
@@ -67,14 +67,14 @@ export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
         ...action.payload,
       },
     };
-  } else if (action.type === 'serverReturnedHostDetails') {
+  } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
       details: action.payload.metadata,
       detailsLoading: false,
       detailsError: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostDetails') {
+  } else if (action.type === 'serverFailedToReturnEndpointDetails') {
     return {
       ...state,
       detailsError: action.payload,
@@ -92,14 +92,14 @@ export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
       error: action.payload,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedHostPolicyResponse') {
+  } else if (action.type === 'serverReturnedEndpointPolicyResponse') {
     return {
       ...state,
       policyResponse: action.payload.policy_response,
       policyResponseLoading: false,
       policyResponseError: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostPolicyResponse') {
+  } else if (action.type === 'serverFailedToReturnEndpointPolicyResponse') {
     return {
       ...state,
       policyResponseError: action.payload,
@@ -111,7 +111,7 @@ export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
       selectedPolicyId: action.payload.selectedPolicyId,
       policyResponseLoading: false,
     };
-  } else if (action.type === 'serverCancelledHostListLoading') {
+  } else if (action.type === 'serverCancelledEndpointListLoading') {
     return {
       ...state,
       loading: false,
@@ -126,13 +126,13 @@ export const endpointListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       endpointPackageInfo: action.payload,
     };
-  } else if (action.type === 'serverReturnedHostExistValue') {
+  } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
       hostsExist: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
-    const newState: Immutable<HostState> = {
+    const newState: Immutable<EndpointState> = {
       ...state,
       location: action.payload,
     };

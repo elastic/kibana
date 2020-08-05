@@ -51,7 +51,7 @@ const LinkToExternalApp = styled.div`
 
 const openReassignFlyoutSearch = '?openReassignFlyout=true';
 
-export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
+export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => {
   const agentId = details.elastic.agent.id;
   const {
     url: agentDetailsUrl,
@@ -231,4 +231,4 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   );
 });
 
-HostDetails.displayName = 'HostDetails';
+EndpointDetails.displayName = 'HostDetails';

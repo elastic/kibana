@@ -15,7 +15,7 @@ import {
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
 
-export interface HostState {
+export interface EndpointState {
   /** list of host **/
   hosts: HostInfo[];
   /** number of items per page */

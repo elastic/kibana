@@ -9,10 +9,10 @@ import * as reactTestingLibrary from '@testing-library/react';
 
 import { EndpointList } from './index';
 import {
-  mockHostDetailsApiResult,
-  mockHostResultList,
-  setHostListApiMockImplementation,
-} from '../store/mock_host_result_list';
+  mockEndpointDetailsApiResult,
+  mockEndpointResultList,
+  setEndpointListApiMockImplementation,
+} from '../store/mock_endpoint_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   HostInfo,
@@ -27,7 +27,7 @@ import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_u
 
 jest.mock('../../../../common/components/link_to');
 
-describe('when on the hosts page', () => {
+describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
@@ -40,7 +40,7 @@ describe('when on the hosts page', () => {
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<EndpointList />);
     reactTestingLibrary.act(() => {
-      history.push('/hosts');
+      history.push('/endpoints');
     });
   });
 
@@ -50,10 +50,10 @@ describe('when on the hosts page', () => {
     expect(timelineFlyout).toBeNull();
   });
 
-  describe('when there are no hosts or polices', () => {
+  describe('when there are no endpoints or polices', () => {
     beforeEach(() => {
-      setHostListApiMockImplementation(coreStart.http, {
-        hostsResults: [],
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
       });
     });
 
@@ -70,8 +70,8 @@ describe('when on the hosts page', () => {
 
   describe('when there are policies, but no hosts', () => {
     beforeEach(async () => {
-      setHostListApiMockImplementation(coreStart.http, {
-        hostsResults: [],
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
         endpointPackageConfigs: mockPolicyResultList({ total: 3 }).items,
       });
     });
@@ -122,7 +122,7 @@ describe('when on the hosts page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockHostResultList({ total: 4 }).hosts;
+          const hostListData = mockEndpointResultList({ total: 4 }).hosts;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
 
@@ -142,8 +142,8 @@ describe('when on the hosts page', () => {
           const ingestPackageConfigs = mockPolicyResultList({ total: 1 }).items;
           ingestPackageConfigs[0].id = firstPolicyID;
 
-          setHostListApiMockImplementation(coreStart.http, {
-            hostsResults: hostListData,
+          setEndpointListApiMockImplementation(coreStart.http, {
+            endpointsResults: hostListData,
             endpointPackageConfigs: ingestPackageConfigs,
           });
         });
@@ -152,7 +152,7 @@ describe('when on the hosts page', () => {
       it('should display rows in the table', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedHostList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const rows = await renderResult.findAllByRole('row');
         expect(rows).toHaveLength(5);
@@ -160,7 +160,7 @@ describe('when on the hosts page', () => {
       it('should show total', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedHostList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const total = await renderResult.findByTestId('hostListTableTotal');
         expect(total.textContent).toEqual('4 Hosts');
@@ -168,7 +168,7 @@ describe('when on the hosts page', () => {
       it('should display correct status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedHostList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
@@ -194,7 +194,7 @@ describe('when on the hosts page', () => {
       it('should display correct policy status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedHostList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
@@ -213,7 +213,7 @@ describe('when on the hosts page', () => {
       it('should display policy name as a link', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
-          await middlewareSpy.waitForAction('serverReturnedHostList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
@@ -225,7 +225,7 @@ describe('when on the hosts page', () => {
         beforeEach(async () => {
           renderResult = render();
           await reactTestingLibrary.act(async () => {
-            await middlewareSpy.waitForAction('serverReturnedHostList');
+            await middlewareSpy.waitForAction('serverReturnedEndpointList');
           });
           const hostNameLinks = await renderResult.findAllByTestId('hostnameCellLink');
           if (hostNameLinks.length) {
@@ -298,12 +298,12 @@ describe('when on the hosts page', () => {
       return policyResponse;
     };
 
-    const dispatchServerReturnedHostPolicyResponse = (
+    const dispatchServerReturnedEndpointPolicyResponse = (
       overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
     ) => {
       reactTestingLibrary.act(() => {
         store.dispatch({
-          type: 'serverReturnedHostPolicyResponse',
+          type: 'serverReturnedEndpointPolicyResponse',
           payload: {
             policy_response: createPolicyResponse(overallStatus),
           },
@@ -316,7 +316,7 @@ describe('when on the hosts page', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { host, ...details },
-      } = mockHostDetailsApiResult();
+      } = mockEndpointDetailsApiResult();
 
       hostDetails = {
         host_status,
@@ -334,18 +334,18 @@ describe('when on the hosts page', () => {
       const policy = docGenerator.generatePolicyPackageConfig();
       policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
 
-      setHostListApiMockImplementation(coreStart.http, {
-        hostsResults: [hostDetails],
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [hostDetails],
         endpointPackageConfigs: [policy],
       });
 
       reactTestingLibrary.act(() => {
-        history.push('/hosts?selected_host=1');
+        history.push('/endpoints?selected_host=1');
       });
 
       renderAndWaitForData = async () => {
         const renderResult = render();
-        await middlewareSpy.waitForAction('serverReturnedHostDetails');
+        await middlewareSpy.waitForAction('serverReturnedEndpointDetails');
         return renderResult;
       };
     });
@@ -387,7 +387,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '/hosts?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
 
@@ -407,7 +407,7 @@ describe('when on the hosts page', () => {
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
-        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.success);
+        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.success);
       });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Success');
@@ -421,7 +421,7 @@ describe('when on the hosts page', () => {
     it('should display Warning overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
-        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
+        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.warning);
       });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Warning');
@@ -435,7 +435,7 @@ describe('when on the hosts page', () => {
     it('should display Failed overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
-        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
+        dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.failure);
       });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Failed');
@@ -449,7 +449,7 @@ describe('when on the hosts page', () => {
     it('should display Unknown overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
       reactTestingLibrary.act(() => {
-        dispatchServerReturnedHostPolicyResponse('' as HostPolicyResponseActionStatus);
+        dispatchServerReturnedEndpointPolicyResponse('' as HostPolicyResponseActionStatus);
       });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Unknown');
@@ -491,7 +491,7 @@ describe('when on the hosts page', () => {
       beforeEach(async () => {
         coreStart.http.post.mockImplementation(async (requestOptions) => {
           if (requestOptions.path === '/api/endpoint/metadata') {
-            return mockHostResultList({ total: 0 });
+            return mockEndpointResultList({ total: 0 });
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
         });
@@ -502,9 +502,9 @@ describe('when on the hosts page', () => {
           reactTestingLibrary.fireEvent.click(policyStatusLink);
         });
         await userChangedUrlChecker;
-        await middlewareSpy.waitForAction('serverReturnedHostPolicyResponse');
+        await middlewareSpy.waitForAction('serverReturnedEndpointPolicyResponse');
         reactTestingLibrary.act(() => {
-          dispatchServerReturnedHostPolicyResponse();
+          dispatchServerReturnedEndpointPolicyResponse();
         });
       });
 
@@ -557,7 +557,7 @@ describe('when on the hosts page', () => {
         );
         reactTestingLibrary.act(() => {
           store.dispatch({
-            type: 'serverReturnedHostPolicyResponse',
+            type: 'serverReturnedEndpointPolicyResponse',
             payload: {
               policy_response: policyResponse,
             },
@@ -572,10 +572,10 @@ describe('when on the hosts page', () => {
 
       it('should show a numbered badge if at least one action failed', async () => {
         const policyResponseActionDispatched = middlewareSpy.waitForAction(
-          'serverReturnedHostPolicyResponse'
+          'serverReturnedEndpointPolicyResponse'
         );
         reactTestingLibrary.act(() => {
-          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
+          dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.failure);
         });
         await policyResponseActionDispatched;
         const attentionBadge = await renderResult.findAllByTestId(
@@ -586,10 +586,10 @@ describe('when on the hosts page', () => {
 
       it('should show a numbered badge if at least one action has a warning', async () => {
         const policyResponseActionDispatched = middlewareSpy.waitForAction(
-          'serverReturnedHostPolicyResponse'
+          'serverReturnedEndpointPolicyResponse'
         );
         reactTestingLibrary.act(() => {
-          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
+          dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.warning);
         });
         await policyResponseActionDispatched;
         const attentionBadge = await renderResult.findAllByTestId(
@@ -602,7 +602,7 @@ describe('when on the hosts page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '/hosts?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_host=1'
         );
       });
 

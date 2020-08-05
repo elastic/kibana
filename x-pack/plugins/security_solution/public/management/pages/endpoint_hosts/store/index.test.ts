@@ -5,15 +5,15 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import { listData } from './selectors';
 import { mockHostResultList } from './mock_host_result_list';
-import { HostAction } from './action';
+import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
 
-describe('HostList store concerns', () => {
-  let store: Store<HostState>;
-  let dispatch: Dispatch<HostAction>;
+describe('EndpointList store concerns', () => {
+  let store: Store<EndpointState>;
+  let dispatch: Dispatch<EndpointAction>;
   const createTestStore = () => {
     store = createStore(endpointListReducer);
     dispatch = store.dispatch;
@@ -21,7 +21,7 @@ describe('HostList store concerns', () => {
 
   const loadDataToStore = () => {
     dispatch({
-      type: 'serverReturnedHostList',
+      type: 'serverReturnedEndpointList',
       payload: mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
     });
   };
@@ -55,14 +55,14 @@ describe('HostList store concerns', () => {
       });
     });
 
-    test('it handles `serverReturnedHostList', () => {
+    test('it handles `serverReturnedEndpointList', () => {
       const payload = mockHostResultList({
         request_page_size: 1,
         request_page_index: 1,
         total: 10,
       });
       dispatch({
-        type: 'serverReturnedHostList',
+        type: 'serverReturnedEndpointList',
         payload,
       });
 

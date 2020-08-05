@@ -16,18 +16,18 @@ import {
 } from '../../../../common/store/test_utils';
 import { Immutable, HostResultList } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
-import { mockHostResultList } from './mock_host_result_list';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { listData } from './selectors';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import { endpointListReducer } from './reducer';
-import { hostMiddlewareFactory } from './middleware';
+import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
 describe('host list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  type HostListStore = Store<Immutable<HostState>, Immutable<AppAction>>;
+  type HostListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
   let store: HostListStore;
   let getState: HostListStore['getState'];
   let dispatch: HostListStore['dispatch'];
@@ -36,16 +36,16 @@ describe('host list middleware', () => {
 
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
-    return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(
       endpointListReducer,
-      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
+      applyMiddleware(endpointMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
     dispatch = store.dispatch;
@@ -63,7 +63,7 @@ describe('host list middleware', () => {
         pathname: getEndpointListPath({ name: 'endpointList' }),
       },
     });
-    await waitForAction('serverReturnedHostList');
+    await waitForAction('serverReturnedEndpointList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
         paging_properties: [{ page_index: '0' }, { page_size: '10' }],

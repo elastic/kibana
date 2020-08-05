@@ -16,7 +16,7 @@ import {
   endpointPackageInfo,
   nonExistingPolicies,
 } from './selectors';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import {
   sendGetEndpointSpecificPackageConfigs,
   sendGetEndpointSecurityPackage,
@@ -24,7 +24,7 @@ import {
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
+export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -61,7 +61,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         hostResponse.request_page_index = Number(pageIndex);
 
         dispatch({
-          type: 'serverReturnedHostList',
+          type: 'serverReturnedEndpointList',
           payload: hostResponse,
         });
 
@@ -73,7 +73,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           .then((missingPolicies) => {
             if (missingPolicies !== undefined) {
               dispatch({
-                type: 'serverReturnedHostNonExistingPolicies',
+                type: 'serverReturnedEndpointNonExistingPolicies',
                 payload: missingPolicies,
               });
             }
@@ -83,7 +83,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostList',
+          type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
       }
@@ -100,7 +100,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         }
 
         dispatch({
-          type: 'serverReturnedHostExistValue',
+          type: 'serverReturnedEndpointExistValue',
           payload: false,
         });
 
@@ -152,7 +152,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           });
           response.request_page_index = Number(pageIndex);
           dispatch({
-            type: 'serverReturnedHostList',
+            type: 'serverReturnedEndpointList',
             payload: response,
           });
 
@@ -164,7 +164,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             .then((missingPolicies) => {
               if (missingPolicies !== undefined) {
                 dispatch({
-                  type: 'serverReturnedHostNonExistingPolicies',
+                  type: 'serverReturnedEndpointNonExistingPolicies',
                   payload: missingPolicies,
                 });
               }
@@ -174,13 +174,13 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             .catch((error) => console.error(error));
         } catch (error) {
           dispatch({
-            type: 'serverFailedToReturnHostList',
+            type: 'serverFailedToReturnEndpointList',
             payload: error,
           });
         }
       } else {
         dispatch({
-          type: 'serverCancelledHostListLoading',
+          type: 'serverCancelledEndpointListLoading',
         });
       }
 
@@ -191,14 +191,14 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           `/api/endpoint/metadata/${selectedHost}`
         );
         dispatch({
-          type: 'serverReturnedHostDetails',
+          type: 'serverReturnedEndpointDetails',
           payload: response,
         });
         getNonExistingPoliciesForHostsList(coreStart.http, [response], nonExistingPolicies(state))
           .then((missingPolicies) => {
             if (missingPolicies !== undefined) {
               dispatch({
-                type: 'serverReturnedHostNonExistingPolicies',
+                type: 'serverReturnedEndpointNonExistingPolicies',
                 payload: missingPolicies,
               });
             }
@@ -208,7 +208,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostDetails',
+          type: 'serverFailedToReturnEndpointDetails',
           payload: error,
         });
       }
@@ -219,12 +219,12 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
           query: { hostId: selectedHost },
         });
         dispatch({
-          type: 'serverReturnedHostPolicyResponse',
+          type: 'serverReturnedEndpointPolicyResponse',
           payload: policyResponse,
         });
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostPolicyResponse',
+          type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
         });
       }
@@ -235,8 +235,8 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
 const getNonExistingPoliciesForHostsList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
-  currentNonExistingPolicies: HostState['nonExistingPolicies']
-): Promise<HostState['nonExistingPolicies'] | undefined> => {
+  currentNonExistingPolicies: EndpointState['nonExistingPolicies']
+): Promise<EndpointState['nonExistingPolicies'] | undefined> => {
   if (hosts.length === 0) {
     return;
   }
@@ -266,14 +266,14 @@ const getNonExistingPoliciesForHostsList = async (
         )})`,
       },
     })
-  ).items.reduce<HostState['nonExistingPolicies']>((list, agentConfig) => {
+  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentConfig) => {
     (agentConfig.package_configs as string[]).forEach((packageConfig) => {
       list[packageConfig as string] = true;
     });
     return list;
   }, {});
 
-  const nonExisting = policyIdsToCheck.reduce<HostState['nonExistingPolicies']>(
+  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
     (list, policyId) => {
       if (policiesFound[policyId]) {
         return list;
