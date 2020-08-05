@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-getFieldByName(name: string): IndexPatternField | void;
+getFieldByName(name: string): IndexPatternField | undefined;
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ getFieldByName(name: string): IndexPatternField | void;
 
 <b>Returns:</b>
 
-`IndexPatternField | void`
+`IndexPatternField | undefined`
 
