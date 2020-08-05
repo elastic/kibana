@@ -14,14 +14,15 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiIcon,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { GlobalSearchResultProvider, GlobalSearchResult } from '../../../global_search/public';
+import { SearchServiceStart, GlobalSearchResult } from '../../../global_search/public';
 
 interface Props {
-  globalSearch: GlobalSearchResultProvider;
+  globalSearch: SearchServiceStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
@@ -34,14 +35,34 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   const onSearch = useCallback(
     (term: string) => {
-      const arr: GlobalSearchResult[] = [];
+      let arr: GlobalSearchResult[] = [];
       // setLoadingState(true);
-      // @ts-ignore this is a bug, TODO, {} should be optional
       globalSearch.find(term, {}).subscribe({
-        // @ts-ignore this is a bug, TODO, TS thinks results don't exist, they exist
         next: ({ results }) => {
-          arr.push(...results);
-          setOptions([...arr]);
+          if (results.length === 0) return;
+
+          // if no search term, filter to only applications and sort alphabetically
+          if (term.length === 0) {
+            results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
+
+            arr = [...results, ...arr].sort((a, b) => {
+              const titleA = a.title.toUpperCase(); // ignore upper and lowercase
+              const titleB = b.title.toUpperCase(); // ignore upper and lowercase
+              if (titleA < titleB) {
+                return -1;
+              }
+              if (titleA > titleB) {
+                return 1;
+              }
+
+              // titles must be equal
+              return 0;
+            });
+          } else {
+            arr.push(...results);
+          }
+
+          setOptions([...arr.map((option) => ({ key: option.id, ...option }))]);
         },
         error: () => {
           // TODO
@@ -99,8 +120,10 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       listProps={{
         rowHeight: 68,
       }}
-      options={options.map((option) => ({ key: option.id, ...option }))}
-      renderOption={(option) => (
+      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
+      options={options}
+      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
+      renderOption={(option: EuiSelectableOption & GlobalSearchResult) => (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
           <EuiFlexItem>{option.title}</EuiFlexItem>
@@ -115,8 +138,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      onChange={(selected) => {
-        const { url } = selected.find(({ checked }) => checked === 'on');
+      // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
+      onChange={(selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
+        const { url } = selected.find(({ checked }) => checked === 'on')!;
 
         if (typeof url === 'string') {
           if (url.startsWith('https://')) {

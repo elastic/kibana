@@ -5,7 +5,6 @@
  */
 
 import { PluginInitializer } from 'src/core/public';
-import { GlobalSearchProvidersPlugin, GlobalSearchBarPluginSetupDeps } from './plugin';
+import { GlobalSearchProvidersPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}, GlobalSearchBarPluginSetupDeps, {}> = () =>
-  new GlobalSearchProvidersPlugin();
+export const plugin: PluginInitializer<{}, {}, {}, {}> = () => new GlobalSearchProvidersPlugin();

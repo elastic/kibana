@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 // import { GlobalSearchTestApi } from '../../plugins/global_search_test/public/types';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  // const { common } = getPageObjects(['common']);
   // const browser = getService('browser');
 
   // const findResultsWithAPI = async (t: string): Promise<GlobalSearchResult[]> => {
