@@ -217,12 +217,11 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields.replaceAll(spec.fields || []);
     this.typeMeta = spec.typeMeta;
-    // /*
+
     this.fieldFormatMap = _.mapValues(fieldFormatMap, (mapping) => {
       return this.deserializeFieldFormatMap(mapping);
     });
-    // */
-    // this.fieldFormatMap = fieldFormatMap
+
     return this;
   }
 
@@ -425,13 +424,12 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getTimeField() {
-    // todo perhaps less undefined
     if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(this.timeFieldName) || undefined;
   }
 
-  getFieldByName(name: string): IndexPatternField | void {
-    if (!this.fields || !this.fields.getByName) return;
+  getFieldByName(name: string): IndexPatternField | undefined {
+    if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
 
