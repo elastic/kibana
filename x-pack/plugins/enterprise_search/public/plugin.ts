@@ -20,6 +20,7 @@ import {
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
+import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../common/constants';
 import { getPublicUrl } from './applications/shared/enterprise_search_url';
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
 import WorkplaceSearchLogo from './applications/workplace_search/assets/logo.svg';
@@ -44,9 +45,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     const config = { host: this.config.host };
 
     core.application.register({
-      id: 'appSearch',
-      title: 'App Search',
-      appRoute: '/app/enterprise_search/app_search',
+      id: APP_SEARCH_PLUGIN.ID,
+      title: APP_SEARCH_PLUGIN.NAME,
+      appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
@@ -61,9 +62,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      id: 'workplaceSearch',
-      title: 'Workplace Search',
-      appRoute: '/app/enterprise_search/workplace_search',
+      id: WORKPLACE_SEARCH_PLUGIN.ID,
+      title: WORKPLACE_SEARCH_PLUGIN.NAME,
+      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
@@ -76,23 +77,21 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     plugins.home.featureCatalogue.register({
-      id: 'appSearch',
-      title: 'App Search',
+      id: APP_SEARCH_PLUGIN.ID,
+      title: APP_SEARCH_PLUGIN.NAME,
       icon: AppSearchLogo,
-      description:
-        'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/enterprise_search/app_search',
+      description: APP_SEARCH_PLUGIN.DESCRIPTION,
+      path: APP_SEARCH_PLUGIN.URL,
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
 
     plugins.home.featureCatalogue.register({
-      id: 'workplaceSearch',
-      title: 'Workplace Search',
+      id: WORKPLACE_SEARCH_PLUGIN.ID,
+      title: WORKPLACE_SEARCH_PLUGIN.NAME,
       icon: WorkplaceSearchLogo,
-      description:
-        'Search all documents, files, and sources available across your virtual workplace.',
-      path: '/app/enterprise_search/workplace_search',
+      description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
+      path: WORKPLACE_SEARCH_PLUGIN.URL,
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
