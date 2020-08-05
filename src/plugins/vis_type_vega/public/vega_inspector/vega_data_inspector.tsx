@@ -47,11 +47,13 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
       id: 'data-viewer--id',
       name: dataSetsLabel,
       content: <DataViewer vegaAdapter={adapters.vega} />,
+      'data-test-subj': 'vegaDataInspectorDataViewerButton',
     },
     {
       id: 'signal-viewer--id',
       name: signalValuesLabel,
       content: <SignalViewer vegaAdapter={adapters.vega} />,
+      'data-test-subj': 'vegaDataInspectorSignalViewerButton',
     },
     {
       id: 'spec-viewer--id',
@@ -59,6 +61,7 @@ export const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
       content: (
         <SpecViewer className="vgaVegaDataInspector__specViewer" vegaAdapter={adapters.vega} />
       ),
+      'data-test-subj': 'vegaDataInspectorSpecViewerButton',
     },
   ];
 

@@ -234,37 +234,16 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       return await singleRequest.getVisibleText();
     }
 
-    public async getRequestStatisticTab() {
+    public getOpenRequestStatisticButton() {
       return testSubjects.find('inspectorRequestDetailStatistics');
     }
 
-    public async expectRequestStatisticTabIsExists(): Promise<void> {
-      await retry.try(async () => {
-        const requestStatisticTab = await this.getRequestStatisticTab();
-        expect(await requestStatisticTab.isDisplayed()).to.be(true);
-      });
-    }
-
-    public async getRequestDetailRequestTab() {
+    public getOpenRequestDetailRequestButton() {
       return testSubjects.find('inspectorRequestDetailRequest');
     }
 
-    public async expectRequestDetailRequestTabIsExists(): Promise<void> {
-      await retry.try(async () => {
-        const requestStatisticTab = await this.getRequestDetailRequestTab();
-        expect(await requestStatisticTab.isDisplayed()).to.be(true);
-      });
-    }
-
-    public async getRequestDetailResponseTab() {
+    public getOpenRequestDetailResponseButton() {
       return testSubjects.find('inspectorRequestDetailResponse');
-    }
-
-    public async expectRequestDetailResponseTabIsEnabled(): Promise<void> {
-      await retry.try(async () => {
-        const requestStatisticTab = await this.getRequestDetailResponseTab();
-        expect(await requestStatisticTab.isDisplayed()).to.be(true);
-      });
     }
   }
 

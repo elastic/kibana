@@ -47,7 +47,11 @@ import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
-import { PieChartProvider, ElasticChartProvider } from './visualizations';
+import {
+  PieChartProvider,
+  ElasticChartProvider,
+  VegaDebugInspectorViewProvider,
+} from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
@@ -78,6 +82,7 @@ export const services = {
   browser: BrowserProvider,
   pieChart: PieChartProvider,
   inspector: InspectorProvider,
+  vegaDebugInspector: VegaDebugInspectorViewProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,

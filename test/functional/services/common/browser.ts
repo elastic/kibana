@@ -481,5 +481,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
       await driver.switchTo().frame(_id);
     }
+
+    public getClipboardValue(): Promise<string> {
+      return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
+    }
   })();
 }

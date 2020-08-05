@@ -31,7 +31,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const filterBar = getService('filterBar');
   const inspector = getService('inspector');
+  const vegaDebugInspectorView = getService('vegaDebugInspector');
   const log = getService('log');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   describe('vega chart in visualize app', () => {
     before(async () => {
@@ -105,11 +108,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await inspector.close();
         });
 
-        it('should contain Statistics, Request, Response tabs', async () => {
+        it('should contain "Statistics", "Request", "Response" tabs', async () => {
           await inspector.openInspectorRequestsView();
-          await inspector.expectRequestStatisticTabIsExists();
-          await inspector.expectRequestDetailRequestTabIsExists();
-          await inspector.expectRequestDetailResponseTabIsEnabled();
+
+          for (const getFn of [
+            inspector.getOpenRequestDetailRequestButton,
+            inspector.getOpenRequestDetailResponseButton,
+            inspector.getOpenRequestStatisticButton,
+          ]) {
+            await retry.try(async () => {
+              const requestStatisticTab = await getFn();
+
+              expect(await requestStatisticTab.isDisplayed()).to.be(true);
+            });
+          }
         });
 
         it('should set the default query name if not given in the schema', async () => {
@@ -125,6 +137,49 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(unzip(rawTableData)[0].join(', ')).to.be(
             'Hits, Hits (total), Query time, Request timestamp'
           );
+        });
+      });
+
+      describe('Debug Tab', () => {
+        beforeEach(async () => {
+          await inspector.open();
+        });
+
+        afterEach(async () => {
+          await inspector.close();
+        });
+
+        it('should contain "Data Sets", "Signal Values", "Spec" tabs', async () => {
+          await vegaDebugInspectorView.openVegaDebugInspectorView();
+
+          for (const getFn of [
+            vegaDebugInspectorView.getOpenDataViewerButton,
+            vegaDebugInspectorView.getOpenSignalViewerButton,
+            vegaDebugInspectorView.getOpenSpecViewerButton,
+          ]) {
+            await retry.try(async () => {
+              const requestStatisticTab = await getFn();
+
+              expect(await requestStatisticTab.isDisplayed()).to.be(true);
+            });
+          }
+        });
+
+        it('should be able to copy vega spec to clipboard', async () => {
+          await vegaDebugInspectorView.openVegaDebugInspectorView();
+          const openSpecViewerButton = await vegaDebugInspectorView.getOpenSpecViewerButton();
+
+          await openSpecViewerButton.click();
+
+          const copyCopyToClipboardButton = await vegaDebugInspectorView.getCopyClipboardButton();
+
+          await copyCopyToClipboardButton.click();
+
+          const clipboardValue = await browser.getClipboardValue();
+
+          expect(
+            clipboardValue.includes('"$schema": "https://vega.github.io/schema/vega-lite/')
+          ).to.be(true);
         });
       });
     });
