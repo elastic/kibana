@@ -54,6 +54,7 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
+        closeList={noop}
       />
     );
 
@@ -69,6 +70,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
+        closeList={noop}
       />
     );
 
@@ -84,6 +86,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        closeList={noop}
       />
     );
 
@@ -100,6 +103,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        closeList={noop}
       />
     );
 
@@ -116,6 +120,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        closeList={noop}
       />
     );
 
@@ -134,6 +139,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        closeList={noop}
       />
     );
 

@@ -23,6 +23,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={false}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is not a helpful suggestion",
@@ -40,6 +41,7 @@ exports[`SuggestionsComponent Passing the index should control which suggestion 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={true}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is another unhelpful suggestion",
@@ -79,6 +81,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={true}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is not a helpful suggestion",
@@ -96,6 +99,7 @@ exports[`SuggestionsComponent Should display given suggestions if the show prop 
           onClick={[Function]}
           onMouseEnter={[Function]}
           selected={false}
+          shouldDisplayDescription={false}
           suggestion={
             Object {
               "description": "This is another unhelpful suggestion",
