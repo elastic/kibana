@@ -327,55 +327,6 @@ function getValidationAlertType() {
   return result;
 }
 
-const noopAlertType: AlertType = {
-  id: 'test.noop',
-  name: 'Test: Noop',
-  actionGroups: [{ id: 'default', name: 'Default' }],
-  producer: 'alertsFixture',
-  defaultActionGroupId: 'default',
-  async executor() {},
-};
-
-const onlyContextVariablesAlertType: AlertType = {
-  id: 'test.onlyContextVariables',
-  name: 'Test: Only Context Variables',
-  actionGroups: [{ id: 'default', name: 'Default' }],
-  producer: 'alertsFixture',
-  defaultActionGroupId: 'default',
-  actionVariables: {
-    context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
-  },
-  async executor() {},
-};
-
-const onlyStateVariablesAlertType: AlertType = {
-  id: 'test.onlyStateVariables',
-  name: 'Test: Only State Variables',
-  actionGroups: [{ id: 'default', name: 'Default' }],
-  producer: 'alertsFixture',
-  defaultActionGroupId: 'default',
-  actionVariables: {
-    state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
-  },
-  async executor() {},
-};
-
-const throwAlertType: AlertType = {
-  id: 'test.throw',
-  name: 'Test: Throw',
-  actionGroups: [
-    {
-      id: 'default',
-      name: 'Default',
-    },
-  ],
-  producer: 'alertsFixture',
-  defaultActionGroupId: 'default',
-  async executor() {
-    throw new Error('this alert is intended to fail');
-  },
-};
-
 function getPatternFiringAlertType() {
   const paramsSchema = schema.object({
     pattern: schema.arrayOf(schema.boolean()),
@@ -419,6 +370,52 @@ export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerts }: Pick<FixtureSetupDeps, 'alerts'>
 ) {
+  const noopAlertType: AlertType = {
+    id: 'test.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {},
+  };
+  const onlyContextVariablesAlertType: AlertType = {
+    id: 'test.onlyContextVariables',
+    name: 'Test: Only Context Variables',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    actionVariables: {
+      context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
+    },
+    async executor() {},
+  };
+  const onlyStateVariablesAlertType: AlertType = {
+    id: 'test.onlyStateVariables',
+    name: 'Test: Only State Variables',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    actionVariables: {
+      state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
+    },
+    async executor() {},
+  };
+  const throwAlertType: AlertType = {
+    id: 'test.throw',
+    name: 'Test: Throw',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {
+      throw new Error('this alert is intended to fail');
+    },
+  };
+
   alerts.registerType(getAlwaysFiringAlertType());
   alerts.registerType(getCumulativeFiringAlertType());
   alerts.registerType(getNeverFiringAlertType());
