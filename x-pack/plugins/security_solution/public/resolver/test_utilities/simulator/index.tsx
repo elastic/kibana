@@ -221,6 +221,33 @@ export class Simulator {
   }
 
   /**
+   * For a render of the Enzyme wrapper (may help update if other concerns have effected the render). May be useful for debugging.
+   */
+  public updateWrapper() {
+    return this.wrapper.update();
+  }
+
+  /**
+   * Dump all contents of the outer ReactWrapper (to be `console.log`ged as appropriate)
+   */
+  public debugWrapper() {
+    return this.wrapper.debug();
+  }
+
+  /**
+   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   */
+  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
+    return this.processNodeElements({ entityID }).findWhere(
+      (wrapper) =>
+        typeof wrapper.type() === 'string' &&
+        wrapper.prop('data-test-subj') === 'resolver:submenu:button'
+    );
+  }
+
+  /**
    * Return the selected node query string values.
    */
   public queryStringValues(): { selectedNode: string[] } {
