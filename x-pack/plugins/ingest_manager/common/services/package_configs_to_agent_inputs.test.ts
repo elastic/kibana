@@ -118,7 +118,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
         id: 'some-uuid',
         name: 'mock-package-config',
         type: 'test-logs',
-        dataset: { namespace: 'default' },
+        data_stream: { namespace: 'default' },
         use_output: 'default',
         meta: {
           package: {
@@ -129,13 +129,13 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
         streams: [
           {
             id: 'test-logs-foo',
-            dataset: { name: 'foo', type: 'logs' },
+            data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
           },
           {
             id: 'test-logs-bar',
-            dataset: { name: 'bar', type: 'logs' },
+            data_stream: { dataset: 'bar', type: 'logs' },
           },
         ],
       },
@@ -160,12 +160,12 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
         id: 'some-uuid',
         name: 'mock-package-config',
         type: 'test-logs',
-        dataset: { namespace: 'default' },
+        data_stream: { namespace: 'default' },
         use_output: 'default',
         streams: [
           {
             id: 'test-logs-foo',
-            dataset: { name: 'foo', type: 'logs' },
+            data_stream: { dataset: 'foo', type: 'logs' },
             fooKey: 'fooValue1',
             fooKey2: ['fooValue2'],
           },
