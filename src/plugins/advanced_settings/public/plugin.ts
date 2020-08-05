@@ -49,7 +49,7 @@ export class AdvancedSettingsPlugin
       home.featureCatalogue.register({
         id: 'advanced_settings',
         title,
-        description: i18n.translate('xpack.advancedSettings.featureCatalogueTitle', {
+        description: i18n.translate('advancedSettings.featureCatalogueTitle', {
           defaultMessage: 'Customize your Kibana experience',
         }),
         icon: 'gear',

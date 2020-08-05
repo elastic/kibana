@@ -58,7 +58,7 @@ interface Props {
   apps?: FeatureCatalogueEntry[];
 }
 
-export const SolutionPanel: FC<Props> = ({ solution, apps = [] }) =>
+export const SolutionCard: FC<Props> = ({ solution, apps = [] }) =>
   solution && apps.length ? (
     <EuiFlexItem
       key={solution.id}

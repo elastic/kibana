@@ -35,7 +35,7 @@ import { AddData } from './add_data';
 import { createAppNavigationHandler } from './app_navigation_handler';
 import { ChangeHomeRoute } from './change_home_route';
 import { ManageData } from './manage_data';
-import { SolutionsSection } from './solutions_section';
+import { SolutionsPanel } from './solutions_panel';
 import { Welcome } from './welcome';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
@@ -195,7 +195,7 @@ export class Home extends Component {
         </div>
         <div className="homPageMainContainer">
           <main className="homPageMain" data-test-subj="homeApp">
-            <SolutionsSection
+            <SolutionsPanel
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}

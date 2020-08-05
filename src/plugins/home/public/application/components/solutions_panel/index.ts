@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './solutions_section';
+export * from './solutions_panel';

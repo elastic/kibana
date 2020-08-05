@@ -19,7 +19,7 @@
 
 import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
-import { SolutionPanel } from './solution_panel';
+import { SolutionCard } from './solution_card';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../../';
 import { FeatureCatalogueHomePageSection } from '../../../services';
 
@@ -33,7 +33,7 @@ interface Props {
   solutions: FeatureCatalogueSolution[];
 }
 
-export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
+export const SolutionsPanel: FC<Props> = ({ directories, solutions }) => {
   const findDirectoriesBySolution = (
     solution?: FeatureCatalogueSolution
   ): FeatureCatalogueEntry[] =>
@@ -68,7 +68,7 @@ export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
           <EuiFlexItem grow={1} className={halfWidthClass}>
             <EuiFlexGroup direction="column">
               {solutions.map((solution) => (
-                <SolutionPanel
+                <SolutionCard
                   key={solution.id}
                   solution={solution}
                   apps={solutionAppMap.get(solution.id)}
@@ -77,7 +77,7 @@ export const SolutionsSection: FC<Props> = ({ directories, solutions }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
-        {kibana && kibanaApps.length ? <SolutionPanel solution={kibana} apps={kibanaApps} /> : null}
+        {kibana && kibanaApps.length ? <SolutionCard solution={kibana} apps={kibanaApps} /> : null}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="xl" />
