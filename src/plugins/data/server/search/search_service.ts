@@ -31,7 +31,6 @@ import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
-import { registerSearchUsageRoute } from './collectors/routes';
 import { IEsSearchRequest } from '../../common';
 
 interface StrategyMap {
@@ -47,9 +46,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     core: CoreSetup<object, DataPluginStart>,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ): ISearchSetup {
+    const usage = usageCollection ? usageProvider(core) : undefined;
+
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
-      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$)
+      esSearchStrategyProvider(this.initializerContext.config.legacy.globalConfig$, usage)
     );
 
     core.savedObjects.registerType(searchTelemetry);
@@ -57,10 +58,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
-    const usage = usageProvider(core);
-
     registerSearchRoute(core);
-    registerSearchUsageRoute(core, usage);
 
     return { registerSearchStrategy: this.registerSearchStrategy, usage };
   }
