@@ -124,7 +124,18 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       }
     }
 
-    async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
+    async createAndAddMarkdown({
+      name,
+      markdown,
+      saveOptions = {
+        saveAsNew: false,
+        redirectToOrigin: true,
+      },
+    }: {
+      name: string;
+      markdown: string;
+      saveOptions: { saveAsNew: boolean; redirectToOrigin: boolean };
+    }) {
       log.debug(`createAndAddMarkdown(${markdown})`);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
       if (inViewMode) {
@@ -135,8 +146,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name, {
-        saveAsNew: false,
-        redirectToOrigin: true,
+        saveAsNew: saveOptions.saveAsNew,
+        redirectToOrigin: saveOptions.redirectToOrigin,
       });
     }
 
