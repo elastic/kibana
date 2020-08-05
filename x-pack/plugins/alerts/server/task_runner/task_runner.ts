@@ -274,7 +274,15 @@ export class TaskRunner {
       params: { alertId, spaceId },
     } = this.taskInstance;
 
-    const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+    let apiKey: string | null = null;
+    try {
+      apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
+    } catch (err) {
+      // If we can't decode the api key, let us turn off the rule altogether
+      const [, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, null);
+      await alertsClient.disable({ id: alertId, disableEnsureAuthorized: true });
+      throw err;
+    }
     const [services, alertsClient] = await this.getServicesWithSpaceLevelPermissions(
       spaceId,
       apiKey

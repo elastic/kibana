@@ -592,7 +592,13 @@ export class AlertsClient {
     }
   }
 
-  public async disable({ id }: { id: string }) {
+  public async disable({
+    id,
+    disableEnsureAuthorized,
+  }: {
+    id: string;
+    disableEnsureAuthorized?: boolean;
+  }) {
     let apiKeyToInvalidate: string | null = null;
     let attributes: RawAlert;
     let version: string | undefined;
@@ -614,13 +620,15 @@ export class AlertsClient {
       attributes = alert.attributes;
       version = alert.version;
     }
-
-    await this.authorization.ensureAuthorized(
-      attributes.alertTypeId,
-      attributes.consumer,
-      WriteOperations.Disable
-    );
-
+    // We only disable this whenever we know we have an API key that cannot pass
+    // this check and we are needing to disable the alert altogether
+    if (disableEnsureAuthorized !== true) {
+      await this.authorization.ensureAuthorized(
+        attributes.alertTypeId,
+        attributes.consumer,
+        WriteOperations.Disable
+      );
+    }
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
