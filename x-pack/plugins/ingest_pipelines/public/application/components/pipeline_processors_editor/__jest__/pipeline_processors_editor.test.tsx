@@ -178,5 +178,13 @@ describe('Pipeline Editor', () => {
       expect(data2.processors).toEqual(testProcessors.processors);
       expect(data2.on_failure).toEqual([{ test: { if: '1 == 5' } }]);
     });
+
+    it('prevents moving a processor while in edit mode', () => {
+      const { find, exists } = testBed;
+      find('processors>0.editItemButton').simulate('click');
+      expect(exists('processorSettingsForm')).toBe(true);
+      expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
+      expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
+    });
   });
 });

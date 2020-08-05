@@ -1,16 +1,16 @@
 [[development-pull-request]]
-=== Submitting a pull request
+== Submitting a pull request
 
-[float]
-==== What Goes Into a Pull Request
+[discrete]
+=== What Goes Into a Pull Request
 
 * Please include an explanation of your changes in your PR description.
 * Links to relevant issues, external resources, or related PRs are very important and useful.
 * Please update any tests that pertain to your code, and add new tests where appropriate.
 * Update or add docs when appropriate. Read more about <<development-documentation>>.
 
-[float]
-==== Submitting a Pull Request
+[discrete]
+=== Submitting a Pull Request
 
  1. Push your local changes to your forked copy of the repository and submit a pull request.
  2. Describe what your changes do and mention the number of the issue where discussion has taken place, e.g., “Closes #123″.
@@ -22,8 +22,8 @@ Always submit your pull against master unless the bug is only present in an olde
 
 Then sit back and wait. There will probably be discussion about the Pull Request and, if any changes are needed, we'll work with you to get your Pull Request merged into {kib}.
 
-[float]
-==== What to expect during the pull request review process
+[discrete]
+=== What to expect during the pull request review process
 
 Most PRs go through several iterations of feedback and updates. Depending on the scope and complexity of the PR, the process can take weeks. Please
 be patient and understand we hold our code base to a high standard.

@@ -423,7 +423,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
               return a.timestamp - b.timestamp;
             })
             .map((d, i) => {
-              d.key = String.fromCharCode(65 + i);
+              d.key = (i + 1).toString();
               return d;
             }),
           aggregations: resp.aggregations,

@@ -129,8 +129,8 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(influencers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(criteriaFields),
-    startDate,
-    endDate,
+    startDateMs,
+    endDateMs,
     skip,
     userPermissions,
     // eslint-disable-next-line react-hooks/exhaustive-deps

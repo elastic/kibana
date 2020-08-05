@@ -29,6 +29,7 @@ import { shallow } from 'enzyme';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { AbstractField } from '../../../../fields/field';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { IconDynamicOptions } from '../../../../../../common/descriptor_types';
 import { IconMapSelect } from './icon_map_select';
 
 class MockField extends AbstractField {}
@@ -46,7 +47,9 @@ class MockDynamicStyleProperty {
 const defaultProps = {
   iconPaletteId: 'filledShapes',
   onChange: () => {},
-  styleProperty: (new MockDynamicStyleProperty() as unknown) as IDynamicStyleProperty,
+  styleProperty: (new MockDynamicStyleProperty() as unknown) as IDynamicStyleProperty<
+    IconDynamicOptions
+  >,
   isCustomOnly: false,
 };
 

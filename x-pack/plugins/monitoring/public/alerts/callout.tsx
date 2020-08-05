@@ -10,7 +10,7 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types';
 import { AlertSeverity } from '../../common/enums';
 import { replaceTokens } from './lib/replace_tokens';
-import { AlertMessage } from '../../server/alerts/types';
+import { AlertMessage, AlertState } from '../../server/alerts/types';
 
 const TYPES = [
   {
@@ -24,23 +24,24 @@ const TYPES = [
     severity: AlertSeverity.Danger,
     color: 'danger',
     label: i18n.translate('xpack.monitoring.alerts.callout.dangerLabel', {
-      defaultMessage: 'DAnger alert(s)',
+      defaultMessage: 'Danger alert(s)',
     }),
   },
 ];
 
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
-  const { alerts } = props;
+  const { alerts, stateFilter = () => true } = props;
 
   const callouts = TYPES.map((type) => {
     const list = [];
     for (const alertTypeId of Object.keys(alerts)) {
       const alertInstance = alerts[alertTypeId];
-      for (const { state } of alertInstance.states) {
-        if (state.ui.severity === type.severity) {
+      for (const { firing, state } of alertInstance.states) {
+        if (firing && stateFilter(state) && state.ui.severity === type.severity) {
           list.push(state);
         }
       }

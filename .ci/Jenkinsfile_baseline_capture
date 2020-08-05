@@ -4,23 +4,29 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 120) {
-  ciStats.trackBuild {
-    catchError {
-      parallel([
-        'oss-visualRegression': {
-          workers.ci(name: 'oss-visualRegression', size: 's', ramDisk: false) {
-            kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh')(1)
-          }
-        },
-        'xpack-visualRegression': {
-          workers.ci(name: 'xpack-visualRegression', size: 's', ramDisk: false) {
-            kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')(1)
-          }
-        },
-      ])
-    }
+  githubCommitStatus.trackBuild(params.commit, 'kibana-ci-baseline') {
+    ciStats.trackBuild {
+      catchError {
+        withEnv([
+          'CI_PARALLEL_PROCESS_NUMBER=1'
+        ]) {
+          parallel([
+            'oss-visualRegression': {
+              workers.ci(name: 'oss-visualRegression', size: 's-highmem', ramDisk: true) {
+                kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh')()
+              }
+            },
+            'xpack-visualRegression': {
+              workers.ci(name: 'xpack-visualRegression', size: 's-highmem', ramDisk: true) {
+                kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')()
+              }
+            },
+          ])
+        }
+      }
 
-    kibanaPipeline.sendMail()
-    slackNotifications.onFailure()
+      kibanaPipeline.sendMail()
+      slackNotifications.onFailure()
+    }
   }
 }

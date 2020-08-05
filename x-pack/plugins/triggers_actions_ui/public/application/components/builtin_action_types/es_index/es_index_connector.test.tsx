@@ -88,6 +88,7 @@ describe('IndexActionConnectorFields renders', () => {
         editActionSecrets={() => {}}
         http={deps!.http}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 

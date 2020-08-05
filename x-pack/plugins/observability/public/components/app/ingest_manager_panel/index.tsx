@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 
-export const IngestManagerPanel = () => {
+export function IngestManagerPanel() {
   return (
     <EuiPanel
       paddingSize="l"
@@ -40,7 +40,7 @@ export const IngestManagerPanel = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink href="https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager">
+          <EuiLink href="https://ela.st/ingest-manager-announcement">
             {i18n.translate('xpack.observability.ingestManafer.button', {
               defaultMessage: 'Try Ingest Manager Beta',
             })}
@@ -49,4 +49,4 @@ export const IngestManagerPanel = () => {
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}

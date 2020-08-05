@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS EC2 Encryption Disabled",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:DisableEbsEncryptionByDefault and event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
@@ -25,7 +26,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Data Protection",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

@@ -17,6 +17,7 @@ import {
 } from '../../../common/constants.mock';
 
 export const getListItemResponseMock = (): ListItemSchema => ({
+  _version: undefined,
   created_at: DATE_NOW,
   created_by: USER,
   deserializer: undefined,

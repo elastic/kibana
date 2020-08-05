@@ -27,7 +27,6 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
@@ -70,8 +69,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
       );
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     it('should return 200 when creating a webhook action successfully', async () => {
       const { body: createdAction } = await supertest

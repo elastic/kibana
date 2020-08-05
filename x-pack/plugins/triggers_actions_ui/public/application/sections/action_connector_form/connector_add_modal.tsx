@@ -166,6 +166,7 @@ export const ConnectorAddModal = ({
             actionTypeRegistry={actionTypeRegistry}
             docLinks={docLinks}
             http={http}
+            capabilities={capabilities}
             consumer={consumer}
           />
         </EuiModalBody>

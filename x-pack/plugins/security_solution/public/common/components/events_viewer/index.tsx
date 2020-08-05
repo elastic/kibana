@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
+import styled from 'styled-components';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
@@ -23,12 +24,20 @@ import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
 import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
+import { useFullScreen } from '../../containers/use_full_screen';
+
+const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+
+const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  display: flex;
+  width: 100%;
+`;
 
 export interface OwnProps {
   defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: string;
-  height?: number;
   id: string;
   start: string;
   headerFilterGroup?: React.ReactNode;
@@ -49,7 +58,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
-  height,
   id,
   isLive,
   itemsPerPage,
@@ -69,7 +77,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 }) => {
   const [
     { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
-  ] = useFetchIndexPatterns(defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY));
+  ] = useFetchIndexPatterns(
+    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+    'events_viewer'
+  );
+
+  const { globalFullScreen } = useFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -118,33 +131,34 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <InspectButtonContainer>
-      <EventsViewer
-        browserFields={browserFields}
-        columns={columns}
-        docValueFields={docValueFields}
-        id={id}
-        dataProviders={dataProviders!}
-        deletedEventIds={deletedEventIds}
-        end={end}
-        isLoadingIndexPattern={isLoadingIndexPattern}
-        filters={globalFilters}
-        headerFilterGroup={headerFilterGroup}
-        height={height}
-        indexPattern={indexPatterns}
-        isLive={isLive}
-        itemsPerPage={itemsPerPage!}
-        itemsPerPageOptions={itemsPerPageOptions!}
-        kqlMode={kqlMode}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        query={query}
-        start={start}
-        sort={sort}
-        toggleColumn={toggleColumn}
-        utilityBar={utilityBar}
-        graphEventId={graphEventId}
-      />
-    </InspectButtonContainer>
+    <FullScreenContainer $isFullScreen={globalFullScreen}>
+      <InspectButtonContainer>
+        <EventsViewer
+          browserFields={browserFields}
+          columns={columns}
+          docValueFields={docValueFields}
+          id={id}
+          dataProviders={dataProviders!}
+          deletedEventIds={deletedEventIds}
+          end={end}
+          isLoadingIndexPattern={isLoadingIndexPattern}
+          filters={globalFilters}
+          headerFilterGroup={headerFilterGroup}
+          indexPattern={indexPatterns}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          query={query}
+          start={start}
+          sort={sort}
+          toggleColumn={toggleColumn}
+          utilityBar={utilityBar}
+          graphEventId={graphEventId}
+        />
+      </InspectButtonContainer>
+    </FullScreenContainer>
   );
 };
 
@@ -206,7 +220,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 export const StatefulEventsViewer = connector(
   React.memo(
     StatefulEventsViewerComponent,
-    // eslint-disable-next-line complexity
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -216,7 +229,6 @@ export const StatefulEventsViewer = connector(
       prevProps.deletedEventIds === nextProps.deletedEventIds &&
       prevProps.end === nextProps.end &&
       deepEqual(prevProps.filters, nextProps.filters) &&
-      prevProps.height === nextProps.height &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

@@ -18,7 +18,7 @@ import { PageLoadDistribution } from './PageLoadDistribution';
 import { I18LABELS } from './translations';
 import { VisitorBreakdown } from './VisitorBreakdown';
 
-export const RumDashboard = () => {
+export function RumDashboard() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -54,4 +54,4 @@ export const RumDashboard = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}
