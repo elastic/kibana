@@ -8,7 +8,12 @@ import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { HttpSetup } from 'src/core/public';
 import { JobId, SourceJob } from '../../common/types';
-import { API_BASE_GENERATE, API_LIST_URL, REPORTING_MANAGEMENT_HOME } from '../../constants';
+import {
+  API_BASE_URL,
+  API_BASE_GENERATE,
+  API_LIST_URL,
+  REPORTING_MANAGEMENT_HOME,
+} from '../../constants';
 import { add } from './job_completion_notifications';
 
 export interface JobQueueEntry {
@@ -57,6 +62,12 @@ export interface JobInfo {
 
 interface JobParams {
   [paramName: string]: any;
+}
+
+export interface DiagnoseResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
 }
 
 export class ReportingAPIClient {
@@ -161,24 +172,24 @@ export class ReportingAPIClient {
   /*
    * Diagnostic-related API calls
    */
-  public verifyConfig = () =>
-    this.http.post(`${API_LIST_URL}/diagnose/config`, {
+  public verifyConfig = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/config`, {
       asSystemRequest: true,
     });
 
   /*
    * Diagnostic-related API calls
    */
-  public verifyBrowser = () =>
-    this.http.post(`${API_LIST_URL}/diagnose/browser`, {
+  public verifyBrowser = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
 
   /*
    * Diagnostic-related API calls
    */
-  public verifyScreenCapture = () =>
-    this.http.post(`${API_LIST_URL}/diagnose/screen-capture`, {
+  public verifyScreenCapture = (): Promise<DiagnoseResponse> =>
+    this.http.post(`${API_BASE_URL}/diagnose/screen-capture`, {
       asSystemRequest: true,
     });
 }

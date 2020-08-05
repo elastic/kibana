@@ -15,11 +15,9 @@ const KIBANA_MAX_SIZE_BYTES_PATH = 'csv.maxSizeBytes';
 const ES_MAX_SIZE_BYTES_PATH = 'http.max_content_length';
 
 interface ConfigResponse {
-  body: {
-    help: string[];
-    configDiagnoseSuccessful: boolean;
-    configLogs: string;
-  };
+  help: string[];
+  success: boolean;
+  logs: string;
 }
 
 export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger) => {
@@ -66,15 +64,13 @@ export const registerDiagnoseConfig = (reporting: ReportingCore, logger: Logger)
         warnings.forEach((warn) => logger.warn(warn));
       }
 
-      const response: ConfigResponse = {
-        body: {
-          help: [],
-          configDiagnoseSuccessful: !warnings.length,
-          configLogs: warnings.join('\n'),
-        },
+      const body: ConfigResponse = {
+        help: warnings,
+        success: !warnings.length,
+        logs: warnings.join('\n'),
       };
 
-      return res.ok(response);
+      return res.ok({ body });
     })
   );
 };

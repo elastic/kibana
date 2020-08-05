@@ -45,8 +45,8 @@ const defaultArgs = [
 
 interface BrowserDiagnosticPayload {
   help: string[];
-  browserStartedSuccessfully: boolean;
-  browserLogs: string;
+  success: boolean;
+  logs: string;
 }
 
 export const browserTest = (
@@ -105,17 +105,17 @@ export const browserTest = (
 
       return resolve({
         help,
-        browserLogs,
-        browserStartedSuccessfully: !err,
+        logs: browserLogs,
+        success: !err && !help.length,
       });
     };
 
+    const rl = createInterface({ input: browserProcess.stderr });
     const timer = setTimeout(
       () => cleanup(new Error(`Browser didn't bind successfully in ${maxTimeToWait} milliseconds`)),
       maxTimeToWait
     );
 
-    const rl = createInterface({ input: browserProcess.stderr });
     rl.on('line', (data) => {
       logger.debug(`Browser log output: "${data}"`);
       browserLogs += data + '\n';

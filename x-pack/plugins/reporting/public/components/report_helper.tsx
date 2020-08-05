@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -18,59 +19,83 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient, DiagnoseResponse } from '../lib/reporting_api_client';
 
 interface Props {
   apiClient: ReportingAPIClient;
 }
 
-type status = 'danger' | 'incomplete' | 'complete';
+type resultStatus = 'danger' | 'incomplete' | 'complete';
+
+enum statuses {
+  configStatus = 'configStatus',
+  chromeStatus = 'chromeStatus',
+  screenshotStatus = 'screenshotStatus',
+}
 
 interface State {
   isFlyoutVisible: boolean;
-  configStatus: status;
-  chromeStatus: status;
-  screenshotStatus: status;
-  error: string;
+  configStatus: resultStatus;
+  chromeStatus: resultStatus;
+  screenshotStatus: resultStatus;
+  help: string[];
+  logs: string;
   isBusy: boolean;
+  success: boolean;
 }
 
-const diceRoll = () => {
-  return Math.floor(Math.random() * Math.floor(10)) <= 7;
-};
-
 const initialState: State = {
+  [statuses.configStatus]: 'incomplete',
+  [statuses.chromeStatus]: 'incomplete',
+  [statuses.screenshotStatus]: 'incomplete',
   isFlyoutVisible: false,
-  configStatus: 'incomplete',
-  chromeStatus: 'incomplete',
-  screenshotStatus: 'incomplete',
-  error: '',
+  help: [],
+  logs: '',
   isBusy: false,
+  success: true,
 };
 
 export const ReportHelper = ({ apiClient }: Props) => {
   const [state, setStateBase] = useState(initialState);
-  const { configStatus, isBusy, screenshotStatus, chromeStatus, error, isFlyoutVisible } = state;
   const setState = (s: Partial<typeof state>) =>
     setStateBase({
       ...state,
       ...s,
     });
+  const {
+    configStatus,
+    isBusy,
+    screenshotStatus,
+    chromeStatus,
+    isFlyoutVisible,
+    help,
+    logs,
+    success,
+  } = state;
 
   const closeFlyout = () => setState({ ...initialState, isFlyoutVisible: false });
   const showFlyout = () => setState({ isFlyoutVisible: true });
-  const sleepRun = (fn: any) => () => {
+  const apiWrapper = (apiMethod: () => Promise<DiagnoseResponse>, statusProp: statuses) => () => {
     setState({ isBusy: true });
-    setTimeout(() => {
-      const isGood = diceRoll();
-      setState({ isBusy: false });
-
-      if (isGood) {
-        setState({ error: '' });
-        return fn();
-      }
-      setState({ error: 'Unable to load configuration properly for user...' });
-    }, 1500);
+    apiMethod()
+      .then((response) => {
+        setState({
+          isBusy: false,
+          help: response.help,
+          logs: response.logs,
+          success: response.success,
+          [statusProp]: response.success ? 'complete' : 'danger',
+        });
+      })
+      .catch((error) => {
+        setState({
+          isBusy: false,
+          help: [`There was a problem running the diagnostic: ${error}`],
+          logs: `${error.message}\n${error.stack}`,
+          success: false,
+          [statusProp]: 'danger',
+        });
+      });
   };
 
   const steps = [
@@ -78,40 +103,43 @@ export const ReportHelper = ({ apiClient }: Props) => {
       title: 'Verify Kibana Configuration',
       children: (
         <Fragment>
-          <p>This ensure your Kibana configuration is setup properly for reports</p>
+          <p>This ensures your Kibana configuration is setup properly for reports</p>
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || configStatus === 'complete'}
             isLoading={isBusy && configStatus === 'incomplete'}
-            onClick={sleepRun(() => setState({ configStatus: 'complete' }))}
+            onClick={apiWrapper(apiClient.verifyConfig, statuses.configStatus)}
             iconType={configStatus === 'complete' ? 'check' : undefined}
           >
             Verify Configuration
           </EuiButton>
         </Fragment>
       ),
-      status: error && configStatus !== 'complete' ? 'danger' : configStatus,
+      status: !success && configStatus !== 'complete' ? 'danger' : configStatus,
     },
   ];
 
   if (configStatus === 'complete') {
     steps.push({
-      title: 'Check Chromium',
+      title: 'Check Browser',
       children: (
         <Fragment>
-          <p>This validates that the chromium binary can run properly</p>
+          <p>
+            Reporting utilizes a headless browser to generate PDF and PNGS, this check validates
+            that the browser binary can run properly
+          </p>
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || chromeStatus === 'complete'}
-            onClick={sleepRun(() => setState({ chromeStatus: 'complete' }))}
+            onClick={apiWrapper(apiClient.verifyBrowser, statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
             iconType={chromeStatus === 'complete' ? 'check' : undefined}
           >
-            Check Chromium
+            Check Browser
           </EuiButton>
         </Fragment>
       ),
-      status: error && chromeStatus !== 'complete' ? 'danger' : chromeStatus,
+      status: !success && chromeStatus !== 'complete' ? 'danger' : chromeStatus,
     });
   }
 
@@ -124,7 +152,7 @@ export const ReportHelper = ({ apiClient }: Props) => {
           <EuiSpacer />
           <EuiButton
             disabled={isBusy || screenshotStatus === 'complete'}
-            onClick={sleepRun(() => setState({ screenshotStatus: 'complete' }))}
+            onClick={apiWrapper(apiClient.verifyScreenCapture, statuses.screenshotStatus)}
             isLoading={isBusy && screenshotStatus === 'incomplete'}
             iconType={screenshotStatus === 'complete' ? 'check' : undefined}
           >
@@ -132,7 +160,7 @@ export const ReportHelper = ({ apiClient }: Props) => {
           </EuiButton>
         </Fragment>
       ),
-      status: error && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,
+      status: !success && screenshotStatus !== 'complete' ? 'danger' : screenshotStatus,
     });
   }
 
@@ -144,17 +172,27 @@ export const ReportHelper = ({ apiClient }: Props) => {
           <p>Excellent! Everything looks like shipshape for reporting to function!</p>
         </Fragment>
       ),
-      status: error ? 'danger' : screenshotStatus,
+      status: !success ? 'danger' : screenshotStatus,
     });
   }
 
-  if (error) {
+  if (!success) {
     steps.push({
       title: "Whoops! Looks like something isn't working properly.",
       children: (
-        <EuiCallOut color="danger" iconType="alert">
-          <p>{error}</p>
-        </EuiCallOut>
+        <Fragment>
+          <EuiCallOut color="danger" iconType="alert">
+            <p>{help.join('\n')}</p>
+          </EuiCallOut>
+          {logs && (
+            <Fragment>
+              <EuiSpacer />
+              <p>Here are some more details about the issue:</p>
+              <EuiSpacer />
+              <EuiCodeBlock>{logs}</EuiCodeBlock>
+            </Fragment>
+          )}
+        </Fragment>
       ),
       status: 'danger',
     });

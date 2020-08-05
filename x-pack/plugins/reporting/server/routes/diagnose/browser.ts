@@ -9,6 +9,12 @@ import { API_DIAGNOSE_URL } from '../../../common/constants';
 import { authorizedUserPreRoutingFactory } from '../lib/authorized_user_pre_routing';
 import { LevelLogger as Logger } from '../../lib';
 
+interface BrowserResponse {
+  help: string[];
+  success: boolean;
+  logs: string;
+}
+
 export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger) => {
   const setupDeps = reporting.getPluginSetupDeps();
   const userHandler = authorizedUserPreRoutingFactory(reporting);
@@ -23,7 +29,7 @@ export const registerDiagnoseBrowser = (reporting: ReportingCore, logger: Logger
     },
     userHandler(async (user, context, req, res) => {
       const { browserDriverFactory } = await reporting.getPluginStartDeps();
-      const body = await browserDriverFactory.test(logger);
+      const body: BrowserResponse = await browserDriverFactory.test(logger);
 
       return res.ok({ body });
     })
