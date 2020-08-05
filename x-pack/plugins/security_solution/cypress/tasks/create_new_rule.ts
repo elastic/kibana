@@ -8,6 +8,7 @@ import {
   CustomRule,
   MachineLearningRule,
   machineLearningRule,
+  OverrideRule,
   ThresholdRule,
 } from '../objects/rule';
 import {
@@ -92,7 +93,73 @@ export const fillAboutRuleAndContinue = (
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
 };
 
-export const fillDefineCustomRuleWithImportedQueryAndContinue = (rule: CustomRule) => {
+export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
+  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
+
+  cy.get('#severity-mapping-override').click();
+  rule.severityOverride.forEach((severity, i) => {
+    cy.get('[data-test-subj="severityOverrideRow"]')
+      .eq(i)
+      .within(() => {
+        cy.get('[data-test-subj="comboBoxInput"]').eq(0).type(`${severity.sourceField}{enter}`);
+        cy.get('[data-test-subj="comboBoxInput"]').eq(1).type(`${severity.sourceValue}{enter}`);
+      });
+  });
+
+  cy.get(SEVERITY_DROPDOWN).click({ force: true });
+  cy.get(`#${rule.severity.toLowerCase()}`).click();
+
+  cy.get('#risk_score-mapping-override').click();
+  cy.get('[data-test-subj="detectionEngineStepAboutRuleRiskScore-riskOverride"]').within(() => {
+    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.riskOverride}{enter}`);
+  });
+
+  cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
+
+  rule.tags.forEach((tag) => {
+    cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
+  });
+
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
+
+  rule.referenceUrls.forEach((url, index) => {
+    cy.get(REFERENCE_URLS_INPUT).eq(index).type(url, { force: true });
+    cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
+  });
+
+  rule.falsePositivesExamples.forEach((falsePositive, index) => {
+    cy.get(FALSE_POSITIVES_INPUT).eq(index).type(falsePositive, { force: true });
+    cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
+  });
+
+  rule.mitre.forEach((mitre, index) => {
+    cy.get(MITRE_TACTIC_DROPDOWN).eq(index).click({ force: true });
+    cy.contains(MITRE_TACTIC, mitre.tactic).click();
+
+    mitre.techniques.forEach((technique) => {
+      cy.get(MITRE_TECHNIQUES_INPUT).eq(index).type(`${technique}{enter}`, { force: true });
+    });
+
+    cy.get(MITRE_BTN).click({ force: true });
+  });
+
+  cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
+
+  cy.get('[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]').within(() => {
+    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.nameOverride}{enter}`);
+  });
+
+  cy.get('[data-test-subj="detectionEngineStepAboutRuleTimestampOverride"]').within(() => {
+    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.timestampOverride}{enter}`);
+  });
+
+  cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
+};
+
+export const fillDefineCustomRuleWithImportedQueryAndContinue = (
+  rule: CustomRule | OverrideRule
+) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(rule.timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', rule.customQuery);
