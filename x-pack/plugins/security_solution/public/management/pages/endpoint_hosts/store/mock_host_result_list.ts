@@ -140,7 +140,7 @@ const hostListApiPathHandlerMocks = ({
   // Build a GET route handler for each host details based on the list of Hosts passed on input
   if (hostsResults) {
     hostsResults.forEach((host) => {
-      // @ts-ignore
+      // @ts-expect-error
       apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
     });
   }

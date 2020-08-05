@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
 import { ReactChildren } from 'react';
 import path from 'path';
 import moment from 'moment';
@@ -93,6 +94,12 @@ import { RenderedElement } from '../shareable_runtime/components/rendered_elemen
 jest.mock('../shareable_runtime/components/rendered_element');
 // @ts-expect-error
 RenderedElement.mockImplementation(() => 'RenderedElement');
+
+// Some of the code requires that this directory exists, but the tests don't actually require any css to be present
+const cssDir = path.resolve(__dirname, '../../../../built_assets/css');
+if (!fs.existsSync(cssDir)) {
+  fs.mkdirSync(cssDir, { recursive: true });
+}
 
 addSerializer(styleSheetSerializer);
 
