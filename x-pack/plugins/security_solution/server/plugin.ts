@@ -16,7 +16,6 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
-  SavedObjectsRepository,
   ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
