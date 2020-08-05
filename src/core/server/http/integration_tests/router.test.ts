@@ -425,11 +425,24 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.post(
-          { path: '/a', validate: false, options: { timeout: { payload: 10000 } } },
+          {
+            path: '/a',
+            validate: false,
+            options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
+          },
           async (context, req, res) => res.ok({})
         );
         await server.start();
-        await supertest(innerServer.listener).post('/a').expect(200, {});
+
+        // start the request
+        const request = supertest(innerServer.listener)
+          .post('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        const result = writeBodyCharAtATime(request, '{}', 10);
+
+        await expect(result).resolves.toHaveProperty('status', 200);
       });
 
       it('should not timeout if PUT payload sending is quick', async () => {
@@ -437,12 +450,23 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.put(
-          { path: '/a', validate: false, options: { timeout: { payload: 10000 } } },
+          {
+            path: '/a',
+            validate: false,
+            options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
+          },
           async (context, req, res) => res.ok({})
         );
         await server.start();
 
-        await supertest(innerServer.listener).put('/a').expect(200, {});
+        const request = supertest(innerServer.listener)
+          .put('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        const result = writeBodyCharAtATime(request, '{}', 10);
+
+        await expect(result).resolves.toHaveProperty('status', 200);
       });
 
       it('should not timeout if DELETE payload sending is quick', async () => {
@@ -450,11 +474,22 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.delete(
-          { path: '/a', validate: false, options: { timeout: { payload: 10000 } } },
+          {
+            path: '/a',
+            validate: false,
+            options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
+          },
           async (context, req, res) => res.ok({})
         );
         await server.start();
-        await supertest(innerServer.listener).delete('/a').expect(200, {});
+        const request = supertest(innerServer.listener)
+          .delete('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        const result = writeBodyCharAtATime(request, '{}', 10);
+
+        await expect(result).resolves.toHaveProperty('status', 200);
       });
     });
   });
