@@ -9,3 +9,19 @@ import { i18n } from '@kbn/i18n';
 export const NAME = i18n.translate('xpack.actions.builtin.case.resilientTitle', {
   defaultMessage: 'IBM Resilient',
 });
+
+export const WHITE_LISTED_ERROR = (message: string) =>
+  i18n.translate('xpack.actions.builtin.configuration.apiWhitelistError', {
+    defaultMessage: 'error configuring connector action: {message}',
+    values: {
+      message,
+    },
+  });
+
+// TODO: remove when Case mappings will be removed
+export const MAPPING_EMPTY = i18n.translate(
+  'xpack.actions.builtin.servicenow.configuration.emptyMapping',
+  {
+    defaultMessage: '[incidentConfiguration.mapping]: expected non-empty but got empty',
+  }
+);
