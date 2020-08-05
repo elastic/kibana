@@ -22,7 +22,7 @@ export type TTitle = string[];
  * @param pages - e.g., ['Curations', 'some Engine', 'App Search']
  * @returns - e.g., 'Curations | some Engine | App Search'
  */
-export const generateTitle = (pages: TTitle) => pages.join(' | ');
+export const generateTitle = (pages: TTitle) => pages.join(' - ');
 
 /**
  * Product-specific helpers
