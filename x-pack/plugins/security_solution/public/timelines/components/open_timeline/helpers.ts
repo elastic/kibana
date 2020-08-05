@@ -238,7 +238,6 @@ export const getTimelineStatus = (
   return duplicate ? TimelineStatus.active : timeline.status;
 };
 
-// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
@@ -374,7 +373,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  dispatch(dispatchAddTimeline({ id, timeline }));
+  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
     timeline.kqlQuery.filterQuery != null &&

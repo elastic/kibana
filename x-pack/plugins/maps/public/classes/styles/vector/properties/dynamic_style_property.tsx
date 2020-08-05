@@ -11,9 +11,10 @@ import { Feature } from 'geojson';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
-  STYLE_TYPE,
-  SOURCE_META_DATA_REQUEST_ID,
   FIELD_ORIGIN,
+  MB_LOOKUP_FUNCTION,
+  SOURCE_META_DATA_REQUEST_ID,
+  STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
@@ -21,8 +22,8 @@ import { CategoricalFieldMetaPopover } from '../components/field_meta/categorica
 import {
   CategoryFieldMeta,
   FieldMetaOptions,
-  StyleMetaData,
   RangeFieldMeta,
+  StyleMetaData,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
@@ -41,12 +42,13 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   supportsFieldMeta(): boolean;
   getFieldMetaRequest(): Promise<unknown>;
   supportsMbFeatureState(): boolean;
+  getMbLookupFunction(): MB_LOOKUP_FUNCTION;
   pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
 }
 
-type fieldFormatter = (value: string | undefined) => string;
+type fieldFormatter = (value: string | number | undefined) => string | number;
 
 export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
@@ -69,12 +71,10 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     this._getFieldFormatter = getFieldFormatter;
   }
 
-  // ignore TS error about "Type '(query: string) => Promise<string[]> | never[]' is not assignable to type '(query: string) => Promise<string[]>'."
-  // @ts-expect-error
-  getValueSuggestions = (query: string) => {
+  getValueSuggestions = async (query: string) => {
     return this._field === null
       ? []
-      : this._field.getSource().getValueSuggestions(this._field, query);
+      : await this._field.getSource().getValueSuggestions(this._field, query);
   };
 
   _getStyleMetaDataRequestId(fieldName: string) {
@@ -195,7 +195,13 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   }
 
   supportsMbFeatureState() {
-    return true;
+    return !!this._field && this._field.canReadFromGeoJson();
+  }
+
+  getMbLookupFunction(): MB_LOOKUP_FUNCTION {
+    return this.supportsMbFeatureState()
+      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
+      : MB_LOOKUP_FUNCTION.GET;
   }
 
   getFieldMetaOptions() {
@@ -306,7 +312,7 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     };
   }
 
-  formatField(value: string | undefined): string {
+  formatField(value: string | number | undefined): string | number {
     if (this.getField()) {
       const fieldName = this.getFieldName();
       const fieldFormatter = this._getFieldFormatter(fieldName);
@@ -314,10 +320,6 @@ export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
     } else {
       return super.formatField(value);
     }
-  }
-
-  renderLegendDetailRow() {
-    return null;
   }
 
   renderFieldMetaPopover(onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void) {
