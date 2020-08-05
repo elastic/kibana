@@ -393,14 +393,14 @@ const updateExistingIndex = async ({
   // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
-  delete mappings.properties.datastream;
+  delete mappings.properties.data_stream;
 
-  // get the datastream values from the index template to compose data stream name
+  // get the data_stream values from the index template to compose data stream name
   const indexMappings = await getIndexMappings(indexName, callCluster);
-  const datastream = indexMappings[indexName].mappings.properties.datastream.properties;
-  if (!datastream.type.value || !datastream.dataset.value || !datastream.namespace.value)
-    throw new Error(`datastream values are missing from the index template ${indexName}`);
-  const datastreamName = `${datastream.type.value}-${datastream.dataset.value}-${datastream.namespace.value}`;
+  const dataStream = indexMappings[indexName].mappings.properties.data_stream.properties;
+  if (!dataStream.type.value || !dataStream.dataset.value || !dataStream.namespace.value)
+    throw new Error(`data_stream values are missing from the index template ${indexName}`);
+  const dataStreamName = `${dataStream.type.value}-${dataStream.dataset.value}-${dataStream.namespace.value}`;
 
   // try to update the mappings first
   try {
@@ -411,13 +411,13 @@ const updateExistingIndex = async ({
     // if update fails, rollover data stream
   } catch (err) {
     try {
-      const path = `/${datastreamName}/_rollover`;
+      const path = `/${dataStreamName}/_rollover`;
       await callCluster('transport.request', {
         method: 'POST',
         path,
       });
     } catch (error) {
-      throw new Error(`cannot rollover data stream ${datastreamName}`);
+      throw new Error(`cannot rollover data stream ${dataStreamName}`);
     }
   }
   // update settings after mappings was successful to ensure
