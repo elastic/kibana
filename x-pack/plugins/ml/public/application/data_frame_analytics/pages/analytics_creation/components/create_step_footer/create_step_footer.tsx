@@ -4,38 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { FC, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlKibana } from '../../../../../contexts/kibana';
+
 import {
   getDataFrameAnalyticsProgressPhase,
   DATA_FRAME_TASK_STATE,
 } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
-import { DataFrameAnalyticsId } from '../../../../common/analytics';
+import { BackToListPanel } from '../back_to_list_panel';
+import { ViewResultsPanel } from '../view_results_panel';
+import { ProgressStats } from './progress_stats';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
-export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) => {
+interface Props {
+  jobId: string;
+  jobType: ANALYSIS_CONFIG_TYPE;
+  showProgress: boolean;
+}
+
+export interface AnalyticsProgressStats {
+  currentPhase: number;
+  progress: number;
+  totalPhases: number;
+}
+
+export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) => {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [failedJobMessage, setFailedJobMessage] = useState<string | undefined>(undefined);
-  const [currentProgress, setCurrentProgress] = useState<
-    | {
-        currentPhase: number;
-        progress: number;
-        totalPhases: number;
-      }
-    | undefined
-  >(undefined);
+  const [jobFinished, setJobFinished] = useState<boolean>(false);
+  const [currentProgress, setCurrentProgress] = useState<AnalyticsProgressStats | undefined>(
+    undefined
+  );
 
   const {
     services: { notifications },
@@ -77,6 +82,7 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
             jobStats.state === DATA_FRAME_TASK_STATE.STOPPED
           ) {
             clearInterval(interval);
+            setJobFinished(true);
           }
         } else {
           clearInterval(interval);
@@ -95,62 +101,26 @@ export const ProgressStats: FC<{ jobId: DataFrameAnalyticsId }> = ({ jobId }) =>
     return () => clearInterval(interval);
   }, [initialized]);
 
-  if (currentProgress === undefined) return null;
-
   return (
-    <>
-      <EuiSpacer />
-      {failedJobMessage !== undefined && (
-        <>
-          <EuiCallOut
-            data-test-subj="analyticsWizardProgressCallout"
-            title={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutTitle',
-              {
-                defaultMessage: 'Job failed',
-              }
-            )}
-            color={'danger'}
-            iconType={'alert'}
-            size="s"
-          >
-            <p>{failedJobMessage}</p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <EuiText size="m">
-        <strong>
-          {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressTitle', {
-            defaultMessage: 'Progress',
-          })}
-        </strong>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.analyticsProgressPhaseTitle', {
-                defaultMessage: 'Phase',
-              })}{' '}
-              {currentProgress.currentPhase}/{currentProgress.totalPhases}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ width: '400px' }} grow={false}>
-          <EuiProgress
-            value={currentProgress.progress}
-            max={100}
-            color="primary"
-            size="l"
-            data-test-subj="mlAnalyticsCreationWizardProgress"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{`${currentProgress.progress}%`}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={false}>
+        {showProgress && (
+          <ProgressStats currentProgress={currentProgress} failedJobMessage={failedJobMessage} />
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiHorizontalRule />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <BackToListPanel />
+          </EuiFlexItem>
+          {jobFinished === true && (
+            <EuiFlexItem grow={false}>
+              <ViewResultsPanel jobId={jobId} analysisType={jobType} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

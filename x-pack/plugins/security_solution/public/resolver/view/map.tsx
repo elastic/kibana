@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 /* eslint-disable react/display-name */
 
 import React, { useContext } from 'react';
