@@ -14,7 +14,7 @@ const MyEuiButton = styled(EuiButton)`
   min-width: 95px;
 `;
 
-interface BuilderButtonOptionsProps {
+interface BuilderLogicButtonsProps {
   isOrDisabled: boolean;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
@@ -26,7 +26,7 @@ interface BuilderButtonOptionsProps {
   onAddClickWhenNested: () => void;
 }
 
-export const BuilderButtonOptions: React.FC<BuilderButtonOptionsProps> = ({
+export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
   isOrDisabled = false,
   isAndDisabled = false,
   showNestedButton = false,
