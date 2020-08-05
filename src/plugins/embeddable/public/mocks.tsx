@@ -109,6 +109,7 @@ export const mockRefOrValEmbeddable = <
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
+    registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
@@ -118,6 +119,9 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
