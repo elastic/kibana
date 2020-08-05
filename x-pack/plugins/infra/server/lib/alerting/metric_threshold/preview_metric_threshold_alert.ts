@@ -28,6 +28,8 @@ interface PreviewMetricThresholdAlertParams {
   config: InfraSource['configuration'];
   lookback: Unit;
   alertInterval: string;
+  alertThrottle: string;
+  alertOnNoData: boolean;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
 }
@@ -43,6 +45,8 @@ export const previewMetricThresholdAlert: (
     config,
     lookback,
     alertInterval,
+    alertThrottle,
+    alertOnNoData,
     end = Date.now(),
     overrideLookbackIntervalInSeconds,
   },
@@ -75,6 +79,10 @@ export const previewMetricThresholdAlert: (
     // Now determine how to interpolate this histogram based on the alert interval
     const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
     const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
+    const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
+    const executionsPerThrottle = Math.floor(
+      (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
+    );
     const previewResults = await Promise.all(
       groups.map(async (group) => {
         // Interpolate the buckets returned by evaluateAlert and return a count of how many of these
@@ -88,6 +96,12 @@ export const previewMetricThresholdAlert: (
         let numberOfTimesFired = 0;
         let numberOfNoDataResults = 0;
         let numberOfErrors = 0;
+        let numberOfNotifications = 0;
+        let throttleTracker = 0;
+        const notifyWithThrottle = () => {
+          if (throttleTracker === 0) numberOfNotifications++;
+          throttleTracker++;
+        };
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
           const allConditionsFiredInMappedBucket = alertResults.every(
@@ -100,11 +114,27 @@ export const previewMetricThresholdAlert: (
           const someConditionsErrorInMappedBucket = alertResults.some((alertResult) => {
             return alertResult[group].isError;
           });
-          if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
-          if (someConditionsNoDataInMappedBucket) numberOfNoDataResults++;
-          if (someConditionsErrorInMappedBucket) numberOfErrors++;
+          if (someConditionsErrorInMappedBucket) {
+            numberOfErrors++;
+            if (alertOnNoData) {
+              notifyWithThrottle();
+            }
+          } else if (someConditionsNoDataInMappedBucket) {
+            numberOfNoDataResults++;
+            if (alertOnNoData) {
+              notifyWithThrottle();
+            }
+          } else if (allConditionsFiredInMappedBucket) {
+            numberOfTimesFired++;
+            notifyWithThrottle();
+          } else if (throttleTracker > 0) {
+            throttleTracker++;
+          }
+          if (throttleTracker === executionsPerThrottle) {
+            throttleTracker = 0;
+          }
         }
-        return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors];
+        return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors, numberOfNotifications];
       })
     );
     return previewResults;
@@ -112,7 +142,15 @@ export const previewMetricThresholdAlert: (
     if (isTooManyBucketsPreviewException(e)) {
       // If there's too much data on the first request, recursively slice the lookback interval
       // until all the data can be retrieved
-      const basePreviewParams = { callCluster, params, config, lookback, alertInterval };
+      const basePreviewParams = {
+        callCluster,
+        params,
+        config,
+        lookback,
+        alertInterval,
+        alertThrottle,
+        alertOnNoData,
+      };
       const { maxBuckets } = e;
       // If this is still the first iteration, try to get the number of groups in order to
       // calculate max buckets. If this fails, just estimate based on 1 group
@@ -156,7 +194,7 @@ export const previewMetricThresholdAlert: (
           .reduce((a, b) => {
             if (!a) return b;
             if (!b) return a;
-            return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+            return [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
           })
       );
       return zippedResult as any;

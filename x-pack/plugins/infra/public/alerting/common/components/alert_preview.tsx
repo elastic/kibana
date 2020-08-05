@@ -33,6 +33,7 @@ import { getAlertPreview, PreviewableAlertTypes } from './get_alert_preview';
 
 interface Props {
   alertInterval: string;
+  alertThrottle: string;
   alertType: PreviewableAlertTypes;
   fetch: HttpSetup['fetch'];
   alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
@@ -45,6 +46,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
   const {
     alertParams,
     alertInterval,
+    alertThrottle,
     fetch,
     alertType,
     validate,
@@ -73,6 +75,8 @@ export const AlertPreview: React.FC<Props> = (props) => {
           ...alertParams,
           lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
           alertInterval,
+          alertThrottle,
+          alertOnNoData: showNoDataResults ?? false,
         } as AlertPreviewRequestParams,
         alertType,
       });
@@ -100,6 +104,13 @@ export const AlertPreview: React.FC<Props> = (props) => {
     );
     return hasValidationErrors || previewIntervalError;
   }, [alertParams.criteria, previewIntervalError, validate]);
+
+  const showNumberOfNotifications = useMemo(() => {
+    if (!previewResult) return false;
+    const { notifications, fired, noData, error } = previewResult.resultTotals;
+    const unthrottledNotifications = fired + (showNoDataResults ? noData + error : 0);
+    return unthrottledNotifications > notifications;
+  }, [previewResult, showNoDataResults]);
 
   return (
     <EuiFormRow
@@ -188,7 +199,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                   id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
                   defaultMessage="There {noData, plural, one {was # result} other {were # results}} of no data."
                   values={{
-                    noData: <strong>{previewResult.resultTotals.noData}</strong>,
+                    noData: <strong>previewResult.resultTotals.noData</strong>,
                   }}
                 />
               ) : null}{' '}
@@ -198,6 +209,32 @@ export const AlertPreview: React.FC<Props> = (props) => {
                   defaultMessage="An error occurred when trying to evaluate some of the data."
                 />
               ) : null}
+              {showNumberOfNotifications ? (
+                <>
+                  <EuiSpacer size={'s'} />
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.alertPreviewTotalNotifications"
+                    defaultMessage="Based on the {notifyEvery} setting, this alert would have sent {notifications}."
+                    values={{
+                      notifyEvery: <strong>Notify every</strong>,
+                      notifications: (
+                        <strong>
+                          {i18n.translate(
+                            'xpack.infra.metrics.alertFlyout.alertPreviewTotalNotificationsNumber',
+                            {
+                              defaultMessage:
+                                '{notifs, plural, one {# notification} other {# notifications}}',
+                              values: {
+                                notifs: previewResult.resultTotals.notifications,
+                              },
+                            }
+                          )}
+                        </strong>
+                      ),
+                    }}
+                  />
+                </>
+              ) : null}{' '}
             </EuiCallOut>
           </>
         )}
