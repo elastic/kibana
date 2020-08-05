@@ -163,8 +163,8 @@ export class HttpServer {
         const validate = isSafeMethod(route.method) ? undefined : { payload: true };
         const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
-        // Hapi does not allow timeouts on payloads to be specified for 'head' or 'get' requests
-        const payloadTimeout = isSafeMethod(route.method) ? undefined : timeout?.payload;
+        // Hapi does not allow timeouts on payloads to be specified for 'head' or 'get' requests so neither do we
+        const payloadTimeout = timeout?.payload;
 
         let socketTimeout: number | undefined;
         if (timeout?.idleSocket) {
