@@ -33,6 +33,11 @@ export interface CustomRule {
   timelineId: string;
 }
 
+export interface ThresholdRule extends CustomRule {
+  thresholdField: string;
+  threshold: string;
+}
+
 export interface MachineLearningRule {
   machineLearningJob: string;
   anomalyScoreThreshold: string;
@@ -70,6 +75,22 @@ export const newRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+};
+
+export const newThresholdRule: ThresholdRule = {
+  customQuery: 'host.name:*',
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  thresholdField: 'host.name',
+  threshold: '10',
 };
 
 export const machineLearningRule: MachineLearningRule = {
