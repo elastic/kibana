@@ -25,6 +25,7 @@ import {
   InsufficientAnomalyMlJobsConfigured,
   InsufficientLogAnalysisMlJobConfigurationError,
   UnknownCategoryError,
+  isMlPrivilegesError,
 } from './errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
@@ -65,7 +66,10 @@ async function getCompatibleAnomaliesJobIds(
     jobIds.push(logRateJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
-    // Job wasn't found
+    if (isMlPrivilegesError(e)) {
+      throw e;
+    }
+    // An error is also thrown when no jobs are found
   }
 
   try {
@@ -75,7 +79,10 @@ async function getCompatibleAnomaliesJobIds(
     jobIds.push(logCategoriesJobId);
     jobSpans = [...jobSpans, ...spans];
   } catch (e) {
-    // Job wasn't found
+    if (isMlPrivilegesError(e)) {
+      throw e;
+    }
+    // An error is also thrown when no jobs are found
   }
 
   return {
