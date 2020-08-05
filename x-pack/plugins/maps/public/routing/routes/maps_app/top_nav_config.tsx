@@ -108,12 +108,10 @@ export function getTopNavConfig({
     setBreadcrumbs();
     goToSpecifiedPath(`/map/${id}${window.location.hash}`);
 
-    if (newCopyOnSave && !returnToOrigin) {
+    const newlyCreated = newCopyOnSave || isNewMap;
+    if (newlyCreated && !returnToOrigin) {
       cutOriginatingAppConnection();
-    }
-
-    if (!!originatingApp && returnToOrigin) {
-      const newlyCreated = newCopyOnSave || isNewMap;
+    } else if (!!originatingApp && returnToOrigin) {
       if (newlyCreated && stateTransfer) {
         stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
           state: { id, type: MAP_SAVED_OBJECT_TYPE },

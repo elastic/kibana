@@ -143,7 +143,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
       if (uncheckReturnToOriginModeSwitch) {
-        const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
         if (!redirectToOriginCheckboxExists) {
           throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
         }
