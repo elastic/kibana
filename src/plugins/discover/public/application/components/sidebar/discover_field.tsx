@@ -199,7 +199,7 @@ export function DiscoverField({
         <EuiPopoverTitle>
           {' '}
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-            defaultMessage: 'Top values',
+            defaultMessage: 'Top 5 values',
           })}
         </EuiPopoverTitle>
         <DiscoverFieldDetails

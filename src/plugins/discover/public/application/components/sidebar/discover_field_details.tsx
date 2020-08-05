@@ -85,12 +85,12 @@ export function DiscoverFieldDetails({
       {!details.error && (
         <EuiPopoverFooter>
           <EuiText size="xs" textAlign="center">
-            <FormattedMessage
-              id="discover.fieldChooser.detailViews.topValuesInRecordsDescription"
-              defaultMessage="Top 5 values in"
-            />{' '}
             {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
               <EuiLink onClick={() => onAddFilter('_exists_', field.name, '+')}>
+                <FormattedMessage
+                  id="discover.fieldChooser.detailViews.existsText"
+                  defaultMessage="Exists in"
+                />{' '}
                 {details.exists}
               </EuiLink>
             ) : (
