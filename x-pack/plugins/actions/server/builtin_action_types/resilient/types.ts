@@ -20,7 +20,7 @@ import { ActionsConfigurationUtilities } from '../../actions_config';
 import { Logger } from '../../../../../../src/core/server';
 
 import { IncidentConfigurationSchema } from './case_schema';
-import { PushToServiceResponse } from './case_types';
+import { PushToServiceResponse, Comment } from './case_types';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
@@ -59,12 +59,33 @@ export interface ExternalServiceCommentResponse {
 
 export type ExternalServiceParams = Record<string, unknown>;
 
+export type Incident = Pick<
+  ExecutorSubActionPushParams,
+  'description' | 'issueTypeIds' | 'severityCode'
+> & {
+  name: string;
+};
+
+export interface CreateIncidentParams {
+  incident: Incident;
+}
+
+export interface UpdateIncidentParams {
+  incidentId: string;
+  incident: Incident;
+}
+
+export interface CreateCommentParams {
+  incidentId: string;
+  comment: Comment;
+}
+
 export interface ExternalService {
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
-  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
-  createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
+  createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
 }
 
 export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
@@ -120,4 +141,12 @@ interface UpdateField {
 
 export interface UpdateIncidentRequest {
   changes: UpdateField[];
+}
+
+export interface CreateIncidentData {
+  name: string;
+  discovered_date: number;
+  description?: { format: string; content: string };
+  incident_type_ids?: Array<{ id: string }>;
+  severity_code?: { name: string };
 }

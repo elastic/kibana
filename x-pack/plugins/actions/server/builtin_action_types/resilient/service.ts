@@ -7,13 +7,19 @@
 import axios from 'axios';
 
 import { Logger } from '../../../../../../src/core/server';
-import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
+import {
+  ExternalServiceCredentials,
+  ExternalService,
+  ExternalServiceParams,
+  CreateCommentParams,
+  UpdateIncidentParams,
+  CreateIncidentParams,
+  CreateIncidentData,
+} from './types';
 import {
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
-  CreateIncidentRequest,
   UpdateIncidentRequest,
-  CreateCommentRequest,
   UpdateFieldText,
   UpdateFieldTextArea,
 } from './types';
@@ -51,10 +57,11 @@ export const formatUpdateRequest = ({
   newIncident,
 }: ExternalServiceParams): UpdateIncidentRequest => {
   return {
-    changes: Object.keys(newIncident).map((key) => ({
+    changes: Object.keys(newIncident as Record<string, unknown>).map((key) => ({
       field: { name: key },
-      old_value: getValueTextContent(key, oldIncident[key]),
-      new_value: getValueTextContent(key, newIncident[key]),
+      // TODO: Fix ugly casting
+      old_value: getValueTextContent(key, (oldIncident as Record<string, unknown>)[key] as string),
+      new_value: getValueTextContent(key, (newIncident as Record<string, unknown>)[key] as string),
     })),
   };
 };
@@ -77,6 +84,10 @@ export const createExternalService = (
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
+
+  const findIncidents = async (params?: Record<string, string>) => {
+    return undefined;
+  };
 
   const getIncidentViewURL = (key: string) => {
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}/${key}`;
@@ -106,21 +117,43 @@ export const createExternalService = (
     }
   };
 
-  const createIncident = async ({ incident }: ExternalServiceParams) => {
+  const createIncident = async ({ incident }: CreateIncidentParams) => {
+    let data: CreateIncidentData = {
+      name: incident.name,
+      discovered_date: Date.now(),
+    };
+
+    if (incident.description) {
+      data = {
+        ...data,
+        description: {
+          format: 'html',
+          content: incident.description ?? '',
+        },
+      };
+    }
+
+    if (incident.issueTypeIds) {
+      data = {
+        ...data,
+        incident_type_ids: incident.issueTypeIds.map((id) => ({ id })),
+      };
+    }
+
+    if (incident.severityCode) {
+      data = {
+        ...data,
+        severity_code: { name: incident.severityCode },
+      };
+    }
+
     try {
-      const res = await request<CreateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
         logger,
-        data: {
-          ...incident,
-          description: {
-            format: 'html',
-            content: incident.description ?? '',
-          },
-          discovered_date: Date.now(),
-        },
+        data,
         proxySettings,
       });
 
@@ -137,12 +170,12 @@ export const createExternalService = (
     }
   };
 
-  const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
+  const updateIncident = async ({ incidentId, incident }: UpdateIncidentParams) => {
     try {
       const latestIncident = await getIncident(incidentId);
 
       const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident: incident });
-      const res = await request<UpdateIncidentRequest>({
+      const res = await request({
         axios: axiosInstance,
         method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
@@ -173,9 +206,9 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
+  const createComment = async ({ incidentId, comment }: CreateCommentParams) => {
     try {
-      const res = await request<CreateCommentRequest>({
+      const res = await request({
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
@@ -200,6 +233,7 @@ export const createExternalService = (
   };
 
   return {
+    findIncidents,
     getIncident,
     createIncident,
     updateIncident,
