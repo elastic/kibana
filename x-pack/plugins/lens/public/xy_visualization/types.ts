@@ -7,13 +7,16 @@
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import chartAreaSVG from '../assets/chart_area.svg';
-import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
-import chartBarSVG from '../assets/chart_bar.svg';
-import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
-import chartBarHorizontalSVG from '../assets/chart_bar_horizontal.svg';
-import chartBarHorizontalStackedSVG from '../assets/chart_bar_horizontal_stacked.svg';
-import chartLineSVG from '../assets/chart_line.svg';
+import { LensIconChartArea } from '../assets/chart_area';
+import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
+import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
+import { LensIconChartBar } from '../assets/chart_bar';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
+import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
+import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
+import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
+import { LensIconChartLine } from '../assets/chart_line';
 
 import { VisualizationType } from '../index';
 import { FittingFunction } from './fitting_functions';
@@ -356,7 +359,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
     icon: 'visBarVertical',
-    largeIcon: chartBarSVG,
+    largeIcon: LensIconChartBar,
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar',
     }),
@@ -364,7 +367,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_horizontal',
     icon: 'visBarHorizontal',
-    largeIcon: chartBarHorizontalSVG,
+    largeIcon: LensIconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
       defaultMessage: 'Horizontal bar',
     }),
@@ -372,7 +375,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_stacked',
     icon: 'visBarVerticalStacked',
-    largeIcon: chartBarStackedSVG,
+    largeIcon: LensIconChartBarStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Stacked bar',
     }),
@@ -380,7 +383,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_percentage_stacked',
     icon: 'visBarVerticalStacked',
-    largeIcon: chartBarStackedSVG,
+    largeIcon: LensIconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar percentage',
     }),
@@ -388,7 +391,7 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_horizontal_stacked',
     icon: 'visBarHorizontalStacked',
-    largeIcon: chartBarHorizontalStackedSVG,
+    largeIcon: LensIconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
       defaultMessage: 'Stacked horizontal bar',
     }),
@@ -396,23 +399,15 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar_horizontal_percentage_stacked',
     icon: 'visBarHorizontalStacked',
-    largeIcon: chartBarHorizontalStackedSVG,
+    largeIcon: LensIconChartBarHorizontalPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
       defaultMessage: 'Horizontal bar percentage',
     }),
   },
   {
-    id: 'line',
-    icon: 'visLine',
-    largeIcon: chartLineSVG,
-    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
-      defaultMessage: 'Line',
-    }),
-  },
-  {
     id: 'area',
     icon: 'visArea',
-    largeIcon: chartAreaSVG,
+    largeIcon: LensIconChartArea,
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
@@ -420,17 +415,25 @@ export const visualizationTypes: VisualizationType[] = [
   {
     id: 'area_stacked',
     icon: 'visAreaStacked',
-    largeIcon: chartAreaStackedSVG,
+    largeIcon: LensIconChartAreaStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Stacked area',
     }),
   },
   {
     id: 'area_percentage_stacked',
-    icon: 'visAreaStacked',
-    largeIcon: chartAreaStackedSVG,
+    icon: 'empty',
+    largeIcon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
+    }),
+  },
+  {
+    id: 'line',
+    icon: 'visLine',
+    largeIcon: LensIconChartLine,
+    label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
+      defaultMessage: 'Line',
     }),
   },
 ];

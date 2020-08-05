@@ -7,7 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
-import chartTableSVG from '../assets/chart_datatable.svg';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 export interface LayerState {
   layerId: string;
@@ -34,8 +34,8 @@ export const datatableVisualization: Visualization<
   visualizationTypes: [
     {
       id: 'lnsDatatable',
-      icon: 'visTable',
-      largeIcon: chartTableSVG,
+      icon: LensIconChartDatatable,
+      largeIcon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -58,7 +58,7 @@ export const datatableVisualization: Visualization<
 
   getDescription() {
     return {
-      icon: chartTableSVG,
+      icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -126,7 +126,7 @@ export const datatableVisualization: Visualization<
             },
           ],
         },
-        previewIcon: chartTableSVG,
+        previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },

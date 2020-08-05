@@ -66,7 +66,7 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>

@@ -190,7 +190,7 @@ export const getXyChartRenderer = (dependencies: {
 });
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
-  return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
+  return visualizationTypes.find((c) => c.id === seriesType)!.largeIcon || 'empty';
 }
 
 const MemoizedChart = React.memo(XYChart);

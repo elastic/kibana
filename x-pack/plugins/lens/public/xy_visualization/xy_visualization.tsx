@@ -14,12 +14,12 @@ import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
-import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
-import chartMixedSVG from '../assets/chart_mixed_xy.svg';
+import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
+import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression } from './to_expression';
 
-const defaultIcon = chartBarStackedSVG;
+const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
@@ -59,7 +59,7 @@ function getDescription(state?: State) {
   return {
     icon:
       visualizationType === 'mixed'
-        ? chartMixedSVG
+        ? LensIconChartMixedXy
         : visualizationType.largeIcon || visualizationType.icon,
     label:
       visualizationType === 'mixed'
@@ -253,7 +253,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
-    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.icon;
+    return visualizationTypes.find((t) => t.id === layer?.seriesType)?.largeIcon;
   },
 
   renderLayerContextMenu(domElement, props) {

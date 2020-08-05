@@ -98,7 +98,7 @@ export function LayerPanel(
     <ChildDragDropProvider {...dragDropContext}>
       <EuiPanel className="lnsLayerPanel" paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="lnsLayerPanel__settingsFlexItem">
             <LayerSettings
               layerId={layerId}
               layerConfigProps={{
