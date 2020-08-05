@@ -33,7 +33,6 @@ import {
 } from '../../embeddable_plugin_test_samples';
 // eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ErrorEmbeddable } from 'src/plugins/embeddable/public';
 
 const options: DashboardContainerOptions = {
   application: {} as any,
