@@ -29,8 +29,6 @@ import {
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { ClonePanelAction } from '.';
-
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

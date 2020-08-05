@@ -32,7 +32,6 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { applicationServiceMock } from '../../../../../../core/public/mocks';
 
