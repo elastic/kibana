@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardVisualizations = getService('dashboardVisualizations');
+  const testSubjects = getService('testSubjects');
 
   describe('save and return work flow', () => {
     describe('new map', () => {
@@ -45,12 +46,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       describe('save and return', () => {
-        it('editing map from dashboard should open maps application', async () => {
-          const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
-          expect(doesLayerExist).to.equal(true);
-        });
-
-        it('clicking "save and return" should return to dashboard', async () => {
+        it('should return to dashboard', async () => {
           await PageObjects.maps.clickSaveAndReturnButton();
           await PageObjects.dashboard.waitForRenderComplete();
           const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -59,11 +55,20 @@ export default function ({ getPageObjects, getService }) {
       });
 
       describe('save as', () => {
-        it('clicking "save as" should return to dashboard and add new panel', async () => {
+        it('should return to dashboard and add new panel', async () => {
           await PageObjects.maps.saveMap('Clone of map embeddable example');
           await PageObjects.dashboard.waitForRenderComplete();
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
+        });
+      });
+
+      describe('save as and uncheck return to origin switch', () => {
+        it('should cut the originator and stay in maps application', async () => {
+          await PageObjects.maps.saveMap('Clone 2 of map embeddable example', true);
+          await PageObjects.maps.waitForLayersToLoad();
+          await testSubjects.missingOrFail('mapSaveAndReturnButton');
+          await testSubjects.existOrFail('mapSaveButton');
         });
       });
     });
