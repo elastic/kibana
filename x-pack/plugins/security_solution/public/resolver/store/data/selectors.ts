@@ -407,7 +407,6 @@ export const processEventForID: (
 ) => (nodeID: string) => ResolverEvent | null = createSelector(
   tree,
   (indexedProcessTree) => (nodeID: string) =>
-    /** TODO unsafe cast */
     indexedProcessTreeModel.processEvent(indexedProcessTree, nodeID) as ResolverEvent
 );
 
@@ -472,13 +471,9 @@ export const ariaFlowtoCandidate: (
       for (const child of children) {
         if (previousChild !== null) {
           // Set the `child` as the following sibling of `previousChild`.
-          memo.set(
-            uniquePidForProcess(previousChild),
-            uniquePidForProcess(/** TODO unsafe cast */ child as ResolverEvent)
-          );
+          memo.set(uniquePidForProcess(previousChild), uniquePidForProcess(child as ResolverEvent));
         }
         // Set the child as the previous child.
-        /** TODO unsafe cast */
         previousChild = child as ResolverEvent;
       }
 
