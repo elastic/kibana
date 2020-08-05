@@ -134,6 +134,10 @@ export class ESAggField implements IESAggField {
   supportsAutoDomain(): boolean {
     return true;
   }
+
+  canReadFromGeoJson(): boolean {
+    return true;
+  }
 }
 
 export function esAggFieldsFactory(

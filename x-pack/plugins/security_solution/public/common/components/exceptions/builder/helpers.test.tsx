@@ -466,7 +466,7 @@ describe('Exception builder helpers', () => {
 
   describe('#isEntryNested', () => {
     test('it returns "false" if payload is not of type EntryNested', () => {
-      const payload: BuilderEntry = { ...getEntryMatchMock() };
+      const payload: BuilderEntry = getEntryMatchMock();
       const output = isEntryNested(payload);
       const expected = false;
       expect(output).toEqual(expected);
@@ -483,7 +483,7 @@ describe('Exception builder helpers', () => {
   describe('#getFormattedBuilderEntries', () => {
     test('it returns formatted entry with field undefined if it unable to find a matching index pattern field', () => {
       const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
-      const payloadItems: BuilderEntry[] = [{ ...getEntryMatchMock() }];
+      const payloadItems: BuilderEntry[] = [getEntryMatchMock()];
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
@@ -654,7 +654,7 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it removes entry corresponding to "nestedEntryIndex"', () => {
+    test('it removes nested entry of "entryIndex" with corresponding parent index', () => {
       const payloadItem: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
         entries: [
@@ -664,10 +664,10 @@ describe('Exception builder helpers', () => {
           },
         ],
       };
-      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 1);
+      const output = getUpdatedEntriesOnDelete(payloadItem, 0, 0);
       const expected: ExceptionsBuilderExceptionItem = {
         ...getExceptionListItemSchemaMock(),
-        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryExistsMock() }] }],
+        entries: [{ ...getEntryNestedMock(), entries: [{ ...getEntryMatchAnyMock() }] }],
       };
       expect(output).toEqual(expected);
     });

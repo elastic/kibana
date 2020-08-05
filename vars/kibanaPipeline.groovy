@@ -16,6 +16,25 @@ def withPostBuildReporting(Closure closure) {
   }
 }
 
+def notifyOnError(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
+    catchErrors {
+      githubPr.sendComment(false)
+    }
+    catchErrors {
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
+      }
+    }
+    throw ex
+  }
+}
+
 def functionalTestProcess(String name, Closure closure) {
   return { processNumber ->
     def kibanaPort = "61${processNumber}1"
@@ -35,7 +54,7 @@ def functionalTestProcess(String name, Closure closure) {
       "JOB=${name}",
       "KBN_NP_PLUGINS_BUILT=true",
     ]) {
-      githubPr.sendCommentOnError {
+      notifyOnError {
         closure()
       }
     }
@@ -89,6 +108,7 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
+    '**/target/public/.kbn-optimizer-cache',
     'target/kibana-*',
     'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
@@ -165,7 +185,7 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     retryWithDelay(2, 15) {
       try {
         runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
@@ -182,13 +202,13 @@ def doSetup() {
 }
 
 def buildOss() {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
   }
 }
 
 def buildXpack() {
-  githubPr.sendCommentOnError {
+  notifyOnError {
     runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
   }
 }
