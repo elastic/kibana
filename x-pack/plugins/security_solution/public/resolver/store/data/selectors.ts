@@ -146,9 +146,7 @@ export const tree = createSelector(graphableProcesses, function indexedTree(
   graphableProcesses
   /* eslint-enable no-shadow */
 ) {
-  return indexedProcessTreeModel.factory(
-    /** TODO remove */ graphableProcesses as SafeResolverEvent[]
-  );
+  return indexedProcessTreeModel.factory(graphableProcesses as SafeResolverEvent[]);
 });
 
 /**

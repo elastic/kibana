@@ -6,6 +6,13 @@
 
 import { ECSField } from '../types';
 
+/**
+ * Use these functions to accecss information held in `ECSField`s.
+ */
+
+/**
+ * True if the field contains `expected`. If the field contains an array, this will be true if the array contains `expected`.
+ */
 export function hasValue<T>(valueOrCollection: ECSField<T>, expected: T): boolean {
   if (Array.isArray(valueOrCollection)) {
     return valueOrCollection.includes(expected);
@@ -15,15 +22,13 @@ export function hasValue<T>(valueOrCollection: ECSField<T>, expected: T): boolea
 }
 
 /**
- * Return first non-null value.
+ * Return first non-null value. If the field contains an array, this will return the first value that isn't null. If the field isn't an array it'll be returned unless it's null.
  */
 export function firstValue<T>(valueOrCollection: ECSField<T>): T | undefined {
   if (valueOrCollection === null) {
-    // make it consistent
     return undefined;
   } else if (Array.isArray(valueOrCollection)) {
     for (const value of valueOrCollection) {
-      // TODO can ES return an array with null in the first position and non-null values later on?
       if (value !== null) {
         return value;
       }
@@ -34,7 +39,7 @@ export function firstValue<T>(valueOrCollection: ECSField<T>): T | undefined {
 }
 
 /*
- * Get an array of all non-null values. If there was originally 1 value, return it wrapped in an array. If there were multiple values, return the non-null ones.
+ * Get an array of all non-null values. If there is just 1 value, return it wrapped in an array. If there are multiple values, return the non-null ones.
  * Use this when you want to consistently access the value(s) as an array.
  */
 export function values<T>(valueOrCollection: ECSField<T>): T[] {

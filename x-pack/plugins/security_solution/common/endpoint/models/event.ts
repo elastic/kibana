@@ -11,12 +11,18 @@ import {
 } from '../types';
 import { firstValue } from './ecs_safety_helpers';
 
+/*
+ * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`.
+ */
 export function isLegacyEventSafeVersion(
   event: SafeResolverEvent
 ): event is SafeLegacyEndpointEvent {
   return 'endgame' in event && event.endgame !== undefined;
 }
 
+/*
+ * Determine if a `ResolverEvent` is the legacy variety. Can be used to narrow `ResolverEvent` to `LegacyEndpointEvent`. See `isLegacyEventSafeVersion`
+ */
 export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEvent {
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
@@ -43,7 +49,7 @@ export function isProcessRunning(event: ResolverEvent): boolean {
   );
 }
 
-export function eventTimestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
+export function timestampSafeVersion(event: SafeResolverEvent): string | undefined | number {
   return isLegacyEventSafeVersion(event)
     ? firstValue(event.endgame?.timestamp_utc)
     : firstValue(event?.['@timestamp']);

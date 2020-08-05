@@ -151,7 +151,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
         let dateTime;
-        const eventTime = event.eventTimestampSafeVersion(processEvent);
+        const eventTime = event.timestampSafeVersion(processEvent);
         const name = event.processNameSafeVersion(processEvent);
         if (eventTime) {
           const date = new Date(eventTime);

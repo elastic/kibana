@@ -181,7 +181,9 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
   return widths;
 }
 
-// TODO, before this is called, assert that all children have `process.entity_id`, otherwise this could throw
+/**
+ * Layout the graph. Note: if any process events are missing the `entity_id`, this will throw an Error.
+ */
 function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
@@ -215,8 +217,8 @@ function processEdgeLineSegments(
       throw new Error();
     }
 
-    const parentTime = eventModel.eventTimestampSafeVersion(parent);
-    const processTime = eventModel.eventTimestampSafeVersion(process);
+    const parentTime = eventModel.timestampSafeVersion(parent);
+    const processTime = eventModel.timestampSafeVersion(process);
     if (parentTime && processTime) {
       edgeLineMetadata.elapsedTime = elapsedTime(parentTime, processTime) ?? undefined;
     }

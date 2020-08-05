@@ -33,7 +33,7 @@ export function isTerminatedProcess(passedEvent: ResolverEvent) {
  * may return NaN if the timestamp wasn't present or was invalid.
  */
 export function datetime(passedEvent: SafeResolverEvent): number | null {
-  const timestamp = event.eventTimestampSafeVersion(passedEvent);
+  const timestamp = event.timestampSafeVersion(passedEvent);
 
   const time = timestamp === undefined ? 0 : new Date(timestamp).getTime();
 

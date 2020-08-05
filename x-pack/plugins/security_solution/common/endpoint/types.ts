@@ -469,8 +469,6 @@ export type HostMetadata = Immutable<{
 
 export interface LegacyEndpointEvent {
   '@timestamp': number;
-  // This helps TS distinguish this type from `EndpointEvent`
-  process?: never;
   endgame: {
     pid?: number;
     ppid?: number;
@@ -497,7 +495,6 @@ export interface LegacyEndpointEvent {
     action?: string;
     type?: string;
     category?: string | string[];
-    id?: string;
   };
 }
 
@@ -511,7 +508,7 @@ export interface EndpointEvent {
   ecs: {
     version: string;
   };
-  // This helps TS distinguish this from `LegacyEndpointEvent`
+  // A legacy has `endgame` and an `EndpointEvent` (AKA ECS event) will never have it. This helps TS narrow `SafeResolverEvent`.
   endgame?: never;
   event: {
     category: string | string[];
@@ -564,8 +561,16 @@ export interface EndpointEvent {
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
+/**
+ * All mappings in Elasticsearch support arrays. They can also return null values or be missing. For example, a `keyword` mapping could return `null` or `[null]` or `[]` or `'hi'`, or `['hi', 'there']`. We need to handle these cases in order to avoid throwing an error.
+ * When dealing with an value that comes from ES, wrap the underlying type in `ECSField`. For example, if you have a `keyword` or `text` value coming from ES, cast it to `ECSField<string>`.
+ */
 export type ECSField<T> = T | null | Array<T | null>;
 
+/**
+ * A more conservative version of `ResolverEvent` that treats fields as optional and use `ECSField` to type all ECS fields.
+ * Prefer this over `ResolverEvent`.
+ */
 export type SafeResolverEvent = SafeEndpointEvent | SafeLegacyEndpointEvent;
 
 /**
@@ -649,7 +654,9 @@ export type SafeEndpointEvent = Partial<{
 
 export interface SafeLegacyEndpointEvent {
   '@timestamp'?: ECSField<number>;
-  // This is required
+  /**
+   * 'legacy' events must have an `endgame` key.
+   */
   endgame: Partial<{
     pid: ECSField<number>;
     ppid: ECSField<number>;
