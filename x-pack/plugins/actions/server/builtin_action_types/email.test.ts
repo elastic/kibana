@@ -10,7 +10,6 @@ jest.mock('./lib/send_email', () => ({
 
 import { Logger } from '../../../../../src/core/server';
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
@@ -21,6 +20,8 @@ import {
   ActionTypeConfigType,
   ActionTypeSecretsType,
   getActionType,
+  EmailActionType,
+  EmailActionTypeExecutorOptions,
 } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
@@ -29,13 +30,17 @@ const ACTION_TYPE_ID = '.email';
 
 const services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: EmailActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeEach(() => {
   jest.resetAllMocks();
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -242,7 +247,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -306,7 +311,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -363,7 +368,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,
