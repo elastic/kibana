@@ -62,7 +62,6 @@ import {
 interface SearchExamplesAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
   http: CoreStart['http'];
   savedObjectsClient: CoreStart['savedObjects']['client'];
   navigation: NavigationPublicPluginStart;
