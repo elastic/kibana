@@ -181,7 +181,7 @@ export function DiscoverField({
           <FieldButton
             size="s"
             className="dscSidebarItem"
-            isOpen={showDetails}
+            isActive={infoIsOpen}
             onClick={() => {
               togglePopover();
             }}

@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import './field_button.scss';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
-import './field_button.scss';
 
 export interface FieldButtonProps {
-  isOpen?: boolean;
+  isActive?: boolean;
   fieldIcon?: ReactNode;
-  fieldName?: ReactNode;
+  fieldName: ReactNode;
   fieldInfoIcon?: ReactNode;
   fieldAction?: ReactNode;
   isDraggable?: boolean;
@@ -51,7 +51,7 @@ export const SIZES = keysOf(sizeToClassNameMap);
 
 export function FieldButton({
   size = 'm',
-  isOpen,
+  isActive = false,
   fieldIcon,
   fieldName,
   fieldInfoIcon,
@@ -64,7 +64,7 @@ export function FieldButton({
   const classes = classNames(
     'kbnFieldButton',
     size ? sizeToClassNameMap[size] : null,
-    { 'kbnFieldButton-isOpen': isOpen },
+    { 'kbnFieldButton-isActive': isActive },
     { 'kbnFieldButton--isDraggable': isDraggable },
     className
   );
@@ -72,8 +72,8 @@ export function FieldButton({
   return (
     <div className={classes} {...rest}>
       <button onClick={onClick} className="kbn-resetFocusState kbnFieldButton__content">
-        <div className="kbnFieldButton__fieldIcon">{fieldIcon}</div>
-        <div className="kbnFieldButton__name">{fieldName}</div>
+        {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
+        {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
       </button>
       <div className="kbnFieldButton__append">
         {fieldAction && <div className="kbnFieldButton__fieldAction">{fieldAction}</div>}
