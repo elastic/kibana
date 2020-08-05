@@ -138,6 +138,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('space with index pattern management disabled', function () {
+      // unskipped because of flakiness in cloud, caused be ingest management tests
+      // should be unskipped when https://github.com/elastic/kibana/issues/74353 was resolved
       this.tags(['skipCloud']);
       before(async () => {
         await spacesService.create({
