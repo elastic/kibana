@@ -60,7 +60,7 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
   this.getFormatterForField = () => ({
-    convert: () => ({}),
+    convert: () => '',
   });
 
   this._reindexFields = function () {
