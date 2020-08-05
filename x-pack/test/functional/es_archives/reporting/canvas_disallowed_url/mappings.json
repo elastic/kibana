@@ -2,8 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana": {
-      }
+      ".kibana": {}
     },
     "index": ".kibana_1",
     "mappings": {
@@ -1247,9 +1246,9 @@
                     "config": {
                       "type": "flattened"
                     },
-                    "dataset": {
+                    "data_stream": {
                       "properties": {
-                        "name": {
+                        "dataset": {
                           "type": "keyword"
                         },
                         "type": {

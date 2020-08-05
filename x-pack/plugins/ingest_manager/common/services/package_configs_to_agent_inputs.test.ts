@@ -39,7 +39,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
       {
         id: 'test-logs-foo',
         enabled: true,
-        dataset: { name: 'foo', type: 'logs' },
+        data_stream: { dataset: 'foo', type: 'logs' },
         vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
@@ -52,7 +52,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
       {
         id: 'test-logs-bar',
         enabled: true,
-        dataset: { name: 'bar', type: 'logs' },
+        data_stream: { dataset: 'bar', type: 'logs' },
         vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },

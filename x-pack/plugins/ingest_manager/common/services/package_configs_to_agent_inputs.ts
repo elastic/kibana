@@ -37,10 +37,7 @@ export const storedPackageConfigsToAgentInputs = (
           .map((stream) => {
             const fullStream: FullAgentConfigInputStream = {
               id: stream.id,
-              data_stream: {
-                dataset: stream.dataset.name,
-                type: stream.dataset.type,
-              },
+              data_stream: stream.data_stream,
               ...stream.compiled_stream,
               ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                 acc[key] = value;
