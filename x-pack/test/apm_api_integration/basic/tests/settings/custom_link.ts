@@ -147,9 +147,11 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload('8.0.0'));
 
       it('fetches a transaction sample', async () => {
-        const response = await supertestRead.get(`/api/apm/settings/custom_links/transaction`);
+        const response = await supertestRead.get(
+          '/api/apm/settings/custom_links/transaction?service.name=opbeans-java'
+        );
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(expectedTransaction);
+        expect(response.body.service.name).to.eql('opbeans-java');
       });
     });
   });
