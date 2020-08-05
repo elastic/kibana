@@ -29,6 +29,10 @@ export const PERSISTENT_APM_PARAMS = [
   'environment',
 ];
 
+/**
+ * Get an APM link for a path. This function does not prepend the basepath so
+ * you'll need to do that when calling this.
+ */
 export function getAPMHref(
   path: string,
   currentSearch: string,
@@ -47,14 +51,31 @@ export function getAPMHref(
   });
 }
 
-export function APMLink({ path = '', query, ...rest }: Props) {
+/**
+ * Hook to to get an APM href. This does prepend the basepath and add the search
+ * for you.
+ */
+export function useAPMHref({
+  path,
+  currentSearch,
+  query = {},
+}: {
+  path: string;
+  currentSearch?: string;
+  query?: APMQueryParams;
+}) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
-  const href = getAPMHref(
+
+  return getAPMHref(
     core.http.basePath.prepend(`/app/apm${path}`),
-    search,
+    currentSearch ?? search,
     query
   );
+}
+
+export function APMLink({ path = '', query, ...rest }: Props) {
+  const href = useAPMHref({ path, query });
 
   return <EuiLink {...rest} href={href} />;
 }

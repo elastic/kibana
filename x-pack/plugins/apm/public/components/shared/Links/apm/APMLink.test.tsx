@@ -5,53 +5,90 @@
  */
 
 import { Location } from 'history';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
-import { APMLink } from './APMLink';
+import { useAPMHref, APMLink } from './APMLink';
+import { renderHook } from '@testing-library/react-hooks';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+import { createMemoryHistory } from 'history';
+import { LocationContext } from '../../../../context/LocationContext';
 
-test('APMLink should produce the correct URL', async () => {
-  const href = await getRenderedHref(
-    () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
-    {
-      search:
-        '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-    } as Location
-  );
+describe('useAPMHref', () => {
+  it('returns the APM url', () => {
+    const history = createMemoryHistory();
+    const { location } = history;
 
-  expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/apm/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
-  );
+    function Wrapper({ children }: { children?: ReactNode }) {
+      return (
+        <LocationContext.Provider value={location}>
+          <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+        </LocationContext.Provider>
+      );
+    }
+
+    const { result } = renderHook(
+      () =>
+        useAPMHref({
+          path: '/test',
+          currentSearch: '?kuery=x:y',
+          query: { traceId: '1' },
+        }),
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    expect(result.current).toEqual(
+      '/basepath/app/apm/test?kuery=x:y&traceId=1'
+    );
+  });
 });
 
-test('APMLink should retain current kuery value if it exists', async () => {
-  const href = await getRenderedHref(
-    () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
-    {
-      search:
-        '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-    } as Location
-  );
+describe('APMLink', () => {
+  test('APMLink should produce the correct URL', async () => {
+    const href = await getRenderedHref(
+      () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
+      {
+        search:
+          '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
+      } as Location
+    );
 
-  expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/apm/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
-  );
-});
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/apm/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+    );
+  });
 
-test('APMLink should overwrite current kuery value if new kuery value is provided', async () => {
-  const href = await getRenderedHref(
-    () => (
-      <APMLink
-        path="/some/path"
-        query={{ kuery: 'host.os~20~3A~20~22linux~22' }}
-      />
-    ),
-    {
-      search:
-        '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-    } as Location
-  );
+  test('APMLink should retain current kuery value if it exists', async () => {
+    const href = await getRenderedHref(
+      () => <APMLink path="/some/path" query={{ transactionId: 'blah' }} />,
+      {
+        search:
+          '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
+      } as Location
+    );
 
-  expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/apm/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`
-  );
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/apm/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+    );
+  });
+
+  test('APMLink should overwrite current kuery value if new kuery value is provided', async () => {
+    const href = await getRenderedHref(
+      () => (
+        <APMLink
+          path="/some/path"
+          query={{ kuery: 'host.os~20~3A~20~22linux~22' }}
+        />
+      ),
+      {
+        search:
+          '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
+      } as Location
+    );
+
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/apm/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`
+    );
+  });
 });

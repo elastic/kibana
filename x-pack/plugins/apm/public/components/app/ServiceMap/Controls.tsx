@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useTheme } from '../../../hooks/useTheme';
+import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useAPMHref } from '../../shared/Links/apm/APMLink';
+import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
-import { getAPMHref } from '../../shared/Links/apm/APMLink';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { APMQueryParams } from '../../shared/Links/url_helpers';
-import { useTheme } from '../../../hooks/useTheme';
 
 const ControlsContainer = styled('div')`
   left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
@@ -103,6 +103,11 @@ export function Controls() {
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
   const downloadUrl = useDebugDownloadUrl(cy);
+  const viewFullMapUrl = useAPMHref({
+    path: '/service-map',
+    currentSearch,
+    query: urlParams as APMQueryParams,
+  });
 
   // Handle zoom events
   useEffect(() => {
@@ -209,11 +214,8 @@ export function Controls() {
             <Button
               aria-label={viewFullMapLabel}
               color="text"
-              href={getAPMHref(
-                '/service-map',
-                currentSearch,
-                urlParams as APMQueryParams
-              )}
+              data-test-subj="viewFullMapButton"
+              href={viewFullMapUrl}
               iconType="apps"
             />
           </EuiToolTip>
