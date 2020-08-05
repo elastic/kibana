@@ -18,11 +18,30 @@ import { shallow } from 'enzyme';
 import { DynamicSizeProperty } from './dynamic_size_property';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 import { IField } from '../../../fields/field';
-import { MockMbMap } from './__tests__/test_util';
-
+import { Map as MbMap } from 'mapbox-gl';
+import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
 
-const makeProperty = (options: object, mockStyle: MockStyle, field: IField = mockField) => {
+export class MockMbMap {
+  _paintPropertyCalls: unknown[];
+
+  constructor() {
+    this._paintPropertyCalls = [];
+  }
+  setPaintProperty(...args: unknown[]) {
+    this._paintPropertyCalls.push([...args]);
+  }
+
+  getPaintPropertyCalls(): unknown[] {
+    return this._paintPropertyCalls;
+  }
+}
+
+const makeProperty = (
+  options: SizeDynamicOptions,
+  mockStyle: MockStyle,
+  field: IField = mockField
+) => {
   return new DynamicSizeProperty(
     options,
     VECTOR_STYLES.ICON_SIZE,
@@ -30,19 +49,20 @@ const makeProperty = (options: object, mockStyle: MockStyle, field: IField = moc
     new MockLayer(mockStyle),
     () => {
       return (x: string) => x + '_format';
-    }
+    },
+    false
   );
 };
 
-const defaultLegendParams = {
-  isPointsOnly: true,
-  isLinesOnly: false,
-};
+const fieldMetaOptions = { isEnabled: true };
 
 describe('renderLegendDetailRow', () => {
   test('Should render as range', async () => {
-    const sizeProp = makeProperty({}, new MockStyle({ min: 0, max: 100 }));
-    const legendRow = sizeProp.renderLegendDetailRow(defaultLegendParams);
+    const sizeProp = makeProperty(
+      { minSize: 0, maxSize: 10, fieldMetaOptions },
+      new MockStyle({ min: 0, max: 100 })
+    );
+    const legendRow = sizeProp.renderLegendDetailRow();
     const component = shallow(legendRow);
 
     // Ensure all promises resolve
@@ -55,8 +75,11 @@ describe('renderLegendDetailRow', () => {
 
 describe('syncSize', () => {
   test('Should sync with circle-radius prop', async () => {
-    const sizeProp = makeProperty({ minSize: 8, maxSize: 32 }, new MockStyle({ min: 0, max: 100 }));
-    const mockMbMap = new MockMbMap();
+    const sizeProp = makeProperty(
+      { minSize: 8, maxSize: 32, fieldMetaOptions },
+      new MockStyle({ min: 0, max: 100 })
+    );
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap & { getPaintPropertyCalls };
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 
@@ -88,10 +111,10 @@ describe('syncSize', () => {
 
   test('Should truncate interpolate expression to max when no delta', async () => {
     const sizeProp = makeProperty(
-      { minSize: 8, maxSize: 32 },
+      { minSize: 8, maxSize: 32, fieldMetaOptions },
       new MockStyle({ min: 100, max: 100 })
     );
-    const mockMbMap = new MockMbMap();
+    const mockMbMap = (new MockMbMap() as unknown) as MbMap & { getPaintPropertyCalls };
 
     sizeProp.syncCircleRadiusWithMb('foobar', mockMbMap);
 

@@ -47,7 +47,7 @@ export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getValueSuggestions(query: string): Promise<string[]>;
 }
 
-type FieldFormatter = (value: string | number | undefined) => string | number;
+export type FieldFormatter = (value: string | number | undefined) => string | number;
 
 export class DynamicStyleProperty<T> extends AbstractStyleProperty<T>
   implements IDynamicStyleProperty<T> {
