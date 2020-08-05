@@ -10,6 +10,7 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
+  SavedObjectsRepository,
 } from '../../../../../../../src/core/server';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusAttributes } from '../rules/types';
@@ -27,7 +28,7 @@ export interface RuleStatusSavedObjectsClient {
 }
 
 export const ruleStatusSavedObjectsClientFactory = (
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract | SavedObjectsRepository
 ): RuleStatusSavedObjectsClient => ({
   find: (options) =>
     savedObjectsClient.find<IRuleStatusAttributes>({ ...options, type: ruleStatusSavedObjectType }),

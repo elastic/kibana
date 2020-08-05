@@ -16,6 +16,8 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
+  SavedObjectsRepository,
+  ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
@@ -70,6 +72,7 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  errorService?: Promise<ISavedObjectsRepository>;
 }
 
 export interface StartPlugins {
@@ -112,7 +115,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
-
     this.logger.debug('plugin initialized');
   }
 
@@ -234,12 +236,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        errorService: core.getStartServices().then(async ([coreStart]) => {
+          return coreStart.savedObjects.createInternalRepository();
+        }),
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
       });
 
       if (isAlertExecutor(signalRuleType)) {
+        // add status callback here in order to pick up failures on task manager
         plugins.alerts.registerType(signalRuleType);
       }
 

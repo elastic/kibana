@@ -317,12 +317,13 @@ export class TaskRunner {
             previousStartedAt,
           };
         },
-        (err: Error) => {
+        async (err: Error) => {
           const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
             this.logger.error(message);
+            await this.alertType.errorCB({ alertId, message });
           }
           return {
             ...originalState,

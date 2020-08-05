@@ -6,7 +6,7 @@
 
 /* eslint-disable complexity */
 
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest, SavedObjectsRepository } from 'src/core/server';
 
 import {
   SIGNALS_ID,
@@ -50,11 +50,13 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
+  errorService,
 }: {
   logger: Logger;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
+  errorService: SetupPlugins['errorService'];
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -412,6 +414,22 @@ export const signalRulesAlertType = ({
           lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
+    },
+    errorCB: async ({ alertId, message }) => {
+      logger.error(`Detections rule with alert Id: ${alertId} failed with message: ${message}`);
+      const savedObjectsClient = await errorService;
+      if (savedObjectsClient != null) {
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(
+          savedObjectsClient as SavedObjectsRepository
+        );
+        const ruleStatusService = await ruleStatusServiceFactory({
+          alertId,
+          ruleStatusClient,
+        });
+        await ruleStatusService.error(message);
+      }
+
+      return Promise.resolve(logger.error(message));
     },
   };
 };
