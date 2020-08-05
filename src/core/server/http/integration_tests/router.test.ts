@@ -324,6 +324,7 @@ describe('Options', () => {
           }, interval);
         });
       };
+
       it('should timeout if POST payload sending is too slow', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -490,6 +491,47 @@ describe('Options', () => {
         const result = writeBodyCharAtATime(request, '{}', 10);
 
         await expect(result).resolves.toHaveProperty('status', 200);
+      });
+    });
+
+    describe('idleSocket', () => {
+      // HapiJS forces the idleSocket timeout to be larger than the payload timeout, so we can't slowly
+      // send the payload to trigger the idle socket...
+      // We can add this test once https://github.com/hapijs/hapi/issues/4122 is fixed
+
+      it('should timeout if servers response is too slow', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.post(
+          { path: '/a', validate: false, options: { timeout: { idleSocket: 1000, payload: 100 } } },
+          async (context, req, res) => {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return res.ok({});
+          }
+        );
+
+        await server.start();
+        await expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
+      });
+
+      it('should not timeout if servers response is quick', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.post(
+          { path: '/a', validate: false, options: { timeout: { idleSocket: 2000, payload: 100 } } },
+          async (context, req, res) => {
+            await new Promise((resolve) => setTimeout(resolve, 10));
+            return res.ok({});
+          }
+        );
+
+        await server.start();
+        await expect(supertest(innerServer.listener).post('/a')).resolves.toHaveProperty(
+          'status',
+          200
+        );
       });
     });
   });
