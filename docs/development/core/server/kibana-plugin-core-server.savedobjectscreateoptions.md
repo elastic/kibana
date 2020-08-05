@@ -20,4 +20,5 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions
 |  [overwrite](./kibana-plugin-core-server.savedobjectscreateoptions.overwrite.md) | <code>boolean</code> | Overwrite existing documents (defaults to false) |
 |  [references](./kibana-plugin-core-server.savedobjectscreateoptions.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [refresh](./kibana-plugin-core-server.savedobjectscreateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
+|  [version](./kibana-plugin-core-server.savedobjectscreateoptions.version.md) | <code>string</code> | An opaque version number which changes on each successful write operation. Can be used in conjunction with <code>overwrite</code> for implementing optimistic concurrency control. |
 
