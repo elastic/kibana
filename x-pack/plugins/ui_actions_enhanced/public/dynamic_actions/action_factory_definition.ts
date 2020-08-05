@@ -5,7 +5,7 @@
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { BaseActionFactoryContext, SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction, SerializedEvent } from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
   TriggerContextMapping,
@@ -13,6 +13,8 @@ import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
+import { SavedObjectReference } from '../../../../../src/core/types';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface for registering new action factories.
@@ -25,7 +27,8 @@ export interface ActionFactoryDefinition<
   },
   ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
-    Configurable<Config, FactoryContext> {
+    Configurable<Config, FactoryContext>,
+    PersistableStateDefinition<SerializedEvent> {
   /**
    * Unique ID of the action factory. This ID is used to identify this action
    * factory in the registry as well as to construct actions of this type and

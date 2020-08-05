@@ -9,11 +9,14 @@ import {
   ActionFactory,
   ActionFactoryDefinition,
   BaseActionFactoryContext,
+  SerializedEvent,
 } from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
+import { SavedObjectReference } from '../../../../../src/core/types';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common/persistable_state';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -22,7 +25,7 @@ export interface UiActionsServiceEnhancementsParams {
   readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
 }
 
-export class UiActionsServiceEnhancements {
+export class UiActionsServiceEnhancements implements PersistableStateDefinition<SerializedEvent> {
   protected readonly actionFactories: ActionFactoryRegistry;
   protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
@@ -101,6 +104,9 @@ export class UiActionsServiceEnhancements {
     licenseFeatureName,
     supportedTriggers,
     isCompatible,
+    migrate,
+    extract,
+    inject,
   }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
     const actionFactory: ActionFactoryDefinition<
       Config,
@@ -117,6 +123,9 @@ export class UiActionsServiceEnhancements {
       isConfigValid,
       getDisplayName,
       supportedTriggers,
+      telemetry,
+      extract,
+      inject,
       getIconType: () => euiIcon,
       isCompatible: async () => true,
       create: (serializedAction) => ({
@@ -149,4 +158,25 @@ export class UiActionsServiceEnhancements {
         );
       });
   };
+
+  public telemetry(state: SerializedEvent) {
+    return this.actionFactories.has(state.eventId)
+      ? this.actionFactories.get(state.eventId)!.telemetry(state)
+      : {};
+  }
+
+  public extract(state: SerializedEvent) {
+    return this.actionFactories.has(state.eventId)
+      ? this.actionFactories.get(state.eventId)!.extract(state)
+      : {
+          state,
+          references: [],
+        };
+  }
+
+  public inject(state: SerializedEvent, references: SavedObjectReference[]) {
+    return this.actionFactories.has(state.eventId)
+      ? this.actionFactories.get(state.eventId)!.inject(state, references)
+      : state;
+  }
 }

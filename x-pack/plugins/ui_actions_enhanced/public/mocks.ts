@@ -30,6 +30,9 @@ const createStartContract = (): Start => {
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
     FlyoutManageDrilldowns: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
   };
 
   return startContract;

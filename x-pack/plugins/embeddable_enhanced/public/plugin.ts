@@ -68,6 +68,7 @@ export class EmbeddableEnhancedPlugin
     const panelNotificationAction = new PanelNotificationsAction();
     plugins.uiActionsEnhanced.registerAction(panelNotificationAction);
     plugins.uiActionsEnhanced.attachAction(PANEL_NOTIFICATION_TRIGGER, panelNotificationAction.id);
+    plugins.embeddable.registerEmbeddableEnhancement(dynamicActionEnhancement(startServices));
 
     plugins.uiActionsEnhanced.registerDrilldown(
       new UrlDrilldown({
@@ -82,7 +83,7 @@ export class EmbeddableEnhancedPlugin
     return {};
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): StartContract {
+  public start(core: CoreStart, plugins: StartDependenciesStartDependencies): StartContract {
     this.uiActions = plugins.uiActionsEnhanced;
 
     return {};
