@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
-    describe('exit existing map', () => {
+    describe('edit existing map', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
