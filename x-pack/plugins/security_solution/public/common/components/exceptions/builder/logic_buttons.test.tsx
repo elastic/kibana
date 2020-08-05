@@ -7,12 +7,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { BuilderButtonOptions } from './builder_button_options';
+import { BuilderLogicButtons } from './logic_buttons';
 
-describe('BuilderButtonOptions', () => {
+describe('BuilderLogicButtons', () => {
   test('it renders "and" and "or" buttons', () => {
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -37,7 +37,7 @@ describe('BuilderButtonOptions', () => {
     const onOrClicked = jest.fn();
 
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -59,7 +59,7 @@ describe('BuilderButtonOptions', () => {
     const onAndClicked = jest.fn();
 
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -81,7 +81,7 @@ describe('BuilderButtonOptions', () => {
     const onAddClickWhenNested = jest.fn();
 
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -101,7 +101,7 @@ describe('BuilderButtonOptions', () => {
 
   test('it disables "and" button if "isAndDisabled" is true', () => {
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         showNestedButton={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -121,7 +121,7 @@ describe('BuilderButtonOptions', () => {
 
   test('it disables "or" button if "isOrDisabled" is "true"', () => {
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         showNestedButton={false}
         isOrDisabled
         isAndDisabled={false}
@@ -141,7 +141,7 @@ describe('BuilderButtonOptions', () => {
 
   test('it disables "add nested" button if "isNestedDisabled" is "true"', () => {
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         showNestedButton
         isOrDisabled={false}
         isAndDisabled={false}
@@ -163,7 +163,7 @@ describe('BuilderButtonOptions', () => {
     const onNestedClicked = jest.fn();
 
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
@@ -185,7 +185,7 @@ describe('BuilderButtonOptions', () => {
     const onAndClicked = jest.fn();
 
     const wrapper = mount(
-      <BuilderButtonOptions
+      <BuilderLogicButtons
         isAndDisabled={false}
         isOrDisabled={false}
         isNestedDisabled={false}
