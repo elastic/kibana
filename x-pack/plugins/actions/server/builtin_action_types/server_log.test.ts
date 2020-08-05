@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from '../types';
 import { validateParams } from '../lib';
 import { Logger } from '../../../../../src/core/server';
 import { createActionTypeRegistry } from './index.test';
 import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ServerLogActionType,
+  ServerLogActionTypeExecutorOptions,
+} from './server_log';
 
 const ACTION_TYPE_ID = '.server-log';
 
-let actionType: ActionType;
+let actionType: ServerLogActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ACTION_TYPE_ID);
   mockedLogger = logger;
   expect(actionType).toBeTruthy();
 });
@@ -88,13 +92,14 @@ describe('validateParams()', () => {
 describe('execute()', () => {
   test('calls the executor with proper params', async () => {
     const actionId = 'some-id';
-    await actionType.executor({
+    const executorOptions: ServerLogActionTypeExecutorOptions = {
       actionId,
       services: actionsMock.createServices(),
       params: { message: 'message text here', level: 'info' },
       config: {},
       secrets: {},
-    });
+    };
+    await actionType.executor(executorOptions);
     expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');
   });
 });
