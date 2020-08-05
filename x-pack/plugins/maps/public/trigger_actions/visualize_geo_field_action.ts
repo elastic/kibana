@@ -22,7 +22,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
   type: ACTION_VISUALIZE_GEO_FIELD,
   getDisplayName: () =>
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {
-      defaultMessage: 'Visualize on Kibana Maps',
+      defaultMessage: 'Visualize on a map',
     }),
   execute: async (context) => {
     const indexPattern = await getIndexPatternService().get(context.indexPatternId);

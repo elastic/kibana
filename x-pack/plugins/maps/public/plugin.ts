@@ -61,7 +61,10 @@ import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import { visualizeGeoFieldAction, ACTION_VISUALIZE_GEO_FIELD } from './actions';
+import {
+  visualizeGeoFieldAction,
+  ACTION_VISUALIZE_GEO_FIELD,
+} from './trigger_actions/visualize_geo_field_action';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
@@ -41,14 +41,16 @@ export function DiscoverFieldDetails({
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean | undefined>(false);
 
-  isFieldVisualizable(field, indexPattern.id).then(
-    (flag) => {
-      setShowVisualizeLink(flag);
-    },
-    () => {
-      setShowVisualizeLink(false);
-    }
-  );
+  useEffect(() => {
+    isFieldVisualizable(field, indexPattern.id).then(
+      (flag) => {
+        setShowVisualizeLink(flag);
+      },
+      () => {
+        setShowVisualizeLink(false);
+      }
+    );
+  }, [field, indexPattern.id]);
 
   return (
     <div className="dscFieldDetails">
