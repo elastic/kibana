@@ -24,7 +24,7 @@ import { AppPluginStartDependencies } from './types';
 import { SearchExamplesApp } from './components/app';
 
 export const renderApp = (
-  { notifications, savedObjects, uiSettings, http }: CoreStart,
+  { notifications, savedObjects, http }: CoreStart,
   { navigation, data }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
