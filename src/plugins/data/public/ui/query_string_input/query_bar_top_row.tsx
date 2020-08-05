@@ -94,7 +94,7 @@ export function QueryBarTopRow(props: Props) {
   }
 
   function getDateRange() {
-    const defaultTimeSetting = uiSettings!.get('timepicker:timeDefaults');
+    const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
       from: props.dateRangeFrom || defaultTimeSetting.from,
       to: props.dateRangeTo || defaultTimeSetting.to,

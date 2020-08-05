@@ -34,7 +34,6 @@ export const updateTimelinesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    // eslint-disable-next-line complexity
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
