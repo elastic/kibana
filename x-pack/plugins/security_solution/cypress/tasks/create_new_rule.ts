@@ -17,6 +17,7 @@ import {
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
+  COMBO_BOX_INPUT,
   CREATE_AND_ACTIVATE_BTN,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
@@ -33,10 +34,16 @@ import {
   MITRE_TECHNIQUES_INPUT,
   RISK_INPUT,
   REFERENCE_URLS_INPUT,
+  RISK_MAPPING_OVERRIDE_OPTION,
+  RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
+  RULE_NAME_OVERRIDE,
+  RULE_TIMESTAMP_OVERRIDE,
   SCHEDULE_CONTINUE_BUTTON,
   SEVERITY_DROPDOWN,
+  SEVERITY_MAPPING_OVERRIDE_OPTION,
+  SEVERITY_OVERRIDE_ROW,
   TAGS_INPUT,
   THRESHOLD_FIELD_SELECTION,
   THRESHOLD_INPUT_AREA,
@@ -97,22 +104,22 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
-  cy.get('#severity-mapping-override').click();
+  cy.get(SEVERITY_MAPPING_OVERRIDE_OPTION).click();
   rule.severityOverride.forEach((severity, i) => {
-    cy.get('[data-test-subj="severityOverrideRow"]')
+    cy.get(SEVERITY_OVERRIDE_ROW)
       .eq(i)
       .within(() => {
-        cy.get('[data-test-subj="comboBoxInput"]').eq(0).type(`${severity.sourceField}{enter}`);
-        cy.get('[data-test-subj="comboBoxInput"]').eq(1).type(`${severity.sourceValue}{enter}`);
+        cy.get(COMBO_BOX_INPUT).eq(0).type(`${severity.sourceField}{enter}`);
+        cy.get(COMBO_BOX_INPUT).eq(1).type(`${severity.sourceValue}{enter}`);
       });
   });
 
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${rule.severity.toLowerCase()}`).click();
 
-  cy.get('#risk_score-mapping-override').click();
-  cy.get('[data-test-subj="detectionEngineStepAboutRuleRiskScore-riskOverride"]').within(() => {
-    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.riskOverride}{enter}`);
+  cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
+  cy.get(RISK_OVERRIDE).within(() => {
+    cy.get(COMBO_BOX_INPUT).type(`${rule.riskOverride}{enter}`);
   });
 
   cy.get(RISK_INPUT).clear({ force: true }).type(`${rule.riskScore}`, { force: true });
@@ -146,12 +153,12 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(rule.note, { force: true });
 
-  cy.get('[data-test-subj="detectionEngineStepAboutRuleRuleNameOverride"]').within(() => {
-    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.nameOverride}{enter}`);
+  cy.get(RULE_NAME_OVERRIDE).within(() => {
+    cy.get(COMBO_BOX_INPUT).type(`${rule.nameOverride}{enter}`);
   });
 
-  cy.get('[data-test-subj="detectionEngineStepAboutRuleTimestampOverride"]').within(() => {
-    cy.get('[data-test-subj="comboBoxInput"]').type(`${rule.timestampOverride}{enter}`);
+  cy.get(RULE_TIMESTAMP_OVERRIDE).within(() => {
+    cy.get(COMBO_BOX_INPUT).type(`${rule.timestampOverride}{enter}`);
   });
 
   cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });

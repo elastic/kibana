@@ -15,15 +15,19 @@ import {
   SEVERITY,
 } from '../screens/alerts_detection_rules';
 import {
-  ABOUT_FALSE_POSITIVES,
   ABOUT_INVESTIGATION_NOTES,
-  ABOUT_MITRE,
-  ABOUT_RISK,
+  ABOUT_OVERRIDE_FALSE_POSITIVES,
+  ABOUT_OVERRIDE_MITRE,
+  ABOUT_OVERRIDE_NAME_OVERRIDE,
+  ABOUT_OVERRIDE_RISK,
+  ABOUT_OVERRIDE_RISK_OVERRIDE,
+  ABOUT_OVERRIDE_SEVERITY_OVERRIDE,
+  ABOUT_OVERRIDE_TAGS,
+  ABOUT_OVERRIDE_TIMESTAMP_OVERRIDE,
+  ABOUT_OVERRIDE_URLS,
   ABOUT_RULE_DESCRIPTION,
   ABOUT_SEVERITY,
   ABOUT_STEP,
-  ABOUT_TAGS,
-  ABOUT_URLS,
   DEFINITION_CUSTOM_QUERY,
   DEFINITION_INDEX_PATTERNS,
   DEFINITION_TIMELINE,
@@ -140,7 +144,7 @@ describe('Detection rules, override', () => {
     cy.get(ABOUT_STEP).eq(ABOUT_SEVERITY).invoke('text').should('eql', newOverrideRule.severity);
     newOverrideRule.severityOverride.forEach((severity, i) => {
       cy.get(ABOUT_STEP)
-        .eq(1 + i)
+        .eq(ABOUT_OVERRIDE_SEVERITY_OVERRIDE + i)
         .invoke('text')
         .should(
           'eql',
@@ -148,17 +152,29 @@ describe('Detection rules, override', () => {
         );
     });
 
-    cy.get(ABOUT_STEP).eq(5).invoke('text').should('eql', newOverrideRule.riskScore);
     cy.get(ABOUT_STEP)
-      .eq(6)
+      .eq(ABOUT_OVERRIDE_RISK)
+      .invoke('text')
+      .should('eql', newOverrideRule.riskScore);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_OVERRIDE_RISK_OVERRIDE)
       .invoke('text')
       .should('eql', `${newOverrideRule.riskOverride}signal.rule.risk_score`);
-    cy.get(ABOUT_STEP).eq(7).invoke('text').should('eql', expectedUrls);
-    cy.get(ABOUT_STEP).eq(8).invoke('text').should('eql', expectedFalsePositives);
-    cy.get(ABOUT_STEP).eq(9).invoke('text').should('eql', newOverrideRule.nameOverride);
-    cy.get(ABOUT_STEP).eq(10).invoke('text').should('eql', expectedMitre);
-    cy.get(ABOUT_STEP).eq(11).invoke('text').should('eql', newOverrideRule.timestampOverride);
-    cy.get(ABOUT_STEP).eq(12).invoke('text').should('eql', expectedTags);
+    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_URLS).invoke('text').should('eql', expectedUrls);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_OVERRIDE_FALSE_POSITIVES)
+      .invoke('text')
+      .should('eql', expectedFalsePositives);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_OVERRIDE_NAME_OVERRIDE)
+      .invoke('text')
+      .should('eql', newOverrideRule.nameOverride);
+    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_MITRE).invoke('text').should('eql', expectedMitre);
+    cy.get(ABOUT_STEP)
+      .eq(ABOUT_OVERRIDE_TIMESTAMP_OVERRIDE)
+      .invoke('text')
+      .should('eql', newOverrideRule.timestampOverride);
+    cy.get(ABOUT_STEP).eq(ABOUT_OVERRIDE_TAGS).invoke('text').should('eql', expectedTags);
 
     cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
