@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 
 import { HttpSetup } from '../../../../../src/core/public';
-import { sendRequest, SendRequestConfig, SendRequestResponse } from './send_request';
+import {
+  sendRequest as sendStatelessRequest,
+  SendRequestConfig,
+  SendRequestResponse,
+} from './send_request';
 
 export interface UseRequestConfig extends SendRequestConfig {
   pollIntervalMs?: number;
@@ -38,17 +42,8 @@ export interface UseRequestResponse<D = any, E = Error> {
 
 export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
-  {
-    path,
-    method,
-    query,
-    body,
-    pollIntervalMs,
-    initialData,
-    deserializer = (data: any): any => data,
-  }: UseRequestConfig
+  { path, method, query, body, pollIntervalMs, initialData, deserializer }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
-  const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   const scheduleRequestRef = useRef<() => void>();
 
   // Main states for tracking request status and data
@@ -64,34 +59,42 @@ export const useRequest = <D = any, E = Error>(
   // We always want to use the most recently-set interval when scheduling the next request.
   pollIntervalMsRef.current = pollIntervalMs;
 
-  // Tied to every render and bound to each request.
-  let isOutdatedRequest = false;
-
-  scheduleRequestRef.current = () => {
-    // Clear current interval
+  const clearPollInterval = useCallback(() => {
     if (pollIntervalIdRef.current) {
       clearTimeout(pollIntervalIdRef.current);
     }
+  }, []);
 
-    // Set new interval
-    if (pollIntervalMsRef.current) {
-      pollIntervalIdRef.current = setTimeout(sendRequestRef.current!, pollIntervalMsRef.current);
-    }
-  };
+  // Tied to every render and bound to each request.
+  let isOutdatedRequest = false;
 
-  sendRequestRef.current = async () => {
+  // Convert our object to string to be able to compare them in our useMemo,
+  // allowing the consumer to freely passed new objects to the hook on each
+  // render without requiring them to be memoized.
+  const queryStringified = query ? JSON.stringify(query) : undefined;
+  const bodyStringified = body ? JSON.stringify(body) : undefined;
+
+  const requestBody = useMemo(() => {
+    return {
+      path,
+      method,
+      query: queryStringified ? query : undefined,
+      body: bodyStringified ? body : undefined,
+    };
+    // queryStringified and bodyStringified stand in for query and body as dependencies.
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [path, method, queryStringified, bodyStringified]);
+
+  const sendRequest = useCallback(async () => {
+    // If we're on an interval, this allows us to reset it if the user has manually requested the
+    // data, to avoid doubled-up requests.
+    clearPollInterval();
+
     // We don't clear error or data, so it's up to the consumer to decide whether to display the
     // "old" error/data or loading state when a new request is in-flight.
     setIsLoading(true);
 
-    const requestBody = {
-      path,
-      method,
-      query,
-      body,
-    };
-
-    const response = await sendRequest<D, E>(httpClient, requestBody);
+    const response = await sendStatelessRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
 
     // If an outdated request has resolved, ignore its outdated data.
@@ -102,40 +105,42 @@ export const useRequest = <D = any, E = Error>(
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
     if (!responseError) {
-      const responseData = deserializer(serializedResponseData);
+      const responseData = deserializer
+        ? deserializer(serializedResponseData)
+        : serializedResponseData;
       setData(responseData);
     }
     setIsLoading(false);
     setIsInitialRequest(false);
 
-    // If we're on an interval, we need to schedule the next request. This also allows us to reset
-    // the interval if the user has manually requested the data, to avoid doubled-up requests.
+    // If we're on an interval, we need to schedule the next request.
     scheduleRequestRef.current!();
 
     return { data: serializedResponseData, error: responseError };
-  };
-
-  // The stringified value won't change even if the object reference does.
-  const stringifiedQuery = useMemo(() => JSON.stringify(query), [query]);
+  }, [requestBody, httpClient, deserializer, clearPollInterval, isOutdatedRequest]);
 
   useEffect(() => {
-    sendRequestRef.current!();
+    sendRequest();
+  }, [sendRequest]);
 
-    // To be functionally correct we'd send a new request if the method, path, query or body changes.
-    // But it doesn't seem likely that the method will change and body is likely to be a new
-    // object even if its shape hasn't changed, so for now we're just watching the path and the query.
-  }, [path, stringifiedQuery]);
+  scheduleRequestRef.current = () => {
+    // If there's a scheduled poll request, this new one should supersede it.
+    clearPollInterval();
+
+    // Schedule next poll request.
+    if (pollIntervalMsRef.current) {
+      pollIntervalIdRef.current = setTimeout(sendRequest, pollIntervalMsRef.current);
+    }
+  };
 
   useEffect(() => {
     scheduleRequestRef.current!();
 
-    // Clean up timeout and mark inflight requests as stale if the poll interval changes.
+    // Clean up timeout and mark in-flight requests as stale if the poll interval changes.
     return () => {
       /* eslint-disable-next-line react-hooks/exhaustive-deps */
       isOutdatedRequest = true;
-      if (pollIntervalIdRef.current) {
-        clearTimeout(pollIntervalIdRef.current);
-      }
+      clearPollInterval();
     };
   }, [pollIntervalMs]);
 
@@ -144,6 +149,6 @@ export const useRequest = <D = any, E = Error>(
     isLoading,
     error,
     data,
-    sendRequest: sendRequestRef.current, // Gives the user the ability to manually request data
+    sendRequest, // Gives the user the ability to manually request data
   };
 };

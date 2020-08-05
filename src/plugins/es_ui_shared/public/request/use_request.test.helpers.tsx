@@ -24,7 +24,7 @@ import sinon from 'sinon';
 
 import { HttpSetup, HttpFetchOptions } from '../../../../../src/core/public';
 import { SendRequestConfig, SendRequestResponse } from './send_request';
-import { useRequest, UseRequestResponse } from './use_request';
+import { useRequest, UseRequestResponse, UseRequestConfig } from './use_request';
 
 export interface UseRequestHelpers {
   advanceTime: (ms: number) => Promise<void>;
@@ -86,7 +86,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
   const hookResult = {} as UseRequestResponse;
   const sendRequestSpy = sinon.stub();
 
-  const setupUseRequest = (config: SendRequestConfig) => {
+  const setupUseRequest = (config: UseRequestConfig) => {
     const httpClient = {
       post: (path: string, options: HttpFetchOptions) => {
         return new Promise((resolve, reject) => {
@@ -103,7 +103,7 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
       },
     };
 
-    const TestComponent = ({ requestConfig }: { requestConfig: SendRequestConfig }) => {
+    const TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
       const { isInitialRequest, isLoading, error, data, sendRequest } = useRequest(
         httpClient as HttpSetup,
         requestConfig

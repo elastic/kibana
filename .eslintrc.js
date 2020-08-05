@@ -95,12 +95,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/es_ui_shared/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
