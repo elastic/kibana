@@ -186,15 +186,15 @@ export const AlertPreview: React.FC<Props> = (props) => {
               {showNoDataResults && previewResult.resultTotals.noData ? (
                 <FormattedMessage
                   id="xpack.infra.metrics.alertFlyout.alertPreviewNoDataResult"
-                  defaultMessage="There {noDataNumberForPluralization, plural, one {was} other {were}} {boldedResultsNumber} of no data."
+                  defaultMessage="There {boldedResultsNumber} of no data."
                   values={{
-                    noDataNumberForPluralization: previewResult.resultTotals.noData,
                     boldedResultsNumber: (
                       <strong>
                         {i18n.translate(
                           'xpack.infra.metrics.alertFlyout.alertPreviewNoDataResultNumber',
                           {
-                            defaultMessage: '{noData, plural, one {# result} other {# results}}',
+                            defaultMessage:
+                              '{noData, plural, one {was # result} other {were # results}}',
                             values: {
                               noData: previewResult.resultTotals.noData,
                             },
