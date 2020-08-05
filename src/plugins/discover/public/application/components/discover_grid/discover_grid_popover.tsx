@@ -66,7 +66,6 @@ export function DiscoverGridPopover({
               defaultMessage: 'Filter out {value}',
               values: { value: text },
             })}
-            color="danger"
             onClick={onNegativeFilterClick}
           >
             {i18n.translate('discover.grid.filterOut', {

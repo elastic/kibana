@@ -1,0 +1,13 @@
+.dscResultCount {
+  @include euiBreakpoint('xs', 's') {
+    .dscResultCount__toggle {
+      align-items: flex-end;
+      margin-top: 0 !important;
+    }
+
+    .dscResuntCount__title,
+    .dscResultCount__actions {
+      margin-bottom: 0 !important;
+    }
+  }
+}
