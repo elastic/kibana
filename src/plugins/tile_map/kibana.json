@@ -10,8 +10,7 @@
     "expressions",
     "mapsLegacy",
     "kibanaLegacy",
-    "data",
-    "uiActions"
+    "data"
   ],
   "requiredBundles": [
     "kibanaUtils",

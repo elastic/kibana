@@ -87,36 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.close();
     });
 
-    it('should visualize a geo field in coordinate map', async () => {
+    it('should not show the "Visualize" button for geo field', async () => {
       await PageObjects.discover.findFieldByName('geo.coordinates');
       log.debug('visualize a geo field');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.coordinates');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const expectedTableData = [
-        ['-', 'dn', '1,429', '{ "lat": 36.3805938706661, "lon": -84.78903367466954 }'],
-        ['-', 'dp', '1,418', '{ "lat": 41.64736261928247, "lon": -84.89820087802752 }'],
-        ['-', '9y', '1,215', '{ "lat": 36.45605538343942, "lon": -95.0664490789727 }'],
-        ['-', '9z', '1,099', '{ "lat": 42.185341429717, "lon": -95.16736012207238 }'],
-        ['-', 'dr', '1,076', '{ "lat": 42.023513913358, "lon": -73.9809102583313 }'],
-        ['-', 'dj', '982', '{ "lat": 31.6727389150504, "lon": -84.50814768605602 }'],
-        ['-', '9v', '938', '{ "lat": 31.380770751890708, "lon": -95.27050333687349 }'],
-        ['-', '9q', '722', '{ "lat": 36.51360971975679, "lon": -119.18302192208242 }'],
-        ['-', '9w', '475', '{ "lat": 36.392644499761886, "lon": -106.91101965061144 }'],
-        ['-', 'cb', '457', '{ "lat": 46.70940757519209, "lon": -95.81077479910212 }'],
-        ['-', 'c2', '453', '{ "lat": 47.14486789763196, "lon": -119.50036960974681 }'],
-        ['-', '9x', '420', '{ "lat": 41.80676538663517, "lon": -106.4800124125156 }'],
-        ['-', 'dq', '399', '{ "lat": 37.1589753382202, "lon": -77.03116585150417 }'],
-        ['-', '9r', '396', '{ "lat": 41.97058037664233, "lon": -119.63551023403521 }'],
-        ['-', '9t', '274', '{ "lat": 32.61719440381947, "lon": -106.79003051444752 }'],
-        ['-', 'c8', '271', '{ "lat": 47.13446403516807, "lon": -106.58752490872881 }'],
-        ['-', 'dh', '214', '{ "lat": 26.89657606600096, "lon": -81.23893259637163 }'],
-        ['-', 'b6', '207', '{ "lat": 60.10175546125063, "lon": -161.7005743794953 }'],
-        ['-', 'bd', '206', '{ "lat": 59.65593476375131, "lon": -152.93652406179356 }'],
-        ['-', 'b7', '167', '{ "lat": 64.35817028535251, "lon": -162.25999960090274 }'],
-      ];
-      await inspector.open();
-      await inspector.expectTableData(expectedTableData);
-      await inspector.close();
+      await PageObjects.discover.expectMissingFieldListItemVisualize('geo.coordinates');
     });
 
     it('should preserve app filters in visualize', async () => {

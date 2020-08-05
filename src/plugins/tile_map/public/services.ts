@@ -20,8 +20,6 @@
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { ApplicationStart } from '../../../core/public';
-import { VisualizationsSetup } from '../../visualizations/public';
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
@@ -33,10 +31,4 @@ export const [getQueryService, setQueryService] = createGetterSetter<
 
 export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
   'KibanaLegacy'
-);
-
-export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
-
-export const [getVisualizations, setVisualizations] = createGetterSetter<VisualizationsSetup>(
-  'Visualizations'
 );
