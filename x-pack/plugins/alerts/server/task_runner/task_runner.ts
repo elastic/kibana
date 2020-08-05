@@ -317,7 +317,6 @@ export class TaskRunner {
             previousStartedAt,
           };
         },
-
         (err: Error) => {
           const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
