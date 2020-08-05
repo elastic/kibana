@@ -193,16 +193,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
   >(type: string, explicitInput: Partial<EEI>) {
     if (explicitInput.id && this.input.panels[explicitInput.id]) {
-      this.replacePanel(this.input.panels[explicitInput.id], {
+      return this.replacePanel(this.input.panels[explicitInput.id], {
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          // TS does not catch up with the typeguard above, so it needs to be explicit
+          id: explicitInput.id,
         },
       });
-    } else {
-      this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
     }
+    return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
   }
 
   public render(dom: HTMLElement) {
