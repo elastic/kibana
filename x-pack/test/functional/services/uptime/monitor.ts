@@ -7,10 +7,12 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
+export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+
+  const PageObjects = getPageObjects(['header']);
 
   return {
     async locationMissingExists() {
@@ -70,6 +72,7 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
         },
         async () => {
           await testSubjects.click('superDatePickerApplyTimeButton');
+          await PageObjects.header.waitUntilLoadingHasFinished();
         }
       );
     },
