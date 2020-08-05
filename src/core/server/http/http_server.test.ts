@@ -1256,7 +1256,7 @@ describe('timeout options', () => {
 
     // this can ideally be deleted in the future once https://github.com/hapijs/hapi/issues/4122 is resolved
     test(`idleSocket timeout must be larger than the payload timeout`, async () => {
-      const { registerRouter, server: innerServer } = await server.setup(config);
+      const { registerRouter } = await server.setup(config);
 
       const router = new Router('', logger, enhanceWithContext);
       router.post(

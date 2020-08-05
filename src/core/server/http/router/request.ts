@@ -221,7 +221,7 @@ export class KibanaRequest<
       tags: request.route.settings.tags || [],
       timeout: {
         payload: payloadTimeout,
-        idleSocket: request.route.settings.timeout.socket,
+        idleSocket: request.route.settings.timeout?.socket,
       },
       body: isSafeMethod(method)
         ? undefined
