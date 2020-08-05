@@ -58,7 +58,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor() {
       throw new Error('this alert is intended to fail');
@@ -82,7 +82,7 @@ function getAlwaysFiringAlertType() {
   const paramsSchema = schema.object({
     index: schema.string(),
     reference: schema.string(),
-    groupsToScheduleActionsInSeries: schema.arrayOf(schema.nullable(schema.string())),
+    groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State {
@@ -403,7 +403,7 @@ function getPatternFiringAlertType() {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor(alertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
