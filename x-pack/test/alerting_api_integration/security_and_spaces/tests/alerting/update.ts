@@ -28,7 +28,18 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     return supertest
       .get(`/api/alerting_tasks/${taskId}`)
       .expect(200)
-      .then((response: SupertestResponse) => response.body);
+      .then((response) => {
+        console.log(JSON.stringify(response.body));
+        return response.body;
+      });
+  }
+
+  function ensureTasksIndexRefreshed() {
+    return supertest
+      .get(`/api/ensure_tasks_index_refreshed`)
+      .send({})
+      .expect(200)
+      .then((response) => response.body);
   }
 
   describe('update', () => {
@@ -725,11 +736,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
           await retry.try(async () => {
-            const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+            const alertTask = await getAlertingTaskById(createdAlert.scheduledTaskId);
             expect(alertTask.status).to.eql('idle');
             // ensure the alert inital run has completed and it's been rescheduled to half an hour from now
             ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 30 * 60 * 1000);
           });
+
+          await ensureTasksIndexRefreshed();
 
           const updatedData = {
             name: 'bcd',
@@ -768,7 +781,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
-                const alertTask = (await getAlertingTaskById(createdAlert.scheduledTaskId)).docs[0];
+                await ensureTasksIndexRefreshed();
+                const alertTask = await getAlertingTaskById(createdAlert.scheduledTaskId);
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now
                 ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 60 * 1000);

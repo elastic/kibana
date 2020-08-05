@@ -242,6 +242,8 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
+    console.log(`________ markAvailableTasksAsClaimed`);
+    console.log(JSON.stringify({ claimOwnershipUntil, claimTasksById, size }));
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -282,6 +284,7 @@ export class TaskStore {
         max_docs: size,
       }
     );
+    console.log(`_____updated: ${updated}`);
 
     if (apmTrans) apmTrans.end();
     return updated;
@@ -294,6 +297,8 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<ConcreteTaskInstance[]> {
+    console.log(`________ sweepForClaimedTasks`);
+    console.log(JSON.stringify({ claimTasksById, size }));
     const claimedTasksQuery = tasksClaimedByOwner(this.taskManagerId);
     const { docs } = await this.search({
       query:
@@ -304,6 +309,8 @@ export class TaskStore {
       sort: SortByRunAtAndRetryAt,
       seq_no_primary_term: true,
     });
+
+    console.log(`docs: ${JSON.stringify(docs)}`);
 
     return docs;
   }

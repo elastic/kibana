@@ -386,14 +386,17 @@ export class AlertsClient {
           updateResult.scheduledTaskId &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
+          console.log(`UPDATING ALERT ${id} RUNS TASK ${updateResult.scheduledTaskId}`);
           this.taskManager
             .runNow(updateResult.scheduledTaskId)
             .then(() => {
+              console.log(`++++++ RUN NOW TASK ${updateResult.scheduledTaskId}`);
               this.logger.debug(
                 `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
               );
             })
             .catch((err: Error) => {
+              console.log(`------ FAILED RUN NOW TASK ${updateResult.scheduledTaskId}`);
               this.logger.error(
                 `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
               );
