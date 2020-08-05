@@ -17,7 +17,8 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
   const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} > monitoringTableNoData`;
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
-  const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_search_rate_5`;
+  // const SUBJ_TABLE_SORT_SEARCH_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_search_rate_5`;
+  const SUBJ_TABLE_SORT_SEARCH_COL = `tableHeaderCell_search_rate_5`;
 
   const SUBJ_INDICES_NAMES = `${SUBJ_TABLE_CONTAINER} > name`;
   const SUBJ_INDICES_STATUSES = `${SUBJ_TABLE_CONTAINER} > statusIcon`;
@@ -36,7 +37,8 @@ export function MonitoringElasticsearchIndicesProvider({ getService, getPageObje
     }
 
     async clickSearchCol() {
-      const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_SEARCH_COL);
+      const table = await testSubjects.find(SUBJ_TABLE_CONTAINER);
+      const headerCell = await testSubjects.findDescendant(SUBJ_TABLE_SORT_SEARCH_COL, table);
       const button = await headerCell.findByTagName('button');
       return button.click();
     }
