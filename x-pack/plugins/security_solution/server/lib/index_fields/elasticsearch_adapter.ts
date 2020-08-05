@@ -17,26 +17,21 @@ import {
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { FieldsAdapter, IndexFieldDescriptor } from './types';
 
-type IndexesAliasIndices = Record<string, string[]>;
-
 export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getIndexFields(request: FrameworkRequest, indices: string[]): Promise<IndexField[]> {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
-    const indexesAliasIndices: IndexesAliasIndices = indices.reduce(
-      (accumulator: IndexesAliasIndices, indice: string) => {
-        const key = getIndexAlias(indices, indice);
+    const indexesAliasIndices = indices.reduce<Record<string, string[]>>((accumulator, indice) => {
+      const key = getIndexAlias(indices, indice);
 
-        if (get(key, accumulator)) {
-          accumulator[key] = [...accumulator[key], indice];
-        } else {
-          accumulator[key] = [indice];
-        }
-        return accumulator;
-      },
-      {} as IndexesAliasIndices
-    );
+      if (get(key, accumulator)) {
+        accumulator[key] = [...accumulator[key], indice];
+      } else {
+        accumulator[key] = [indice];
+      }
+      return accumulator;
+    }, {});
     const responsesIndexFields: IndexFieldDescriptor[][] = await Promise.all(
       Object.values(indexesAliasIndices).map((indicesByGroup) =>
         indexPatternsService.getFieldsForWildcard({
