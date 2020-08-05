@@ -4,24 +4,104 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { TypeOf } from '@kbn/config-schema';
-import { ResilientPublicConfigurationSchema, ResilientSecretConfigurationSchema } from './schema';
+import {
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
+} from './schema';
 
-export type ResilientPublicConfigurationType = TypeOf<typeof ResilientPublicConfigurationSchema>;
-export type ResilientSecretConfigurationType = TypeOf<typeof ResilientSecretConfigurationSchema>;
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { Logger } from '../../../../../../src/core/server';
 
-interface CreateIncidentBasicRequestArgs {
-  name: string;
-  description: string;
-  discovered_date: number;
+import { IncidentConfigurationSchema } from './case_schema';
+import { PushToServiceResponse } from './case_types';
+
+export type ResilientPublicConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceConfigurationSchema
+>;
+export type ResilientSecretConfigurationType = TypeOf<
+  typeof ExternalIncidentServiceSecretConfigurationSchema
+>;
+
+export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+
+export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
+
+export interface ExternalServiceCredentials {
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
 }
 
-interface Comment {
-  text: { format: string; content: string };
+export interface ExternalServiceValidation {
+  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
+  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
 }
 
-interface CreateIncidentRequestArgs extends CreateIncidentBasicRequestArgs {
-  comments?: Comment[];
+export interface ExternalServiceIncidentResponse {
+  id: string;
+  title: string;
+  url: string;
+  pushedDate: string;
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
+}
+
+export type ExternalServiceParams = Record<string, unknown>;
+
+export interface ExternalService {
+  getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
+  findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
+  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
+}
+
+export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
+  externalObject: Record<string, any>;
+}
+
+export interface ExternalServiceApiHandlerArgs {
+  externalService: ExternalService;
+  mapping: Map<string, any> | null;
+}
+
+export type ExecutorSubActionGetIncidentParams = TypeOf<
+  typeof ExecutorSubActionGetIncidentParamsSchema
+>;
+
+export type ExecutorSubActionHandshakeParams = TypeOf<
+  typeof ExecutorSubActionHandshakeParamsSchema
+>;
+
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+  secrets: Record<string, unknown>;
+  logger: Logger;
+}
+
+export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionGetIncidentParams;
+}
+
+export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionHandshakeParams;
+}
+
+export interface ExternalServiceApi {
+  handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
 }
 
 export interface UpdateFieldText {
@@ -37,9 +117,6 @@ interface UpdateField {
   old_value: UpdateFieldText | UpdateFieldTextArea;
   new_value: UpdateFieldText | UpdateFieldTextArea;
 }
-
-export type CreateIncidentRequest = CreateIncidentRequestArgs;
-export type CreateCommentRequest = Comment;
 
 export interface UpdateIncidentRequest {
   changes: UpdateField[];
