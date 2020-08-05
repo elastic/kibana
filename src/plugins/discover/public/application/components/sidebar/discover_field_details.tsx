@@ -42,7 +42,7 @@ export function DiscoverFieldDetails({
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean | undefined>(false);
 
   useEffect(() => {
-    isFieldVisualizable(field, indexPattern.id).then(
+    isFieldVisualizable(field, indexPattern.id, details.columns).then(
       (flag) => {
         setShowVisualizeLink(flag);
       },
@@ -50,7 +50,7 @@ export function DiscoverFieldDetails({
         setShowVisualizeLink(false);
       }
     );
-  }, [field, indexPattern.id]);
+  }, [field, indexPattern.id, details.columns]);
 
   return (
     <div className="dscFieldDetails">
@@ -92,7 +92,7 @@ export function DiscoverFieldDetails({
         <>
           <EuiLink
             onClick={() => {
-              triggerVisualizeActions(field, indexPattern.id);
+              triggerVisualizeActions(field, indexPattern.id, details.columns);
             }}
             className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
             data-test-subj={`fieldVisualize-${field.name}`}

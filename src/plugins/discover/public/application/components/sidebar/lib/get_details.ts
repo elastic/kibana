@@ -21,7 +21,11 @@
 import { fieldCalculator } from './field_calculator';
 import { IndexPatternField } from '../../../../../../data/public';
 
-export function getDetails(field: IndexPatternField, hits: Array<Record<string, unknown>>) {
+export function getDetails(
+  field: IndexPatternField,
+  hits: Array<Record<string, unknown>>,
+  columns: string[]
+) {
   const details = {
     ...fieldCalculator.getFieldValueCounts({
       hits,
@@ -29,6 +33,7 @@ export function getDetails(field: IndexPatternField, hits: Array<Record<string, 
       count: 5,
       grouped: false,
     }),
+    columns,
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {

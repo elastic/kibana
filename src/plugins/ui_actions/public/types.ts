@@ -36,6 +36,7 @@ export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 export interface VisualizeFieldContext {
   fieldName: string;
   indexPatternId: string;
+  contextualFields?: string[];
 }
 
 const DEFAULT_TRIGGER = '';

@@ -32,7 +32,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     const appStateFromUrl: DiscoverAppState | null = stateStorage.get('_a');
     // create initial layer descriptor
     const hasTooltips =
-      appStateFromUrl?.columns?.length && appStateFromUrl?.columns[0] !== '_source';
+      context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
 
     const linkUrlParams = {
       _a: rison.encode({
@@ -49,7 +49,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
           id: uuid(),
           type: 'ES_SEARCH',
           geoField: context.fieldName,
-          tooltipProperties: hasTooltips ? appStateFromUrl?.columns : [],
+          tooltipProperties: hasTooltips ? context.contextualFields : [],
           indexPatternId: context.indexPatternId,
           scalingType: supportsClustering ? 'CLUSTERS' : 'LIMIT',
         },

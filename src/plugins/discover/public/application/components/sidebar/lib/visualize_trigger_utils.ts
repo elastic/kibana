@@ -33,31 +33,36 @@ function getTrigger(type: string) {
 async function getCompatibleActions(
   fieldName: string,
   indexPatternId: string,
+  contextualFields: string[],
   action: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(action, {
     indexPatternId,
     fieldName,
+    contextualFields,
   });
   return compatibleActions;
 }
 
 export function triggerVisualizeActions(
   field: IndexPatternField,
-  indexPatternId: string | undefined
+  indexPatternId: string | undefined,
+  contextualFields: string[]
 ) {
   if (!indexPatternId) return;
   const trigger = getTrigger(field.type);
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
+    contextualFields: trigger === VISUALIZE_GEO_FIELD_TRIGGER ? contextualFields : [],
   };
   getUiActions().executeTriggerActions(trigger, triggerOptions);
 }
 
 export async function isFieldVisualizable(
   field: IndexPatternField,
-  indexPatternId: string | undefined
+  indexPatternId: string | undefined,
+  contextualFields: string[]
 ) {
   if (!indexPatternId) return;
   if (field.name === '_id') {
@@ -66,7 +71,12 @@ export async function isFieldVisualizable(
   }
   const trigger = getTrigger(field.type);
   const services: DiscoverServices = getServices();
-  const compatibleActions = await getCompatibleActions(field.name, indexPatternId, trigger);
+  const compatibleActions = await getCompatibleActions(
+    field.name,
+    indexPatternId,
+    contextualFields,
+    trigger
+  );
   return (
     compatibleActions.length > 0 && field.visualizable && !!services.capabilities.visualize.show
   );
