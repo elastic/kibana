@@ -31,15 +31,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  function ensureTasksIndexRefreshed() {
-    return supertest
-      .get(`/api/ensure_tasks_index_refreshed`)
-      .send({})
-      .expect(200)
-      .then((response) => response.body);
-  }
-
-  describe('update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/72803
+  describe.skip('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -738,8 +731,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             // ensure the alert inital run has completed and it's been rescheduled to half an hour from now
             ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 30 * 60 * 1000);
           });
-
-          await ensureTasksIndexRefreshed();
 
           const updatedData = {
             name: 'bcd',
