@@ -5,14 +5,27 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
-import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
+import {
+  createEditSwimlanePanelAction,
+  EDIT_SWIMLANE_PANEL_ACTION,
+} from './edit_swimlane_panel_action';
+import {
+  createOpenInExplorerAction,
+  OPEN_IN_ANOMALY_EXPLORER_ACTION,
+} from './open_in_anomaly_explorer_action';
 import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
-import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
+import {
+  APPLY_INFLUENCER_FILTERS_ACTION,
+  createApplyInfluencerFiltersAction,
+} from './apply_influencer_filters_action';
 import { SWIM_LANE_SELECTION_TRIGGER, swimLaneSelectionTrigger } from './triggers';
-import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
+import {
+  APPLY_TIME_RANGE_SELECTION_ACTION,
+  createApplyTimeRangeSelectionAction,
+} from './apply_time_range_action';
+import { EditSwimlanePanelContext, SwimLaneDrilldownContext } from '../embeddables';
 
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
@@ -49,4 +62,17 @@ export function registerMlUiActions(
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
+}
+
+declare module '../../../../../src/plugins/ui_actions/public' {
+  export interface ActionContextMapping {
+    [EDIT_SWIMLANE_PANEL_ACTION]: EditSwimlanePanelContext;
+    [OPEN_IN_ANOMALY_EXPLORER_ACTION]: SwimLaneDrilldownContext;
+    [APPLY_INFLUENCER_FILTERS_ACTION]: SwimLaneDrilldownContext;
+    [APPLY_TIME_RANGE_SELECTION_ACTION]: SwimLaneDrilldownContext;
+  }
+
+  export interface TriggerContextMapping {
+    [SWIM_LANE_SELECTION_TRIGGER]: SwimLaneDrilldownContext;
+  }
 }
