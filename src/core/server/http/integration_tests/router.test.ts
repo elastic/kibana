@@ -305,7 +305,7 @@ describe('Options', () => {
 
   describe('timeout', () => {
     describe('payload', () => {
-      it('should timeout if payload takes too long to POST', async () => {
+      it('should timeout if POST payload sending takes too long', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
@@ -354,39 +354,104 @@ describe('Options', () => {
         await expect(result).resolves.toHaveProperty('status', 408);
       });
 
-      it('should timeout if configured with a small timeout value for a PUT', async () => {
+      it('should timeout if PUT payload sending takes too long', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         router.put(
-          { path: '/a', validate: false, options: { timeout: { payload: 1000 } } },
+          {
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { payload: 100, idleSocket: 120000 },
+            },
+            path: '/a',
+            validate: false,
+          },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
           }
         );
-        router.put({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
         await server.start();
 
-        expect(supertest(innerServer.listener).put('/a')).rejects.toThrow('socket hang up');
-        await supertest(innerServer.listener).put('/b').expect(200, {});
+        // start the request
+        const request = supertest(innerServer.listener)
+          .put('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        // write some JSON very slowly...
+        const result = new Promise((resolve, reject) => {
+          const body = '{"foo":"bar"}';
+          let i = 0;
+          const intervalId = setInterval(() => {
+            if (i < body.length) {
+              request.write(body[i++]);
+            } else {
+              clearInterval(intervalId);
+              request.end((err, res) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(res);
+                }
+              });
+            }
+          }, 10);
+        });
+
+        await expect(result).resolves.toHaveProperty('status', 408);
       });
 
-      it('should timeout if configured with a small timeout value for a DELETE', async () => {
+      it('should timeout if DELETE payload sending takes too long', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         router.delete(
-          { path: '/a', validate: false, options: { timeout: { payload: 1000 } } },
+          {
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { payload: 100, idleSocket: 120000 },
+            },
+            path: '/a',
+            validate: false,
+          },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
           }
         );
-        router.delete({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
         await server.start();
-        expect(supertest(innerServer.listener).delete('/a')).rejects.toThrow('socket hang up');
-        await supertest(innerServer.listener).delete('/b').expect(200, {});
+
+        // start the request
+        const request = supertest(innerServer.listener)
+          .delete('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        // write some JSON very slowly...
+        const result = new Promise((resolve, reject) => {
+          const body = '{"foo":"bar"}';
+          let i = 0;
+          const intervalId = setInterval(() => {
+            if (i < body.length) {
+              request.write(body[i++]);
+            } else {
+              clearInterval(intervalId);
+              request.end((err, res) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(res);
+                }
+              });
+            }
+          }, 10);
+        });
+
+        await expect(result).resolves.toHaveProperty('status', 408);
       });
 
       it('should timeout if configured with a small timeout value for a GET', async () => {
