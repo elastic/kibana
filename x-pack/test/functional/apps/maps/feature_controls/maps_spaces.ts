@@ -11,7 +11,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'error', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
 
   // FLAKY: https://github.com/elastic/kibana/issues/38759
   describe.skip('spaces feature controls', () => {

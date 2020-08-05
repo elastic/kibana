@@ -11,7 +11,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'error', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
-  const testSubjects = getService('testSubjects');
 
   describe('timelion', () => {
     before(async () => {

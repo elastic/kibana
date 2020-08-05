@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const testSubjects = getService('testSubjects');
 
   describe('feature controls security', () => {
     before(async () => {

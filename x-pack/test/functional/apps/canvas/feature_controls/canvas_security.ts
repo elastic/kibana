@@ -12,7 +12,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const testSubjects = getService('testSubjects');
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
