@@ -4530,7 +4530,6 @@
     "visualize.createVisualization.noVisTypeErrorMessage": "必须提供有效的可视化类型",
     "visualize.editor.createBreadcrumb": "创建",
     "visualize.error.title": "可视化错误",
-    "visualize.experimentalVisInfoText": "此可视化标记为“实验性”。想反馈？请在以下位置创建问题：",
     "visualize.helpMenu.appName": "Visualize",
     "visualize.linkedToSearch.unlinkSuccessNotificationText": "已取消与已保存搜索“{searchTitle}”的链接",
     "visualize.listing.betaTitle": "公测版",
