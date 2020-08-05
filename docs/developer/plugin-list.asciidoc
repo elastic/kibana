@@ -339,7 +339,9 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger/README.md[grokdebugger]
+|{kib-repo}blob/{branch}/x-pack/plugins/grokdebugger[grokdebugger]
+|WARNING: Missing README.
+
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_lifecycle_management/README.md[indexLifecycleManagement]
 |You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in
@@ -466,6 +468,8 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
+|Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant[upgradeAssistant]
 |WARNING: Missing README.
