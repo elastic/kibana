@@ -32,11 +32,6 @@
 
 .kbnFieldButton--small {
   font-size: $euiFontSizeXS;
-  .kbnFieldButton__content {
-    .kbnFieldButton__fieldIcon {
-      margin-top: 0;
-    }
-  }
 }
 
 .kbnFieldButton__content {
@@ -58,7 +53,7 @@
 
   .kbnFieldButton__fieldIcon {
     flex-shrink: 0;
-    margin-top: $euiSizeXS / 2;
+    margin-top: 0;
     margin-right: $euiSizeXS / 2;
   }
 }
