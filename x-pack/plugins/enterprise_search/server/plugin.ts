@@ -19,6 +19,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
+import { ENTERPRISE_SEARCH_PLUGIN } from '../common/constants';
 import { ConfigType } from './';
 import { checkAccess } from './lib/check_access';
 import { registerPublicUrlRoute } from './routes/enterprise_search/public_url';
@@ -65,7 +66,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     features.registerFeature({
       id: 'enterpriseSearch',
-      name: 'Enterprise Search',
+      name: ENTERPRISE_SEARCH_PLUGIN.NAME,
       order: 0,
       icon: 'logoEnterpriseSearch',
       navLinkId: 'appSearch', // TODO - remove this once functional tests no longer rely on navLinkId
