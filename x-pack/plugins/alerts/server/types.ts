@@ -8,6 +8,7 @@ import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
+export * from '../common';
 import {
   ILegacyClusterClient,
   ILegacyScopedClusterClient,
@@ -25,7 +26,6 @@ import {
   AlertInstanceState,
 } from '../common';
 
-export * from '../common';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
