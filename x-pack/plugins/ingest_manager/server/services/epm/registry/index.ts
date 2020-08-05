@@ -35,6 +35,19 @@ export interface CategoriesParams {
   experimental?: boolean;
 }
 
+/**
+ * Extract the package name and package version from a string.
+ *
+ * @param pkgkey a string containing the package name delimited by the package version
+ */
+export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
+  // this will return an empty string if `indexOf` returns -1
+  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  // this will return the entire string if `indexOf` return -1
+  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
+  return { pkgName, pkgVersion };
+}
+
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
 

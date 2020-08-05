@@ -5,7 +5,7 @@
  */
 
 import { AssetParts } from '../../../types';
-import { pathParts } from './index';
+import { pathParts, splitPkgKey } from './index';
 
 const testPaths = [
   {
@@ -47,4 +47,31 @@ test('testPathParts', () => {
   for (const value of testPaths) {
     expect(pathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
   }
+});
+
+describe('splitPkgKey tests', () => {
+  it('returns an empty name if the delimiter is not found', () => {
+    const pkgkey = 'awesome_package';
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
+    expect(pkgName).toBe('');
+    expect(pkgVersion).toBe(pkgkey);
+  });
+
+  it('returns an empty name if there is nothing before the delimiter', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('-0.0.1-dev1');
+    expect(pkgName).toBe('');
+    expect(pkgVersion).toBe('0.0.1-dev1');
+  });
+
+  it('returns the name and version if the delimiter is found once', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('awesome-0.1.0');
+    expect(pkgName).toBe('awesome');
+    expect(pkgVersion).toBe('0.1.0');
+  });
+
+  it('returns the name and version if the delimiter is found multiple times', () => {
+    const { pkgName, pkgVersion } = splitPkgKey('endpoint-0.13.0-alpha.1+abcd');
+    expect(pkgName).toBe('endpoint');
+    expect(pkgVersion).toBe('0.13.0-alpha.1+abcd');
+  });
 });
