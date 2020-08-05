@@ -348,7 +348,8 @@ describe('Options', () => {
         // start the request
         const request = supertest(innerServer.listener)
           .post('/a')
-          .set('Content-Type', 'application/json');
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
 
         const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
