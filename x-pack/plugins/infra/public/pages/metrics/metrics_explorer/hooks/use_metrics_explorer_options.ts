@@ -17,7 +17,10 @@ const metricsExplorerOptionsMetricRT = t.intersection([
   t.partial({
     rate: t.boolean,
     color: t.keyof(
-      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<string, null>
+      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<
+        MetricsExplorerColor,
+        null
+      >
     ),
     label: t.string,
   }),
@@ -39,13 +42,13 @@ export enum MetricsExplorerYAxisMode {
 export const metricsExplorerChartOptionsRT = t.type({
   yAxisMode: t.keyof(
     Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
-      string,
+      MetricsExplorerYAxisMode,
       null
     >
   ),
   type: t.keyof(
     Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
-      string,
+      MetricsExplorerChartType,
       null
     >
   ),
