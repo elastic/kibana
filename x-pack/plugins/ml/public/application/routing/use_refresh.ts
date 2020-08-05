@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { merge } from 'rxjs';
 import { map } from 'rxjs/operators';
 

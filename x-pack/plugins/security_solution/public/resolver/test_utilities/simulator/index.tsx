@@ -252,6 +252,20 @@ export class Simulator {
   }
 
   /**
+   * The outer panel container.
+   */
+  public panelElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj="resolver:panel"]');
+  }
+
+  /**
+   * The panel content element (which may include tables, lists, other data depending on the view).
+   */
+  public panelContentElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj^="resolver:panel:"]');
+  }
+
+  /**
    * Like `this.wrapper.find` but only returns DOM nodes.
    */
   private findInDOM(selector: string): ReactWrapper {
