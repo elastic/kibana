@@ -23,7 +23,7 @@ import { FieldButton, SIZES } from './field_button';
 describe('sizes', () => {
   SIZES.forEach((size) => {
     test(`${size} is applied`, () => {
-      const component = shallow(<FieldButton size={size} />);
+      const component = shallow(<FieldButton fieldName="name" size={size} />);
       expect(component).toMatchSnapshot();
     });
   });
@@ -31,7 +31,18 @@ describe('sizes', () => {
 
 describe('isDraggable', () => {
   it('is rendered', () => {
-    const component = shallow(<FieldButton isDraggable />);
+    const component = shallow(<FieldButton fieldName="name" isDraggable />);
+    expect(component).toMatchSnapshot();
+  });
+});
+
+describe('isActive', () => {
+  it('defaults to false', () => {
+    const component = shallow(<FieldButton fieldName="name" />);
+    expect(component).toMatchSnapshot();
+  });
+  it('renders true', () => {
+    const component = shallow(<FieldButton fieldName="name" isActive />);
     expect(component).toMatchSnapshot();
   });
 });

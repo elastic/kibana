@@ -1,6 +1,8 @@
 .lnsFieldItem--missing {
-  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
-  color: $euiColorDarkShade;
+  .lnsFieldItem__info {
+    background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
+    color: $euiColorDarkShade;
+  }
 }
 
 .lnsFieldItem__info {

@@ -6,7 +6,7 @@
   align-items: center;
 
   &:focus-within,
-  .euiPopover-isOpen & {
+  &-isActive {
     @include euiFocusRing;
   }
 }
@@ -32,18 +32,13 @@
 
 .kbnFieldButton--small {
   font-size: $euiFontSizeXS;
-  .kbnFieldButton__content {
-    .kbnFieldButton__fieldIcon {
-      margin-top: 0;
-    }
-  }
 }
 
 .kbnFieldButton__content {
   width: 100%;
   text-align: left;
   border-radius: $euiBorderRadius - 1px;
-  padding: $euiSizeS;
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
   display: flex;
   align-items: flex-start;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
@@ -58,10 +53,7 @@
 
   .kbnFieldButton__fieldIcon {
     flex-shrink: 0;
-  }
-
-  .kbnFieldButton__fieldIcon {
-    margin-top: $euiSizeXS / 2;
+    margin-top: 0;
     margin-right: $euiSizeXS / 2;
   }
 }

@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiKeyboardAccessible,
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
@@ -216,7 +215,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           <FieldButton
             className="lnsFieldItem__info"
             isDraggable
-            isOpen={infoIsOpen}
+            isActive={infoIsOpen}
             data-test-subj={`lnsFieldListPanelField-${field.name}`}
             onClick={() => {
               if (exists) {

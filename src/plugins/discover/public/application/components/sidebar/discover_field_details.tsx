@@ -17,13 +17,14 @@
  * under the License.
  */
 import React from 'react';
-import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter } from '@elastic/eui';
+import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import { Bucket, FieldDetails } from './types';
 import { getServices } from '../../../kibana_services';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import './discover_field_details.scss';
 
 interface DiscoverFieldDetailsProps {
   field: IndexPatternField;
@@ -59,28 +60,30 @@ export function DiscoverFieldDetails({
 
         {details.visualizeUrl && (
           <>
-            <EuiLink
+            <EuiSpacer size="xs" />
+            <EuiButton
               onClick={() => {
                 getServices().core.application.navigateToApp(details.visualizeUrl.app, {
                   path: details.visualizeUrl.path,
                 });
               }}
-              className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
+              size="s"
+              className="dscFieldDetails__visualizeBtn"
               data-test-subj={`fieldVisualize-${field.name}`}
             >
               <FormattedMessage
                 id="discover.fieldChooser.detailViews.visualizeLinkText"
                 defaultMessage="Visualize"
               />
-            </EuiLink>
+            </EuiButton>
             {warnings.length > 0 && (
               <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
             )}
           </>
         )}
       </div>
-      <EuiPopoverFooter>
-        {!details.error && (
+      {!details.error && (
+        <EuiPopoverFooter>
           <EuiText size="xs" textAlign="center">
             <FormattedMessage
               id="discover.fieldChooser.detailViews.topValuesInRecordsDescription"
@@ -99,8 +102,8 @@ export function DiscoverFieldDetails({
               defaultMessage="records"
             />
           </EuiText>
-        )}
-      </EuiPopoverFooter>
+        </EuiPopoverFooter>
+      )}
     </>
   );
 }

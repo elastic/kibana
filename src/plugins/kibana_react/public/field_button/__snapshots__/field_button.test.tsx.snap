@@ -1,5 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`isActive defaults to false 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__content"
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+  <div
+    className="kbnFieldButton__append"
+  />
+</div>
+`;
+
+exports[`isActive renders true 1`] = `
+<div
+  className="kbnFieldButton kbnFieldButton-isActive"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__content"
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+  <div
+    className="kbnFieldButton__append"
+  />
+</div>
+`;
+
 exports[`isDraggable is rendered 1`] = `
 <div
   className="kbnFieldButton kbnFieldButton--isDraggable"
@@ -7,12 +45,11 @@ exports[`isDraggable is rendered 1`] = `
   <button
     className="kbn-resetFocusState kbnFieldButton__content"
   >
-    <div
-      className="kbnFieldButton__fieldIcon"
-    />
-    <div
+    <span
       className="kbnFieldButton__name"
-    />
+    >
+      name
+    </span>
   </button>
   <div
     className="kbnFieldButton__append"
@@ -27,12 +64,11 @@ exports[`sizes m is applied 1`] = `
   <button
     className="kbn-resetFocusState kbnFieldButton__content"
   >
-    <div
-      className="kbnFieldButton__fieldIcon"
-    />
-    <div
+    <span
       className="kbnFieldButton__name"
-    />
+    >
+      name
+    </span>
   </button>
   <div
     className="kbnFieldButton__append"
@@ -47,12 +83,11 @@ exports[`sizes s is applied 1`] = `
   <button
     className="kbn-resetFocusState kbnFieldButton__content"
   >
-    <div
-      className="kbnFieldButton__fieldIcon"
-    />
-    <div
+    <span
       className="kbnFieldButton__name"
-    />
+    >
+      name
+    </span>
   </button>
   <div
     className="kbnFieldButton__append"
