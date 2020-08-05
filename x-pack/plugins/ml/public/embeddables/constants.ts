@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
+export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
