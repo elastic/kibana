@@ -65,9 +65,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      webhookSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
-      );
+      webhookSimulatorURL = 'http://localhost:8080';
     });
 
     it('should return 200 when creating a webhook action successfully', async () => {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
 import { Plugin, CoreSetup, IRouter } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
@@ -13,6 +14,8 @@ import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
+import { initPlugin as initSlack } from './slack_simulation';
+import { initPlugin as initWebhook } from './webhook_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -49,7 +52,9 @@ interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
+  private webhookHttpServer: http.Server | undefined = undefined;
+
+  public async setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
     const notEnabledActionType: ActionType = {
       id: 'test.not-enabled',
@@ -92,8 +97,18 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
+    initSlack(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
+    this.webhookHttpServer = await initWebhook();
   }
 
-  public start() {}
-  public stop() {}
+  public start() {
+    if (this.webhookHttpServer) {
+      this.webhookHttpServer.listen(8080);
+    }
+  }
+  public stop() {
+    if (this.webhookHttpServer) {
+      this.webhookHttpServer.close();
+    }
+  }
 }
