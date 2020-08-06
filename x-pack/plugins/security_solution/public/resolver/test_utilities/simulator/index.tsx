@@ -221,6 +221,28 @@ export class Simulator {
   }
 
   /**
+   * Dump all contents of the outer ReactWrapper (to be `console.log`ged as appropriate)
+   * This will include both DOM (div, span, etc.) and React/JSX (MyComponent, MyGrid, etc.)
+   */
+  public debugWrapper() {
+    return this.wrapper.debug();
+  }
+
+  /**
+   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   */
+  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
+    return this.processNodeElements({ entityID }).findWhere(
+      (wrapper) =>
+        // Filter out React components
+        typeof wrapper.type() === 'string' &&
+        wrapper.prop('data-test-subj') === 'resolver:submenu:button'
+    );
+  }
+
+  /**
    * Return the selected node query string values.
    */
   public queryStringValues(): { selectedNode: string[] } {
@@ -249,6 +271,20 @@ export class Simulator {
    */
   public graphElement(): ReactWrapper {
     return this.findInDOM('[data-test-subj="resolver:graph"]');
+  }
+
+  /**
+   * The outer panel container.
+   */
+  public panelElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj="resolver:panel"]');
+  }
+
+  /**
+   * The panel content element (which may include tables, lists, other data depending on the view).
+   */
+  public panelContentElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj^="resolver:panel:"]');
   }
 
   /**

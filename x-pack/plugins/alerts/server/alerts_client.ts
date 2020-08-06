@@ -295,6 +295,7 @@ export class AlertsClient {
       type: 'alert',
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const authorizedData = data.map(({ id, attributes, updated_at, references }) => {
       ensureAlertTypeIsAuthorized(attributes.alertTypeId, attributes.consumer);
       return this.getAlertFromRaw(
