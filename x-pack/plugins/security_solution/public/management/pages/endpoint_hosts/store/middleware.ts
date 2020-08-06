@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpStart } from 'kibana/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
@@ -28,6 +28,8 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
+
+    // Host list
     if (
       action.type === 'userChangedUrl' &&
       isOnHostPage(state) &&
@@ -89,6 +91,19 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       // No hosts, so we should check to see if there are policies for onboarding
       if (hostResponse && hostResponse.hosts.length === 0) {
         const http = coreStart.http;
+
+        // The original query to the list could have had an invalid param (ex. invalid page_size),
+        // so we check first if hosts actually do exist before pulling in data for the onboarding
+        // messages.
+        if (await doHostsExist(http)) {
+          return;
+        }
+
+        dispatch({
+          type: 'serverReturnedHostExistValue',
+          payload: false,
+        });
+
         try {
           const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackageConfigs(
             http,
@@ -119,6 +134,8 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         });
       }
     }
+
+    // Host Details
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',
@@ -160,7 +177,6 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
             type: 'serverFailedToReturnHostList',
             payload: error,
           });
-          return;
         }
       } else {
         dispatch({
@@ -217,7 +233,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
 };
 
 const getNonExistingPoliciesForHostsList = async (
-  http: HttpSetup,
+  http: HttpStart,
   hosts: HostResultList['hosts'],
   currentNonExistingPolicies: HostState['nonExistingPolicies']
 ): Promise<HostState['nonExistingPolicies'] | undefined> => {
@@ -273,4 +289,24 @@ const getNonExistingPoliciesForHostsList = async (
   }
 
   return nonExisting;
+};
+
+const doHostsExist = async (http: HttpStart): Promise<boolean> => {
+  try {
+    return (
+      (
+        await http.post<HostResultList>('/api/endpoint/metadata', {
+          body: JSON.stringify({
+            paging_properties: [{ page_index: 0 }, { page_size: 1 }],
+          }),
+        })
+      ).hosts.length !== 0
+    );
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`error while trying to check if hosts exist`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+  return false;
 };

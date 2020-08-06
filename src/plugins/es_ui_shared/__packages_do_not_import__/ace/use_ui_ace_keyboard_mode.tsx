@@ -27,7 +27,6 @@ const OverlayText = () => (
   // The point of this element is for accessibility purposes, so ignore eslint error
   // in this case
   //
-  // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
   <>
     <EuiText size="s">Press Enter to start editing.</EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
