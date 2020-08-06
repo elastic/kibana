@@ -4,34 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { TRANSFORM_STATE } from '../../../../../../common';
-import {
-  AuthorizationContext,
-  createCapabilityFailureMessage,
-} from '../../../../lib/authorization';
+import { createCapabilityFailureMessage } from '../../../../lib/authorization';
 import { TransformListRow } from '../../../../common';
 
+export const deleteActionButtonText = i18n.translate(
+  'xpack.transform.transformList.deleteActionName',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const transformCanNotBeDeleted = (item: TransformListRow) =>
+  ![TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED].includes(item.stats.state);
+
+export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
+  const disabled = items.some(transformCanNotBeDeleted);
+  return forceDisable === true || disabled;
+};
+
 interface DeleteButtonProps {
-  items: TransformListRow[];
-  forceDisable?: boolean;
-  onClick: (items: TransformListRow[]) => void;
+  canDeleteTransform: boolean;
+  disabled: boolean;
+  isBulkAction: boolean;
 }
 
-const transformCanNotBeDeleted = (i: TransformListRow) =>
-  ![TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED].includes(i.stats.state);
-
-export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onClick }) => {
-  const isBulkAction = items.length > 1;
-
-  const disabled = items.some(transformCanNotBeDeleted);
-  const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
-
-  const buttonText = i18n.translate('xpack.transform.transformList.deleteActionName', {
-    defaultMessage: 'Delete',
-  });
+export const DeleteButton: FC<DeleteButtonProps> = ({
+  canDeleteTransform,
+  disabled,
+  isBulkAction,
+}) => {
   const bulkDeleteButtonDisabledText = i18n.translate(
     'xpack.transform.transformList.deleteBulkActionDisabledToolTipContent',
     {
@@ -45,23 +50,6 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
     }
   );
 
-  const buttonDisabled = forceDisable === true || disabled || !canDeleteTransform;
-
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="transformActionDelete"
-      flush="left"
-      iconType="trash"
-      isDisabled={buttonDisabled}
-      onClick={() => onClick(items)}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
   if (disabled || !canDeleteTransform) {
     let content;
     if (disabled) {
@@ -72,10 +60,10 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ items, forceDisable, onCli
 
     return (
       <EuiToolTip position="top" content={content}>
-        {button}
+        <>{deleteActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{deleteActionButtonText}</>;
 };

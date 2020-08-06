@@ -4,15 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
-import { TransformListRow } from '../../../../common';
+import { TransformListAction, TransformListRow } from '../../../../common';
 import { useDeleteIndexAndTargetIndex, useDeleteTransforms } from '../../../../hooks';
+import { AuthorizationContext } from '../../../../lib/authorization';
+
+import { deleteActionButtonText, isDeleteActionDisabled, DeleteButton } from './delete_button';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
-export const useDeleteAction = () => {
+export const useDeleteAction = (forceDisable: boolean) => {
+  const { canDeleteTransform } = useContext(AuthorizationContext).capabilities;
+
   const deleteTransforms = useDeleteTransforms();
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -58,7 +63,30 @@ export const useDeleteAction = () => {
     }
   };
 
+  const action: TransformListAction = useMemo(
+    () => ({
+      name: (item: TransformListRow) => (
+        <DeleteButton
+          {...{
+            canDeleteTransform,
+            isBulkAction: false,
+            disabled: isDeleteActionDisabled([item], forceDisable),
+          }}
+        />
+      ),
+      enabled: (item: TransformListRow) =>
+        !isDeleteActionDisabled([item], forceDisable) && canDeleteTransform,
+      description: deleteActionButtonText,
+      icon: 'trash',
+      type: 'icon',
+      onClick: (item: TransformListRow) => openModal([item]),
+      'data-test-subj': 'transformActionDelete',
+    }),
+    [canDeleteTransform, forceDisable]
+  );
+
   return {
+    action,
     closeModal,
     deleteAndCloseModal,
     deleteDestIndex,

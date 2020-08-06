@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -15,7 +15,23 @@ import {
   createCapabilityFailureMessage,
   AuthorizationContext,
 } from '../../../../lib/authorization';
-import { useStopTransforms } from '../../../../hooks';
+
+export const stopActionButtonText = i18n.translate('xpack.transform.transformList.stopActionName', {
+  defaultMessage: 'Stop',
+});
+
+export const isStopActionDisabled = (
+  items: TransformListRow[],
+  canStartStopTransform: boolean,
+  forceDisable: boolean
+) => {
+  // Disable stop action if one of the transforms is stopped already
+  const stoppedTransform = items.some(
+    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STOPPED
+  );
+
+  return forceDisable === true || !canStartStopTransform || stoppedTransform === true;
+};
 
 interface StopButtonProps {
   items: TransformListRow[];
@@ -24,10 +40,6 @@ interface StopButtonProps {
 export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
-  const stopTransforms = useStopTransforms();
-  const buttonText = i18n.translate('xpack.transform.transformList.stopActionName', {
-    defaultMessage: 'Stop',
-  });
 
   // Disable stop action if one of the transforms is stopped already
   const stoppedTransform = items.some(
@@ -52,28 +64,6 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
     );
   }
 
-  const handleStop = () => {
-    stopTransforms(items);
-  };
-
-  const buttonDisabled =
-    forceDisable === true || !canStartStopTransform || stoppedTransform === true;
-
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="transformActionStop"
-      flush="left"
-      iconType="stop"
-      isDisabled={buttonDisabled}
-      onClick={handleStop}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
   if (!canStartStopTransform || stoppedTransform) {
     return (
       <EuiToolTip
@@ -84,10 +74,10 @@ export const StopButton: FC<StopButtonProps> = ({ items, forceDisable }) => {
             : stoppedTransformMessage
         }
       >
-        {button}
+        <>{stopActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{stopActionButtonText}</>;
 };

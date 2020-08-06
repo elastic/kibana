@@ -6,7 +6,7 @@
 
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import { TRANSFORM_STATE } from '../../../../../../common';
 
@@ -16,18 +16,36 @@ import {
 } from '../../../../lib/authorization';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
+export const startActionButtonText = i18n.translate(
+  'xpack.transform.transformList.startActionName',
+  {
+    defaultMessage: 'Start',
+  }
+);
+
+export const isStartActionDisabled = (
+  items: TransformListRow[],
+  canStartStopTransform: boolean
+) => {
+  // Disable start for batch transforms which have completed.
+  const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
+  // Disable start action if one of the transforms is already started or trying to restart will throw error
+  const startedTransform = items.some(
+    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
+  );
+
+  return (
+    !canStartStopTransform || completedBatchTransform || startedTransform || items.length === 0
+  );
+};
+
 interface StartButtonProps {
   items: TransformListRow[];
   forceDisable?: boolean;
-  onClick: (items: TransformListRow[]) => void;
 }
-export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick }) => {
+export const StartButton: FC<StartButtonProps> = ({ items, forceDisable }) => {
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
   const isBulkAction = items.length > 1;
-
-  const buttonText = i18n.translate('xpack.transform.transformList.startActionName', {
-    defaultMessage: 'Start',
-  });
 
   // Disable start for batch transforms which have completed.
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
@@ -70,8 +88,7 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
     );
   }
 
-  const actionIsDisabled =
-    !canStartStopTransform || completedBatchTransform || startedTransform || items.length === 0;
+  const actionIsDisabled = isStartActionDisabled(items, canStartStopTransform);
 
   let content: string | undefined;
   if (actionIsDisabled && items.length > 0) {
@@ -84,30 +101,13 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
     }
   }
 
-  const buttonDisabled = forceDisable === true || actionIsDisabled;
-
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="transformActionStart"
-      flush="left"
-      iconType="play"
-      isDisabled={buttonDisabled}
-      onClick={() => onClick(items)}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
-  if (buttonDisabled && content !== undefined) {
+  if ((forceDisable === true || actionIsDisabled) && content !== undefined) {
     return (
       <EuiToolTip position="top" content={content}>
-        {button}
+        <>{startActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{startActionButtonText}</>;
 };

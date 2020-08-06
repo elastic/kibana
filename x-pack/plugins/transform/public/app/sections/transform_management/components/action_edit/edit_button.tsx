@@ -8,47 +8,27 @@ import React, { useContext, FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import {
   createCapabilityFailureMessage,
   AuthorizationContext,
 } from '../../../../lib/authorization';
 
-interface EditButtonProps {
-  onClick: () => void;
-}
-export const EditButton: FC<EditButtonProps> = ({ onClick }) => {
+export const editActionButtonText = i18n.translate('xpack.transform.transformList.editActionName', {
+  defaultMessage: 'Edit',
+});
+
+export const EditButton: FC = () => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
-
-  const buttonText = i18n.translate('xpack.transform.transformList.editActionName', {
-    defaultMessage: 'Edit',
-  });
-
-  const buttonDisabled = !canCreateTransform;
-
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="transformActionEdit"
-      flush="left"
-      iconType="pencil"
-      isDisabled={buttonDisabled}
-      onClick={onClick}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
 
   if (!canCreateTransform) {
     return (
       <EuiToolTip position="top" content={createCapabilityFailureMessage('canStartStopTransform')}>
-        {button}
+        <>{editActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{editActionButtonText}</>;
 };
