@@ -21,6 +21,7 @@ export declare class SearchInterceptor
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [abortController](./kibana-plugin-plugins-data-public.searchinterceptor.abortcontroller.md) |  | <code>AbortController</code> | <code>abortController</code> used to signal all searches to abort. |
+|  [application](./kibana-plugin-plugins-data-public.searchinterceptor.application.md) |  | <code>CoreStart['application']</code> |  |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
 |  [getPendingCount$](./kibana-plugin-plugins-data-public.searchinterceptor.getpendingcount_.md) |  | <code>() =&gt; Observable&lt;number&gt;</code> | Returns an <code>Observable</code> over the current number of pending searches. This could mean that one of the search requests is still in flight, or that it has only received partial responses. |
 |  [hideToast](./kibana-plugin-plugins-data-public.searchinterceptor.hidetoast.md) |  | <code>() =&gt; void</code> |  |

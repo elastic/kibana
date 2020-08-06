@@ -8,12 +8,12 @@ import { $Values } from '@kbn/utility-types';
 import _ from 'lodash';
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import Boom from 'boom';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';
+import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
@@ -65,7 +65,7 @@ import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/ex
 import { Subscription } from 'rxjs';
 import { Toast } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
-import { ToastsStart } from 'kibana/public';
+import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -226,6 +226,10 @@ export interface DataPublicPluginSetup {
     //
     // (undocumented)
     autocomplete: AutocompleteSetup;
+    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "FieldFormatsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1651,6 +1655,8 @@ export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
     protected abortController: AbortController;
     // (undocumented)
+    protected application: CoreStart['application'];
+    // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     getPendingCount$: () => Observable<number>;
     // (undocumented)
@@ -1678,13 +1684,13 @@ export class SearchInterceptor {
 // @public (undocumented)
 export interface SearchInterceptorDeps {
     // (undocumented)
-    application: ApplicationStart;
+    http: CoreSetup_2['http'];
     // (undocumented)
-    http: CoreStart['http'];
+    startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
-    toasts: ToastsStart;
+    toasts: ToastsSetup;
     // (undocumented)
-    uiSettings: CoreStart['uiSettings'];
+    uiSettings: CoreSetup_2['uiSettings'];
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1915,9 +1921,9 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:395:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:398:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:45:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:54:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:55:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:59:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:60:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:68:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

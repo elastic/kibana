@@ -155,10 +155,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           return new SearchSource({}, searchSourceDependencies);
         },
       },
-      setInterceptor: (searchInterceptor: SearchInterceptor) => {
-        // TODO: should an intercepror have a destroy method?
-        this.searchInterceptor = searchInterceptor;
-      },
       __LEGACY: legacySearch,
     };
   }
