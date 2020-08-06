@@ -22,6 +22,7 @@ import {
   TriggerContext,
   VALUE_CLICK_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
+import { SavedObjectReference } from 'kibana/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -146,10 +147,10 @@ export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
-  initialize: (state?: P) => Promise<T>;
+  initialize: (state?: P, savedObjectReferences?: SavedObjectReference[]) => Promise<T>;
 
   // Given the current state, which parts should be saved?
-  getPersistableState: (state: T) => P;
+  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
@@ -418,11 +419,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: P) => T;
+  initialize: (frame: FramePublicAPI, state?: P, savedObjectReferences?: SavedObjectReference[]) => T;
   /**
    * Can remove any state that should not be persisted to saved object, such as UI state
    */
-  getPersistableState: (state: T) => P;
+  getPersistableState: (state: T) => { state: P, savedObjectReferences: SavedObjectReference[] };
 
   /**
    * Visualizations must provide at least one type for the chart switcher,
