@@ -33,7 +33,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
   if (isLoading) {
     content = <EuiLoadingContent lines={3} />;
   } else if (error) {
-    const { statusCode, error: errorString, message } = error;
+    const { statusCode, message } = error;
     content = (
       <EuiCallOut
         title={
@@ -45,7 +45,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         color="danger"
       >
         <p>
-          {statusCode}: {errorString}. {message}
+          {message} ({statusCode})
         </p>
         <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
           <FormattedMessage
