@@ -22,7 +22,7 @@ import { errorIfXPackRemove } from '../lib/error_if_x_pack';
 
 import del from 'del';
 
-export default function remove(settings, logger) {
+export function remove(settings, logger) {
   try {
     let stat;
     try {

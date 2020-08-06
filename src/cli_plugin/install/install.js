@@ -28,11 +28,10 @@ import { renamePlugin } from './rename';
 import del from 'del';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
-import { prepareExternalProjectDependencies } from '@kbn/pm';
 
 const mkdir = promisify(Fs.mkdir);
 
-export default async function install(settings, logger) {
+export async function install(settings, logger) {
   try {
     errorIfXPackInstall(settings, logger);
 
@@ -52,16 +51,13 @@ export default async function install(settings, logger) {
 
     assertVersion(settings);
 
-    await prepareExternalProjectDependencies(settings.workingPath);
-
-    await renamePlugin(
-      settings.workingPath,
-      path.join(settings.pluginDir, settings.plugins[0].name)
-    );
+    const targetDir = path.join(settings.pluginDir, settings.plugins[0].id);
+    await renamePlugin(settings.workingPath, targetDir);
 
     logger.log('Plugin installation complete');
   } catch (err) {
     logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
+    console.error(err);
     cleanArtifacts(settings);
     process.exit(70);
   }

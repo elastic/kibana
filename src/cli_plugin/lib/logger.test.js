@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import Logger from './logger';
+import { Logger } from './logger';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

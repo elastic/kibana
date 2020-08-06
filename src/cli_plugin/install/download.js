@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import downloadHttpFile from './downloaders/http';
-import downloadLocalFile from './downloaders/file';
-import { UnsupportedProtocolError } from '../lib/errors';
 import { parse } from 'url';
+
+import { UnsupportedProtocolError } from '../lib/errors';
+import { downloadHttpFile } from './downloaders/http';
+import { downloadLocalFile } from './downloaders/file';
 
 function _isWindows() {
   return /^win/.test(process.platform);

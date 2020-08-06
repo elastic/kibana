@@ -23,10 +23,10 @@ import { statSync } from 'fs';
 
 export function existingInstall(settings, logger) {
   try {
-    statSync(path.join(settings.pluginDir, settings.plugins[0].name));
+    statSync(path.join(settings.pluginDir, settings.plugins[0].id));
 
     logger.error(
-      `Plugin ${settings.plugins[0].name} already exists, please remove before installing a new version`
+      `Plugin ${settings.plugins[0].id} already exists, please remove before installing a new version`
     );
     process.exit(70);
   } catch (e) {
@@ -37,7 +37,7 @@ export function existingInstall(settings, logger) {
 export function assertVersion(settings) {
   if (!settings.plugins[0].kibanaVersion) {
     throw new Error(
-      `Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`
+      `Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional).`
     );
   }
 
@@ -45,7 +45,7 @@ export function assertVersion(settings) {
   const expected = cleanVersion(settings.version);
   if (!versionSatisfies(actual, expected)) {
     throw new Error(
-      `Plugin ${settings.plugins[0].name} [${actual}] is incompatible with Kibana [${expected}]`
+      `Plugin ${settings.plugins[0].id} [${actual}] is incompatible with Kibana [${expected}]`
     );
   }
 }
