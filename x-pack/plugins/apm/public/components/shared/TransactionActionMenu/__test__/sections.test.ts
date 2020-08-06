@@ -6,14 +6,14 @@
 import { Location } from 'history';
 import { getSections } from '../sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
+import { IBasePath } from 'kibana/public';
 
 describe('Transaction action menu', () => {
   const basePath = ({
     prepend: (url: string) => {
       return `some-basepath${url}`;
     },
-  } as unknown) as AppMountContextBasePath;
+  } as unknown) as IBasePath;
   const date = '2020-02-06T11:00:00.000Z';
   const timestamp = { us: new Date(date).getTime() };
 

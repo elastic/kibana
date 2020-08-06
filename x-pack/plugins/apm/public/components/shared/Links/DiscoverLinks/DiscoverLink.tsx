@@ -6,14 +6,14 @@
 
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
+import { IBasePath } from 'kibana/public';
 import React from 'react';
-import url from 'url';
 import rison, { RisonValue } from 'rison-node';
-import { useLocation } from '../../../../hooks/useLocation';
-import { getTimepickerRisonData } from '../rison_helpers';
+import url from 'url';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
+import { useLocation } from '../../../../hooks/useLocation';
+import { getTimepickerRisonData } from '../rison_helpers';
 
 interface Props {
   query: {
@@ -37,7 +37,7 @@ export const getDiscoverHref = ({
   location,
   query,
 }: {
-  basePath: AppMountContextBasePath;
+  basePath: IBasePath;
   location: Location;
   query: Props['query'];
 }) => {

@@ -9,8 +9,6 @@ import { createContext } from 'react';
 import { ConfigSchema } from '../../';
 import { ApmPluginSetupDeps } from '../../plugin';
 
-export type AppMountContextBasePath = CoreStart['http']['basePath'];
-
 export interface ApmPluginContextValue {
   config: ConfigSchema;
   core: CoreStart;
