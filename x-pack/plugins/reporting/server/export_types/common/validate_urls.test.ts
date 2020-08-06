@@ -35,6 +35,7 @@ describe('Validate URLS', () => {
     });
 
     it(`throws for JS URLs`, () => {
+      // eslint-disable-next-line no-script-url
       expect(() => validateUrls(['javascript:alert(document.cookies)'])).toThrow();
     });
 

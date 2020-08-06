@@ -5,13 +5,12 @@
  */
 
 const extractCausedByChain = (causedBy: any = {}, accumulator: any[] = []): any => {
-  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/camelcase
+  const { reason, caused_by } = causedBy; // eslint-disable-line @typescript-eslint/naming-convention
 
   if (reason) {
     accumulator.push(reason);
   }
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
   if (caused_by) {
     return extractCausedByChain(caused_by, accumulator);
   }
@@ -31,8 +30,8 @@ export const wrapEsError = (err: any, statusCodeToMessageMap: any = {}) => {
 
   const {
     error: {
-      root_cause = [], // eslint-disable-line @typescript-eslint/camelcase
-      caused_by = {}, // eslint-disable-line @typescript-eslint/camelcase
+      root_cause = [], // eslint-disable-line @typescript-eslint/naming-convention
+      caused_by = {}, // eslint-disable-line @typescript-eslint/naming-convention
     } = {},
   } = JSON.parse(response);
 

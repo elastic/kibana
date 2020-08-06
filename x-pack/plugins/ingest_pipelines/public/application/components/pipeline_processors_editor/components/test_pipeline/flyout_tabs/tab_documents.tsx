@@ -17,32 +17,27 @@ import {
   Form,
   useForm,
   FormConfig,
-  useKibana,
-} from '../../../../../shared_imports';
+} from '../../../../../../shared_imports';
+
+import { usePipelineProcessorsContext, useTestConfigContext, TestConfig } from '../../../context';
 
 import { documentsSchema } from './schema';
-import { useTestConfigContext, TestConfig } from '../../test_config_context';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
   handleExecute: (documents: object[], verbose: boolean) => void;
-  isPipelineValid: boolean;
   isExecuting: boolean;
 }
 
-export const DocumentsTab: React.FunctionComponent<Props> = ({
-  isPipelineValid,
-  handleExecute,
-  isExecuting,
-}) => {
-  const { services } = useKibana();
+export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
+  const { links } = usePipelineProcessorsContext();
 
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
 
   const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
-    if (!isValid || !isPipelineValid) {
+    if (!isValid) {
       return;
     }
 
@@ -76,7 +71,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
             values={{
               learnMoreLink: (
                 <EuiLink
-                  href={services.documentation.getSimulatePipelineApiUrl()}
+                  href={`${links.esDocsBasePath}/simulate-pipeline-api.html`}
                   target="_blank"
                   external
                 >
@@ -98,7 +93,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
       <Form
         form={form}
         data-test-subj="testPipelineForm"
-        isInvalid={form.isSubmitted && !form.isValid && !isPipelineValid}
+        isInvalid={form.isSubmitted && !form.isValid}
         error={form.getErrors()}
       >
         {/* Documents editor */}
@@ -125,7 +120,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
           onClick={form.submit}
           size="s"
           isLoading={isExecuting}
-          disabled={(form.isSubmitted && !form.isValid) || !isPipelineValid}
+          disabled={form.isSubmitted && !form.isValid}
         >
           {isExecuting ? (
             <FormattedMessage
