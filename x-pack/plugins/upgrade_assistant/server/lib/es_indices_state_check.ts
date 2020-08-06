@@ -18,6 +18,9 @@ export const esIndicesStateCheck = async (
   // The response from this call is considered internal and subject to change. We have an API
   // integration test for asserting that the current ES version still returns what we expect.
   // This lives in x-pack/test/upgrade_assistant_integration
+  //
+  // Additionally, we query for all indices to avoid building up a URI that might exceed max web server
+  // URI thresholds.
   const clusterState: ClusterStateAPIResponse = await callAsUser('cluster.state', {
     index: '*',
     metric: 'metadata',
