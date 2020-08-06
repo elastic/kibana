@@ -332,15 +332,16 @@ export class FileDataVisualizerView extends Component {
             )}
 
             {bottomBarVisible && loaded && (
-              <BottomBar
-                mode={MODE.READ}
-                onChangeMode={this.changeMode}
-                onCancel={this.onCancel}
-                disableImport={hasPermissionToImport === false}
-              />
+              <>
+                <BottomBar
+                  mode={MODE.READ}
+                  onChangeMode={this.changeMode}
+                  onCancel={this.onCancel}
+                  disableImport={hasPermissionToImport === false}
+                />
+                <BottomPadding />
+              </>
             )}
-
-            <BottomPadding />
           </>
         )}
         {mode === MODE.IMPORT && (
