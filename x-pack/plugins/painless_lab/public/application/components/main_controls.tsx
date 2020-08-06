@@ -93,6 +93,7 @@ export function MainControls({
   let classes = '';
   if (isNavLegacy) {
     classes = classNames('painlessLab__bottomBar', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
     });
   }
