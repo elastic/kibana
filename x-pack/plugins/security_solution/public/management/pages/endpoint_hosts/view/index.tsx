@@ -333,7 +333,7 @@ export const EndpointList = () => {
     if (hostsExist) {
       return (
         <EuiBasicTable
-          data-test-subj="hostListTable"
+          data-test-subj="endpointListTable"
           items={[...listData]}
           columns={columns}
           error={listError?.message}
@@ -377,7 +377,7 @@ export const EndpointList = () => {
   return (
     <ManagementPageView
       viewType="list"
-      data-test-subj="hostPage"
+      data-test-subj="endpointPage"
       headerLeft={
         <>
           <EuiFlexGroup alignItems="center" responsive={false}>
@@ -414,7 +414,7 @@ export const EndpointList = () => {
       {hasSelectedHost && <EndpointDetailsFlyout />}
       {listData && listData.length > 0 && (
         <>
-          <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
+          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
               id="xpack.securitySolution.endpointList.totalCount"
               defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"

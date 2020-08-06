@@ -74,54 +74,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Jan 24, 2020 @ 16:06:09.541',
           ],
         ];
-        const tableData = await pageObjects.endpointPageUtils.tableData('hostListTable');
+        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });
 
       it('does not show the details flyout initially', async () => {
-        await testSubjects.missingOrFail('hostDetailsFlyout');
+        await testSubjects.missingOrFail('endpointDetailsFlyout');
       });
 
       describe('when the hostname is clicked on,', () => {
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
-          await testSubjects.existOrFail('hostDetailsUpperList');
-          await testSubjects.existOrFail('hostDetailsLowerList');
+          await testSubjects.existOrFail('endpointDetailsUpperList');
+          await testSubjects.existOrFail('endpointDetailsLowerList');
         });
 
         it('updates the details flyout when a new hostname is selected from the list', async () => {
           // display flyout for the first host in the list
           await (await testSubjects.findAll('hostnameCellLink'))[0].click();
-          await testSubjects.existOrFail('hostDetailsFlyoutTitle');
-          const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+          await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
+          const hostDetailTitle0 = await testSubjects.getVisibleText('endpointDetailsFlyoutTitle');
           // select the 2nd host in the host list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
           await pageObjects.endpoint.waitForVisibleTextToChange(
-            'hostDetailsFlyoutTitle',
+            'endpointDetailsFlyoutTitle',
             hostDetailTitle0
           );
-          const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+          const hostDetailTitle1 = await testSubjects.getVisibleText('endpointDetailsFlyoutTitle');
           expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
         });
 
         it('has the same flyout info when the same hostname is selected', async () => {
           // display flyout for the first host in the list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
-          await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+          await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
           const hostDetailTitleInitial = await testSubjects.getVisibleText(
-            'hostDetailsFlyoutTitle'
+            'endpointDetailsFlyoutTitle'
           );
           // select the same host in the host list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
           await sleep(500); // give page time to refresh and verify it did not change
-          const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+          const hostDetailTitleNew = await testSubjects.getVisibleText(
+            'endpointDetailsFlyoutTitle'
+          );
           expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
         });
 
         // The integration does not work properly yet.  Skipping this test for now.
         it.skip('navigates to ingest fleet when the Reassign Configuration link is clicked', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
-          await (await testSubjects.find('hostDetailsLinkToIngest')).click();
+          await (await testSubjects.find('endpointDetailsLinkToIngest')).click();
           await testSubjects.existOrFail('fleetAgentListTable');
         });
       });
@@ -135,9 +137,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('shows a flyout', async () => {
-          await testSubjects.existOrFail('hostDetailsFlyoutBody');
-          await testSubjects.existOrFail('hostDetailsUpperList');
-          await testSubjects.existOrFail('hostDetailsLowerList');
+          await testSubjects.existOrFail('endpointDetailsFlyoutBody');
+          await testSubjects.existOrFail('endpointDetailsUpperList');
+          await testSubjects.existOrFail('endpointDetailsLowerList');
         });
 
         it('displays details row headers', async () => {
@@ -152,14 +154,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Sensor Version',
           ];
           const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
-            'hostDetailsFlyout'
+            'endpointDetailsFlyout'
           );
           expect(keys).to.eql(expectedData);
         });
 
         it('displays details row descriptions', async () => {
           const values = await pageObjects.endpoint.endpointFlyoutDescriptionValues(
-            'hostDetailsFlyout'
+            'endpointDetailsFlyout'
           );
 
           expect(values).to.eql([

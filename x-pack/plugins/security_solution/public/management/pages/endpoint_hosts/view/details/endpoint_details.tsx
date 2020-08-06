@@ -200,13 +200,13 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsUpper}
-        data-test-subj="hostDetailsUpperList"
+        data-test-subj="endpointDetailsUpperList"
       />
       <EuiHorizontalRule margin="m" />
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsPolicy}
-        data-test-subj="hostDetailsPolicyList"
+        data-test-subj="endpointDetailsPolicyList"
       />
       <LinkToExternalApp>
         <LinkToApp
@@ -214,7 +214,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
           appPath={agentDetailsWithFlyoutPath}
           href={agentDetailsWithFlyoutUrl}
           onClick={handleReassignEndpointsClick}
-          data-test-subj="hostDetailsLinkToIngest"
+          data-test-subj="endpointDetailsLinkToIngest"
         >
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
@@ -228,7 +228,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsLower}
-        data-test-subj="hostDetailsLowerList"
+        data-test-subj="endpointDetailsLowerList"
       />
     </>
   );

@@ -73,12 +73,12 @@ export const EndpointDetailsFlyout = memo(() => {
     <EuiFlyout
       onClose={handleFlyoutClose}
       style={{ zIndex: 4001 }}
-      data-test-subj="hostDetailsFlyout"
+      data-test-subj="endpointDetailsFlyout"
       size="s"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 data-test-subj="hostDetailsFlyoutTitle">
+          <h2 data-test-subj="endpointDetailsFlyoutTitle">
             {loading ? <EuiLoadingContent lines={1} /> : details?.host?.hostname}
           </h2>
         </EuiTitle>
@@ -93,7 +93,7 @@ export const EndpointDetailsFlyout = memo(() => {
         <>
           {show === 'details' && (
             <>
-              <EuiFlyoutBody data-test-subj="hostDetailsFlyoutBody">
+              <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
                 <EndpointDetails details={details} />
               </EuiFlyoutBody>
             </>
@@ -149,10 +149,10 @@ const PolicyResponseFlyoutPanel = memo<{
     <>
       <FlyoutSubHeader
         backButton={backButtonProp}
-        data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
+        data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
       />
-      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
+      <EuiFlyoutBody data-test-subj="endpointDetailsPolicyResponseFlyoutBody">
+        <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
               id="xpack.securitySolution.endpoint.host.policyResponse.title"

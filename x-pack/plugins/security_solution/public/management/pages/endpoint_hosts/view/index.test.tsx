@@ -111,7 +111,7 @@ describe('when on the list page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('hostDetailsFlyout').catch((e) => {
+      return renderResult.findByTestId('endpointDetailsFlyout').catch((e) => {
         expect(e).not.toBeNull();
       });
     });
@@ -162,7 +162,7 @@ describe('when on the list page', () => {
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
-        const total = await renderResult.findByTestId('hostListTableTotal');
+        const total = await renderResult.findByTestId('endpointListTableTotal');
         expect(total.textContent).toEqual('4 Hosts');
       });
       it('should display correct status', async () => {
@@ -234,7 +234,7 @@ describe('when on the list page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
+          return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
             expect(flyout).not.toBeNull();
           });
         });
@@ -355,7 +355,7 @@ describe('when on the list page', () => {
 
     it('should show the flyout', async () => {
       const renderResult = await renderAndWaitForData();
-      return renderResult.findByTestId('hostDetailsFlyout').then((flyout) => {
+      return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
         expect(flyout).not.toBeNull();
       });
     });
@@ -463,7 +463,7 @@ describe('when on the list page', () => {
     it('should include the link to reassignment in Ingest', async () => {
       coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
       const renderResult = await renderAndWaitForData();
-      const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+      const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Configuration');
       expect(linkToReassign.getAttribute('href')).toEqual(
@@ -475,7 +475,7 @@ describe('when on the list page', () => {
       beforeEach(async () => {
         coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
         const renderResult = await renderAndWaitForData();
-        const linkToReassign = await renderResult.findByTestId('hostDetailsLinkToIngest');
+        const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(linkToReassign);
         });
@@ -511,35 +511,35 @@ describe('when on the list page', () => {
       afterEach(reactTestingLibrary.cleanup);
 
       it('should hide the host details panel', async () => {
-        const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
-        expect(hostDetailsFlyout).toBeNull();
+        const endpointDetailsFlyout = await renderResult.queryByTestId('endpointDetailsFlyoutBody');
+        expect(endpointDetailsFlyout).toBeNull();
       });
 
       it('should display policy response sub-panel', async () => {
         expect(
-          await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutHeader')
+          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutHeader')
         ).not.toBeNull();
         expect(
-          await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutBody')
+          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
       });
 
       it('should include the sub-panel title', async () => {
         expect(
-          (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
+          (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
         ).toBe('Configuration Response');
       });
 
       it('should show a configuration section for each protection', async () => {
         const configAccordions = await renderResult.findAllByTestId(
-          'hostDetailsPolicyResponseConfigAccordion'
+          'endpointDetailsPolicyResponseConfigAccordion'
         );
         expect(configAccordions).not.toBeNull();
       });
 
       it('should show an actions section for each configuration', async () => {
         const actionAccordions = await renderResult.findAllByTestId(
-          'hostDetailsPolicyResponseActionsAccordion'
+          'endpointDetailsPolicyResponseActionsAccordion'
         );
         const action = await renderResult.findAllByTestId('policyResponseAction');
         const statusHealth = await renderResult.findAllByTestId('policyResponseStatusHealth');
@@ -564,7 +564,7 @@ describe('when on the list page', () => {
           });
         });
         return renderResult
-          .findAllByTestId('hostDetailsPolicyResponseAttentionBadge')
+          .findAllByTestId('endpointDetailsPolicyResponseAttentionBadge')
           .catch((e) => {
             expect(e).not.toBeNull();
           });
@@ -579,7 +579,7 @@ describe('when on the list page', () => {
         });
         await policyResponseActionDispatched;
         const attentionBadge = await renderResult.findAllByTestId(
-          'hostDetailsPolicyResponseAttentionBadge'
+          'endpointDetailsPolicyResponseAttentionBadge'
         );
         expect(attentionBadge).not.toBeNull();
       });
@@ -593,7 +593,7 @@ describe('when on the list page', () => {
         });
         await policyResponseActionDispatched;
         const attentionBadge = await renderResult.findAllByTestId(
-          'hostDetailsPolicyResponseAttentionBadge'
+          'endpointDetailsPolicyResponseAttentionBadge'
         );
         expect(attentionBadge).not.toBeNull();
       });
