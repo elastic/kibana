@@ -206,3 +206,4 @@ export const getCategorizerStatsSchema = schema.nullable(
     partitionByValue: schema.maybe(schema.string()),
   })
 );
+export const getStoppedPartitionsSchema = schema.arrayOf(schema.string());

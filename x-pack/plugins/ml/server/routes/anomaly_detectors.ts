@@ -773,13 +773,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {get} /api/ml/anomaly_detectors/:jobId/categorizer_stats
    * @apiName GetStoppedPartitions
    * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
-   * @apiSchema (params) getCatergorizerStatsSchema
+   * @apiSchema (params) jobIdSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/stopped_partitions',
       validate: {
-        params: jobIdSchema,
+        query: jobIdSchema,
       },
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -803,7 +803,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         }
 
         const jobConfig = jobConfigResponse.jobs[0];
-        if (jobConfig.analysis_config?.stop_on_warn === true) {
+        if (jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true) {
           // search for categorizer_stats documents for the current job where the categorization_status is warn
           // Return all the partition_field_value values from the documents found
           const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
@@ -822,7 +822,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
             'search',
             {
               index: ML_RESULTS_INDEX_PATTERN,
-              size: 0,
               body: {
                 query: {
                   bool: {

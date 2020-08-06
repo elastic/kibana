@@ -30,6 +30,7 @@ import {
   EuiPanel,
   EuiAccordion,
   EuiBadge,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -204,7 +205,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity } = this.props;
+    const { showCharts, severity, stoppedPartitions } = this.props;
 
     const {
       annotations,
@@ -297,6 +298,20 @@ export class Explorer extends React.Component {
 
           <div className={mainColumnClasses}>
             <EuiSpacer size="m" />
+
+            {stoppedPartitions && (
+              <EuiCallOut
+                size={'s'}
+                title={i18n.translate('xpack.ml.explorer.stoppedPartitionsExistCallout', {
+                  defaultMessage:
+                    'There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection stops for partitions [{stoppedPartitions}] where the categorization status changes to warn.',
+                  values: {
+                    stoppedPartitions: stoppedPartitions.join(', '),
+                  },
+                })}
+              />
+            )}
+
             <AnomalyTimeline
               explorerState={this.props.explorerState}
               setSelectedCells={this.props.setSelectedCells}

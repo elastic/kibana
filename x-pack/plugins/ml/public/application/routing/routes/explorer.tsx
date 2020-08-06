@@ -40,7 +40,7 @@ export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute =>
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
-      text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
+      text: i18n.translate('xpack.ml.anomalyDetection.xanomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
       }),
       href: '',
@@ -70,6 +70,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
+  const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
+
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -109,9 +111,27 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
+  const getStoppedPartitions = async (jobId: string) => {
+    try {
+      const fetchedStoppedPartitions = await ml.jobs.getStoppedPartitions(jobId);
+      if (fetchedStoppedPartitions.length > 0) {
+        setStoppedPartitions(fetchedStoppedPartitions);
+      } else {
+        setStoppedPartitions(undefined);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  };
   useEffect(() => {
     if (jobIds.length > 0) {
       explorerService.updateJobSelection(jobIds);
+
+      if (jobIds.length === 1) {
+        // if it's a per partition category job and and if stop_on_warn is true
+        getStoppedPartitions(jobIds[0]);
+      }
     } else {
       explorerService.clearJobs();
     }
@@ -209,6 +229,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           setSelectedCells,
           showCharts,
           severity: tableSeverity.val,
+          stoppedPartitions,
         }}
       />
     </div>
