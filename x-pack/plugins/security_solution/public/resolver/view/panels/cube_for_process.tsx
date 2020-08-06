@@ -17,7 +17,7 @@ export const CubeForProcess = memo(function CubeForProcess({
   isProcessTerminated: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol, descriptionText } = cubeAssetsForNode(isProcessTerminated, false);
+  const { cubeSymbol } = cubeAssetsForNode(isProcessTerminated, false);
 
   return (
     <>
@@ -28,7 +28,6 @@ export const CubeForProcess = memo(function CubeForProcess({
         height="1.5em"
         viewBox="0 0 1 1"
       >
-        <desc>{descriptionText}</desc>
         <use
           role="presentation"
           xlinkHref={cubeSymbol}
