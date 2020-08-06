@@ -20,7 +20,6 @@
 import { functionWrapper } from './utils';
 import { theme } from '../theme';
 import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext } from '../../../expression_types';
 
 describe('expression_functions', () => {
   describe('theme', () => {
@@ -38,7 +37,7 @@ describe('expression_functions', () => {
       };
 
       context = {
-        getInitialInput: () => input,
+        getInitialInput: () => {},
         types: {},
         variables: { theme: themeProps },
         abortSignal: {} as any,
