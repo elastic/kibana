@@ -11,7 +11,7 @@ import {
   getInstalledJobs,
   getModuleJobs,
   moduleToSecurityJob,
-} from './use_siem_jobs_helpers';
+} from './use_security_jobs_helpers';
 import {
   checkRecognizerSuccess,
   mockGetModuleResponse,

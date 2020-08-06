@@ -12,7 +12,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useUiSetting$, useHttp } from '../../../lib/kibana';
 import { checkRecognizer, getModules } from '../api';
 import { SecurityJob } from '../types';
-import { createSecurityJobs } from './use_siem_jobs_helpers';
+import { createSecurityJobs } from './use_security_jobs_helpers';
 import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import * as i18n from '../../ml/translations';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
