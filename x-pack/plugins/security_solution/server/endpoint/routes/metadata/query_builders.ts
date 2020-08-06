@@ -30,7 +30,7 @@ export async function kibanaRequestToMetadataListESQuery(
       ),
       sort: [
         {
-          'Host_details.event.created': {
+          'HostDetails.event.created': {
             order: 'desc',
           },
         },
@@ -75,7 +75,7 @@ function buildQueryBody(
       ? {
           must_not: {
             terms: {
-              'Host_details.elastic.agent.id': unerolledAgentIds,
+              'HostDetails.elastic.agent.id': unerolledAgentIds,
             },
           },
         }
@@ -84,7 +84,7 @@ function buildQueryBody(
     ? {
         must: {
           terms: {
-            'Host_details.elastic.agent.id': statusAgentIDs,
+            'HostDetails.elastic.agent.id': statusAgentIDs,
           },
         },
       }
@@ -122,12 +122,12 @@ export function getESQueryHostMetadataByID(hostID: string, index: string) {
     body: {
       query: {
         match: {
-          'Host_details.host.id': hostID,
+          'HostDetails.host.id': hostID,
         },
       },
       sort: [
         {
-          'Host_details.event.created': {
+          'HostDetails.event.created': {
             order: 'desc',
           },
         },

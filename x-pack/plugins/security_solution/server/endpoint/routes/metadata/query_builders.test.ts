@@ -31,7 +31,7 @@ describe('query builder', () => {
           },
           sort: [
             {
-              'Host_details.event.created': {
+              'HostDetails.event.created': {
                 order: 'desc',
               },
             },
@@ -71,14 +71,14 @@ describe('query builder', () => {
               bool: {
                 must_not: {
                   terms: {
-                    'Host_details.elastic.agent.id': [unenrolledElasticAgentId],
+                    'HostDetails.elastic.agent.id': [unenrolledElasticAgentId],
                   },
                 },
               },
             },
             sort: [
               {
-                'Host_details.event.created': {
+                'HostDetails.event.created': {
                   order: 'desc',
                 },
               },
@@ -97,7 +97,7 @@ describe('query builder', () => {
     it('test default query params for all endpoints metadata when body filter is provided', async () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {
-          filters: { kql: 'not Host_details.host.ip:10.140.73.246' },
+          filters: { kql: 'not HostDetails.host.ip:10.140.73.246' },
         },
       });
       const query = await kibanaRequestToMetadataListESQuery(
@@ -122,7 +122,7 @@ describe('query builder', () => {
                         should: [
                           {
                             match: {
-                              'Host_details.host.ip': '10.140.73.246',
+                              'HostDetails.host.ip': '10.140.73.246',
                             },
                           },
                         ],
@@ -136,7 +136,7 @@ describe('query builder', () => {
           },
           sort: [
             {
-              'Host_details.event.created': {
+              'HostDetails.event.created': {
                 order: 'desc',
               },
             },
@@ -156,7 +156,7 @@ describe('query builder', () => {
         const unenrolledElasticAgentId = '1fdca33f-799f-49f4-939c-ea4383c77672';
         const mockRequest = httpServerMock.createKibanaRequest({
           body: {
-            filters: { kql: 'not Host_details.host.ip:10.140.73.246' },
+            filters: { kql: 'not HostDetails.host.ip:10.140.73.246' },
           },
         });
         const query = await kibanaRequestToMetadataListESQuery(
@@ -181,7 +181,7 @@ describe('query builder', () => {
                     bool: {
                       must_not: {
                         terms: {
-                          'Host_details.elastic.agent.id': [unenrolledElasticAgentId],
+                          'HostDetails.elastic.agent.id': [unenrolledElasticAgentId],
                         },
                       },
                     },
@@ -193,7 +193,7 @@ describe('query builder', () => {
                           should: [
                             {
                               match: {
-                                'Host_details.host.ip': '10.140.73.246',
+                                'HostDetails.host.ip': '10.140.73.246',
                               },
                             },
                           ],
@@ -207,7 +207,7 @@ describe('query builder', () => {
             },
             sort: [
               {
-                'Host_details.event.created': {
+                'HostDetails.event.created': {
                   order: 'desc',
                 },
               },
@@ -229,8 +229,8 @@ describe('query builder', () => {
 
       expect(query).toEqual({
         body: {
-          query: { match: { 'Host_details.host.id': mockID } },
-          sort: [{ 'Host_details.event.created': { order: 'desc' } }],
+          query: { match: { 'HostDetails.host.id': mockID } },
+          sort: [{ 'HostDetails.event.created': { order: 'desc' } }],
           size: 1,
         },
         index: metadataCurrentIndexPattern,

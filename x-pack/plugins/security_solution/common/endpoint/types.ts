@@ -437,7 +437,7 @@ export type HostMetadataDetails = Immutable<{
   agent: {
     id: string;
   };
-  Host_details: HostMetadata;
+  HostDetails: HostMetadata;
 }>;
 
 export type HostMetadata = Immutable<{

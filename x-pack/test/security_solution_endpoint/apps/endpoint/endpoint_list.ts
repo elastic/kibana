@@ -6,12 +6,16 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { deleteMetadataStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import {
+  deleteMetadataCurrentStream,
+  deleteMetadataStream,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const esClient = getService('es');
 
   describe('host list', function () {
     this.tags('ciGroup7');
@@ -20,10 +24,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
+        await esClient.transform.putTransform({
+          transform_id: transformId,
+          defer_validation: false,
+          body: {
+            source: {
+              index: 'metrics-endpoint.metadata-default',
+            },
+            dest: {
+              index: 'metrics-endpoint.metadata_current-default',
+            },
+            pivot: {
+              group_by: {
+                'agent.id': {
+                  terms: {
+                    field: 'agent.id',
+                  },
+                },
+              },
+              aggregations: {
+                HostDetails: {
+                  scripted_metric: {
+                    init_script: '',
+                    map_script: "state.doc = new HashMap(params['_source'])",
+                    combine_script: 'return state',
+                    reduce_script:
+                      "def all_docs = []; for (s in states) {     all_docs.add(s.doc); }  all_docs.sort((HashMap o1, HashMap o2)->o1['@timestamp'].millis.compareTo(o2['@timestamp'].millis)); def size = all_docs.size(); return all_docs[size-1];",
+                  },
+                },
+              },
+            },
+            description: 'collapse and update the latest document for each host',
+            frequency: '1m',
+            sync: {
+              time: {
+                field: 'event.created',
+                delay: '60s',
+              },
+            },
+          },
+        });
+
+        await esClient.transform.startTransform({
+          transform_id: transformId,
+          timeout: '60s',
+        });
+
+        // wait for transform to apply
+        await new Promise((r) => setTimeout(r, 70000));
+        await esClient.transform.getTransformStats({
+          transform_id: transformId,
+        });
         await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
+        await esClient.transform.deleteTransform({
+          transform_id: transformId,
+          force: true,
+        });
+
         await deleteMetadataStream(getService);
+        await deleteMetadataCurrentStream(getService);
       });
 
       it('finds page title', async () => {

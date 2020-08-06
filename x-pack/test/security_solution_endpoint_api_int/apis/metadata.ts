@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
               aggregations: {
-                Host_details: {
+                HostDetails: {
                   scripted_metric: {
                     init_script: '',
                     map_script: "state.doc = new HashMap(params['_source'])",
@@ -183,7 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not Host_details.host.ip:10.46.229.234',
+              kql: 'not HostDetails.host.ip:10.46.229.234',
             },
           })
           .expect(200);
@@ -208,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not Host_details.host.ip:${notIncludedIp}`,
+              kql: `not HostDetails.host.ip:${notIncludedIp}`,
             },
           })
           .expect(200);
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
@@ -258,7 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not Host_details.Endpoint.policy.applied.status:success`,
+              kql: `not HostDetails.Endpoint.policy.applied.status:success`,
             },
           })
           .expect(200);
@@ -300,7 +300,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);
