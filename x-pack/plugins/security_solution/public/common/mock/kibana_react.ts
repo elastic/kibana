@@ -28,9 +28,9 @@ import {
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 import { StartServices } from '../../types';
 import { createSecuritySolutionStorageMock } from './mock_local_storage';
+import { uiSettingsServiceMock } from '../../../../../../src/core/public/mocks';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const mockUiSettings: Record<string, any> = {
+const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
   [DEFAULT_REFRESH_RATE_INTERVAL]: { pause: false, value: 0 },
   [DEFAULT_APP_TIME_RANGE]: {
@@ -48,10 +48,7 @@ export const mockUiSettings: Record<string, any> = {
   [DEFAULT_DARK_MODE]: false,
 };
 
-export const createUseUiSettingMock = () => <T extends unknown = string>(
-  key: string,
-  defaultValue?: T
-): T => {
+export const createUseUiSettingMock = () => (key: string, defaultValue?: unknown): unknown => {
   const result = mockUiSettings[key];
 
   if (typeof result != null) return result;
@@ -66,61 +63,38 @@ export const createUseUiSettingMock = () => <T extends unknown = string>(
 export const createUseUiSetting$Mock = () => {
   const useUiSettingMock = createUseUiSettingMock();
 
-  return <T extends unknown = string>(
-    key: string,
-    defaultValue?: T
-  ): [T, () => void] | undefined => [useUiSettingMock(key, defaultValue), jest.fn()];
+  return (key: string, defaultValue?: unknown): [unknown, () => void] | undefined => [
+    useUiSettingMock(key, defaultValue),
+    jest.fn(),
+  ];
 };
 
-export const createKibanaObservable$Mock = createKibanaCoreStartMock;
-
-export const createUseKibanaMock = () => {
+export const createStartServicesMock = (): StartServices => {
   const core = createKibanaCoreStartMock();
   const plugins = createKibanaPluginsStartMock();
-  const useUiSetting = createUseUiSettingMock();
+  core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
-
-  const services = {
-    ...core,
-    ...plugins,
-    uiSettings: {
-      ...core.uiSettings,
-      get: useUiSetting,
-    },
-    storage,
-  };
-
-  return () => ({ services });
-};
-
-export const createStartServices = () => {
-  const core = createKibanaCoreStartMock();
-  const plugins = createKibanaPluginsStartMock();
 
   const services = ({
     ...core,
     ...plugins,
+    storage,
   } as unknown) as StartServices;
 
   return services;
 };
 
 export const createWithKibanaMock = () => {
-  const kibana = createUseKibanaMock()();
+  const services = createStartServicesMock();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (Component: any) => (props: any) => {
-    return React.createElement(Component, { ...props, kibana });
+  return (Component: unknown) => (props: unknown) => {
+    return React.createElement(Component as string, { ...(props as object), kibana: { services } });
   };
 };
 
 export const createKibanaContextProviderMock = () => {
-  const kibana = createUseKibanaMock()();
+  const services = createStartServicesMock();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ({ services, ...rest }: any) =>
-    React.createElement(KibanaContextProvider, {
-      ...rest,
-      services: { ...kibana.services, ...services },
-    });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(KibanaContextProvider, { services }, children);
 };

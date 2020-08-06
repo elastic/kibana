@@ -14,7 +14,7 @@ import '../../../common/mock/match_media';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useAllCasesModal, UseAllCasesModalProps, UseAllCasesModalReturnedValues } from '.';
 import { TestProviders } from '../../../common/mock';
-import { createUseKibanaMock } from '../../../common/mock/kibana_react';
+import { createStartServicesMock } from '../../../common/mock/kibana_react';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -25,10 +25,10 @@ describe('useAllCasesModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    const kibanaMock = createUseKibanaMock()();
+    const servicesMock = createStartServicesMock();
     useKibanaMock.mockImplementation(() => ({
-      ...kibanaMock,
       services: {
+        ...servicesMock,
         application: {
           navigateToApp,
         },

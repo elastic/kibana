@@ -15,7 +15,7 @@ import { useGetCasesMockState } from '../../containers/mock';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../common/lib/kibana';
-import { createUseKibanaMock } from '../../../common/mock/kibana_react';
+import { createStartServicesMock } from '../../../common/mock/kibana_react';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -99,10 +99,10 @@ describe('AllCases', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     navigateToApp = jest.fn();
-    const kibanaMock = createUseKibanaMock()();
+    const servicesMock = createStartServicesMock();
     useKibanaMock.mockReturnValue({
-      ...kibanaMock,
       services: {
+        ...servicesMock,
         application: {
           navigateToApp,
         },

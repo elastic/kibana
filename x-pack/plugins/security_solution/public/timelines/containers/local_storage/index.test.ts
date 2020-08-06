@@ -15,7 +15,7 @@ import {
 import { TimelineId } from '../../../../common/types/timeline';
 import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { createUseKibanaMock } from '../../../common/mock/kibana_react';
+import { createStartServicesMock } from '../../../common/mock/kibana_react';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -28,7 +28,7 @@ describe('SiemLocalStorage', () => {
     jest.resetAllMocks();
     useKibanaMock.mockImplementation(() => ({
       services: {
-        ...createUseKibanaMock()().services,
+        ...createStartServicesMock(),
         storage,
       },
     }));

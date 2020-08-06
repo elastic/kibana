@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import '../../../../common/mock/match_media';
-import { createUseKibanaMock, TestProviders } from '../../../../common/mock';
+import { createStartServicesMock, TestProviders } from '../../../../common/mock';
 import { NoCases } from '.';
 
 jest.mock('../../../../common/lib/kibana');
@@ -22,10 +22,10 @@ describe('RecentCases', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     navigateToApp = jest.fn();
-    const kibanaMock = createUseKibanaMock()();
+    const servicesMock = createStartServicesMock();
     useKibanaMock.mockReturnValue({
-      ...kibanaMock,
       services: {
+        ...servicesMock,
         application: {
           navigateToApp,
           getUrlForApp: jest.fn(),
