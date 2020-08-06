@@ -7,35 +7,34 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useManageSource } from '../../containers/source';
+import { useManageSource } from '../../containers/sourcerer';
 import * as i18n from './translations';
-export const Sourcerer = React.memo(() => {
+import { SOURCERER_FEATURE_FLAG_ON } from '../../containers/sourcerer/constants';
+
+export const MaybeSourcerer = React.memo(() => {
   const {
-    getActiveSourceGroupId,
-    getAvailableIndexPatterns,
-    getManageSourceById,
-    updateIndicies,
+    activeSourceGroupId,
+    availableIndexPatterns,
+    getManageSourceGroupById,
     isIndexPatternsLoading,
+    updateSourceGroupIndicies,
   } = useManageSource();
-
-  const activeSourceGroupId = useMemo(() => getActiveSourceGroupId(), [getActiveSourceGroupId]);
-
   const { indexPatterns: selectedOptions, loading: loadingIndices } = useMemo(
-    () => getManageSourceById(activeSourceGroupId),
-    [getManageSourceById, activeSourceGroupId]
-  );
-
-  const onChangeIndexPattern = useCallback(
-    (newIndexPatterns: string[]) => {
-      updateIndicies(activeSourceGroupId, newIndexPatterns);
-    },
-    [activeSourceGroupId, updateIndicies]
+    () => getManageSourceGroupById(activeSourceGroupId),
+    [getManageSourceGroupById, activeSourceGroupId]
   );
 
   const loading = useMemo(() => loadingIndices || isIndexPatternsLoading, [
     isIndexPatternsLoading,
     loadingIndices,
   ]);
+
+  const onChangeIndexPattern = useCallback(
+    (newIndexPatterns: string[]) => {
+      updateSourceGroupIndicies(activeSourceGroupId, newIndexPatterns);
+    },
+    [activeSourceGroupId, updateSourceGroupIndicies]
+  );
 
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const trigger = useMemo(
@@ -56,13 +55,13 @@ export const Sourcerer = React.memo(() => {
   );
   const options: EuiSelectableOption[] = useMemo(
     () =>
-      getAvailableIndexPatterns().map((title, id) => ({
+      availableIndexPatterns.map((title, id) => ({
         label: title,
         key: `${title}-${id}`,
         value: title,
         checked: selectedOptions && selectedOptions.includes(title) ? 'on' : undefined,
       })),
-    [getAvailableIndexPatterns, selectedOptions]
+    [availableIndexPatterns, selectedOptions]
   );
 
   const onChange = useCallback(
@@ -75,6 +74,7 @@ export const Sourcerer = React.memo(() => {
     },
     [onChangeIndexPattern]
   );
+
   return (
     <EuiPopover
       button={trigger}
@@ -107,4 +107,6 @@ export const Sourcerer = React.memo(() => {
     </EuiPopover>
   );
 });
-Sourcerer.displayName = 'Sourcerer';
+MaybeSourcerer.displayName = 'Sourcerer';
+
+export const Sourcerer = SOURCERER_FEATURE_FLAG_ON ? MaybeSourcerer : () => null;
