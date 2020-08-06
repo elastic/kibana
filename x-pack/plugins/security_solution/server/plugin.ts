@@ -42,7 +42,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
-  APP_ICON,
   SERVER_APP_ID,
   SecurityPageName,
   SIGNALS_ID,
@@ -170,7 +169,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: APP_ICON,
+      icon: 'logoSecurity',
       navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],

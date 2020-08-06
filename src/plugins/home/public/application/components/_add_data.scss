@@ -1,63 +1,8 @@
-.homAddData__card {
-  border: none;
-  box-shadow: none;
-}
-
-.homAddData__cardDivider {
-  position: relative;
-
-  &:after {
-    position: absolute;
-    content: '';
-    width: 1px;
-    right: -$euiSizeS;
-    top: 0;
-    bottom: 0;
-    background: $euiBorderColor;
-  }
-}
-
-.homAddData__icon {
-  width: $euiSizeXL * 2;
-  height: $euiSizeXL * 2;
-}
-
-.homAddData__footerItem--highlight {
-  background-color: tintOrShade($euiColorPrimary, 90%, 70%);
-  padding: $euiSize;
-}
-
-.homAddData__footerItem {
+.homAddData__image {
   text-align: center;
-}
 
-.homAddData__logo {
-  margin-left: $euiSize;
-}
-
-@include euiBreakpoint('xs', 's') {
-  .homeAddData__flexGroup {
-    flex-wrap: wrap;
-  }
-}
-
-@include euiBreakpoint('xs', 's', 'm') {
-  .homAddDat__flexTablet {
-    flex-direction: column;
-  }
-
-  .homAddData__cardDivider:after {
-    display: none;
-  }
-
-  .homAddData__cardDivider {
-    flex-grow: 0 !important;
-    flex-basis: 100% !important;
-  }
-}
-
-@include euiBreakpoint('l', 'xl') {
-  .homeAddData__flexGroup {
-    flex-wrap: nowrap;
+  .euiImage__img {
+    max-height: $euiSize * 16; // too tall if only two "Add data" features are enabled
+    width: auto;
   }
 }
