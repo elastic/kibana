@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { isObject, uniq } from 'lodash/fp';
+import { isObject } from 'lodash/fp';
 
 export const formatErrors = (errors: t.Errors): string[] => {
   const err = errors.map((error) => {
@@ -27,5 +27,5 @@ export const formatErrors = (errors: t.Errors): string[] => {
     }
   });
 
-  return uniq(err);
+  return [...new Set(err)];
 };
