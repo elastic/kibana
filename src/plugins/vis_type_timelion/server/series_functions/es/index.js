@@ -129,9 +129,39 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
-    const { callAsCurrentUser: callWithRequest } = tlConfig.esDataClient();
-    const resp = await callWithRequest('search', body);
-    if (!resp._shards.total) {
+    const MAX_INTERVAL = 300000;
+
+    async function searchWithPolling(search, requestParams, interval) {
+      async function checkCondition(resolve, reject) {
+        const resp = await search(
+          tlConfig.context,
+          {
+            params: requestParams,
+          },
+          {}
+        );
+
+        if (interval > MAX_INTERVAL) {
+          reject('Reach max interval');
+        }
+
+        if (resp.is_running || resp.is_partial) {
+          setTimeout(() => {
+            interval = interval * Math.log10(interval / 100);
+            checkCondition(resolve, reject);
+          }, interval);
+        } else {
+          console.log(resp);
+          resolve(resp);
+        }
+      }
+
+      return new Promise(checkCondition);
+    }
+
+    const resp = await searchWithPolling(tlConfig.esDataClient, body, 10000);
+    console.log(resp);
+    if (!resp.rawResponse._shards.total) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {
           defaultMessage: 'Elasticsearch index not found: {index}',
@@ -143,7 +173,7 @@ export default new Datasource('es', {
     }
     return {
       type: 'seriesList',
-      list: toSeriesList(resp.aggregations, config),
+      list: toSeriesList(resp.rawResponse.aggregations, config),
     };
   },
 });

@@ -20,6 +20,8 @@ import { IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
+
+import { PluginStart } from '../../../../../src/plugins/data/server';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
 // @ts-ignore
@@ -37,10 +39,12 @@ export function runRoute(
     logger,
     getFunction,
     configManager,
+    data,
   }: {
     logger: Logger;
     getFunction: (name: string) => TimelionFunctionInterface;
     configManager: ConfigManager;
+    data: PluginStart;
   }
 ) {
   router.post(
@@ -82,12 +86,13 @@ export function runRoute(
 
         const tlConfig = getTlConfig({
           request,
+          context,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
           getFunction,
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: () => context.core.elasticsearch.legacy.client,
+          esDataClient: data.search.search,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
