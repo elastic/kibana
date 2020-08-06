@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlSummaryJob } from '../../../../../../ml/public';
+import { MlSummaryJob } from '../../../../../ml/public';
 import {
   Group,
   Module,
@@ -13,7 +13,7 @@ import {
   SecurityJob,
   StartDatafeedResponse,
   StopDatafeedResponse,
-} from '../types';
+} from './types';
 
 export const mockGroupsResponse: Group[] = [
   {

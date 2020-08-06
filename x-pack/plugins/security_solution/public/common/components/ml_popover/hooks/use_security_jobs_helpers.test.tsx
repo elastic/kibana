@@ -16,7 +16,7 @@ import {
   checkRecognizerSuccess,
   mockGetModuleResponse,
   mockJobsSummaryResponse,
-} from '../__mocks__/api';
+} from '../api.mock';
 
 // TODO: Expand test coverage
 

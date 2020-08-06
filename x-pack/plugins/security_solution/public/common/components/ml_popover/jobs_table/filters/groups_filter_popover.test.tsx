@@ -7,7 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { GroupsFilterPopoverComponent } from './groups_filter_popover';
-import { mockSecurityJobs } from '../../__mocks__/api';
+import { mockSecurityJobs } from '../../api.mock';
 import { SecurityJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
 

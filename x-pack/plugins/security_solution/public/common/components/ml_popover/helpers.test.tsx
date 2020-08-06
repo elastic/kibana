@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockSecurityJobs } from './__mocks__/api';
+import { mockSecurityJobs } from './api.mock';
 import { filterJobs, getStablePatternTitles, searchFilter } from './helpers';
 
 describe('helpers', () => {

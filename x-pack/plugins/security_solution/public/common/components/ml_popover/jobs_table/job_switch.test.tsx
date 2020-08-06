@@ -9,7 +9,7 @@ import React from 'react';
 
 import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
-import { mockSecurityJobs } from '../__mocks__/api';
+import { mockSecurityJobs } from '../api.mock';
 import { SecurityJob } from '../types';
 
 describe('JobSwitch', () => {

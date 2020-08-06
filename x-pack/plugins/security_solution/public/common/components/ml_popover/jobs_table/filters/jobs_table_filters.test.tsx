@@ -9,7 +9,7 @@ import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
 import { SecurityJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
-import { mockSecurityJobs } from '../../__mocks__/api';
+import { mockSecurityJobs } from '../../api.mock';
 
 describe('JobsTableFilters', () => {
   let securityJobs: SecurityJob[];
