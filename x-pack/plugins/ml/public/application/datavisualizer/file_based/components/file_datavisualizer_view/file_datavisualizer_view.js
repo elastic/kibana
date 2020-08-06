@@ -358,14 +358,15 @@ export class FileDataVisualizerView extends Component {
             />
 
             {bottomBarVisible && (
-              <BottomBar
-                mode={MODE.IMPORT}
-                onChangeMode={this.changeMode}
-                onCancel={this.onCancel}
-              />
+              <>
+                <BottomBar
+                  mode={MODE.IMPORT}
+                  onChangeMode={this.changeMode}
+                  onCancel={this.onCancel}
+                />
+                <BottomPadding />
+              </>
             )}
-
-            <BottomPadding />
           </>
         )}
       </div>
