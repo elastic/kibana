@@ -25,11 +25,11 @@ import {
   IContainer,
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
-  AttributeService,
   ReferenceOrValueEmbeddable,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
+import { AttributeService } from '../../../../src/plugins/dashboard/public';
 
 export const BOOK_EMBEDDABLE = 'book';
 export type BookEmbeddableInput = BookByValueInput | BookByReferenceInput;
@@ -107,7 +107,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
   };
 
   getInputAsRefType = async (): Promise<BookByReferenceInput> => {
-    return this.attributeService.getInputAsRefType(this.input);
+    return this.attributeService.getInputAsRefType(this.input, { showSaveModal: true });
   };
 
   public render(node: HTMLElement) {

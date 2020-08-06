@@ -18,4 +18,3 @@
  */
 
 export { ReferenceOrValueEmbeddable, isReferenceOrValueEmbeddable } from './types';
-export { AttributeService } from './attribute_service';

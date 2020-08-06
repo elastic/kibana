@@ -17,24 +17,40 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from '../../../../../core/public';
+import React from 'react';
 import {
+  EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  EmbeddableInput,
   IEmbeddable,
-} from '../';
-import { SimpleSavedObject } from '../../../../../core/public';
+} from '../embeddable_plugin';
+import { SavedObjectsClientContract, SimpleSavedObject, I18nStart } from '../../../../core/public';
+import {
+  SavedObjectSaveModal,
+  showSaveModal,
+  OnSaveProps,
+  SaveResult,
+} from '../../../saved_objects/public';
 
+/**
+ * The attribute service is a shared, generic service that embeddables can use to provide the functionality
+ * required to fulfill the requirements of the ReferenceOrValueEmbeddable interface. The attribute_service
+ * can also be used as a higher level wrapper to transform an embeddable input shape that references a saved object
+ * into an embeddable input shape that contains that saved object's attributes by value.
+ */
 export class AttributeService<
   SavedObjectAttributes,
   ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput
 > {
-  constructor(private type: string, private savedObjectsClient: SavedObjectsClientContract) {}
+  constructor(
+    private type: string,
+    private savedObjectsClient: SavedObjectsClientContract,
+    private i18nContext: I18nStart['Context']
+  ) {}
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
-    if (isSavedObjectEmbeddableInput(input)) {
+    if (this.inputIsRefType(input)) {
       const savedObject: SimpleSavedObject<SavedObjectAttributes> = await this.savedObjectsClient.get<
         SavedObjectAttributes
       >(this.type, input.savedObjectId);
@@ -82,14 +98,40 @@ export class AttributeService<
     };
   };
 
-  getInputAsRefType = async (input: ValType | RefType): Promise<RefType> => {
+  getInputAsRefType = async (
+    input: ValType | RefType,
+    saveOptions?: { showSaveModal: boolean } | { title: string }
+  ): Promise<RefType> => {
     if (this.inputIsRefType(input)) {
       return input;
     }
-    const wrappedInput = await this.wrapAttributes(input.attributes, true);
-    return {
-      id: input.id,
-      ...wrappedInput,
-    } as RefType;
+
+    return new Promise<RefType>((resolve, reject) => {
+      const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
+        try {
+          const wrappedInput = (await this.wrapAttributes(input.attributes, true)) as RefType;
+          wrappedInput.title = props.newTitle;
+          resolve(wrappedInput);
+          return { id: wrappedInput.savedObjectId };
+        } catch (error) {
+          reject();
+          return { error };
+        }
+      };
+
+      if (saveOptions && (saveOptions as { showSaveModal: boolean }).showSaveModal) {
+        showSaveModal(
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => reject()}
+            title={input.title || ''}
+            showCopyOnSave={false}
+            objectType={this.type}
+            showDescription={false}
+          />,
+          this.i18nContext
+        );
+      }
+    });
   };
 }

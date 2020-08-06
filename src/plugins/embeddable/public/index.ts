@@ -28,7 +28,6 @@ export {
   ACTION_EDIT_PANEL,
   Adapters,
   AddPanelAction,
-  AttributeService,
   ReferenceOrValueEmbeddable,
   isReferenceOrValueEmbeddable,
   ChartActionContext,

@@ -58,6 +58,15 @@ import {
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
+import {
+  ACTION_ADD_BOOK_TO_LIBRARY,
+  createAddBookToLibraryAction,
+} from './book/add_book_to_library_action';
+import { DashboardStart } from '../../../src/plugins/dashboard/public';
+import {
+  ACTION_UNLINK_BOOK_FROM_LIBRARY,
+  createUnlinkBookFromLibraryAction,
+} from './book/unlink_book_from_library_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -66,6 +75,7 @@ export interface EmbeddableExamplesSetupDependencies {
 
 export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
+  dashboard: DashboardStart;
 }
 
 interface ExampleEmbeddableFactories {
@@ -86,6 +96,8 @@ export interface EmbeddableExamplesStart {
 declare module '../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
+    [ACTION_ADD_BOOK_TO_LIBRARY]: { embeddable: BookEmbeddable };
+    [ACTION_UNLINK_BOOK_FROM_LIBRARY]: { embeddable: BookEmbeddable };
   }
 }
 
@@ -144,17 +156,25 @@ export class EmbeddableExamplesPlugin
     this.exampleEmbeddableFactories.getBookEmbeddableFactory = deps.embeddable.registerEmbeddableFactory(
       BOOK_EMBEDDABLE,
       new BookEmbeddableFactoryDefinition(async () => ({
-        getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
+        getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
         openModal: (await core.getStartServices())[0].overlays.openModal,
       }))
     );
 
     const editBookAction = createEditBookAction(async () => ({
-      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
+      getAttributeService: (await core.getStartServices())[1].dashboard.getAttributeService,
       openModal: (await core.getStartServices())[0].overlays.openModal,
     }));
     deps.uiActions.registerAction(editBookAction);
     deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
+
+    const addBookToLibraryAction = createAddBookToLibraryAction();
+    deps.uiActions.registerAction(addBookToLibraryAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
+
+    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
+    deps.uiActions.registerAction(unlinkBookFromLibraryAction);
+    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
   }
 
   public start(
