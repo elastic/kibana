@@ -96,7 +96,7 @@ export interface UseSourceManager extends ManageSourcerer {
 }
 
 // DEFAULTS/INIT
-const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) => ({
+export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) => ({
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
@@ -216,6 +216,7 @@ export const useSourceManager = (): UseSourceManager => {
         setAvailableIndexPatterns(result);
         setIsIndexPatternsLoading(false);
       } catch (error) {
+        console.log('error in fetch titles', error);
         setIsIndexPatternsLoading(false);
       }
     }
@@ -280,7 +281,6 @@ export const useSourceManager = (): UseSourceManager => {
               },
             },
           });
-
           if (isSubscribed) {
             dispatch({
               type: 'SET_SOURCE',
@@ -310,6 +310,7 @@ export const useSourceManager = (): UseSourceManager => {
             });
           }
         } catch (error) {
+          console.log('ERROR!!!!', error);
           if (isSubscribed) {
             dispatch({
               type: 'SET_SOURCE',
