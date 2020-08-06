@@ -20,11 +20,11 @@ import { PHASE_NODE_ATTRS } from '../../../constants';
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
+import { NodeAttrsDetails } from './node_attrs_details';
 
 interface Props {
   phase: string;
   setPhaseData: (dataKey: string, value: any) => void;
-  showNodeDetailsFlyout: (nodeAttrs: any) => void;
   errors: any;
   phaseData: any;
   isShowingErrors: boolean;
@@ -48,7 +48,6 @@ const learnMoreLink = (
 export const NodeAllocation: React.FunctionComponent<Props> = ({
   phase,
   setPhaseData,
-  showNodeDetailsFlyout,
   errors,
   phaseData,
   isShowingErrors,
@@ -58,6 +57,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
     null
   );
+
   if (isLoading) {
     return (
       <Fragment>
@@ -68,7 +68,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
   }
 
   if (error) {
-    const { error: errorString, statusCode, message } = error;
+    const { statusCode, message } = error;
     return (
       <Fragment>
         <EuiCallOut
@@ -76,13 +76,13 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesLoadingFailedTitle"
-              defaultMessage="Unable to load node attributes."
+              defaultMessage="Unable to load node attributes"
             />
           }
           color="danger"
         >
           <p>
-            {statusCode}: {errorString}. {message}
+            {message} ({statusCode})
           </p>
           <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
             <FormattedMessage
@@ -165,7 +165,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
           data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
           flush="left"
           iconType="eye"
-          onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+          onClick={() => setSelectedNodeAttrsForDetails(phaseData[PHASE_NODE_ATTRS])}
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
@@ -175,6 +175,13 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
       ) : null}
       {learnMoreLink}
       <EuiSpacer size="m" />
+
+      {selectedNodeAttrsForDetails ? (
+        <NodeAttrsDetails
+          selectedNodeAttrs={selectedNodeAttrsForDetails}
+          close={() => setSelectedNodeAttrsForDetails(null)}
+        />
+      ) : null}
     </Fragment>
   );
 };

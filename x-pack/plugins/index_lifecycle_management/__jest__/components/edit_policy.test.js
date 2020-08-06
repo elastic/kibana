@@ -131,7 +131,7 @@ describe('edit policy', () => {
     store = indexLifecycleManagementStore();
     component = (
       <Provider store={store}>
-        <EditPolicy getUrlForApp={() => {}} history={{ push: () => {} }} />
+        <EditPolicy history={{ push: () => {} }} getUrlForApp={() => {}} />
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
