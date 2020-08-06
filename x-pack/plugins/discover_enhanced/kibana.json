@@ -5,7 +5,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["uiActions", "embeddable", "discover"],
-  "optionalPlugins": ["share", "kibanaLegacy"],
+  "optionalPlugins": ["share", "kibanaLegacy", "usageCollection"],
   "configPath": ["xpack", "discoverEnhanced"],
   "requiredBundles": ["kibanaUtils", "data"]
 }
