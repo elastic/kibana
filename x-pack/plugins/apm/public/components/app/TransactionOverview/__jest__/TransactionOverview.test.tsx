@@ -24,10 +24,8 @@ import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../../hooks/useFetcher';
 import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
-import { fromQuery } from '../../../shared/Links/url_helpers';
 import { disableConsoleWarning } from '../../../../utils/testHelpers';
-
-disableConsoleWarning('Warning: componentWillReceiveProps');
+import { fromQuery } from '../../../shared/Links/url_helpers';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -73,6 +71,16 @@ function setup({
 }
 
 describe('TransactionOverview', () => {
+  let consoleMock: jest.SpyInstance;
+
+  beforeAll(() => {
+    consoleMock = disableConsoleWarning('Warning: componentWillReceiveProps');
+  });
+
+  afterAll(() => {
+    consoleMock.mockRestore();
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
