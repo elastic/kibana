@@ -34,7 +34,6 @@ const FLEET_ENROLL_ROLE = 'fleet_enroll';
 let setupIngestStatus: Promise<void> | undefined;
 // default resolve & reject to guard against "undefined is not a function" errors
 let onSetupResolve = () => {};
-let onSetupReject = (error: Error) => {};
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
@@ -47,7 +46,6 @@ export async function setupIngestManager(
     // create the initial promise
     setupIngestStatus = new Promise((res, rej) => {
       onSetupResolve = res;
-      onSetupReject = rej;
     });
   }
   try {
@@ -124,14 +122,13 @@ export async function setupIngestManager(
     // if everything works, resolve/succeed
     onSetupResolve();
   } catch (error) {
-    // if anything errors, reject/fail
-    onSetupReject(error);
+    // reset the tracking promise to try again next time
+    setupIngestStatus = undefined;
+    // return the rejection so it can be dealt with now
+    return Promise.reject(error);
   }
 
-  // be sure to return the promise because it has the resolved/rejected status attached to it
-  // otherwise, we effectively return success every time even if there are errors
-  // because `return undefined` -> `Promise.resolve(undefined)` in an `async` function
-  return setupIngestStatus;
+
 }
 
 export async function setupFleet(
