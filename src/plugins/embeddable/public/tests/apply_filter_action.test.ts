@@ -30,7 +30,6 @@ import {
   FilterableContainerFactory,
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
-// eslint-disable-next-line
 import { esFilters } from '../../../data/public';
 import { applyFilterTrigger } from '../../../ui_actions/public';
 

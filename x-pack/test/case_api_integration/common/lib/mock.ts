@@ -36,6 +36,7 @@ export const postCaseResp = (id: string): Partial<CaseResponse> => ({
 export const removeServerGeneratedPropertiesFromCase = (
   config: Partial<CaseResponse>
 ): Partial<CaseResponse> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { closed_at, created_at, updated_at, version, ...rest } = config;
   return rest;
 };

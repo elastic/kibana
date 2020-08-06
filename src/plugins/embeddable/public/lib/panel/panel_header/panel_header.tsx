@@ -135,6 +135,7 @@ export function PanelHeader({
   const showTitle = !isViewMode || (title && !hidePanelTitles) || viewDescription !== '';
   const showPanelBar = badges.length > 0 || showTitle;
   const classes = classNames('embPanel__header', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
 
