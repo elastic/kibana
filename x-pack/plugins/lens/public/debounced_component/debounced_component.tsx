@@ -17,13 +17,11 @@ export function debouncedComponent<TProps>(component: FunctionComponent<TProps>,
 
   return (props: TProps) => {
     const [cachedProps, setCachedProps] = useState(props);
-    const debouncePropsChange = debounce(setCachedProps, delay);
-    const delayRender = useMemo(() => debouncePropsChange, []);
+    const debouncePropsChange = useMemo(() => debounce(setCachedProps, delay), [setCachedProps]);
 
     // cancel debounced prop change if component has been unmounted in the meantime
-    useEffect(() => () => debouncePropsChange.cancel(), []);
-
-    delayRender(props);
+    useEffect(() => () => debouncePropsChange.cancel(), [debouncePropsChange]);
+    debouncePropsChange(props);
 
     return React.createElement(MemoizedComponent, cachedProps);
   };

@@ -20,7 +20,6 @@ import url from 'url';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
 
