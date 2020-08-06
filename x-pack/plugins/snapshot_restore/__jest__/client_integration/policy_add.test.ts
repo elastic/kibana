@@ -24,7 +24,11 @@ jest.mock('ui/i18n', () => {
 
 // mock for EuiSelectable's virtualization
 jest.mock('react-virtualized-auto-sizer', () => {
-  return ({ children }: { children: ({ width: number, height: number }) => ReactElement }) => children({ width: 100, height: 500 });
+  return ({
+    children,
+  }: {
+    children: (dimensions: { width: number; height: number }) => ReactElement;
+  }) => children({ width: 100, height: 500 });
 });
 
 const POLICY_NAME = 'my_policy';
