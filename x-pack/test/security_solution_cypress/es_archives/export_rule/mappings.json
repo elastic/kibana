@@ -38,7 +38,7 @@
           "infrastructure-ui-source": "2b2809653635caf490c93f090502d04c",
           "ingest-agent-policies": "9326f99c977fd2ef5ab24b6336a0675c",
           "ingest-outputs": "87da6a0e27b3a61ad389fb7a7e2da293",
-          "ingest-package-configs": "48e8bd97e488008e21c0b5a2367b83ad",
+          "ingest-package-policies": "48e8bd97e488008e21c0b5a2367b83ad",
           "ingest_manager_settings": "c5b0749b4ab03c582efd4c14cb8f132c",
           "inventory-view": "88fc7e12fd1b45b6f0787323ce4f18d2",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
@@ -1926,7 +1926,7 @@
             }
           }
         },
-        "ingest-package-configs": {
+        "ingest-package-policies": {
           "properties": {
             "config_id": {
               "type": "keyword"
