@@ -13,6 +13,7 @@ jest.mock('../components/vector_style_editor', () => ({
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { Feature, Point } from 'geojson';
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import { COLOR_MAP_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
@@ -21,18 +22,12 @@ import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IField } from '../../../fields/field';
 
-const defaultMockStyle = new MockStyle();
-
-const makeProperty = (
-  options: ColorDynamicOptions,
-  mockStyle?: MockStyle = defaultMockStyle,
-  field?: IField = mockField
-) => {
+const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
   return new DynamicColorProperty(
     options,
     VECTOR_STYLES.LINE_COLOR,
-    field,
-    (new MockLayer(mockStyle) as unknown) as IVectorLayer,
+    field ? field : mockField,
+    (new MockLayer(style ? style : new MockStyle()) as unknown) as IVectorLayer,
     () => {
       return (value: string | number | undefined) => value + '_format';
     }
@@ -168,14 +163,18 @@ describe('categorical', () => {
   });
 });
 
-function makeFeatures(foobarPropValues) {
-  return foobarPropValues.map((value) => {
+function makeFeatures(foobarPropValues: string[]) {
+  return foobarPropValues.map((value: string) => {
     return {
       type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [-10, 0],
+      } as Point,
       properties: {
         foobar: value,
       },
-    };
+    } as Feature;
   });
 }
 
@@ -228,7 +227,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
 });
 
 describe('supportsFieldMeta', () => {
-  test('should support it when field does for ordinals', () => {
+  test('should support fieldMeta when ordinal field supports fieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions,
@@ -238,7 +237,7 @@ describe('supportsFieldMeta', () => {
     expect(styleProp.supportsFieldMeta()).toEqual(true);
   });
 
-  test('should support it when field does for categories', () => {
+  test('should support fieldMeta when categorical field supports fieldMeta', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.CATEGORICAL,
       fieldMetaOptions,
@@ -248,7 +247,7 @@ describe('supportsFieldMeta', () => {
     expect(styleProp.supportsFieldMeta()).toEqual(true);
   });
 
-  test('should not support it when field does not', () => {
+  test('should not support fieldMeta when field does not support fieldMeta', () => {
     const field = Object.create(mockField);
     field.supportsFieldMeta = function () {
       return false;
@@ -263,17 +262,26 @@ describe('supportsFieldMeta', () => {
     expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
 
-  test('should not support it when field config not complete', () => {
+  test('should not support fieldMeta when field is not provided', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
       fieldMetaOptions,
     };
-    const styleProp = makeProperty(dynamicStyleOptions, undefined, null);
+
+    const styleProp = new DynamicColorProperty(
+      dynamicStyleOptions,
+      VECTOR_STYLES.LINE_COLOR,
+      null,
+      (new MockLayer(new MockStyle()) as unknown) as IVectorLayer,
+      () => {
+        return (value: string | number | undefined) => value + '_format';
+      }
+    );
 
     expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
 
-  test('should not support it when using custom ramp for ordinals', () => {
+  test('should not support fieldMeta when using custom ramp for ordinal field', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.ORDINAL,
       useCustomColorRamp: true,
@@ -285,7 +293,7 @@ describe('supportsFieldMeta', () => {
     expect(styleProp.supportsFieldMeta()).toEqual(false);
   });
 
-  test('should not support it when using custom palette for categories', () => {
+  test('should not support fieldMeta when using custom palette for categorical field', () => {
     const dynamicStyleOptions = {
       type: COLOR_MAP_TYPE.CATEGORICAL,
       useCustomColorPalette: true,
@@ -315,6 +323,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         field: {},
         fieldMetaOptions,
       };
+      // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBeNull();
     });
@@ -456,7 +465,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       const dynamicStyleOptions = {
         type: COLOR_MAP_TYPE.CATEGORICAL,
         field: {},
+        fieldMetaOptions,
       };
+      // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
       expect(colorProperty._getMbColor()).toBeNull();
     });
@@ -465,6 +476,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       test('should return null when color palette is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
+          fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toBeNull();
@@ -474,6 +486,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.CATEGORICAL,
           colorCategory: 'palette_0',
+          fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([

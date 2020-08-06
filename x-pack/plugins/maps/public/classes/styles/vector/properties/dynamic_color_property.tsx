@@ -123,7 +123,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         },
         []
       );
-      const firstStopValue = colorStops[0];
+      const firstStopValue = colorStops[0] as number;
       const lessThanFirstStopValue = firstStopValue - 1;
       return [
         'step',
@@ -138,7 +138,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       }
 
       const colorStops = getOrdinalMbColorRampStops(
-        this._options.color,
+        this._options.color ? this._options.color : null,
         rangeFieldMeta.min,
         rangeFieldMeta.max
       );
@@ -293,8 +293,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
     const { stops, defaultColor } = this._getColorStops();
     const breaks = [];
-    stops.forEach(({ stop, color }: OrdinalColorStop) => {
-      if (stop) {
+    stops.forEach(({ stop, color }: { stop: number | null; color: string }) => {
+      if (stop !== null) {
         breaks.push({
           color,
           symbolId,

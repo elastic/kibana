@@ -11,7 +11,7 @@ import { VectorIcon } from './vector_icon';
 
 interface Props {
   styleName: VECTOR_STYLES;
-  label: ReactElement<any> | string;
+  label: ReactElement<any> | string | number;
   color: string;
   isLinesOnly: boolean;
   isPointsOnly: boolean;
