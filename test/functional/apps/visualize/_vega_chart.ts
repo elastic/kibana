@@ -165,20 +165,39 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         });
 
+        it('should contain  data on "Signal Values" tab', async () => {
+          await vegaDebugInspectorView.openVegaDebugInspectorView();
+          await vegaDebugInspectorView.navigateToSignalViewerTab();
+
+          const { rows, columns } = await vegaDebugInspectorView.getGridTableData();
+
+          expect(columns.join(', ')).to.be('Signal, Value');
+          expect(rows.length).to.be.greaterThan(0);
+          expect(rows[0].length).to.be(2);
+        });
+
+        it('should contain data on "Signal Values" tab', async () => {
+          await vegaDebugInspectorView.openVegaDebugInspectorView();
+          await vegaDebugInspectorView.navigateToDataViewerTab();
+
+          const { rows, columns } = await vegaDebugInspectorView.getGridTableData();
+
+          expect(columns.length).to.be.greaterThan(0);
+          expect(rows.length).to.be.greaterThan(0);
+        });
+
         it('should be able to copy vega spec to clipboard', async () => {
           await vegaDebugInspectorView.openVegaDebugInspectorView();
-          const openSpecViewerButton = await vegaDebugInspectorView.getOpenSpecViewerButton();
-
-          await openSpecViewerButton.click();
+          await vegaDebugInspectorView.navigateToSpecViewerTab();
 
           const copyCopyToClipboardButton = await vegaDebugInspectorView.getCopyClipboardButton();
 
           await copyCopyToClipboardButton.click();
 
-          const clipboardValue = await browser.getClipboardValue();
-
           expect(
-            clipboardValue.includes('"$schema": "https://vega.github.io/schema/vega-lite/')
+            (await browser.getClipboardValue()).includes(
+              '"$schema": "https://vega.github.io/schema/vega-lite/'
+            )
           ).to.be(true);
         });
       });

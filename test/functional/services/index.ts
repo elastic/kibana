@@ -47,6 +47,7 @@ import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
+import { DataGridProvider } from './dagta_grid';
 import {
   PieChartProvider,
   ElasticChartProvider,
@@ -76,6 +77,7 @@ export const services = {
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
+  dataGrid: DataGridProvider,
   embedding: EmbeddingProvider,
   renderable: RenderableProvider,
   table: TableProvider,

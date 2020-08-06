@@ -21,6 +21,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function VegaDebugInspectorViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
+  const dataGrid = getService('dataGrid');
 
   class VegaDebugInspectorView {
     async openVegaDebugInspectorView() {
@@ -41,6 +42,25 @@ export function VegaDebugInspectorViewProvider({ getService }: FtrProviderContex
 
     public getCopyClipboardButton() {
       return testSubjects.find('vegaDataInspectorCopyClipboardButton');
+    }
+
+    public getGridTableData() {
+      return dataGrid.getDataGridTableData();
+    }
+
+    public async navigateToDataViewerTab() {
+      const dataViewerButton = await this.getOpenDataViewerButton();
+      await dataViewerButton.click();
+    }
+
+    public async navigateToSignalViewerTab() {
+      const signalViewerButton = await this.getOpenSignalViewerButton();
+      await signalViewerButton.click();
+    }
+
+    public async navigateToSpecViewerTab() {
+      const specViewerButton = await this.getOpenSpecViewerButton();
+      await specViewerButton.click();
     }
   }
 
