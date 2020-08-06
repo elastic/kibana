@@ -6,8 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import {
   _versionOrUndefined,
   created_at,

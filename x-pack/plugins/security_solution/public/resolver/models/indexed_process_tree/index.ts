@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-shadow */
-
 import { uniquePidForProcess, uniqueParentPidForProcess, orderByTime } from '../process_event';
 import { IndexedProcessTree } from '../../types';
 import { ResolverEvent } from '../../../../common/endpoint/types';
