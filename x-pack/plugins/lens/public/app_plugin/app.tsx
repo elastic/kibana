@@ -163,7 +163,13 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+  }, [
+    data.query.filterManager,
+    data.query.timefilter.timefilter,
+    core.uiSettings,
+    data.query,
+    history,
+  ]);
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -210,57 +216,61 @@ export function App({
     ]);
   }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
 
-  useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState((s) => ({ ...s, isLoading: true }));
-      docStorage
-        .load(docId)
-        .then((doc) => {
-          getAllIndexPatterns(
-            doc.state.datasourceMetaData.filterableIndexPatterns,
-            data.indexPatterns,
-            core.notifications
-          )
-            .then((indexPatterns) => {
-              // Don't overwrite any pinned filters
-              data.query.filterManager.setAppFilters(doc.state.filters);
-              setState((s) => ({
-                ...s,
-                isLoading: false,
-                persistedDoc: doc,
-                lastKnownDoc: doc,
-                query: doc.state.query,
-                indexPatternsForTopNav: indexPatterns,
-              }));
-            })
-            .catch(() => {
-              setState((s) => ({ ...s, isLoading: false }));
+  useEffect(
+    () => {
+      if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
+        setState((s) => ({ ...s, isLoading: true }));
+        docStorage
+          .load(docId)
+          .then((doc) => {
+            getAllIndexPatterns(
+              doc.state.datasourceMetaData.filterableIndexPatterns,
+              data.indexPatterns,
+              core.notifications
+            )
+              .then((indexPatterns) => {
+                // Don't overwrite any pinned filters
+                data.query.filterManager.setAppFilters(doc.state.filters);
+                setState((s) => ({
+                  ...s,
+                  isLoading: false,
+                  persistedDoc: doc,
+                  lastKnownDoc: doc,
+                  query: doc.state.query,
+                  indexPatternsForTopNav: indexPatterns,
+                }));
+              })
+              .catch(() => {
+                setState((s) => ({ ...s, isLoading: false }));
 
-              redirectTo();
-            });
-        })
-        .catch(() => {
-          setState((s) => ({ ...s, isLoading: false }));
+                redirectTo();
+              });
+          })
+          .catch(() => {
+            setState((s) => ({ ...s, isLoading: false }));
 
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
+            core.notifications.toasts.addDanger(
+              i18n.translate('xpack.lens.app.docLoadingError', {
+                defaultMessage: 'Error loading saved document',
+              })
+            );
 
-          redirectTo();
-        });
-    }
-  }, [
-    core.notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    docId,
-    // TODO: These dependencies are changing too often
-    // docStorage,
-    // redirectTo,
-    // state.persistedDoc,
-  ]);
+            redirectTo();
+          });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      core.notifications,
+      data.indexPatterns,
+      data.query.filterManager,
+      docId,
+      // TODO: These dependencies are changing too often
+      // docStorage,
+      // redirectTo,
+      // state.persistedDoc,
+    ]
+  );
 
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {

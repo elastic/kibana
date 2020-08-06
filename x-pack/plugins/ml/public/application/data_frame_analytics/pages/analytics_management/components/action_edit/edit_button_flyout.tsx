@@ -133,7 +133,7 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
         onClose={closeFlyout}
         hideCloseButton
         aria-labelledby="analyticsEditFlyoutTitle"
-        data-test-subj="analyticsEditFlyout"
+        data-test-subj="mlAnalyticsEditFlyout"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
@@ -297,7 +297,7 @@ export const EditButtonFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                data-test-subj="analyticsEditFlyoutUpdateButton"
+                data-test-subj="mlAnalyticsEditFlyoutUpdateButton"
                 onClick={onSubmit}
                 fill
                 isDisabled={updateButtonDisabled}
