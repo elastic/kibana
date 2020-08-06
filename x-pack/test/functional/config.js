@@ -357,7 +357,7 @@ export default async function ({ readConfigFile }) {
 
         index_management_user: {
           elasticsearch: {
-            cluster: ['monitor', 'manage_templates'],
+            cluster: ['monitor', 'manage_index_templates'],
             indices: [
               {
                 names: ['geo_shapes*'],
