@@ -94,7 +94,7 @@ const endpointListApiPathHandlerMocks = ({
       };
     },
 
-    // host list
+    // endpoint list
     '/api/endpoint/metadata': (): HostResultList => {
       return {
         hosts: endpointsResults,
@@ -104,7 +104,7 @@ const endpointListApiPathHandlerMocks = ({
       };
     },
 
-    // Do policies referenced in host list exist
+    // Do policies referenced in endpoint list exist
     // just returns 1 single agent config that includes all of the packageConfig IDs provided
     [INGEST_API_AGENT_CONFIGS]: (): GetAgentConfigsResponse => {
       const agentConfig = generator.generateAgentConfig();
@@ -137,7 +137,7 @@ const endpointListApiPathHandlerMocks = ({
     },
   };
 
-  // Build a GET route handler for each host details based on the list of Hosts passed on input
+  // Build a GET route handler for each endpoint details based on the list of Endpoints passed on input
   if (endpointsResults) {
     endpointsResults.forEach((host) => {
       // @ts-expect-error
@@ -149,7 +149,7 @@ const endpointListApiPathHandlerMocks = ({
 };
 
 /**
- * Sets up mock impelementations in support of the Hosts list view
+ * Sets up mock impelementations in support of the Endpoints list view
  *
  * @param mockedHttpService
  * @param endpointsResults

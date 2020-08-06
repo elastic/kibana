@@ -90,34 +90,38 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('updates the details flyout when a new hostname is selected from the list', async () => {
-          // display flyout for the first host in the list
+          // display flyout for the first endpoint in the list
           await (await testSubjects.findAll('hostnameCellLink'))[0].click();
           await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
-          const hostDetailTitle0 = await testSubjects.getVisibleText('endpointDetailsFlyoutTitle');
-          // select the 2nd host in the host list
+          const endpointDetailTitle0 = await testSubjects.getVisibleText(
+            'endpointDetailsFlyoutTitle'
+          );
+          // select the 2nd endpoint in the endpoint list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
           await pageObjects.endpoint.waitForVisibleTextToChange(
             'endpointDetailsFlyoutTitle',
-            hostDetailTitle0
+            endpointDetailTitle0
           );
-          const hostDetailTitle1 = await testSubjects.getVisibleText('endpointDetailsFlyoutTitle');
-          expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
+          const endpointDetailTitle1 = await testSubjects.getVisibleText(
+            'endpointDetailsFlyoutTitle'
+          );
+          expect(endpointDetailTitle1).to.not.eql(endpointDetailTitle0);
         });
 
         it('has the same flyout info when the same hostname is selected', async () => {
-          // display flyout for the first host in the list
+          // display flyout for the first endpoint in the list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
           await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
-          const hostDetailTitleInitial = await testSubjects.getVisibleText(
+          const endpointDetailTitleInitial = await testSubjects.getVisibleText(
             'endpointDetailsFlyoutTitle'
           );
-          // select the same host in the host list
+          // select the same endpoint in the endpoint list
           await (await testSubjects.findAll('hostnameCellLink'))[1].click();
           await sleep(500); // give page time to refresh and verify it did not change
-          const hostDetailTitleNew = await testSubjects.getVisibleText(
+          const endpointDetailTitleNew = await testSubjects.getVisibleText(
             'endpointDetailsFlyoutTitle'
           );
-          expect(hostDetailTitleNew).to.equal(hostDetailTitleInitial);
+          expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
 
         // The integration does not work properly yet.  Skipping this test for now.
@@ -129,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
-      describe.skip('has a url with a host id', () => {
+      describe.skip("has a url with an endpoint host's id", () => {
         before(async () => {
           await pageObjects.endpoint.navigateToEndpointList(
             'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'

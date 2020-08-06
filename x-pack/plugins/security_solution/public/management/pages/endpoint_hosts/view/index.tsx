@@ -84,12 +84,12 @@ export const EndpointList = () => {
     listLoading: loading,
     listError,
     uiQueryParams: queryParams,
-    hasSelectedHost,
+    hasSelectedEndpoint: hasSelectedHost,
     policyItems,
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
-    hostsExist,
+    endpointsExist: hostsExist,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 

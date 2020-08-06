@@ -30,7 +30,7 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
-import { EndpointPolicyLink } from '../components/host_policy_link';
+import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;

@@ -23,14 +23,14 @@ import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath } from '../../../common/routing';
 
-describe('host list middleware', () => {
+describe('endpoint list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  type HostListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
-  let store: HostListStore;
-  let getState: HostListStore['getState'];
-  let dispatch: HostListStore['dispatch'];
+  type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;
+  let store: EndpointListStore;
+  let getState: EndpointListStore['getState'];
+  let dispatch: EndpointListStore['dispatch'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let actionSpyMiddleware;
 

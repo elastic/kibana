@@ -50,4 +50,4 @@ export const EndpointPolicyLink = memo<
   );
 });
 
-EndpointPolicyLink.displayName = 'HostPolicyLink';
+EndpointPolicyLink.displayName = 'EndpointPolicyLink';

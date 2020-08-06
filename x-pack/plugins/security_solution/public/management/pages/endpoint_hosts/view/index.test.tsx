@@ -340,7 +340,7 @@ describe('when on the list page', () => {
       });
 
       reactTestingLibrary.act(() => {
-        history.push('/endpoints?selected_host=1');
+        history.push('/endpoints?selected_endpoint=1');
       });
 
       renderAndWaitForData = async () => {
@@ -387,7 +387,7 @@ describe('when on the list page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '/endpoints?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=policy_response'
       );
     });
 
@@ -400,7 +400,7 @@ describe('when on the list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.search).toEqual(
-        '?page_index=0&page_size=10&selected_host=1&show=policy_response'
+        '?page_index=0&page_size=10&selected_endpoint=1&show=policy_response'
       );
     });
 
@@ -602,7 +602,7 @@ describe('when on the list page', () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
         expect(subHeaderBackLink.getAttribute('href')).toBe(
-          '/endpoints?page_index=0&page_size=10&selected_host=1'
+          '/endpoints?page_index=0&page_size=10&selected_endpoint=1'
         );
       });
 
@@ -614,7 +614,7 @@ describe('when on the list page', () => {
         });
         const changedUrlAction = await userChangedUrlChecker;
         expect(changedUrlAction.payload.search).toEqual(
-          '?page_index=0&page_size=10&selected_host=1'
+          '?page_index=0&page_size=10&selected_endpoint=1'
         );
       });
 

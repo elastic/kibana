@@ -31,7 +31,7 @@ const querystringStringify: <ExpectedType extends object, ArgType>(
   params: Exact<ExpectedType, ArgType>
 ) => string = querystring.stringify;
 
-/** Make `selected_host` required */
+/** Make `selected_endpoint` required */
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
   Required<Pick<EndpointIndexUIQueryParams, 'selected_endpoint'>>;
 

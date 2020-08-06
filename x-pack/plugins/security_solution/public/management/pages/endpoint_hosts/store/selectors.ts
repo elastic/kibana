@@ -111,7 +111,7 @@ export const policyResponseLoading = (state: Immutable<EndpointState>): boolean 
 
 export const policyResponseError = (state: Immutable<EndpointState>) => state.policyResponseError;
 
-export const isOnHostPage = (state: Immutable<EndpointState>) => {
+export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   return (
     matchPath(state.location?.pathname ?? '', {
       path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
@@ -171,10 +171,10 @@ export const uiQueryParams: (
   }
 );
 
-export const hasSelectedHost: (state: Immutable<EndpointState>) => boolean = createSelector(
+export const hasSelectedEndpoint: (state: Immutable<EndpointState>) => boolean = createSelector(
   uiQueryParams,
-  ({ selected_endpoint: selectedHost }) => {
-    return selectedHost !== undefined;
+  ({ selected_endpoint: selectedEndpoint }) => {
+    return selectedEndpoint !== undefined;
   }
 );
 
@@ -197,7 +197,7 @@ export const policyResponseStatus: (state: Immutable<EndpointState>) => string =
 );
 
 /**
- * returns the list of known non-existing polices that may have been in the Host API response.
+ * returns the list of known non-existing polices that may have been in the Endpoint API response.
  * @param state
  */
 export const nonExistingPolicies: (
@@ -205,7 +205,8 @@ export const nonExistingPolicies: (
 ) => Immutable<EndpointState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
 
 /**
- * Return boolean that indicates whether hosts exist
+ * Return boolean that indicates whether endpoints exist
  * @param state
  */
-export const hostsExist: (state: Immutable<EndpointState>) => boolean = (state) => state.hostsExist;
+export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (state) =>
+  state.endpointsExist;

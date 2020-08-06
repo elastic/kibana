@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isOnHostPage, hasSelectedHost } from './selectors';
+import { isOnEndpointPage, hasSelectedEndpoint } from './selectors';
 import { EndpointState } from '../types';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
@@ -29,7 +29,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
-  hostsExist: true,
+  endpointsExist: true,
 };
 
 /* eslint-disable-next-line complexity */
@@ -129,19 +129,19 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
   } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
-      hostsExist: action.payload,
+      endpointsExist: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<EndpointState> = {
       ...state,
       location: action.payload,
     };
-    const isCurrentlyOnListPage = isOnHostPage(newState) && !hasSelectedHost(newState);
-    const wasPreviouslyOnListPage = isOnHostPage(state) && !hasSelectedHost(state);
-    const isCurrentlyOnDetailsPage = isOnHostPage(newState) && hasSelectedHost(newState);
-    const wasPreviouslyOnDetailsPage = isOnHostPage(state) && hasSelectedHost(state);
+    const isCurrentlyOnListPage = isOnEndpointPage(newState) && !hasSelectedEndpoint(newState);
+    const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
+    const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
+    const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
 
-    // if on the host list page for the first time, return new location and load list
+    // if on the endpoint list page for the first time, return new location and load list
     if (isCurrentlyOnListPage) {
       if (!wasPreviouslyOnListPage) {
         return {
@@ -154,7 +154,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
-      // if previous page was the list or another host details page, load host details only
+      // if previous page was the list or another endpoint details page, load endpoint details only
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
@@ -166,7 +166,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
           policyResponseError: undefined,
         };
       } else {
-        // if previous page was not host list or host details, load both list and details
+        // if previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
           location: action.payload,
@@ -180,14 +180,14 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
         };
       }
     }
-    // otherwise we are not on a host list or details page
+    // otherwise we are not on a endpoint list or details page
     return {
       ...state,
       location: action.payload,
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
-      hostsExist: true,
+      endpointsExist: true,
     };
   }
   return state;

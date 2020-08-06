@@ -46,15 +46,18 @@ export const EndpointDetailsFlyout = memo(() => {
   const history = useHistory();
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
-  const { selected_endpoint: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
+  const {
+    selected_endpoint: selectedEndpoint,
+    ...queryParamsWithoutSelectedEndpoint
+  } = queryParams;
   const details = useEndpointSelector(detailsData);
   const loading = useEndpointSelector(detailsLoading);
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
 
   const handleFlyoutClose = useCallback(() => {
-    history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
-  }, [history, queryParamsWithoutSelectedHost]);
+    history.push(urlFromQueryParams(queryParamsWithoutSelectedEndpoint));
+  }, [history, queryParamsWithoutSelectedEndpoint]);
 
   useEffect(() => {
     if (error !== undefined) {
