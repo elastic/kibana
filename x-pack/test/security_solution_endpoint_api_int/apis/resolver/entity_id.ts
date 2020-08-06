@@ -16,7 +16,7 @@ import {
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 import { InsertedEvents } from '../../services/resolver';
 
-export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
   const generator = new EndpointDocGenerator('resolver');

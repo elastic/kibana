@@ -37,6 +37,7 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  * @param {Object} kibana The Kibana Usage stats
  */
 export function handleLocalStats(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats,

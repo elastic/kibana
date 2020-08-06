@@ -60,6 +60,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       _meta,
       _routing,
       dynamic,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
