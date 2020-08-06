@@ -357,70 +357,6 @@ describe('Options', () => {
         await expect(result).resolves.toHaveProperty('status', 408);
       });
 
-      it('should timeout if PUT payload sending is too slow', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.put(
-          {
-            options: {
-              body: {
-                accepts: ['application/json'],
-              },
-              timeout: { payload: 100, idleSocket: 120000 },
-            },
-            path: '/a',
-            validate: false,
-          },
-          async (context, req, res) => {
-            return res.ok({});
-          }
-        );
-        await server.start();
-
-        // start the request
-        const request = supertest(innerServer.listener)
-          .put('/a')
-          .set('Content-Type', 'application/json')
-          .set('Transfer-Encoding', 'chunked');
-
-        const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
-
-        await expect(result).resolves.toHaveProperty('status', 408);
-      });
-
-      it('should timeout if DELETE payload sending is too slow', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.delete(
-          {
-            options: {
-              body: {
-                accepts: ['application/json'],
-              },
-              timeout: { payload: 100, idleSocket: 120000 },
-            },
-            path: '/a',
-            validate: false,
-          },
-          async (context, req, res) => {
-            return res.ok({});
-          }
-        );
-        await server.start();
-
-        // start the request
-        const request = supertest(innerServer.listener)
-          .delete('/a')
-          .set('Content-Type', 'application/json')
-          .set('Transfer-Encoding', 'chunked');
-
-        const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
-
-        await expect(result).resolves.toHaveProperty('status', 408);
-      });
-
       it('should not timeout if POST payload sending is quick', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -438,53 +374,6 @@ describe('Options', () => {
         // start the request
         const request = supertest(innerServer.listener)
           .post('/a')
-          .set('Content-Type', 'application/json')
-          .set('Transfer-Encoding', 'chunked');
-
-        const result = writeBodyCharAtATime(request, '{}', 10);
-
-        await expect(result).resolves.toHaveProperty('status', 200);
-      });
-
-      it('should not timeout if PUT payload sending is quick', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.put(
-          {
-            path: '/a',
-            validate: false,
-            options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
-          },
-          async (context, req, res) => res.ok({})
-        );
-        await server.start();
-
-        const request = supertest(innerServer.listener)
-          .put('/a')
-          .set('Content-Type', 'application/json')
-          .set('Transfer-Encoding', 'chunked');
-
-        const result = writeBodyCharAtATime(request, '{}', 10);
-
-        await expect(result).resolves.toHaveProperty('status', 200);
-      });
-
-      it('should not timeout if DELETE payload sending is quick', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
-        const router = createRouter('/');
-
-        router.delete(
-          {
-            path: '/a',
-            validate: false,
-            options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
-          },
-          async (context, req, res) => res.ok({})
-        );
-        await server.start();
-        const request = supertest(innerServer.listener)
-          .delete('/a')
           .set('Content-Type', 'application/json')
           .set('Transfer-Encoding', 'chunked');
 
