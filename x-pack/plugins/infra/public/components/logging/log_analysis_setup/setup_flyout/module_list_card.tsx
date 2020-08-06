@@ -14,6 +14,7 @@ import { getOverallAnomalyExplorerLinkDescriptor } from '../../log_analysis_resu
 
 export const LogAnalysisModuleListCard: React.FC<{
   jobId: string;
+  timeRange: { startTime: string; endTime: string };
   hasSetupCapabilities: boolean;
   moduleDescription: string;
   moduleName: string;
@@ -21,6 +22,7 @@ export const LogAnalysisModuleListCard: React.FC<{
   onViewSetup: () => void;
 }> = ({
   jobId,
+  timeRange,
   hasSetupCapabilities,
   moduleDescription,
   moduleName,
@@ -34,12 +36,7 @@ export const LogAnalysisModuleListCard: React.FC<{
       <EuiIcon color="secondary" size="xxl" type="check" />
     );
 
-  const viewInMlLinkProps = useLinkProps(
-    getOverallAnomalyExplorerLinkDescriptor(jobId, {
-      endTime: Date.now(),
-      startTime: Date.now() - 86400000 * 14,
-    })
-  );
+  const viewInMlLinkProps = useLinkProps(getOverallAnomalyExplorerLinkDescriptor(jobId, timeRange));
 
   const moduleSetupButton =
     moduleStatus.type === 'required' ? (
