@@ -6,11 +6,11 @@
 
 import {
   composeModuleAndInstalledJobs,
-  createSiemJobs,
+  createSecurityJobs,
   getAugmentedFields,
   getInstalledJobs,
   getModuleJobs,
-  moduleToSiemJob,
+  moduleToSecurityJob,
 } from './use_siem_jobs_helpers';
 import {
   checkRecognizerSuccess,
@@ -20,15 +20,15 @@ import {
 
 // TODO: Expand test coverage
 
-describe('useSiemJobsHelpers', () => {
-  describe('moduleToSiemJob', () => {
-    test('correctly converts module to SiemJob', () => {
-      const siemJob = moduleToSiemJob(
+describe('useSecurityJobsHelpers', () => {
+  describe('moduleToSecurityJob', () => {
+    test('correctly converts module to SecurityJob', () => {
+      const securityJob = moduleToSecurityJob(
         mockGetModuleResponse[0],
         mockGetModuleResponse[0].jobs[0],
         false
       );
-      expect(siemJob).toEqual({
+      expect(securityJob).toEqual({
         datafeedId: '',
         datafeedIndices: [],
         datafeedState: '',
@@ -86,19 +86,19 @@ describe('useSiemJobsHelpers', () => {
         const installedJobs = getInstalledJobs(mockJobsSummaryResponse, moduleJobs, [
           'siem_auditbeat',
         ]);
-        const siemJobs = composeModuleAndInstalledJobs(installedJobs, moduleJobs);
-        expect(siemJobs.length).toEqual(6);
+        const securityJobs = composeModuleAndInstalledJobs(installedJobs, moduleJobs);
+        expect(securityJobs.length).toEqual(6);
       });
     });
 
-    describe('createSiemJobs', () => {
+    describe('createSecurityJobs', () => {
       test('returns correct number of jobs when creating jobs with successful responses', () => {
-        const siemJobs = createSiemJobs(
+        const securityJobs = createSecurityJobs(
           mockJobsSummaryResponse,
           mockGetModuleResponse,
           checkRecognizerSuccess
         );
-        expect(siemJobs.length).toEqual(6);
+        expect(securityJobs.length).toEqual(6);
       });
     });
   });

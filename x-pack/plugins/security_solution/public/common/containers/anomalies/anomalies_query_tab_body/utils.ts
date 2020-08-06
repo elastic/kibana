@@ -14,12 +14,12 @@ import { FlowTarget } from '../../../../graphql/types';
 export const getAnomaliesFilterQuery = (
   filterQuery: string | ESTermQuery | undefined,
   anomaliesFilterQuery: object = {},
-  siemJobs: JobSummary[] = [],
+  securityJobs: JobSummary[] = [],
   anomalyScore: number,
   flowTarget?: FlowTarget,
   ip?: string
 ): string => {
-  const siemJobIds = siemJobs
+  const securityJobIds = securityJobs
     .map((job) => job.id)
     .map((jobId) => ({
       match_phrase: {
@@ -37,7 +37,7 @@ export const getAnomaliesFilterQuery = (
         filter: [
           {
             bool: {
-              should: siemJobIds,
+              should: securityJobIds,
               minimum_should_match: 1,
             },
           },

@@ -10,7 +10,7 @@ import {
   Module,
   RecognizerModule,
   SetupMlResponse,
-  SiemJob,
+  SecurityJob,
   StartDatafeedResponse,
   StopDatafeedResponse,
 } from '../types';
@@ -491,7 +491,7 @@ export const mockStopDatafeedsSuccess: StopDatafeedResponse = {
   'datafeed-linux_anomalous_network_service': { stopped: true },
 };
 
-export const mockSiemJobs: SiemJob[] = [
+export const mockSecurityJobs: SecurityJob[] = [
   {
     id: 'linux_anomalous_network_activity_ecs',
     description:

@@ -113,7 +113,7 @@ export interface CustomURL {
  * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and JobSummary
  * that includes necessary metadata like moduleName, defaultIndexPattern, etc.
  */
-export interface SiemJob extends JobSummary {
+export interface SecurityJob extends JobSummary {
   moduleId: string;
   defaultIndexPattern: string;
   isCompatible: boolean;
@@ -121,7 +121,7 @@ export interface SiemJob extends JobSummary {
   isElasticJob: boolean;
 }
 
-export interface AugmentedSiemJobFields {
+export interface AugmentedSecurityJobFields {
   moduleId: string;
   defaultIndexPattern: string;
   isCompatible: boolean;

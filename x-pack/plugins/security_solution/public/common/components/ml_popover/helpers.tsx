@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SiemJob } from './types';
+import { SecurityJob } from './types';
 
 /**
  * Returns a filtered array of Jobs according to JobsTableFilters selections
@@ -22,12 +22,12 @@ export const filterJobs = ({
   showElasticJobs,
   filterQuery,
 }: {
-  jobs: SiemJob[];
+  jobs: SecurityJob[];
   selectedGroups: string[];
   showCustomJobs: boolean;
   showElasticJobs: boolean;
   filterQuery: string;
-}): SiemJob[] =>
+}): SecurityJob[] =>
   searchFilter(
     jobs
       .filter((job) => !showCustomJobs || (showCustomJobs && !job.isElasticJob))
@@ -44,7 +44,7 @@ export const filterJobs = ({
  * @param jobs to filter
  * @param filterQuery user-provided search string to filter for occurrence in job names/description
  */
-export const searchFilter = (jobs: SiemJob[], filterQuery?: string): SiemJob[] =>
+export const searchFilter = (jobs: SecurityJob[], filterQuery?: string): SecurityJob[] =>
   jobs.filter((job) =>
     filterQuery == null
       ? true

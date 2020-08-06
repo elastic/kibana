@@ -11,15 +11,15 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useUiSetting$, useHttp } from '../../../lib/kibana';
 import { checkRecognizer, getModules } from '../api';
-import { SiemJob } from '../types';
-import { createSiemJobs } from './use_siem_jobs_helpers';
+import { SecurityJob } from '../types';
+import { createSecurityJobs } from './use_siem_jobs_helpers';
 import { useMlCapabilities } from './use_ml_capabilities';
 import * as i18n from '../../ml/translations';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 
 export interface UseSecurityJobsReturn {
   loading: boolean;
-  jobs: SiemJob[];
+  jobs: SecurityJob[];
   isMlAdmin: boolean;
   isLicensed: boolean;
 }
@@ -35,7 +35,7 @@ export interface UseSecurityJobsReturn {
  * @param refetchData
  */
 export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => {
-  const [jobs, setJobs] = useState<SiemJob[]>([]);
+  const [jobs, setJobs] = useState<SecurityJob[]>([]);
   const [loading, setLoading] = useState(true);
   const mlCapabilities = useMlCapabilities();
   const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
@@ -50,7 +50,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
     const abortCtrl = new AbortController();
     setLoading(true);
 
-    async function fetchSiemJobIdsFromGroupsData() {
+    async function fetchSecurityJobIdsFromGroupsData() {
       if (isMlAdmin) {
         try {
           // Batch fetch all installed jobs, ML modules, and check which modules are compatible with siemDefaultIndex
@@ -63,10 +63,14 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
             }),
           ]);
 
-          const compositeSiemJobs = createSiemJobs(jobSummaryData, modulesData, compatibleModules);
+          const compositeSecurityJobs = createSecurityJobs(
+            jobSummaryData,
+            modulesData,
+            compatibleModules
+          );
 
           if (isSubscribed) {
-            setJobs(compositeSiemJobs);
+            setJobs(compositeSecurityJobs);
           }
         } catch (error) {
           if (isSubscribed) {
@@ -79,7 +83,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
       }
     }
 
-    fetchSiemJobIdsFromGroupsData();
+    fetchSecurityJobIdsFromGroupsData();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();

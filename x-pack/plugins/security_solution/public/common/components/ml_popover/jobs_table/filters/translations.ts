@@ -35,7 +35,7 @@ export const SHOW_ELASTIC_JOBS = i18n.translate(
 );
 
 export const SHOW_CUSTOM_JOBS = i18n.translate(
-  'xpack.securitySolution.components.mlPopover.jobsTable.filters.showSiemJobsLabel',
+  'xpack.securitySolution.components.mlPopover.jobsTable.filters.showSecurityJobsLabel',
   {
     defaultMessage: 'Custom jobs',
   }
