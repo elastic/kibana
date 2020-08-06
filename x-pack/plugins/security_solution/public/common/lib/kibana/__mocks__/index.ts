@@ -17,6 +17,7 @@ export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => 
 export const useKibana = jest.fn(createUseKibanaMock());
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
+export const useHttp = jest.fn(() => useKibana().services.http);
 export const useTimeZone = jest.fn();
 export const useDateFormat = jest.fn();
 export const useBasePath = jest.fn(() => '/test/base/path');
