@@ -29,7 +29,6 @@ const getKibanaUrl = (pathname?: string, search?: string) =>
     search,
   });
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');

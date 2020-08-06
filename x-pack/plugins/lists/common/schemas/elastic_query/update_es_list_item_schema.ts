@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import { esDataTypeUnion, metaOrUndefined, updated_at, updated_by } from '../common/schemas';
