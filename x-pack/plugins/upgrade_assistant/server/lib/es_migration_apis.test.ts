@@ -6,33 +6,33 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { getUpgradeAssistantStatus } from './es_migration_apis';
-
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
+
+import { getUpgradeAssistantStatus } from './es_migration_apis';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 describe('getUpgradeAssistantStatus', () => {
+  const clusterStateResponse = {
+    metadata: {
+      indices: {
+        ...Object.keys(fakeDeprecations.index_settings).reduce(
+          (acc, i) => ({
+            ...acc,
+            [i]: 'open',
+          }),
+          {}
+        ),
+      },
+    },
+  };
   let deprecationsResponse: DeprecationAPIResponse;
 
   const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path, index }) => {
+  (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
     } else if (api === 'cluster.state') {
-      return {
-        metadata: {
-          indices: {
-            ...index.reduce((acc: any, i: any) => {
-              return {
-                ...acc,
-                [i]: {
-                  state: 'open',
-                },
-              };
-            }, {}),
-          },
-        },
-      };
+      return clusterStateResponse;
     } else if (api === 'indices.getMapping') {
       return {};
     } else {
