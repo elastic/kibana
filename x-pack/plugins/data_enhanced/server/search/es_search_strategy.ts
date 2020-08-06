@@ -18,19 +18,33 @@ import {
   getDefaultSearchParams,
   getTotalLoaded,
   ISearchStrategy,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
+import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
 
-export interface AsyncSearchResponse<T> {
+interface AsyncSearchResponse<T> {
   id: string;
   is_partial: boolean;
   is_running: boolean;
   response: SearchResponse<T>;
 }
 
+interface EnhancedEsSearchResponse extends IEsSearchResponse {
+  is_partial: boolean;
+  is_running: boolean;
+}
+
+function isEnhancedEsSearchResponse(
+  response: IEsSearchResponse
+): response is EnhancedEsSearchResponse {
+  return response.hasOwnProperty('is_partial') && response.hasOwnProperty('is_running');
+}
+
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
+  config$: Observable<SharedGlobalConfig>,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   const search = async (
     context: RequestHandlerContext,
@@ -42,9 +56,24 @@ export const enhancedEsSearchStrategyProvider = (
     const defaultParams = getDefaultSearchParams(config);
     const params = { ...defaultParams, ...request.params };
 
-    return request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
+    try {
+      const response =
+        request.indexType === 'rollup'
+          ? await rollupSearch(caller, { ...request, params }, options)
+          : await asyncSearch(caller, { ...request, params }, options);
+
+      if (
+        usage &&
+        (!isEnhancedEsSearchResponse(response) || (!response.is_partial && !response.is_running))
+      ) {
+        usage.trackSuccess(response.rawResponse.took);
+      }
+
+      return response;
+    } catch (e) {
+      if (usage) usage.trackError();
+      throw e;
+    }
   };
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
