@@ -29,9 +29,12 @@ export const parseSourceOfTruth = (sourceOfTruth: []) => {
     for (const path of pathPatterns as []) {
       const existing = owners.get(path);
 
+      const ownersSet = new Set(existing ? [...existing.owners, handle] : [handle]);
+      const teamsSet = new Set(existing ? [...existing.teams, team] : [team]);
+
       owners.set(path, {
-        owners: existing ? [...existing.owners, handle] : [handle],
-        teams: existing ? [...existing.teams, team] : [team],
+        owners: [...ownersSet],
+        teams: [...teamsSet],
       });
     }
   }
