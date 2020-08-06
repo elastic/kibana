@@ -60,13 +60,20 @@ export const getFilteredIndexPatterns = (
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
       ...indexPatterns,
-      fields: indexPatterns.fields.filter(
-        (field) =>
-          field.subType != null &&
-          field.subType.nested != null &&
-          item.parent != null &&
-          field.subType.nested.path.startsWith(item.parent.parent.field)
-      ),
+      fields: indexPatterns.fields
+        .filter((indexField) => {
+          const fieldHasCommonParentPath =
+            indexField.subType != null &&
+            indexField.subType.nested != null &&
+            item.parent != null &&
+            indexField.subType.nested.path === item.parent.parent.field;
+
+          return fieldHasCommonParentPath;
+        })
+        .map((f) => {
+          const fieldNameWithoutParentPath = f.name.split('.').slice(-1)[0];
+          return { ...f, name: fieldNameWithoutParentPath };
+        }),
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
@@ -145,7 +152,10 @@ export const getFormattedBuilderEntry = (
 
   if (parent != null && parentIndex != null) {
     return {
-      field: foundField,
+      field:
+        foundField != null
+          ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
+          : foundField,
       correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
