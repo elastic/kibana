@@ -65,7 +65,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
   }
 
   if (error) {
-    const { error: errorString, statusCode, message } = error;
+    const { statusCode, message } = error;
     return (
       <Fragment>
         <EuiCallOut
@@ -79,7 +79,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
           color="danger"
         >
           <p>
-            {statusCode}: {errorString}. {message}
+            {message} ({statusCode})
           </p>
           <EuiButton onClick={sendRequest} iconType="refresh" color="danger">
             <FormattedMessage
