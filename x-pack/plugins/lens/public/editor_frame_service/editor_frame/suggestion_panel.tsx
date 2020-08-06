@@ -71,6 +71,7 @@ const PreviewRenderer = ({
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
@@ -123,6 +124,7 @@ const SuggestionPreview = ({
     <EuiToolTip content={preview.title}>
       <EuiPanelFixed
         className={classNames('lnsSuggestionPanel__button', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'lnsSuggestionPanel__button-isSelected': selected,
         })}
         paddingSize="none"
@@ -203,6 +205,7 @@ export function SuggestionPanel({
 
     return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
   }, [
+    frame,
     currentDatasourceStates,
     currentVisualizationState,
     currentVisualizationId,
@@ -215,7 +218,7 @@ export function SuggestionPanel({
     return (props: ReactExpressionRendererProps) => (
       <ExpressionRendererComponent {...props} reload$={autoRefreshFetch$} />
     );
-  }, [plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$, ExpressionRendererComponent]);
+  }, [plugins.data.query.timefilter.timefilter]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 
@@ -226,6 +229,7 @@ export function SuggestionPanel({
     if (!stagedPreview && lastSelectedSuggestion !== -1) {
       setLastSelectedSuggestion(-1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagedPreview]);
 
   if (!activeDatasourceId) {

@@ -15,7 +15,6 @@ import {
   httpServiceMock,
   scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
 import { LicenseStatus } from '../../../common/types/license_status';
 
