@@ -175,7 +175,7 @@ image::images/canvas-add-pages.gif[Add pages]
 
 --
 
-include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
+include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
 
