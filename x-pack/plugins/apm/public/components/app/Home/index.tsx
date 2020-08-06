@@ -84,7 +84,7 @@ interface Props {
 
 export function Home({ tab }: Props) {
   const { config, core } = useApmPluginContext();
-  const isMLEnabled = !!core.application.capabilities.ml;
+  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
@@ -106,7 +106,7 @@ export function Home({ tab }: Props) {
               </EuiButtonEmpty>
             </SettingsLink>
           </EuiFlexItem>
-          {isMLEnabled && (
+          {canAccessML && (
             <EuiFlexItem grow={false}>
               <AnomalyDetectionSetupLink />
             </EuiFlexItem>

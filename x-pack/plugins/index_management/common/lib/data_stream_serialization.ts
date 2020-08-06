@@ -7,12 +7,13 @@
 import { DataStream, DataStreamFromEs } from '../types';
 
 export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataStream {
-  const { name, timestamp_field, indices, generation } = dataStreamFromEs;
+  const { name, timestamp_field: timeStampField, indices, generation } = dataStreamFromEs;
 
   return {
     name,
-    timeStampField: timestamp_field,
+    timeStampField,
     indices: indices.map(
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ({ index_name, index_uuid }: { index_name: string; index_uuid: string }) => ({
         name: index_name,
         uuid: index_uuid,

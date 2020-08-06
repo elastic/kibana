@@ -32,19 +32,19 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   const macOsLinuxTarCommand = `./elastic-agent enroll ${enrollArgs}
 ./elastic-agent run`;
 
-  const linuxDebRpmCommand = `./elastic-agent enroll ${enrollArgs}
+  const linuxDebRpmCommand = `elastic-agent enroll ${enrollArgs}
 systemctl enable elastic-agent
 systemctl start elastic-agent`;
 
-  const windowsCommand = `./elastic-agent enroll ${enrollArgs}
-./install-service-elastic-agent.ps1`;
+  const windowsCommand = `.\\elastic-agent enroll ${enrollArgs}
+.\\install-service-elastic-agent.ps1`;
 
   return (
     <>
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.enrollmentInstructions.descriptionText"
-          defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine."
+          defaultMessage="From the agent’s directory, run the appropriate commands to enroll and start an Elastic Agent. You can reuse these commands to setup agents on more than one machine. Be sure to run the enrollment steps as a user with Administrator privilege on the system."
         />
       </EuiText>
       <EuiSpacer size="l" />
