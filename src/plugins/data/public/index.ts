@@ -338,7 +338,6 @@ export {
   // search
   ES_SEARCH_STRATEGY,
   getEsPreference,
-  getSearchErrorType,
   ISearch,
   ISearchOptions,
   ISearchGeneric,
