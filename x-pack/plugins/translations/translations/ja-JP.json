@@ -1407,7 +1407,6 @@
     "discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel": "{field}を除外：\"{value}\"",
     "discover.fieldChooser.detailViews.filterValueButtonAriaLabel": "{field}を除外：\"{value}\"",
     "discover.fieldChooser.detailViews.recordsText": "記録",
-    "discover.fieldChooser.detailViews.topValuesInRecordsDescription": "次の記録のトップ5の値",
     "discover.fieldChooser.detailViews.visualizeLinkText": "可視化",
     "discover.fieldChooser.discoverField.addButtonAriaLabel": "{field}を表に追加",
     "discover.fieldChooser.discoverField.addButtonLabel": "追加",

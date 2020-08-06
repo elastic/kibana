@@ -1408,7 +1408,6 @@
     "discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel": "筛除 {field}：“{value}”",
     "discover.fieldChooser.detailViews.filterValueButtonAriaLabel": "筛留 {field}：“{value}”",
     "discover.fieldChooser.detailViews.recordsText": "个记录",
-    "discover.fieldChooser.detailViews.topValuesInRecordsDescription": "排名前 5 值 - 范围",
     "discover.fieldChooser.detailViews.visualizeLinkText": "可视化",
     "discover.fieldChooser.discoverField.addButtonAriaLabel": "将 {field} 添加到表中",
     "discover.fieldChooser.discoverField.addButtonLabel": "添加",

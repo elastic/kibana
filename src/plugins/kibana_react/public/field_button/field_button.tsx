@@ -59,7 +59,7 @@ export interface FieldButtonProps extends HTMLAttributes<HtmlDivElement> {
   /**
    * Pass more button props to the actual `<button>` element
    */
-  buttonProps: ButtonHTMLAttributes<HTMLButtonElement>;
+  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 /**

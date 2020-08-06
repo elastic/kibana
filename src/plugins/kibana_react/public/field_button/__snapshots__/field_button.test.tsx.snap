@@ -5,7 +5,7 @@ exports[`isActive defaults to false 1`] = `
   className="kbnFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__content"
+    className="kbn-resetFocusState kbnFieldButton__button"
   >
     <span
       className="kbnFieldButton__name"
@@ -13,9 +13,6 @@ exports[`isActive defaults to false 1`] = `
       name
     </span>
   </button>
-  <div
-    className="kbnFieldButton__append"
-  />
 </div>
 `;
 
@@ -24,7 +21,7 @@ exports[`isActive renders true 1`] = `
   className="kbnFieldButton kbnFieldButton-isActive"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__content"
+    className="kbn-resetFocusState kbnFieldButton__button"
   >
     <span
       className="kbnFieldButton__name"
@@ -32,9 +29,6 @@ exports[`isActive renders true 1`] = `
       name
     </span>
   </button>
-  <div
-    className="kbnFieldButton__append"
-  />
 </div>
 `;
 
@@ -43,7 +37,7 @@ exports[`isDraggable is rendered 1`] = `
   className="kbnFieldButton kbnFieldButton--isDraggable"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__content"
+    className="kbn-resetFocusState kbnFieldButton__button"
   >
     <span
       className="kbnFieldButton__name"
@@ -51,9 +45,6 @@ exports[`isDraggable is rendered 1`] = `
       name
     </span>
   </button>
-  <div
-    className="kbnFieldButton__append"
-  />
 </div>
 `;
 
@@ -62,7 +53,7 @@ exports[`sizes m is applied 1`] = `
   className="kbnFieldButton"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__content"
+    className="kbn-resetFocusState kbnFieldButton__button"
   >
     <span
       className="kbnFieldButton__name"
@@ -70,9 +61,6 @@ exports[`sizes m is applied 1`] = `
       name
     </span>
   </button>
-  <div
-    className="kbnFieldButton__append"
-  />
 </div>
 `;
 
@@ -81,7 +69,7 @@ exports[`sizes s is applied 1`] = `
   className="kbnFieldButton kbnFieldButton--small"
 >
   <button
-    className="kbn-resetFocusState kbnFieldButton__content"
+    className="kbn-resetFocusState kbnFieldButton__button"
   >
     <span
       className="kbnFieldButton__name"
@@ -89,8 +77,5 @@ exports[`sizes s is applied 1`] = `
       name
     </span>
   </button>
-  <div
-    className="kbnFieldButton__append"
-  />
 </div>
 `;
