@@ -34,7 +34,7 @@ import {
 import { Storage, createKbnUrlTracker, createKbnUrlStateStorage } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
-import { SharePluginStart } from '../../share/public';
+import { SharePluginStart, SharePluginSetup, UrlGeneratorState } from '../../share/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
@@ -48,8 +48,19 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VisualizeFieldContext,
 } from '../../ui_actions/public';
-import { setUISettings, setApplication, setIndexPatterns, setQueryService } from './services';
+import {
+  setUISettings,
+  setApplication,
+  setIndexPatterns,
+  setQueryService,
+  setShareService,
+} from './services';
 import { visualizeFieldAction, ACTION_VISUALIZE_FIELD } from './actions/visualize_field_action';
+import {
+  VisualizeUrlGeneratorState,
+  VISUALIZE_APP_URL_GENERATOR,
+  createVisualizeUrlGenerator,
+} from './url_generator';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -66,11 +77,18 @@ export interface VisualizePluginSetupDependencies {
   home?: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
+  share?: SharePluginSetup;
 }
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
     [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
+  }
+}
+
+declare module '../../share/public' {
+  export interface UrlGeneratorStateMapping {
+    [VISUALIZE_APP_URL_GENERATOR]: UrlGeneratorState<VisualizeUrlGeneratorState>;
   }
 }
 
@@ -89,7 +107,7 @@ export class VisualizePlugin
 
   public async setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
-    { home, kibanaLegacy, data }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, data, share }: VisualizePluginSetupDependencies
   ) {
     const {
       appMounted,
@@ -122,7 +140,17 @@ export class VisualizePlugin
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
-
+    if (share) {
+      share.urlGenerators.registerUrlGenerator(
+        createVisualizeUrlGenerator(async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            appBasePath: coreStart.application.getUrlForApp('visualize'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          };
+        })
+      );
+    }
     setUISettings(core.uiSettings);
 
     core.application.register({
@@ -220,6 +248,9 @@ export class VisualizePlugin
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
+    if (plugins.share) {
+      setShareService(plugins.share);
+    }
     plugins.uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
   }
 

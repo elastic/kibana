@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import rison from 'rison-node';
 import uuid from 'uuid/v4';
-import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
-import { getApplication, getIndexPatternService, getQueryService } from '../kibana_services';
+import {
+  getApplication,
+  getIndexPatternService,
+  getData,
+  getShareService,
+} from '../kibana_services';
+import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
 
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 
@@ -17,7 +22,7 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
   type: ACTION_VISUALIZE_GEO_FIELD,
   getDisplayName: () =>
     i18n.translate('xpack.maps.discover.visualizeFieldLabel', {
-      defaultMessage: 'Visualize on a map',
+      defaultMessage: 'Visualize in Maps',
     }),
   execute: async (context) => {
     const indexPattern = await getIndexPatternService().get(context.indexPatternId);
@@ -26,31 +31,33 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     // create initial layer descriptor
     const hasTooltips =
       context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
-
-    const linkUrlParams = {
-      _a: rison.encode({
-        filters: getQueryService().filterManager.getFilters() || [],
-        query: getQueryService().queryString.getQuery(),
-      } as any),
-      initialLayers: rison.encode({
+    const initialLayers = {
+      id: uuid(),
+      visible: true,
+      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+      sourceDescriptor: {
         id: uuid(),
-        indexPattern: context.indexPatternId,
+        type: SOURCE_TYPES.ES_SEARCH,
+        tooltipProperties: hasTooltips ? context.contextualFields : [],
         label: indexPattern.title,
-        visible: true,
-        type: supportsClustering ? 'BLENDED_VECTOR' : 'VECTOR',
-        sourceDescriptor: {
-          id: uuid(),
-          type: 'ES_SEARCH',
-          geoField: context.fieldName,
-          tooltipProperties: hasTooltips ? context.contextualFields : [],
-          indexPatternId: context.indexPatternId,
-          scalingType: supportsClustering ? 'CLUSTERS' : 'LIMIT',
-        },
-      }),
+        indexPatternId: context.indexPatternId,
+        geoField: context.fieldName,
+        scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+      },
     };
 
+    const generator = getShareService().urlGenerators.getUrlGenerator(MAPS_APP_URL_GENERATOR);
+    const urlState: MapsUrlGeneratorState = {
+      filters: getData().query.filterManager.getFilters(),
+      query: getData().query.queryString.getQuery(),
+      initialLayers,
+      timeRange: getData().query.timefilter.timefilter.getTime(),
+    };
+    const url = await generator.createUrl(urlState);
+    const hash = url.split('#')[1];
+
     getApplication().navigateToApp('maps', {
-      path: `/map#?${stringify(linkUrlParams)}`,
+      path: `map/#${hash}`,
     });
   },
 });

@@ -12,6 +12,7 @@ import {
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
+import { SharePluginSetup, UrlGeneratorState } from '../../../../src/plugins/share/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
@@ -42,7 +43,7 @@ import {
   setUiSettings,
   setVisualizations,
   setApplication,
-  setQueryService,
+  setShareService,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -53,6 +54,11 @@ import {
   VISUALIZE_GEO_FIELD_TRIGGER,
   VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
+import {
+  MapsUrlGeneratorState,
+  MAPS_APP_URL_GENERATOR,
+  createMapsUrlGenerator,
+} from './url_generator';
 import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
@@ -73,6 +79,7 @@ export interface MapsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: unknown };
+  share: SharePluginSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -83,13 +90,19 @@ declare module '../../../../src/plugins/ui_actions/public' {
   }
 }
 
+declare module '../../../../src/plugins/share/public' {
+  export interface UrlGeneratorStateMapping {
+    [MAPS_APP_URL_GENERATOR]: UrlGeneratorState<MapsUrlGeneratorState>;
+  }
+}
+
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
   plugins: any,
   config: MapsConfigType,
   kibanaVersion: string
 ) => {
-  const { licensing, mapsLegacy } = plugins;
+  const { licensing, mapsLegacy, share } = plugins;
   const { uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
@@ -101,6 +114,15 @@ export const bindSetupCoreAndPlugins = (
   setKibanaCommonConfig(mapsLegacy.config);
   setMapAppConfig(config);
   setKibanaVersion(kibanaVersion);
+  share.urlGenerators.registerUrlGenerator(
+    createMapsUrlGenerator(async () => {
+      const [coreStart] = await core.getStartServices();
+      return {
+        appBasePath: coreStart.application.getUrlForApp('maps'),
+        useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+      };
+    })
+  );
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -119,7 +141,6 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
   setSearchService(data.search);
-  setQueryService(data.query);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
   setCore(core);
@@ -133,6 +154,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
   setApplication(core.application);
+  setShareService(plugins.share);
 };
 
 /**

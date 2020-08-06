@@ -7,6 +7,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
 import { ApplicationStart } from '../../../../src/core/public';
+import { SharePluginStart } from '../../../../src/plugins/share/public';
 import { MapsConfigType } from '../config';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 
@@ -33,8 +34,8 @@ export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
 export function getApplication(): ApplicationStart;
+export function getShareService(): SharePluginStart;
 export function getSearchService(): DataPublicPluginStart['search'];
-export function getQueryService(): DataPublicPluginStart['query'];
 export function getKibanaCommonConfig(): MapsLegacyConfigType;
 export function getMapAppConfig(): MapsConfigType;
 export function getIsEmsEnabled(): any;
@@ -76,8 +77,8 @@ export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
 export function setApplication(args: ApplicationStart): void;
+export function setShareService(args: SharePluginStart): void;
 export function setSearchService(args: DataPublicPluginStart['search']): void;
-export function setQueryService(args: DataPublicPluginStart['query']): void;
 export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;
 export function setKibanaVersion(version: string): void;

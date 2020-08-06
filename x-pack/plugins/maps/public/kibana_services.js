@@ -139,10 +139,6 @@ let dataSearchService;
 export const setSearchService = (searchService) => (dataSearchService = searchService);
 export const getSearchService = () => dataSearchService;
 
-let dataQueryService;
-export const setQueryService = (queryService) => (dataQueryService = queryService);
-export const getQueryService = () => dataQueryService;
-
 let kibanaVersion;
 export const setKibanaVersion = (version) => (kibanaVersion = version);
 export const getKibanaVersion = () => kibanaVersion;
@@ -185,3 +181,7 @@ export const getIsGoldPlus = () => {
 let coreApplication;
 export const setApplication = (application) => (coreApplication = application);
 export const getApplication = () => coreApplication;
+
+let coreShareService;
+export const setShareService = (shareService) => (coreShareService = shareService);
+export const getShareService = () => coreShareService;

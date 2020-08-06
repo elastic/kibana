@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import rison from 'rison-node';
-import { stringify } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../ui_actions/public';
-import { getApplication, getUISettings, getIndexPatterns, getQueryService } from '../services';
+import {
+  getApplication,
+  getUISettings,
+  getIndexPatterns,
+  getQueryService,
+  getShareService,
+} from '../services';
+import { VISUALIZE_APP_URL_GENERATOR, VisualizeUrlGeneratorState } from '../url_generator';
 import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
@@ -60,21 +65,22 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
       };
     }
 
-    const linkUrlParams = {
-      indexPattern: context.indexPatternId,
+    const generator = getShareService().urlGenerators.getUrlGenerator(VISUALIZE_APP_URL_GENERATOR);
+    const urlState: VisualizeUrlGeneratorState = {
+      filters: getQueryService().filterManager.getFilters(),
+      query: getQueryService().queryString.getQuery(),
+      indexPatternId: context.indexPatternId,
       type: 'histogram',
-      _a: rison.encode({
-        filters: getQueryService().filterManager.getFilters() || [],
-        query: getQueryService().queryString.getQuery(),
-        vis: {
-          type: 'histogram',
-          aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],
-        },
-      } as any),
+      vis: {
+        type: 'histogram',
+        aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],
+      },
     };
+    const url = await generator.createUrl(urlState);
+    const hash = url.split('#')[1];
 
     getApplication().navigateToApp('visualize', {
-      path: `#/create?${stringify(linkUrlParams)}`,
+      path: `/#${hash}`,
     });
   },
 });
