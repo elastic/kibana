@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverTree, ResolverEntityIndex } from '../../../../common/endpoint/types';
 

@@ -100,9 +100,9 @@ export class ValidatedDualRange extends Component<Props> {
       fullWidth,
       label,
       formRowDisplay,
-      value, // eslint-disable-line no-unused-vars
-      onChange, // eslint-disable-line no-unused-vars
-      allowEmptyRange, // eslint-disable-line no-unused-vars
+      value,
+      onChange,
+      allowEmptyRange,
       ...rest // TODO: Consider alternatives for spread operator in component
     } = this.props;
 

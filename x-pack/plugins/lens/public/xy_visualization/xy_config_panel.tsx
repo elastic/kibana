@@ -379,7 +379,7 @@ const ColorPicker = ({
         }
         setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
       }, 256),
-    [state, layer, accessor, index]
+    [state, setState, layer, accessor, index]
   );
 
   const colorPicker = (
