@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineTestFlyoutProvider as PipelineTestFlyout } from './pipeline_test_flyout_provider';
+export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
