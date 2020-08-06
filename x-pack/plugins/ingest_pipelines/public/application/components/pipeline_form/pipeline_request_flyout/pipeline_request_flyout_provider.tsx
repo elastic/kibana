@@ -7,21 +7,34 @@
 import React, { useState, useEffect, FunctionComponent } from 'react';
 
 import { Pipeline } from '../../../../../common/types';
-import { useFormContext } from '../../../../shared_imports';
+import { useFormContext, GlobalFlyout } from '../../../../shared_imports';
 
 import { ReadProcessorsFunction } from '../types';
 
-import { PipelineRequestFlyout } from './pipeline_request_flyout';
+import {
+  PipelineRequestFlyout,
+  Props as PipelineRequestProps,
+  defaultFlyoutProps,
+} from './pipeline_request_flyout';
 
 interface Props {
   closeFlyout: () => void;
   readProcessors: ReadProcessorsFunction;
+  isFlyoutOpen: boolean;
 }
+
+const { useGlobalFlyout } = GlobalFlyout;
 
 export const PipelineRequestFlyoutProvider: FunctionComponent<Props> = ({
   closeFlyout,
   readProcessors,
+  isFlyoutOpen,
 }) => {
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
+
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
 
@@ -36,10 +49,29 @@ export const PipelineRequestFlyoutProvider: FunctionComponent<Props> = ({
     return subscription.unsubscribe;
   }, [form]);
 
-  return (
-    <PipelineRequestFlyout
-      pipeline={{ ...formData, ...readProcessors() }}
-      closeFlyout={closeFlyout}
-    />
-  );
+  useEffect(() => {
+    if (isFlyoutOpen) {
+      // Open the ES request flyout
+      addContentToGlobalFlyout<PipelineRequestProps>({
+        id: 'pipelineRequest',
+        Component: PipelineRequestFlyout,
+        flyoutProps: {
+          ...defaultFlyoutProps,
+          onClose: closeFlyout,
+        },
+        props: {
+          pipeline: { ...formData, ...readProcessors() },
+          closeFlyout,
+        },
+      });
+    }
+  }, [isFlyoutOpen, addContentToGlobalFlyout, closeFlyout, formData, readProcessors]);
+
+  useEffect(() => {
+    if (!isFlyoutOpen) {
+      removeContentFromGlobalFlyout('pipelineRequest');
+    }
+  }, [isFlyoutOpen, removeContentFromGlobalFlyout]);
+
+  return null;
 };

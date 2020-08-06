@@ -13,10 +13,12 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 
 import { API_BASE_PATH } from '../../common/constants';
 
-import { AuthorizationProvider } from '../shared_imports';
+import { AuthorizationProvider, GlobalFlyout } from '../shared_imports';
 
 import { App } from './app';
 import { DocumentationService, UiMetricService, ApiService, BreadcrumbService } from './services';
+
+const { GlobalFlyoutProvider } = GlobalFlyout;
 
 export interface AppServices {
   breadcrumbs: BreadcrumbService;
@@ -45,7 +47,9 @@ export const renderApp = (
     >
       <I18nContext>
         <KibanaContextProvider services={services}>
-          <App />
+          <GlobalFlyoutProvider>
+            <App />
+          </GlobalFlyoutProvider>
         </KibanaContextProvider>
       </I18nContext>
     </AuthorizationProvider>,

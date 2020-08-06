@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -21,10 +20,14 @@ import {
 
 import { Pipeline } from '../../../../../common/types';
 
-interface Props {
+export interface Props {
   pipeline: Pipeline;
   closeFlyout: () => void;
 }
+
+export const defaultFlyoutProps = {
+  'data-test-subj': 'requestFlyout',
+};
 
 export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   closeFlyout,
@@ -40,7 +43,7 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   uuid.current++;
 
   return (
-    <EuiFlyout maxWidth={550} onClose={closeFlyout} data-test-subj="requestFlyout">
+    <>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 data-test-subj="title">
@@ -84,6 +87,6 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
           />
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

@@ -179,15 +179,13 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* ES request flyout */}
-        {isRequestVisible ? (
-          <PipelineRequestFlyout
-            readProcessors={() =>
-              processorStateRef.current?.getData() || { processors: [], on_failure: [] }
-            }
-            closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
-          />
-        ) : null}
+        <PipelineRequestFlyout
+          readProcessors={() =>
+            processorStateRef.current?.getData() || { processors: [], on_failure: [] }
+          }
+          closeFlyout={() => setIsRequestVisible((prevIsRequestVisible) => !prevIsRequestVisible)}
+          isFlyoutOpen={isRequestVisible}
+        />
       </Form>
 
       <EuiSpacer size="m" />
