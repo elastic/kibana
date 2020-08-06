@@ -22,6 +22,7 @@ import {
   existsOperator,
   isOneOfOperator,
   EXCEPTION_OPERATORS,
+  EXCEPTION_OPERATORS_SANS_LISTS,
 } from '../../autocomplete/operators';
 import { OperatorOption } from '../../autocomplete/types';
 import {
@@ -32,6 +33,7 @@ import {
   EmptyNestedEntry,
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
+import exceptionableFields from '../exceptionable_fields.json';
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -40,39 +42,86 @@ import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
  *
  * @param patterns IIndexPattern containing available fields on rule index
  * @param item exception item entry
- * @param addNested boolean noting whether or not UI is currently
  * set to add a nested field
  */
 export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
-  item: FormattedBuilderEntry
+  item: FormattedBuilderEntry,
+  type: ExceptionListType
 ): IIndexPattern => {
+  const indexPatterns = {
+    ...patterns,
+    fields: patterns.fields.filter(({ name }) =>
+      type === 'endpoint' ? exceptionableFields.includes(name) : true
+    ),
+  };
+
   if (item.nested === 'child' && item.parent != null) {
     // when user has selected a nested entry, only fields with the common parent are shown
     return {
-      ...patterns,
-      fields: patterns.fields.filter(
-        (field) =>
-          field.subType != null &&
-          field.subType.nested != null &&
-          item.parent != null &&
-          field.subType.nested.path.startsWith(item.parent.parent.field)
-      ),
+      ...indexPatterns,
+      fields: indexPatterns.fields
+        .filter((indexField) => {
+          const fieldHasCommonParentPath =
+            indexField.subType != null &&
+            indexField.subType.nested != null &&
+            item.parent != null &&
+            indexField.subType.nested.path === item.parent.parent.field;
+
+          return fieldHasCommonParentPath;
+        })
+        .map((f) => {
+          const fieldNameWithoutParentPath = f.name.split('.').slice(-1)[0];
+          return { ...f, name: fieldNameWithoutParentPath };
+        }),
     };
   } else if (item.nested === 'parent' && item.field != null) {
     // when user has selected a nested entry, right above it we show the common parent
-    return { ...patterns, fields: [item.field] };
+    return { ...indexPatterns, fields: [item.field] };
   } else if (item.nested === 'parent' && item.field == null) {
     // when user selects to add a nested entry, only nested fields are shown as options
     return {
-      ...patterns,
-      fields: patterns.fields.filter(
+      ...indexPatterns,
+      fields: indexPatterns.fields.filter(
         (field) => field.subType != null && field.subType.nested != null
       ),
     };
   } else {
-    return patterns;
+    return indexPatterns;
   }
+};
+
+/**
+ * Fields of type 'text' do not generate autocomplete values, we want
+ * to find it's corresponding keyword type (if available) which does
+ * generate autocomplete values
+ *
+ * @param fields IFieldType fields
+ * @param selectedField the field name that was selected
+ * @param isTextType we only want a corresponding keyword field if
+ * the selected field is of type 'text'
+ *
+ */
+export const getCorrespondingKeywordField = ({
+  fields,
+  selectedField,
+}: {
+  fields: IFieldType[];
+  selectedField: string | undefined;
+}): IFieldType | undefined => {
+  const selectedFieldBits =
+    selectedField != null && selectedField !== '' ? selectedField.split('.') : [];
+  const selectedFieldIsTextType = selectedFieldBits.slice(-1)[0] === 'text';
+
+  if (selectedFieldIsTextType && selectedFieldBits.length > 0) {
+    const keywordField = selectedFieldBits.slice(0, selectedFieldBits.length - 1).join('.');
+    const [foundKeywordField] = fields.filter(
+      ({ name }) => keywordField !== '' && keywordField === name
+    );
+    return foundKeywordField;
+  }
+
+  return undefined;
 };
 
 /**
@@ -95,11 +144,19 @@ export const getFormattedBuilderEntry = (
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
-  const [selectedField] = fields.filter(({ name }) => field != null && field === name);
+  const [foundField] = fields.filter(({ name }) => field != null && field === name);
+  const correspondingKeywordField = getCorrespondingKeywordField({
+    fields,
+    selectedField: field,
+  });
 
   if (parent != null && parentIndex != null) {
     return {
-      field: selectedField,
+      field:
+        foundField != null
+          ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
+          : foundField,
+      correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -108,7 +165,8 @@ export const getFormattedBuilderEntry = (
     };
   } else {
     return {
-      field: selectedField,
+      field: foundField,
+      correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: undefined,
@@ -167,6 +225,7 @@ export const getFormattedBuilderEntries = (
         value: undefined,
         entryIndex: index,
         parent: undefined,
+        correspondingKeywordField: undefined,
       };
 
       // User has selected to add a nested field, but not yet selected the field
@@ -198,22 +257,22 @@ export const getFormattedBuilderEntries = (
 export const getUpdatedEntriesOnDelete = (
   exceptionItem: ExceptionsBuilderExceptionItem,
   entryIndex: number,
-  nestedEntryIndex: number | null
+  nestedParentIndex: number | null
 ): ExceptionsBuilderExceptionItem => {
-  const itemOfInterest: BuilderEntry = exceptionItem.entries[entryIndex];
+  const itemOfInterest: BuilderEntry = exceptionItem.entries[nestedParentIndex ?? entryIndex];
 
-  if (nestedEntryIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
+  if (nestedParentIndex != null && itemOfInterest.type === OperatorTypeEnum.NESTED) {
     const updatedEntryEntries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists> = [
-      ...itemOfInterest.entries.slice(0, nestedEntryIndex),
-      ...itemOfInterest.entries.slice(nestedEntryIndex + 1),
+      ...itemOfInterest.entries.slice(0, entryIndex),
+      ...itemOfInterest.entries.slice(entryIndex + 1),
     ];
 
     if (updatedEntryEntries.length === 0) {
       return {
         ...exceptionItem,
         entries: [
-          ...exceptionItem.entries.slice(0, entryIndex),
-          ...exceptionItem.entries.slice(entryIndex + 1),
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
         ],
       };
     } else {
@@ -227,9 +286,9 @@ export const getUpdatedEntriesOnDelete = (
       return {
         ...exceptionItem,
         entries: [
-          ...exceptionItem.entries.slice(0, entryIndex),
+          ...exceptionItem.entries.slice(0, nestedParentIndex),
           updatedItemOfInterest,
-          ...exceptionItem.entries.slice(entryIndex + 1),
+          ...exceptionItem.entries.slice(nestedParentIndex + 1),
         ],
       };
     }
@@ -295,12 +354,14 @@ export const getEntryFromOperator = (
  *
  * @param item
  * @param listType
- *
+ * @param isBoolean
+ * @param includeValueListOperators whether or not to include the 'is in list' and 'is not in list' operators
  */
 export const getOperatorOptions = (
   item: FormattedBuilderEntry,
   listType: ExceptionListType,
-  isBoolean: boolean
+  isBoolean: boolean,
+  includeValueListOperators = true
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
     return [isOperator];
@@ -309,7 +370,11 @@ export const getOperatorOptions = (
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
   } else {
-    return isBoolean ? [isOperator, existsOperator] : EXCEPTION_OPERATORS;
+    return isBoolean
+      ? [isOperator, existsOperator]
+      : includeValueListOperators
+      ? EXCEPTION_OPERATORS
+      : EXCEPTION_OPERATORS_SANS_LISTS;
   }
 };
 
@@ -547,3 +612,6 @@ export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
   type: OperatorTypeEnum.NESTED,
   entries: [],
 });
+
+export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
+  items.some((item) => item.entries.some((entry) => entry.type === OperatorTypeEnum.LIST));

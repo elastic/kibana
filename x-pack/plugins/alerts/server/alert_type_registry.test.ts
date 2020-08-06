@@ -57,7 +57,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
@@ -89,7 +88,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
 
     expect(() => registry.register(alertType)).toThrowError(
@@ -111,7 +109,6 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
@@ -208,6 +205,7 @@ describe('get()', () => {
         ],
         "actionVariables": Object {
           "context": Array [],
+          "params": Array [],
           "state": Array [],
         },
         "defaultActionGroupId": "default",
@@ -261,6 +259,7 @@ describe('list()', () => {
           ],
           "actionVariables": Object {
             "context": Array [],
+            "params": Array [],
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",

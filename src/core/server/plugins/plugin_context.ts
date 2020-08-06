@@ -212,6 +212,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
     elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
       legacy: deps.elasticsearch.legacy,
     },
     http: {

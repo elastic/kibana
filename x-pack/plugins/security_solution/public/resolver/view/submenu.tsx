@@ -190,7 +190,7 @@ const NodeSubMenuComponents = React.memo(
          * then force the popover to reposition itself.
          */
         popoverRef.current &&
-        !projectionMatrixAtLastRender.current &&
+        projectionMatrixAtLastRender.current &&
         projectionMatrixAtLastRender.current !== projectionMatrix
       ) {
         popoverRef.current.positionPopoverFixed();
@@ -233,6 +233,7 @@ const NodeSubMenuComponents = React.memo(
         iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
         iconSide="right"
         tabIndex={-1}
+        data-test-subj="resolver:submenu:button"
       >
         {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>

@@ -14,7 +14,7 @@ import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 
-const TraceOverviewLink = (props: APMLinkExtendProps) => {
+function TraceOverviewLink(props: APMLinkExtendProps) {
   const { urlParams } = useUrlParams();
 
   const persistedFilters = pickKeys(
@@ -26,6 +26,6 @@ const TraceOverviewLink = (props: APMLinkExtendProps) => {
   );
 
   return <APMLink path="/traces" query={persistedFilters} {...props} />;
-};
+}
 
 export { TraceOverviewLink };
