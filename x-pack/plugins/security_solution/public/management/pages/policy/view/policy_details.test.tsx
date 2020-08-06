@@ -153,7 +153,7 @@ describe('Policy Details', () => {
       );
       const agentsSummary = headerRight.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Hosts5Online3Offline1Error1');
+      expect(agentsSummary.text()).toBe('Endpoints5Online3Offline1Error1');
     });
     it('should display cancel button', async () => {
       await asyncActions;

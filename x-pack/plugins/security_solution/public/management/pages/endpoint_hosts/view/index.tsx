@@ -49,7 +49,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { EndpointAction } from '../store/action';
-import { EndpointPolicyLink } from './components/host_policy_link';
+import { EndpointPolicyLink } from './components/endpoint_policy_link';
 
 const EndpointListNavLink = memo<{
   name: string;

@@ -51,7 +51,7 @@ describe('EndpointList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
-        hostsExist: true,
+        endpointsExist: true,
       });
     });
 
@@ -80,7 +80,7 @@ describe('EndpointList store concerns', () => {
       loadDataToStore();
     });
 
-    test('it selects `hostListData`', () => {
+    test('it selects `endpointListData`', () => {
       const currentState = store.getState();
       expect(listData(currentState)).toEqual(currentState.hosts);
     });
