@@ -76,7 +76,7 @@ export interface IStateSyncConfig<State extends BaseState, StateStorage extends 
 }
 
 // @public (undocumented)
-export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> {
+export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> {
     start: StartSyncStateFnType;
     stop: StopSyncStateFnType;
 }
