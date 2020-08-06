@@ -31,11 +31,11 @@ export function createAction<T extends ActionType>(
   action: ActionDefinitionByType<T>
 ): ActionByType<T> {
   return {
-    getIconType: action.getIconType ?? (() => undefined),
-    order: action.order ?? 0,
-    id: action.id ?? action.type,
-    isCompatible: action.isCompatible ?? (() => Promise.resolve(true)),
-    getDisplayName: action.getDisplayName ?? (() => ''),
+    getIconType: () => undefined,
+    order: 0,
+    id: action.type,
+    isCompatible: () => Promise.resolve(true),
+    getDisplayName: () => '',
     ...action,
   } as ActionByType<T>;
 }

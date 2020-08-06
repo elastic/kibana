@@ -142,7 +142,7 @@ export class UiActionsService {
     triggerId: T,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T]>
+    action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T]> // TODO: remove `Action` https://github.com/elastic/kibana/issues/74501
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
