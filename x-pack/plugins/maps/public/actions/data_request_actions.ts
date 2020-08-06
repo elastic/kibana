@@ -381,15 +381,16 @@ export function fitToDataBounds(onNoBounds?: () => void) {
 let lastSetQueryCallId: string = '';
 export function autoFitToBounds() {
   return async (dispatch: Dispatch) => {
+    // Method can be triggered before async actions complete
+    // Use localSetQueryCallId to only continue execution path if method has not been re-triggered.
+    const localSetQueryCallId = uuid();
+    lastSetQueryCallId = localSetQueryCallId;
+
     // Joins are performed on the client.
     // As a result, bounds for join layers must also be performed on the client.
     // Therefore join layers need to fetch data prior to auto fitting bounds.
-    const localSetQueryCallId = uuid();
-    lastSetQueryCallId = localSetQueryCallId;
     await dispatch<any>(syncDataForAllJoinLayers());
 
-    // autoFitToBounds can be triggered before async data fetching completes
-    // Only continue execution path if autoFitToBounds has not been re-triggered.
     if (localSetQueryCallId === lastSetQueryCallId) {
       // In cases where there are no bounds, such as no matching documents, fitToDataBounds does not trigger setGotoWithBounds.
       // Ensure layer syncing occurs when setGotoWithBounds is not triggered.
