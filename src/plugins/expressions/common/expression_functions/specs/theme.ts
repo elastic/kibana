@@ -26,7 +26,7 @@ interface Arguments {
   default: string | number | boolean;
 }
 
-type Output = string | number | boolean | undefined;
+type Output = any;
 
 export type ExpressionFunctionTheme = ExpressionFunctionDefinition<
   'theme',
