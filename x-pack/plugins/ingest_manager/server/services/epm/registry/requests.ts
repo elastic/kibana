@@ -9,39 +9,47 @@ import pRetry from 'p-retry';
 import { streamToString } from './streams';
 import { RegistryError } from '../../../errors';
 
-const run = async (url:string) => {
-  console.log('run() await fetch', url)
+// not sure what to call this function, but we're not exporting it
+async function registryFetch(url: string) {
   const response = await fetch(url);
-  console.log(response.status, url, response)
 
   if (response.ok) {
     return response;
   } else {
-    throw new pRetry.AbortError(new RegistryError(
-      `Error connecting to package registry at ${url}: ${response.statusText}`
-    ));
+    // 4xx & 5xx responses
+    // exit without retry & throw RegistryError
+    throw new pRetry.AbortError(
+      new RegistryError(`Error connecting to package registry at ${url}: ${response.statusText}`)
+    );
   }
 }
 
 export async function getResponse(url: string): Promise<Response> {
   try {
-    const response = await pRetry(
-      () => run(url),
-      {
-        factor: 2,
-        retries: 5,
-        onFailedAttempt: (error) => {
-          // https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
-          if (error instanceof FetchError && error.type !== 'system') {
-            throw new RegistryError(
-              `Error connecting to package registry at ${url}: ${response.statusText}`
-            );
-          }
-        }
-      }
-    );
+    // we only want to retry certain failures like network issues
+    // the rest should only try the one time then fail as they do now
+    const response = await pRetry(() => registryFetch(url), {
+      factor: 2,
+      retries: 5,
+      onFailedAttempt: (error) => {
+        // we only want to retry certain types of errors, like `ECONNREFUSED` and other operational errors
+        // and let the others through without retrying
+        //
+        // node-fetch throws a FetchError for those types of errors and
+        // "All errors originating from Node.js core are marked with error.type = 'system'"
+        // https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
+        const isSystemError = error instanceof FetchError && error.type === 'system';
 
-    console.log('getResponse response', response)
+        // throwing in onFailedAttempt will abandon all retries & fail the request
+        // we only want to retry system errors, so throw a RegistryError for everything else
+        const shouldRetry = isSystemError;
+        if (!shouldRetry) {
+          throw new RegistryError(
+            `Error connecting to package registry at ${url}: ${error.message}`
+          );
+        }
+      },
+    });
     return response;
   } catch (e) {
     throw new RegistryError(`Error connecting to package registry at ${url}: ${e.message}`);
