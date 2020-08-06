@@ -50,17 +50,22 @@ test('testPathParts', () => {
 });
 
 describe('splitPkgKey tests', () => {
-  it('returns an empty name if the delimiter is not found', () => {
-    const pkgkey = 'awesome_package';
-    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-    expect(pkgName).toBe('');
-    expect(pkgVersion).toBe(pkgkey);
+  it('throws an error if the delimiter is not found', () => {
+    expect(() => {
+      splitPkgKey('awesome_package');
+    }).toThrow();
   });
 
-  it('returns an empty name if there is nothing before the delimiter', () => {
-    const { pkgName, pkgVersion } = splitPkgKey('-0.0.1-dev1');
-    expect(pkgName).toBe('');
-    expect(pkgVersion).toBe('0.0.1-dev1');
+  it('throws an error if there is nothing before the delimiter', () => {
+    expect(() => {
+      splitPkgKey('-0.0.1-dev1');
+    }).toThrow();
+  });
+
+  it('throws an error if the version is not a semver', () => {
+    expect(() => {
+      splitPkgKey('awesome-laskdfj');
+    }).toThrow();
   });
 
   it('returns the name and version if the delimiter is found once', () => {

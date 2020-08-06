@@ -5,18 +5,23 @@
  */
 
 import expect from '@kbn/expect';
+import * as st from 'supertest';
+import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
+
+export const deletePackage = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  pkgkey: string
+) => {
+  await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const dockerServers = getService('dockerServers');
   const log = getService('log');
-
-  const deletePackage = async (pkgkey: string) => {
-    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
-  };
 
   const mappingsPackage = 'overrides-0.1.0';
   const server = dockerServers.get('registry');
@@ -25,7 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
-        await deletePackage(mappingsPackage);
+        await deletePackage(supertest, mappingsPackage);
       }
     });
 
