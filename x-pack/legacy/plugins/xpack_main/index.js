@@ -37,14 +37,6 @@ export const xpackMain = (kibana) => {
     uiExports: {
       hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
       replaceInjectedVars,
-      injectDefaultVars(server) {
-        const config = server.config();
-
-        return {
-          activeSpace: null,
-          spacesEnabled: config.get('xpack.spaces.enabled'),
-        };
-      },
       __webpackPluginProvider__(webpack) {
         return new webpack.BannerPlugin({
           banner: dedent`
