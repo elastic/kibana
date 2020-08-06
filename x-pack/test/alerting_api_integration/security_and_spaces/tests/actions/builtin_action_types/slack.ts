@@ -5,28 +5,25 @@
  */
 
 import expect from '@kbn/expect';
-
+import http from 'http';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
     let simulatedActionId = '';
-    let slackSimulatorURL: string = '<could not determine kibana url>';
 
+    let slackSimulatorURL: string = '';
+    let slackServer: http.Server;
     // need to wait for kibanaServer to settle ...
-    before(() => {
-      slackSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
-      );
+    before(async () => {
+      slackServer = await getSlackServer();
+      slackServer.listen(9004);
+      slackSimulatorURL = 'http://localhost:9004';
     });
 
     it('should return 200 when creating a slack action successfully', async () => {

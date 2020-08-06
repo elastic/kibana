@@ -6,16 +6,11 @@
 
 import http from 'http';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-  getWebhookServer,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getWebhookServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('webhook action', () => {
     let webhookSimulatorURL: string = '';

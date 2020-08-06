@@ -4,76 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
-import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
-} from 'kibana/server';
+import http from 'http';
 
-export function initPlugin(router: IRouter, path: string) {
-  router.post(
-    {
-      path,
-      options: {
-        authRequired: false,
-      },
-      validate: {
-        body: schema.object({
-          text: schema.string(),
-        }),
-      },
-    },
-    // ServiceNow simulator: create a servicenow action pointing here, and you can get
-    // different responses based on the message posted. See the README.md for
-    // more info.
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const body = req.body;
-      const text = body && body.text;
+export async function initPlugin() {
+  return http.createServer((request, response) => {
+    if (request.method === 'POST') {
+      let data = '';
+      request.on('data', (chunk) => {
+        data += chunk;
+      });
+      request.on('end', () => {
+        const body = JSON.parse(data);
+        const text = body && body.text;
 
-      if (text == null) {
-        return res.badRequest({ body: 'bad request to slack simulator' });
-      }
+        if (text == null) {
+          response.statusCode = 400;
+          response.end('bad request to slack simulator');
+          return;
+        }
 
-      switch (text) {
-        case 'success':
-          return res.ok({ body: 'ok' });
+        switch (text) {
+          case 'success': {
+            response.statusCode = 200;
+            response.end('ok');
+            return;
+          }
+          case 'no_text':
+            response.statusCode = 400;
+            response.end('no_text');
+            return;
 
-        case 'no_text':
-          return res.badRequest({ body: 'no_text' });
+          case 'invalid_payload':
+            response.statusCode = 400;
+            response.end('invalid_payload');
+            return;
 
-        case 'invalid_payload':
-          return res.badRequest({ body: 'invalid_payload' });
+          case 'invalid_token':
+            response.statusCode = 403;
+            response.end('invalid_token');
+            return;
 
-        case 'invalid_token':
-          return res.forbidden({ body: 'invalid_token' });
+          case 'status_500':
+            response.statusCode = 500;
+            response.end('simulated slack 500 response');
+            return;
 
-        case 'status_500':
-          return res.internalError({ body: 'simulated slack 500 response' });
+          case 'rate_limit':
+            const res = {
+              retry_after: 1,
+              ok: false,
+              error: 'rate_limited',
+            };
 
-        case 'rate_limit':
-          const response = {
-            retry_after: 1,
-            ok: false,
-            error: 'rate_limited',
-          };
-
-          return res.custom({
-            body: Buffer.from('ok'),
-            statusCode: 429,
-            headers: {
-              'retry-after': '1',
-            },
-          });
-      }
-
-      return res.badRequest({ body: 'unknown request to slack simulator' });
+            response.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '1' });
+            response.write(JSON.stringify(res));
+            response.end();
+            return;
+        }
+        response.statusCode = 400;
+        response.end('unknown request to slack simulator');
+      });
     }
-  );
+  });
 }

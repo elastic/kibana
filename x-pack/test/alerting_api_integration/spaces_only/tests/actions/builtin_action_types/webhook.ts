@@ -13,7 +13,6 @@ import { getWebhookServer } from '../../../../common/fixtures/plugins/actions_si
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -45,7 +44,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   describe('webhook action', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
-    // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
       webhookServer.listen(9003);

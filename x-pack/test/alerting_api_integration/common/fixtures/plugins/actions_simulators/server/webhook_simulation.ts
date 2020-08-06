@@ -48,7 +48,7 @@ export async function initPlugin() {
         }
         response.statusCode = 400;
         response.end(
-          `unknown request to webhook simulator [${body ? `content: ${body}` : `no content`}]`
+          `unknown request to webhook simulator [${data ? `content: ${data}` : `no content`}]`
         );
         return;
       });

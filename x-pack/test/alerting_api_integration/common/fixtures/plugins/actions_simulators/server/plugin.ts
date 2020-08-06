@@ -42,8 +42,12 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   return allPaths;
 }
 
-export async function getWebhookServer(): http.Server {
+export async function getWebhookServer(): Promise<http.Server> {
   return await initWebhook();
+}
+
+export async function getSlackServer(): Promise<http.Server> {
+  return await initSlack();
 }
 
 interface FixtureSetupDeps {
@@ -56,8 +60,6 @@ interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  private webhookHttpServer: http.Server | undefined = undefined;
-
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
     const notEnabledActionType: ActionType = {
@@ -101,7 +103,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
-    initSlack(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
   }
 
   public start() {}
