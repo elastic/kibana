@@ -393,7 +393,7 @@ export const EndpointList = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.endpointList.beta', {
+                label={i18n.translate('xpack.securitySolution.endpointList.beta', {
                   defaultMessage: 'Beta',
                 })}
               />
