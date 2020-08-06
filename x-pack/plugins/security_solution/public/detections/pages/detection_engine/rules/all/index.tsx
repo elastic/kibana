@@ -47,7 +47,7 @@ import { getColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';

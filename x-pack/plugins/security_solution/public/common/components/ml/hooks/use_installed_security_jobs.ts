@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
-import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from './use_ml_capabilities';
 import * as i18n from '../translations';
 import { useGetJobsSummary } from './use_get_jobs_summary';
 import { JobSummary } from '../types';

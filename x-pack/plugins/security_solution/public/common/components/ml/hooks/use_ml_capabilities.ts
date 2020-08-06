@@ -6,6 +6,6 @@
 
 import { useContext } from 'react';
 
-import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
+import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
 
 export const useMlCapabilities = () => useContext(MlCapabilitiesContext);

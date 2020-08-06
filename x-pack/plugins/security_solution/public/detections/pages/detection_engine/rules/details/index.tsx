@@ -71,7 +71,7 @@ import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_o
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
