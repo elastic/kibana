@@ -74,7 +74,7 @@ export const mockEndpointDetailsApiResult = (): HostInfo => {
  * API handlers for Host details based on a list of Host results.
  */
 const endpointListApiPathHandlerMocks = ({
-  endpointResults = mockEndpointResultList({ total: 3 }).hosts,
+  endpointsResults = mockEndpointResultList({ total: 3 }).hosts,
   epmPackages = [generator.generateEpmPackage()],
   endpointPackageConfigs = [],
   policyResponse = generator.generatePolicyResponse(),
@@ -97,10 +97,10 @@ const endpointListApiPathHandlerMocks = ({
     // host list
     '/api/endpoint/metadata': (): HostResultList => {
       return {
-        hosts: endpointResults,
+        hosts: endpointsResults,
         request_page_size: 10,
         request_page_index: 0,
-        total: endpointResults?.length || 0,
+        total: endpointsResults?.length || 0,
       };
     },
 
@@ -138,8 +138,8 @@ const endpointListApiPathHandlerMocks = ({
   };
 
   // Build a GET route handler for each host details based on the list of Hosts passed on input
-  if (endpointResults) {
-    endpointResults.forEach((host) => {
+  if (endpointsResults) {
+    endpointsResults.forEach((host) => {
       // @ts-expect-error
       apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
     });
