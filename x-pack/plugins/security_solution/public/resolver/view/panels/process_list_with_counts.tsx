@@ -19,7 +19,7 @@ import * as selectors from '../../store/selectors';
 import { CrumbInfo, formatter, StyledBreadcrumbs } from './panel_content_utilities';
 import { useResolverDispatch } from '../use_resolver_dispatch';
 import { SideEffectContext } from '../side_effect_context';
-import { CubeForProcess } from './process_cube_icon';
+import { CubeForProcess } from './cube_for_process';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { LimitWarning } from '../limit_warnings';
 
