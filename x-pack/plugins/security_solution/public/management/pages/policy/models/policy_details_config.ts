@@ -48,12 +48,12 @@ export function clone(policyDetailsConfig: UIPolicyConfig): UIPolicyConfig {
  * Returns value from `configuration`
  */
 export const getIn = (a: UIPolicyConfig) => <Key extends keyof UIPolicyConfig>(key: Key) => <
-  subKey extends keyof UIPolicyConfig[Key]
+  SubKey extends keyof UIPolicyConfig[Key]
 >(
-  subKey: subKey
-) => <LeafKey extends keyof UIPolicyConfig[Key][subKey]>(
+  subKey: SubKey
+) => <LeafKey extends keyof UIPolicyConfig[Key][SubKey]>(
   leafKey: LeafKey
-): UIPolicyConfig[Key][subKey][LeafKey] => {
+): UIPolicyConfig[Key][SubKey][LeafKey] => {
   return a[key][subKey][leafKey];
 };
 
@@ -61,11 +61,11 @@ export const getIn = (a: UIPolicyConfig) => <Key extends keyof UIPolicyConfig>(k
  * Returns cloned `configuration` with `value` set by the `keyPath`.
  */
 export const setIn = (a: UIPolicyConfig) => <Key extends keyof UIPolicyConfig>(key: Key) => <
-  subKey extends keyof UIPolicyConfig[Key]
+  SubKey extends keyof UIPolicyConfig[Key]
 >(
-  subKey: subKey
-) => <LeafKey extends keyof UIPolicyConfig[Key][subKey]>(leafKey: LeafKey) => <
-  V extends UIPolicyConfig[Key][subKey][LeafKey]
+  subKey: SubKey
+) => <LeafKey extends keyof UIPolicyConfig[Key][SubKey]>(leafKey: LeafKey) => <
+  V extends UIPolicyConfig[Key][SubKey][LeafKey]
 >(
   v: V
 ): UIPolicyConfig => {
