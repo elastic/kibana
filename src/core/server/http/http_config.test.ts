@@ -54,12 +54,12 @@ test('throws if invalid hostname', () => {
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
-describe('requestOpaqueId', () => {
+describe('requestId', () => {
   test('accepts valid ip addresses', () => {
     const {
-      requestOpaqueId: { ipAllowlist },
+      requestId: { ipAllowlist },
     } = config.schema.validate({
-      requestOpaqueId: {
+      requestId: {
         allowFromAnyIp: false,
         ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
       },
@@ -76,37 +76,37 @@ describe('requestOpaqueId', () => {
   test('rejects invalid ip addresses', () => {
     expect(() => {
       config.schema.validate({
-        requestOpaqueId: {
+        requestId: {
           allowFromAnyIp: false,
           ipAllowlist: ['1200:0000:AB00:1234:O000:2552:7777:1313', '[2001:db8:0:1]:80'],
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestOpaqueId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
+      `"[requestId.ipAllowlist.0]: value must be a valid ipv4 or ipv6 address"`
     );
   });
 
   test('rejects if allowFromAnyIp is `true` and `ipAllowlist` is non-empty', () => {
     expect(() => {
       config.schema.validate({
-        requestOpaqueId: {
+        requestId: {
           allowFromAnyIp: true,
           ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestOpaqueId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
     );
 
     expect(() => {
       config.schema.validate({
-        requestOpaqueId: {
+        requestId: {
           allowFromAnyIp: true,
           ipAllowlist: ['0.0.0.0', '123.123.123.123', '1200:0000:AB00:1234:0000:2552:7777:1313'],
         },
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[requestOpaqueId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
+      `"[requestId]: allowFromAnyIp must be set to 'false' if any values are specified in ipAllowlist"`
     );
   });
 });

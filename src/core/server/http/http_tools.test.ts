@@ -103,7 +103,7 @@ describe('timeouts', () => {
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
       compression: { enabled: true },
-      requestOpaqueId: {
+      requestId: {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },

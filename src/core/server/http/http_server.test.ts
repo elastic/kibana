@@ -68,7 +68,7 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
-    requestOpaqueId: {
+    requestId: {
       allowFromAnyIp: true,
       ipAllowlist: [],
     },

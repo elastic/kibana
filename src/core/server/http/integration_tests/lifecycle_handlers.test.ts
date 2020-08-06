@@ -62,7 +62,7 @@ describe('core lifecycle handlers', () => {
           'some-header': 'some-value',
         },
         xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
-        requestOpaqueId: {
+        requestId: {
           allowFromAnyIp: true,
           ipAllowlist: [],
         },

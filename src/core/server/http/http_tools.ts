@@ -171,7 +171,7 @@ export function defaultValidationErrorHandler(
   throw err;
 }
 
-export function getRequestId(request: Request, options: HttpConfig['requestOpaqueId']): string {
+export function getRequestId(request: Request, options: HttpConfig['requestId']): string {
   return options.allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
     (request.raw.req.socket?.remoteAddress &&
