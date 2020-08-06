@@ -6,53 +6,33 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
-import { getAnalysisType } from '../../../../common/analytics';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
-
-import { getResultsUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 import { getViewLinkStatus } from './get_view_link_status';
+
+export const viewActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.viewActionName',
+  {
+    defaultMessage: 'View',
+  }
+);
 
 interface ViewButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
 export const ViewButton: FC<ViewButtonProps> = ({ item }) => {
-  const navigateToPath = useNavigateToPath();
-
   const { disabled, tooltipContent } = getViewLinkStatus(item);
-  const analysisType = getAnalysisType(item.config.analysis);
-
-  const onClickHandler = () => navigateToPath(getResultsUrl(item.id, analysisType));
-
-  const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.viewActionName', {
-    defaultMessage: 'View',
-  });
-
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobViewButton"
-      flush="left"
-      iconType="visTable"
-      isDisabled={disabled}
-      onClick={onClickHandler}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
 
   if (disabled) {
     return (
       <EuiToolTip position="top" content={tooltipContent}>
-        {button}
+        <>{viewActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{viewActionButtonText}</>;
 };

@@ -6,44 +6,30 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.startActionName', {
-  defaultMessage: 'Start',
-});
+export const startActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.startActionName',
+  {
+    defaultMessage: 'Start',
+  }
+);
 
 interface StartButtonProps {
   canStartStopDataFrameAnalytics: boolean;
   isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
-  onClick: () => void;
 }
 
 export const StartButton: FC<StartButtonProps> = ({
   canStartStopDataFrameAnalytics,
   isDisabled,
   item,
-  onClick,
 }) => {
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobStartButton"
-      flush="left"
-      iconType="play"
-      isDisabled={isDisabled}
-      onClick={onClick}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
   if (isDisabled) {
     return (
       <EuiToolTip
@@ -58,10 +44,10 @@ export const StartButton: FC<StartButtonProps> = ({
               })
         }
       >
-        {button}
+        <>{startActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{startActionButtonText}</>;
 };

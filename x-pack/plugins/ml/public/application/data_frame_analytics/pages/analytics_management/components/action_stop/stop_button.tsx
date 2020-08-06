@@ -7,48 +7,32 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
-
-const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.stopActionName', {
-  defaultMessage: 'Stop',
-});
+export const stopActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.stopActionName',
+  {
+    defaultMessage: 'Stop',
+  }
+);
 
 interface StopButtonProps {
   isDisabled: boolean;
-  item: DataFrameAnalyticsListRow;
-  onClick: () => void;
 }
 
-export const StopButton: FC<StopButtonProps> = ({ isDisabled, item, onClick }) => {
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobStopButton"
-      flush="left"
-      iconType="stop"
-      isDisabled={isDisabled}
-      onClick={onClick}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
+export const StopButton: FC<StopButtonProps> = ({ isDisabled }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
         position="top"
         content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
       >
-        {button}
+        <>{stopActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{stopActionButtonText}</>;
 };

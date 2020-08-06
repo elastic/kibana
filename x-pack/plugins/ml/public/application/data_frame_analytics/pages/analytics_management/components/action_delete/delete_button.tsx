@@ -6,36 +6,23 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.deleteActionName', {
-  defaultMessage: 'Delete',
-});
+export const deleteActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.deleteActionName',
+  {
+    defaultMessage: 'Delete',
+  }
+);
 
 interface DeleteButtonProps {
   isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
-  onClick: () => void;
 }
 
-export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item, onClick }) => {
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobDeleteButton"
-      flush="left"
-      iconType="trash"
-      isDisabled={isDisabled}
-      onClick={onClick}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
+export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
@@ -51,10 +38,10 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item, onClick 
             : createPermissionFailureMessage('canStartStopDataFrameAnalytics')
         }
       >
-        {button}
+        <>{deleteActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{deleteActionButtonText}</>;
 };

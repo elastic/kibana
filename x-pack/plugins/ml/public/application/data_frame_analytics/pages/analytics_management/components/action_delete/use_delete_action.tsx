@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,10 +21,16 @@ import {
   canDeleteIndex,
 } from '../../services/analytics_service';
 
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import {
+  isDataFrameAnalyticsRunning,
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
+
+import { deleteActionButtonText, DeleteButton } from './delete_button';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
-export const useDeleteAction = () => {
+export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [item, setItem] = useState<DataFrameAnalyticsListRow>();
 
   const [isModalVisible, setModalVisible] = useState(false);
@@ -130,7 +136,27 @@ export const useDeleteAction = () => {
     setModalVisible(true);
   };
 
+  const action: DataFrameAnalyticsListAction = useMemo(
+    () => ({
+      name: (i: DataFrameAnalyticsListRow) => (
+        <DeleteButton
+          isDisabled={isDataFrameAnalyticsRunning(i.stats.state) || !canDeleteDataFrameAnalytics}
+          item={i}
+        />
+      ),
+      enabled: (i: DataFrameAnalyticsListRow) =>
+        !isDataFrameAnalyticsRunning(i.stats.state) && canDeleteDataFrameAnalytics,
+      description: deleteActionButtonText,
+      icon: 'trash',
+      type: 'icon',
+      onClick: (i: DataFrameAnalyticsListRow) => openModal(i),
+      'data-test-subj': 'mlAnalyticsJobDeleteButton',
+    }),
+    []
+  );
+
   return {
+    action,
     closeModal,
     deleteAndCloseModal,
     deleteTargetIndex,

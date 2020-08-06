@@ -7,7 +7,6 @@
 export {
   extractCloningConfig,
   isAdvancedConfig,
-  useNavigateToWizardWithClonedJob,
-  CloneButton,
   CloneDataFrameAnalyticsConfig,
 } from './clone_button';
+export { useCloneAction } from './use_clone_action';

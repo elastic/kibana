@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { DataFrameAnalyticsListRow } from '../analytics_list/common';
+import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
+
+import { editActionButtonText, EditButton } from './edit_button';
 
 export const isEditActionFlyoutVisible = (editAction: any): editAction is Required<EditAction> => {
   return editAction.isFlyoutVisible === true && editAction.item !== undefined;
@@ -18,7 +20,7 @@ export interface EditAction {
   closeFlyout: () => void;
   openFlyout: (newItem: DataFrameAnalyticsListRow) => void;
 }
-export const useEditAction = () => {
+export const useEditAction = (canStartStopDataFrameAnalytics: boolean) => {
   const [item, setItem] = useState<DataFrameAnalyticsListRow>();
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -28,7 +30,21 @@ export const useEditAction = () => {
     setIsFlyoutVisible(true);
   };
 
+  const action: DataFrameAnalyticsListAction = useMemo(
+    () => ({
+      name: () => <EditButton isDisabled={!canStartStopDataFrameAnalytics} />,
+      enabled: () => canStartStopDataFrameAnalytics,
+      description: editActionButtonText,
+      icon: 'pencil',
+      type: 'icon',
+      onClick: (i: DataFrameAnalyticsListRow) => openFlyout(i),
+      'data-test-subj': 'mlAnalyticsJobEditButton',
+    }),
+    [canStartStopDataFrameAnalytics]
+  );
+
   return {
+    action,
     isFlyoutVisible,
     item,
     closeFlyout,

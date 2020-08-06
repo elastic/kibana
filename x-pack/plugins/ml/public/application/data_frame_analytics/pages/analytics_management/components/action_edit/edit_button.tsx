@@ -8,33 +8,20 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
-const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.editActionName', {
-  defaultMessage: 'Edit',
-});
+export const editActionButtonText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.editActionName',
+  {
+    defaultMessage: 'Edit',
+  }
+);
 
 interface EditButtonProps {
   isDisabled: boolean;
-  onClick: () => void;
 }
 
-export const EditButton: FC<EditButtonProps> = ({ isDisabled, onClick }) => {
-  const button = (
-    <EuiButtonEmpty
-      aria-label={buttonText}
-      color="text"
-      data-test-subj="mlAnalyticsJobEditButton"
-      flush="left"
-      iconType="pencil"
-      isDisabled={isDisabled}
-      onClick={onClick}
-      size="xs"
-    >
-      {buttonText}
-    </EuiButtonEmpty>
-  );
-
+export const EditButton: FC<EditButtonProps> = ({ isDisabled }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
@@ -43,10 +30,10 @@ export const EditButton: FC<EditButtonProps> = ({ isDisabled, onClick }) => {
           defaultMessage: 'You do not have permission to edit analytics jobs.',
         })}
       >
-        {button}
+        <>{editActionButtonText}</>
       </EuiToolTip>
     );
   }
 
-  return button;
+  return <>{editActionButtonText}</>;
 };
