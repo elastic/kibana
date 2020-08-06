@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('create_lists', () => {
     describe('validation errors', () => {
-      it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
+      it('should give an error that the index must exist first if it does not exist before creating a list', async () => {
         const { body } = await supertest
           .post(LIST_URL)
           .set('kbn-xsrf', 'true')
