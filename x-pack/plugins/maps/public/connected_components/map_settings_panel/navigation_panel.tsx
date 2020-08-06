@@ -42,6 +42,12 @@ const initialLocationOptions = [
     }),
   },
   {
+    id: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS,
+    label: i18n.translate('xpack.maps.mapSettingsPanel.autoFitToBoundsLocationLabel', {
+      defaultMessage: 'Auto fit map to data bounds',
+    }),
+  },
+  {
     id: INITIAL_LOCATION.FIXED_LOCATION,
     label: i18n.translate('xpack.maps.mapSettingsPanel.fixedLocationLabel', {
       defaultMessage: 'Fixed location',
@@ -125,7 +131,10 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
   };
 
   function renderInitialLocationInputs() {
-    if (settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION) {
+    if (
+      settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION ||
+      settings.initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS
+    ) {
       return null;
     }
 
