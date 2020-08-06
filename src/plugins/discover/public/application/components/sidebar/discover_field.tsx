@@ -50,14 +50,6 @@ export interface DiscoverFieldProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Callback to hide/show details, buckets of the field
-   */
-  onShowDetails: (show: boolean, field: IndexPatternField) => void;
-  /**
-   * Determines, whether details of the field are displayed
-   */
-  showDetails: boolean;
-  /**
    * Retrieve details data for the field
    */
   getDetails: (field: IndexPatternField) => FieldDetails;
@@ -77,8 +69,6 @@ export function DiscoverField({
   onAddField,
   onRemoveField,
   onAddFilter,
-  onShowDetails,
-  showDetails,
   getDetails,
   selected,
   useShortDots,
@@ -209,15 +199,6 @@ export function DiscoverField({
           onAddFilter={onAddFilter}
         />
       </EuiPopover>
-
-      {showDetails && (
-        <DiscoverFieldDetails
-          indexPattern={indexPattern}
-          field={field}
-          details={getDetails(field)}
-          onAddFilter={onAddFilter}
-        />
-      )}
     </>
   );
 }
