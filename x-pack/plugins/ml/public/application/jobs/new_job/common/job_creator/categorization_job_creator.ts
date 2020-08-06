@@ -75,6 +75,11 @@ export class CategorizationJobCreator extends JobCreator {
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
     dtr.by_field_name = mlCategory.id;
+
+    // API requires if per_partition_categorization is enabled, add partition field to the detector
+    if (this.perPartitionCategorization && this.categorizationPerPartitionField !== null) {
+      dtr.partition_field_name = this.categorizationPerPartitionField;
+    }
     this._addDetector(dtr, agg, mlCategory);
   }
 
