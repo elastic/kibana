@@ -18,6 +18,7 @@
  */
 
 import { EnvironmentService, EnvironmentServiceSetup } from './environment';
+import { MlCardState } from '../../types';
 
 const createSetupMock = (): jest.Mocked<EnvironmentServiceSetup> => {
   const setup = {
@@ -30,9 +31,7 @@ const createMock = (): jest.Mocked<PublicMethodsOf<EnvironmentService>> => {
   const service = {
     setup: jest.fn(),
     getEnvironment: jest.fn(() => ({
-      cloud: false,
-      apmUi: false,
-      ml: false,
+      ml: () => MlCardState.ENABLED,
     })),
   };
   service.setup.mockImplementation(createSetupMock);

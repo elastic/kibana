@@ -17,26 +17,25 @@
  * under the License.
  */
 
+import { MlCardState } from '../../types';
+
 /** @public */
 export interface Environment {
   /**
-   * Flag whether the home app should advertise ml features
+   * Flag whether ml features should be advertised
    */
-  readonly ml: boolean;
+  readonly ml: () => MlCardState;
 }
 
 export class EnvironmentService {
   private environment = {
-    ml: false,
+    ml: () => MlCardState.DISABLED,
   };
 
   public setup() {
     return {
       /**
-       * Update the environment to influence how the home app is presenting available features.
-       * This API should not be extended for new features and will be removed in future versions
-       * in favor of display specific extension apis.
-       * @deprecated
+       * Update the environment to influence how available features are presented.
        * @param update
        */
       update: (update: Partial<Environment>) => {

@@ -44,9 +44,15 @@ export interface IndexPatternManagmentContext {
   data: DataPublicPluginStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  isMlAvailable: () => boolean;
+  getMlCardState: () => MlCardState;
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<
   IndexPatternManagmentContext
 >;
+
+export enum MlCardState {
+  HIDDEN,
+  DISABLED,
+  ENABLED,
+}

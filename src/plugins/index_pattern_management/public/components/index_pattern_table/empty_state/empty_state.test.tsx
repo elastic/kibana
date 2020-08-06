@@ -25,6 +25,7 @@ import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { docLinksServiceMock } from '../../../../../../core/public/mocks';
+import { MlCardState } from '../../../types';
 
 const docLinks = docLinksServiceMock.createStartContract();
 
@@ -41,7 +42,7 @@ describe('EmptyState', () => {
         docLinks={docLinks}
         onRefresh={() => {}}
         navigateToApp={async () => {}}
-        isMlAvailable={() => true}
+        getMlCardState={() => MlCardState.ENABLED}
         canSave={true}
       />
     );
@@ -59,7 +60,7 @@ describe('EmptyState', () => {
             docLinks={docLinks}
             onRefresh={onRefreshHandler}
             navigateToApp={async () => {}}
-            isMlAvailable={() => true}
+            getMlCardState={() => MlCardState.ENABLED}
             canSave={true}
           />
         );
