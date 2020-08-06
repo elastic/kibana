@@ -19,7 +19,7 @@
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
-import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
+import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
 import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
 import { ISearchOptions } from './types';
@@ -29,10 +29,10 @@ import { SearchUsageCollector } from './collectors';
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
 
 export interface SearchInterceptorDeps {
-  toasts: ToastsStart;
-  application: ApplicationStart;
-  http: CoreStart['http'];
-  uiSettings: CoreStart['uiSettings'];
+  toasts: ToastsSetup;
+  http: CoreSetup['http'];
+  uiSettings: CoreSetup['uiSettings'];
+  startServices: Promise<[CoreStart, any, unknown]>;
   usageCollector?: SearchUsageCollector;
 }
 
@@ -62,6 +62,8 @@ export class SearchInterceptor {
    */
   protected longRunningToast?: Toast;
 
+  protected application!: CoreStart['application'];
+
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
@@ -74,6 +76,10 @@ export class SearchInterceptor {
     protected readonly requestTimeout?: number
   ) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
+
+    this.deps.startServices.then(([coreStart]) => {
+      this.application = coreStart.application;
+    });
 
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
@@ -172,7 +178,7 @@ export class SearchInterceptor {
       {
         title: 'Your query is taking awhile',
         text: getLongQueryNotification({
-          application: this.deps.application,
+          application: this.application,
         }),
       },
       {

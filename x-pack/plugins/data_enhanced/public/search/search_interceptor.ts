@@ -20,8 +20,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application The `core.application` service
+   * @param deps `SearchInterceptorDeps`
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
   constructor(deps: SearchInterceptorDeps, requestTimeout?: number) {

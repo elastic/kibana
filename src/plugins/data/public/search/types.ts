@@ -58,12 +58,17 @@ export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
 }
 
+export interface SearchEnhancements {
+  searchInterceptor: SearchInterceptor;
+}
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
  */
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
+  usageCollector?: SearchUsageCollector;
+  enhance: (enhancements: SearchEnhancements) => void;
 }
 
 export interface ISearchStart {
@@ -74,7 +79,6 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  usageCollector?: SearchUsageCollector;
   __LEGACY: ISearchStartLegacy;
 }
 
