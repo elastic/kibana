@@ -288,6 +288,13 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.click('advancedParams-1');
           await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
         });
+
+        it('count agg should not have advanced accordion and json input', async () => {
+          await PageObjects.visEditor.clickMetricEditor();
+          log.debug('Count aggregation');
+          await PageObjects.visEditor.selectAggregation('Count', 'metrics');
+          await testSubjects.missingOrFail('advancedParams-1');
+        });
       });
 
       describe('sibling pipeline', () => {
