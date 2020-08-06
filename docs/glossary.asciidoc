@@ -214,6 +214,13 @@ syslog, Apache, and other webserver logs. See
 [[k_glos]]
 == K
 
+[[glossary-kibana-privileges]] {kib} privileges ::
+// tag::kibana-privileges-def[]
+Enable administrators to grant users read-only, read-write, or no access to 
+individual features within <<glossary-space,spaces>> in {kib}. See
+{kibana-ref}/kibana-privileges.html[{kib} privileges].
+// end::kibana-privileges-def[]
+
 [[glossary-kql]] {kib} Query Language (KQL) ::
 // tag::kql-def[]
 The default language for querying in {kib}. KQL provides
