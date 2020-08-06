@@ -335,7 +335,7 @@ export class Plugin {
             },
             getActionsClient: () => {
               try {
-                return plugins.alerts.getActionsClientWithRequest(req);
+                return plugins.actions.getActionsClientWithRequest(req);
               } catch (err) {
                 // If security is disabled, this call will throw an error unless a certain config is set for dist builds
                 return null;
