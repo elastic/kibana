@@ -344,6 +344,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 {alertData !== undefined && alertStatus !== 'closed' && (
                   <EuiFormRow fullWidth>
                     <EuiCheckbox
+                      data-test-subj="close-alert-on-add-add-exception-checkbox"
                       id="close-alert-on-add-add-exception-checkbox"
                       label="Close this alert"
                       checked={shouldCloseAlert}
@@ -353,6 +354,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 )}
                 <EuiFormRow fullWidth>
                   <EuiCheckbox
+                    data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"
                     id="bulk-close-alert-on-add-add-exception-checkbox"
                     label={
                       shouldDisableBulkClose
@@ -380,6 +382,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="add-exception-confirm-button"
             onClick={onAddExceptionConfirm}
             isLoading={addExceptionIsLoading}
             isDisabled={isSubmitButtonDisabled}
