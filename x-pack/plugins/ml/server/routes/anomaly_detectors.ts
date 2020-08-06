@@ -583,9 +583,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         const results = await legacyClient.callAsInternalUser('ml.modelSnapshots', {
           jobId: request.params.jobId,
         });
-        // const results = await legacyClient.callAsInternalUser('ml.modelSnapshots', {
-        //   jobId: request.params.jobId,
-        // });
         return response.ok({
           body: results,
         });
