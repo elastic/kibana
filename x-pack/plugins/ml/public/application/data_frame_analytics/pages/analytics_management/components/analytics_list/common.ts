@@ -130,6 +130,6 @@ export function isCompletedAnalyticsJob(stats: DataFrameAnalyticsStats) {
   return stats.state === DATA_FRAME_TASK_STATE.STOPPED && progress === 100;
 }
 
-export function getResultsUrl(jobId: string, analysisType: string) {
+export function getResultsUrl(jobId: string, analysisType: ANALYSIS_CONFIG_TYPE | string) {
   return `#/data_frame_analytics/exploration?_g=(ml:(jobId:${jobId},analysisType:${analysisType}))`;
 }
