@@ -284,11 +284,7 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && (
-              <>
-                <AboutPanel onFilePickerChange={this.onFilePickerChange} />
-              </>
-            )}
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
 
@@ -301,7 +297,7 @@ export class FileDataVisualizerView extends Component {
                 <FileCouldNotBeRead
                   error={serverError}
                   loaded={loaded}
-                  showEditFlyout={() => this.showEditFlyout()}
+                  showEditFlyout={this.showEditFlyout}
                 />
                 <EuiSpacer size="l" />
               </>
@@ -313,8 +309,8 @@ export class FileDataVisualizerView extends Component {
                 explanation={explanation}
                 fileName={fileName}
                 data={fileContents}
-                showEditFlyout={() => this.showEditFlyout()}
-                showExplanationFlyout={() => this.showExplanationFlyout()}
+                showEditFlyout={this.showEditFlyout}
+                showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
               />
             )}
