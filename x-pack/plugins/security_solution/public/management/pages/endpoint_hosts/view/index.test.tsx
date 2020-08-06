@@ -313,6 +313,7 @@ describe('when on the hosts page', () => {
 
     beforeEach(async () => {
       const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { host, ...details },
       } = mockHostDetailsApiResult();
