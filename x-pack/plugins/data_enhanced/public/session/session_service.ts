@@ -5,24 +5,23 @@
  */
 
 import { HttpStart } from 'kibana/public';
-import { DataPublicPluginStart, SessionService } from '../../../../../src/plugins/data/public';
+import { SessionService } from '../../../../../src/plugins/data/public';
 import { IEnhancedSessionService } from '../search/types';
 
 export class EnhancedSessionService extends SessionService implements IEnhancedSessionService {
   constructor(
     private readonly http: HttpStart,
-    private readonly search: DataPublicPluginStart['search']
   ) {
     super();
   }
 
   public async store(sessionId?: string) {
-    return await this.http.post(`/internal/session/${sessionId || this.search.session.get()}/save`);
+    return await this.http.post(`/internal/session/${sessionId || this.get()}/save`);
   }
 
   public async getSearchIds(sessionId?: string) {
     try {
-      return await this.http.get(`/internal/session/${sessionId || this.search.session.get()}`);
+      return await this.http.get(`/internal/session/${sessionId || this.get()}`);
     } catch (e) {
       return undefined;
     }

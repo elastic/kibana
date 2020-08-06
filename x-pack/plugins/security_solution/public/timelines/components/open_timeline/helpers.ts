@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable complexity */
-
 import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
@@ -238,7 +236,6 @@ export const getTimelineStatus = (
   return duplicate ? TimelineStatus.active : timeline.status;
 };
 
-// eslint-disable-next-line complexity
 export const defaultTimelineToTimelineModel = (
   timeline: TimelineResult,
   duplicate: boolean,
@@ -326,7 +323,6 @@ export const queryTimelineById = <TCache>({
         fetchPolicy: 'no-cache',
         variables: { id: timelineId },
       })
-      // eslint-disable-next-line
       .then((result) => {
         const timelineToOpen: TimelineResult = omitTypenameInTimeline(
           getOr({}, 'data.getOneTimeline', result)
@@ -374,7 +370,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
-  dispatch(dispatchAddTimeline({ id, timeline }));
+  dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (
     timeline.kqlQuery != null &&
     timeline.kqlQuery.filterQuery != null &&

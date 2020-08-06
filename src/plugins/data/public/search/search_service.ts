@@ -18,7 +18,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
-import { ISearchSetup, ISearchStart } from './types';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
@@ -92,15 +92,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggFunctions = getAggTypesFunctions();
     aggFunctions.forEach((fn) => expressions.registerFunction(fn));
 
-    return {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        types: aggTypesSetup,
-      },
-    };
-  }
-
-  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -113,14 +104,27 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       {
         session: sessionService,
         toasts: core.notifications.toasts,
-        application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
         usageCollector: this.usageCollector!,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
+    return {
+      usageCollector: this.usageCollector!,
+      enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
+      },
+      aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+        types: aggTypesSetup,
+      },
+    };
+  }
+
+  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     const aggTypesStart = this.aggTypesRegistry.start();
 
     const search: ISearchGeneric = (request, options) => {
@@ -156,9 +160,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
-      },
-      setInterceptor: (searchInterceptor: SearchInterceptor) => {
-        this.searchInterceptor = searchInterceptor;
       },
       subscribe: (handler: (e: SearchEventInfo) => void) => {
         return this.searchInterceptor?.getEvents$().subscribe({

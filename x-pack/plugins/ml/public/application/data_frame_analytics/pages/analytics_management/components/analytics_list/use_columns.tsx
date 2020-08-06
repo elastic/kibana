@@ -258,6 +258,7 @@ export const useColumns = (
       }),
       actions,
       width: isManagementTable === true ? '100px' : '150px',
+      'data-test-subj': 'mlAnalyticsTableColumnActions',
     },
   ];
 

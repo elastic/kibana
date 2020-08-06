@@ -20,16 +20,11 @@ export interface DataEnhancedStartDependencies {
 }
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
-export interface DataEnhancedStart {
-  search: {
-    session: EnhancedSessionService;
-  };
-}
+export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin
   implements
     Plugin<void, DataEnhancedStart, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
-  private sessionService!: EnhancedSessionService;
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
@@ -39,24 +34,31 @@ export class DataEnhancedPlugin
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-  }
 
-  public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
-    setAutocompleteService(plugins.data.autocomplete);
-    this.sessionService = new EnhancedSessionService(core.http, plugins.data.search);
+    const sessionService = new EnhancedSessionService(core.http);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
       {
-        session: this.sessionService,
+        session: sessionService,
         toasts: core.notifications.toasts,
-        application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
-        usageCollector: plugins.data.search.usageCollector,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
-    plugins.data.search.setInterceptor(enhancedSearchInterceptor);
+
+    data.enhance({
+      search: {
+        searchInterceptor: enhancedSearchInterceptor,
+        sessionService
+      },
+    });
+  }
+
+  public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
+    setAutocompleteService(plugins.data.autocomplete);
 
     /*
       Clear any open sessions upon navigation to make sure they are not used mistakenly by
@@ -66,10 +68,5 @@ export class DataEnhancedPlugin
       plugins.data.search.session.clear();
     });
 
-    return {
-      search: {
-        session: this.sessionService,
-      },
-    };
   }
 }

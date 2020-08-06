@@ -20,7 +20,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
-   * @param deps
+   * @param deps `SearchInterceptorDeps`
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
   constructor(protected readonly deps: EnhancedSearchInterceptorDeps, requestTimeout?: number) {
