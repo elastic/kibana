@@ -593,6 +593,7 @@ export type SafeEndpointEvent = Partial<{
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
+    sequence: ECSField<number>;
   }>;
   host: Partial<{
     id: ECSField<string>;

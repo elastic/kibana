@@ -7,13 +7,16 @@
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { ChildrenPaginationCursor } from './children_pagination';
 
-type SortFields = [
+export type SortFields = [
   {
     '@timestamp': string;
   },
   { [x: string]: string }
 ];
+
+export type Decoder<T> = (parsed: T | undefined) => T | undefined;
 
 type SearchAfterFields = [number, string];
 
@@ -31,10 +34,31 @@ export interface PaginationFields {
   searchAfter?: SearchAfterFields;
 }
 
+export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
+  const value = JSON.stringify(data);
+  return Buffer.from(value, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+export function urlDecodeCursor<T>(cursor: string, decode: Decoder<T>): T | undefined {
+  const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
+  const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
+  let parsed: T;
+  try {
+    parsed = JSON.parse(data);
+  } catch (e) {
+    return;
+  }
+
+  return decode(parsed);
+}
+
 /**
  * This class handles constructing pagination cursors that resolver can use to return additional events in subsequent
- * queries. It also constructs an aggregation query to determine the totals for other queries. This class should be used
- * with a query to build cursors for paginated results.
+ * queries.
  */
 export class PaginationBuilder {
   constructor(
@@ -52,22 +76,11 @@ export class PaginationBuilder {
     private readonly eventID?: string
   ) {}
 
-  private static urlEncodeCursor(data: PaginationCursor): string {
-    const value = JSON.stringify(data);
-    return Buffer.from(value, 'utf8')
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/g, '');
-  }
-
-  private static urlDecodeCursor(cursor: string): PaginationCursor {
-    const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
-    const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
-    const { timestamp, eventID } = JSON.parse(data);
-    // take some extra care to only grab the things we want
-    // convert the timestamp string to date object
-    return { timestamp, eventID };
+  static decode(parsed: PaginationCursor | undefined): PaginationCursor | undefined {
+    if (parsed && parsed.timestamp && parsed.eventID) {
+      const { timestamp, eventID } = parsed;
+      return { timestamp, eventID };
+    }
   }
 
   /**
@@ -81,7 +94,7 @@ export class PaginationBuilder {
       timestamp: lastResult['@timestamp'],
       eventID: eventId(lastResult) === undefined ? '' : String(eventId(lastResult)),
     };
-    return PaginationBuilder.urlEncodeCursor(cursor);
+    return urlEncodeCursor(cursor);
   }
 
   /**
@@ -107,8 +120,8 @@ export class PaginationBuilder {
   static createBuilder(limit: number, after?: string): PaginationBuilder {
     if (after) {
       try {
-        const cursor = PaginationBuilder.urlDecodeCursor(after);
-        if (cursor.timestamp && cursor.eventID) {
+        const cursor = urlDecodeCursor(after, PaginationBuilder.decode);
+        if (cursor && cursor.timestamp && cursor.eventID) {
           return new PaginationBuilder(limit, cursor.timestamp, cursor.eventID);
         }
       } catch (err) {
