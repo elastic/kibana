@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
         expect(body.request_page_index).to.eql(1);
@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(30);
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(2);
+        expect(body.total).to.eql(2);
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(2);
+        expect(body.total).to.eql(2);
         const resultIps: string[] = [].concat(
           ...body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.ip)
         );
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(1);
         const resultOsVariantValue: Set<string> = new Set(
           body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.Ext.variant)
         );
@@ -262,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(1);
         const resultIp: string = body.hosts[0].metadata.host.ip.filter(
           (ip: string) => ip === targetEndpointIp
         );
@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(1);
         const resultHostId: string = body.hosts[0].metadata.host.id;
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
@@ -326,7 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
