@@ -176,9 +176,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async hasChartSwitchWarning(subVisualizationId: string) {
       await this.openChartSwitchPopover();
-
       const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
-      return await testSubjects.descendantExists('euiKeyPadMenuItem__betaBadgeWrapper', element);
+      return await find.descendantExistsByCssSelector(
+        '.euiKeyPadMenuItem__betaBadgeWrapper',
+        element
+      );
     },
 
     /**
@@ -231,8 +233,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         'lns-dimensionTrigger',
         dimensionElements[index]
       );
-      const text = await trigger.getVisibleText();
-      return text;
+      return await trigger.getVisibleText();
     },
 
     /**
@@ -240,7 +241,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param index - index of th element in datatable
      */
-    async getDatatableThText(index = 0) {
+    async getDatatableHeaderText(index = 0) {
       return find
         .byCssSelector(
           `[data-test-subj="lnsDataTable"] thead th:nth-child(${

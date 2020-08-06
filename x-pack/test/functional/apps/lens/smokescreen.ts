@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
-      expect(await PageObjects.lens.getDatatableThText()).to.eql('Maximum of bytes');
+      expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
       await PageObjects.lens.switchToVisualization('lnsMetric');
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
@@ -114,6 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('lnsXYvis');
       await PageObjects.lens.clickVisualizeListItemTitle('lnsXYvis');
       await PageObjects.lens.goToTimeRange();
+      expect(await PageObjects.lens.hasChartSwitchWarning('donut')).to.eql(true);
       await PageObjects.lens.switchToVisualization('donut');
 
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
@@ -124,8 +125,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Average of bytes'
       );
 
+      expect(await PageObjects.lens.hasChartSwitchWarning('bar')).to.eql(false);
       await PageObjects.lens.switchToVisualization('bar');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+        'Top values of ip'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
     });
 
     it('should allow seamless transition from bar chart to line chart using layer chart switch', async () => {
@@ -135,6 +143,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchLayerSeriesType('line');
       expect(await PageObjects.lens.getTitle()).to.eql('lnsXYvis');
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+        '@timestamp'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Average of bytes'
+      );
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
+        'Top values of ip'
+      );
     });
 
     it('should allow seamless transition from pie chart to treemap chart', async () => {
@@ -172,11 +189,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
+      expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
-      expect(await PageObjects.lens.getDatatableThText()).to.eql('@timestamp per 3 hours');
+      expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
-      expect(await PageObjects.lens.getDatatableThText(1)).to.eql('Average of bytes');
+      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
   });
