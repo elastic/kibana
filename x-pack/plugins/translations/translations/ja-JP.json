@@ -4534,7 +4534,6 @@
     "visualize.createVisualization.noVisTypeErrorMessage": "有効なビジュアライゼーションタイプを指定してください",
     "visualize.editor.createBreadcrumb": "作成",
     "visualize.error.title": "ビジュアライゼーションエラー",
-    "visualize.experimentalVisInfoText": "このビジュアライゼーションは実験的なものです。フィードバックがありますか？で問題を報告してください。",
     "visualize.helpMenu.appName": "可視化",
     "visualize.linkedToSearch.unlinkSuccessNotificationText": "保存された検索「{searchTitle}」からリンクが解除されました",
     "visualize.listing.betaTitle": "ベータ",
