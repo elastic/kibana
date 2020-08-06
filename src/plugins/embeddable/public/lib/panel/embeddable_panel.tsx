@@ -30,6 +30,7 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
+  contextMenuTrigger,
 } from '../triggers';
 import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
@@ -314,7 +315,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       actions: sortedActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
-        trigger: null,
+        trigger: contextMenuTrigger,
       })),
       closeMenu: this.closeMyContextMenuPanel,
     });

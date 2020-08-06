@@ -19,6 +19,7 @@
 
 import { createFilterAction } from './apply_filter_action';
 import { expectErrorAsync } from '../../tests/helpers';
+import { defaultTrigger } from '../../../../ui_actions/public/triggers';
 
 test('has ACTION_APPLY_FILTER type and id', () => {
   const action = createFilterAction();
@@ -51,7 +52,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
-      trigger: null,
+      trigger: defaultTrigger,
     });
     expect(result).toBe(true);
   });
@@ -67,7 +68,7 @@ describe('isCompatible()', () => {
         }),
       } as any,
       filters: [],
-      trigger: null,
+      trigger: defaultTrigger,
     });
     expect(result).toBe(false);
   });
@@ -121,7 +122,7 @@ describe('execute()', () => {
       await action.execute({
         embeddable,
         filters: ['FILTER' as any],
-        trigger: null,
+        trigger: defaultTrigger,
       });
 
       expect(root.updateInput).toHaveBeenCalledTimes(1);

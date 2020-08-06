@@ -37,7 +37,7 @@ interface ActionWithContext<Context extends BaseContext = BaseContext> {
   /**
    * Trigger that caused this action
    */
-  trigger: Trigger | null;
+  trigger: Trigger;
 }
 
 /**
@@ -105,7 +105,7 @@ async function convertPanelActionToContextMenuItem<Context extends object>({
 }: {
   action: Action<Context>;
   actionContext: Context;
-  trigger: Trigger | null;
+  trigger: Trigger;
   closeMenu: () => void;
 }): Promise<EuiContextMenuPanelItemDescriptor> {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {

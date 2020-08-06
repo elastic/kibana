@@ -35,12 +35,20 @@ export interface ActionExecutionMeta {
   /**
    * Trigger that executed the action
    */
-  trigger: Trigger | null;
+  trigger: Trigger;
 }
 
+/**
+ * Action methods are executed with Context from trigger + {@link ActionExecutionMeta}
+ */
 export type ActionExecutionContext<Context extends BaseContext = BaseContext> = Context &
   ActionExecutionMeta;
 
+/**
+ * Simplified action context for {@link ActionDefinition}
+ * When defining action consumer may use either it's own Context
+ * or an ActionExecutionContext<Context> to get access to {@link ActionExecutionMeta} params
+ */
 export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | Context
   | ActionExecutionContext<Context>;
