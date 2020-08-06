@@ -213,6 +213,8 @@ export const getDescriptionItem = (
   } else if (field === 'ruleType') {
     const ruleType: RuleType = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
+  } else if (field === 'kibanaSiemAppUrl') {
+    return [];
   }
 
   const description: string = get(field, data);
