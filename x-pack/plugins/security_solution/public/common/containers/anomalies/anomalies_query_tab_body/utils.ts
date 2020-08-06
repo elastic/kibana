@@ -8,19 +8,18 @@ import deepmerge from 'deepmerge';
 
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
-import { SiemJob } from '../../../components/ml_popover/types';
+import { JobSummary } from '../../../components/ml/types';
 import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesFilterQuery = (
   filterQuery: string | ESTermQuery | undefined,
   anomaliesFilterQuery: object = {},
-  siemJobs: SiemJob[] = [],
+  siemJobs: JobSummary[] = [],
   anomalyScore: number,
   flowTarget?: FlowTarget,
   ip?: string
 ): string => {
   const siemJobIds = siemJobs
-    .filter((job) => job.isInstalled)
     .map((job) => job.id)
     .map((jobId) => ({
       match_phrase: {
