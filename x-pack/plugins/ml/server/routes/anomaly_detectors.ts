@@ -779,7 +779,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/stopped_partitions',
       validate: {
-        query: jobIdSchema,
+        params: jobIdSchema,
       },
       options: {
         tags: ['access:ml:canCreateJob'],
