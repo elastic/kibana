@@ -142,6 +142,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                         arg: { processor, selector },
                       });
                     }}
+                    data-test-subj="manageItemButton"
                   >
                     <b>{processor.type}</b>
                   </EuiLink>
