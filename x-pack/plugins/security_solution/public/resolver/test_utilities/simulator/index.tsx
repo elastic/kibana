@@ -10,7 +10,6 @@ import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
@@ -98,9 +97,6 @@ export class Simulator {
         databaseDocumentID={databaseDocumentID}
       />
     );
-
-    // Update the enzyme wrapper after each state transition
-    connectEnzymeWrapperAndStore(this.store, this.wrapper);
   }
 
   /**
