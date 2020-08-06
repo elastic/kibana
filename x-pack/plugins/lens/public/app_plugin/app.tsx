@@ -168,6 +168,7 @@ export function App({
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    core.notifications.toasts,
     core.uiSettings,
     data.query,
     history,
