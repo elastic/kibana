@@ -293,7 +293,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
     const { stops, defaultColor } = this._getColorStops();
     const breaks = [];
-    stops.forEach(({ stop, color }: { stop: number | null; color: string }) => {
+    stops.forEach(({ stop, color }: { stop: string | number | null; color: string }) => {
       if (stop !== null) {
         breaks.push({
           color,

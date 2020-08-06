@@ -15,7 +15,7 @@ const EMPTY_VALUE = '';
 interface Break {
   color: string;
   label: ReactElement<any> | string | number;
-  symbolId: string;
+  symbolId?: string;
 }
 
 interface Props {

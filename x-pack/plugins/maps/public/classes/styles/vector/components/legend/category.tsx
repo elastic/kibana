@@ -15,7 +15,7 @@ interface Props {
   color: string;
   isLinesOnly: boolean;
   isPointsOnly: boolean;
-  symbolId: string;
+  symbolId?: string;
 }
 
 export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, symbolId }: Props) {
