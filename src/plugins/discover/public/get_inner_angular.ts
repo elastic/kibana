@@ -45,7 +45,6 @@ import { CollapsibleSidebarProvider } from './application/angular/directives/col
 import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
 // @ts-ignore
 import { DebounceProviderTimeout } from './application/angular/directives/debounce/debounce';
-import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
   configureAppAngularModule,
@@ -130,7 +129,6 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective)
       .service('debounce', ['$timeout', DebounceProviderTimeout]);
   }
 
@@ -155,7 +153,6 @@ export function initializeInnerAngularModule(
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
     .directive('fixedScroll', FixedScrollProvider)
-    .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverSidebar', createDiscoverSidebarDirective)
     .directive('skipBottomButton', createSkipBottomButtonDirective)
     .directive('hitsCounter', createHitsCounterDirective)

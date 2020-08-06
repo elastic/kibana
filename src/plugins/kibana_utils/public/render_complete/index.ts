@@ -31,5 +31,3 @@ export function dispatchRenderComplete(el: HTMLElement) {
 export function dispatchRenderStart(el: HTMLElement) {
   dispatchCustomEvent(el, 'renderStart');
 }
-
-export * from './render_complete_helper';
