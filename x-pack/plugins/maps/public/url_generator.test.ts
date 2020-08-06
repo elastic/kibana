@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import rison from 'rison-node';
 import { createMapsUrlGenerator } from './url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
 import { esFilters } from '../../../../src/plugins/data/public';
@@ -47,25 +47,29 @@ describe('visualize url generator', () => {
         useHashedUrl: false,
       })
     );
-    const initialLayers = {
-      id: LAYER_ID,
-      visible: true,
-      type: LAYER_TYPE.VECTOR,
-      sourceDescriptor: {
+    const initialLayers = [
+      {
         id: LAYER_ID,
-        type: SOURCE_TYPES.ES_SEARCH,
-        tooltipProperties: [],
-        label: 'Sample Data',
-        indexPatternId: INDEX_PATTERN_ID,
-        geoField: 'test',
-        scalingType: SCALING_TYPES.LIMIT,
+        visible: true,
+        type: LAYER_TYPE.VECTOR,
+        sourceDescriptor: {
+          id: LAYER_ID,
+          type: SOURCE_TYPES.ES_SEARCH,
+          tooltipProperties: [],
+          label: 'Sample Data',
+          indexPatternId: INDEX_PATTERN_ID,
+          geoField: 'test',
+          scalingType: SCALING_TYPES.LIMIT,
+        },
       },
-    };
+    ];
+    // @ts-ignore
+    const encodedLayers = rison.encode_array(initialLayers);
     const url = await generator.createUrl!({
       initialLayers,
     });
     expect(url).toMatchInlineSnapshot(
-      `"test/app/maps/map#/?_g=()&_a=()&initialLayers=(id:'${LAYER_ID}',sourceDescriptor:(geoField:test,id:'${LAYER_ID}',indexPatternId:'${INDEX_PATTERN_ID}',label:'Sample%20Data',scalingType:LIMIT,tooltipProperties:!(),type:ES_SEARCH),type:VECTOR,visible:!t)"`
+      `"test/app/maps/map#/?_g=()&_a=()&initialLayers=${encodedLayers}"`
     );
   });
 

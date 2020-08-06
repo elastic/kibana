@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import rison from 'rison-node';
 import {
   TimeRange,
   Filter,
@@ -13,11 +14,11 @@ import {
 } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
-import { LayerDescriptor } from '../common/descriptor_types/sources';
+import { LayerDescriptor } from '../common/descriptor_types';
+import { INITIAL_LAYERS_KEY } from '../common/constants';
 
 const STATE_STORAGE_KEY = '_a';
 const GLOBAL_STATE_STORAGE_KEY = '_g';
-const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_URL_GENERATOR = 'MAPS_APP_URL_GENERATOR';
 
@@ -34,7 +35,7 @@ export interface MapsUrlGeneratorState {
   /**
    * Optionally set the initial Layers.
    */
-  initialLayers?: LayerDescriptor;
+  initialLayers?: LayerDescriptor[];
 
   /**
    * Optionally set the refresh interval.
@@ -97,8 +98,10 @@ export const createMapsUrlGenerator = (
     let url = `${appBasePath}/map#/${mapId || ''}`;
     url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, queryState, { useHash }, url);
     url = setStateToKbnUrl(STATE_STORAGE_KEY, appState, { useHash }, url);
-    if (initialLayers) {
-      url = setStateToKbnUrl(INITIAL_LAYERS_KEY, initialLayers, { useHash }, url);
+
+    if (initialLayers && initialLayers.length) {
+      // @ts-ignore
+      url = `${url}&${INITIAL_LAYERS_KEY}=${rison.encode_array(initialLayers)}`;
     }
 
     return url;

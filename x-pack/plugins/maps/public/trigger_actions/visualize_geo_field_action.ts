@@ -14,7 +14,7 @@ import {
   getShareService,
 } from '../kibana_services';
 import { MAPS_APP_URL_GENERATOR, MapsUrlGeneratorState } from '../url_generator';
-import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../common/constants';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES, APP_ID, MAP_PATH } from '../../common/constants';
 
 export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
 
@@ -31,20 +31,22 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     // create initial layer descriptor
     const hasTooltips =
       context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
-    const initialLayers = {
-      id: uuid(),
-      visible: true,
-      type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
-      sourceDescriptor: {
+    const initialLayers = [
+      {
         id: uuid(),
-        type: SOURCE_TYPES.ES_SEARCH,
-        tooltipProperties: hasTooltips ? context.contextualFields : [],
-        label: indexPattern.title,
-        indexPatternId: context.indexPatternId,
-        geoField: context.fieldName,
-        scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+        visible: true,
+        type: supportsClustering ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR,
+        sourceDescriptor: {
+          id: uuid(),
+          type: SOURCE_TYPES.ES_SEARCH,
+          tooltipProperties: hasTooltips ? context.contextualFields : [],
+          label: indexPattern.title,
+          indexPatternId: context.indexPatternId,
+          geoField: context.fieldName,
+          scalingType: supportsClustering ? SCALING_TYPES.CLUSTERS : SCALING_TYPES.LIMIT,
+        },
       },
-    };
+    ];
 
     const generator = getShareService().urlGenerators.getUrlGenerator(MAPS_APP_URL_GENERATOR);
     const urlState: MapsUrlGeneratorState = {
@@ -56,8 +58,8 @@ export const visualizeGeoFieldAction = createAction<typeof ACTION_VISUALIZE_GEO_
     const url = await generator.createUrl(urlState);
     const hash = url.split('#')[1];
 
-    getApplication().navigateToApp('maps', {
-      path: `map/#${hash}`,
+    getApplication().navigateToApp(APP_ID, {
+      path: `${MAP_PATH}/#${hash}`,
     });
   },
 });
