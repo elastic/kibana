@@ -24,14 +24,13 @@ export async function initPlugin() {
       getOrElse(constant({ username: '', password: '' }))
     );
 
-    if (request.method === 'POST' || 'PUT') {
-      const data: unknown[] = [];
+    if (request.method === 'POST' || request.method === 'PUT') {
+      let data = '';
       request.on('data', (chunk) => {
-        data.push(chunk);
+        data += chunk;
       });
       request.on('end', () => {
-        const body = JSON.parse(data.toString());
-        switch (body) {
+        switch (data) {
           case 'success':
             response.statusCode = 200;
             response.end('OK');
@@ -73,7 +72,7 @@ function validateAuthentication(credentials: any, res: any) {
 
 function validateRequestUsesMethod(requestMethod: string, method: string, res: any) {
   try {
-    expect(requestMethod).to.eql(method);
+    expect(requestMethod.toLowerCase()).to.eql(method);
     res.statusCode = 200;
     res.end('OK');
   } catch (ex) {

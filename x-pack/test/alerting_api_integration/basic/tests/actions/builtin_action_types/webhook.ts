@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
+  getWebhookServer,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,13 +18,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('webhook action', () => {
-    let webhookSimulatorURL: string = '<could not determine kibana url>';
-
+    let webhookSimulatorURL: string = '';
+    let webhookServer: http.Server;
     // need to wait for kibanaServer to settle ...
-    before(() => {
-      webhookSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
-      );
+    before(async () => {
+      webhookServer = await getWebhookServer();
+      webhookServer.listen(9001);
+      webhookSimulatorURL = 'http://localhost:9001';
     });
 
     it('should return 403 when creating a webhook action', async () => {
@@ -46,6 +48,10 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           message:
             'Action type .webhook is disabled because your basic license does not support it. Please upgrade your license.',
         });
+    });
+
+    after(() => {
+      webhookServer.close();
     });
   });
 }
