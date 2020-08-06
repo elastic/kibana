@@ -197,4 +197,21 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): Array<keyof TriggerContextMapping>;
+
+  /**
+   * Should emit `true` when embeddable has finished loading its data and has
+   * completely rendered. Should emit `false` when when embeddable is loading data
+   * again. At the start it is assumed that embeddable is has not completed
+   * rendering, so this embeddable has to emit `true` at least once.
+   *
+   * This is used for reporting to know that embeddable is ready, so
+   * it can take a screenshot. It is also used in functional tests to know that
+   * page has stabilized.
+   */
+  renderComplete$?: Observable<boolean>;
+
+  /**
+   * Use this hook to report when error happened during rendering.
+   */
+  renderError$?: Observable<Error>;
 }

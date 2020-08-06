@@ -97,6 +97,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
 
+  protected renderComplete$ = new Rx.Subject<boolean>();
+  protected renderError$ = new Rx.Subject<Error>();
+
   constructor(
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
@@ -274,6 +277,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    */
   public async render(domNode: HTMLElement) {
     super.render(domNode);
+
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
