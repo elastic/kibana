@@ -29,25 +29,50 @@ export function dispatchRenderStart(el: HTMLElement) {
   dispatchEvent(el, 'renderStart');
 }
 
-export class RenderComplete {
-  constructor(private readonly el: HTMLElement) {}
+/**
+ * Should call `dispatchComplete()` when UI block has finished loading its data and has
+ * completely rendered. Should `dispatchInProgress()` every time UI block
+ * starts loading data again. At the start it is assumed that UI block is loading
+ * so it dispatches "in progress" automatically, so you need to call `setRenderComplete`
+ * at least once.
+ *
+ * This is used for reporting to know that UI block is ready, so
+ * it can take a screenshot. It is also used in functional tests to know that
+ * page has stabilized.
+ */
+export class RenderCompleteDispatcher {
+  private count: number = 0;
+  private el?: HTMLElement;
 
-  public readonly dispatchInProgress = () => {
+  constructor(el?: HTMLElement) {
+    this.setEl(el);
+  }
+
+  public setEl(el?: HTMLElement) {
+    this.el = el;
+    this.count = 0;
+    if (el) this.dispatchInProgress();
+  }
+
+  public dispatchInProgress() {
+    if (!this.el) return;
     this.el.setAttribute('data-render-complete', 'false');
+    this.el.setAttribute('data-rendering-count', String(this.count));
     dispatchRenderStart(this.el);
-  };
+  }
 
-  public readonly dispatchComplete = (count: number) => {
+  public dispatchComplete() {
+    if (!this.el) return;
+    this.count++;
     this.el.setAttribute('data-render-complete', 'true');
-    this.el.setAttribute('data-rendering-count', count.toString());
+    this.el.setAttribute('data-rendering-count', String(this.count));
     dispatchRenderComplete(this.el);
-  };
+  }
 
-  public readonly dispatchError = () => {
-    this.el.setAttribute(
-      'data-rendering-count',
-      String(Number(this.el.getAttribute('data-rendering-count')) + 1)
-    );
+  public dispatchError() {
+    if (!this.el) return;
+    this.count++;
     this.el.setAttribute('data-render-complete', 'false');
-  };
+    this.el.setAttribute('data-rendering-count', String(this.count));
+  }
 }

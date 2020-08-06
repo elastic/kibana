@@ -19,6 +19,7 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
+import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -46,6 +47,8 @@ export abstract class Embeddable<
 
   private readonly input$: Rx.BehaviorSubject<TEmbeddableInput>;
   private readonly output$: Rx.BehaviorSubject<TEmbeddableOutput>;
+
+  protected renderComplete = new RenderCompleteDispatcher();
 
   // Listener to parent changes, if this embeddable exists in a parent, in order
   // to update input when the parent changes.
@@ -133,7 +136,9 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement | Element): void {
+  public render(domNode: HTMLElement): void {
+    this.renderComplete.setEl(domNode);
+
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');
     }

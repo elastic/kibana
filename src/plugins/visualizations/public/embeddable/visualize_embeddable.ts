@@ -36,7 +36,6 @@ import {
   IContainer,
   Adapters,
 } from '../../../../plugins/embeddable/public';
-import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import {
   IExpressionLoaderParams,
   ExpressionsStart,
@@ -96,9 +95,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
-
-  protected renderComplete$ = new Rx.Subject<boolean>();
-  protected renderError$ = new Rx.Subject<Error>();
 
   constructor(
     timefilter: TimefilterContract,
@@ -248,26 +244,20 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   hasInspector = () => Boolean(this.getInspectorAdapters());
 
   onContainerLoading = () => {
-    this.domNode.setAttribute('data-render-complete', 'false');
+    this.renderComplete.dispatchInProgress();
     this.updateOutput({ loading: true, error: undefined });
   };
 
-  onContainerRender = (count: number) => {
-    this.domNode.setAttribute('data-render-complete', 'true');
-    this.domNode.setAttribute('data-rendering-count', count.toString());
+  onContainerRender = () => {
+    this.renderComplete.dispatchComplete();
     this.updateOutput({ loading: false, error: undefined });
-    dispatchRenderComplete(this.domNode);
   };
 
   onContainerError = (error: ExpressionRenderError) => {
     if (this.abortController) {
       this.abortController.abort();
     }
-    this.domNode.setAttribute(
-      'data-rendering-count',
-      this.domNode.getAttribute('data-rendering-count') + 1
-    );
-    this.domNode.setAttribute('data-render-complete', 'false');
+    this.renderComplete.dispatchError();
     this.updateOutput({ loading: false, error });
   };
 
@@ -287,6 +277,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
 
     this.domNode = div;
+    this.renderComplete.setEl(div);
 
     const expressions = getExpressions();
     this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
@@ -334,11 +325,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
-    div.setAttribute('data-rendering-count', '0');
-    div.setAttribute('data-render-complete', 'false');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
-
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.updateHandler();
