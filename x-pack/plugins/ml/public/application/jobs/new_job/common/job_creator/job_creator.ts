@@ -57,6 +57,7 @@ export class JobCreator {
   private _stopAllRefreshPolls: {
     stop: boolean;
   } = { stop: false };
+  private _partitionField: string | null;
 
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
@@ -81,6 +82,7 @@ export class JobCreator {
     }
 
     this._datafeed_config.query = query;
+    this._partitionField = null;
   }
 
   public get type(): JOB_TYPE {
@@ -620,6 +622,56 @@ export class JobCreator {
 
   public get formattedDatafeedJson() {
     return JSON.stringify(this._datafeed_config, null, 2);
+  }
+
+  private _initPerPartitionCategorization() {
+    if (this._job_config.analysis_config.per_partition_categorization === undefined) {
+      this._job_config.analysis_config.per_partition_categorization = {};
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.enabled === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.enabled = false;
+    }
+    if (this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === undefined) {
+      this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = false;
+    }
+  }
+
+  public get perPartitionCategorization() {
+    return this._job_config.analysis_config.per_partition_categorization?.enabled === true;
+  }
+
+  public set perPartitionCategorization(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.enabled = enabled;
+  }
+
+  public get partitionStopOnWarn() {
+    return this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === true;
+  }
+
+  public set partitionStopOnWarn(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
+  }
+
+  public get categorizationPerPartitionField() {
+    return this._partitionField;
+  }
+
+  public set categorizationPerPartitionField(fieldName: string | null) {
+    if (fieldName === null) {
+      this._detectors.forEach((detector) => {
+        delete detector.partition_field_name;
+      });
+      this._partitionField = null;
+    } else {
+      if (this._partitionField !== fieldName) {
+        this._partitionField = fieldName;
+        this._detectors.forEach((detector) => {
+          detector.partition_field_name = fieldName;
+        });
+      }
+    }
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {

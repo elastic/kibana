@@ -113,8 +113,6 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       <CategorizationDetector />
       <EuiHorizontalRule />
       <CategorizationField />
-      <EuiHorizontalRule />
-      <CategorizationPerPartitionField />
       {loadingData === true && (
         <LoadingWrapper hasData={false} loading={true}>
           <div />
@@ -130,6 +128,8 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
           <FieldExamples fieldExamples={fieldExamples} />
         </>
       )}
+      <EuiHorizontalRule />
+      <CategorizationPerPartitionField />
     </>
   );
 };

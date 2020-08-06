@@ -8,24 +8,18 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  AdvancedJobCreator,
-  CategorizationJobCreator,
-  isCategorizationJobCreator,
-} from '../../../../../common/job_creator';
+import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 
 export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
-  const [stopOnWarn, setStopOnWarn] = useState(false);
+  const [stopOnWarn, setStopOnWarn] = useState(jobCreator.partitionStopOnWarn);
 
   const toggleStopOnWarn = () => setStopOnWarn(!stopOnWarn);
 
   useEffect(() => {
-    if (isCategorizationJobCreator(jobCreator)) {
-      jobCreator.partitionStopOnWarn = stopOnWarn;
-      jobCreatorUpdate();
-    }
+    jobCreator.partitionStopOnWarn = stopOnWarn;
+    jobCreatorUpdate();
   }, [stopOnWarn]);
 
   return (

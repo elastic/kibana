@@ -8,25 +8,26 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  AdvancedJobCreator,
-  CategorizationJobCreator,
-  isCategorizationJobCreator,
-} from '../../../../../common/job_creator';
+import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 
 export const CategorizationPerPartitionSwitch: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
-  const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
+  const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(
+    jobCreator.perPartitionCategorization
+  );
 
   const toggleEnablePerPartitionCategorization = () =>
     setEnablePerPartitionCategorization(!enablePerPartitionCategorization);
 
   useEffect(() => {
-    if (isCategorizationJobCreator(jobCreator)) {
-      jobCreator.perPartitionCategorization = enablePerPartitionCategorization;
-      jobCreatorUpdate();
+    // also turn off stop on warn if per_partition_categorization is turned off
+    if (enablePerPartitionCategorization === false) {
+      jobCreator.partitionStopOnWarn = false;
     }
+
+    jobCreator.perPartitionCategorization = enablePerPartitionCategorization;
+    jobCreatorUpdate();
   }, [enablePerPartitionCategorization]);
 
   return (

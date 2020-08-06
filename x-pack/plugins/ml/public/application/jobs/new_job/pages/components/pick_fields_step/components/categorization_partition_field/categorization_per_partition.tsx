@@ -24,33 +24,29 @@ export const CategorizationPerPartitionField: FC = () => {
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
   const [categorizationPartitionFieldName, setCategorizationPartitionFieldName] = useState<
     string | null
-  >(null);
+  >(jobCreator.categorizationPerPartitionField);
 
   const { catFields } = newJobCapsService;
 
   const filteredCategories = catFields.filter((c) => c.id !== jobCreator.categorizationFieldName);
 
   useEffect(() => {
-    if (isCategorizationJobCreator(jobCreator)) {
-      jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
-      jobCreatorUpdate();
-    }
+    jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
+    jobCreatorUpdate();
   }, [categorizationPartitionFieldName]);
 
   useEffect(() => {
-    if (isCategorizationJobCreator(jobCreator)) {
-      // set the first item in category as partition field by default
-      // because API requires partition_field to be defined in each detector with mlcategory
-      // if per-partition categorization is enabled
-      if (
-        jobCreator.perPartitionCategorization &&
-        jobCreator.categorizationPerPartitionField === null
-      ) {
-        jobCreator.categorizationPerPartitionField = filteredCategories[0].id;
-      }
-      setCategorizationPartitionFieldName(jobCreator.categorizationPerPartitionField);
-      setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // set the first item in category as partition field by default
+    // because API requires partition_field to be defined in each detector with mlcategory
+    // if per-partition categorization is enabled
+    if (
+      jobCreator.perPartitionCategorization &&
+      jobCreator.categorizationPerPartitionField === null
+    ) {
+      jobCreator.categorizationPerPartitionField = filteredCategories[0].id;
     }
+    setCategorizationPartitionFieldName(jobCreator.categorizationPerPartitionField);
+    setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
   }, [jobCreatorUpdated]);
 
   const isCategorizationJob = isCategorizationJobCreator(jobCreator);
