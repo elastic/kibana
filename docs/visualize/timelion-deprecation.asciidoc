@@ -1,9 +1,59 @@
 [[timelion-deprecation]]
 == Timelion App Deprecation
 
-Timelion is a time series data visualizer that enables you to combine totally
-independent data sources within a single visualization. It's driven by a simple
-expression language you use to retrieve time series data, perform calculations
-to tease out the answers to complex questions, and visualize the results.
+*With 8.0*, Timelion app is going to be deprecated so there are some actions you should take to copy your existing Timelion worksheets to a dashboard.
+This guide is designed to help you through this process. 
 
-For example, Timelion enables you to easily get the answers to questions like:
+One important note here is that it is going to affect *only the Timelion application*. 
+
+[role="screenshot"]
+image::images/timelion-app.png[]
+{nbsp}
+
+If you use Timelion only as visualization feel free to skip this guide. 
+
+[float]
+[[timelion-app-to-vis]]
+=== Create Timelion visualizations from a Timelion sheet
+
+To migrate your Timelion's charts to Timelion visualizations, you should copy the expression of each graph and create a new Timelion Visualization.
+
+* Select the chart you want to copy and copy its expression.
+
+[role="screenshot"]
+image::images/timelion-copy-expression.png[]
+{nbsp}
+
+* Navigate to Visualize to create new visualization and click on Timelion.
+
+[role="screenshot"]
+image::images/timelion-create-new-vis.png[]
+{nbsp}
+
+* Paste the copied expression to *Timelion Expression* field and click the Update button.
+
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[]
+{nbsp}
+
+* Save the new Timelion Visualization and repeat for all your charts on each sheet.
+
+[float]
+[[timelion-sheet-to-dashboard]]
+=== Create a new dashboard with Timelion visualizations
+
+Timelion sheets may be deprecated but they can easily be replaced by a dashboard. The process is the same as adding a new visualization to a dashboard.
+
+* Navigate to Dashboard and click to create a new dashboard.
+
+* Click to Add an existing visualization to the dashboard.
+
+[role="screenshot"]
+image::images/timelion-add-to-dashboard.png[]
+{nbsp}
+
+* Add your Timelion visualizations and save your dashboard.
+
+[role="screenshot"]
+image::images/timelion-dashboard.png[]
+{nbsp}
