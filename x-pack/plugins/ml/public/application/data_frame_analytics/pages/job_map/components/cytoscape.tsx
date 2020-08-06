@@ -69,7 +69,7 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
   const divStyle = { ...style, height };
 
   const dataHandler = useCallback<cytoscape.EventHandler>(
-    event => {
+    (event) => {
       if (cy) {
         const layout = cy.layout(getLayoutOptions(width, height));
         layout.run();
@@ -88,11 +88,11 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
 
   // Set up cytoscape event handlers
   useEffect(() => {
-    const mouseoverHandler: cytoscape.EventHandler = event => {
+    const mouseoverHandler: cytoscape.EventHandler = (event) => {
       event.target.addClass('hover');
       event.target.connectedEdges().addClass('nodeHover');
     };
-    const mouseoutHandler: cytoscape.EventHandler = event => {
+    const mouseoutHandler: cytoscape.EventHandler = (event) => {
       event.target.removeClass('hover');
       event.target.connectedEdges().removeClass('nodeHover');
     };

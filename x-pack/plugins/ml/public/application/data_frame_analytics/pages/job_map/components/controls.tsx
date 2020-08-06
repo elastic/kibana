@@ -102,7 +102,7 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
 
   // Set up Cytoscape event handlers
   useEffect(() => {
-    const selectHandler: cytoscape.EventHandler = event => {
+    const selectHandler: cytoscape.EventHandler = (event) => {
       setSelectedNode(event.target);
       setShowFlyout(true);
     };

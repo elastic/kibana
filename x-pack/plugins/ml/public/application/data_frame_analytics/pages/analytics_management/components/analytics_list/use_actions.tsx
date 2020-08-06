@@ -18,6 +18,7 @@ import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
 
 import { DataFrameAnalyticsListRow } from './common';
+import { getMapAction } from '../action_map';
 
 export const useActions = (
   isManagementTable: boolean
@@ -40,6 +41,7 @@ export const useActions = (
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
     viewAction.action,
+    getMapAction(),
   ];
 
   // isManagementTable will be the same for the lifecycle of the component
