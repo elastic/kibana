@@ -5,7 +5,8 @@
  */
 
 import moment from 'moment';
-import { loggingSystemMock } from 'src/core/server/mocks';
+
+import { loggingSystemMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
@@ -129,7 +130,7 @@ describe('rules_notification_alert_type', () => {
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
-      errorService: undefined,
+      securitySavedObjectsClient: (async () => savedObjectsRepositoryMock.create())(),
     });
   });
 
@@ -237,7 +238,7 @@ describe('rules_notification_alert_type', () => {
           version,
           ml: undefined,
           lists: undefined,
-          errorService: undefined,
+          securitySavedObjectsClient: (async () => savedObjectsRepositoryMock.create())(),
         });
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();

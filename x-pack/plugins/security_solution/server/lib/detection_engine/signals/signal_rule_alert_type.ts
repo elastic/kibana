@@ -6,7 +6,7 @@
 
 /* eslint-disable complexity */
 
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest, ISavedObjectsRepository } from 'src/core/server';
 
 import {
   SIGNALS_ID,
@@ -50,13 +50,13 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
-  errorService,
+  securitySavedObjectsClient,
 }: {
   logger: Logger;
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
-  errorService: SetupPlugins['errorService'];
+  securitySavedObjectsClient: Promise<ISavedObjectsRepository>;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -415,9 +415,9 @@ export const signalRulesAlertType = ({
         });
       }
     },
-    errorCB: async ({ alertId, message }) => {
+    onError: async ({ alertId, message }) => {
       logger.error(`Detections rule with alert Id: ${alertId} failed with message: ${message}`);
-      const savedObjectsClient = await errorService;
+      const savedObjectsClient = await securitySavedObjectsClient;
       if (savedObjectsClient != null) {
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const ruleStatusService = await ruleStatusServiceFactory({

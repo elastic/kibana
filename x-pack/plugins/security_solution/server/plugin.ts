@@ -16,7 +16,6 @@ import {
   Plugin as IPlugin,
   PluginInitializerContext,
   SavedObjectsClient,
-  ISavedObjectsRepository,
 } from '../../../../src/core/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
@@ -71,7 +70,6 @@ export interface SetupPlugins {
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  errorService?: Promise<ISavedObjectsRepository>;
 }
 
 export interface StartPlugins {
@@ -236,7 +234,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
-        errorService: (async () => {
+        securitySavedObjectsClient: (async () => {
           const [coreStart] = await core.getStartServices();
           return coreStart.savedObjects.createInternalRepository();
         })(),
