@@ -6,6 +6,9 @@
 
 import { ClusterStateAPIResponse } from './types';
 
+/**
+ * Throws if index cannot be found in cluster state.
+ */
 const checkAllAliases = (
   indexName: string,
   clusterState: ClusterStateAPIResponse

@@ -19,7 +19,7 @@ export const esIndicesStateCheck = async (
   // integration test for asserting that the current ES version still returns what we expect.
   // This lives in x-pack/test/upgrade_assistant_integration
   const clusterState: ClusterStateAPIResponse = await callAsUser('cluster.state', {
-    index: indices,
+    index: '*',
     metric: 'metadata',
   });
 
