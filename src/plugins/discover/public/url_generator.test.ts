@@ -19,7 +19,6 @@
 
 import { DiscoverUrlGenerator } from './url_generator';
 import { hashedItemStore, getStatesFromKbnUrl } from '../../kibana_utils/public';
-// eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '../../data/common';
 

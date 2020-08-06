@@ -30,7 +30,6 @@ import {
   FilterableContainerFactory,
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
-// eslint-disable-next-line
 import { esFilters } from '../../../data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
