@@ -20,6 +20,7 @@ import {
 import {
   createKbnUrlStateStorage,
   IStorageWrapper,
+  withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -173,6 +174,7 @@ export function App({
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
     });
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
@@ -184,7 +186,14 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+  }, [
+    data.query.filterManager,
+    data.query.timefilter.timefilter,
+    core.notifications.toasts,
+    core.uiSettings,
+    data.query,
+    history,
+  ]);
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -231,45 +240,50 @@ export function App({
           : i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
       },
     ]);
-  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
+  }, [core.application, core.chrome, core.http.basePath, state.persistedDoc, state.byValueMode]);
 
-  useEffect(() => {
-    if (
-      savedObjectId &&
-      (!state.persistedDoc || state.persistedDoc.savedObjectId !== savedObjectId)
-    ) {
-      setState((s) => ({ ...s, isLoading: true }));
-      docStorage
-        .load(savedObjectId)
-        .then((doc) => updateDoc(doc))
-        .catch(() => {
-          setState((s) => ({ ...s, isLoading: false }));
+  useEffect(
+    () => {
+      if (
+        savedObjectId &&
+        (!state.persistedDoc || state.persistedDoc.savedObjectId !== savedObjectId)
+      ) {
+        setState((s) => ({ ...s, isLoading: true }));
+        docStorage
+          .load(savedObjectId)
+          .then((doc) => updateDoc(doc))
+          .catch(() => {
+            setState((s) => ({ ...s, isLoading: false }));
 
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
+            core.notifications.toasts.addDanger(
+              i18n.translate('xpack.lens.app.docLoadingError', {
+                defaultMessage: 'Error loading saved document',
+              })
+            );
 
-          redirectTo();
-        });
-    } else if (state.byValueMode && !!embeddableEditorIncomingState?.valueInput) {
-      const doc: Document = {
-        ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
-      };
-      updateDoc(doc);
-      redirectTo();
-    }
-  }, [
-    core.notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    savedObjectId,
-    // TODO: These dependencies are changing too often
-    // docStorage,
-    // redirectTo,
-    // state.persistedDoc,
-  ]);
+            redirectTo();
+          });
+      } else if (state.byValueMode && !!embeddableEditorIncomingState?.valueInput) {
+        const doc: Document = {
+          ...(embeddableEditorIncomingState?.valueInput as LensByValueInput).attributes,
+        };
+        updateDoc(doc);
+        redirectTo();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      core.notifications,
+      data.indexPatterns,
+      data.query.filterManager,
+      savedObjectId,
+      state.byValueMode,
+      // TODO: These dependencies are changing too often
+      // docStorage,
+      // redirectTo,
+      // state.persistedDoc,
+    ]
+  );
 
   const updateDoc = async (doc: Document) => {
     getAllIndexPatterns(
