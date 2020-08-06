@@ -96,7 +96,7 @@ export const schema: FormSchema = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel',
       {
-        defaultMessage: 'Associate rule to Global Endpoint Exception List',
+        defaultMessage: 'Add existing Endpoint exceptions to the rule',
       }
     ),
     labelAppend: OptionalFieldLabel,
@@ -117,18 +117,16 @@ export const schema: FormSchema = {
         },
       ],
     },
-    mapping: {
-      type: FIELD_TYPES.TEXT,
-    },
+    mapping: {},
+    isMappingChecked: {},
   },
   riskScore: {
     value: {
       type: FIELD_TYPES.RANGE,
       serializer: (input: string) => Number(input),
     },
-    mapping: {
-      type: FIELD_TYPES.TEXT,
-    },
+    mapping: {},
+    isMappingChecked: {},
   },
   references: {
     label: i18n.translate(

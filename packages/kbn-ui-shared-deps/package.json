@@ -21,6 +21,7 @@
     "custom-event-polyfill": "^0.3.0",
     "elasticsearch-browser": "^16.7.0",
     "jquery": "^3.5.0",
+    "mini-css-extract-plugin": "0.8.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "react": "^16.12.0",

@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
-import { identity, pick } from 'lodash';
+import { identity, pickBy } from 'lodash';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 
@@ -22,7 +22,7 @@ export const readKibanaConfig = () => {
     )
   ) || {}) as {};
 
-  const cliEsCredentials = pick(
+  const cliEsCredentials = pickBy(
     {
       'elasticsearch.username': process.env.ELASTICSEARCH_USERNAME,
       'elasticsearch.password': process.env.ELASTICSEARCH_PASSWORD,
@@ -36,12 +36,14 @@ export const readKibanaConfig = () => {
   };
 
   return {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.transactionIndices': 'apm-*',
     'apm_oss.metricsIndices': 'apm-*',
     'apm_oss.errorIndices': 'apm-*',
     'apm_oss.spanIndices': 'apm-*',
     'apm_oss.onboardingIndices': 'apm-*',
     'apm_oss.sourcemapIndices': 'apm-*',
+    /* eslint-enable @typescript-eslint/naming-convention */
     'elasticsearch.hosts': 'http://localhost:9200',
     ...loadedKibanaConfig,
     ...cliEsCredentials,

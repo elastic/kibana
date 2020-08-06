@@ -61,7 +61,6 @@ interface OwnProps {
   timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
-  eventsViewerBodyHeight?: number;
   hasIndexWrite: boolean;
   from: string;
   loading: boolean;
@@ -88,7 +87,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   clearEventsLoading,
   clearSelected,
   defaultFilters,
-  eventsViewerBodyHeight,
   from,
   globalFilters,
   globalQuery,
@@ -116,8 +114,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionModalBaseProps>(
     addExceptionModalInitialState
   );
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
-    signalsIndex !== '' ? [signalsIndex] : []
+  const [{ browserFields, indexPatterns, isLoading: indexPatternsLoading }] = useFetchIndexPatterns(
+    signalsIndex !== '' ? [signalsIndex] : [],
+    'alerts_table'
   );
   const kibana = useKibana();
   const [, dispatchToaster] = useStateToaster();
@@ -433,7 +432,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     closeAddExceptionModal,
   ]);
 
-  if (loading || isEmpty(signalsIndex)) {
+  if (loading || indexPatternsLoading || isEmpty(signalsIndex)) {
     return (
       <EuiPanel>
         <HeaderSection title="" />
@@ -450,7 +449,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         defaultModel={alertsDefaultModel}
         end={to}
         headerFilterGroup={headerFilterGroup}
-        height={eventsViewerBodyHeight}
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}
