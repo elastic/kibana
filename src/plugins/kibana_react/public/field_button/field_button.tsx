@@ -21,7 +21,7 @@ import './field_button.scss';
 import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
-export interface FieldButtonProps extends HTMLAttributes<HtmlDivElement> {
+export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * Label for the button
    */
