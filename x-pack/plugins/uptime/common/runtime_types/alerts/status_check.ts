@@ -32,7 +32,7 @@ export type AtomicStatusCheckParams = t.TypeOf<typeof AtomicStatusCheckParamsTyp
 
 export const StatusCheckParamsType = t.intersection([
   t.partial({
-    filters: t.string,
+    filters: t.unknown,
     shouldCheckStatus: t.boolean,
   }),
   t.type({
@@ -66,7 +66,7 @@ export const GetMonitorAvailabilityParamsType = t.intersection([
     threshold: t.string,
   }),
   t.partial({
-    filters: t.string,
+    filters: t.unknown,
   }),
 ]);
 

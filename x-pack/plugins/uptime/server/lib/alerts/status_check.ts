@@ -5,29 +5,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRight } from 'fp-ts/lib/Either';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions } from '../../../../alerts/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { UptimeAlertTypeFactory } from './types';
-import { GetMonitorStatusResult } from '../requests';
 import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
-  StatusCheckParamsType,
   StatusCheckParams,
   StatusCheckFilters,
-  AtomicStatusCheckParamsType,
-  MonitorAvailabilityType,
   DynamicSettings,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
-import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
-import { commonStateTranslations } from './translations';
+import { commonMonitorStateI18, commonStateTranslations } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { UMServerLibs } from '../lib';
+import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -36,193 +30,7 @@ const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
  * @param items to reduce
  */
 export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitor_id }) => {
-    acc.add(monitor_id);
-    return acc;
-  }, new Set<string>());
-
-const sortAvailabilityResultByRatioAsc = (
-  a: GetMonitorAvailabilityResult,
-  b: GetMonitorAvailabilityResult
-): number => (a.availabilityRatio ?? 100) - (b.availabilityRatio ?? 100);
-
-/**
- * Map an availability result object to a descriptive string.
- */
-const mapAvailabilityResultToString = ({
-  availabilityRatio,
-  name,
-  monitorId,
-  url,
-}: GetMonitorAvailabilityResult) =>
-  i18n.translate('xpack.uptime.alerts.availability.monitorSummary', {
-    defaultMessage: '{nameOrId}({url}): {availabilityRatio}%',
-    values: {
-      nameOrId: name || monitorId,
-      url,
-      availabilityRatio: ((availabilityRatio ?? 1.0) * 100).toPrecision(5),
-    },
-  });
-
-const reduceAvailabilityStringsToMessage = (threshold: string) => (
-  prev: string,
-  cur: string,
-  _ind: number,
-  array: string[]
-) => {
-  let prefix: string = '';
-  if (prev !== '') {
-    prefix = prev;
-  } else if (array.length > 1) {
-    prefix = i18n.translate('xpack.uptime.alerts.availability.multiItemTitle', {
-      defaultMessage: `Top {monitorCount} Monitors Below Availability Threshold ({threshold} %):\n`,
-      values: {
-        monitorCount: Math.min(array.length, MESSAGE_AVAILABILITY_MAX),
-        threshold,
-      },
-    });
-  } else {
-    prefix = i18n.translate('xpack.uptime.alerts.availability.singleItemTitle', {
-      defaultMessage: `Monitor Below Availability Threshold ({threshold} %):\n`,
-      values: { threshold },
-    });
-  }
-  return prefix + `${cur}\n`;
-};
-
-const MESSAGE_AVAILABILITY_MAX = 3;
-
-/**
- * Creates a summary message from a list of availability check result objects.
- * @param availabilityResult the list of results
- * @param threshold the threshold used by the check
- */
-export const availabilityMessage = (
-  availabilityResult: GetMonitorAvailabilityResult[],
-  threshold: string,
-  max: number = MESSAGE_AVAILABILITY_MAX
-): string => {
-  return availabilityResult.length > 0
-    ? // if there are results, map each item to a descriptive string, and reduce the list
-      availabilityResult
-        .sort(sortAvailabilityResultByRatioAsc)
-        .slice(0, max)
-        .map(mapAvailabilityResultToString)
-        .reduce(reduceAvailabilityStringsToMessage(threshold), '')
-    : // if there are no results, return an empty list default string
-      i18n.translate('xpack.uptime.alerts.availability.emptyMessage', {
-        defaultMessage: `No monitors were below Availability Threshold ({threshold} %)`,
-        values: {
-          threshold,
-        },
-      });
-};
-
-/**
- * Generates a message to include in contexts of alerts.
- * @param monitors the list of monitors to include in the message
- * @param max the maximum number of items the summary should contain
- */
-export const contextMessage = (
-  monitorIds: string[],
-  max: number,
-  availabilityResult: GetMonitorAvailabilityResult[],
-  availabilityThreshold: string,
-  availabilityWasChecked: boolean,
-  statusWasChecked: boolean
-): string => {
-  const MIN = 2;
-  if (max < MIN) throw new Error(`Maximum value must be greater than ${MIN}, received ${max}.`);
-
-  // generate the message
-  let message = '';
-  if (statusWasChecked) {
-    if (monitorIds.length === 1) {
-      message = i18n.translate('xpack.uptime.alerts.message.singularTitle', {
-        defaultMessage: 'Down monitor: ',
-      });
-    } else if (monitorIds.length) {
-      message = i18n.translate('xpack.uptime.alerts.message.multipleTitle', {
-        defaultMessage: 'Down monitors: ',
-      });
-    } else {
-      message = i18n.translate('xpack.uptime.alerts.message.emptyTitle', {
-        defaultMessage: 'No down monitor IDs received',
-      });
-    }
-
-    for (let i = 0; i < monitorIds.length; i++) {
-      const id = monitorIds[i];
-      if (i === max) {
-        message =
-          message +
-          i18n.translate('xpack.uptime.alerts.message.overflowBody', {
-            defaultMessage: `... and {overflowCount} other monitors`,
-            values: {
-              overflowCount: monitorIds.length - i,
-            },
-          });
-        break;
-      } else if (i === 0) {
-        message = message + id;
-      } else {
-        message = message + `, ${id}`;
-      }
-    }
-  }
-
-  if (availabilityWasChecked) {
-    const availabilityMsg = availabilityMessage(availabilityResult, availabilityThreshold);
-    return message ? message + '\n' + availabilityMsg : availabilityMsg;
-  }
-
-  return message;
-};
-
-/**
- * Creates an exhaustive list of all the down monitors.
- * @param list all the monitors that are down
- * @param sizeLimit the max monitors, we shouldn't allow an arbitrarily long string
- */
-export const fullListByIdAndLocation = (
-  list: GetMonitorStatusResult[],
-  sizeLimit: number = 1000
-) => {
-  return (
-    list
-      // sort by id, then location
-      .sort((a, b) => {
-        if (a.monitor_id > b.monitor_id) {
-          return 1;
-        } else if (a.monitor_id < b.monitor_id) {
-          return -1;
-        } else if (a.location > b.location) {
-          return 1;
-        }
-        return -1;
-      })
-      .slice(0, sizeLimit)
-      .reduce(
-        (cur, { monitor_id: id, location }) =>
-          cur + `${id} from ${location ?? 'Unnamed location'}; `,
-        ''
-      ) +
-    (sizeLimit < list.length
-      ? i18n.translate('xpack.uptime.alerts.message.fullListOverflow', {
-          defaultMessage: '...and {overflowCount} other {pluralizedMonitor}',
-          values: {
-            pluralizedMonitor:
-              list.length - sizeLimit === 1 ? 'monitor/location' : 'monitors/locations',
-            overflowCount: list.length - sizeLimit,
-          },
-        })
-      : '')
-  );
-};
-
-// Right now the maximum number of monitors shown in the message is hardcoded here.
-// we might want to make this a parameter in the future
-const DEFAULT_MAX_MESSAGE_ROWS = 3;
+  items.reduce((acc, { monitor_id }) => acc.add(monitor_id), new Set<string>());
 
 export const hasFilters = (filters?: StatusCheckFilters) => {
   if (!filters) return false;
@@ -236,25 +44,18 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
 
 export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IIndexPattern | undefined>,
-  filters?: StatusCheckFilters,
-  search?: string
+  filters: StatusCheckFilters,
+  search: string
 ): Promise<JsonObject | undefined> => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
 
-  let filterString: string | undefined;
+  let filterString = '';
   if (filtersExist) {
     filterString = stringifyKueries(new Map(Object.entries(filters ?? {})));
   }
 
-  let combinedString: string | undefined;
-  if (filterString && search) {
-    combinedString = combineFiltersAndUserSearch(filterString, search);
-  } else if (filterString) {
-    combinedString = filterString;
-  } else if (search) {
-    combinedString = search;
-  }
+  const combinedString = combineFiltersAndUserSearch(filterString, search);
 
   return esKuery.toElasticsearchQuery(
     esKuery.fromKueryExpression(combinedString ?? ''),
@@ -265,20 +66,18 @@ export const generateFilterDSL = async (
 const formatFilterString = async (
   libs: UMServerLibs,
   dynamicSettings: DynamicSettings,
-  options: AlertExecutorOptions,
-  filters?: StatusCheckFilters,
-  search?: string
+  callES: ILegacyScopedClusterClient['callAsCurrentUser'],
+  filters: StatusCheckFilters,
+  search: string
 ) =>
-  JSON.stringify(
-    await generateFilterDSL(
-      () =>
-        libs.requests.getIndexPattern({
-          callES: options.services.callCluster,
-          dynamicSettings,
-        }),
-      filters,
-      search
-    )
+  await generateFilterDSL(
+    () =>
+      libs.requests.getIndexPattern({
+        callES,
+        dynamicSettings,
+      }),
+    filters,
+    search
   );
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
@@ -354,94 +153,73 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         ),
       },
     ],
-    state: [...commonStateTranslations],
+    state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
-  producer: 'uptime',
-  async executor(options: AlertExecutorOptions) {
-    const { params: rawParams } = options;
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-      options.services.savedObjectsClient
-    );
-    const atomicDecoded = AtomicStatusCheckParamsType.decode(rawParams);
-    const availabilityDecoded = MonitorAvailabilityType.decode(rawParams);
-    const decoded = StatusCheckParamsType.decode(rawParams);
-    let filterString: string = '';
-    let params: StatusCheckParams;
-    if (isRight(atomicDecoded)) {
-      const { filters, search, numTimes, timerangeCount, timerangeUnit } = atomicDecoded.right;
-      const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
-      filterString = await formatFilterString(libs, dynamicSettings, options, filters, search);
-      params = {
-        timerange,
-        numTimes,
-        locations: [],
-        filters: filterString,
-      };
-    } else if (isRight(decoded)) {
-      params = decoded.right;
-    } else if (!isRight(availabilityDecoded)) {
-      ThrowReporter.report(decoded);
-      return {
-        error: 'Alert param types do not conform to required shape.',
-      };
-    }
+  async executor(
+    { params: rawParams, state, services: { alertInstanceFactory } },
+    callES,
+    dynamicSettings
+  ) {
+    const {
+      filters,
+      search,
+      numTimes,
+      timerangeCount,
+      timerangeUnit,
+      shouldCheckAvailability,
+      shouldCheckStatus,
+    } = rawParams;
+
+    const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
+
+    const filterString = await formatFilterString(libs, dynamicSettings, callES, filters, search);
+
+    const params: StatusCheckParams = {
+      timerange,
+      numTimes,
+      locations: [],
+      filters: filterString,
+    };
 
     let availabilityResults: GetMonitorAvailabilityResult[] = [];
-    if (
-      isRight(availabilityDecoded) &&
-      availabilityDecoded.right.shouldCheckAvailability === true
-    ) {
-      const { filters, search } = availabilityDecoded.right;
-      if (filterString === '' && (filters || search)) {
-        filterString = await formatFilterString(libs, dynamicSettings, options, filters, search);
-      }
+    if (shouldCheckAvailability) {
+      const { availability } = rawParams;
 
       availabilityResults = await libs.requests.getMonitorAvailability({
-        callES: options.services.callCluster,
+        callES,
         dynamicSettings,
-        ...availabilityDecoded.right.availability,
+        ...availability,
         filters: filterString || undefined,
       });
     }
 
-    /* This is called `monitorsByLocation` but it's really
-     * monitors by location by status. The query we run to generate this
-     * filters on the status field, so effectively there should be one and only one
-     * status represented in the result set. */
-    let monitorsByLocation: GetMonitorStatusResult[] = [];
+    let downMonitorsByLocation: GetMonitorStatusResult[] = [];
 
-    // old alert versions are missing this field so it must default to true
-    const verifiedParams = StatusCheckParamsType.decode(params!);
-    if (isRight(verifiedParams) && (verifiedParams.right?.shouldCheckStatus ?? true)) {
-      monitorsByLocation = await libs.requests.getMonitorStatus({
-        callES: options.services.callCluster,
+    if (shouldCheckStatus) {
+      downMonitorsByLocation = await libs.requests.getMonitorStatus({
+        callES,
         dynamicSettings,
-        ...verifiedParams.right,
+        ...params,
       });
     }
 
     // if no monitors are down for our query, we don't need to trigger an alert
-    if (monitorsByLocation.length || availabilityResults.length) {
-      const uniqueIds = uniqueMonitorIds(monitorsByLocation);
-      const alertInstance = options.services.alertInstanceFactory(MONITOR_STATUS.id);
-      alertInstance.replaceState({
-        ...options.state,
-        monitors: monitorsByLocation,
-        ...updateState(options.state, true),
-      });
-      alertInstance.scheduleActions(MONITOR_STATUS.id, {
-        message: contextMessage(
-          Array.from(uniqueIds.keys()),
-          DEFAULT_MAX_MESSAGE_ROWS,
-          availabilityResults,
-          isRight(availabilityDecoded) ? availabilityDecoded.right.availability.threshold : '100',
-          isRight(availabilityDecoded) && availabilityDecoded.right.shouldCheckAvailability,
-          rawParams?.shouldCheckStatus ?? false
-        ),
-        downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
+    if (downMonitorsByLocation.length || availabilityResults.length) {
+      const uniqueIds = uniqueMonitorIds(downMonitorsByLocation);
+
+      uniqueIds.forEach((monId) => {
+        const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monId);
+
+        alertInstance.replaceState({
+          ...state,
+          monitors: downMonitorsByLocation,
+          ...updateState(state, true),
+        });
+
+        alertInstance.scheduleActions(MONITOR_STATUS.id);
       });
     }
 
-    return updateState(options.state, monitorsByLocation.length > 0);
+    return updateState(state, downMonitorsByLocation.length > 0);
   },
 });

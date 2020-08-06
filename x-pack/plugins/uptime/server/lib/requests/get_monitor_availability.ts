@@ -141,9 +141,8 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = { ...esParams.body.query.bool, ...parsedFilters.bool };
+    if (filters?.bool) {
+      esParams.body.query.bool = { ...esParams.body.query.bool, ...filters.bool };
     }
 
     if (afterKey) {

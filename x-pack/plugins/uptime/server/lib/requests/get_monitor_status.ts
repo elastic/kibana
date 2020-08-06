@@ -7,7 +7,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 
 export interface GetMonitorStatusParams {
-  filters?: string;
+  filters?: unknown;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
@@ -26,15 +26,6 @@ interface MonitorStatusKey {
   location: string;
 }
 
-const formatBuckets = async (
-  buckets: any[],
-  numTimes: number
-): Promise<GetMonitorStatusResult[]> => {
-  return buckets
-    .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
-};
-
 const getLocationClause = (locations: string[]) => ({
   bool: {
     should: [
@@ -51,10 +42,10 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   GetMonitorStatusParams,
   GetMonitorStatusResult[]
 > = async ({ callES, dynamicSettings, filters, locations, numTimes, timerange: { from, to } }) => {
-  const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
   const STATUS = 'down';
+  const monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
@@ -110,6 +101,13 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                 },
               ],
             },
+            aggs: {
+              monitors_data: {
+                top_hits: {
+                  size: 1,
+                },
+              },
+            },
           },
         },
       },
@@ -119,9 +117,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
      * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
      * to the bool of the parsed filters.
      */
-    if (filters) {
-      const parsedFilters = JSON.parse(filters);
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
+    if (filters?.bool) {
+      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, filters.bool);
     }
 
     /**
@@ -142,8 +139,10 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     const result = await callES('search', esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
-    queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || [], numTimes));
+    monitors.concat(result?.aggregations?.monitors?.buckets || []);
   } while (afterKey !== undefined);
 
-  return (await Promise.all(queryResults)).reduce((acc, cur) => acc.concat(cur), []);
+  return monitors
+    .filter((monitor: any) => monitor?.doc_count > numTimes)
+    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
 };

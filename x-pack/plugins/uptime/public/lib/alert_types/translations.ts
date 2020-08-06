@@ -8,10 +8,16 @@ import { i18n } from '@kbn/i18n';
 
 export const MonitorStatusTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage: '{contextMessage}\nLast triggered at: {lastTriggered}\n',
+    defaultMessage:
+      '{monitorName} with url {monitorUrl} is down from {observerLocation}. The latest error message is {latestErrorMessage}',
     values: {
-      contextMessage: '{{context.message}}',
-      lastTriggered: '{{state.lastTriggeredAt}}',
+      monitorName: '{{state.monitorName}}',
+      monitorId: '{{state.monitorId}}',
+      monitorUrl: '{{{state.monitorUrl}}}',
+      monitorType: '{{state.monitorType}}',
+      latestErrorMessage: '{{state.latestErrorMessage}}',
+      observerLocation: '{{state.observerLocation}}',
+      observerHostname: '{{state.observerHostname}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
