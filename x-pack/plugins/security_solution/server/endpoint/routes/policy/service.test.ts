@@ -11,7 +11,7 @@ describe('test policy handlers schema', () => {
   it('validate that get policy response query schema', async () => {
     expect(
       GetPolicyResponseSchema.query.validate({
-        hostId: 'id',
+        agentId: 'id',
       })
     ).toBeTruthy();
 
