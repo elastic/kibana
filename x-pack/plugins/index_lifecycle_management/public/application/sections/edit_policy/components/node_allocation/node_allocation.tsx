@@ -73,7 +73,7 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
           title={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesLoadingFailedTitle"
-              defaultMessage="Unable to load node attributes."
+              defaultMessage="Unable to load node attributes"
             />
           }
           color="danger"
