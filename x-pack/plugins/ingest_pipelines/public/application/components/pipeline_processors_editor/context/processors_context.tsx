@@ -148,7 +148,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             },
           });
           break;
-        case 'editingProcessor':
+        case 'managingProcessor':
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
@@ -229,10 +229,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         />
       )}
 
-      {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
+      {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
         <ProcessorSettingsForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
-          processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
+          processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
