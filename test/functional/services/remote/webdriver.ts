@@ -56,6 +56,12 @@ const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
 const chromiumDownloadPrefs = {
   'download.default_directory': downloadDir,
   'download.prompt_for_download': false,
+  'profile.content_settings.exceptions.clipboard': {
+    '[*.],*': {
+      last_modified: Date.now(),
+      setting: 1,
+    },
+  },
 };
 
 /**

@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await retry.try(async () => {
               const requestStatisticTab = await getFn();
 
-              expect(await requestStatisticTab.isDisplayed()).to.be(true);
+              expect(await requestStatisticTab.isEnabled()).to.be(true);
             });
           }
         });
@@ -160,7 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await retry.try(async () => {
               const requestStatisticTab = await getFn();
 
-              expect(await requestStatisticTab.isDisplayed()).to.be(true);
+              expect(await requestStatisticTab.isEnabled()).to.be(true);
             });
           }
         });
