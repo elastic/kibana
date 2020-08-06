@@ -465,6 +465,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await find.clickByCssSelector('[data-test-subj="metricsAggGroup"] .euiAccordion__button');
     }
 
+    public async addAnotherMetric() {
+      return await testSubjects.click('visEditorAdd_metrics');
+    }
+
     public async clickMetricByIndex(index: number) {
       const metrics = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
