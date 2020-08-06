@@ -24,7 +24,7 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;
 
-  useEffect(() => initializeWorkpad);
+  useEffect(() => initializeWorkpad());
 
   return (
     <div className="canvasExport" data-shared-page={selectedPageIndex + 1}>
