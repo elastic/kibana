@@ -98,19 +98,19 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     async clickOnConsole() {
-      await testSubjects.click('homeSynopsisLinkconsole');
+      await this.clickSynopsis('console');
     }
     async clickOnLogo() {
       await testSubjects.click('logo');
     }
 
-    async ClickOnLogsData() {
-      await testSubjects.click('logsData');
+    async clickOnAddData() {
+      await this.clickSynopsis('home_tutorial_directory');
     }
 
     // clicks on Active MQ logs
     async clickOnLogsTutorial() {
-      await testSubjects.click('homeSynopsisLinkactivemq logs');
+      await this.clickSynopsis('activemqlogs');
     }
 
     // clicks on cloud tutorial link

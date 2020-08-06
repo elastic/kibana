@@ -47,7 +47,7 @@ import { StartContract as FileUploadStartContract } from '../../file_upload/publ
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   mapsLegacy: { config: MapsLegacyConfigType };
@@ -93,7 +93,9 @@ export class MapsPlugin
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
     plugins.inspector.registerView(MapView);
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (home) {
+      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
     plugins.visualizations.registerAlias(
       getMapsVisTypeAlias(plugins.visualizations, config.showMapVisualizationTypes)
     );

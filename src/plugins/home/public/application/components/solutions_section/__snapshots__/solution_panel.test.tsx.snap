@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SolutionPanel renders the solution panel for the given solution 1`] = `
+<EuiFlexItem
+  className="homSolutions__group homSolutions__group--single homSolutions__item"
+  grow={1}
+  key="kibana"
+>
+  <EuiPanel
+    className="homSolutionPanel homSolutionPanel--kibana"
+    onClick={[Function]}
+    paddingSize="none"
+  >
+    <EuiFlexGroup
+      gutterSize="none"
+    >
+      <EuiFlexItem
+        className="homSolutionPanel__header"
+        grow={1}
+      >
+        <SolutionTitle
+          iconType="logoKibana"
+          subtitle="Visualize & analyze"
+          title="Kibana"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        className="homSolutionPanel__content"
+        grow={1}
+      >
+        <EuiText
+          key="Analyze data in dashboards"
+          size="s"
+        >
+          <p>
+            Analyze data in dashboards
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</EuiFlexItem>
+`;
