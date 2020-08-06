@@ -182,6 +182,7 @@ const VisLegendItemComponent = ({
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
               className={classNames('visLegend__valueColorPickerDot', {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
               })}
               style={{ color }}

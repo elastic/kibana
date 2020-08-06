@@ -41,7 +41,7 @@ beforeEach(() => {
   };
 });
 
-const executor: ExecutorType = async (options) => {
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 
@@ -203,7 +203,9 @@ describe('isActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    executor: async () => {},
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
   };
 
   beforeEach(() => {
@@ -258,7 +260,9 @@ describe('ensureActionTypeEnabled', () => {
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'basic',
-    executor: async () => {},
+    executor: async (options) => {
+      return { status: 'ok', actionId: options.actionId };
+    },
   };
 
   beforeEach(() => {
