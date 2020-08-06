@@ -111,15 +111,15 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get searchable() {
-    return this.spec.searchable || this.scripted;
+    return !!(this.spec.searchable || this.scripted);
   }
 
   public get aggregatable() {
-    return this.spec.aggregatable || this.scripted;
+    return !!(this.spec.aggregatable || this.scripted);
   }
 
   public get readFromDocValues() {
-    return this.spec.readFromDocValues && !this.scripted;
+    return !!(this.spec.readFromDocValues && !this.scripted);
   }
 
   public get subType() {

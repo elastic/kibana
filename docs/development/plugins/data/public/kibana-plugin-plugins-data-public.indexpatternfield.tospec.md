@@ -18,7 +18,7 @@ toSpec(): {
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;
-        readFromDocValues: boolean | undefined;
+        readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
         format: any;
     };
@@ -36,7 +36,7 @@ toSpec(): {
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;
-        readFromDocValues: boolean | undefined;
+        readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
         format: any;
     }`

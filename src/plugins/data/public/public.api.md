@@ -606,7 +606,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;
-        readFromDocValues: boolean | undefined;
+        readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
         format: any;
     }[];
@@ -1083,7 +1083,7 @@ export class IndexPatternField implements IFieldType {
     // (undocumented)
     get name(): string;
     // (undocumented)
-    get readFromDocValues(): boolean | undefined;
+    get readFromDocValues(): boolean;
     // (undocumented)
     get script(): string | undefined;
     set script(script: string | undefined);
@@ -1109,7 +1109,7 @@ export class IndexPatternField implements IFieldType {
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;
-        readFromDocValues: boolean | undefined;
+        readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
     };
     // (undocumented)
@@ -1124,7 +1124,7 @@ export class IndexPatternField implements IFieldType {
         scripted: boolean;
         searchable: boolean;
         aggregatable: boolean;
-        readFromDocValues: boolean | undefined;
+        readFromDocValues: boolean;
         subType: import("../types").IFieldSubType | undefined;
         format: any;
     };
