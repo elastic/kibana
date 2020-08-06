@@ -259,10 +259,10 @@ export const HostList = () => {
         name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
           defaultMessage: 'Configuration Status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getHostDetailsPath({
             name: 'hostPolicyResponse',
+            ...queryParams,
             selected_host: item.metadata.host.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);

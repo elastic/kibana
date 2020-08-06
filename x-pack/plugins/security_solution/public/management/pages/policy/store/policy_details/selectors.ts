@@ -29,6 +29,7 @@ export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.pol
 export const getPolicyDataForUpdate = (
   policy: PolicyData | Immutable<PolicyData>
 ): NewPolicyData | Immutable<NewPolicyData> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
   return newPolicy;
 };

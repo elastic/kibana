@@ -214,13 +214,13 @@ export function getGlobalFilters(state: State): string[] {
   }, []);
 }
 
-type onValueFunction = (
+type OnValueFunction = (
   argValue: ExpressionAstArgument,
   argNames?: string,
   args?: ExpressionAstFunction['arguments']
 ) => ExpressionAstArgument | ExpressionAstArgument[] | undefined;
 
-function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: onValueFunction) {
+function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: OnValueFunction) {
   const argNames = Object.keys(args);
 
   return argNames.reduce<ExpressionAstArgument[]>((values, argName) => {
@@ -495,7 +495,6 @@ export function getRenderedWorkpad(state: State) {
 
   const workpad = getWorkpad(state);
 
-  // eslint-disable-next-line no-unused-vars
   const { pages, variables, ...rest } = workpad;
 
   return {
