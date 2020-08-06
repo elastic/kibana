@@ -627,7 +627,7 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('it returns task objects', async () => {
+    test('it filters out running tasks', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
       const runAt = new Date();
@@ -641,7 +641,7 @@ if (doc['task.runAt'].size()!=0) {
               taskType: 'foo',
               schedule: undefined,
               attempts: 0,
-              status: 'idle',
+              status: 'claiming',
               params: '{ "hello": "world" }',
               state: '{ "baby": "Henhen" }',
               user: 'jimbo',
@@ -715,7 +715,103 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting'],
           state: { baby: 'Henhen' },
-          status: 'idle',
+          status: 'claiming',
+          taskType: 'foo',
+          user: 'jimbo',
+          ownerId: taskManagerId,
+        },
+      ]);
+    });
+
+    test('it returns task objects', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const {
+        result: { docs },
+        args: {
+          search: {
+            body: { query },
+          },
+        },
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: 10,
+        },
+        hits: tasks,
+      });
+
+      expect(query.bool.must).toContainEqual({
+        bool: {
+          must: [
+            {
+              term: {
+                'task.ownerId': taskManagerId,
+              },
+            },
+            { term: { 'task.status': 'claiming' } },
+          ],
+        },
+      });
+
+      expect(docs).toMatchObject([
+        {
+          attempts: 0,
+          id: 'aaa',
+          schedule: undefined,
+          params: { hello: 'world' },
+          runAt,
+          scope: ['reporting'],
+          state: { baby: 'Henhen' },
+          status: 'claiming',
           taskType: 'foo',
           user: 'jimbo',
           ownerId: taskManagerId,
@@ -728,7 +824,7 @@ if (doc['task.runAt'].size()!=0) {
           runAt,
           scope: ['reporting', 'ceo'],
           state: { henry: 'The 8th' },
-          status: 'running',
+          status: 'claiming',
           taskType: 'bar',
           user: 'dabo',
           ownerId: taskManagerId,
