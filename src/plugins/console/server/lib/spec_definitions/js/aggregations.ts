@@ -18,7 +18,7 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 const significantTermsArgs = {
   __template: {
     field: '',

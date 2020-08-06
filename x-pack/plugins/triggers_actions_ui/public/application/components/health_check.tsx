@@ -65,6 +65,7 @@ type PromptErrorProps = Pick<Props, 'docLinks'> & {
 };
 
 const TlsAndEncryptionError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (
@@ -107,6 +108,7 @@ const TlsAndEncryptionError = ({
 );
 
 const EncryptionError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (
@@ -158,6 +160,7 @@ const EncryptionError = ({
 );
 
 const TlsError = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   className,
 }: PromptErrorProps) => (
