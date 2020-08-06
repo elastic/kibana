@@ -657,12 +657,13 @@ export class VegaParser {
     }
 
     // provide right colors for light and dark themes
-    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'title', 'color');
-    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'style', 'guide-label', 'fill');
-    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'style', 'guide-title', 'fill');
-    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'axis', 'tickColor');
-    this._setDefaultValue(euiThemeVars.euiTextColor, 'config', 'axis', 'domainColor');
-    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'axis', 'gridColor');
+    this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-title', 'fill');
+    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'group-title', 'fill');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
+    this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
     this._setDefaultValue('transparent', 'config', 'background');
   }
 
