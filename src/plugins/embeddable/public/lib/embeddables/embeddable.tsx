@@ -136,8 +136,10 @@ export abstract class Embeddable<
     }
   }
 
-  public render(domNode: HTMLElement): void {
-    this.renderComplete.setEl(domNode);
+  public render(el: HTMLElement): void {
+    this.renderComplete.setEl(el);
+
+    el.setAttribute('data-title', this.output.title || '');
 
     if (this.destroyed) {
       throw new Error('Embeddable has been destroyed');

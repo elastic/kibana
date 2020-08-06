@@ -266,8 +266,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
    * @param {Element} domNode
    */
   public async render(domNode: HTMLElement) {
-    super.render(domNode);
-
     this.timeRange = _.cloneDeep(this.input.timeRange);
 
     this.transferCustomizationsToUiState();
@@ -277,7 +275,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
 
     this.domNode = div;
-    this.renderComplete.setEl(div);
+    super.render(this.domNode);
 
     const expressions = getExpressions();
     this.handler = new expressions.ExpressionLoader(this.domNode, undefined, {
@@ -316,8 +314,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         }
       })
     );
-
-    div.setAttribute('data-title', this.output.title || '');
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);
