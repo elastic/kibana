@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MlSummaryJob } from '../../../../../../ml/public';
 import {
   Group,
-  JobSummary,
   Module,
   RecognizerModule,
   SetupMlResponse,
@@ -31,7 +31,7 @@ export const mockGroupsResponse: Group[] = [
   { id: 'suricata', jobIds: ['suricata_alert_rate'], calendarIds: [] },
 ];
 
-export const mockOpenedJob: JobSummary = {
+export const mockOpenedJob: MlSummaryJob = {
   datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
   datafeedIndices: ['auditbeat-*'],
   datafeedState: 'started',
@@ -48,7 +48,7 @@ export const mockOpenedJob: JobSummary = {
   processed_record_count: 3425264,
 };
 
-export const mockJobsSummaryResponse: JobSummary[] = [
+export const mockJobsSummaryResponse: MlSummaryJob[] = [
   {
     id: 'rc-rare-process-windows-5',
     description:

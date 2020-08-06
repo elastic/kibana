@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobSummary } from '../../ml/types';
 import {
   AugmentedSecurityJobFields,
   Module,
@@ -13,6 +12,7 @@ import {
   SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
+import { MlSummaryJob } from '../../../../../../ml/public';
 
 /**
  * Helper function for converting from ModuleJob -> SecurityJob
@@ -74,7 +74,7 @@ export const getAugmentedFields = (
 };
 
 /**
- * Process Modules[] from the `get_module` ML API into SecurityJobs[] by filtering to SIEM specific
+ * Process Modules[] from the `get_module` ML API into SecurityJobs[] by filtering to Security specific
  * modules and unpacking jobs from each module
  *
  * @param modulesData
@@ -94,7 +94,7 @@ export const getModuleJobs = (
     .flat();
 
 /**
- * Process JobSummary[] from the `jobs_summary` ML API into SecurityJobs[] by filtering to to SIEM jobs
+ * Process data from the `jobs_summary` ML API into SecurityJobs[] by filtering to Security jobs
  * and augmenting with moduleId/defaultIndexPattern/isCompatible
  *
  * @param jobSummaryData
@@ -102,7 +102,7 @@ export const getModuleJobs = (
  * @param compatibleModuleIds
  */
 export const getInstalledJobs = (
-  jobSummaryData: JobSummary[],
+  jobSummaryData: MlSummaryJob[],
   moduleJobs: SecurityJob[],
   compatibleModuleIds: string[]
 ): SecurityJob[] =>
@@ -132,25 +132,25 @@ export const composeModuleAndInstalledJobs = (
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
 /**
- * Creates a list of SecurityJobs by composing JobSummary jobs (installed jobs) and Module
- * jobs (pre-packaged SIEM jobs) into a single job object that can be used throughout the SIEM app
+ * Creates a list of SecurityJobs by composing jobs summaries (installed jobs) and Module
+ * jobs (pre-packaged Security jobs) into a single job object that can be used throughout the Security app
  *
  * @param jobSummaryData
  * @param modulesData
  * @param compatibleModules
  */
 export const createSecurityJobs = (
-  jobSummaryData: JobSummary[],
+  jobSummaryData: MlSummaryJob[],
   modulesData: Module[],
   compatibleModules: RecognizerModule[]
 ): SecurityJob[] => {
   // Create lookup of compatible modules
   const compatibleModuleIds = compatibleModules.map((module) => module.id);
 
-  // Process modulesData: Filter to SIEM specific modules, and unpack jobs from modules
+  // Process modulesData: Filter to Security specific modules, and unpack jobs from modules
   const moduleSecurityJobs = getModuleJobs(modulesData, compatibleModuleIds);
 
-  // Process jobSummaryData: Filter to SIEM jobs, and augment with moduleId/defaultIndexPattern/isCompatible
+  // Process jobSummaryData: Filter to Security jobs, and augment with moduleId/defaultIndexPattern/isCompatible
   const installedJobs = getInstalledJobs(jobSummaryData, moduleSecurityJobs, compatibleModuleIds);
 
   // Combine installed jobs + moduleSecurityJobs that don't overlap, and sort by name asc

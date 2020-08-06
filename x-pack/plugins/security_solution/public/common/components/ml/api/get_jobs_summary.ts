@@ -5,7 +5,7 @@
  */
 
 import { HttpSetup } from '../../../../../../../../src/core/public';
-import { JobSummary } from '../types';
+import { MlSummaryJob } from '../../../../../../ml/public';
 
 export interface GetJobsSummaryArgs {
   http: HttpSetup;
@@ -26,8 +26,8 @@ export const getJobsSummary = async ({
   http,
   jobIds,
   signal,
-}: GetJobsSummaryArgs): Promise<JobSummary[]> =>
-  http.fetch<JobSummary[]>('/api/ml/jobs/jobs_summary', {
+}: GetJobsSummaryArgs): Promise<MlSummaryJob[]> =>
+  http.fetch<MlSummaryJob[]>('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify({ jobIds: jobIds ?? [] }),
     asSystemRequest: true,

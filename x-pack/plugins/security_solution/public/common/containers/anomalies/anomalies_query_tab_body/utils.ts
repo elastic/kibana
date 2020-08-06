@@ -6,15 +6,15 @@
 
 import deepmerge from 'deepmerge';
 
+import { MlSummaryJob } from '../../../../../../ml/public';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
-import { JobSummary } from '../../../components/ml/types';
 import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesFilterQuery = (
   filterQuery: string | ESTermQuery | undefined,
   anomaliesFilterQuery: object = {},
-  securityJobs: JobSummary[] = [],
+  securityJobs: MlSummaryJob[] = [],
   anomalyScore: number,
   flowTarget?: FlowTarget,
   ip?: string

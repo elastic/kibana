@@ -9,7 +9,6 @@ import {
   CloseJobsResponse,
   ErrorResponse,
   GetModulesProps,
-  JobSummary,
   MlSetupArgs,
   Module,
   RecognizerModule,

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlError, JobSummary } from '../ml/types';
+import { MlError } from '../ml/types';
+import { MlSummaryJob } from '../../../../../ml/public';
 
 export interface Group {
   id: string;
@@ -110,10 +111,10 @@ export interface CustomURL {
 }
 
 /**
- * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and JobSummary
+ * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and MlSummaryJob
  * that includes necessary metadata like moduleName, defaultIndexPattern, etc.
  */
-export interface SecurityJob extends JobSummary {
+export interface SecurityJob extends MlSummaryJob {
   moduleId: string;
   defaultIndexPattern: string;
   isCompatible: boolean;

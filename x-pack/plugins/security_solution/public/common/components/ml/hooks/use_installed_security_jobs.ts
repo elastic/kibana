@@ -6,18 +6,18 @@
 
 import { useEffect, useState } from 'react';
 
+import { MlSummaryJob } from '../../../../../../ml/public';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
 import { useMlCapabilities } from './use_ml_capabilities';
 import * as i18n from '../translations';
 import { useGetJobsSummary } from './use_get_jobs_summary';
-import { JobSummary } from '../types';
-import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 
 export interface UseInstalledSecurityJobsReturn {
   loading: boolean;
-  jobs: JobSummary[];
+  jobs: MlSummaryJob[];
   isMlUser: boolean;
   isLicensed: boolean;
 }
@@ -30,7 +30,7 @@ export interface UseInstalledSecurityJobsReturn {
  *
  */
 export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
-  const [jobs, setJobs] = useState<JobSummary[]>([]);
+  const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
   const { addError } = useAppToasts();
   const mlCapabilities = useMlCapabilities();
   const http = useHttp();
