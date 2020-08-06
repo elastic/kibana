@@ -11,8 +11,8 @@ import { buildBoolArray } from './build_bool_array';
 
 const response = {
   columns: [
-    { name: 'One', type: 'keyword' },
-    { name: 'Two', type: 'keyword' },
+    { id: 'One', name: 'One', meta: { type: 'keyword' } },
+    { id: 'Two', name: 'Two', meta: { type: 'keyword' } },
   ],
   rows: [
     ['foo', 'bar'],
@@ -53,7 +53,11 @@ describe('query_es_sql', () => {
 
     const result = await queryEsSQL(api, baseArgs);
 
-    const expectedColumns = response.columns.map((c) => ({ name: c.name, type: 'string' }));
+    const expectedColumns = response.columns.map((c) => ({
+      id: c.id,
+      name: c.name,
+      meta: { type: 'string' },
+    }));
     const columnNames = expectedColumns.map((c) => c.name);
     const expectedRows = response.rows.map((r) => zipObject(columnNames, r));
 
@@ -65,8 +69,8 @@ describe('query_es_sql', () => {
   it('fetches pages until it has the requested count', async () => {
     const pageOne = {
       columns: [
-        { name: 'One', type: 'keyword' },
-        { name: 'Two', type: 'keyword' },
+        { id: 'One', name: 'One', meta: { type: 'keyword' } },
+        { id: 'Two', name: 'Two', meta: { type: 'keyword' } },
       ],
       rows: [['foo', 'bar']],
       cursor: 'cursor-value',

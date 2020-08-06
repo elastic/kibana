@@ -26,9 +26,7 @@ import { ExpressionValueRender } from './render';
 type State = string | number | boolean | null | undefined | SerializableState;
 
 /** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
+export type SerializableState = Record<string, State | State[]>;
 
 const name = 'datatable';
 
