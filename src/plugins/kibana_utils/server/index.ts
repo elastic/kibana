@@ -19,11 +19,9 @@
 
 export {
   createGetterSetter,
-  createStartServicesGetter,
   fieldWildcardFilter,
   fieldWildcardMatcher,
   Get,
   Set,
-  StartServicesGetter,
   url,
 } from '../common';
