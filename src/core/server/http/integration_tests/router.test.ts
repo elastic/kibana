@@ -304,27 +304,27 @@ describe('Options', () => {
   });
 
   describe('timeout', () => {
-    describe('payload', () => {
-      const writeBodyCharAtATime = (request: supertest.Test, body: string, interval: number) => {
-        return new Promise((resolve, reject) => {
-          let i = 0;
-          const intervalId = setInterval(() => {
-            if (i < body.length) {
-              request.write(body[i++]);
-            } else {
-              clearInterval(intervalId);
-              request.end((err, res) => {
-                if (err) {
-                  reject(err);
-                } else {
-                  resolve(res);
-                }
-              });
-            }
-          }, interval);
+    const writeBodyCharAtATime = (request: supertest.Test, body: string, interval: number) => {
+      return new Promise((resolve, reject) => {
+        let i = 0;
+        const intervalId = setInterval(() => {
+          if (i < body.length) {
+            request.write(body[i++]);
+          } else {
+            clearInterval(intervalId);
+            request.end((err, res) => {
+              resolve(res);
+            });
+          }
+        }, interval);
+        request.on('error', (err) => {
+          clearInterval(intervalId);
+          reject(err);
         });
-      };
+      });
+    };
 
+    describe('payload', () => {
       it('should timeout if POST payload sending is too slow', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -335,7 +335,7 @@ describe('Options', () => {
               body: {
                 accepts: ['application/json'],
               },
-              timeout: { payload: 100, idleSocket: 120000 },
+              timeout: { payload: 100 },
             },
             path: '/a',
             validate: false,
@@ -354,7 +354,7 @@ describe('Options', () => {
 
         const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
 
-        await expect(result).resolves.toHaveProperty('status', 408);
+        await expect(result).rejects.toMatchInlineSnapshot(`[Error: Request Timeout]`);
       });
 
       it('should not timeout if POST payload sending is quick', async () => {
@@ -384,16 +384,88 @@ describe('Options', () => {
     });
 
     describe('idleSocket', () => {
-      // HapiJS forces the idleSocket timeout to be larger than the payload timeout, so we can't slowly
-      // send the payload to trigger the idle socket...
-      // We can add this test once https://github.com/hapijs/hapi/issues/4122 is fixed
+      it('should timeout if payload sending has too long of an idle period', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.post(
+          {
+            path: '/a',
+            validate: false,
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { idleSocket: 10 },
+            },
+          },
+          async (context, req, res) => {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return res.ok({});
+          }
+        );
+
+        await server.start();
+
+        // start the request
+        const request = supertest(innerServer.listener)
+          .post('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        const result = writeBodyCharAtATime(request, '{}', 20);
+
+        await expect(result).rejects.toThrow('socket hang up');
+      });
+
+      it(`should not timeout if payload sending doesn't have too long of an idle period`, async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        router.post(
+          {
+            path: '/a',
+            validate: false,
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { idleSocket: 1000 },
+            },
+          },
+          async (context, req, res) => {
+            return res.ok({});
+          }
+        );
+
+        await server.start();
+
+        // start the request
+        const request = supertest(innerServer.listener)
+          .post('/a')
+          .set('Content-Type', 'application/json')
+          .set('Transfer-Encoding', 'chunked');
+
+        const result = writeBodyCharAtATime(request, '{}', 10);
+
+        await expect(result).resolves.toHaveProperty('status', 200);
+      });
 
       it('should timeout if servers response is too slow', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         router.post(
-          { path: '/a', validate: false, options: { timeout: { idleSocket: 1000, payload: 100 } } },
+          {
+            path: '/a',
+            validate: false,
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { idleSocket: 1000, payload: 100 },
+            },
+          },
           async (context, req, res) => {
             await new Promise((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
@@ -409,7 +481,16 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.post(
-          { path: '/a', validate: false, options: { timeout: { idleSocket: 2000, payload: 100 } } },
+          {
+            path: '/a',
+            validate: false,
+            options: {
+              body: {
+                accepts: ['application/json'],
+              },
+              timeout: { idleSocket: 2000, payload: 100 },
+            },
+          },
           async (context, req, res) => {
             await new Promise((resolve) => setTimeout(resolve, 10));
             return res.ok({});

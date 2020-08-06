@@ -214,6 +214,8 @@ export class KibanaRequest<
     const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
       request.route.settings.payload || {};
 
+    // net.Socket#timeout isn't documented, yet, and isn't part of the types, yet... https://github.com/nodejs/node/pull/34543
+    const socketTimeout = (request.raw.req.socket as any).timeout;
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
@@ -221,7 +223,7 @@ export class KibanaRequest<
       tags: request.route.settings.tags || [],
       timeout: {
         payload: payloadTimeout,
-        idleSocket: request.route.settings.timeout?.socket,
+        idleSocket: socketTimeout === 0 ? undefined : socketTimeout,
       },
       body: isSafeMethod(method)
         ? undefined
