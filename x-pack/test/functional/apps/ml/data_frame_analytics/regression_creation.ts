@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const editedDescription = 'Edited description';
 
   describe('regression creation', function () {
     before(async () => {
@@ -171,6 +172,36 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
+            sourceIndex: testData.source,
+            destinationIndex: testData.destinationIndex,
+            type: testData.expected.row.type,
+            status: testData.expected.row.status,
+            progress: testData.expected.row.progress,
+          });
+        });
+
+        it('should open the edit form for the created job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+        });
+
+        it('should input the description in the edit form', async () => {
+          await ml.dataFrameAnalyticsEdit.assertJobDescriptionEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobDescriptionEdit(editedDescription);
+        });
+
+        it('should input the model memory limit in the edit form', async () => {
+          await ml.dataFrameAnalyticsEdit.assertJobMmlEditInputExists();
+          await ml.dataFrameAnalyticsEdit.setJobMmlEdit('21mb');
+        });
+
+        it('should submit the edit job form', async () => {
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
+        });
+
+        it('displays details for the edited job in the analytics table', async () => {
+          await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
+            id: testData.jobId,
+            description: editedDescription,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,

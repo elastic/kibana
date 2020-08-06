@@ -196,7 +196,7 @@ describe('Lens App', () => {
 
     core.uiSettings.get.mockImplementation(
       jest.fn((type) => {
-        if (type === 'timepicker:timeDefaults') {
+        if (type === UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS) {
           return { from: 'now-7d', to: 'now' };
         } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';

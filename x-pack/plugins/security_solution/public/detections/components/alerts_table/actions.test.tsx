@@ -255,8 +255,7 @@ describe('alert actions', () => {
           nonEcsData: [],
           updateTimelineIsLoading,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
@@ -285,8 +284,7 @@ describe('alert actions', () => {
           nonEcsData: [],
           updateTimelineIsLoading,
         });
-        // @ts-ignore
-        const createTimelineArg = createTimeline.mock.calls[0][0];
+        const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQueryDraft.kind).toEqual('kuery');
