@@ -486,12 +486,7 @@ export const ariaFlowtoCandidate: (
 
 const spatiallyIndexedLayout: (state: DataState) => rbush<IndexedEntity> = createSelector(
   layout,
-  function ({
-    /* eslint-disable no-shadow */
-    processNodePositions,
-    edgeLineSegments,
-    /* eslint-enable no-shadow */
-  }) {
+  function ({ processNodePositions, edgeLineSegments }) {
     const spatialIndex: rbush<IndexedEntity> = new rbush();
     const processesToIndex: IndexedProcessNode[] = [];
     const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];

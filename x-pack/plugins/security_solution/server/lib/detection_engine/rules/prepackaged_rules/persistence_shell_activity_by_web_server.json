@@ -7,7 +7,8 @@
     "Network monitoring or management products may have a web server component that runs shell commands as part of normal behavior."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

@@ -46,6 +46,7 @@ describe('import timelines', () => {
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
+  let mockGetNote: jest.Mock;
   let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
 
   beforeEach(() => {
@@ -69,6 +70,7 @@ describe('import timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+    mockGetNote = jest.fn();
     mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
 
     jest.doMock('../create_timelines_stream_from_ndjson', () => {
@@ -113,6 +115,37 @@ describe('import timelines', () => {
       jest.doMock('../../note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
+          getNote: mockGetNote
+            .mockResolvedValueOnce({
+              noteId: 'd2649d40-6bc5-11ea-86f0-5db0048c6086',
+              version: 'WzExNjQsMV0=',
+              eventId: undefined,
+              note: 'original note',
+              created: '1584830796960',
+              createdBy: 'original author A',
+              updated: '1584830796960',
+              updatedBy: 'original author A',
+            })
+            .mockResolvedValueOnce({
+              noteId: '73ac2370-6bc2-11ea-a90b-f5341fb7a189',
+              version: 'WzExMjgsMV0=',
+              eventId: 'ZaAi8nAB5OldxqFfdhke',
+              note: 'original event note',
+              created: '1584830796960',
+              createdBy: 'original author B',
+              updated: '1584830796960',
+              updatedBy: 'original author B',
+            })
+            .mockResolvedValue({
+              noteId: 'f7b71620-6bc2-11ea-a0b6-33c7b2a78885',
+              version: 'WzExMzUsMV0=',
+              eventId: 'ZaAi8nAB5OldxqFfdhke',
+              note: 'event note2',
+              created: '1584830796960',
+              createdBy: 'angela',
+              updated: '1584830796960',
+              updatedBy: 'angela',
+            }),
         };
       });
 
@@ -213,6 +246,14 @@ describe('import timelines', () => {
       );
     });
 
+    test('should Check if note exists', async () => {
+      const mockRequest = getImportTimelinesRequest();
+      await server.inject(mockRequest, context);
+      expect(mockGetNote.mock.calls[0][1]).toEqual(
+        mockUniqueParsedObjects[0].globalNotes[0].noteId
+      );
+    });
+
     test('should Create notes', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
@@ -237,20 +278,67 @@ describe('import timelines', () => {
       expect(mockPersistNote.mock.calls[0][2]).toEqual(mockCreatedTimeline.version);
     });
 
-    test('should provide new notes when Creating notes for a timeline', async () => {
+    test('should provide new notes with original author info when Creating notes for a timeline', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistNote.mock.calls[0][3]).toEqual({
+        eventId: undefined,
+        note: 'original note',
+        created: '1584830796960',
+        createdBy: 'original author A',
+        updated: '1584830796960',
+        updatedBy: 'original author A',
+        timelineId: mockCreatedTimeline.savedObjectId,
+      });
+      expect(mockPersistNote.mock.calls[1][3]).toEqual({
+        eventId: mockUniqueParsedObjects[0].eventNotes[0].eventId,
+        note: 'original event note',
+        created: '1584830796960',
+        createdBy: 'original author B',
+        updated: '1584830796960',
+        updatedBy: 'original author B',
+        timelineId: mockCreatedTimeline.savedObjectId,
+      });
+      expect(mockPersistNote.mock.calls[2][3]).toEqual({
+        eventId: mockUniqueParsedObjects[0].eventNotes[1].eventId,
+        note: 'event note2',
+        created: '1584830796960',
+        createdBy: 'angela',
+        updated: '1584830796960',
+        updatedBy: 'angela',
+        timelineId: mockCreatedTimeline.savedObjectId,
+      });
+    });
+
+    test('should keep current author if note does not exist when Creating notes for a timeline', async () => {
+      mockGetNote.mockReset();
+      mockGetNote.mockRejectedValue(new Error());
+
+      const mockRequest = getImportTimelinesRequest();
+      await server.inject(mockRequest, context);
+      expect(mockPersistNote.mock.calls[0][3]).toEqual({
+        created: mockUniqueParsedObjects[0].globalNotes[0].created,
+        createdBy: mockUniqueParsedObjects[0].globalNotes[0].createdBy,
+        updated: mockUniqueParsedObjects[0].globalNotes[0].updated,
+        updatedBy: mockUniqueParsedObjects[0].globalNotes[0].updatedBy,
         eventId: undefined,
         note: mockUniqueParsedObjects[0].globalNotes[0].note,
         timelineId: mockCreatedTimeline.savedObjectId,
       });
       expect(mockPersistNote.mock.calls[1][3]).toEqual({
+        created: mockUniqueParsedObjects[0].eventNotes[0].created,
+        createdBy: mockUniqueParsedObjects[0].eventNotes[0].createdBy,
+        updated: mockUniqueParsedObjects[0].eventNotes[0].updated,
+        updatedBy: mockUniqueParsedObjects[0].eventNotes[0].updatedBy,
         eventId: mockUniqueParsedObjects[0].eventNotes[0].eventId,
         note: mockUniqueParsedObjects[0].eventNotes[0].note,
         timelineId: mockCreatedTimeline.savedObjectId,
       });
       expect(mockPersistNote.mock.calls[2][3]).toEqual({
+        created: mockUniqueParsedObjects[0].eventNotes[1].created,
+        createdBy: mockUniqueParsedObjects[0].eventNotes[1].createdBy,
+        updated: mockUniqueParsedObjects[0].eventNotes[1].updated,
+        updatedBy: mockUniqueParsedObjects[0].eventNotes[1].updatedBy,
         eventId: mockUniqueParsedObjects[0].eventNotes[1].eventId,
         note: mockUniqueParsedObjects[0].eventNotes[1].note,
         timelineId: mockCreatedTimeline.savedObjectId,
@@ -573,6 +661,10 @@ describe('import timeline templates', () => {
       expect(mockPersistNote.mock.calls[0][3]).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
+        created: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].created,
+        createdBy: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].createdBy,
+        updated: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].updated,
+        updatedBy: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].updatedBy,
         timelineId: mockCreatedTemplateTimeline.savedObjectId,
       });
     });
@@ -721,6 +813,10 @@ describe('import timeline templates', () => {
       expect(mockPersistNote.mock.calls[0][3]).toEqual({
         eventId: undefined,
         note: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].note,
+        created: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].created,
+        createdBy: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].createdBy,
+        updated: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].updated,
+        updatedBy: mockUniqueParsedTemplateTimelineObjects[0].globalNotes[0].updatedBy,
         timelineId: mockCreatedTemplateTimeline.savedObjectId,
       });
     });
