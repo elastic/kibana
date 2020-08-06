@@ -9,6 +9,7 @@ import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -16,14 +17,16 @@ import GettingStarted from '../../assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
-    productName={i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
-      defaultMessage: 'App Search',
-    })}
+    productName={APP_SEARCH_PLUGIN.NAME}
     productEuiIcon="logoAppSearch"
     standardAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#standard"
     elasticsearchNativeAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
   >
-    <SetBreadcrumbs text="Setup Guide" />
+    <SetBreadcrumbs
+      text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+        defaultMessage: 'Setup Guide',
+      })}
+    />
     <SendTelemetry action="viewed" metric="setup_guide" />
 
     <a
