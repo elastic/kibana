@@ -16,7 +16,7 @@ Run all tests from the `x-pack` root directory
 
 ## UI Terminology
 
-Lens has a lot of UI elements - to make it easier to refer to them in issues or bugs, this is a hopefully complete list:
+Lens has a lot of UI elements – to make it easier to refer to them in issues or bugs, this is a hopefully complete list:
 
 * **Top nav** Navigation menu on top of the app (contains Save button)
   * **Query bar** Input to enter KQL or Lucene query below the top nav
