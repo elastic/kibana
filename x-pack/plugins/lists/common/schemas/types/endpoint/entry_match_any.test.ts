@@ -30,8 +30,10 @@ describe('endpointEntryMatchAny', () => {
     const decoded = endpointEntryMatchAny.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "excluded" supplied to "operator"',
+    ]);
+    expect(message.schema).toEqual({});
   });
 
   test('it should FAIL validation when field is empty string', () => {
