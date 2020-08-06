@@ -40,7 +40,7 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   );
 };
 
-const getOverallAnomalyExplorerLinkDescriptor = (
+export const getOverallAnomalyExplorerLinkDescriptor = (
   jobId: string,
   timeRange: TimeRange
 ): LinkDescriptor => {
