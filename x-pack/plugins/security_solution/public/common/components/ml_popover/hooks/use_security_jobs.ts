@@ -51,7 +51,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
     setLoading(true);
 
     async function fetchSecurityJobIdsFromGroupsData() {
-      if (isMlAdmin) {
+      if (isMlAdmin && isLicensed) {
         try {
           // Batch fetch all installed jobs, ML modules, and check which modules are compatible with siemDefaultIndex
           const [jobSummaryData, modulesData, compatibleModules] = await Promise.all([
@@ -88,7 +88,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchData, isMlAdmin, siemDefaultIndex, addError, http]);
+  }, [refetchData, isMlAdmin, isLicensed, siemDefaultIndex, addError, http]);
 
   return { isLicensed, isMlAdmin, jobs, loading };
 };
