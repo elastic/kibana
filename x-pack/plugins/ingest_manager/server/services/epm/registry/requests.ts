@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fetch, { Response } from 'node-fetch';
+import fetch, { FetchError, Response } from 'node-fetch';
 import pRetry from 'p-retry';
 import { streamToString } from './streams';
 import { RegistryError } from '../../../errors';
@@ -30,10 +30,9 @@ export async function getResponse(url: string): Promise<Response> {
       {
         factor: 2,
         retries: 5,
-        onFailedAttempt: error => {
-
-          console.log('pRetry error', error.type, error.message, error);
-          if (error.type !== 'system') {
+        onFailedAttempt: (error) => {
+          // https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
+          if (error instanceof FetchError && error.type !== 'system') {
             throw new RegistryError(
               `Error connecting to package registry at ${url}: ${response.statusText}`
             );
