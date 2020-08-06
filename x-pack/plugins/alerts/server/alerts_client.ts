@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { omit, isEqual, map, uniq, pick, truncate } from 'lodash';
+import { omit, omitBy, isUndefined, isEqual, map, uniq, pick, truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   Logger,
@@ -234,15 +234,15 @@ export class AlertsClient {
         'alert',
         createdAlert.id,
         {
+          ...rawAlert,
           ...createdAlert.attributes,
           scheduledTaskId: scheduledTask.id,
         },
         {
-          references: createdAlert.references,
-          version: createdAlert.version,
+          references,
         }
       );
-      createdAlert.attributes.acscheduledTaskId = scheduledTask.id;
+      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
     return this.getAlertFromRaw(
       createdAlert.id,
@@ -511,7 +511,7 @@ export class AlertsClient {
         ),
         updatedBy: username,
       },
-      { version, references }
+      omitBy({ version, references }, isUndefined)
     );
 
     if (apiKeyToInvalidate) {
@@ -573,31 +573,30 @@ export class AlertsClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+      const updatedAttributes = {
+        ...attributes,
+        enabled: true,
+        ...this.apiKeyAsAlertAttributes(
+          await this.createAPIKey(this.generateAPIKeyName(attributes.alertTypeId, attributes.name)),
+          username
+        ),
+        updatedBy: username,
+      };
       const updatedAlert = await this.unsecuredSavedObjectsClient.update<RawAlert>(
         'alert',
         id,
-        {
-          ...attributes,
-          enabled: true,
-          ...this.apiKeyAsAlertAttributes(
-            await this.createAPIKey(
-              this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-            ),
-            username
-          ),
-          updatedBy: username,
-        },
-        { version, references }
+        updatedAttributes,
+        omitBy({ version, references }, isUndefined)
       );
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.unsecuredSavedObjectsClient.update<RawAlert>(
         'alert',
         id,
         {
-          ...updatedAlert.attributes,
+          ...updatedAttributes,
           scheduledTaskId: scheduledTask.id,
         },
-        { references: updatedAlert.references }
+        omitBy({ version: updatedAlert.version, references: updatedAlert.references }, isUndefined)
       );
       if (apiKeyToInvalidate) {
         await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
@@ -642,13 +641,11 @@ export class AlertsClient {
         'alert',
         id,
         {
-          ...attributes,
+          ...omit(attributes, 'scheduledTaskId', 'apiKey', 'apiKeyOwner'),
           enabled: false,
-          apiKey: null,
-          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
         },
-        { version, references }
+        omitBy({ version, references }, isUndefined)
       );
 
       await Promise.all([
@@ -661,9 +658,13 @@ export class AlertsClient {
   }
 
   public async muteAll({ id }: { id: string }) {
-    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
-      RawAlert
-    >('alert', id);
+    const {
+      attributes,
+      references,
+      version,
+    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -683,14 +684,18 @@ export class AlertsClient {
         mutedInstanceIds: [],
         updatedBy: await this.getUserName(),
       },
-      { references, version }
+      omitBy({ version, references }, isUndefined)
     );
   }
 
   public async unmuteAll({ id }: { id: string }) {
-    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
-      RawAlert
-    >('alert', id);
+    const {
+      attributes,
+      references,
+      version,
+    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>('alert', id, {
+      namespace: this.namespace,
+    });
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -710,14 +715,22 @@ export class AlertsClient {
         mutedInstanceIds: [],
         updatedBy: await this.getUserName(),
       },
-      { references, version }
+      omitBy({ version, references }, isUndefined)
     );
   }
 
   public async muteInstance({ alertId, alertInstanceId }: MuteOptions) {
-    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
-      RawAlert
-    >('alert', alertId);
+    const {
+      attributes,
+      references,
+      version,
+    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+      'alert',
+      alertId,
+      {
+        namespace: this.namespace,
+      }
+    );
 
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
@@ -740,7 +753,7 @@ export class AlertsClient {
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
         },
-        { version, references }
+        omitBy({ version, references }, isUndefined)
       );
     }
   }
@@ -752,9 +765,17 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
-      RawAlert
-    >('alert', alertId);
+    const {
+      attributes,
+      references,
+      version,
+    } = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
+      'alert',
+      alertId,
+      {
+        namespace: this.namespace,
+      }
+    );
     await this.authorization.ensureAuthorized(
       attributes.alertTypeId,
       attributes.consumer,
@@ -774,7 +795,7 @@ export class AlertsClient {
           updatedBy: await this.getUserName(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
-        { version, references }
+        omitBy({ version, references }, isUndefined)
       );
     }
   }

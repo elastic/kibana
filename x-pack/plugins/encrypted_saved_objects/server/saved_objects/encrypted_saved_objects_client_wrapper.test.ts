@@ -457,7 +457,7 @@ describe('#bulkUpdate', () => {
           attrSecret: `*${doc.attributes.attrSecret}*`,
           attrNotSoSecret: `*${doc.attributes.attrNotSoSecret}*`,
         },
-        references: undefined,
+        references: [],
       })),
     };
 

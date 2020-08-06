@@ -11,6 +11,7 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { RawAlert } from '../../../../../../../plugins/alerts/server/types';
 
 export function defineRoutes(core: CoreSetup) {
   const router = core.http.createRouter();
@@ -50,7 +51,13 @@ export function defineRoutes(core: CoreSetup) {
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         includedHiddenTypes: ['alert'],
       });
-      const result = await savedObjectsWithAlerts.update(type, id, attributes, options);
+      const savedAlert = await savedObjectsWithAlerts.get<RawAlert>(type, id);
+      const result = await savedObjectsWithAlerts.update(
+        type,
+        id,
+        { ...savedAlert.attributes, ...attributes },
+        options
+      );
       return res.ok({ body: result });
     }
   );

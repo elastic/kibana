@@ -17,6 +17,7 @@ import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/
 import { actionsClientMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { AlertsAuthorization } from './authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../actions/server';
+import { pick } from 'lodash';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -397,14 +398,44 @@ describe('create()', () => {
                                                                         ]
                                                 `);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "scheduledTaskId": "task-123",
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": "2019-02-12T21:01:22.479Z",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+      Object {
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+        ],
+        "version": undefined,
+      }
+    `);
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -1075,6 +1106,16 @@ describe('enable()', () => {
     alertsClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
     });
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+      },
+    });
     taskManager.schedule.mockResolvedValue({
       id: 'task-123',
       scheduledAt: new Date(),
@@ -1133,6 +1174,17 @@ describe('enable()', () => {
   });
 
   test('enables an alert', async () => {
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+      },
+    });
+
     await alertsClient.enable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -1165,6 +1217,7 @@ describe('enable()', () => {
       },
       {
         version: '123',
+        references: existingAlert.references,
       }
     );
     expect(taskManager.schedule).toHaveBeenCalledWith({
@@ -1180,9 +1233,22 @@ describe('enable()', () => {
       },
       scope: ['alerting'],
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      scheduledTaskId: 'task-123',
-    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        ...existingAlert.attributes,
+        enabled: true,
+        apiKey: null,
+        apiKeyOwner: null,
+        updatedBy: 'elastic',
+        scheduledTaskId: 'task-123',
+      },
+      {
+        version: '123',
+        references: existingAlert.references,
+      }
+    );
   });
 
   test('invalidates API key if ever one existed prior to updating', async () => {
@@ -1249,6 +1315,7 @@ describe('enable()', () => {
         ],
       },
       {
+        references: [],
         version: '123',
       }
     );
@@ -1278,6 +1345,7 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the first time', async () => {
+    unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1290,6 +1358,7 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the second time', async () => {
+    unsecuredSavedObjectsClient.update.mockReset();
     unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
@@ -1395,10 +1464,7 @@ describe('disable()', () => {
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
-        apiKey: null,
-        apiKeyOwner: null,
         enabled: false,
-        scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
           {
@@ -1413,6 +1479,7 @@ describe('disable()', () => {
         ],
       },
       {
+        references: [],
         version: '123',
       }
     );
@@ -1435,10 +1502,7 @@ describe('disable()', () => {
         consumer: 'myApp',
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
-        apiKey: null,
-        apiKeyOwner: null,
         enabled: false,
-        scheduledTaskId: null,
         updatedBy: 'elastic',
         actions: [
           {
@@ -1454,6 +1518,7 @@ describe('disable()', () => {
       },
       {
         version: '123',
+        references: [],
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
@@ -1545,11 +1610,27 @@ describe('muteAll()', () => {
     });
 
     await alertsClient.muteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      muteAll: true,
-      mutedInstanceIds: [],
-      updatedBy: 'elastic',
-    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        muteAll: true,
+        mutedInstanceIds: [],
+        updatedBy: 'elastic',
+      },
+      { references: [] }
+    );
   });
 
   describe('authorization', () => {
@@ -1630,11 +1711,27 @@ describe('unmuteAll()', () => {
     });
 
     await alertsClient.unmuteAll({ id: '1' });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
-      muteAll: false,
-      mutedInstanceIds: [],
-      updatedBy: 'elastic',
-    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        muteAll: false,
+        mutedInstanceIds: [],
+        updatedBy: 'elastic',
+      },
+      { references: [] }
+    );
   });
 
   describe('authorization', () => {
@@ -1714,10 +1811,15 @@ describe('muteInstance()', () => {
       'alert',
       '1',
       {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
         mutedInstanceIds: ['2'],
         updatedBy: 'elastic',
       },
-      { version: '123' }
+      { version: '123', references: [] }
     );
   });
 
@@ -1847,10 +1949,18 @@ describe('unmuteInstance()', () => {
       'alert',
       '1',
       {
+        actions: [],
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        scheduledTaskId: 'task-123',
         mutedInstanceIds: [],
         updatedBy: 'elastic',
       },
-      { version: '123' }
+      {
+        version: '123',
+        references: [],
+      }
     );
   });
 
@@ -3811,7 +3921,7 @@ describe('updateApiKey()', () => {
           },
         ],
       },
-      { version: '123' }
+      pick(existingAlert, 'version', 'references')
     );
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
@@ -3847,7 +3957,7 @@ describe('updateApiKey()', () => {
           },
         ],
       },
-      { version: '123' }
+      pick(existingAlert, 'version', 'references')
     );
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
