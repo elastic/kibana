@@ -48,6 +48,7 @@ export class Simulator {
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    history,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -61,6 +62,7 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID?: string;
+    history?: HistoryPackageHistoryInterface<never>;
   }) {
     this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
@@ -79,8 +81,9 @@ export class Simulator {
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
-    // Create a fake 'history' instance that Resolver will use to read and write query string values
-    this.history = createMemoryHistory();
+    // If needed, create a fake 'history' instance.
+    // Resolver will use to read and write query string values.
+    this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
