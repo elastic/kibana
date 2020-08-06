@@ -72,13 +72,16 @@ export default function (providerContext: FtrProviderContext) {
         '@timestamp': {
           type: 'date',
         },
-        logs_test_name2: {
+        logs_test_name: {
+          type: 'text',
+        },
+        new_field_name: {
           ignore_above: 1024,
           type: 'keyword',
         },
-        dataset: {
+        data_stream: {
           properties: {
-            name: {
+            dataset: {
               type: 'constant_keyword',
             },
             namespace: {
@@ -105,9 +108,9 @@ export default function (providerContext: FtrProviderContext) {
           ignore_above: 1024,
           type: 'keyword',
         },
-        dataset: {
+        data_stream: {
           properties: {
-            name: {
+            dataset: {
               type: 'constant_keyword',
             },
             namespace: {
@@ -136,9 +139,9 @@ export default function (providerContext: FtrProviderContext) {
           ignore_above: 1024,
           type: 'keyword',
         },
-        dataset: {
+        data_stream: {
           properties: {
-            name: {
+            dataset: {
               type: 'constant_keyword',
             },
             namespace: {
@@ -195,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'logs-*',
       });
       const fields = JSON.parse(resIndexPatternLogs.attributes.fields);
-      const updated = fields.filter((field: { name: string }) => field.name === 'logs_test_name2');
+      const updated = fields.filter((field: { name: string }) => field.name === 'new_field_name');
       expect(!!updated.length).equal(true);
       const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
         type: 'index-pattern',
