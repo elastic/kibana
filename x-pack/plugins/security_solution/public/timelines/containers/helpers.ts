@@ -6,12 +6,12 @@
 
 import { TimelineId } from '../../../common/types/timeline';
 
-export const dectectionsTimelineIds = [
+export const detectionsTimelineIds = [
   TimelineId.detectionsPage,
   TimelineId.detectionsRulesDetailsPage,
 ];
 
 export const skipQueryForDetectionsPage = (id: string, defaultIndex: string[]) =>
   id != null &&
-  dectectionsTimelineIds.some((timelineId) => timelineId === id) &&
+  detectionsTimelineIds.some((timelineId) => timelineId === id) &&
   !defaultIndex.some((di) => di.toLowerCase().startsWith('.siem-signals'));
