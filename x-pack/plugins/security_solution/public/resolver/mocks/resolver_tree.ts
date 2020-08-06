@@ -5,8 +5,7 @@
  */
 
 import { mockEndpointEvent } from './endpoint_event';
-import { mockRelatedEvent } from './related_event';
-import { ResolverTree, ResolverEvent } from '../../../../common/endpoint/types';
+import { ResolverTree, ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 
 export function mockTreeWith2AncestorsAndNoChildren({
   originID,
@@ -125,11 +124,11 @@ type RelatedEventType = string;
  * @param treeToAddRelatedEventsTo the ResolverTree to modify
  * @param relatedEventsToAddByCategoryAndType Iterable of `[category, type]` pairs describing related events. e.g. [['dns','info'],['registry','access']]
  */
-export function withRelatedEventsOnOrigin(
+function withRelatedEventsOnOrigin(
   treeToAddRelatedEventsTo: ResolverTree,
   relatedEventsToAddByCategoryAndType: Iterable<[RelatedEventCategory, RelatedEventType]>
 ): ResolverTree {
-  const events = [];
+  const events: SafeResolverEvent[] = [];
   const byCategory: Record<string, number> = {};
   const stats = {
     totalAlerts: 0,
@@ -139,14 +138,18 @@ export function withRelatedEventsOnOrigin(
     },
   };
   for (const [category, type] of relatedEventsToAddByCategoryAndType) {
-    events.push(
-      mockRelatedEvent({
-        entityID: treeToAddRelatedEventsTo.entityID,
-        timestamp: 1,
-        category,
+    events.push({
+      '@timestamp': 1,
+      event: {
+        kind: 'event',
         type,
-      })
-    );
+        category,
+        id: 'xyz',
+      },
+      process: {
+        entity_id: treeToAddRelatedEventsTo.entityID,
+      },
+    });
     stats.events.total++;
     stats.events.byCategory[category] = stats.events.byCategory[category]
       ? stats.events.byCategory[category] + 1
@@ -156,7 +159,7 @@ export function withRelatedEventsOnOrigin(
     ...treeToAddRelatedEventsTo,
     stats,
     relatedEvents: {
-      events,
+      events: events as ResolverEvent[],
       nextEvent: null,
     },
   };
@@ -308,4 +311,25 @@ export function mockTreeWithNoProcessEvents(): ResolverTree {
       },
     },
   };
+}
+
+export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
+  originID,
+  firstChildID,
+  secondChildID,
+}: {
+  originID: string;
+  firstChildID: string;
+  secondChildID: string;
+}) {
+  const baseTree = mockTreeWithNoAncestorsAnd2Children({
+    originID,
+    firstChildID,
+    secondChildID,
+  });
+  const withRelatedEvents: Array<[string, string]> = [
+    ['registry', 'access'],
+    ['registry', 'access'],
+  ];
+  return withRelatedEventsOnOrigin(baseTree, withRelatedEvents);
 }
