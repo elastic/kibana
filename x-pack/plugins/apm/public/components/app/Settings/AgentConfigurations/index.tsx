@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useTrackPageview } from '../../../../../../observability/public';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useLocation } from '../../../../hooks/useLocation';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
@@ -61,8 +62,10 @@ export function AgentConfigurations() {
 }
 
 function CreateConfigurationButton() {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
   const { search } = useLocation();
-  const href = createAgentConfigurationHref(search);
+  const href = createAgentConfigurationHref(search, basePath);
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

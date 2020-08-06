@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Location } from 'history';
-import { getSections } from '../sections';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { IBasePath } from 'kibana/public';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { getSections } from '../sections';
 
 describe('Transaction action menu', () => {
   const basePath = ({

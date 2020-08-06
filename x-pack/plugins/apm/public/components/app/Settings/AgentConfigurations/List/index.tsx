@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import { getOptionLabel } from '../../../../../../common/agent_configuration/all_option';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AgentConfigurationListAPIResponse } from '../../../../../../server/lib/settings/agent_configuration/list_configurations';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
 import { useLocation } from '../../../../../hooks/useLocation';
 import { useTheme } from '../../../../../hooks/useTheme';
@@ -40,6 +41,8 @@ interface Props {
 }
 
 export function AgentConfigurationList({ status, data, refetch }: Props) {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
   const { search } = useLocation();
   const theme = useTheme();
   const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
@@ -74,7 +77,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         <EuiButton
           color="primary"
           fill
-          href={createAgentConfigurationHref(search)}
+          href={createAgentConfigurationHref(search, basePath)}
         >
           {i18n.translate(
             'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
@@ -151,7 +154,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
           flush="left"
           size="s"
           color="primary"
-          href={editAgentConfigurationHref(config.service, search)}
+          href={editAgentConfigurationHref(config.service, search, basePath)}
         >
           {getOptionLabel(config.service.name)}
         </EuiButtonEmpty>
@@ -185,7 +188,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         <EuiButtonIcon
           aria-label="Edit"
           iconType="pencil"
-          href={editAgentConfigurationHref(config.service, search)}
+          href={editAgentConfigurationHref(config.service, search, basePath)}
         />
       ),
     },
