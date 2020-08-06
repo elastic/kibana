@@ -14,7 +14,7 @@ import { getEndpointEntryNestedMock } from './entry_nested.mock';
 import { EndpointEntryNested, endpointEntryNested } from './entry_nested';
 import { getEndpointEntryMatchAnyMock } from './entry_match_any.mock';
 
-describe('entriesNested', () => {
+describe('endpointEntryNested', () => {
   test('it should validate a nested entry', () => {
     const payload = getEndpointEntryNestedMock();
     const decoded = endpointEntryNested.decode(payload);

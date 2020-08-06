@@ -19,7 +19,7 @@ export const endpointEntriesArray = t.array(
 export type EndpointEntriesArray = t.TypeOf<typeof endpointEntriesArray>;
 
 /**
- * Types the nonEmptyEntriesArray as:
+ * Types the nonEmptyEndpointEntriesArray as:
  *   - An array of entries of length 1 or greater
  *
  */

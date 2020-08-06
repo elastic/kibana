@@ -13,7 +13,7 @@ import { getEntryMatchMock } from '../entry_match.mock';
 import { getEndpointEntryMatchMock } from './entry_match.mock';
 import { EndpointEntryMatch, endpointEntryMatch } from './entry_match';
 
-describe('entriesMatch', () => {
+describe('endpointEntryMatch', () => {
   test('it should validate an entry', () => {
     const payload = getEndpointEntryMatchMock();
     const decoded = endpointEntryMatch.decode(payload);
