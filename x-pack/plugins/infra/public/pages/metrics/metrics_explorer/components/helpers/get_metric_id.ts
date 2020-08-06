@@ -7,8 +7,5 @@
 import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 
 export const getMetricId = (metric: MetricsExplorerOptionsMetric, index: string | number) => {
-  if (['p95', 'p99'].includes(metric.aggregation)) {
-    return `metric_${index}:percentile_0`;
-  }
   return `metric_${index}`;
 };

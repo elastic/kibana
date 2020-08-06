@@ -34,12 +34,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           fold(throwErrors(Boom.badRequest), identity)
         );
         UsageCollector.countNode(options.nodeType);
-        const searchES = <Hit = {}, Aggregation = undefined>(
-          opts: CallWithRequestParams
-        ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-          framework.callWithRequest(requestContext, 'search', opts);
-
-        const nodesWithInterval = await libs.snapshot.getNodes(searchES, options);
+        const client = createSearchClient(requestContext, framework);
+        const nodesWithInterval = await libs.snapshot.getNodes(client, options);
         return response.ok({
           body: SnapshotNodeResponseRT.encode(nodesWithInterval),
         });

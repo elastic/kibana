@@ -10,17 +10,21 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getGroupings } from './lib/get_groupings';
-import { populateSeriesWithTSVBData } from './lib/populate_series_with_tsvb_data';
-import { metricsExplorerRequestBodyRT, metricsExplorerResponseRT } from '../../../common/http_api';
+import {
+  metricsExplorerRequestBodyRT,
+  metricsExplorerResponseRT,
+  MetricsExplorerPageInfo,
+} from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
+import { converstRequestToMetricsAPIOptions } from './lib/convert_request_to_metrics_api_options';
+import { createSearchClient } from '../../lib/create_search_client';
+import { findIntervalForMetrics } from './lib/find_interval_for_metrics';
+import { query } from '../../lib/metrics';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
-  const { callWithRequest } = framework;
-
   framework.registerRoute(
     {
       method: 'post',
@@ -31,26 +35,41 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const payload = pipe(
+        const options = pipe(
           metricsExplorerRequestBodyRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const search = <Aggregation>(searchOptions: object) =>
-          callWithRequest<{}, Aggregation>(requestContext, 'search', searchOptions);
+        const client = createSearchClient(requestContext, framework);
+        const interval = await findIntervalForMetrics(client, options);
 
-        // First we get the groupings from a composite aggregation
-        const groupings = await getGroupings(search, payload);
+        const optionsWithInterval = options.forceInterval
+          ? options
+          : {
+              ...options,
+              timerange: {
+                ...options.timerange,
+                interval: interval ? `>=${interval}s` : options.timerange.interval,
+              },
+            };
 
-        // Then we take the results and fill in the data from TSVB with the
-        // user's custom metrics
-        const seriesWithMetrics = await Promise.all(
-          groupings.series.map(
-            populateSeriesWithTSVBData(request, payload, framework, requestContext)
-          )
-        );
+        const metricsApiOptions = converstRequestToMetricsAPIOptions(optionsWithInterval);
+        const metricsApiResponse = await query(client, metricsApiOptions);
+
+        const pageInfo: MetricsExplorerPageInfo = {
+          total: 0,
+          afterKey: null,
+        };
+
+        if (metricsApiResponse.info.afterKey) {
+          pageInfo.afterKey = metricsApiResponse.info.afterKey;
+        }
+
         return response.ok({
-          body: metricsExplorerResponseRT.encode({ ...groupings, series: seriesWithMetrics }),
+          body: metricsExplorerResponseRT.encode({
+            series: metricsApiResponse.series,
+            pageInfo,
+          }),
         });
       } catch (error) {
         return response.internalError({

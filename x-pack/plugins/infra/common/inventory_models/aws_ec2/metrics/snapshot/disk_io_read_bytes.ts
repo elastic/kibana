@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const diskIOReadBytes: SnapshotModel = {
+export const diskIOReadBytes: MetricsUIAggregation = {
   diskIOReadBytes: {
     avg: {
       field: 'aws.ec2.diskio.read.bytes_per_sec',

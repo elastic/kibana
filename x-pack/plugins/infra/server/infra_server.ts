@@ -36,6 +36,7 @@ import { initInventoryMetaRoute } from './routes/inventory_metadata';
 import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
 import { initSourceRoute } from './routes/source';
 import { initAlertPreviewRoute } from './routes/alerting';
+import { initMetricsApiRoute } from './routes/metrics_api';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
@@ -72,4 +73,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initLogSourceConfigurationRoutes(libs);
   initLogSourceStatusRoutes(libs);
   initAlertPreviewRoute(libs);
+  initMetricsApiRoute(libs);
 };
