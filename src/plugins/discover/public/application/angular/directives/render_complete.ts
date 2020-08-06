@@ -16,6 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IScope } from 'angular';
+import { RenderCompleteHelper } from '../../../../../kibana_utils/public';
 
-export * from './render_complete';
-export * from './render_complete_helper';
+export function createRenderCompleteDirective() {
+  return {
+    controller($scope: IScope, $element: JQLite) {
+      const el = $element[0];
+      const renderCompleteHelper = new RenderCompleteHelper(el);
+      $scope.$on('$destroy', renderCompleteHelper.destroy);
+    },
+  };
+}
