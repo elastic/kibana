@@ -20,6 +20,7 @@ import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
 import {
+  DEFAULT_LINES_TO_SAMPLE,
   getMaxBytes,
   readFile,
   createUrlOverrides,
@@ -28,7 +29,6 @@ import {
 } from '../utils';
 
 import { MODE } from './constants';
-const DEFAULT_LINES_TO_SAMPLE = 1000;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {

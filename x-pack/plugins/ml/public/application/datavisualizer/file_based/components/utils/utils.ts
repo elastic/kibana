@@ -18,7 +18,7 @@ import {
 import { getUiSettings } from '../../../../util/dependency_cache';
 import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
 
-const DEFAULT_LINES_TO_SAMPLE = 1000;
+export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
 
 const overrideDefaults = {
