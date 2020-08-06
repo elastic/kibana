@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import expiry from 'expiry-js';
 import { resolve } from 'path';
+
+import expiry from 'expiry-js';
+
 import { fromRoot } from '../../core/server/utils';
 
 function generateUrls({ version, plugin }) {

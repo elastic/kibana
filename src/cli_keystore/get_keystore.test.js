@@ -18,7 +18,7 @@
  */
 
 import { getKeystore } from './get_keystore';
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 import fs from 'fs';
 import sinon from 'sinon';
 

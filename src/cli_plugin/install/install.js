@@ -19,13 +19,14 @@
 
 import Fs from 'fs';
 import { promisify } from 'util';
+import path from 'path';
+
+import del from 'del';
 
 import { download } from './download';
-import path from 'path';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
-import del from 'del';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
 
@@ -57,7 +58,6 @@ export async function install(settings, logger) {
     logger.log('Plugin installation complete');
   } catch (err) {
     logger.error(`Plugin installation was unsuccessful due to error "${err.message}"`);
-    console.error(err);
     cleanArtifacts(settings);
     process.exit(70);
   }

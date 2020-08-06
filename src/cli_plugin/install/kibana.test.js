@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import { Logger } from '../lib/logger';
 import { join } from 'path';
-import del from 'del';
 import fs from 'fs';
+
+import sinon from 'sinon';
+import del from 'del';
+
 import { existingInstall, assertVersion } from './kibana';
+import { Logger } from '../lib/logger';
 
 jest.spyOn(fs, 'statSync');
 

@@ -18,14 +18,15 @@
  */
 
 import Fs from 'fs';
+import { join } from 'path';
 
 import sinon from 'sinon';
 import glob from 'glob-all';
 import del from 'del';
+
 import { Logger } from '../lib/logger';
 import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
-import { join } from 'path';
 
 describe('kibana cli', function () {
   describe('pack', function () {

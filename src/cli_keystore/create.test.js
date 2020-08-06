@@ -40,7 +40,7 @@ import sinon from 'sinon';
 
 import { Keystore } from '../legacy/server/keystore';
 import { create } from './create';
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from '../legacy/server/utils/prompt';
 
 describe('Kibana keystore', () => {

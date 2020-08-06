@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import del from 'del';
 import path from 'path';
 import os from 'os';
-import glob from 'glob';
 import fs from 'fs';
+
+import del from 'del';
+import glob from 'glob';
+
 import { analyzeArchive, extractArchive } from './zip';
 
 const getMode = (path) => (fs.statSync(path).mode & parseInt('777', 8)).toString(8);

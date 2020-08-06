@@ -18,8 +18,9 @@
  */
 
 import path from 'path';
-import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
 import { statSync } from 'fs';
+
+import { versionSatisfies, cleanVersion } from '../../legacy/utils/version';
 
 export function existingInstall(settings, logger) {
   try {

@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+
 import { installCommand } from './index';
 
 describe('kibana cli', function () {

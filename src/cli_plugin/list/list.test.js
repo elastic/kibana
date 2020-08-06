@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import del from 'del';
-import { list } from './list';
 import { join } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
+
+import del from 'del';
+
+import { list } from './list';
 
 function createPlugin(name, version, pluginBaseDir) {
   const pluginDir = join(pluginBaseDir, name);

@@ -18,6 +18,7 @@
  */
 
 import sinon from 'sinon';
+
 import { Logger } from './logger';
 
 describe('kibana cli', function () {
