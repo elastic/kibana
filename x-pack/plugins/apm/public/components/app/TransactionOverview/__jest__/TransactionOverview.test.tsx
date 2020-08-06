@@ -25,6 +25,9 @@ import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import * as useFetcherHook from '../../../../hooks/useFetcher';
 import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
 import { fromQuery } from '../../../shared/Links/url_helpers';
+import { disableConsoleWarning } from '../../../../utils/testHelpers';
+
+disableConsoleWarning('Warning: componentWillReceiveProps');
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },

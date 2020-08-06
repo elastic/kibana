@@ -26,6 +26,20 @@ import {
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
+const originalConsoleWarn = console.warn; // eslint-disable-line no-console
+/**
+ *  A dependency we're using is using deprecated react methods. Override the
+ * console to hide the warnings. These should go away when we switch to
+ * Elastic Charts
+ */
+export function disableConsoleWarning(messageToDisable: string) {
+  return jest.spyOn(console, 'warn').mockImplementation((message) => {
+    if (!message.startsWith(messageToDisable)) {
+      originalConsoleWarn(message);
+    }
+  });
+}
+
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
     noKey: true,

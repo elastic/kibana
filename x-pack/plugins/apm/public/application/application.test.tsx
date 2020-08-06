@@ -12,8 +12,26 @@ import { mockApmPluginContextValue } from '../context/ApmPluginContext/MockApmPl
 import { ApmPluginSetupDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
+import { disableConsoleWarning } from '../utils/testHelpers';
 
 describe('renderApp', () => {
+  let mockConsole: jest.SpyInstance;
+
+  beforeAll(() => {
+    // The RUM agent logs an unnecessary message here. There's a couple open
+    // issues need to be fixed to get the ability to turn off all of the logging:
+    //
+    // * https://github.com/elastic/apm-agent-rum-js/issues/799
+    // * https://github.com/elastic/apm-agent-rum-js/issues/861
+    //
+    // for now, override `console.warn` to filter those messages out.
+    mockConsole = disableConsoleWarning('[Elastic APM]');
+  });
+
+  afterAll(() => {
+    mockConsole.mockRestore();
+  });
+
   it('renders the app', () => {
     const { core, config } = mockApmPluginContextValue;
     const plugins = {
@@ -28,13 +46,6 @@ describe('renderApp', () => {
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core.http as unknown) as HttpSetup);
 
-    // The RUM agent logs an unnecessary message here. There's a couple open
-    // issues need to be fixed to get the ability to turn off all of the logging:
-    //
-    // * https://github.com/elastic/apm-agent-rum-js/issues/799
-    // * https://github.com/elastic/apm-agent-rum-js/issues/861
-    //
-    // for now, override `console.warn` to filter those messages out.
     jest
       .spyOn(window.console, 'warn')
       .mockImplementationOnce((message: string) => {
