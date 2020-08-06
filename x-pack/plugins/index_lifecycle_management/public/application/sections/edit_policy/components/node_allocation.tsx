@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +20,6 @@ import { PHASE_NODE_ATTRS } from '../../../constants';
 import { LearnMoreLink } from './learn_more_link';
 import { ErrableFormRow } from './form_errors';
 import { useLoadNodes } from '../../../services/api';
-import { NodeAttrsDetails } from './node_attrs_details';
 
 interface Props {
   phase: string;
@@ -56,8 +55,9 @@ export const NodeAllocation: React.FunctionComponent<Props> = ({
 }) => {
   const { isLoading, data: nodes, error, sendRequest } = useLoadNodes();
 
-  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string>(null);
-
+  const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
+    null
+  );
   if (isLoading) {
     return (
       <Fragment>

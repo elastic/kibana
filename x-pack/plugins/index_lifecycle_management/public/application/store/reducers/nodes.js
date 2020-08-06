@@ -5,10 +5,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import {
-  setSelectedPrimaryShardCount,
-  setSelectedReplicaCount,
-} from '../actions/nodes';
+import { setSelectedPrimaryShardCount, setSelectedReplicaCount } from '../actions/nodes';
 
 const defaultState = {
   isLoading: false,

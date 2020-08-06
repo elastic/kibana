@@ -39,7 +39,7 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsLoadingFailedTitle"
-            defaultMessage="Unable to load node attribute details."
+            defaultMessage="Unable to load node attribute details"
           />
         }
         color="danger"
