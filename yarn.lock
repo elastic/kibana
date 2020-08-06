@@ -4306,11 +4306,6 @@
   resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
   integrity sha512-HonbGsHFbskh9zRAzA6tabcw18mCOsSEOL2ibGAuVqk6e7nElcRmWO5L4UfIHpDbWBWw+eZYFdsQ1+MEGgpcVA==
 
-"@types/browserslist-useragent@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/browserslist-useragent/-/browserslist-useragent-3.0.0.tgz#d425c9818182ce71ce53866798cee9c7d41d6e53"
-  integrity sha512-ZBvKzg3yyWNYEkwxAzdmUzp27sFvw+1m080/+2lwrt+eltNefn1f4fnpMyrjOla31p8zLleCYqQXw+3EETfn0w==
-
 "@types/cacheable-request@^6.0.1":
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/@types/cacheable-request/-/cacheable-request-6.0.1.tgz#5d22f3dded1fd3a84c0bbeb5039a7419c2c91976"
@@ -8601,15 +8596,6 @@ browserify-zlib@^0.2.0:
   dependencies:
     pako "~1.0.5"
 
-browserslist-useragent@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/browserslist-useragent/-/browserslist-useragent-3.0.2.tgz#f0e209b2742baa5de0e451b52e678e8b4402617c"
-  integrity sha512-/UPzK9xZnk5mwwWx4wcuBKAKx/mD3MNY8sUuZ2NPqnr4RVFWZogX+8mOP0cQEYo8j78sHk0hiDNaVXZ1U3hM9A==
-  dependencies:
-    browserslist "^4.6.6"
-    semver "^6.3.0"
-    useragent "^2.3.0"
-
 browserslist@4.6.6:
   version "4.6.6"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.6.6.tgz#6e4bf467cde520bc9dbdf3747dafa03531cec453"
@@ -8629,7 +8615,7 @@ browserslist@^4.12.0:
     node-releases "^1.1.53"
     pkg-up "^2.0.0"
 
-browserslist@^4.6.6, browserslist@^4.8.3:
+browserslist@^4.8.3:
   version "4.8.5"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.8.5.tgz#691af4e327ac877b25e7a3f7ee869c4ef36cdea3"
   integrity sha512-4LMHuicxkabIB+n9874jZX/az1IaZ5a+EUuvD7KFOu9x/Bd5YHyO0DIz2ls/Kl8g0ItS4X/ilEgf4T1Br0lgSg==
@@ -29564,13 +29550,6 @@ tmp@0.0.30:
   dependencies:
     os-tmpdir "~1.0.1"
 
-tmp@0.0.x, tmp@^0.0.33:
-  version "0.0.33"
-  resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.33.tgz#6d34335889768d21b2bcda0aa277ced3b1bfadf9"
-  integrity sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==
-  dependencies:
-    os-tmpdir "~1.0.2"
-
 tmp@0.1.0, tmp@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.1.0.tgz#ee434a4e22543082e294ba6201dcc6eafefa2877"
@@ -29584,6 +29563,13 @@ tmp@^0.0.29:
   integrity sha1-8lEl/w3Z2jzLDC3Tce4SiLuRKMA=
   dependencies:
     os-tmpdir "~1.0.1"
+
+tmp@^0.0.33:
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.33.tgz#6d34335889768d21b2bcda0aa277ced3b1bfadf9"
+  integrity sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==
+  dependencies:
+    os-tmpdir "~1.0.2"
 
 tmpl@1.0.x:
   version "1.0.4"
@@ -30710,14 +30696,6 @@ user-home@^2.0.0:
   integrity sha1-nHC/2Babwdy/SGBODwS4tJzenp8=
   dependencies:
     os-homedir "^1.0.0"
-
-useragent@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/useragent/-/useragent-2.3.0.tgz#217f943ad540cb2128658ab23fc960f6a88c9972"
-  integrity sha512-4AoH4pxuSvHCjqLO04sU6U/uE65BYza8l/KKBS0b0hnUPWi+cQ2BpeTEwejCSx9SPV5/U03nniDTrWx5NrmKdw==
-  dependencies:
-    lru-cache "4.1.x"
-    tmp "0.0.x"
 
 utif@^2.0.1:
   version "2.0.1"
