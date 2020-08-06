@@ -27,7 +27,7 @@ import {
   md5HashForProcess,
   argsForProcess,
 } from '../../models/process_event';
-import { CubeForProcess } from './process_cube_icon';
+import { CubeForProcess } from './cube_for_process';
 import { ResolverEvent } from '../../../../common/endpoint/types';
 import { useResolverTheme } from '../assets';
 
