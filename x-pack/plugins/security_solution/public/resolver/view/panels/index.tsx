@@ -7,17 +7,17 @@
 import React, { memo, useMemo, useContext, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiPanel } from '@elastic/eui';
-import * as selectors from '../store/selectors';
-import { useResolverDispatch } from './use_resolver_dispatch';
-import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
-import { SideEffectContext } from './side_effect_context';
-import { ProcessEventListNarrowedByType } from './panels/panel_content_related_list';
-import { EventCountsForProcess } from './panels/panel_content_related_counts';
-import { ProcessDetails } from './panels/panel_content_process_detail';
-import { ProcessListWithCounts } from './panels/panel_content_process_list';
-import { RelatedEventDetail } from './panels/panel_content_related_detail';
-import { useResolverQueryParams } from './use_resolver_query_params';
+import * as selectors from '../../store/selectors';
+import { useResolverDispatch } from '../use_resolver_dispatch';
+import * as event from '../../../../common/endpoint/models/event';
+import { ResolverEvent, ResolverNodeStats } from '../../../../common/endpoint/types';
+import { SideEffectContext } from '../side_effect_context';
+import { ProcessEventList } from './process_event_list';
+import { EventCountsForProcess } from './event_counts_for_process';
+import { ProcessDetails } from './process_details';
+import { ProcessListWithCounts } from './process_list_with_counts';
+import { RelatedEventDetail } from './related_event_detail';
+import { useResolverQueryParams } from '../use_resolver_query_params';
 
 /**
  * The team decided to use this table to determine which breadcrumbs/view to display:
@@ -145,7 +145,7 @@ const PanelContent = memo(function PanelContent() {
        */
 
       if (crumbEvent && crumbEvent.length && uiSelectedEvent) {
-        return 'processEventListNarrowedByType';
+        return 'processEventList';
       }
     }
 
@@ -179,9 +179,9 @@ const PanelContent = memo(function PanelContent() {
       );
     }
 
-    if (panelToShow === 'processEventListNarrowedByType') {
+    if (panelToShow === 'processEventList') {
       return (
-        <ProcessEventListNarrowedByType
+        <ProcessEventList
           processEvent={uiSelectedEvent!}
           pushToQueryParams={pushToQueryParams}
           relatedStats={relatedStatsForIdFromParams!}
