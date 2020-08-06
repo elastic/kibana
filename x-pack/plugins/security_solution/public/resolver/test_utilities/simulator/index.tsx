@@ -226,6 +226,13 @@ export class Simulator {
   }
 
   /**
+   * The title element for the node detail view.
+   */
+  public nodeDetailViewTitle(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:title"]');
+  }
+
+  /**
    * The details of the selected node are shown in a description list. This returns the title elements of the description list.
    */
   private nodeDetailEntryTitle(): ReactWrapper {

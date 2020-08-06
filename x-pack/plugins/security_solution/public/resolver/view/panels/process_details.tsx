@@ -161,7 +161,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h4 aria-describedby={titleId}>
+        <h4 data-test-subj="resolver:node-detail:title" aria-describedby={titleId}>
           <CubeForProcess isProcessTerminated={isProcessTerminated} />
           {processName}
         </h4>

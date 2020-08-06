@@ -10,6 +10,7 @@ import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
+import { urlSearch } from '../test_utilities/url_search';
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
@@ -58,21 +59,47 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     simulatorInstance = undefined;
   });
 
-  describe('when the URL query string is  query string has the origin node entity ID selected', () => {
+  const queryStringWithOriginSelected = urlSearch(resolverComponentInstanceID, {
+    selectedEntityID: 'origin',
+  });
+
+  describe(`when the URL query string is ${queryStringWithOriginSelected}`, () => {
     beforeEach(() => {
-      const urlSearchParams = new URLSearchParams();
-      urlSearchParams.set(`resolver-${resolverComponentInstanceID}-id`, 'origin');
       memoryHistory.push({
-        search: urlSearchParams.toString(),
+        search: queryStringWithOriginSelected,
       });
     });
-    it('should show the node details', async () => {
-      // TODO, make the details of each node unique enough that the test will fail if the wrong node is selected.
+    it('should show the node details for the origin', async () => {
       await expect(
         simulator().map(() => simulator().nodeDetailDescriptionListEntries())
       ).toYieldEqualTo([
         ['process.executable', 'executable'],
         ['process.pid', '0'],
+        ['user.name', 'user.name'],
+        ['user.domain', 'user.domain'],
+        ['process.parent.pid', '0'],
+        ['process.hash.md5', 'hash.md5'],
+        ['process.args', 'args'],
+      ]);
+    });
+  });
+
+  const queryStringWithFirstChildSelected = urlSearch(resolverComponentInstanceID, {
+    selectedEntityID: 'firstChild',
+  });
+
+  describe(`when the URL query string is ${queryStringWithFirstChildSelected}`, () => {
+    beforeEach(() => {
+      memoryHistory.push({
+        search: queryStringWithFirstChildSelected,
+      });
+    });
+    it('should show the node details for the first child', async () => {
+      await expect(
+        simulator().map(() => simulator().nodeDetailDescriptionListEntries())
+      ).toYieldEqualTo([
+        ['process.executable', 'executable'],
+        ['process.pid', '1'],
         ['user.name', 'user.name'],
         ['user.domain', 'user.domain'],
         ['process.parent.pid', '0'],
