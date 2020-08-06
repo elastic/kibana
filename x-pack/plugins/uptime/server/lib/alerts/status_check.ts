@@ -14,6 +14,7 @@ import {
   StatusCheckParams,
   StatusCheckFilters,
   DynamicSettings,
+  Ping,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { updateState } from './common';
@@ -22,6 +23,7 @@ import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/l
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { UMServerLibs } from '../lib';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
+import { UNNAMED_LOCATION } from '../../../common/constants';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -30,7 +32,10 @@ const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
  * @param items to reduce
  */
 export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitor_id }) => acc.add(monitor_id), new Set<string>());
+  items.reduce(
+    (acc, { monitor_id: monId, monitorId }) => acc.add(monId || monitorId),
+    new Set<string>()
+  );
 
 export const hasFilters = (filters?: StatusCheckFilters) => {
   if (!filters) return false;
@@ -79,6 +84,30 @@ const formatFilterString = async (
     filters,
     search
   );
+
+export const getMonitorSummary = (monitorInfo: Ping) => {
+  return {
+    monitorUrl: monitorInfo.url?.full,
+    monitorId: monitorInfo.monitor?.id,
+    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
+    monitorType: monitorInfo.monitor?.type,
+    latestErrorMessage: monitorInfo.error?.message,
+    observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
+    observerHostname: monitorInfo.agent?.name,
+  };
+};
+
+export const getAvailabilitySummary = (monitorInfo: Ping) => {
+  return {
+    monitorUrl: monitorInfo.url?.full,
+    monitorId: monitorInfo.monitor?.id,
+    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
+    monitorType: monitorInfo.monitor?.type,
+    latestErrorMessage: monitorInfo.error?.message,
+    observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
+    observerHostname: monitorInfo.agent?.name,
+  };
+};
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
@@ -203,22 +232,27 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       });
     }
 
-    // if no monitors are down for our query, we don't need to trigger an alert
-    if (downMonitorsByLocation.length || availabilityResults.length) {
-      const uniqueIds = uniqueMonitorIds(downMonitorsByLocation);
+    const uniqueDownsIds = uniqueMonitorIds(downMonitorsByLocation);
+    const uniqueAvailIds = uniqueMonitorIds(availabilityResults);
 
-      uniqueIds.forEach((monId) => {
-        const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monId);
+    const mergedIds = new Set([...uniqueDownsIds, ...uniqueAvailIds]);
 
-        alertInstance.replaceState({
-          ...state,
-          monitors: downMonitorsByLocation,
-          ...updateState(state, true),
-        });
+    mergedIds.forEach((monId) => {
+      const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monId);
 
-        alertInstance.scheduleActions(MONITOR_STATUS.id);
+      const availMonInfo = availabilityResults.find((res) => res.monitorId === monId)?.monitorInfo;
+      const downMonInfo = availabilityResults.find((res) => res.monitorId === monId)?.monitorInfo;
+
+      const monitorSummary = getMonitorSummary(availMonInfo);
+      const monitorSummary = getMonitorSummary(availMonInfo);
+
+      alertInstance.replaceState({
+        ...updateState(state, true),
+        ...monitorSummary,
       });
-    }
+
+      alertInstance.scheduleActions(MONITOR_STATUS.id);
+    });
 
     return updateState(state, downMonitorsByLocation.length > 0);
   },

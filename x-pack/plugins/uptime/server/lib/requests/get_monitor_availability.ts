@@ -26,8 +26,7 @@ export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabil
   // eslint-disable-next-line @typescript-eslint/naming-convention
   buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
-    name: fields?.hits?.hits?.[0]?._source?.monitor.name,
-    url: fields?.hits?.hits?.[0]?._source?.url.full,
+    monitorInfo: fields?.hits?.hits?.[0]?._source,
     up: up_sum.value,
     down: down_sum.value,
     availabilityRatio: ratio.value,
@@ -94,7 +93,6 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
               fields: {
                 top_hits: {
                   size: 1,
-                  _source: ['monitor.name', 'url.full'],
                   sort: [
                     {
                       '@timestamp': {
