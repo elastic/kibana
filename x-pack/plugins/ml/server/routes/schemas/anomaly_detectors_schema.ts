@@ -200,3 +200,9 @@ export const updateModelSnapshotSchema = schema.object({
 });
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
+
+export const getCategorizerStatsSchema = schema.nullable(
+  schema.object({
+    partitionByValue: schema.maybe(schema.string()),
+  })
+);
