@@ -178,7 +178,7 @@ export class TaskStore {
     );
 
     if (taskInstance?.scope?.includes('alerting')) {
-      console.log(`:::::: TaskStore.schedule(${taskInstance.params?.alertId})`);
+      console.log(`:::::: TaskStore.schedule(alert=${taskInstance.params?.alertId}) @ ${new Date().toISOString()}`);
       console.log(`:::::: ${JSON.stringify(savedObject)}`);
     }
 
@@ -213,6 +213,8 @@ export class TaskStore {
     claimTasksById = [],
     size,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
+    console.log(`:::::: TaskStore.claimAvailableTasks() @ ${new Date().toISOString()}`);
+    console.log(`:::::: ${JSON.stringify({claimOwnershipUntil, size})}`);
     const claimTasksByIdWithRawIds = claimTasksById.map((id) =>
       this.serializer.generateRawId(undefined, 'task', id)
     );
@@ -259,6 +261,11 @@ export class TaskStore {
       this.emitEvents(
         documentsRequestedButNotReturned.map((id) => asTaskClaimEvent(id, asErr(none)))
       );
+
+      return {
+        claimedTasks: documentsClaimedById.length + documentsClaimedBySchedule.length,
+        docs,
+      };
     }
 
     return {

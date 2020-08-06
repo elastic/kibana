@@ -305,6 +305,7 @@ export class TaskManager {
    * @returns {Promise<ConcreteTaskInstance>}
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
+    console.log(`:::::: TaskManager.runNow(${taskId})`);
     await this.waitUntilStarted();
     return new Promise(async (resolve, reject) => {
       awaitTaskRunResult(taskId, this.events$, this.store.getLifecycle.bind(this.store))
@@ -389,6 +390,8 @@ export async function claimAvailableTasks(
   availableWorkers: number,
   logger: Logger
 ) {
+  console.log(`:::::: TaskManager.claimAvailableTasks`);
+  console.log(`:::::: ${JSON.stringify({claimTasksById, availableWorkers})}`);
   if (availableWorkers > 0) {
     performance.mark('claimAvailableTasks_start');
 
@@ -398,6 +401,7 @@ export async function claimAvailableTasks(
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
       });
+      console.log(`:::::: ${JSON.stringify({docs, claimedTasks})}`);
 
       if (claimedTasks === 0) {
         performance.mark('claimAvailableTasks.noTasks');
