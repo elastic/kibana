@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   Direction,
-  EuiButtonEmpty,
+  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -147,25 +147,29 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     return (
       <>
         <EuiEmptyPrompt
+          iconType="createAdvancedJob"
           title={
             <h2>
               {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
-                defaultMessage: 'No data frame analytics jobs found',
+                defaultMessage: 'Create your first data frame analytics job',
               })}
             </h2>
           }
           actions={
             !isManagementTable
               ? [
-                  <EuiButtonEmpty
+                  <EuiButton
                     onClick={() => setIsSourceIndexModalVisible(true)}
                     isDisabled={disabled}
+                    color="primary"
+                    iconType="plusInCircle"
+                    fill
                     data-test-subj="mlAnalyticsCreateFirstButton"
                   >
                     {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-                      defaultMessage: 'Create your first data frame analytics job',
+                      defaultMessage: 'Create job',
                     })}
-                  </EuiButtonEmpty>,
+                  </EuiButton>,
                 ]
               : []
           }

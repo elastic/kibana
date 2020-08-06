@@ -26,6 +26,7 @@ import { createPromiseFromStreams } from '../../../../../../../../src/legacy/uti
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 import { CompareTimelinesStatus } from './compare_timelines_status';
 import { TimelineStatusActions } from './common';
+import { DEFAULT_ERROR } from './failure_cases';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;
@@ -96,7 +97,6 @@ export const setTimeline = (
 };
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
-const DEFAULT_IMPORT_ERROR = `Something has gone wrong. We didn't handle something properly. To help us fix this, please upload your file to https://discuss.elastic.co/c/security/siem.`;
 
 export const importTimelines = async (
   file: Readable,
@@ -173,6 +173,7 @@ export const importTimelines = async (
                   pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
                   notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                   isImmutable,
+                  overrideNotesOwner: false,
                 });
 
                 resolve({
@@ -186,7 +187,7 @@ export const importTimelines = async (
                 const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                   TimelineStatusActions.createViaImport
                 );
-                const message = errorMessage?.body ?? DEFAULT_IMPORT_ERROR;
+                const message = errorMessage?.body ?? DEFAULT_ERROR;
 
                 resolve(
                   createBulkErrorObject({
@@ -206,6 +207,7 @@ export const importTimelines = async (
                     notes: globalNotes,
                     existingNoteIds: compareTimelinesStatus.timelineInput.data?.noteIds,
                     isImmutable,
+                    overrideNotesOwner: false,
                   });
 
                   resolve({
@@ -218,7 +220,7 @@ export const importTimelines = async (
                     TimelineStatusActions.updateViaImport
                   );
 
-                  const message = errorMessage?.body ?? DEFAULT_IMPORT_ERROR;
+                  const message = errorMessage?.body ?? DEFAULT_ERROR;
 
                   resolve(
                     createBulkErrorObject({
