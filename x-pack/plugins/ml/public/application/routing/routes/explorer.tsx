@@ -40,7 +40,7 @@ export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute =>
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
     {
-      text: i18n.translate('xpack.ml.anomalyDetection.xanomalyExplorerLabel', {
+      text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
         defaultMessage: 'Anomaly Explorer',
       }),
       href: '',
