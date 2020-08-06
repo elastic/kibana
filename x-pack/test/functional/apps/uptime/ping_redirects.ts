@@ -28,6 +28,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded(archive);
     });
 
+    after('unload', async () => {
+      await esArchiver.unload(archive);
+    });
+
     beforeEach(async () => {
       await makeChecksWithStatus(
         getService('legacyEs'),

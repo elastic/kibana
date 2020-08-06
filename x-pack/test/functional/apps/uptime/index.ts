@@ -54,6 +54,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
+    });
+
+    describe('with generated data but no data reset', () => {
       loadTestFile(require.resolve('./ping_redirects'));
     });
 

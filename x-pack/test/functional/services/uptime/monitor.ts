@@ -65,9 +65,9 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
     },
     async expandPingRow() {
       return retry.tryForTime(
-        60 * 1000,
+        60 * 3000,
         async () => {
-          await testSubjects.existOrFail('uptimePingListExpandBtn', { timeout: 1000 });
+          await testSubjects.existOrFail('uptimePingListExpandBtn', { timeout: 5000 });
           await testSubjects.click('uptimePingListExpandBtn');
         },
         async () => {
