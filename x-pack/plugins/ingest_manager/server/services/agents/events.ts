@@ -19,6 +19,7 @@ export async function getAgentEvents(
 ) {
   const { page, perPage, kuery } = options;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { total, saved_objects } = await soClient.find<AgentEventSOAttributes>({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
     filter:
