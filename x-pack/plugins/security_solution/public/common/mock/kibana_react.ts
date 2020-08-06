@@ -28,7 +28,6 @@ import {
 import { createKibanaCoreStartMock, createKibanaPluginsStartMock } from './kibana_core';
 import { StartServices } from '../../types';
 import { createSecuritySolutionStorageMock } from './mock_local_storage';
-import { uiSettingsServiceMock } from '../../../../../../src/core/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
