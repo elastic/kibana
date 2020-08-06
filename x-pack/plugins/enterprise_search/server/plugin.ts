@@ -75,7 +75,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       icon: 'logoEnterpriseSearch',
       navLinkId: APP_SEARCH_PLUGIN.ID, // TODO - remove this once functional tests no longer rely on navLinkId
       app: ['kibana', APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
-      catalogue: [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
+      catalogue: [ENTERPRISE_SEARCH_PLUGIN.ID, APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID],
       privileges: null,
     });
 
@@ -93,6 +93,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           workplaceSearch: hasWorkplaceSearchAccess,
         },
         catalogue: {
+          enterpriseSearch: hasAppSearchAccess || hasWorkplaceSearchAccess,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
         },

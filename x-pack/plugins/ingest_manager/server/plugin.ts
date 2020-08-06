@@ -179,10 +179,12 @@ export class IngestManagerPlugin
         icon: 'savedObjectsApp',
         navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
+        catalogue: ['ingestManager'],
         privileges: {
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'],
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -192,6 +194,7 @@ export class IngestManagerPlugin
           read: {
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID, 'kibana'],
+            catalogue: ['ingestManager'], // TODO: check if this is actually available to read user
             savedObject: {
               all: [],
               read: allSavedObjectTypes,

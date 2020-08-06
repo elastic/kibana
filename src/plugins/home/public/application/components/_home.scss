@@ -1,5 +1,60 @@
-@include euiBreakpoint('xs', 's', 'm') {
-  .homHome__synopsisItem {
-    flex-basis: 100% !important;
+// Local page vars
+$homePageWidth: 1200px;
+
+.homPageContainer {
+  display: flex;
+  height: calc(100vh - #{$euiHeaderHeightCompensation});
+  flex-direction: column;
+  background-color: $euiColorEmptyShade;
+}
+
+.homPageHeaderContainer {
+  background-color: $euiPageBackgroundColor;
+  border-bottom: 1px solid $euiColorLightShade;
+}
+
+.homPageHeader {
+  margin: 0 auto;
+  max-width: $homePageWidth;
+  padding: $euiSizeXL $euiSize $euiSizeXXL;
+}
+
+.homPageHeader__titleWrapper {
+  @include euiBreakpoint('xs', 's') {
+    text-align: center;
+  }  
+}
+
+.homPageHeader__menu {
+
+  @include euiBreakpoint('xs', 's') {
+    margin-top: 0;
+    
+    .homPageHeader__menuItem {
+      margin-bottom: 0 !important;
+      margin-top: 0 !important;
+    }  
+  }
+}
+
+.homPageMainContainer {
+  max-width: $homePageWidth;
+  margin: 0 auto;
+  padding: 0 $euiSize $euiSizeXL;
+  background-color: transparent;
+}
+
+.homHome__synopsisItem {
+  max-width: 50%;
+  min-width: $euiSizeL * 9;
+
+  @include euiBreakpoint('xs', 's') {
+    max-width: 100%;
+  }
+}
+
+.homPageFooter__mainAction {
+  @include euiBreakpoint('xs', 's') {
+    flex-direction: column;
   }
 }
