@@ -63,6 +63,7 @@ export const deleteListsIndex = async (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (rule: Partial<ListSchema>): Partial<ListSchema> => {
+  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, ...removedProperties } = rule;
   return removedProperties;
 };

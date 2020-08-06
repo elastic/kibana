@@ -12,5 +12,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./create_lists'));
+    loadTestFile(require.resolve('./read_lists'));
   });
 };

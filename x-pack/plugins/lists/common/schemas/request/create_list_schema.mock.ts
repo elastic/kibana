@@ -25,3 +25,9 @@ export const getCreateMinimalListSchemaMock = (): CreateListSchema => ({
   name: NAME,
   type: TYPE,
 });
+
+export const getCreateMinimalListSchemaMockWithoutId = (): CreateListSchema => ({
+  description: DESCRIPTION,
+  name: NAME,
+  type: TYPE,
+});
