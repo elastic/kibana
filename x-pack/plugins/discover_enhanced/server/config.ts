@@ -10,7 +10,7 @@ import { PluginConfigDescriptor } from '../../../../src/core/server';
 export const configSchema = schema.object({
   actions: schema.object({
     exploreDataInChart: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
 });
