@@ -17,7 +17,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
 
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
-  // React concurrent mode and Suspense in oder to handle that more gracefully.
+  // React concurrent mode and Suspense in order to handle that more gracefully.
   if (sourceConfiguration?.configuration.logAlias == null || space == null) {
     return null;
   }
