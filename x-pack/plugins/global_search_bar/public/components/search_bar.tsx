@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   EuiSelectable,
   EuiPopover,
@@ -21,63 +21,93 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SearchServiceStart, GlobalSearchResult } from '../../../global_search/public';
 
+const useIfMounted = () => {
+  const isMounted = useRef(true);
+  useEffect(
+    () => () => {
+      isMounted.current = false;
+    },
+    []
+  );
+
+  const ifMounted = useCallback((func) => {
+    if (isMounted.current && func) {
+      func();
+    }
+  }, []);
+
+  return ifMounted;
+};
+
 interface Props {
   globalSearch: SearchServiceStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
 export function SearchBar({ globalSearch, navigateToUrl }: Props) {
+  const ifMounted = useIfMounted();
   const [isSearchFocused, setSearchFocus] = useState(false);
-  const [options, setOptions] = useState([] as GlobalSearchResult[]);
+  const [term, setTerm] = useState<string | null>(null);
+  const [options, _setOptions] = useState([] as GlobalSearchResult[]);
   // const [isLoading, setLoadingState] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
   const onSearch = useCallback(
-    (term: string) => {
+    (currentTerm: string) => {
+      if (currentTerm === term) return;
+      const setOptions = (_options: GlobalSearchResult[]) => {
+        ifMounted(() =>
+          _setOptions([..._options.map((option) => ({ key: option.id, ...option }))])
+        );
+      };
+
       let arr: GlobalSearchResult[] = [];
       // setLoadingState(true);
-      globalSearch.find(term, {}).subscribe({
+      globalSearch.find(currentTerm, {}).subscribe({
         next: ({ results }) => {
-          if (results.length === 0) return;
-
-          // if no search term, filter to only applications and sort alphabetically
-          if (term.length === 0) {
-            results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
-
-            arr = [...results, ...arr].sort((a, b) => {
-              const titleA = a.title.toUpperCase(); // ignore upper and lowercase
-              const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-              if (titleA < titleB) {
-                return -1;
-              }
-              if (titleA > titleB) {
-                return 1;
-              }
-
-              // titles must be equal
-              return 0;
-            });
-          } else {
+          // if something was searched
+          if (currentTerm.length > 0) {
             arr.push(...results);
+            setOptions(arr);
+            return;
           }
 
-          setOptions([...arr.map((option) => ({ key: option.id, ...option }))]);
+          // if searchbar is empty, filter to only applications and sort alphabetically
+          results = results.filter(({ type }: GlobalSearchResult) => type === 'application');
+
+          arr = [...results, ...arr].sort((a, b) => {
+            const titleA = a.title.toUpperCase(); // ignore upper and lowercase
+            const titleB = b.title.toUpperCase(); // ignore upper and lowercase
+            if (titleA < titleB) {
+              return -1;
+            }
+            if (titleA > titleB) {
+              return 1;
+            }
+
+            // titles must be equal
+            return 0;
+          });
+
+          setOptions(arr);
         },
         error: () => {
           // TODO
         },
         complete: () => {
+          ifMounted(() => setTerm(currentTerm));
           // setLoadingState(false);
         },
       });
     },
-    [globalSearch]
+    [globalSearch, term, ifMounted]
   );
 
   useEffect(() => {
     onSearch('');
-  }, [onSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
@@ -139,21 +169,17 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         </EuiFlexGroup>
       )}
       // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
-      onChange={(selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
+      onChange={async (selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
         const { url } = selected.find(({ checked }) => checked === 'on')!;
 
-        if (typeof url === 'string') {
-          if (url.startsWith('https://')) {
-            // if absolute path
-            window.location.assign(url);
-          } else {
-            // else is relative path
-            navigateToUrl(url);
-            (document.querySelector('a') as HTMLElement).focus(); // assumption that header link is first, is this bad assumption?
-          }
+        if (url.startsWith('https://')) {
+          // if absolute path
+          window.location.assign(url);
         } else {
-          // else is url obj
-          // TODO
+          // else is relative path
+          await navigateToUrl(url);
+          // a simplified "get first tabbale element" with likely subjects
+          (document.activeElement as HTMLElement).blur();
         }
       }}
     >

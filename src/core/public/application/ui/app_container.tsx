@@ -90,7 +90,9 @@ export const AppContainer: FunctionComponent<Props> = ({
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
-        setShowSpinner(false);
+        if (elementRef.current) {
+          setShowSpinner(false);
+        }
         setIsMounting(false);
       }
     };
