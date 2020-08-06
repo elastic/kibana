@@ -10,7 +10,7 @@ import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { getAPMHref } from '../../../shared/Links/apm/APMLink';
+import { useAPMHref } from '../../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
 interface ButtonsProps {
@@ -28,16 +28,16 @@ export function Buttons({
   const urlParams = { ...useUrlParams().urlParams } as APMQueryParams;
   urlParams.serviceName = selectedNodeServiceName;
 
-  const detailsUrl = getAPMHref(
-    `/services/${selectedNodeServiceName}/transactions`,
-    '',
-    urlParams
-  );
-  const focusUrl = getAPMHref(
-    `/services/${selectedNodeServiceName}/service-map`,
-    '',
-    urlParams
-  );
+  const detailsUrl = useAPMHref({
+    path: `/services/${selectedNodeServiceName}/transactions`,
+    currentSearch: '',
+    query: urlParams,
+  });
+  const focusUrl = useAPMHref({
+    path: `/services/${selectedNodeServiceName}/service-map`,
+    currentSearch: '',
+    query: urlParams,
+  });
 
   return (
     <>
