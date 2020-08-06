@@ -822,6 +822,7 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
             'search',
             {
               index: ML_RESULTS_INDEX_PATTERN,
+              size: 0,
               body: {
                 query: {
                   bool: {
