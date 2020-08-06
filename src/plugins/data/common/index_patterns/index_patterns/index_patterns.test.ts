@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { IndexPatternsService } from './index_patterns';
 import { fieldFormatsMock } from '../../field_formats/mocks';
 import {

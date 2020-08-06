@@ -27,9 +27,12 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
 
   router.post(
     {
-      path: '/internal/search/{strategy}',
+      path: '/internal/search/{strategy}/{id?}',
       validate: {
-        params: schema.object({ strategy: schema.string() }),
+        params: schema.object({
+          strategy: schema.string(),
+          id: schema.maybe(schema.string()),
+        }),
 
         query: schema.object({}, { unknowns: 'allow' }),
 
@@ -38,13 +41,13 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
     },
     async (context, request, res) => {
       const searchRequest = request.body;
-      const { strategy } = request.params;
+      const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       const [, , selfStart] = await core.getStartServices();
 
       try {
-        const response = await selfStart.search.search(context, searchRequest, {
+        const response = await selfStart.search.search(context, id ? { id } : searchRequest, {
           signal,
           strategy,
         });
