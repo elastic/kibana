@@ -35,7 +35,6 @@ import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 /**
  *  Re-export legacy types under a namespace.
  */
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Legacy {
   export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
   export type Request = LegacyKibanaServer.Request;
