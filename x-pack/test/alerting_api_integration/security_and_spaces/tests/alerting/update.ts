@@ -735,12 +735,16 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
+          console.log('scheduled with interval of 30m');
+
           await retry.try(async () => {
             const alertTask = await getAlertingTaskById(createdAlert.scheduledTaskId);
             expect(alertTask.status).to.eql('idle');
             // ensure the alert inital run has completed and it's been rescheduled to half an hour from now
             ensureDatetimeIsWithinRange(Date.parse(alertTask.runAt), 30 * 60 * 1000);
           });
+
+          console.log('has been rescheduled after first run');
 
           await ensureTasksIndexRefreshed();
 

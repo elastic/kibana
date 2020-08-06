@@ -174,6 +174,11 @@ export class TaskStore {
       { id: taskInstance.id, refresh: false }
     );
 
+    if (taskInstance?.scope?.includes('alerting')) {
+      console.log(`:::::: TaskStore.schedule(${taskInstance.params?.alertId})`);
+      console.log(`:::::: ${JSON.stringify(savedObject)}`);
+    }
+
     return savedObjectToConcreteTaskInstance(savedObject);
   }
 

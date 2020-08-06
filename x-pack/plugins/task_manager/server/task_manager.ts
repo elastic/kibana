@@ -284,6 +284,11 @@ export class TaskManager {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: object
   ): Promise<ConcreteTaskInstance> {
+    if (taskInstance?.scope?.includes('alerting')) {
+      console.log(
+        `:::::: TaskManager.schedule(${taskInstance.params?.alertId}) [availableWorkers=${this.pool.availableWorkers}]`
+      );
+    }
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
