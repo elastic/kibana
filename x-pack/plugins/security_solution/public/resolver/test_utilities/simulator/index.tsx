@@ -112,6 +112,16 @@ export class Simulator {
   }
 
   /**
+   * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
+   * This forces any `AutoSizer` instances to have a large size.
+   */
+  private forceAutoSizerOpen() {
+    this.wrapper
+      .find('AutoSizer')
+      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+  }
+
+  /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
@@ -123,6 +133,7 @@ export class Simulator {
       yield mapper();
       await new Promise((resolve) => {
         setTimeout(() => {
+          this.forceAutoSizerOpen();
           this.wrapper.update();
           resolve();
         }, 0);
@@ -173,6 +184,9 @@ export class Simulator {
     );
   }
 
+  public processNodeSubmenu(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:map:node-submenu"]');
+  }
   /**
    * Return the selected node query string values.
    */
@@ -219,10 +233,24 @@ export class Simulator {
   }
 
   /**
+   * The links that select a node in the node list view.
+   */
+  public nodeListNodeLinks(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link"]');
+  }
+
+  /**
    * The element containing the details for the selected node.
    */
   public nodeDetailElement(): ReactWrapper {
     return this.domNodes('[data-test-subj="resolver:node-detail"]');
+  }
+
+  /**
+   * Link rendered in the breadcrumbs of the node detail view. Takes the user to the node list.
+   */
+  public nodeDetailBreadcrumbNodeListLink(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:breadcrumbs:node-list-link"]');
   }
 
   /**

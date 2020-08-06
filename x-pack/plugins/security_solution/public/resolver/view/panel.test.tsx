@@ -142,5 +142,24 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         selectedNode: [entityIDs.origin],
       });
     });
+    describe('and when the node list link has been clicked', () => {
+      beforeEach(async () => {
+        const nodeListLink = await simulator().resolveWrapper(() =>
+          simulator().nodeDetailBreadcrumbNodeListLink()
+        );
+        if (nodeListLink) {
+          nodeListLink.simulate('click');
+        }
+      });
+      it('should show the list of nodes with links to each node', async () => {
+        await expect(
+          simulator().map(() => {
+            return simulator()
+              .nodeListNodeLinks()
+              .map((node) => node.text());
+          })
+        ).toYieldEqualTo(['c', 'd', 'e']);
+      });
+    });
   });
 });

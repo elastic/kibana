@@ -112,6 +112,7 @@ const OptionList = React.memo(
         options={options}
         {...selectableProps}
         isLoading={isLoading}
+        data-test-subj="resolver:map:node-submenu"
       >
         {(list) => <OptionListItem>{list}</OptionListItem>}
       </EuiSelectable>

@@ -129,6 +129,7 @@ export const ProcessDetails = memo(function ProcessDetails({
             defaultMessage: 'Events',
           }
         ),
+        'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
         onClick: () => {
           pushToQueryParams({ crumbId: '', crumbEvent: '' });
         },

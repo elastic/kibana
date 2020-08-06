@@ -152,5 +152,26 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         relatedEventButtons: 1,
       });
     });
+    describe('when the related events button is clicked', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should open the submenu', async () => {
+        await expect(
+          /* eslint-disable array-callback-return */
+          simulator.map(() => {
+            const wrapper = simulator.processNodeSubmenu();
+            if (wrapper.exists()) {
+              return simulator.processNodeSubmenu().text();
+            }
+          })
+        ).toYieldEqualTo('2 registry');
+      });
+    });
   });
 });

@@ -110,6 +110,7 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
                   crumbEvent: '',
                 });
               }}
+              data-test-subj="resolver:node-list:node-link"
             >
               <CubeForProcess isProcessTerminated={isTerminated} />
               {name}
@@ -150,18 +151,10 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
-        let dateTime: Date | undefined;
-        const eventTime = event.timestampSafeVersion(processEvent);
         const name = event.processNameSafeVersion(processEvent);
-        if (eventTime) {
-          const date = new Date(eventTime);
-          if (isFinite(date.getTime())) {
-            dateTime = date;
-          }
-        }
         return {
           name,
-          timestamp: dateTime,
+          timestamp: event.timestampAsDateSafeVersion(processEvent),
           event: processEvent,
         };
       }),
@@ -172,12 +165,9 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const crumbs = useMemo(() => {
     return [
       {
-        text: i18n.translate(
-          'xpack.securitySolution.endpoint.resolver.panel.processListWithCounts.events',
-          {
-            defaultMessage: 'All Process Events',
-          }
-        ),
+        text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
+          defaultMessage: 'All Process Events',
+        }),
         onClick: () => {},
       },
     ];
