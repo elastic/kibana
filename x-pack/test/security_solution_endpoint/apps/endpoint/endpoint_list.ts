@@ -13,14 +13,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('host list', function () {
+  describe('endpoint list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await pageObjects.endpoint.navigateToHostList();
+        await pageObjects.endpoint.navigateToEndpointList();
       });
       after(async () => {
         await deleteMetadataStream(getService);
@@ -28,14 +28,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds page title', async () => {
         const title = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
-        expect(title).to.equal('Hosts');
+        expect(title).to.equal('Endpoints');
       });
 
       it('displays table data', async () => {
         const expectedData = [
           [
             'Hostname',
-            'Host Status',
+            'Endpoint Status',
             'Integration',
             'Configuration Status',
             'Operating System',
@@ -129,7 +129,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // This set of tests fails the flyout does not open in the before() and will be fixed in soon
       describe.skip('has a url with a host id', () => {
         before(async () => {
-          await pageObjects.endpoint.navigateToHostList(
+          await pageObjects.endpoint.navigateToEndpointList(
             'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
           );
         });
@@ -151,12 +151,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Hostname',
             'Sensor Version',
           ];
-          const keys = await pageObjects.endpoint.hostFlyoutDescriptionKeys('hostDetailsFlyout');
+          const keys = await pageObjects.endpoint.endpointFlyoutDescriptionKeys(
+            'hostDetailsFlyout'
+          );
           expect(keys).to.eql(expectedData);
         });
 
         it('displays details row descriptions', async () => {
-          const values = await pageObjects.endpoint.hostFlyoutDescriptionValues(
+          const values = await pageObjects.endpoint.endpointFlyoutDescriptionValues(
             'hostDetailsFlyout'
           );
 
@@ -178,7 +180,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
-        await pageObjects.endpoint.navigateToHostList();
+        await pageObjects.endpoint.navigateToEndpointList();
       });
       it('displays empty Policy Table page.', async () => {
         await testSubjects.existOrFail('emptyPolicyTable');
