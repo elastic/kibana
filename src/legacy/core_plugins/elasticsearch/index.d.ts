@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable */
 import {
   Client as ESClient,
   GenericParams,
@@ -145,7 +144,6 @@ import {
   TasksGetParams,
   TasksListParams,
 } from 'elasticsearch';
-/* eslint-enable */
 
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;

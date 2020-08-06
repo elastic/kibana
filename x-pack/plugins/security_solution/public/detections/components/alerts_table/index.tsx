@@ -61,7 +61,6 @@ interface OwnProps {
   timelineId: TimelineIdLiteral;
   canUserCRUD: boolean;
   defaultFilters?: Filter[];
-  eventsViewerBodyHeight?: number;
   hasIndexWrite: boolean;
   from: string;
   loading: boolean;
@@ -88,7 +87,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   clearEventsLoading,
   clearSelected,
   defaultFilters,
-  eventsViewerBodyHeight,
   from,
   globalFilters,
   globalQuery,
@@ -149,13 +147,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote, notes }: CreateTimelineProps) => {
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
       updateTimeline({
         duplicate: true,
+        forceNotes: true,
         from: fromTimeline,
         id: 'timeline-1',
-        notes: [],
+        notes,
         timeline: {
           ...timeline,
           show: true,
@@ -451,7 +450,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         defaultModel={alertsDefaultModel}
         end={to}
         headerFilterGroup={headerFilterGroup}
-        height={eventsViewerBodyHeight}
         id={timelineId}
         start={from}
         utilityBar={utilityBarCallback}

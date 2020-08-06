@@ -6,8 +6,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
-// @ts-ignore
-import turf from 'turf';
+import bbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
@@ -368,7 +368,7 @@ export function fitToDataBounds() {
       return;
     }
 
-    const dataBounds = turfBboxToBounds(turf.bbox(turf.multiPoint(corners)));
+    const dataBounds = turfBboxToBounds(bbox(multiPoint(corners)));
 
     dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
