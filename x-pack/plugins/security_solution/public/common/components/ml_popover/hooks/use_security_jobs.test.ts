@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { renderHook } from '@testing-library/react-hooks';
 
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -34,7 +35,7 @@ describe('useSecurityJobs', () => {
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
-  describe('when user is an ML Admin with a license', () => {
+  describe('when user has valid permissions', () => {
     beforeEach(() => {
       (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
       (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: true });
@@ -72,6 +73,14 @@ describe('useSecurityJobs', () => {
       expect(result.current.jobs).toEqual(expect.arrayContaining([expectedSecurityJob]));
     });
 
+    it('returns those permissions', async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
+      await waitForNextUpdate();
+
+      expect(result.current.isMlAdmin).toEqual(true);
+      expect(result.current.isLicensed).toEqual(true);
+    });
+
     it('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
       const { waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
@@ -83,7 +92,7 @@ describe('useSecurityJobs', () => {
     });
   });
 
-  describe('when the user is not an ML Admin with no license', () => {
+  describe('when the user does not have valid permissions', () => {
     beforeEach(() => {
       (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
       (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: false });

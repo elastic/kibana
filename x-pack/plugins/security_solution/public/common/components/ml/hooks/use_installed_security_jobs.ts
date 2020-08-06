@@ -40,8 +40,10 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   const isLicensed = mlCapabilities.isPlatinumOrTrialLicense;
 
   useEffect(() => {
-    start({ http });
-  }, [http, start]);
+    if (isMlUser && isLicensed) {
+      start({ http });
+    }
+  }, [http, isMlUser, isLicensed, start]);
 
   useEffect(() => {
     if (result) {
