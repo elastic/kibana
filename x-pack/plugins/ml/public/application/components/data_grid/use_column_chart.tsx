@@ -8,7 +8,7 @@ import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 
 import { euiPaletteColorBlind, EuiDataGridColumn } from '@elastic/eui';
 
