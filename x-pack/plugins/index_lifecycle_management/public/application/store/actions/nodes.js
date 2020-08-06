@@ -9,7 +9,6 @@ import { showApiError } from '../../services/api_errors';
 import { loadNodes } from '../../services/api';
 import { SET_SELECTED_NODE_ATTRS } from '../../constants';
 
-export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);
 export const setSelectedPrimaryShardCount = createAction('SET_SELECTED_PRIMARY_SHARED_COUNT');
 export const setSelectedReplicaCount = createAction('SET_SELECTED_REPLICA_COUNT');
 export const fetchedNodes = createAction('FETCHED_NODES');

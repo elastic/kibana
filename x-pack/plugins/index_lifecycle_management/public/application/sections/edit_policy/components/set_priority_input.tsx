@@ -9,9 +9,9 @@ import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eu
 
 import { PHASE_INDEX_PRIORITY } from '../../../constants';
 
-import { LearnMoreLink } from '../../components/learn_more_link';
-import { OptionalLabel } from '../../components/optional_label';
-import { ErrableFormRow } from '../form_errors';
+import { LearnMoreLink } from './';
+import { OptionalLabel } from './';
+import { ErrableFormRow } from './';
 
 interface Props {
   errors: Record<string, string[]>;

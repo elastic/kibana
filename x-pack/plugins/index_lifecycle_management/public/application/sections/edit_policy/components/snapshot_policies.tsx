@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useLoadSnapshotPolicies } from '../../../../services/api';
+import { useLoadSnapshotPolicies } from '../../../services/api';
 
 interface Props {
   value: string;

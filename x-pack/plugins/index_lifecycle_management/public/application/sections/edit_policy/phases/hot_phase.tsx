@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,18 +27,24 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ENABLED,
-} from '../../../../constants';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
-import { ErrableFormRow } from '../../form_errors';
-import { SetPriorityInput } from '../set_priority_input';
+} from '../../../constants';
+import {
+  LearnMoreLink,
+  ActiveBadge,
+  PhaseErrorMessage,
+  ErrableFormRow,
+  SetPriorityInput,
+} from '../components';
 
-export class HotPhase extends PureComponent {
-  static propTypes = {
-    setPhaseData: PropTypes.func.isRequired,
-    isShowingErrors: PropTypes.bool.isRequired,
-    errors: PropTypes.object.isRequired,
-  };
+interface Props {
+  errors: Record<string, string[]>;
+  isShowingErrors: boolean;
+  phaseData: any;
+  setPhaseData: (key: string, value: any) => void;
+  setWarmPhaseOnRollover: (value: boolean) => void;
+}
 
+export class HotPhase extends PureComponent<Props> {
   render() {
     const { setPhaseData, phaseData, isShowingErrors, errors, setWarmPhaseOnRollover } = this.props;
 

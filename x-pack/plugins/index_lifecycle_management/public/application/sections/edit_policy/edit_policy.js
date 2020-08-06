@@ -33,17 +33,15 @@ import {
   PHASE_DELETE,
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_ROLLOVER_ENABLED,
 } from '../../constants';
 
 import { toasts } from '../../services/notification';
 import { findFirstError } from '../../services/find_errors';
-import { LearnMoreLink } from '../components';
-import { PolicyJsonFlyout } from './components/policy_json_flyout';
-import { ErrableFormRow } from './form_errors';
-import { HotPhase } from './components/hot_phase';
-import { WarmPhase } from './components/warm_phase';
-import { DeletePhase } from './components/delete_phase';
-import { ColdPhase } from './components/cold_phase';
+import { LearnMoreLink, PolicyJsonFlyout, ErrableFormRow } from './components';
+
+import { HotPhase, WarmPhase, ColdPhase, DeletePhase } from './phases';
 
 export class EditPolicy extends Component {
   static propTypes = {
@@ -137,6 +135,8 @@ export class EditPolicy extends Component {
       isNewPolicy,
       lifecycle,
       originalPolicyName,
+      phases,
+      setPhaseData,
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors, isShowingPolicyJsonFlyout } = this.state;
@@ -275,9 +275,13 @@ export class EditPolicy extends Component {
               <EuiSpacer />
 
               <HotPhase
-                selectedPolicy={selectedPolicy}
                 errors={errors[PHASE_HOT]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_HOT, key, value)}
+                phaseData={phases[PHASE_HOT]}
+                setWarmPhaseOnRollover={(value) =>
+                  setPhaseData(PHASE_WARM, WARM_PHASE_ON_ROLLOVER, value)
+                }
               />
 
               <EuiHorizontalRule />
@@ -285,6 +289,9 @@ export class EditPolicy extends Component {
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_WARM, key, value)}
+                phaseData={phases[PHASE_WARM]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />
@@ -292,6 +299,9 @@ export class EditPolicy extends Component {
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
+                setPhaseData={(key, value) => setPhaseData(PHASE_COLD, key, value)}
+                phaseData={phases[PHASE_COLD]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />
@@ -300,6 +310,9 @@ export class EditPolicy extends Component {
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
                 getUrlForApp={this.props.getUrlForApp}
+                setPhaseData={(key, value) => setPhaseData(PHASE_DELETE, key, value)}
+                phaseData={phases[PHASE_DELETE]}
+                hotPhaseRolloverEnabled={phases[PHASE_HOT][PHASE_ROLLOVER_ENABLED]}
               />
 
               <EuiHorizontalRule />

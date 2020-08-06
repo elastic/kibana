@@ -5,22 +5,35 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../../constants';
-import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../../components';
-import { MinAgeInput } from '../min_age_input';
-import { SnapshotPolicies } from '../snapshot_policies';
+import { PHASE_DELETE, PHASE_ENABLED, PHASE_WAIT_FOR_SNAPSHOT_POLICY } from '../../../constants';
+import {
+  ActiveBadge,
+  LearnMoreLink,
+  OptionalLabel,
+  PhaseErrorMessage,
+  MinAgeInput,
+  SnapshotPolicies,
+} from '../components';
 
-export class DeletePhase extends PureComponent {
-  static propTypes = {
-    setPhaseData: PropTypes.func.isRequired,
-    isShowingErrors: PropTypes.bool.isRequired,
-    errors: PropTypes.object.isRequired,
-  };
+interface Props {
+  setPhaseData: (key: string, value: any) => void;
+  phaseData: any;
+  isShowingErrors: boolean;
+  errors: Record<string, string[]>;
+  hotPhaseRolloverEnabled: boolean;
+  getUrlForApp: (
+    appId: string,
+    options?: {
+      path?: string;
+      absolute?: boolean;
+    }
+  ) => string;
+}
 
+export class DeletePhase extends PureComponent<Props> {
   render() {
     const {
       setPhaseData,
@@ -28,6 +41,7 @@ export class DeletePhase extends PureComponent {
       errors,
       isShowingErrors,
       hotPhaseRolloverEnabled,
+      getUrlForApp,
     } = this.props;
 
     return (
@@ -123,7 +137,7 @@ export class DeletePhase extends PureComponent {
               <SnapshotPolicies
                 value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
                 onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
-                getUrlForApp={this.props.getUrlForApp}
+                getUrlForApp={getUrlForApp}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

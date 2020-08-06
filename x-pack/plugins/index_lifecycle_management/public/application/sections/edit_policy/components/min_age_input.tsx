@@ -16,8 +16,8 @@ import {
   PHASE_COLD,
   PHASE_DELETE,
 } from '../../../constants';
-import { LearnMoreLink } from '../../components/learn_more_link';
-import { ErrableFormRow } from '../form_errors';
+import { LearnMoreLink } from './learn_more_link';
+import { ErrableFormRow } from './form_errors';
 
 function getTimingLabelForPhase(phase: string) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
