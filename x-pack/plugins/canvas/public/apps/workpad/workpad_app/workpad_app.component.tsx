@@ -7,7 +7,6 @@
 import React, { FC, MouseEventHandler, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Sidebar } from '../../../components/sidebar';
-// @ts-expect-error Untyped local
 import { Toolbar } from '../../../components/toolbar';
 // @ts-expect-error Untyped local
 import { Workpad } from '../../../components/workpad';
