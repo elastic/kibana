@@ -9,7 +9,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -31,7 +31,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -53,7 +53,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -75,7 +75,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -97,7 +97,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -119,35 +119,35 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "flat": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
           "my_array": Object {
             "total": Object {
-              "kind": 140,
+              "kind": 143,
               "type": "NumberKeyword",
             },
             "type": Object {
-              "kind": 128,
+              "kind": 131,
               "type": "BooleanKeyword",
             },
           },
           "my_objects": Object {
             "total": Object {
-              "kind": 140,
+              "kind": 143,
               "type": "NumberKeyword",
             },
             "type": Object {
-              "kind": 128,
+              "kind": 131,
               "type": "BooleanKeyword",
             },
           },
           "my_str": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
           "my_str_array": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
