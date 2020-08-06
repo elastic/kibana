@@ -119,16 +119,20 @@ export async function setupIngestManager(
       }
     }
 
-    // if everything works, resolve/succeed
+    // if everything works, mark the tracking promise as resolved
     onSetupResolve();
   } catch (error) {
-    // reset the tracking promise to try again next time
+    // if something fails
+    // * reset the tracking promise to try again next time
     setupIngestStatus = undefined;
-    // return the rejection so it can be dealt with now
+    // * return the rejection so it can be dealt with now
     return Promise.reject(error);
   }
 
-
+  // be sure to return the promise because it has the resolved status attached to it
+  // otherwise, we effectively return success every time even if there are errors
+  // because `return undefined` -> `Promise.resolve(undefined)` in an `async` function
+  return setupIngestStatus;
 }
 
 export async function setupFleet(
