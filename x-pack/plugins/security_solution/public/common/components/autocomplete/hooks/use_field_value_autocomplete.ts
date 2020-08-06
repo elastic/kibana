@@ -17,7 +17,7 @@ type Func = (args: {
   patterns: IIndexPattern | undefined;
 }) => void;
 
-export type UseFieldValueAutocompleteReturn = [boolean, string[], Func | null];
+export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func | null];
 
 export interface UseFieldValueAutocompleteProps {
   selectedField: IFieldType | undefined;
@@ -37,6 +37,7 @@ export const useFieldValueAutocomplete = ({
 }: UseFieldValueAutocompleteProps): UseFieldValueAutocompleteReturn => {
   const { services } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuggestingValues, setIsSuggestingValues] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const updateSuggestions = useRef<Func | null>(null);
 
@@ -70,6 +71,7 @@ export const useFieldValueAutocomplete = ({
             // Fields of type boolean should only display two options
             if (fieldSelected.type === 'boolean') {
               setIsLoading(false);
+              setIsSuggestingValues(false);
               setSuggestions(['true', 'false']);
               return;
             }
@@ -80,6 +82,10 @@ export const useFieldValueAutocomplete = ({
               query: userSuggestion.trim(),
               signal: abortCtrl.signal,
             });
+
+            if (newSuggestions.length === 0) {
+              setIsSuggestingValues(false);
+            }
 
             setIsLoading(false);
             setSuggestions([...newSuggestions]);
@@ -110,5 +116,5 @@ export const useFieldValueAutocomplete = ({
     };
   }, [services.data.autocomplete, selectedField, operatorType, fieldValue, indexPattern]);
 
-  return [isLoading, suggestions, updateSuggestions.current];
+  return [isLoading, isSuggestingValues, suggestions, updateSuggestions.current];
 };

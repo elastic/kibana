@@ -172,11 +172,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         return (
           <AutocompleteFieldMatchComponent
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
-            selectedField={
-              entry.correspondingKeywordField != null
-                ? entry.correspondingKeywordField
-                : entry.field
-            }
+            selectedField={entry.correspondingKeywordField ?? entry.field}
             selectedValue={value}
             isDisabled={
               indexPattern == null || (indexPattern != null && indexPattern.fields.length === 0)

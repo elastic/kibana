@@ -38,7 +38,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   onChange,
 }): JSX.Element => {
   const [touched, setIsTouched] = useState(false);
-  const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
+  const [isLoadingSuggestions, , suggestions, updateSuggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH_ANY,
     fieldValue: selectedValue,
@@ -55,6 +55,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
         options: optionsMemo,
         selectedOptions: selectedValue,
         getLabel,
+        selectedField: undefined,
       }),
     [optionsMemo, selectedValue, getLabel]
   );

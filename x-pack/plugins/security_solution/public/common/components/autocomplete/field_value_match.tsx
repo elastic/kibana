@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
+import { EuiFieldNumber, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 import { uniq } from 'lodash';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -40,7 +40,12 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   onChange,
 }): JSX.Element => {
   const [touched, setIsTouched] = useState(false);
-  const [isLoadingSuggestions, suggestions, updateSuggestions] = useFieldValueAutocomplete({
+  const [
+    isLoadingSuggestions,
+    isSuggestingValues,
+    suggestions,
+    updateSuggestions,
+  ] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH,
     fieldValue: selectedValue,
@@ -62,8 +67,9 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
+        selectedField,
       }),
-    [optionsMemo, selectedOptionsMemo, getLabel]
+    [optionsMemo, selectedOptionsMemo, getLabel, selectedField]
   );
 
   const handleValuesChange = (newOptions: EuiComboBoxOptionOption[]): void => {
@@ -71,7 +77,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     onChange(newValue ?? '');
   };
 
-  const onSearchChange = (searchVal: string): void => {
+  const handleSearchChange = (searchVal: string): void => {
     if (updateSuggestions != null) {
       updateSuggestions({
         fieldSelected: selectedField,
@@ -79,6 +85,16 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
         patterns: indexPattern,
       });
     }
+  };
+
+  const handleNonComboBoxInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const newValue = event.target.value;
+    onChange(newValue);
+  };
+
+  const handleBooleanInputChange = (newOptions: EuiComboBoxOptionOption[]): void => {
+    const [newValue] = newOptions;
+    onChange(newValue != null ? newValue.label : '');
   };
 
   const isValid = useMemo(
@@ -98,27 +114,72 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     isLoadingSuggestions,
   ]);
 
-  return (
-    <EuiComboBox
-      placeholder={inputPlaceholder}
-      isDisabled={isDisabled}
-      isLoading={isLoadingState}
-      isClearable={isClearable}
-      options={comboOptions}
-      selectedOptions={selectedComboOptions}
-      onChange={handleValuesChange}
-      singleSelection={{ asPlainText: true }}
-      onSearchChange={onSearchChange}
-      onCreateOption={onChange}
-      isInvalid={!isValid}
-      onFocus={setIsTouchedValue}
-      sortMatchesBy="startsWith"
-      data-test-subj="valuesAutocompleteComboBox matchComboxBox"
-      style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
-      fullWidth
-      async
-    />
-  );
+  const getDefaultInput = () => {
+    return (
+      <EuiComboBox
+        placeholder={inputPlaceholder}
+        isDisabled={isDisabled}
+        isLoading={isLoadingState}
+        isClearable={isClearable}
+        options={comboOptions}
+        selectedOptions={selectedComboOptions}
+        onChange={handleValuesChange}
+        singleSelection={{ asPlainText: true }}
+        onSearchChange={handleSearchChange}
+        onCreateOption={onChange}
+        isInvalid={!isValid}
+        onFocus={setIsTouchedValue}
+        sortMatchesBy="startsWith"
+        data-test-subj="valuesAutocompleteComboBox matchComboxBox"
+        style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+        fullWidth
+        async
+      />
+    );
+  };
+
+  if (!isSuggestingValues && selectedField != null) {
+    switch (selectedField.type) {
+      case 'number':
+        return (
+          <EuiFieldNumber
+            placeholder={inputPlaceholder}
+            onBlur={setIsTouchedValue}
+            value={
+              typeof selectedValue === 'string' && selectedValue.trim().length > 0
+                ? parseFloat(selectedValue)
+                : selectedValue
+            }
+            onChange={handleNonComboBoxInputChange}
+            data-test-subj="autocompleteFieldMatchNumber"
+            style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+            fullWidth
+          />
+        );
+      case 'boolean':
+        return (
+          <EuiComboBox
+            placeholder={inputPlaceholder}
+            isDisabled={isDisabled}
+            isLoading={isLoadingState}
+            isClearable={isClearable}
+            options={comboOptions}
+            selectedOptions={selectedComboOptions}
+            onChange={handleBooleanInputChange}
+            singleSelection={{ asPlainText: true }}
+            onFocus={setIsTouchedValue}
+            data-test-subj="valuesAutocompleteComboBox matchComboxBoxBoolean"
+            style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+            fullWidth
+            async
+          />
+        );
+      default:
+        return getDefaultInput();
+    }
+  } else {
+    return getDefaultInput();
+  }
 };
 
 AutocompleteFieldMatchComponent.displayName = 'AutocompleteFieldMatch';

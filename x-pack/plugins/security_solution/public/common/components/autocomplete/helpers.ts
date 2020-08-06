@@ -61,11 +61,26 @@ export function getGenericComboBoxProps<T>({
   options,
   selectedOptions,
   getLabel,
+  selectedField,
 }: {
   options: T[];
   selectedOptions: T[];
   getLabel: (value: T) => string;
+  selectedField: IFieldType | undefined;
 }): GetGenericComboBoxPropsReturn {
+  if (selectedField != null && selectedField.type === 'boolean') {
+    const [selection] = selectedOptions;
+    const newValue =
+      typeof selection === 'string' && (selection === 'false' || selection === 'true')
+        ? selection
+        : undefined;
+
+    return {
+      comboOptions: [{ label: 'true' }, { label: 'false' }],
+      labels: ['true', 'false'],
+      selectedComboOptions: newValue != null ? [{ label: newValue }] : [],
+    };
+  }
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions

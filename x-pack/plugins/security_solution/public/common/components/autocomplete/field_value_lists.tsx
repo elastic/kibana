@@ -63,6 +63,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
+        selectedField: undefined,
       }),
     [optionsMemo, selectedOptionsMemo, getLabel]
   );
