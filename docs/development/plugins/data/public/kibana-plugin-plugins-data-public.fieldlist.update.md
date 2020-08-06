@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-update: (field: FieldSpec) => void;
+readonly update: (field: FieldSpec) => void;
 ```

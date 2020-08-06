@@ -72,11 +72,11 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     specs.map((field) => this.add(field));
   }
 
-  getByName = (name: IndexPatternField['name']) => this.byName.get(name);
-  getByType = (type: IndexPatternField['type']) => [
+  public readonly getByName = (name: IndexPatternField['name']) => this.byName.get(name);
+  public readonly getByType = (type: IndexPatternField['type']) => [
     ...(this.groups.get(type) || new Map()).values(),
   ];
-  add = (field: FieldSpec) => {
+  public readonly add = (field: FieldSpec) => {
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
@@ -88,7 +88,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.setByGroup(newField);
   };
 
-  remove = (field: IFieldType) => {
+  public readonly remove = (field: IFieldType) => {
     this.removeByGroup(field);
     this.byName.delete(field.name);
 
@@ -96,7 +96,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.splice(fieldIndex, 1);
   };
 
-  update = (field: FieldSpec) => {
+  public readonly update = (field: FieldSpec) => {
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
@@ -110,18 +110,18 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     this.setByGroup(newField);
   };
 
-  removeAll = () => {
+  public readonly removeAll = () => {
     this.length = 0;
     this.byName.clear();
     this.groups.clear();
   };
 
-  replaceAll = (specs: FieldSpec[]) => {
+  public readonly replaceAll = (specs: FieldSpec[]) => {
     this.removeAll();
     specs.forEach(this.add);
   };
 
-  toSpec = () => {
+  public readonly toSpec = () => {
     return [...this.map((field) => field.toSpec())];
   };
 }

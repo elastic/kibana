@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getByType: (type: IndexPatternField['type']) => any[];
+readonly getByType: (type: IndexPatternField['type']) => any[];
 ```

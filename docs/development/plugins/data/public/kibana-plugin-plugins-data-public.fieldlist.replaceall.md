@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-replaceAll: (specs: FieldSpec[]) => void;
+readonly replaceAll: (specs: FieldSpec[]) => void;
 ```

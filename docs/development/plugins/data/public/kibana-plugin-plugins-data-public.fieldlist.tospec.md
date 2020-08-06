@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec: () => {
+readonly toSpec: () => {
         count: number;
         script: string | undefined;
         lang: string | undefined;

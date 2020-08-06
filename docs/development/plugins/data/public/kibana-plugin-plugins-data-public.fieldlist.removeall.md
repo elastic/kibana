@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-removeAll: () => void;
+readonly removeAll: () => void;
 ```

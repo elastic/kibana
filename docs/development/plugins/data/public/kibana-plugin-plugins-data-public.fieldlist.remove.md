@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-remove: (field: IFieldType) => void;
+readonly remove: (field: IFieldType) => void;
 ```

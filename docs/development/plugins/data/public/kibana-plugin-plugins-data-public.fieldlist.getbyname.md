@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
 ```
