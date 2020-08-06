@@ -8,9 +8,10 @@ import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useTheme } from '../../../hooks/useTheme';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useAPMHref } from '../../shared/Links/apm/APMLink';
+import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { APMQueryParams } from '../../shared/Links/url_helpers';
 import { CytoscapeContext } from './Cytoscape';
 import { getAnimationOptions, getNodeHeight } from './cytoscapeOptions';
@@ -96,6 +97,8 @@ function useDebugDownloadUrl(cy?: cytoscape.Core) {
 }
 
 export function Controls() {
+  const { core } = useApmPluginContext();
+  const { basePath } = core.http;
   const theme = useTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useUrlParams();
@@ -103,9 +106,10 @@ export function Controls() {
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
   const downloadUrl = useDebugDownloadUrl(cy);
-  const viewFullMapUrl = useAPMHref({
+  const viewFullMapUrl = getAPMHref({
+    basePath,
     path: '/service-map',
-    currentSearch,
+    search: currentSearch,
     query: urlParams as APMQueryParams,
   });
 

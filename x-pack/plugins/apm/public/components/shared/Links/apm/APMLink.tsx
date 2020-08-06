@@ -5,6 +5,7 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+import { IBasePath } from 'kibana/public';
 import { pick } from 'lodash';
 import React from 'react';
 import url from 'url';
@@ -30,15 +31,20 @@ export const PERSISTENT_APM_PARAMS = [
 ];
 
 /**
- * Get an APM link for a path. This function does not prepend the basepath so
- * you'll need to do that when calling this.
+ * Get an APM link for a path.
  */
-export function getAPMHref(
-  path: string,
-  currentSearch: string,
-  query: APMQueryParams = {}
-) {
-  const currentQuery = toQuery(currentSearch);
+export function getAPMHref({
+  basePath,
+  path = '',
+  search,
+  query = {},
+}: {
+  basePath: IBasePath;
+  path?: string;
+  search?: string;
+  query?: APMQueryParams;
+}) {
+  const currentQuery = toQuery(search);
   const nextQuery = {
     ...pick(currentQuery, PERSISTENT_APM_PARAMS),
     ...query,
@@ -46,36 +52,16 @@ export function getAPMHref(
   const nextSearch = fromQuery(nextQuery);
 
   return url.format({
-    pathname: path,
+    pathname: basePath.prepend(`/app/apm${path}`),
     search: nextSearch,
   });
 }
 
-/**
- * Hook to to get an APM href. This does prepend the basepath and add the search
- * for you.
- */
-export function useAPMHref({
-  path,
-  currentSearch,
-  query = {},
-}: {
-  path: string;
-  currentSearch?: string;
-  query?: APMQueryParams;
-}) {
+export function APMLink({ path = '', query, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
-
-  return getAPMHref(
-    core.http.basePath.prepend(`/app/apm${path}`),
-    currentSearch ?? search,
-    query
-  );
-}
-
-export function APMLink({ path = '', query, ...rest }: Props) {
-  const href = useAPMHref({ path, query });
+  const { basePath } = core.http;
+  const href = getAPMHref({ basePath, path, search, query });
 
   return <EuiLink {...rest} href={href} />;
 }

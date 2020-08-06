@@ -20,14 +20,12 @@ import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 export function Settings(props: { children: ReactNode }) {
   const { core } = useApmPluginContext();
+  const { basePath } = core.http;
   const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = useLocation();
 
   function getSettingsHref(path: string) {
-    return getAPMHref(
-      core.http.basePath.prepend(`/app/apm/settings${path}`),
-      search
-    );
+    return getAPMHref({ basePath, path: `/settings${path}`, search });
   }
 
   return (

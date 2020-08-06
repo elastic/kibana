@@ -27,19 +27,17 @@ function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
+    const { basePath } = this.props.core.http;
     const breadcrumbs = this.props.breadcrumbs.map(
       ({ value, match }, index) => {
         // Remove trailing slash from root route
         const path = match.url === '/' ? '' : match.url;
-
+        const { search } = this.props.location;
         const isLastBreadcrumbItem =
           index === this.props.breadcrumbs.length - 1;
         const href = isLastBreadcrumbItem
           ? undefined // makes the breadcrumb item not clickable
-          : getAPMHref(
-              this.props.core.http.basePath.prepend(`/app/apm${path}`),
-              this.props.location.search
-            );
+          : getAPMHref({ basePath, path, search });
         return {
           text: value,
           href,

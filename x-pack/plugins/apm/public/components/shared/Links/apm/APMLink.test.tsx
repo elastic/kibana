@@ -5,44 +5,9 @@
  */
 
 import { Location } from 'history';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
-import { useAPMHref, APMLink } from './APMLink';
-import { renderHook } from '@testing-library/react-hooks';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import { createMemoryHistory } from 'history';
-import { LocationContext } from '../../../../context/LocationContext';
-
-describe('useAPMHref', () => {
-  it('returns the APM url', () => {
-    const history = createMemoryHistory();
-    const { location } = history;
-
-    function Wrapper({ children }: { children?: ReactNode }) {
-      return (
-        <LocationContext.Provider value={location}>
-          <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
-        </LocationContext.Provider>
-      );
-    }
-
-    const { result } = renderHook(
-      () =>
-        useAPMHref({
-          path: '/test',
-          currentSearch: '?kuery=x:y',
-          query: { traceId: '1' },
-        }),
-      {
-        wrapper: Wrapper,
-      }
-    );
-
-    expect(result.current).toEqual(
-      '/basepath/app/apm/test?kuery=x:y&traceId=1'
-    );
-  });
-});
+import { APMLink } from './APMLink';
 
 describe('APMLink', () => {
   test('APMLink should produce the correct URL', async () => {
