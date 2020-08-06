@@ -17,9 +17,9 @@
  * under the License.
  */
 
-const attributeName = 'data-render-complete';
+export class RenderCompleteListener {
+  private readonly attributeName = 'data-render-complete';
 
-export class RenderCompleteHelper {
   constructor(private readonly element: HTMLElement) {
     this.setup();
   }
@@ -30,23 +30,23 @@ export class RenderCompleteHelper {
   };
 
   public setup = () => {
-    this.element.setAttribute(attributeName, 'false');
+    this.element.setAttribute(this.attributeName, 'false');
     this.element.addEventListener('renderStart', this.start);
     this.element.addEventListener('renderComplete', this.complete);
   };
 
   public disable = () => {
-    this.element.setAttribute(attributeName, 'disabled');
+    this.element.setAttribute(this.attributeName, 'disabled');
     this.destroy();
   };
 
   private start = () => {
-    this.element.setAttribute(attributeName, 'false');
+    this.element.setAttribute(this.attributeName, 'false');
     return true;
   };
 
   private complete = () => {
-    this.element.setAttribute(attributeName, 'true');
+    this.element.setAttribute(this.attributeName, 'true');
     return true;
   };
 }

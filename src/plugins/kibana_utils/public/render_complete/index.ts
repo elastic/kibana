@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export * from './render_complete';
-export * from './render_complete_helper';
+export * from './render_complete_listener';
+export * from './render_complete_dispatcher';
