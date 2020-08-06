@@ -127,11 +127,13 @@ Object {
       "services": Object {
         "terms": Object {
           "field": "service.name",
+          "min_doc_count": 0,
           "size": 50,
         },
       },
     },
     "size": 0,
+    "timeout": "1ms",
   },
 }
 `;

@@ -37,6 +37,7 @@ export async function getAllEnvironments({
       ],
     },
     body: {
+      ...(!serviceNameFilter.length ? { timeout: '1ms' } : {}),
       size: 0,
       query: {
         bool: {
@@ -48,6 +49,7 @@ export async function getAllEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             size: 100,
+            ...(!serviceNameFilter.length ? { min_doc_count: 0 } : {}),
             missing: includeMissing ? ENVIRONMENT_NOT_DEFINED : undefined,
           },
         },
@@ -56,6 +58,7 @@ export async function getAllEnvironments({
   };
 
   const resp = await apmEventClient.search(params);
+
   const environments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
