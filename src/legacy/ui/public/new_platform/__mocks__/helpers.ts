@@ -17,7 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
 import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/mocks';
@@ -33,7 +32,6 @@ import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/p
 import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
 import { visualizationsPluginMock } from '../../../../../plugins/visualizations/public/mocks';
 import { discoverPluginMock } from '../../../../../plugins/discover/public/mocks';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
   createSetup: () => ({

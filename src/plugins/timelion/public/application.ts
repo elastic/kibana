@@ -100,7 +100,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'angula
 function mountTimelionApp(appBasePath: string, element: HTMLElement, deps: RenderDeps) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('class', 'timelionAppContainer');
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-unsanitized/property
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
