@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../__mocks__/react_router_history.mock';
+
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
 import { EuiLink as EuiLinkExternal } from '@elastic/eui';
@@ -54,6 +57,26 @@ describe('SideNavLink', () => {
     expect(externalLink).toHaveLength(1);
     expect(externalLink.prop('href')).toEqual('http://website.com');
     expect(externalLink.prop('target')).toEqual('_blank');
+  });
+
+  it('sets an active class if the current path matches the nav link', () => {
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/test/' }));
+
+    const wrapper = shallow(<SideNavLink to="/test">Link</SideNavLink>);
+
+    expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(1);
+  });
+
+  it('sets an active class if the current path is / and the link isRoot', () => {
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({ pathname: '/' }));
+
+    const wrapper = shallow(
+      <SideNavLink to="/test" isRoot>
+        Link
+      </SideNavLink>
+    );
+
+    expect(wrapper.find('.enterpriseSearchNavLinks__item--isActive')).toHaveLength(1);
   });
 
   it('passes down custom classes and props', () => {
