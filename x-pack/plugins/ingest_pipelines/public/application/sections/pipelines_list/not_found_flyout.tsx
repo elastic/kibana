@@ -6,17 +6,16 @@
 
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlyout, EuiFlyoutBody, EuiCallOut } from '@elastic/eui';
+import { EuiFlyoutBody, EuiCallOut } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-interface Props {
-  onClose: () => void;
+export interface Props {
   pipelineName: string | string[] | null | undefined;
 }
 
-export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose, pipelineName }) => {
+export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ pipelineName }) => {
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={550}>
+    <>
       <EuiFlyoutHeader>
         {pipelineName && (
           <EuiTitle id="notFoundFlyoutTitle">
@@ -37,6 +36,6 @@ export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose, pipe
           iconType="alert"
         />
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </>
   );
 };

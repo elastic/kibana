@@ -7,7 +7,6 @@
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
@@ -35,6 +34,11 @@ export interface Props {
   onDeleteClick: (pipelineName: string[]) => void;
   onClose: () => void;
 }
+
+export const defaultFlyoutProps = {
+  'data-test-subj': 'pipelineDetails',
+  'aria-labelledby': 'pipelineDetailsFlyoutTitle',
+};
 
 export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   pipeline,
@@ -101,13 +105,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      aria-labelledby="pipelineDetailsFlyoutTitle"
-      data-test-subj="pipelineDetails"
-      size="m"
-      maxWidth={550}
-    >
+    <>
       <EuiFlyoutHeader>
         <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
           <h2>{pipeline.name}</h2>
@@ -211,6 +209,6 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

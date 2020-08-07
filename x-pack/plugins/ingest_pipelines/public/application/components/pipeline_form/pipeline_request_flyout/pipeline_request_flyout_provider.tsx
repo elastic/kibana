@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, FunctionComponent } from 'react';
+import { useState, useEffect, FunctionComponent } from 'react';
 
 import { Pipeline } from '../../../../../common/types';
 import { useFormContext, GlobalFlyout } from '../../../../shared_imports';

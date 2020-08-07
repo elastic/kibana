@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
@@ -25,13 +25,17 @@ import {
 
 import { Pipeline } from '../../../../common/types';
 import { BASE_PATH } from '../../../../common/constants';
-import { useKibana, SectionLoading } from '../../../shared_imports';
+import { useKibana, SectionLoading, GlobalFlyout } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
-import { PipelineDetailsFlyout } from './details_flyout';
-import { PipelineNotFoundFlyout } from './not_found_flyout';
+import {
+  PipelineDetailsFlyout,
+  Props as PipelineDetailsProps,
+  defaultFlyoutProps as pipelineDetailsDefaultProps,
+} from './details_flyout';
+import { PipelineNotFoundFlyout, Props as PipelineNotFoundProps } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
 
 const getPipelineNameFromLocation = (location: Location) => {
@@ -39,10 +43,17 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
+const { useGlobalFlyout } = GlobalFlyout;
+
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,
   location,
 }) => {
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
+
   const { services } = useKibana();
   const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
@@ -52,6 +63,25 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
+
+  const goToEditPipeline = useCallback(
+    (name: string) => {
+      history.push(`${BASE_PATH}/edit/${encodeURIComponent(name)}`);
+    },
+    [history]
+  );
+
+  const goToClonePipeline = useCallback(
+    (name: string) => {
+      history.push(`${BASE_PATH}/create/${encodeURIComponent(name)}`);
+    },
+    [history]
+  );
+
+  const goHome = useCallback(() => {
+    setShowFlyout(false);
+    history.push(BASE_PATH);
+  }, [history, setShowFlyout]);
 
   // Track component loaded
   useEffect(() => {
@@ -67,18 +97,61 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     }
   }, [pipelineNameFromLocation, data]);
 
-  const goToEditPipeline = (name: string) => {
-    history.push(`${BASE_PATH}/edit/${encodeURIComponent(name)}`);
-  };
+  useEffect(() => {
+    if (showFlyout) {
+      if (selectedPipeline) {
+        // Open the pipeline details flyout
+        addContentToGlobalFlyout<PipelineDetailsProps>({
+          id: 'pipelineDetails',
+          Component: PipelineDetailsFlyout,
+          flyoutProps: {
+            ...pipelineDetailsDefaultProps,
+            onClose: () => {
+              setSelectedPipeline(undefined);
+              goHome();
+            },
+          },
+          props: {
+            pipeline: selectedPipeline,
+            onClose: () => {
+              setSelectedPipeline(undefined);
+              goHome();
+            },
+            onEditClick: goToEditPipeline,
+            onCloneClick: goToClonePipeline,
+            onDeleteClick: setPipelinesToDelete,
+          },
+        });
+      } else {
+        // Open the pipeline not found flyout
+        addContentToGlobalFlyout<PipelineNotFoundProps>({
+          id: 'pipelineNotFound',
+          Component: PipelineNotFoundFlyout,
+          flyoutProps: {
+            onClose: goHome,
+          },
+          props: {
+            pipelineName: pipelineNameFromLocation,
+          },
+        });
+      }
+    }
+  }, [
+    addContentToGlobalFlyout,
+    showFlyout,
+    selectedPipeline,
+    goToEditPipeline,
+    goToClonePipeline,
+    goHome,
+    pipelineNameFromLocation,
+  ]);
 
-  const goToClonePipeline = (name: string) => {
-    history.push(`${BASE_PATH}/create/${encodeURIComponent(name)}`);
-  };
-
-  const goHome = () => {
-    setShowFlyout(false);
-    history.push(BASE_PATH);
-  };
+  useEffect(() => {
+    if (!showFlyout) {
+      removeContentFromGlobalFlyout('pipelineDetails');
+      removeContentFromGlobalFlyout('pipelineNotFound');
+    }
+  }, [removeContentFromGlobalFlyout, showFlyout]);
 
   if (data && data.length === 0) {
     return <EmptyList />;
@@ -106,30 +179,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       />
     );
   }
-
-  const renderFlyout = (): React.ReactNode => {
-    if (!showFlyout) {
-      return;
-    }
-    if (selectedPipeline) {
-      return (
-        <PipelineDetailsFlyout
-          pipeline={selectedPipeline}
-          onClose={() => {
-            setSelectedPipeline(undefined);
-            goHome();
-          }}
-          onEditClick={goToEditPipeline}
-          onCloneClick={goToClonePipeline}
-          onDeleteClick={setPipelinesToDelete}
-        />
-      );
-    } else {
-      // Somehow we triggered show pipeline details, but do not have a pipeline.
-      // We assume not found.
-      return <PipelineNotFoundFlyout onClose={goHome} pipelineName={pipelineNameFromLocation} />;
-    }
-  };
 
   return (
     <>
@@ -198,7 +247,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           )}
         </EuiPageContent>
       </EuiPageBody>
-      {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal
           callback={(deleteResponse) => {
