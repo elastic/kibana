@@ -482,6 +482,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       await driver.switchTo().frame(_id);
     }
 
+    public async checkBrowserPermission(permission: string): Promise<boolean> {
+      const result: any = await driver.executeAsyncScript(
+        `navigator.permissions.query({name:'${permission}'}).then(arguments[0])`
+      );
+
+      return Boolean(result?.state === 'granted');
+    }
+
     public getClipboardValue(): Promise<string> {
       return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
     }

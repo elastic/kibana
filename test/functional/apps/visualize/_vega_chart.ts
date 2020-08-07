@@ -187,6 +187,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should be able to copy vega spec to clipboard', async () => {
+          // The "clipboard-read" permission of the Permissions API must be granted before you can execute that test
+          if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+            return;
+          }
+
           await vegaDebugInspectorView.openVegaDebugInspectorView();
           await vegaDebugInspectorView.navigateToSpecViewerTab();
 
