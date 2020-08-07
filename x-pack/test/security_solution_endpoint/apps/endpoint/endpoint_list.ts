@@ -72,7 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // wait for transform to apply
-        await new Promise((r) => setTimeout(r, 70000));
+        await new Promise((r) => setTimeout(r, 90000));
         await esClient.transform.getTransformStats({
           transform_id: transformId,
         });
@@ -240,6 +240,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
+        await deleteMetadataCurrentStream(getService);
         await pageObjects.endpoint.navigateToHostList();
       });
       it('displays empty Policy Table page.', async () => {
