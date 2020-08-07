@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+.enterpriseSearchLayout {
+  $sideBarWidth: $euiSize * 15;
+
+  position: relative;
+  left: $sideBarWidth;
+  width: calc(100% - #{$sideBarWidth});
+  padding: 0;
+
+  &__sideBar {
+    z-index: $euiZNavigation;
+    position: fixed;
+    margin-left: -1 * $sideBarWidth;
+    margin-right: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    $kibanaHeader: 49px; // NOTE: Keep an eye on this for changes
+    height: calc(100vh - #{$kibanaHeader});
+    width: $sideBarWidth;
+
+    background-color: $euiColorLightestShade;
+    box-shadow: inset (-1 * $euiSizeXS) 0 $euiSizeS (-1 * $euiSizeXS) rgba($euiShadowColor, 0.25);
+  }
+
+  &__body {
+    padding: $euiSizeXXL;
+  }
+}
