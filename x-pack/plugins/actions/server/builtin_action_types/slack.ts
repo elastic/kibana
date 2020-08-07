@@ -7,11 +7,13 @@
 import { URL } from 'url';
 import { curry } from 'lodash';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
 import {
@@ -19,6 +21,7 @@ import {
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
   ExecutorType,
+  ProxySettings,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
@@ -43,11 +46,11 @@ const ParamsSchema = schema.object({
 
 // customizing executor is only used for tests
 export function getActionType({
+  logger,
   configurationUtilities,
-  executor = slackExecutor,
 }: {
+  logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType;
 }): ActionType {
   return {
     id: '.slack',
@@ -61,7 +64,7 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(slackExecutor)({ logger }),
   };
 }
 
@@ -93,6 +96,7 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
+  { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
@@ -105,15 +109,7 @@ async function slackExecutor(
 
   let proxyAgent: HttpsProxyAgent | undefined;
   if (execOptions.proxySettings) {
-    const proxyUrl = new URL(execOptions.proxySettings.proxyUrl);
-    proxyAgent = new HttpsProxyAgent({
-      host: proxyUrl.host,
-      port: Number(proxyUrl.port),
-      protocol: proxyUrl.protocol,
-      headers: execOptions.proxySettings.proxyHeaders,
-      // do not fail on invalid certs
-      rejectUnauthorized: execOptions.proxySettings.rejectUnauthorizedCertificates,
-    });
+    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
   }
 
   try {
@@ -172,6 +168,27 @@ async function slackExecutor(
   }
 
   return successResult(actionId, result);
+}
+
+function getProxyAgent(
+  proxySettings: ProxySettings,
+  logger: Logger
+): HttpsProxyAgent | HttpProxyAgent {
+  // logger.log(`Create proxy agent for ${proxySettings.proxyUrl}.`);
+
+  if (/^https/.test(proxySettings.proxyUrl)) {
+    const proxyUrl = new URL(proxySettings.proxyUrl);
+    return new HttpsProxyAgent({
+      host: proxyUrl.hostname,
+      port: Number(proxyUrl.port),
+      protocol: proxyUrl.protocol,
+      headers: proxySettings.proxyHeaders,
+      // do not fail on invalid certs
+      rejectUnauthorized: proxySettings.rejectUnauthorizedCertificates,
+    });
+  } else {
+    return new HttpProxyAgent(proxySettings.proxyUrl);
+  }
 }
 
 function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
