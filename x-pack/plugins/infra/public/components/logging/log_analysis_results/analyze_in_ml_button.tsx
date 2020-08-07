@@ -11,7 +11,7 @@ import { encode } from 'rison-node';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
 
-type DatemathRange = TimeRange & { startTime: string; endTime: string };
+type DatemathRange = TimeRange | { startTime: string; endTime: string };
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
   jobId: string;
