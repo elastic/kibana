@@ -46,6 +46,7 @@ export const RedirectToNodeLogs = ({
   if (isLoading) {
     return (
       <LoadingPage
+        data-test-subj={`nodeLoadingPage-${nodeType}`}
         message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
           defaultMessage: 'Loading {nodeType} logs',
           values: {
