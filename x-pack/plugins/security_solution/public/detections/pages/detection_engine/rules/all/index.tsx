@@ -49,6 +49,7 @@ import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 
@@ -145,8 +146,7 @@ export const AllRules = React.memo<AllRulesProps>(
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
-    const hasMlPermissions =
-      mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+    const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
     const setRules = useCallback((newRules: Rule[], newPagination: Partial<PaginationOptions>) => {
       dispatch({

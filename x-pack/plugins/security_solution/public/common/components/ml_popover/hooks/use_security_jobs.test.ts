@@ -7,10 +7,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
-import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
 import { checkRecognizer, getModules } from '../api';
 import { SecurityJob } from '../types';
 import {
@@ -21,6 +21,7 @@ import {
 import { useSecurityJobs } from './use_security_jobs';
 
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
+jest.mock('../../../../../common/machine_learning/has_ml_license');
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_app_toasts');
 jest.mock('../../ml/hooks/use_ml_capabilities');
@@ -38,7 +39,7 @@ describe('useSecurityJobs', () => {
   describe('when user has valid permissions', () => {
     beforeEach(() => {
       (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
-      (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: true });
+      (hasMlLicense as jest.Mock).mockReturnValue(true);
       (getJobsSummary as jest.Mock).mockResolvedValue(mockJobsSummaryResponse);
       (getModules as jest.Mock).mockResolvedValue(mockGetModuleResponse);
       (checkRecognizer as jest.Mock).mockResolvedValue(checkRecognizerSuccess);
@@ -95,7 +96,7 @@ describe('useSecurityJobs', () => {
   describe('when the user does not have valid permissions', () => {
     beforeEach(() => {
       (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
-      (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: false });
+      (hasMlLicense as jest.Mock).mockReturnValue(false);
     });
 
     it('returns empty jobs and false predicates', () => {

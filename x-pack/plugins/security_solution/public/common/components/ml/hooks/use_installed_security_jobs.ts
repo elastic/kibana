@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { MlSummaryJob } from '../../../../../../ml/public';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
@@ -37,7 +38,7 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   const { error, loading, result, start } = useGetJobsSummary();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);
-  const isLicensed = mlCapabilities.isPlatinumOrTrialLicense;
+  const isLicensed = hasMlLicense(mlCapabilities);
 
   useEffect(() => {
     if (isMlUser && isLicensed) {

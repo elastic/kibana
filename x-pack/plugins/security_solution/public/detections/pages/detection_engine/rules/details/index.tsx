@@ -73,6 +73,7 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -161,8 +162,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
-  const hasMlPermissions =
-    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   // persist rule until refresh is complete

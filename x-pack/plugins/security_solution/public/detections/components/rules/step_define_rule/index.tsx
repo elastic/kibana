@@ -12,6 +12,7 @@ import deepEqual from 'fast-deep-equal';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
@@ -187,7 +188,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             componentProps={{
               describedByIds: ['detectionEngineStepDefineRuleType'],
               isReadOnly: isUpdateView,
-              hasValidLicense: mlCapabilities.isPlatinumOrTrialLicense,
+              hasValidLicense: hasMlLicense(mlCapabilities),
               isMlAdmin: hasMlAdminPermissions(mlCapabilities),
             }}
           />

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useUiSetting$, useHttp } from '../../../lib/kibana';
 import { checkRecognizer, getModules } from '../api';
@@ -43,7 +44,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
   const { addError } = useAppToasts();
 
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
-  const isLicensed = mlCapabilities.isPlatinumOrTrialLicense;
+  const isLicensed = hasMlLicense(mlCapabilities);
 
   useEffect(() => {
     let isSubscribed = true;

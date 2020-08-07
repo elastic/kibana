@@ -7,18 +7,18 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { mockJobsSummaryResponse } from '../../ml_popover/api.mock';
 import { getJobsSummary } from '../api/get_jobs_summary';
-import { useMlCapabilities } from './use_ml_capabilities';
 import { useInstalledSecurityJobs } from './use_installed_security_jobs';
 
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
+jest.mock('../../../../../common/machine_learning/has_ml_license');
 jest.mock('../../../hooks/use_app_toasts');
 jest.mock('../api/get_jobs_summary');
-jest.mock('./use_ml_capabilities');
 
 describe('useInstalledSecurityJobs', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -32,7 +32,7 @@ describe('useInstalledSecurityJobs', () => {
   describe('when the user has permissions', () => {
     beforeEach(() => {
       (hasMlUserPermissions as jest.Mock).mockReturnValue(true);
-      (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: true });
+      (hasMlLicense as jest.Mock).mockReturnValue(true);
     });
 
     it('returns jobs and permissions', async () => {
@@ -85,7 +85,7 @@ describe('useInstalledSecurityJobs', () => {
   describe('when the user does not have valid permissions', () => {
     beforeEach(() => {
       (hasMlUserPermissions as jest.Mock).mockReturnValue(false);
-      (useMlCapabilities as jest.Mock).mockReturnValue({ isPlatinumOrTrialLicense: false });
+      (hasMlLicense as jest.Mock).mockReturnValue(false);
     });
 
     it('returns empty jobs and false predicates', () => {
