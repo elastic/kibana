@@ -108,64 +108,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Vega extension functions', () => {
-      beforeEach(async () => {
-        await PageObjects.vegaChart.cleanSpec();
-        await filterBar.removeAllFilters();
-      });
-
-      const fillSpecAndGo = async (newSpec: string) => {
-        await PageObjects.vegaChart.cleanSpec();
-        await PageObjects.vegaChart.typeInSpec(newSpec);
-        await PageObjects.visEditor.clickGo();
-
-        const viewContainer = await PageObjects.vegaChart.getViewContainer();
-        const textElement = await viewContainer.findByTagName('text');
-
-        await textElement.click();
-      };
-
-      it('should update global time range by calling "kibanaSetTimeFilter" expression', async () => {
-        await fillSpecAndGo(getTestSpec('kibanaSetTimeFilter("2019", "2020")'));
-
-        const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
-
-        expect(currentTimeRange.start).to.be('Jan 1, 2019 @ 00:00:00.000');
-        expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');
-      });
-
-      it('should set filter by calling "kibanaAddFilter" expression', async () => {
-        await fillSpecAndGo(
-          getTestSpec('kibanaAddFilter({ query_string: { query: "response:200" }})')
-        );
-
-        expect(await filterBar.getFilterCount()).to.be(1);
-      });
-
-      it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
-        await filterBar.addFilter('response', 'is', '200');
-
-        expect(await filterBar.getFilterCount()).to.be(1);
-
-        await fillSpecAndGo(
-          getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
-        );
-
-        expect(await filterBar.getFilterCount()).to.be(0);
-      });
-
-      it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
-        await filterBar.addFilter('response', 'is', '200');
-        await filterBar.addFilter('response', 'is', '500');
-
-        expect(await filterBar.getFilterCount()).to.be(2);
-
-        await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
-
-        expect(await filterBar.getFilterCount()).to.be(0);
-      });
-    });
-
     describe('Inspector Panel', () => {
       it('should have inspector enabled', async () => {
         await inspector.expectIsEnabled();
@@ -279,6 +221,64 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             )
           ).to.be(true);
         });
+      });
+    });
+
+    describe('Vega extension functions', () => {
+      beforeEach(async () => {
+        await PageObjects.vegaChart.cleanSpec();
+        await filterBar.removeAllFilters();
+      });
+
+      const fillSpecAndGo = async (newSpec: string) => {
+        await PageObjects.vegaChart.cleanSpec();
+        await PageObjects.vegaChart.typeInSpec(newSpec);
+        await PageObjects.visEditor.clickGo();
+
+        const viewContainer = await PageObjects.vegaChart.getViewContainer();
+        const textElement = await viewContainer.findByTagName('text');
+
+        await textElement.click();
+      };
+
+      it('should update global time range by calling "kibanaSetTimeFilter" expression', async () => {
+        await fillSpecAndGo(getTestSpec('kibanaSetTimeFilter("2019", "2020")'));
+
+        const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
+
+        expect(currentTimeRange.start).to.be('Jan 1, 2019 @ 00:00:00.000');
+        expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');
+      });
+
+      it('should set filter by calling "kibanaAddFilter" expression', async () => {
+        await fillSpecAndGo(
+          getTestSpec('kibanaAddFilter({ query_string: { query: "response:200" }})')
+        );
+
+        expect(await filterBar.getFilterCount()).to.be(1);
+      });
+
+      it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+        await filterBar.addFilter('response', 'is', '200');
+
+        expect(await filterBar.getFilterCount()).to.be(1);
+
+        await fillSpecAndGo(
+          getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
+        );
+
+        expect(await filterBar.getFilterCount()).to.be(0);
+      });
+
+      it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
+        await filterBar.addFilter('response', 'is', '200');
+        await filterBar.addFilter('response', 'is', '500');
+
+        expect(await filterBar.getFilterCount()).to.be(2);
+
+        await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
+
+        expect(await filterBar.getFilterCount()).to.be(0);
       });
     });
   });
