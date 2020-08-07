@@ -34,7 +34,7 @@ signals: [ {
   }]
 }]}`;
 
-// eslint-disable-next-line import/no-default-export
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'timePicker',
