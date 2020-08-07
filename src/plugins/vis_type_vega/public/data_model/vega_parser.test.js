@@ -59,19 +59,22 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, true, {
       config: {
         axis: {
-          domainColor: '#343741',
-          gridColor: '#69707d',
-          tickColor: '#343741',
+          domainColor: '#eef0f3',
+          gridColor: '#eef0f3',
+          tickColor: '#eef0f3',
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
         style: {
+          'group-title': {
+            fill: '#69707d',
+          },
           'guide-label': {
-            fill: '#343741',
+            fill: '#69707d',
           },
           'guide-title': {
-            fill: '#343741',
+            fill: '#69707d',
           },
         },
         title: {
@@ -86,9 +89,9 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, false, {
       config: {
         axis: {
-          domainColor: '#343741',
-          gridColor: '#69707d',
-          tickColor: '#343741',
+          domainColor: '#eef0f3',
+          gridColor: '#eef0f3',
+          tickColor: '#eef0f3',
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
@@ -102,11 +105,14 @@ describe(`VegaParser._setDefaultColors`, () => {
         symbol: { fill: '#54B399' },
         trail: { fill: '#54B399' },
         style: {
+          'group-title': {
+            fill: '#69707d',
+          },
           'guide-label': {
-            fill: '#343741',
+            fill: '#69707d',
           },
           'guide-title': {
-            fill: '#343741',
+            fill: '#69707d',
           },
         },
         title: {
