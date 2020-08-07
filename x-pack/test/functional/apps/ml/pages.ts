@@ -53,5 +53,17 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
     });
+
+    it('should load the stack management with the ML menu item being present', async () => {
+      await ml.navigation.navigateToStackManagement();
+    });
+
+    it('should load the jobs list page in stack management', async () => {
+      await ml.navigation.navigateToStackManagementJobsListPage();
+    });
+
+    it('should load the analytics jobs list page in stack management', async () => {
+      await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+    });
   });
 }
