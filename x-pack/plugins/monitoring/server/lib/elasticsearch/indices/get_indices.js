@@ -16,12 +16,20 @@ export function handleResponse(resp, min, max, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
   return hits.map((hit) => {
-    const stats = get(hit, '_source.index_stats');
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.index_stats');
+    const stats = get(hit, '_source.index_stats', get(hit, '_source.elasticsearch.index'));
+    const earliestStats = get(
+      hit,
+      'inner_hits.earliest.hits.hits[0]._source.index_stats',
+      get(hit, 'inner_hits.earliest.hits.hits[0]._source.elasticsearch.index')
+    );
 
     const rateOptions = {
-      hitTimestamp: get(hit, '_source.timestamp'),
-      earliestHitTimestamp: get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp'),
+      hitTimestamp: get(hit, '_source.timestamp', get(hit, '_source.@timestamp')),
+      earliestHitTimestamp: get(
+        hit,
+        'inner_hits.earliest.hits.hits[0]._source.timestamp',
+        get(hit, 'inner_hits.earliest.hits.hits[0]._source.@timestamp')
+      ),
       timeWindowMin: min,
       timeWindowMax: max,
     };
@@ -40,7 +48,7 @@ export function handleResponse(resp, min, max, shardStats) {
       ...rateOptions,
     });
 
-    const shardStatsForIndex = get(shardStats, ['indices', stats.index]);
+    const shardStatsForIndex = get(shardStats, ['indices', stats.index || stats.name]);
 
     let status;
     let statusSort;
@@ -65,10 +73,10 @@ export function handleResponse(resp, min, max, shardStats) {
     }
 
     return {
-      name: stats.index,
+      name: stats.index || stats.name,
       status,
       doc_count: get(stats, 'primaries.docs.count'),
-      data_size: get(stats, 'total.store.size_in_bytes'),
+      data_size: get(stats, 'total.store.size_in_bytes', get(stats, 'total.store.size.bytes')),
       index_rate: indexRate,
       search_rate: searchRate,
       unassigned_shards: unassignedShards,
@@ -99,18 +107,27 @@ export function buildGetIndicesQuery(
     filterPath: [
       // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
+      'hits.hits._source.elasticsearch.index.name',
       'hits.hits._source.index_stats.primaries.docs.count',
+      'hits.hits._source.elasticsearch.index.primaries.docs.count',
       'hits.hits._source.index_stats.total.store.size_in_bytes',
+      'hits.hits._source.elasticsearch.index.total.store.size.bytes',
 
       // latest hits for calculating metrics
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.index_stats.primaries.indexing.index_total',
+      'hits.hits._source.elasticsearch.index.primaries.indexing.index_total',
       'hits.hits._source.index_stats.total.search.query_total',
+      'hits.hits._source.elasticsearch.index.total.search.query_total',
 
       // earliest hits for calculating metrics
       'hits.hits.inner_hits.earliest.hits.hits._source.timestamp',
+      'hits.hits.inner_hits.earliest.hits.hits._source.@timestamp',
       'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.primaries.indexing.index_total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.primaries.indexing.index_total',
       'hits.hits.inner_hits.earliest.hits.hits._source.index_stats.total.search.query_total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.elasticsearch.index.total.search.query_total',
     ],
     body: {
       query: createQuery({
@@ -147,6 +164,8 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     showSystemIndices,
     size: config.get('monitoring.ui.max_bucket_size'),
   });
+
+  // console.log(JSON.stringify(params, null, 2));
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) =>
