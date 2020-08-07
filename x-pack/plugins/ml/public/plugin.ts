@@ -20,12 +20,10 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import {
-  IndexPatternManagementSetup,
-  MlCardState,
-} from 'src/plugins/index_pattern_management/public';
+import { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerManagementSection } from './application/management';

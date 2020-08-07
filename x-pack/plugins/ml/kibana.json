@@ -32,7 +32,6 @@
     "kibanaUtils",
     "kibanaReact",
     "dashboard",
-    "savedObjects",
-    "indexPatternManagement"
+    "savedObjects"
   ]
 }
