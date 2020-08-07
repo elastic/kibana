@@ -59,7 +59,7 @@ export const AppSearchNav: React.FC = () => {
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to="/engines">
+      <SideNavLink to="/engines" isRoot>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
           defaultMessage: 'Engines',
         })}

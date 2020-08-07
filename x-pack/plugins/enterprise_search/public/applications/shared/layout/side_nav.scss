@@ -48,12 +48,23 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
     font-weight: $euiFontWeightMedium;
     line-height: $euiFontSizeM;
 
+    $activeBgColor: rgba($euiColorFullShade, 0.05);
+
+    &--isActive {
+      background-color: $activeBgColor;
+    }
+
     &.euiLink {
       color: $euiTextColor;
       font-weight: $euiFontWeightMedium;
 
       &:hover {
         color: $euiTextColor;
+      }
+
+      &:focus {
+        outline: solid 0 $activeBgColor;
+        background-color: $activeBgColor;
       }
     }
   }

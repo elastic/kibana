@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
 import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic/eui'; // TODO: Remove EuiLinkExternal after full Kibana transition
@@ -55,6 +56,7 @@ interface ISideNavLinkProps {
   to: string;
   isExternal?: boolean;
   className?: string;
+  isRoot?: boolean;
 }
 
 export const SideNavLink: React.FC<ISideNavLinkProps> = ({
@@ -62,9 +64,16 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   to,
   children,
   className,
+  isRoot,
   ...rest
 }) => {
-  const classes = classNames('enterpriseSearchNavLinks__item', className);
+  const { pathname } = useLocation();
+  const currentPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const isActive = currentPath === to || (isRoot && currentPath === '');
+
+  const classes = classNames('enterpriseSearchNavLinks__item', className, {
+    'enterpriseSearchNavLinks__item--isActive': !isExternal && isActive, // eslint-disable-line @typescript-eslint/naming-convention
+  });
 
   return (
     <li>
