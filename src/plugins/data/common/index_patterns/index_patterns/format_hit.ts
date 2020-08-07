@@ -33,9 +33,9 @@ export function formatHitProvider(indexPattern: IndexPattern, defaultFormat: any
     fieldName: string,
     type: FieldFormatsContentType = 'html'
   ) {
+    // todo - might make sense to getFormatterByFieldName
     const field = indexPattern.fields.getByName(fieldName);
-    const format = field ? field.format : defaultFormat;
-
+    const format = field ? indexPattern.getFormatterForField(field) : defaultFormat;
     return format.convert(val, type, { field, hit });
   }
 

@@ -28,12 +28,7 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new IndexPatternField(
-      fieldValues.indexPattern as IndexPattern,
-      { ...fieldValues, ...values },
-      'displayName',
-      () => {}
-    );
+    return new IndexPatternField({ ...fieldValues, ...values }, 'displayName', () => {});
   }
 
   const fieldValues = {
@@ -144,26 +139,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new IndexPatternField(
-      { fieldFormatMap: { name: {} } } as IndexPattern,
-      fieldValues,
-      'displayName',
-      () => {}
-    );
+    const field = new IndexPatternField(fieldValues, 'displayName', () => {});
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new IndexPatternField(
-      {
-        fieldFormatMap: {
-          name: { toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }) },
-        },
-      } as IndexPattern,
-      fieldValues,
-      'displayName',
-      () => {}
-    );
+    const field = new IndexPatternField(fieldValues, 'displayName', () => {});
     expect(field.toSpec()).toMatchSnapshot();
   });
 });

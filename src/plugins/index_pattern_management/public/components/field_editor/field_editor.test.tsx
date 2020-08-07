@@ -82,17 +82,10 @@ fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);
 };
 
-class Format {
-  static id = 'test_format';
-  static title = 'Test format';
-  params() {}
-}
-
 const field = {
   scripted: true,
   type: 'number',
   lang: 'painless',
-  format: new Format(),
 };
 
 describe('FieldEditor', () => {

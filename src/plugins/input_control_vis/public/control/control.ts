@@ -82,11 +82,10 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
 
   format = (value: any) => {
     const field = this.filterManager.getField();
-    if (field?.format?.convert) {
-      return field.format.convert(value);
+    if (!field) {
+      return value;
     }
-
-    return value;
+    return this.filterManager.getIndexPattern().getFormatterForField(field).convert(value);
   };
 
   setAncestors(ancestors: Array<Control<PhraseFilterManager | RangeFilterManager>>) {

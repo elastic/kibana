@@ -74,10 +74,9 @@ class FieldFormatService {
     // e.g. distinct_count(clientip) should be formatted as a count, not as an IP address.
     let fieldFormat;
     if (esAggName !== 'cardinality') {
-      const fieldList = fullIndexPattern.fields;
-      const field = fieldList.getByName(fieldName);
+      const field = fullIndexPattern.fields.getByName(fieldName);
       if (field !== undefined) {
-        fieldFormat = field.format;
+        fieldFormat = fullIndexPattern.getFormatterByField(field);
       }
     }
 
@@ -104,7 +103,9 @@ class FieldFormatService {
               if (dtr.field_name !== undefined && esAgg !== 'cardinality') {
                 const field = fieldList.getByName(dtr.field_name);
                 if (field !== undefined) {
-                  formatsByDetector[dtr.detector_index!] = field.format;
+                  formatsByDetector[dtr.detector_index!] = indexPatternData.getFormatterForField(
+                    field
+                  );
                 }
               }
             });

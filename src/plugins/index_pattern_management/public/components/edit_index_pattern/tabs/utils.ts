@@ -116,8 +116,8 @@ export function getTabs(
   return tabs;
 }
 
-export function getPath(field: IndexPatternField) {
-  return `/patterns/${field.indexPattern?.id}/field/${field.name}`;
+export function getPath(indexPattern: IndexPattern, field: IndexPatternField) {
+  return `/patterns/${indexPattern.id}/field/${field.name}`;
 }
 
 const allTypesDropDown = i18n.translate(

@@ -175,7 +175,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
                 indexedFieldTypeFilter={indexedFieldTypeFilter}
                 helpers={{
                   redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field));
+                    history.push(getPath(indexPattern, field));
                   },
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
@@ -194,7 +194,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
                 scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
                   redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field));
+                    history.push(getPath(indexPattern, field));
                   },
                 }}
                 onRemoveField={refreshFilters}

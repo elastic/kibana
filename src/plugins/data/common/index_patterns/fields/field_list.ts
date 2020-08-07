@@ -21,7 +21,6 @@ import { findIndex } from 'lodash';
 import { IFieldType, shortenDottedString } from '../../../common';
 import { IndexPatternField } from './index_pattern_field';
 import { OnNotification, FieldSpec } from '../types';
-import { IndexPattern } from '../index_patterns';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
@@ -36,7 +35,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
 }
 
 export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
   specs?: FieldSpec[],
   shortDotsEnable?: boolean,
   onNotification?: OnNotification
@@ -45,7 +43,6 @@ export type CreateIndexPatternFieldList = (
 export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
   private byName: FieldMap = new Map();
   private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
-  private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
   private onNotification: OnNotification;
   private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
@@ -58,14 +55,8 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
   private calcDisplayName = (name: string) =>
     this.shortDotsEnable ? shortenDottedString(name) : name;
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    onNotification = () => {}
-  ) {
+  constructor(specs: FieldSpec[] = [], shortDotsEnable = false, onNotification = () => {}) {
     super();
-    this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
     this.onNotification = onNotification;
 
@@ -78,7 +69,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   ];
   public readonly add = (field: FieldSpec) => {
     const newField = new IndexPatternField(
-      this.indexPattern,
       field,
       this.calcDisplayName(field.name),
       this.onNotification
@@ -98,7 +88,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
 
   public readonly update = (field: FieldSpec) => {
     const newField = new IndexPatternField(
-      this.indexPattern,
       field,
       this.calcDisplayName(field.name),
       this.onNotification
