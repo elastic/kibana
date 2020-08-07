@@ -20,6 +20,20 @@ import { unzip } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const getTestSpec = (expression: string) => `{
+config: { "kibana": {"renderer": "svg"} }
+$schema: https://vega.github.io/schema/vega/v5.json
+marks: [{
+  type: text
+  encode: { update: { text: { value: "Test" } } }
+}]
+signals: [ {
+  on: [{
+  events: click
+  update: ${expression}
+  }]
+}]}`;
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -91,6 +105,64 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(filteredDataLabels[0]).to.eql('0');
           expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
         });
+      });
+    });
+
+    describe('Vega extension functions', () => {
+      beforeEach(async () => {
+        await PageObjects.vegaChart.cleanSpec();
+        await filterBar.removeAllFilters();
+      });
+
+      const fillSpecAndGo = async (newSpec: string) => {
+        await PageObjects.vegaChart.cleanSpec();
+        await PageObjects.vegaChart.typeInSpec(newSpec);
+        await PageObjects.visEditor.clickGo();
+
+        const viewContainer = await PageObjects.vegaChart.getViewContainer();
+        const textElement = await viewContainer.findByTagName('text');
+
+        await textElement.click();
+      };
+
+      it('should update global time range by calling "kibanaSetTimeFilter" expression', async () => {
+        await fillSpecAndGo(getTestSpec('kibanaSetTimeFilter("2019", "2020")'));
+
+        const currentTimeRange = await PageObjects.timePicker.getTimeConfig();
+
+        expect(currentTimeRange.start).to.be('Jan 1, 2019 @ 00:00:00.000');
+        expect(currentTimeRange.end).to.be('Jan 1, 2020 @ 00:00:00.000');
+      });
+
+      it('should set filter by calling "kibanaAddFilter" expression', async () => {
+        await fillSpecAndGo(
+          getTestSpec('kibanaAddFilter({ query_string: { query: "response:200" }})')
+        );
+
+        expect(await filterBar.getFilterCount()).to.be(1);
+      });
+
+      it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
+        await filterBar.addFilter('response', 'is', '200');
+
+        expect(await filterBar.getFilterCount()).to.be(1);
+
+        await fillSpecAndGo(
+          getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
+        );
+
+        expect(await filterBar.getFilterCount()).to.be(0);
+      });
+
+      it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
+        await filterBar.addFilter('response', 'is', '200');
+        await filterBar.addFilter('response', 'is', '500');
+
+        expect(await filterBar.getFilterCount()).to.be(2);
+
+        await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
+
+        expect(await filterBar.getFilterCount()).to.be(0);
       });
     });
 
@@ -187,15 +259,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should be able to copy vega spec to clipboard', async () => {
-          // The "clipboard-read" permission of the Permissions API must be granted before you can execute that test
-          if (!(await browser.checkBrowserPermission('clipboard-read'))) {
-            return;
-          }
-
           await vegaDebugInspectorView.openVegaDebugInspectorView();
           await vegaDebugInspectorView.navigateToSpecViewerTab();
 
           const copyCopyToClipboardButton = await vegaDebugInspectorView.getCopyClipboardButton();
+
+          expect(await copyCopyToClipboardButton.isEnabled()).to.be(true);
+
+          // The "clipboard-read" permission of the Permissions API must be granted
+          if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+            return;
+          }
 
           await copyCopyToClipboardButton.click();
 

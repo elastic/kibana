@@ -30,9 +30,21 @@ export function VegaChartPageProvider({
   const { common } = getPageObjects(['common']);
 
   class VegaChartPage {
+    public getEditor() {
+      return testSubjects.find('vega-editor');
+    }
+
+    public getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    }
+
+    public getControlContainer() {
+      return find.byCssSelector('div.vgaVis__controls');
+    }
+
     public async getSpec() {
       // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-      const editor = await testSubjects.find('vega-editor');
+      const editor = await this.getEditor();
       const lines = await editor.findAllByClassName('ace_line_group');
       const linesText = await Promise.all(
         lines.map(async (line) => {
@@ -43,7 +55,7 @@ export function VegaChartPageProvider({
     }
 
     public async typeInSpec(text: string) {
-      const editor = await testSubjects.find('vega-editor');
+      const editor = await this.getEditor();
       const textarea = await editor.findByClassName('ace_content');
       await textarea.click();
       let repeats = 20;
@@ -55,12 +67,13 @@ export function VegaChartPageProvider({
       await browser.pressKeys(text);
     }
 
-    public async getViewContainer() {
-      return await find.byCssSelector('div.vgaVis__view');
-    }
+    public async cleanSpec() {
+      const editor = await this.getEditor();
+      const aceGutter = await editor.findByClassName('ace_gutter');
 
-    public async getControlContainer() {
-      return await find.byCssSelector('div.vgaVis__controls');
+      // select all spec
+      await aceGutter.doubleClick();
+      await browser.pressKeys(Key.BACK_SPACE);
     }
 
     public async getYAxisLabels() {
