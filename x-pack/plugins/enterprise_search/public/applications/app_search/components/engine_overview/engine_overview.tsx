@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Layout } from '../../../shared/layout';
+import { Layout, SideNav } from '../../../shared/layout';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
@@ -91,7 +91,7 @@ export const EngineOverview: React.FC = () => {
   if (!engines.length) return <EmptyState />;
 
   return (
-    <Layout>
+    <Layout navigation={<SideNav />}>
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="engines_overview" />
 

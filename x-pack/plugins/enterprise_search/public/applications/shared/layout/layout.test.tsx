@@ -11,14 +11,21 @@ import { Layout } from './';
 
 describe('Layout', () => {
   it('renders', () => {
-    const wrapper = shallow(<Layout />);
+    const wrapper = shallow(<Layout navigation={null} />);
 
     expect(wrapper.find('.enterpriseSearchLayout')).toHaveLength(1);
   });
 
+  it('renders navigation', () => {
+    const wrapper = shallow(<Layout navigation={<nav className="nav-test">Hello World</nav>} />);
+
+    expect(wrapper.find('.enterpriseSearchLayout__sideBar')).toHaveLength(1);
+    expect(wrapper.find('.nav-test')).toHaveLength(1);
+  });
+
   it('renders children', () => {
     const wrapper = shallow(
-      <Layout>
+      <Layout navigation={null}>
         <div className="testing">Test</div>
       </Layout>
     );
