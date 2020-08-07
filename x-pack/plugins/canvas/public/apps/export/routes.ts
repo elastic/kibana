@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Dispatch } from 'redux';
+// @ts-expect-error Untyped local
 import * as workpadService from '../../lib/workpad_service';
 import { setWorkpad } from '../../state/actions/workpad';
+// @ts-expect-error Untyped local
 import { fetchAllRenderables } from '../../state/actions/elements';
+// @ts-expect-error Untyped local
 import { setPage } from '../../state/actions/pages';
+// @ts-expect-error Untyped local
 import { setAssets } from '../../state/actions/assets';
 import { ExportApp } from './export';
 
@@ -18,7 +23,13 @@ export const routes = [
       {
         name: 'exportWorkpad',
         path: '/pdf/:id/page/:page',
-        action: (dispatch) => async ({ params, router }) => {
+        action: (dispatch: Dispatch) => async ({
+          params,
+          // @ts-expect-error Fix when Router is typed.
+          router,
+        }: {
+          params: { id: string; page: string };
+        }) => {
           // load workpad if given a new id via url param
           const fetchedWorkpad = await workpadService.get(params.id);
           const pageNumber = parseInt(params.page, 10);
