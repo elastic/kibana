@@ -41,5 +41,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
             'Action type .slack is disabled because your basic license does not support it. Please upgrade your license.',
         });
     });
+
+    after(() => {
+      slackServer.close();
+    });
   });
 }

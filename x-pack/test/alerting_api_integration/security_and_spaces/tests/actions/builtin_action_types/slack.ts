@@ -217,5 +217,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(result.message).to.match(/error posting a slack message, retry later/);
       expect(result.retry).to.equal(true);
     });
+
+    after(() => {
+      slackServer.close();
+    });
   });
 }
