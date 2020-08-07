@@ -10,10 +10,11 @@ import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
+import { SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
-import { AppSearch } from './';
+import { AppSearch, AppSearchNav } from './';
 
 describe('App Search Routes', () => {
   describe('/', () => {
@@ -42,5 +43,17 @@ describe('App Search Routes', () => {
 
       expect(wrapper.find(SetupGuide)).toHaveLength(1);
     });
+  });
+});
+
+describe('AppSearchNav', () => {
+  it('renders', () => {
+    const wrapper = shallow(<AppSearchNav />);
+
+    expect(wrapper.find(SideNav)).toHaveLength(1);
+    expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/engines');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
+      'http://localhost:3002/as#/role-mappings'
+    );
   });
 });

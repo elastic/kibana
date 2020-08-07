@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import classNames from 'classnames';
 
 import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic/eui'; // TODO: Remove EuiLinkExternal after full Kibana transition
 import { EuiLink } from '../react_router_helpers';
 
-import { KibanaContext, IKibanaContext } from '../../';
-
-import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
+import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
 
 import './side_nav.scss';
 
@@ -21,12 +18,18 @@ import './side_nav.scss';
  * Side navigation - product & icon + links wrapper
  */
 
-export const SideNav: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+interface ISideNavProps {
+  // Expects product plugin constants (@see common/constants.ts)
+  product: {
+    NAME: string;
+    ID: string;
+  };
+}
 
+export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
   return (
     <nav>
-      <div className="enterpriseSearchProduct enterpriseSearchProduct--appSearch">
+      <div className={`enterpriseSearchProduct enterpriseSearchProduct--${product.ID}`}>
         <div className="enterpriseSearchProduct__icon">
           <EuiIcon type="logoEnterpriseSearch" />
         </div>
@@ -35,52 +38,45 @@ export const SideNav: React.FC = () => {
             {ENTERPRISE_SEARCH_PLUGIN.NAME}
           </EuiText>
           <EuiTitle size="xs">
-            <h3>{APP_SEARCH_PLUGIN.NAME}</h3>
+            <h3>{product.NAME}</h3>
           </EuiTitle>
         </div>
       </div>
-      <ul className="enterpriseSearchNavLinks">
-        <li>
-          <EuiLink className="enterpriseSearchNavLinks__item" to="/engines">
-            {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
-              defaultMessage: 'Engines',
-            })}
-          </EuiLink>
-        </li>
-        <li>
-          <EuiLinkExternal
-            className="enterpriseSearchNavLinks__item"
-            href={`${enterpriseSearchUrl}/as#/settings/account`}
-            target="_blank"
-          >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-              defaultMessage: 'Account Settings',
-            })}
-          </EuiLinkExternal>
-        </li>
-        <li>
-          <EuiLinkExternal
-            className="enterpriseSearchNavLinks__item"
-            href={`${enterpriseSearchUrl}/as#/settings/credentials`}
-            target="_blank"
-          >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
-              defaultMessage: 'Credentials',
-            })}
-          </EuiLinkExternal>
-        </li>
-        <li>
-          <EuiLinkExternal
-            className="enterpriseSearchNavLinks__item"
-            href={`${enterpriseSearchUrl}/as#/settings/role-mappings`}
-            target="_blank"
-          >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
-              defaultMessage: 'Role Mappings',
-            })}
-          </EuiLinkExternal>
-        </li>
-      </ul>
+      <ul className="enterpriseSearchNavLinks">{children}</ul>
     </nav>
+  );
+};
+
+/**
+ * Side navigation link item
+ */
+
+interface ISideNavLinkProps {
+  to: string;
+  isExternal?: boolean;
+  className?: string;
+}
+
+export const SideNavLink: React.FC<ISideNavLinkProps> = ({
+  isExternal,
+  to,
+  children,
+  className,
+  ...rest
+}) => {
+  const classes = classNames('enterpriseSearchNavLinks__item', className);
+
+  return (
+    <li>
+      {isExternal ? (
+        <EuiLinkExternal {...rest} className={classes} href={to} target="_blank">
+          {children}
+        </EuiLinkExternal>
+      ) : (
+        <EuiLink {...rest} className={classes} to={to}>
+          {children}
+        </EuiLink>
+      )}
+    </li>
   );
 };

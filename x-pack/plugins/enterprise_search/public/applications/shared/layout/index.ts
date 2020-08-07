@@ -5,4 +5,4 @@
  */
 
 export { Layout } from './layout';
-export { SideNav } from './side_nav';
+export { SideNav, SideNavLink } from './side_nav';
