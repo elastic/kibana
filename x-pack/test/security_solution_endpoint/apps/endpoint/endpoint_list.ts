@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const esClient = getService('es');
+  const transformId = 'endpoint_metadata_transform';
 
   describe('host list', function () {
     this.tags('ciGroup7');
