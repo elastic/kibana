@@ -41,6 +41,7 @@ import { PatternCache } from './_pattern_cache';
 import { expandShorthand, FieldMappingSpec, MappingObject } from '../../field_mapping';
 import { IndexPatternSpec, TypeMeta, FieldSpec, SourceFilter } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { FieldTypeUnknownError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -138,7 +139,7 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = uiSettingsValues.shortDotsEnable;
     this.metaFields = uiSettingsValues.metaFields;
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable, this.onUnknownType);
+    this.fields = new FieldList(this, [], this.shortDotsEnable);
 
     this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, uiSettingsValues.metaFields);
@@ -193,7 +194,25 @@ export class IndexPattern implements IIndexPattern {
       await this.refreshFields();
     } else {
       if (specs) {
-        this.fields.replaceAll(specs);
+        try {
+          this.fields.replaceAll(specs);
+        } catch (err) {
+          if (err instanceof FieldTypeUnknownError) {
+            const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+              values: { type: err.fieldSpec.type, name: err.fieldSpec.name },
+              defaultMessage: 'Field {name}: Unknown field type {type}',
+            });
+
+            const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
+              values: { name: err.fieldSpec.name, title: this.title },
+              defaultMessage:
+                'Field {name} in indexPattern {title} is using an unknown field type.',
+            });
+            this.onNotification({ title, text, color: 'danger', iconType: 'alert' });
+          } else {
+            throw err;
+          }
+        }
       }
     }
   }

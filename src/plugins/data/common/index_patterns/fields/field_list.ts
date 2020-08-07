@@ -20,7 +20,7 @@
 import { findIndex } from 'lodash';
 import { IFieldType, shortenDottedString } from '../../../common';
 import { IndexPatternField } from './index_pattern_field';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec } from '../types';
 import { IndexPattern } from '../index_patterns';
 
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
@@ -38,8 +38,7 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
 export type CreateIndexPatternFieldList = (
   indexPattern: IndexPattern,
   specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
+  shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
 
 export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
@@ -47,7 +46,6 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
   private indexPattern: IndexPattern;
   private shortDotsEnable: boolean;
-  private onNotification: OnNotification;
   private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
   private setByGroup = (field: IndexPatternField) => {
     if (typeof this.groups.get(field.type) === 'undefined') {
@@ -58,16 +56,10 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
   private calcDisplayName = (name: string) =>
     this.shortDotsEnable ? shortenDottedString(name) : name;
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    onNotification = () => {}
-  ) {
+  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
     super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
-    this.onNotification = onNotification;
 
     specs.map((field) => this.add(field));
   }
@@ -80,8 +72,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
-      this.calcDisplayName(field.name),
-      this.onNotification
+      this.calcDisplayName(field.name)
     );
     this.push(newField);
     this.setByName(newField);
@@ -100,8 +91,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     const newField = new IndexPatternField(
       this.indexPattern,
       field,
-      this.calcDisplayName(field.name),
-      this.onNotification
+      this.calcDisplayName(field.name)
     );
     const index = this.findIndex((f) => f.name === newField.name);
     this.splice(index, 1, newField);

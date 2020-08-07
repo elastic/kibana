@@ -89,10 +89,9 @@ export class IndexPatternsService {
   public createField(
     indexPattern: IndexPattern,
     spec: IndexPatternField['spec'],
-    displayName: string,
-    onNotification: OnNotification
+    displayName: string
   ) {
-    return new IndexPatternField(indexPattern, spec, displayName, onNotification);
+    return new IndexPatternField(indexPattern, spec, displayName);
   }
 
   private async refreshSavedObjectsCache() {

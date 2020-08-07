@@ -25,7 +25,8 @@ import {
   KBN_FIELD_TYPES,
   FieldFormat,
 } from '../../../common';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec } from '../types';
+import { FieldTypeUnknownError } from '../errors';
 
 import { IndexPattern } from '../index_patterns';
 
@@ -36,27 +37,18 @@ export class IndexPatternField implements IFieldType {
   readonly displayName: string;
   private readonly kbnFieldType: KbnFieldType;
 
-  constructor(
-    indexPattern: IndexPattern,
-    spec: FieldSpec,
-    displayName: string,
-    onNotification: OnNotification
-  ) {
+  constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string) {
     this.indexPattern = indexPattern;
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
     this.displayName = displayName;
 
     this.kbnFieldType = getKbnFieldType(spec.type);
     if (spec.type && this.kbnFieldType?.name === KBN_FIELD_TYPES.UNKNOWN) {
-      const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
-        values: { type: spec.type },
-        defaultMessage: 'Unknown field type {type}',
+      const msg = i18n.translate('data.indexPatterns.unknownFieldHeader', {
+        values: { type: spec.type, name: spec.name },
+        defaultMessage: 'Field {name}: Unknown field type {type}',
       });
-      const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {
-        values: { name: spec.name, title: indexPattern.title },
-        defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
-      });
-      onNotification({ title, text, color: 'danger', iconType: 'alert' });
+      throw new FieldTypeUnknownError(msg, spec);
     }
   }
 
