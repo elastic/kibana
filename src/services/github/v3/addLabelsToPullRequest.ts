@@ -1,7 +1,7 @@
+import { Octokit } from '@octokit/rest';
 import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { logger } from '../../logger';
-import { apiRequestV3 } from './apiRequestV3';
 
 export async function addLabelsToPullRequest(
   {
@@ -9,7 +9,6 @@ export async function addLabelsToPullRequest(
     repoName,
     repoOwner,
     accessToken,
-    username,
     dryRun,
   }: BackportOptions,
   pullNumber: number,
@@ -25,15 +24,19 @@ export async function addLabelsToPullRequest(
       return;
     }
 
-    await apiRequestV3({
-      method: 'post',
-      url: `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}/issues/${pullNumber}/labels`,
-      data: labels,
-      auth: {
-        username: username,
-        password: accessToken,
-      },
+    const octokit = new Octokit({
+      auth: accessToken,
+      baseUrl: githubApiBaseUrlV3,
+      log: logger,
     });
+
+    await octokit.issues.addLabels({
+      owner: repoOwner,
+      repo: repoName,
+      issue_number: pullNumber,
+      labels,
+    });
+
     spinner.succeed();
   } catch (e) {
     spinner.fail();

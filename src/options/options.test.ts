@@ -1,22 +1,21 @@
-import axios from 'axios';
 import * as logger from '../services/logger';
+import { mockGqlRequest } from '../test/nockHelpers';
 import { getOptions } from './options';
 
-function setupSpy({
+function mockGetDefaultRepoBranch({
   defaultBranch,
   refName,
 }: {
   defaultBranch: string;
   refName?: 'backport';
 }) {
-  // startup check request
-  return jest.spyOn(axios, 'post').mockResolvedValueOnce({
-    data: {
+  return mockGqlRequest({
+    name: 'DefaultRepoBranch',
+    statusCode: 200,
+    body: {
       data: {
         repository: {
-          ref: {
-            name: refName,
-          },
+          ref: { name: refName },
           defaultBranchRef: { name: defaultBranch },
         },
       },
@@ -32,6 +31,10 @@ describe('getOptions', () => {
     '6.1',
     '--upstream',
     'elastic/kibana',
+
+    // use localhost to avoid CORS issues with nock
+    '--github-api-base-url-v4',
+    'http://localhost/graphql',
   ];
 
   afterEach(() => {
@@ -39,9 +42,11 @@ describe('getOptions', () => {
   });
 
   it('should use the default repository branch as sourceBranch', async () => {
-    const spy = setupSpy({ defaultBranch: 'my-default-branch' });
+    const mockCalls = mockGetDefaultRepoBranch({
+      defaultBranch: 'my-default-branch',
+    });
     const options = await getOptions(defaultArgs);
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(mockCalls.length).toBe(1);
     expect(options.sourceBranch).toBe('my-default-branch');
   });
 
@@ -55,15 +60,17 @@ describe('getOptions', () => {
       'elastic/kibana',
       '--source-branch',
       'my-source-branch',
+      '--github-api-base-url-v4',
+      'http://localhost/graphql',
     ];
 
-    setupSpy({ defaultBranch: 'my-default-branch' });
+    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
     const options = await getOptions(argv);
     expect(options.sourceBranch).toBe('my-source-branch');
   });
 
   it('should ensure that "backport" branch does not exist', async () => {
-    setupSpy({
+    mockGetDefaultRepoBranch({
       defaultBranch: 'my-default-branch',
       refName: 'backport',
     });
@@ -74,27 +81,27 @@ describe('getOptions', () => {
   });
 
   it('should omit upstream', async () => {
-    setupSpy({ defaultBranch: 'my-default-branch' });
+    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
     const options = await getOptions(defaultArgs);
     //@ts-expect-error
     expect(options.upstream).toBe(undefined);
   });
 
   it('should merge config options and module options', async () => {
-    setupSpy({ defaultBranch: 'my-default-branch' });
+    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
     const myFn = async () => true;
     const options = await getOptions(defaultArgs, { autoFixConflicts: myFn });
     expect(options.autoFixConflicts).toBe(myFn);
   });
 
   it('should call setLogLevel', async () => {
-    setupSpy({ defaultBranch: 'my-default-branch' });
+    mockGetDefaultRepoBranch({ defaultBranch: 'my-default-branch' });
     await getOptions(defaultArgs);
     expect(logger.setLogLevel).toHaveBeenCalledWith({ verbose: false });
   });
 
   it('should return options', async () => {
-    setupSpy({ defaultBranch: 'some-branch-name' });
+    mockGetDefaultRepoBranch({ defaultBranch: 'some-branch-name' });
     const options = await getOptions(defaultArgs);
 
     expect(options).toEqual({
@@ -107,7 +114,7 @@ describe('getOptions', () => {
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
+      githubApiBaseUrlV4: 'http://localhost/graphql',
       maxNumber: 10,
       multipleBranches: true,
       multipleCommits: false,

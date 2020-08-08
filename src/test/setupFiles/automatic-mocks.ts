@@ -92,10 +92,12 @@ jest.mock('../../services/logger', () => {
     consoleLog: jest.fn(),
     setLogLevel: jest.fn(),
     setRedactedAccessToken: jest.fn(),
+    redact: () => {},
     logger: {
       spy: spy,
       info: (msg: string, meta: unknown) => spy(`[INFO] ${msg}`, meta),
       verbose: (msg: string, meta: unknown) => spy(`[VERBOSE] ${msg}`, meta),
+      warn: (msg: string, meta: unknown) => spy(`[WARN] ${msg}`, meta),
       debug: (msg: string, meta: unknown) => spy(`[DEBUG] ${msg}`, meta),
     },
   };

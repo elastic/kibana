@@ -1,19 +1,22 @@
-import axios from 'axios';
 import inquirer from 'inquirer';
+import nock from 'nock';
 import { BackportOptions } from './options/options';
 import { runWithOptions } from './runWithOptions';
 import * as childProcess from './services/child-process-promisified';
 import * as fs from './services/fs-promisified';
-import * as createPullRequest from './services/github/v3/createPullRequest';
-import * as fetchCommitsByAuthor from './services/github/v4/fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './services/github/v4/mocks/commitsByAuthorMock';
+import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
+import { PromiseReturnType } from './types/PromiseReturnType';
 import { SpyHelper } from './types/SpyHelper';
 
 describe('runWithOptions', () => {
   let rpcExecMock: SpyHelper<typeof childProcess.exec>;
   let rpcExecOriginalMock: SpyHelper<typeof childProcess.execAsCallback>;
   let inquirerPromptMock: SpyHelper<typeof inquirer.prompt>;
-  let axiosRequestSpy: SpyHelper<typeof axios.request>;
+  let res: PromiseReturnType<typeof runWithOptions>;
+  let createPullRequestCalls: unknown[];
+  let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
+  let authorIdCalls: ReturnType<typeof mockGqlRequest>;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -33,7 +36,7 @@ describe('runWithOptions', () => {
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
+      githubApiBaseUrlV4: 'http://localhost/graphql', // Using localhost to avoid CORS issues when making requests (related to nock and jsdom)
       mainline: undefined,
       maxNumber: 10,
       multipleBranches: false,
@@ -70,9 +73,6 @@ describe('runWithOptions', () => {
 
     jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
 
-    jest.spyOn(fetchCommitsByAuthor, 'fetchCommitsByAuthor');
-    jest.spyOn(createPullRequest, 'createPullRequest');
-
     inquirerPromptMock = jest
       .spyOn(inquirer, 'prompt')
       .mockImplementationOnce((async (args: any) => {
@@ -82,88 +82,79 @@ describe('runWithOptions', () => {
         return { promptResult: args[0].choices[0].name };
       }) as any);
 
-    // Mock Github v4 API
-    jest
-      .spyOn(axios, 'post')
-
-      // mock author id
-      .mockResolvedValueOnce({
-        data: {
-          data: {
-            user: {
-              id: 'sqren_author_id',
-            },
-          },
-        },
-      })
-
-      // mock list of commits
-      .mockResolvedValueOnce({
-        data: {
-          data: commitsWithPullRequestsMock,
-        },
-      });
-
-    // Mock Github v3 API
-    axiosRequestSpy = jest
-      .spyOn(axios, 'request')
-
-      // mock create pull request
-      .mockResolvedValueOnce({
-        data: {
-          html_url: 'pull request url',
-          number: 1337,
-        },
-      });
-
-    await runWithOptions(options);
-  });
-
-  it('getCommit should be called with correct args', () => {
-    expect(fetchCommitsByAuthor.fetchCommitsByAuthor).toHaveBeenCalledWith(
-      expect.objectContaining({
-        repoName: 'kibana',
-        repoOwner: 'elastic',
-        username: 'sqren',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      })
-    );
-  });
-
-  it('createPullRequest should be called with correct args', () => {
-    expect(createPullRequest.createPullRequest).toHaveBeenCalledWith({
-      options: expect.objectContaining({
-        repoName: 'kibana',
-        repoOwner: 'elastic',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      }),
-      commits: [
-        {
-          existingTargetPullRequests: [],
-          formattedMessage: 'Add 👻 (2e63475c)',
-          pullNumber: undefined,
-          targetBranchesFromLabels: [],
-          sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
-          sourceBranch: 'mySourceBranch',
-        },
-      ],
-      targetBranch: '6.x',
-      backportBranch: 'backport/6.x/commit-2e63475c',
+    authorIdCalls = mockGqlRequest({
+      name: 'AuthorId',
+      statusCode: 200,
+      body: { data: { user: { id: 'sqren_author_id' } } },
     });
+
+    commitsByAuthorCalls = mockGqlRequest({
+      name: 'CommitsByAuthor',
+      statusCode: 200,
+      body: { data: commitsWithPullRequestsMock },
+    });
+
+    const scope = nock('https://api.github.com')
+      .post('/repos/elastic/kibana/pulls')
+      .reply(200, { html_url: 'pull request url', number: 1337 });
+    createPullRequestCalls = getNockCallsForScope(scope);
+
+    res = await runWithOptions(options);
+    scope.done();
   });
 
-  it('should make correct request when creating pull request', () => {
-    expect(axiosRequestSpy).toHaveBeenCalledWith({
-      auth: { password: 'myAccessToken', username: 'sqren' },
-      data: {
+  it('returns pull request', () => {
+    expect(res).toEqual([
+      {
+        pullRequestUrl: 'pull request url',
+        success: true,
+        targetBranch: '6.x',
+      },
+    ]);
+  });
+
+  it('creates pull request', () => {
+    expect(createPullRequestCalls).toEqual([
+      {
         base: '6.x',
-        body: `Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription`,
+        body:
+          'Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription',
         head: 'sqren:backport/6.x/commit-2e63475c',
         title: 'myPrTitle 6.x Add 👻 (2e63475c)',
       },
-      method: 'post',
-      url: 'https://api.github.com/repos/elastic/kibana/pulls',
-    });
+    ]);
+  });
+
+  it('it retrieves author id', () => {
+    expect(authorIdCalls).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "query": "
+          query AuthorId($login: String!) {
+            user(login: $login) {
+              id
+            }
+          }
+        ",
+          "variables": Object {
+            "login": "sqren",
+          },
+        },
+      ]
+    `);
+  });
+
+  it('it retrieves commits by author', () => {
+    expect(commitsByAuthorCalls.map((body) => body.variables)).toEqual([
+      {
+        authorId: 'sqren_author_id',
+        historyPath: null,
+        maxNumber: 10,
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        sourceBranch: 'mySourceBranch',
+      },
+    ]);
   });
 
   it('prompt calls should match snapshot', () => {

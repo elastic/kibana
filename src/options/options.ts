@@ -1,4 +1,4 @@
-import { getDefaultRepoBranchAndPerformStartupChecks } from '../services/github/v4/getDefaultRepoBranchAndPerformStartupChecks';
+import { fetchDefaultRepoBranchAndPerformStartupChecks } from '../services/github/v4/fetchDefaultRepoBranchAndPerformStartupChecks';
 import { PromiseReturnType } from '../types/PromiseReturnType';
 import { setLogLevel, setRedactedAccessToken } from './../services/logger';
 import { ConfigOptions } from './ConfigOptions';
@@ -23,9 +23,11 @@ export async function getOptions(
   // set log level when all config options have been taken into account
   setLogLevel({ verbose: optionsFromCli.verbose });
 
+  // TODO: move `getValidatedOptions` to `getOptionsFromCliArgs`
   const validatedOptions = getValidatedOptions(optionsFromCli);
 
-  const { defaultBranch } = await getDefaultRepoBranchAndPerformStartupChecks(
+  // TODO: make `username` optional by defaulting to `currentUsername`
+  const { defaultBranch } = await fetchDefaultRepoBranchAndPerformStartupChecks(
     validatedOptions
   );
 

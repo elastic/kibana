@@ -1,5 +1,4 @@
-import axios from 'axios';
-import dedent from 'dedent';
+import nock from 'nock';
 import ora from 'ora';
 import { BackportOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
@@ -7,41 +6,41 @@ import * as logger from '../services/logger';
 import * as prompts from '../services/prompts';
 import { ExecError } from '../test/ExecError';
 import { CommitSelected } from '../types/Commit';
+import { PromiseReturnType } from '../types/PromiseReturnType';
 import { SpyHelper } from '../types/SpyHelper';
 import { cherrypickAndCreateTargetPullRequest } from './cherrypickAndCreateTargetPullRequest';
 
 describe('cherrypickAndCreateTargetPullRequest', () => {
-  let axiosRequestSpy: SpyHelper<typeof axios.request>;
+  let execSpy: SpyHelper<typeof childProcess.exec>;
+  let addLabelsScope: ReturnType<typeof nock>;
+  let consoleLogSpy: SpyHelper<typeof logger['consoleLog']>;
 
   beforeEach(() => {
-    axiosRequestSpy = jest
-      .spyOn(axios, 'request')
+    execSpy = jest
+      .spyOn(childProcess, 'exec')
 
-      // mock: createPullRequest
-      .mockResolvedValueOnce({
-        data: {
-          number: 1337,
-          html_url: 'myHtmlUrl',
-        },
+      // mock all exec commands to respond without errors
+      .mockResolvedValue({ stdout: '', stderr: '' });
+
+    consoleLogSpy = jest.spyOn(logger, 'consoleLog');
+
+    // ensure labels are added
+    addLabelsScope = nock('https://api.github.com')
+      .post('/repos/elastic/kibana/issues/1337/labels', {
+        labels: ['backport'],
       })
-
-      // mock: addLabelsToPullRequest
-      .mockResolvedValueOnce({});
+      .reply(200);
   });
 
   afterEach(() => {
+    addLabelsScope.done();
     jest.clearAllMocks();
   });
 
   describe('when commit has a pull request reference', () => {
-    let execSpy: SpyHelper<typeof childProcess.exec>;
+    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
+
     beforeEach(async () => {
-      execSpy = jest
-        .spyOn(childProcess, 'exec')
-
-        // mock all exec commands to respond without errors
-        .mockResolvedValue({ stdout: '', stderr: '' });
-
       const options = {
         assignees: [] as string[],
         githubApiBaseUrlV3: 'https://api.github.com',
@@ -73,74 +72,62 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         },
       ];
 
-      await cherrypickAndCreateTargetPullRequest({
+      const scope = nock('https://api.github.com')
+        .post('/repos/elastic/kibana/pulls', {
+          title: '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)',
+          head: 'sqren:backport/6.x/pr-1000_pr-2000',
+          base: '6.x',
+          body:
+            'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)\n\nmyPrSuffix',
+        })
+        .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
+
+      res = await cherrypickAndCreateTargetPullRequest({
         options,
         commits,
         targetBranch: '6.x',
       });
+
+      scope.done();
+    });
+
+    it('returns the expected response', () => {
+      expect(res).toEqual({ html_url: 'myHtmlUrl', number: 1337 });
     });
 
     it('should make correct git commands', () => {
       expect(execSpy.mock.calls).toMatchSnapshot();
     });
 
+    it('logs correctly', () => {
+      expect(consoleLogSpy.mock.calls.length).toBe(2);
+      expect(consoleLogSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        Backporting to 6.x:"
+      `);
+      expect(consoleLogSpy.mock.calls[1][0]).toMatchInlineSnapshot(
+        `"View pull request: myHtmlUrl"`
+      );
+    });
+
     it('should start the spinner with the correct text', () => {
-      expect((ora as any).mock.calls).toMatchInlineSnapshot(`
+      expect((ora as any).mock.calls.map((call: any) => call[0]))
+        .toMatchInlineSnapshot(`
         Array [
-          Array [
-            "Pulling latest changes",
-          ],
-          Array [
-            "Cherry-picking: myCommitMessage (#1000)",
-          ],
-          Array [
-            "Cherry-picking: myOtherCommitMessage (#2000)",
-          ],
-          Array [
-            "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
-          ],
-          Array [],
-          Array [
-            "Creating pull request",
-          ],
-          Array [
-            "Adding labels: backport",
-          ],
+          "Pulling latest changes",
+          "Cherry-picking: myCommitMessage (#1000)",
+          "Cherry-picking: myOtherCommitMessage (#2000)",
+          "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
+          undefined,
+          "Creating pull request",
+          "Adding labels: backport",
         ]
       `);
-    });
-
-    it('should create pull request', () => {
-      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
-      const config = axiosRequestSpy.mock.calls[0][0];
-      expect(config.url).toBe(
-        'https://api.github.com/repos/elastic/kibana/pulls'
-      );
-      expect(config.data.title).toBe(
-        '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)'
-      );
-      expect(config.data.body).toBe(
-        dedent(`Backports the following commits to 6.x:
-   - myCommitMessage (#1000)
-   - myOtherCommitMessage (#2000)
-
-  myPrSuffix`)
-      );
-      expect(config.data.head).toBe('sqren:backport/6.x/pr-1000_pr-2000');
-      expect(config.data.base).toBe('6.x');
-    });
-
-    it('it should add labels', () => {
-      const config = axiosRequestSpy.mock.calls[1][0];
-
-      expect(config.url).toBe(
-        'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
-      );
-      expect(config.data).toEqual(['backport']);
     });
   });
 
   describe('when commit does not have a pull request reference', () => {
+    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
     beforeEach(async () => {
       const options = {
         assignees: [] as string[],
@@ -154,7 +141,17 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         sourcePRLabels: [] as string[],
       } as BackportOptions;
 
-      await cherrypickAndCreateTargetPullRequest({
+      const scope = nock('https://api.github.com')
+        .post('/repos/elastic/kibana/pulls', {
+          title: '[6.x] myCommitMessage (mySha)',
+          head: 'sqren:backport/6.x/commit-mySha',
+          base: '6.x',
+          body:
+            'Backports the following commits to 6.x:\n - myCommitMessage (mySha)',
+        })
+        .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
+
+      res = await cherrypickAndCreateTargetPullRequest({
         options,
         commits: [
           {
@@ -166,42 +163,22 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         ],
         targetBranch: '6.x',
       });
+      scope.done();
     });
 
-    it('should create pull request', () => {
-      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
-      const config = axiosRequestSpy.mock.calls[0][0];
-
-      expect(config.url).toBe(
-        'https://api.github.com/repos/elastic/kibana/pulls'
-      );
-      expect(config.data.title).toBe('[6.x] myCommitMessage (mySha)');
-      expect(config.data.body).toBe(
-        `Backports the following commits to 6.x:
- - myCommitMessage (mySha)`
-      );
-      expect(config.data.head).toBe('sqren:backport/6.x/commit-mySha');
-      expect(config.data.base).toBe('6.x');
-    });
-
-    it('it should add labels', () => {
-      const config = axiosRequestSpy.mock.calls[1][0];
-
-      expect(config.url).toBe(
-        'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
-      );
-      expect(config.data).toEqual(['backport']);
+    it('returns the expected response', () => {
+      expect(res).toEqual({ html_url: 'myHtmlUrl', number: 1337 });
     });
   });
 
   describe('when cherry-picking fails', () => {
-    it('should start conflict resolution mode', async () => {
+    let res: PromiseReturnType<typeof cherrypickAndCreateTargetPullRequest>;
+    let promptSpy: SpyHelper<typeof prompts['confirmPrompt']>;
+    let execSpy: ReturnType<typeof setupExecSpy>;
+    beforeEach(async () => {
       // spies
-      const promptSpy = jest
-        .spyOn(prompts, 'confirmPrompt')
-        .mockResolvedValue(true);
-      const logSpy = jest.spyOn(logger, 'consoleLog');
-      const execSpy = setupExecSpy();
+      promptSpy = jest.spyOn(prompts, 'confirmPrompt').mockResolvedValue(true);
+      execSpy = setupExecSpy();
 
       const options = {
         assignees: [] as string[],
@@ -215,7 +192,16 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         sourcePRLabels: [] as string[],
       } as BackportOptions;
 
-      const res = await cherrypickAndCreateTargetPullRequest({
+      const scope = nock('https://api.github.com')
+        .post('/repos/elastic/kibana/pulls', {
+          title: '[6.x] myCommitMessage',
+          head: 'sqren:backport/6.x/commit-mySha',
+          base: '6.x',
+          body: 'Backports the following commits to 6.x:\n - myCommitMessage',
+        })
+        .reply(200, { html_url: 'myHtmlUrl', number: 1337 });
+
+      res = await cherrypickAndCreateTargetPullRequest({
         options,
         commits: [
           {
@@ -228,89 +214,84 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         targetBranch: '6.x',
       });
 
-      expect(res).toEqual({
-        html_url: 'myHtmlUrl',
-        number: 1337,
-      });
+      scope.done();
+    });
 
-      expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+    it('creates pull request', () => {
+      expect(res).toEqual({ html_url: 'myHtmlUrl', number: 1337 });
+    });
 
-        Conflicting files:
-         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+    it('shows the right prompts', () => {
+      expect(promptSpy.mock.calls.length).toBe(3);
 
-
-        Press ENTER when the conflicts are resolved and files are staged",
-          ],
-          Array [
-            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+      expect(promptSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
 
         Conflicting files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
 
-        Press ENTER when the conflicts are resolved and files are staged",
-          ],
-          Array [
-            "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+        Press ENTER when the conflicts are resolved and files are staged"
+      `);
+
+      expect(promptSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
+        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
+
+        Conflicting files:
+         - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
+
+
+        Press ENTER when the conflicts are resolved and files are staged"
+      `);
+
+      expect(promptSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
+        "Please fix the issues in: /myHomeDir/.backport/repositories/elastic/kibana
 
 
         Unstaged files:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
-        Press ENTER when the conflicts are resolved and files are staged",
-          ],
-        ]
+        Press ENTER when the conflicts are resolved and files are staged"
       `);
+    });
 
-      expect(logSpy.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "
-        Backporting to 6.x:",
-          ],
-          Array [
-            "
-        ----------------------------------------
-        ",
-          ],
-          Array [
-            "
-        ----------------------------------------
-        ",
-          ],
-          Array [
-            "View pull request: myHtmlUrl",
-          ],
-        ]
-      `);
-      expect((ora as any).mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Pulling latest changes",
-          ],
-          Array [
-            "Cherry-picking: myCommitMessage",
-          ],
-          Array [
-            "Finalizing cherrypick",
-          ],
-          Array [
-            "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
-          ],
-          Array [],
-          Array [
-            "Creating pull request",
-          ],
-          Array [
-            "Adding labels: backport",
-          ],
-        ]
-      `);
+    it('calls exec correctly', () => {
       expect(execSpy.mock.calls).toMatchSnapshot();
-      expect(axiosRequestSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('calls ora correctly', () => {
+      expect((ora as any).mock.calls.map((call: any) => call[0]))
+        .toMatchInlineSnapshot(`
+        Array [
+          "Pulling latest changes",
+          "Cherry-picking: myCommitMessage",
+          "Finalizing cherrypick",
+          "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
+          undefined,
+          "Creating pull request",
+          "Adding labels: backport",
+        ]
+      `);
+    });
+
+    it('logs correctly', async () => {
+      expect(consoleLogSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        Backporting to 6.x:"
+      `);
+      expect(consoleLogSpy.mock.calls[1][0]).toMatchInlineSnapshot(`
+        "
+        ----------------------------------------
+        "
+      `);
+      expect(consoleLogSpy.mock.calls[2][0]).toMatchInlineSnapshot(`
+        "
+        ----------------------------------------
+        "
+      `);
+      expect(consoleLogSpy.mock.calls[3][0]).toMatchInlineSnapshot(
+        `"View pull request: myHtmlUrl"`
+      );
     });
   });
 });

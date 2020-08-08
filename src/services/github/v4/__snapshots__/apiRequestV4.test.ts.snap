@@ -3,6 +3,8 @@
 exports[`apiRequestV4 when request fails without error messages should return parsed github error 1`] = `
 "Unexpected response from Github API (v4):
 {
-  \\"foo\\": \\"bar\\"
+  \\"data\\": {
+    \\"foo\\": \\"bar\\"
+  }
 }"
 `;

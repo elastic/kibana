@@ -1,26 +1,23 @@
-import axios from 'axios';
-import { SpyHelper } from '../../../types/SpyHelper';
+import { mockGqlRequest } from '../../../test/nockHelpers';
 import { HandledError } from '../../HandledError';
 import { apiRequestV4 } from './apiRequestV4';
 
 describe('apiRequestV4', () => {
   describe('when request succeeds', () => {
-    let spy: SpyHelper<typeof axios.post>;
     let res: unknown;
+    let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
     beforeEach(async () => {
-      spy = jest.spyOn(axios, 'post').mockResolvedValueOnce({
-        data: {
-          data: 'some data',
-        },
+      commitsByAuthorCalls = mockGqlRequest({
+        name: 'MyQuery',
+        statusCode: 200,
+        body: { data: 'some data' },
       });
 
       res = await apiRequestV4({
         accessToken: 'myAccessToken',
-        githubApiBaseUrlV4: 'https://my-custom-api.com/graphql',
-        query: 'myQuery',
-        variables: {
-          foo: 'bar',
-        },
+        githubApiBaseUrlV4: 'http://localhost/graphql',
+        query: 'query MyQuery{ foo }',
+        variables: { foo: 'bar' },
       });
     });
 
@@ -29,32 +26,22 @@ describe('apiRequestV4', () => {
     });
 
     it('should call with correct args', async () => {
-      expect(spy).toHaveBeenCalledWith(
-        'https://my-custom-api.com/graphql',
+      expect(commitsByAuthorCalls).toEqual([
         {
-          query: 'myQuery',
+          query: 'query MyQuery{ foo }',
           variables: { foo: 'bar' },
         },
-        {
-          headers: {
-            Authorization: 'bearer myAccessToken',
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      ]);
     });
   });
 
   describe('when request fails with error messages', () => {
     beforeEach(() => {
-      jest.spyOn(axios, 'post').mockRejectedValue({
-        response: {
-          data: {
-            errors: [
-              { message: 'some error' },
-              { message: 'some other error' },
-            ],
-          },
+      mockGqlRequest({
+        name: 'MyQuery',
+        statusCode: 500,
+        body: {
+          errors: [{ message: 'some error' }, { message: 'some other error' }],
         },
       });
     });
@@ -63,8 +50,8 @@ describe('apiRequestV4', () => {
       return expect(
         apiRequestV4({
           accessToken: 'myAccessToken',
-          githubApiBaseUrlV4: 'myApiHostname',
-          query: 'myQuery',
+          githubApiBaseUrlV4: 'http://localhost/graphql',
+          query: 'query MyQuery{ foo }',
           variables: {
             foo: 'bar',
           },
@@ -77,12 +64,10 @@ describe('apiRequestV4', () => {
 
   describe('when request fails without error messages', () => {
     beforeEach(() => {
-      jest.spyOn(axios, 'post').mockRejectedValue({
-        response: {
-          data: {
-            foo: 'bar',
-          },
-        },
+      mockGqlRequest({
+        name: 'MyQuery',
+        statusCode: 500,
+        body: { data: { foo: 'bar' } },
       });
     });
 
@@ -90,8 +75,8 @@ describe('apiRequestV4', () => {
       return expect(
         apiRequestV4({
           accessToken: 'myAccessToken',
-          githubApiBaseUrlV4: 'myApiHostname',
-          query: 'myQuery',
+          githubApiBaseUrlV4: 'http://localhost/graphql',
+          query: 'query MyQuery{ foo }',
           variables: {
             foo: 'bar',
           },

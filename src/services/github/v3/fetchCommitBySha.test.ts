@@ -1,32 +1,32 @@
-import axios from 'axios';
+import nock from 'nock';
 import { BackportOptions } from '../../../options/options';
 import { CommitSelected } from '../../../types/Commit';
 import { fetchCommitBySha } from './fetchCommitBySha';
 import { commitByShaMock } from './mocks/commitByShaMock';
 
+type BackportOptionsWithSha = BackportOptions & { sha: string };
+
 describe('fetchCommitBySha', () => {
   it('should return single commit with pull request', async () => {
-    const commitSha = 'sha123456789';
     const options = {
       repoOwner: 'elastic',
       repoName: 'kibana',
-      accessToken: 'myAccessToken',
-      username: 'sqren',
-      author: 'sqren',
+      sha: 'sha123456789',
       githubApiBaseUrlV3: 'https://api.github.com',
-    } as BackportOptions;
+    } as BackportOptionsWithSha;
 
-    const axiosSpy = jest
-      .spyOn(axios, 'request')
-
-      // mock commits
-      .mockResolvedValueOnce({
-        data: { items: [{ commit: { message: 'myMessage' }, sha: commitSha }] },
+    // mock commits
+    const scope = nock('https://api.github.com')
+      .get('/search/commits')
+      .query({
+        per_page: '1',
+        q: 'hash:sha123456789 repo:elastic/kibana',
+      })
+      .reply(200, {
+        items: [{ commit: { message: 'myMessage' }, sha: options.sha }],
       });
 
-    await expect(
-      await fetchCommitBySha({ ...options, sha: commitSha })
-    ).toEqual({
+    await expect(await fetchCommitBySha(options)).toEqual({
       sourceBranch: 'master',
       formattedMessage: 'myMessage (sha12345)',
       pullNumber: undefined,
@@ -34,13 +34,17 @@ describe('fetchCommitBySha', () => {
       targetBranchesFromLabels: [],
     });
 
-    expect(axiosSpy.mock.calls).toMatchSnapshot();
+    scope.done();
   });
 
   it('should return a single commit without PR', async () => {
-    const axiosSpy = jest
-      .spyOn(axios, 'request')
-      .mockResolvedValueOnce({ data: { items: [commitByShaMock] } });
+    const scope = nock('https://api.github.com')
+      .get('/search/commits')
+      .query({
+        per_page: '1',
+        q: 'hash:myCommitSha repo:elastic/kibana',
+      })
+      .reply(200, { items: [commitByShaMock] });
 
     const commit = await fetchCommitBySha({
       username: 'sqren',
@@ -61,17 +65,17 @@ describe('fetchCommitBySha', () => {
     };
 
     expect(commit).toEqual(expectedCommit);
-    expect(axiosSpy).toHaveBeenCalledWith({
-      method: 'get',
-      url:
-        'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1',
-      headers: { Accept: 'application/vnd.github.cloak-preview' },
-      auth: { password: 'myAccessToken', username: 'sqren' },
-    });
+    scope.done();
   });
 
   it('should throw error if sha does not exist', async () => {
-    jest.spyOn(axios, 'request').mockResolvedValueOnce({ data: { items: [] } });
+    const scope = nock('https://api.github.com')
+      .get('/search/commits')
+      .query({
+        per_page: '1',
+        q: 'hash:myCommitSha repo:elastic/kibana',
+      })
+      .reply(200, { items: [] });
 
     await expect(
       fetchCommitBySha({
@@ -81,5 +85,7 @@ describe('fetchCommitBySha', () => {
         githubApiBaseUrlV3: 'https://api.github.com',
       } as BackportOptions & { sha: string })
     ).rejects.toThrowError('No commit found on master with sha "myCommitSha"');
+
+    scope.done();
   });
 });

@@ -1,23 +1,25 @@
-import axios from 'axios';
 import { BackportOptions } from '../../../options/options';
+import { mockGqlRequest } from '../../../test/nockHelpers';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
-import { SpyHelper } from '../../../types/SpyHelper';
 import { fetchPullRequestBySearchQuery } from './fetchPullRequestBySearchQuery';
 import { fetchPullRequestBySearchQueryMock } from './mocks/fetchPullRequestBySearchQueryMock';
 
 describe('fetchPullRequestBySearchQuery', () => {
-  let spy: SpyHelper<typeof axios.post>;
   let res: PromiseReturnType<typeof fetchPullRequestBySearchQuery>;
+  let mockCalls: ReturnType<typeof mockGqlRequest>;
+
   beforeEach(async () => {
-    spy = jest.spyOn(axios, 'post').mockResolvedValueOnce({
-      data: fetchPullRequestBySearchQueryMock,
+    mockCalls = mockGqlRequest({
+      name: 'PullRequestBySearchQuery',
+      statusCode: 200,
+      body: fetchPullRequestBySearchQueryMock,
     });
 
     res = await fetchPullRequestBySearchQuery({
       accessToken: 'myAccessToken',
       all: false,
       author: 'sqren',
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
+      githubApiBaseUrlV4: 'http://localhost/graphql',
       maxNumber: 10,
       repoName: 'kibana',
       repoOwner: 'elastic',
@@ -27,9 +29,9 @@ describe('fetchPullRequestBySearchQuery', () => {
   });
 
   it('should make request with correct variables', () => {
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][1].variables).toEqual({
-      first: 10,
+    expect(mockCalls.length).toBe(1);
+    expect(mockCalls[0].variables).toEqual({
+      maxNumber: 10,
       query:
         'type:pr is:merged sort:updated-desc repo:elastic/kibana author:sqren label:Team:apm base:master',
     });

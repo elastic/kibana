@@ -60,6 +60,7 @@ export function cloneRepo(
       cb
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (execProcess.stderr) {
       execProcess.stderr.on('data', (data) => {
         const regex = /^Receiving objects:\s+(\d+)%/;

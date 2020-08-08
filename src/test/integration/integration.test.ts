@@ -1,6 +1,7 @@
 import { once } from 'lodash';
 import { getOptions } from '../../options/options';
 import { runWithOptions } from '../../runWithOptions';
+import { PromiseReturnType } from '../../types/PromiseReturnType';
 import { createSpies } from './createSpies';
 import { REMOTE_ORIGIN_REPO_PATH, REMOTE_FORK_REPO_PATH } from './envConstants';
 import {
@@ -14,6 +15,7 @@ jest.unmock('del');
 jest.unmock('../../services/child-process-promisified');
 
 describe('when a single commit is backported', () => {
+  let res: PromiseReturnType<typeof runWithOptions>;
   let spies: ReturnType<typeof createSpies>;
 
   beforeEach(
@@ -23,35 +25,35 @@ describe('when a single commit is backported', () => {
 
       await deleteAndSetupEnvironment();
 
-      const options = await getOptions([]);
-      await runWithOptions(options);
+      const options = await getOptions([], {
+        // use localhost to avoid CORS issues
+        githubApiBaseUrlV4: 'http://localhost/graphql',
+      });
+      res = await runWithOptions(options);
     })
   );
 
-  it('should create PR for forked branch', () => {
-    const { createTargetPullRequestPayload } = spies.getSpyCalls();
-    expect(createTargetPullRequestPayload.head).toBe(
-      'sqren:backport/6.0/pr-85'
-    );
+  it('returns pull request', () => {
+    expect(res).toEqual([
+      { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
+    ]);
   });
 
-  it('should call logger correctly', () => {
-    const { loggerCalls } = spies.getSpyCalls();
-    expect(loggerCalls).toMatchSnapshot();
+  it('sends the correct http body when creating pull request', () => {
+    expect(spies.createPullRequestCalls).toEqual([
+      {
+        base: '6.0',
+        body: 'Backports the following commits to 6.0:\n - Add witch (#85)',
+        head: 'sqren:backport/6.0/pr-85',
+        title: '[6.0] Add witch (#85)',
+      },
+    ]);
   });
 
   it('should make correct API requests', () => {
-    const {
-      getDefaultRepoBranchAndPerformStartupChecks,
-      getAuthorRequestConfig,
-      getCommitsRequestConfig,
-      createTargetPullRequestPayload,
-    } = spies.getSpyCalls();
-
-    expect(getDefaultRepoBranchAndPerformStartupChecks).toMatchSnapshot();
-    expect(getAuthorRequestConfig).toMatchSnapshot();
-    expect(getCommitsRequestConfig).toMatchSnapshot();
-    expect(createTargetPullRequestPayload).toMatchSnapshot();
+    expect(spies.getDefaultRepoBranchCalls).toMatchSnapshot();
+    expect(spies.authorIdCalls).toMatchSnapshot();
+    expect(spies.commitsByAuthorCalls).toMatchSnapshot();
   });
 
   it('should not create new branches in origin (elastic/backport-demo)', async () => {
@@ -86,8 +88,9 @@ describe('when a single commit is backported', () => {
   });
 });
 
-describe('when a multiple commits are backported', () => {
+describe('when two commits are backported', () => {
   let spies: ReturnType<typeof createSpies>;
+  let res: PromiseReturnType<typeof runWithOptions>;
 
   beforeEach(
     once(async () => {
@@ -96,21 +99,36 @@ describe('when a multiple commits are backported', () => {
 
       await deleteAndSetupEnvironment();
 
-      const options = await getOptions([]);
-      await runWithOptions(options);
+      const options = await getOptions([], {
+        // use localhost to avoid CORS issues
+        githubApiBaseUrlV4: 'http://localhost/graphql',
+      });
+      res = await runWithOptions(options);
     })
   );
 
-  it('should make correct API requests', () => {
-    const {
-      getAuthorRequestConfig,
-      getCommitsRequestConfig,
-      createTargetPullRequestPayload,
-    } = spies.getSpyCalls();
+  it('sends the correct http body when creating pull request', () => {
+    expect(spies.createPullRequestCalls).toEqual([
+      {
+        title: '[6.0] Add witch (#85) | Add 👻 (2e63475c)',
+        head: 'sqren:backport/6.0/pr-85_commit-2e63475c',
+        base: '6.0',
+        body:
+          'Backports the following commits to 6.0:\n - Add witch (#85)\n - Add 👻 (2e63475c)',
+      },
+    ]);
+  });
 
-    expect(getAuthorRequestConfig).toMatchSnapshot();
-    expect(getCommitsRequestConfig).toMatchSnapshot();
-    expect(createTargetPullRequestPayload).toMatchSnapshot();
+  it('returns pull request', () => {
+    expect(res).toEqual([
+      { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
+    ]);
+  });
+
+  it('should make correct API requests', () => {
+    expect(spies.getDefaultRepoBranchCalls).toMatchSnapshot();
+    expect(spies.authorIdCalls).toMatchSnapshot();
+    expect(spies.commitsByAuthorCalls).toMatchSnapshot();
   });
 
   it('should not create new branches in origin (elastic/backport-demo)', async () => {
@@ -160,24 +178,39 @@ describe('when a multiple commits are backported', () => {
 });
 
 describe('when disabling fork mode', () => {
+  let res: PromiseReturnType<typeof runWithOptions>;
   let spies: ReturnType<typeof createSpies>;
 
   beforeEach(
     once(async () => {
       jest.clearAllMocks();
+
       spies = createSpies({ commitCount: 1 });
       await deleteAndSetupEnvironment();
 
-      const options = await getOptions(['--fork=false']);
-      await runWithOptions(options);
+      const options = await getOptions(['--fork=false'], {
+        // use localhost to avoid CORS issues
+        githubApiBaseUrlV4: 'http://localhost/graphql',
+      });
+      res = await runWithOptions(options);
     })
   );
 
-  it('should create PR for non-forked branch', () => {
-    const { createTargetPullRequestPayload } = spies.getSpyCalls();
-    expect(createTargetPullRequestPayload.head).toBe(
-      'elastic:backport/6.0/pr-85'
-    );
+  it('sends the correct http body when creating pull request', () => {
+    expect(spies.createPullRequestCalls).toEqual([
+      {
+        base: '6.0',
+        body: 'Backports the following commits to 6.0:\n - Add witch (#85)',
+        head: 'elastic:backport/6.0/pr-85',
+        title: '[6.0] Add witch (#85)',
+      },
+    ]);
+  });
+
+  it('returns pull request', () => {
+    expect(res).toEqual([
+      { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
+    ]);
   });
 
   it('should create new branches in origin (elastic/backport-demo)', async () => {

@@ -16,12 +16,19 @@ export function consoleLog(message: string) {
 }
 
 export function setLogLevel({ verbose }: { verbose: boolean }) {
-  winstonInstance.level = verbose ? 'verbose' : 'info';
+  winstonInstance.level = verbose ? 'debug' : 'info';
 }
 
 export type Logger = typeof logger;
+
 export const logger = {
-  info: (message: string, meta?: string | Record<string, unknown>) => {
+  error: (message: string, meta?: unknown) => {
+    winstonInstance.error(message, { meta });
+  },
+  warn: (message: string, meta?: unknown) => {
+    winstonInstance.warn(message, { meta });
+  },
+  info: (message: string, meta?: unknown) => {
     winstonInstance.info(message, { meta });
   },
   verbose: (message: string, meta?: unknown) => {

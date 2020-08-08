@@ -2,7 +2,7 @@ import { BackportOptions } from '../../../options/options';
 import { getRemoteName } from '../../git';
 import { apiRequestV4 } from './apiRequestV4';
 
-export async function fetchExistingPullNumber({
+export async function fetchExistingPullRequest({
   options,
   targetBranch,
   backportBranch,
@@ -13,7 +13,7 @@ export async function fetchExistingPullNumber({
 }) {
   const { githubApiBaseUrlV4, repoName, accessToken } = options;
   const query = /* GraphQL */ `
-    query getExistingPullRequest(
+    query ExistingPullRequest(
       $repoOwner: String!
       $repoName: String!
       $targetBranch: String!

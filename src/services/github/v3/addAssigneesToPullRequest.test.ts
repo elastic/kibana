@@ -1,4 +1,4 @@
-import axios from 'axios';
+import nock from 'nock';
 import { BackportOptions } from '../../../options/options';
 import { addAssigneesToPullRequest } from './addAssigneesToPullRequest';
 
@@ -7,11 +7,13 @@ describe('addAssigneesToPullRequest', () => {
     const pullNumber = 216;
     const assignees = ['sqren'];
 
-    const spy = jest
-      .spyOn(axios, 'request')
-      .mockResolvedValueOnce('some-response');
+    const scope = nock('https://api.github.com')
+      .post('/repos/sqren/backport-demo/issues/216/assignees', {
+        assignees: ['sqren'],
+      })
+      .reply(200, 'some response');
 
-    await addAssigneesToPullRequest(
+    const res = await addAssigneesToPullRequest(
       {
         githubApiBaseUrlV3: 'https://api.github.com',
         repoName: 'backport-demo',
@@ -24,12 +26,7 @@ describe('addAssigneesToPullRequest', () => {
       assignees
     );
 
-    expect(spy).toHaveBeenCalledWith({
-      method: 'post',
-      url:
-        'https://api.github.com/repos/sqren/backport-demo/issues/216/assignees',
-      auth: { username: 'sqren', password: 'my-token' },
-      data: { assignees: ['sqren'] },
-    });
+    expect(res).toBe(undefined);
+    scope.done();
   });
 });

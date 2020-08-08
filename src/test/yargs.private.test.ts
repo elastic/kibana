@@ -1,34 +1,14 @@
 import { execSync, spawn } from 'child_process';
 import stripAnsi from 'strip-ansi';
+import { getDevAccessToken } from './private/getDevAccessToken';
 
-const execOptions = {
-  stdio: 'pipe',
-  encoding: 'utf-8',
-} as const;
-
-// get global config: either from .backport/config.json or via env variables
-function getGlobalConfig() {
-  return JSON.parse(
-    execSync(
-      `./node_modules/.bin/ts-node --transpile-only ./src/test/getGlobalConfig.ts`,
-      execOptions
-    )
-  );
-}
+const execOptions = { stdio: 'pipe', encoding: 'utf-8' } as const;
 
 describe('yargs', () => {
-  let accessToken: string;
-  let username: string;
+  let devAccessToken: string;
 
-  beforeAll(() => {
-    const config = getGlobalConfig();
-
-    accessToken = config.accessToken;
-    username = config.username;
-
-    if (!username || !accessToken) {
-      throw new Error('username or accessToken is missing');
-    }
+  beforeAll(async () => {
+    devAccessToken = await getDevAccessToken();
   });
 
   it('--version', () => {
@@ -48,7 +28,7 @@ describe('yargs', () => {
 
   it('should return error when branch is missing', () => {
     const res = runBackport(
-      `--upstream foo --username ${username} --accessToken ${accessToken}`
+      `--upstream foo --username sqren --accessToken ${devAccessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
       "You must specify a target branch
@@ -62,7 +42,7 @@ describe('yargs', () => {
 
   it('should return error when upstream is missing', () => {
     const res = runBackport(
-      `--branch foo --username ${username} --accessToken ${accessToken}`
+      `--branch foo --username sqren --accessToken ${devAccessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
       "You must specify a valid Github repository
@@ -85,7 +65,7 @@ describe('yargs', () => {
 
   it(`should return error when repo doesn't exist`, () => {
     const res = runBackport(
-      `--branch foo --upstream foo/bar --username ${username} --accessToken ${accessToken}`
+      `--branch foo --upstream foo/bar --username sqren --accessToken ${devAccessToken}`
     );
     expect(res).toMatchInlineSnapshot(`
       "The repository \\"foo/bar\\" doesn't exist
@@ -100,9 +80,9 @@ describe('yargs', () => {
       '--upstream',
       'sqren/backport-demo',
       '--username',
-      username,
+      'sqren',
       '--accessToken',
-      accessToken,
+      devAccessToken,
       '--author',
       'sqren',
       '--max-number',
@@ -127,9 +107,9 @@ describe('yargs', () => {
       '--upstream',
       'sqren/backport-demo',
       '--username',
-      username,
+      'sqren',
       '--accessToken',
-      accessToken,
+      devAccessToken,
       '--author',
       'sqren',
       '--max-number',

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cherrypickAndCreateTargetPullRequest when cherry-picking fails should start conflict resolution mode 4`] = `
+exports[`cherrypickAndCreateTargetPullRequest when cherry-picking fails calls exec correctly 1`] = `
 Array [
   Array [
     "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-mySha elastic/6.x --no-track",

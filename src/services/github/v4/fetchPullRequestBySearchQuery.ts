@@ -17,14 +17,14 @@ export async function fetchPullRequestBySearchQuery(
     branchLabelMapping,
     githubApiBaseUrlV4,
     maxNumber,
+    prFilter,
     repoName,
     repoOwner,
     sourceBranch,
-    prFilter,
   } = options;
   const query = /* GraphQL */ `
-    query getPulLRequestBySearchQuery($query: String!, $first: Int!) {
-      search(query: $query, type: ISSUE, first: $first) {
+    query PullRequestBySearchQuery($query: String!, $maxNumber: Int!) {
+      search(query: $query, type: ISSUE, first: $maxNumber) {
         nodes {
           ... on PullRequest {
             number
@@ -54,7 +54,7 @@ export async function fetchPullRequestBySearchQuery(
       query,
       variables: {
         query: searchQuery,
-        first: maxNumber,
+        maxNumber: maxNumber,
       },
     });
     spinner.stop();

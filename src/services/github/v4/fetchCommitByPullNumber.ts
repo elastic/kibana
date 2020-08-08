@@ -11,15 +11,15 @@ export async function fetchCommitByPullNumber(
   options: BackportOptions & { pullNumber: number }
 ): Promise<CommitSelected> {
   const {
-    githubApiBaseUrlV4,
-    repoName,
-    repoOwner,
-    pullNumber,
     accessToken,
     branchLabelMapping,
+    githubApiBaseUrlV4,
+    pullNumber,
+    repoName,
+    repoOwner,
   } = options;
   const query = /* GraphQL */ `
-    query getCommitbyPullNumber(
+    query CommitByPullNumber(
       $repoOwner: String!
       $repoName: String!
       $pullNumber: Int!
