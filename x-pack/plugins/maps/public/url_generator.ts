@@ -43,13 +43,13 @@ export interface MapsUrlGeneratorState {
   refreshInterval?: RefreshInterval;
 
   /**
-   * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has filters saved with it, this will _replace_ those filters.
+   * Optionally apply filers. NOTE: if given and used in conjunction with `mapId`, and the
+   * saved map has filters saved with it, this will _replace_ those filters.
    */
   filters?: Filter[];
   /**
-   * Optionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the
-   * saved dashboard has a query saved with it, this will _replace_ that query.
+   * Optionally set a query. NOTE: if given and used in conjunction with `mapId`, and the
+   * saved map has a query saved with it, this will _replace_ that query.
    */
   query?: Query;
   /**
