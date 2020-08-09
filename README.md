@@ -64,3 +64,7 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
   Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
 Elastic engineer will be glad to help you out.
+
+## Testing powered by 
+<a target="_blank" href="https://www.browserstack.com/"><img width="200" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png"></a><br>
+[BrowserStack Open-Source Program](https://www.browserstack.com/open-source)
