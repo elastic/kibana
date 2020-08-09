@@ -19,6 +19,7 @@ import {
 import {
   createKbnUrlStateStorage,
   IStorageWrapper,
+  withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -152,6 +153,7 @@ export function App({
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
     });
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
@@ -166,6 +168,7 @@ export function App({
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    core.notifications.toasts,
     core.uiSettings,
     data.query,
     history,
@@ -333,9 +336,7 @@ export function App({
           ...s,
           isSaveModalVisible: false,
           originatingApp:
-            saveProps.newCopyOnSave && !saveProps.returnToOrigin
-              ? undefined
-              : currentOriginatingApp,
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
