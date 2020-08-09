@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(200);
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             package: {
               name: 'endpoint',
               title: 'Endpoint',
-              version: '0.8.0',
+              version: '0.13.0',
             },
           })
           .expect(500);
