@@ -19,6 +19,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const transformId = 'endpoint_metadata_transform';
 
   describe('host list', function () {
+  describe.skip('host list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
