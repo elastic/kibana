@@ -14873,7 +14873,7 @@
     "xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription": "某些功能可能被工作区隐藏或受全局工作区权限影响。",
     "xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice": "这些权限将应用到所有当前和未来工作区。",
     "xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeWarning": "创建全局权限可能会影响您的其他工作区权限。",
-    "xpack.security.management.editRole.spacePrivilegeForm.modalTitle": "工作区权限",
+    "xpack.security.management.editRole.spacePrivilegeForm.modalTitle": "Kibana 特权",
     "xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel": "权限",
     "xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails": "授予对选定工作区所有功能的只读访问权限。",
     "xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay": "读取",

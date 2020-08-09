@@ -14868,7 +14868,7 @@
     "xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription": "機能によってはスペースごとに非表示になっているか、グローバルスペース権限による影響を受けているものもあります。",
     "xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice": "これらの権限はすべての現在および未来のスペースに適用されます。",
     "xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeWarning": "グローバル権限の作成は他のスペース権限に影響を与える可能性があります。",
-    "xpack.security.management.editRole.spacePrivilegeForm.modalTitle": "スペース権限",
+    "xpack.security.management.editRole.spacePrivilegeForm.modalTitle": "Kibana 権限",
     "xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel": "権限",
     "xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails": "選択されたスペースの全機能への読み込み専用アクセスを許可します。",
     "xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay": "読み込み",
