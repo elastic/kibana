@@ -95,7 +95,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               <h2>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                  defaultMessage="Space privileges"
+                  defaultMessage="Kibana privileges"
                 />
               </h2>
             </EuiTitle>
