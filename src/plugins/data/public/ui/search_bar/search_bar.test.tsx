@@ -24,6 +24,7 @@ import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
+import { getFieldListMock } from '../../../common/index_patterns/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
@@ -69,16 +70,15 @@ const createMockStorage = () => ({
 const mockIndexPattern = {
   id: '1234',
   title: 'logstash-*',
-  fields: [
+  fields: getFieldListMock([
     {
       name: 'response',
       type: 'number',
       esTypes: ['integer'],
       aggregatable: true,
-      filterable: true,
       searchable: true,
     },
-  ],
+  ]),
 } as IIndexPattern;
 
 const kqlQuery = {

@@ -29,7 +29,7 @@ import {
 } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
-  return indexPattern.fields.find((field) => field.name === filter.meta.key);
+  return indexPattern.fields.getByName(filter.meta.key || '');
 }
 
 export function getOperatorFromFilter(filter: Filter) {
@@ -39,7 +39,7 @@ export function getOperatorFromFilter(filter: Filter) {
 }
 
 export function getFilterableFields(indexPattern: IIndexPattern) {
-  return indexPattern.fields.filter(isFilterable);
+  return indexPattern.fields.getAll().filter(isFilterable);
 }
 
 export function getOperatorOptions(field: IFieldType) {

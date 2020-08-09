@@ -17,16 +17,15 @@
  * under the License.
  */
 
-import { IFieldType } from '.';
+import { FieldSpec } from '.';
 
-export const stubFields: IFieldType[] = [
+export const stubFields: FieldSpec[] = [
   {
     name: 'machine.os',
     esTypes: ['text'],
     type: 'string',
     aggregatable: false,
     searchable: false,
-    filterable: true,
   },
   {
     name: 'machine.os.raw',
@@ -34,7 +33,6 @@ export const stubFields: IFieldType[] = [
     esTypes: ['keyword'],
     aggregatable: true,
     searchable: true,
-    filterable: true,
   },
   {
     name: 'not.filterable',
@@ -42,7 +40,6 @@ export const stubFields: IFieldType[] = [
     esTypes: ['text'],
     aggregatable: true,
     searchable: false,
-    filterable: false,
   },
   {
     name: 'bytes',
@@ -50,7 +47,6 @@ export const stubFields: IFieldType[] = [
     esTypes: ['long'],
     aggregatable: true,
     searchable: true,
-    filterable: true,
   },
   {
     name: '@timestamp',
@@ -58,7 +54,6 @@ export const stubFields: IFieldType[] = [
     esTypes: ['date'],
     aggregatable: true,
     searchable: true,
-    filterable: true,
   },
   {
     name: 'clientip',
@@ -66,7 +61,6 @@ export const stubFields: IFieldType[] = [
     esTypes: ['ip'],
     aggregatable: true,
     searchable: true,
-    filterable: true,
   },
   {
     name: 'bool.field',
@@ -74,6 +68,5 @@ export const stubFields: IFieldType[] = [
     esTypes: ['boolean'],
     aggregatable: true,
     searchable: true,
-    filterable: true,
   },
 ];

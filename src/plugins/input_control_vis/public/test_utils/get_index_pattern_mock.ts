@@ -18,6 +18,17 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
+import { getFieldListMock } from '../../../data/common/index_patterns/mocks';
+
+const sharedProps = {
+  searchable: true,
+};
+
+const fields = getFieldListMock([
+  { name: 'keywordField', type: 'string', aggregatable: true, ...sharedProps },
+  { name: 'textField', type: 'string', aggregatable: false, ...sharedProps },
+  { name: 'numberField', type: 'number', aggregatable: true, ...sharedProps },
+]);
 
 /**
  * Returns forced **Partial** IndexPattern for use in tests
@@ -26,10 +37,6 @@ export const getIndexPatternMock = (): Promise<IIndexPattern> => {
   return Promise.resolve({
     id: 'mockIndexPattern',
     title: 'mockIndexPattern',
-    fields: [
-      { name: 'keywordField', type: 'string', aggregatable: true },
-      { name: 'textField', type: 'string', aggregatable: false },
-      { name: 'numberField', type: 'number', aggregatable: true },
-    ],
+    fields,
   } as IIndexPattern);
 };

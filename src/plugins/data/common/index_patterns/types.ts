@@ -20,13 +20,13 @@
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import { IFieldType } from './fields';
+import { IFieldType, FieldList } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES } from '..';
 
 export interface IIndexPattern {
   [key: string]: any;
-  fields: IFieldType[];
+  fields: FieldList;
   title: string;
   id?: string;
   type?: string;
@@ -149,7 +149,7 @@ export interface FieldSpecExportFmt {
 }
 
 export interface FieldSpec {
-  count: number;
+  count?: number;
   script?: string;
   lang?: string;
   conflictDescriptions?: Record<string, string[]>;
@@ -158,7 +158,7 @@ export interface FieldSpec {
   name: string;
   type: string;
   esTypes?: string[];
-  scripted: boolean;
+  scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;

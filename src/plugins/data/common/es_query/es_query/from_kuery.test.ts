@@ -20,12 +20,12 @@
 import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/mocks';
+import { getFieldListMock } from '../../index_patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {
   const indexPattern: IIndexPattern = ({
-    fields,
+    fields: getFieldListMock(),
   } as unknown) as IIndexPattern;
 
   describe('buildQueryFromKuery', () => {

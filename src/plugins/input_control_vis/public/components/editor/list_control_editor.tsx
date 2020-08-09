@@ -127,9 +127,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    const field = (indexPattern.fields as IFieldType[]).find(
-      ({ name }) => name === this.props.controlParams.fieldName
-    );
+    const field = indexPattern.fields.getByName(this.props.controlParams.fieldName);
     if (!field) {
       return;
     }

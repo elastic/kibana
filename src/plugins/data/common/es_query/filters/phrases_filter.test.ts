@@ -19,16 +19,16 @@
 
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
 import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/fields/fields.mocks.ts';
+import { getFieldListMock } from '../../index_patterns/fields/fields.mocks';
 
 describe('phrases filter', function () {
   const indexPattern: IIndexPattern = ({
-    fields,
+    fields: getFieldListMock(),
   } as unknown) as IIndexPattern;
 
   describe('getPhrasesFilterField', function () {
     it('should return the name of the field a phrases query is targeting', () => {
-      const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
+      const field = indexPattern.fields.getByName('extension');
       const filter = buildPhrasesFilter(field!, ['jpg', 'png'], indexPattern);
       const result = getPhrasesFilterField(filter);
       expect(result).toBe('extension');

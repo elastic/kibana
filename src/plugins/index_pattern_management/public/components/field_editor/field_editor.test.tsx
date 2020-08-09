@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import {
-  IndexPattern,
-  IndexPatternField,
-  IIndexPatternFieldList,
-  FieldFormatInstanceType,
-} from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
+
+import { getFieldListMock } from '../../../../data/common/index_patterns/mocks';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -112,7 +109,7 @@ describe('FieldEditor', () => {
 
   beforeEach(() => {
     indexPattern = ({
-      fields: fields as IIndexPatternFieldList,
+      fields: getFieldListMock(fields),
       getFormatterForField: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
@@ -139,7 +136,7 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    indexPattern.fields.push(testField as IndexPatternField);
+    indexPattern.fields.add(testField as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
@@ -169,7 +166,7 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
       lang: 'testlang',
     };
-    indexPattern.fields.push((testField as unknown) as IndexPatternField);
+    indexPattern.fields.add((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,

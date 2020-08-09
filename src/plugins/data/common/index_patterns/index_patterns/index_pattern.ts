@@ -25,7 +25,7 @@ import { DuplicateField, SavedObjectNotFound } from '../../../../kibana_utils/co
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { IndexPatternField, IIndexPatternFieldList, FieldList } from '../fields';
+import { IndexPatternField, FieldList } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -68,7 +68,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IIndexPatternFieldList & { toSpec: () => FieldSpec[] };
+  public fields: FieldList & { toSpec: () => FieldSpec[] };
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -403,11 +403,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return [...this.fields.filter((field) => !field.scripted)];
+    return this.fields.getAll().filter((field: IndexPatternField) => !field.scripted);
   }
 
   getScriptedFields() {
-    return [...this.fields.filter((field) => field.scripted)];
+    return this.fields.getAll().filter((field: IndexPatternField) => field.scripted);
   }
 
   isTimeBased(): boolean {
@@ -577,7 +577,7 @@ export class IndexPattern implements IIndexPattern {
 
   async _fetchFields() {
     const fields = await this.fieldsFetcher.fetch(this);
-    const scripted = this.getScriptedFields().map((field) => field.spec);
+    const scripted = this.getScriptedFields().map((field: IndexPatternField) => field.spec);
     this.fields.replaceAll([...fields, ...scripted]);
   }
 

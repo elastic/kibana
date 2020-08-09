@@ -22,8 +22,10 @@ import {
   buildPhraseFilter,
   getPhraseFilterField,
 } from './phrase_filter';
-import { fields, getField } from '../../index_patterns/mocks';
+import { getFieldListMock } from '../../index_patterns/mocks';
 import { IIndexPattern } from '../../index_patterns';
+
+const fields = getFieldListMock();
 
 describe('Phrase filter builder', () => {
   let indexPattern: IIndexPattern;
@@ -39,7 +41,7 @@ describe('Phrase filter builder', () => {
   });
 
   it('should return a match query filter when passed a standard field', () => {
-    const field = getField('bytes');
+    const field = fields.getByName('bytes')!;
 
     expect(buildPhraseFilter(field, 5, indexPattern)).toEqual({
       meta: {
@@ -54,7 +56,7 @@ describe('Phrase filter builder', () => {
   });
 
   it('should return a script filter when passed a scripted field', () => {
-    const field = getField('script number');
+    const field = fields.getByName('script number')!;
 
     expect(buildPhraseFilter(field, 5, indexPattern)).toEqual({
       meta: {
@@ -106,7 +108,7 @@ describe('getPhraseFilterField', function () {
   } as unknown) as IIndexPattern;
 
   it('should return the name of the field a phrase query is targeting', () => {
-    const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
+    const field = indexPattern.fields.getByName('extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = getPhraseFilterField(filter);
     expect(result).toBe('extension');

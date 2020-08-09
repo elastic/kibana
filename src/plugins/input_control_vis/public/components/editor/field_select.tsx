@@ -107,6 +107,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     const fieldsByTypeMap = new Map<string, string[]>();
     const fields: Array<EuiComboBoxOptionOption<string>> = [];
     indexPattern.fields
+      .getAll()
       .filter(this.props.filterField ?? (() => true))
       .forEach((field: IFieldType) => {
         const fieldsList = fieldsByTypeMap.get(field.type) ?? [];

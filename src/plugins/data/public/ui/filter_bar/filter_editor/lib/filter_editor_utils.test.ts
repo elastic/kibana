@@ -25,7 +25,7 @@ import {
   stubIndexPattern,
   stubFields,
 } from '../../../../stubs';
-import { toggleFilterNegated } from '../../../../../common';
+import { toggleFilterNegated, IndexPatternField } from '../../../../../common';
 import {
   getFieldFromFilter,
   getFilterableFields,
@@ -115,7 +115,9 @@ describe('Filter editor utils', () => {
 
     it('limits the fields to the filterable fields', () => {
       const fieldOptions = getFilterableFields(stubIndexPattern);
-      const nonFilterableFields = fieldOptions.filter((field) => !field.filterable);
+      const nonFilterableFields = fieldOptions.filter(
+        (field: IndexPatternField) => !field.filterable
+      );
       expect(nonFilterableFields.length).toBe(0);
     });
   });

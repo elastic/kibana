@@ -28,9 +28,7 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern)
     return filter;
   }
 
-  const field = indexPattern.fields.find(
-    (indexPatternField) => indexPatternField.name === fieldName
-  );
+  const field = indexPattern.fields.getByName(fieldName);
   if (!field || !field.subType || !field.subType.nested || !field.subType.nested.path) {
     return filter;
   }

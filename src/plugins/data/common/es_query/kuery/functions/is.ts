@@ -22,7 +22,8 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { IIndexPattern, KueryNode, IFieldType, IndexPatternField } from '../../..';
+import { IndexPattern } from '../../../index_patterns/index_patterns';
 
 import * as ast from '../ast';
 
@@ -90,17 +91,27 @@ export function toElasticsearchQuery(
   // field should return no results. It's debatable whether this is desirable, but it's been that way forever, so we'll
   // keep things familiar for now.
   if (fields && fields.length === 0) {
-    fields.push({
-      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
-      scripted: false,
-      type: '',
-    });
+    const name = (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string;
+    fields.push(
+      new IndexPatternField(
+        {} as IndexPattern,
+        {
+          name,
+          scripted: false,
+          type: '',
+          searchable: true,
+          aggregatable: true,
+        },
+        name,
+        () => {}
+      )
+    );
   }
 
   const isExistsQuery = valueArg.type === 'wildcard' && (value as any) === '*';
   const isAllFieldsQuery =
     (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
-    (fields && indexPattern && fields.length === indexPattern.fields.length);
+    (fields && indexPattern && fields.length === indexPattern.fields.getAll().length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {

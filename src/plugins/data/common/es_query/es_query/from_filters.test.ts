@@ -20,11 +20,11 @@
 import { buildQueryFromFilters } from './from_filters';
 import { IIndexPattern } from '../../index_patterns';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
-import { fields } from '../../index_patterns/mocks';
+import { getFieldListMock } from '../../index_patterns/mocks';
 
 describe('build query', () => {
   const indexPattern: IIndexPattern = ({
-    fields,
+    fields: getFieldListMock(),
   } as unknown) as IIndexPattern;
 
   describe('buildQueryFromFilters', () => {

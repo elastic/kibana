@@ -253,7 +253,7 @@ export function FilterItem(props: Props) {
     if (ip) return true;
 
     const allFields = indexPatterns.map((indexPattern) => {
-      return indexPattern.fields.map((field) => field.name);
+      return indexPattern.fields.getAll().map((field) => field.name);
     });
     const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
     return flatFields.includes(filter.meta?.key || '');

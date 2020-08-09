@@ -18,7 +18,7 @@
  */
 
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
+import { getFieldListMock } from '../../../index_patterns/mocks';
 import { IIndexPattern } from '../../../index_patterns';
 
 // @ts-ignore
@@ -45,7 +45,7 @@ describe('kuery functions', () => {
 
     beforeEach(() => {
       indexPattern = ({
-        fields,
+        fields: getFieldListMock(),
       } as unknown) as IIndexPattern;
     });
 

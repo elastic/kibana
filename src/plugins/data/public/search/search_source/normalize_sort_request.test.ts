@@ -20,6 +20,7 @@
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
 import { IIndexPattern } from '../..';
+import { getFieldListMock } from '../../../common/index_patterns/mocks';
 
 describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {
@@ -29,6 +30,8 @@ describe('SearchSource#normalizeSortRequest', function () {
     sortable: true,
     script: 'foo',
     lang: 'painless',
+    searchable: true,
+    aggregatable: true,
   };
   const stringScriptedField = {
     ...scriptedField,
@@ -47,7 +50,12 @@ describe('SearchSource#normalizeSortRequest', function () {
     type: 'murmur3',
   };
   const indexPattern = {
-    fields: [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField],
+    fields: getFieldListMock([
+      scriptedField,
+      stringScriptedField,
+      booleanScriptedField,
+      murmurScriptedField,
+    ]),
   } as IIndexPattern;
 
   it('should return an array', function () {

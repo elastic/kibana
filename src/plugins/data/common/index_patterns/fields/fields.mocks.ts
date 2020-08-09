@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IFieldType } from './types';
+import { FieldSpec } from '../types';
+import { FieldList } from './field_list';
+import { IndexPattern } from '../index_patterns';
 
-export const fields: IFieldType[] = [
+export const fieldSpecs: FieldSpec[] = [
   {
     name: 'bytes',
     type: 'number',
@@ -318,4 +320,12 @@ export const fields: IFieldType[] = [
   },
 ];
 
-export const getField = (name: string) => fields.find((field) => field.name === name) as IFieldType;
+const indexPattern = ({
+  getFormatterForField: () => {},
+} as unknown) as IndexPattern;
+// export const fields = new FieldList(indexPattern, fieldSpecs, false, () => {});
+
+export const getFieldListMock = (specs: FieldSpec[] = fieldSpecs) =>
+  new FieldList(indexPattern, specs, false, () => {});
+
+// export const getField = (name: string) => fields.find((field) => field.name === name) as IFieldType;

@@ -22,48 +22,57 @@ import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { getFieldListMock } from '../../../../../data/common/index_patterns/mocks';
+
+const commonProps = {
+  searchable: true,
+  aggregatable: true,
+};
+
+const fieldSpecs = [
+  {
+    name: '_index',
+    type: 'string',
+    scripted: false,
+    filterable: true,
+    ...commonProps,
+  },
+  {
+    name: 'message',
+    type: 'string',
+    scripted: false,
+    filterable: false,
+    ...commonProps,
+  },
+  {
+    name: 'extension',
+    type: 'string',
+    scripted: false,
+    filterable: true,
+    ...commonProps,
+  },
+  {
+    name: 'bytes',
+    type: 'number',
+    scripted: false,
+    filterable: true,
+    ...commonProps,
+  },
+  {
+    name: 'scripted',
+    type: 'number',
+    scripted: true,
+    filterable: false,
+    ...commonProps,
+  },
+];
 
 const indexPattern = {
-  fields: [
-    {
-      name: '_index',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'message',
-      type: 'string',
-      scripted: false,
-      filterable: false,
-    },
-    {
-      name: 'extension',
-      type: 'string',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'bytes',
-      type: 'number',
-      scripted: false,
-      filterable: true,
-    },
-    {
-      name: 'scripted',
-      type: 'number',
-      scripted: true,
-      filterable: false,
-    },
-  ],
+  fields: getFieldListMock(fieldSpecs),
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
 } as IndexPattern;
-
-indexPattern.fields.getByName = (name: string) => {
-  return indexPattern.fields.find((field) => field.name === name);
-};
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 

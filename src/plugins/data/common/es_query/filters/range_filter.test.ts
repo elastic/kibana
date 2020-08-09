@@ -19,11 +19,12 @@
 
 import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
-import { fields, getField } from '../../index_patterns/mocks';
+import { getFieldListMock } from '../../index_patterns/mocks';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 describe('Range filter builder', () => {
   let indexPattern: IIndexPattern;
+  const fields = getFieldListMock();
 
   beforeEach(() => {
     indexPattern = {
@@ -36,7 +37,7 @@ describe('Range filter builder', () => {
   });
 
   it('should return a range filter when passed a standard field', () => {
-    const field = getField('bytes');
+    const field = fields.getByName('bytes')!;
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
@@ -53,7 +54,7 @@ describe('Range filter builder', () => {
   });
 
   it('should return a script filter when passed a scripted field', () => {
-    const field = getField('script number');
+    const field = fields.getByName('script number')!;
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
@@ -76,7 +77,7 @@ describe('Range filter builder', () => {
   });
 
   it('should wrap painless scripts in comparator lambdas', () => {
-    const field = getField('script date');
+    const field = fields.getByName('script date')!;
     const expected =
       `boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))} ` +
       `boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}` +
@@ -89,7 +90,7 @@ describe('Range filter builder', () => {
   });
 
   it('should throw an error when gte and gt, or lte and lt are both passed', () => {
-    const field = getField('script number');
+    const field = fields.getByName('script number')!;
 
     expect(() => {
       buildRangeFilter(field, { gte: 1, gt: 3 }, indexPattern);
@@ -101,7 +102,7 @@ describe('Range filter builder', () => {
   });
 
   it('to use the right operator for each of gte, gt, lt and lte', () => {
-    const field = getField('script number');
+    const field = fields.getByName('script number')!;
 
     each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, (operator: string, key: any) => {
       const params = {
@@ -122,7 +123,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = fields.getByName('script number')!;
       filter = buildRangeFilter(field, { gte: 0, lt: Infinity }, indexPattern);
     });
 
@@ -152,7 +153,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = fields.getByName('script number')!;
       filter = buildRangeFilter(field, { gte: -Infinity, lt: Infinity }, indexPattern);
     });
 
@@ -175,11 +176,11 @@ describe('Range filter builder', () => {
 
 describe('getRangeFilterField', function () {
   const indexPattern: IIndexPattern = ({
-    fields,
+    fields: getFieldListMock(),
   } as unknown) as IIndexPattern;
 
   test('should return the name of the field a range query is targeting', () => {
-    const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');
+    const field = indexPattern.fields.getByName('bytes');
     const filter = buildRangeFilter(field!, {}, indexPattern);
     const result = getRangeFilterField(filter);
     expect(result).toBe('bytes');

@@ -46,8 +46,7 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const fieldList: IFieldType[] = indexPattern?.fields ?? [];
-  const field = fieldList.find((fld: IFieldType) => fld.name === fieldName);
+  const field = indexPattern?.fields.getAll().find((fld: IFieldType) => fld.name === fieldName);
   const queryParams = {
     points: points.map((point: LiteralTypeBuildNode) => {
       return ast.toElasticsearchQuery(point, indexPattern, config, context);

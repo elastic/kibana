@@ -18,7 +18,7 @@
  */
 
 import { nodeTypes } from '../node_types';
-import { fields } from '../../../index_patterns/mocks';
+import { getFieldListMock } from '../../../index_patterns/mocks';
 
 // @ts-ignore
 import * as is from './is';
@@ -30,7 +30,7 @@ describe('kuery functions', () => {
 
     beforeEach(() => {
       indexPattern = ({
-        fields,
+        fields: getFieldListMock(),
       } as unknown) as IIndexPattern;
     });
 
@@ -112,7 +112,7 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(result.bool!.should!.length).toBe(indexPattern.fields.length);
+        expect(result.bool!.should!.length).toBe(indexPattern.fields.getAll().length);
       });
 
       test('should return an ES exists query when value is "*"', () => {

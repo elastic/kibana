@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fields } from '../../../../index_patterns/mocks';
+import { getFieldListMock } from '../../../../index_patterns/mocks';
 
 import { nodeTypes } from '../../index';
 import { IIndexPattern, IFieldType } from '../../../../index_patterns';
@@ -30,7 +30,7 @@ describe('getFields', () => {
 
   beforeEach(() => {
     indexPattern = ({
-      fields,
+      fields: getFieldListMock(),
     } as unknown) as IIndexPattern;
   });
 
@@ -54,11 +54,14 @@ describe('getFields', () => {
     test('should not match a wildcard in a literal node', () => {
       const indexPatternWithWildField = {
         title: 'wildIndex',
-        fields: [
+        fields: getFieldListMock([
           {
             name: 'foo*',
+            type: '',
+            searchable: true,
+            aggregatable: true,
           },
-        ],
+        ]),
       } as IIndexPattern;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');

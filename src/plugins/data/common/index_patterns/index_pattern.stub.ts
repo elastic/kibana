@@ -19,10 +19,11 @@
 
 import { IIndexPattern } from '.';
 import { stubFields } from './field.stub';
+import { getFieldListMock } from './mocks';
 
 export const stubIndexPattern: IIndexPattern = {
   id: 'logstash-*',
-  fields: stubFields,
+  fields: getFieldListMock(stubFields),
   title: 'logstash-*',
   timeFieldName: '@timestamp',
 };
@@ -30,14 +31,13 @@ export const stubIndexPattern: IIndexPattern = {
 export const stubIndexPatternWithFields: IIndexPattern = {
   id: '1234',
   title: 'logstash-*',
-  fields: [
+  fields: getFieldListMock([
     {
       name: 'response',
       type: 'number',
       esTypes: ['integer'],
       aggregatable: true,
-      filterable: true,
       searchable: true,
     },
-  ],
+  ]),
 };

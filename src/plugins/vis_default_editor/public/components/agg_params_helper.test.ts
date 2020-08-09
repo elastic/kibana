@@ -119,7 +119,8 @@ describe('DefaultEditorAggParams helpers', () => {
               getAvailableFields: jest.fn((aggConfig: IAggConfig) =>
                 aggConfig
                   .getIndexPattern()
-                  .fields.filter(({ type }) => filterFieldTypes.includes(type))
+                  .fields.getAll()
+                  .filter(({ type }) => filterFieldTypes.includes(type))
               ),
             },
             {

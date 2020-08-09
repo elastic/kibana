@@ -108,7 +108,7 @@ export class FieldParamType extends BaseParamType {
    */
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
-    const filteredFields = fields.filter((field: IndexPatternField) => {
+    const filteredFields = fields.getAll().filter((field: IndexPatternField) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (

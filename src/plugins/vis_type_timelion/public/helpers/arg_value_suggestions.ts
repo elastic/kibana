@@ -20,7 +20,11 @@
 import { get } from 'lodash';
 import { getIndexPatterns, getSavedObjectsClient } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
-import { indexPatterns as indexPatternsUtils, IndexPatternAttributes } from '../../../data/public';
+import {
+  indexPatterns as indexPatternsUtils,
+  IndexPatternAttributes,
+  IndexPatternField,
+} from '../../../data/public';
 
 export interface Location {
   min: number;
@@ -117,7 +121,8 @@ export function getArgValueSuggestions() {
 
         const valueSplit = partial.split(':');
         return indexPattern.fields
-          .filter((field) => {
+          .getAll()
+          .filter((field: IndexPatternField) => {
             return (
               field.aggregatable &&
               'number' === field.type &&
@@ -125,7 +130,7 @@ export function getArgValueSuggestions() {
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map((field) => {
+          .map((field: IndexPatternField) => {
             return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
           });
       },
@@ -136,7 +141,8 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .filter((field) => {
+          .getAll()
+          .filter((field: IndexPatternField) => {
             return (
               field.aggregatable &&
               ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
@@ -144,7 +150,7 @@ export function getArgValueSuggestions() {
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map((field) => {
+          .map((field: IndexPatternField) => {
             return { name: field.name, help: field.type };
           });
       },
@@ -155,14 +161,15 @@ export function getArgValueSuggestions() {
         }
 
         return indexPattern.fields
-          .filter((field) => {
+          .getAll()
+          .filter((field: IndexPatternField) => {
             return (
               'date' === field.type &&
               containsFieldName(partial, field) &&
               !indexPatternsUtils.isNestedField(field)
             );
           })
-          .map((field) => {
+          .map((field: IndexPatternField) => {
             return { name: field.name };
           });
       },

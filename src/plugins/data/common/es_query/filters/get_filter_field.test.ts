@@ -21,16 +21,16 @@ import { buildPhraseFilter } from './phrase_filter';
 import { buildQueryFilter } from './query_string_filter';
 import { getFilterField } from './get_filter_field';
 import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/fields/fields.mocks.ts';
+import { getFieldListMock } from '../../index_patterns/fields/fields.mocks';
 
 describe('getFilterField', function () {
   const indexPattern: IIndexPattern = ({
     id: 'logstash-*',
-    fields,
+    fields: getFieldListMock(),
   } as unknown) as IIndexPattern;
 
   it('should return the field name from known filter types that target a specific field', () => {
-    const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');
+    const field = indexPattern.fields.getByName('extension');
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = getFilterField(filter);
     expect(result).toBe('extension');

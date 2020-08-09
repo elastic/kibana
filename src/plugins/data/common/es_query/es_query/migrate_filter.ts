@@ -45,7 +45,7 @@ export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
     const params: Record<string, any> = get(filter, ['query', 'match', fieldName]);
     let query = params.query;
     if (indexPattern) {
-      const field = indexPattern.fields.find((f) => f.name === fieldName);
+      const field = indexPattern.fields.getByName(fieldName);
 
       if (field) {
         query = getConvertedValueForField(field, params.query);
