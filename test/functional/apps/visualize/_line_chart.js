@@ -321,22 +321,5 @@ export default function ({ getService, getPageObjects }) {
         });
       });
     });
-
-    describe('count aggregation', () => {
-      it('should not have advanced accordion and json input', async () => {
-        await PageObjects.visEditor.clickMetricEditor();
-        log.debug('Count aggregation');
-        await PageObjects.visEditor.selectAggregation('Count', 'metrics');
-        await testSubjects.missingOrFail('advancedParams-1');
-      });
-
-      it('should display advanced accordion if a second metric is added', async () => {
-        await PageObjects.visEditor.addAnotherMetric();
-        log.debug('Metrics agg = Serial diff');
-        await PageObjects.visEditor.selectAggregation('Serial diff', 'metrics');
-        await testSubjects.click('advancedParams-1');
-        await testSubjects.existOrFail('advancedParams-1 > codeEditorContainer');
-      });
-    });
   });
 }
