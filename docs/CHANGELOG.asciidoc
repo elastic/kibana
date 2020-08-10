@@ -121,7 +121,7 @@ Machine Learning::
 * Adds optional ability to delete target index and index pattern when deleting {dfanalytics-job} {kib-pull}66934[#66934]
 * {dfanalytics-cap}: Creation wizard part 1 {kib-pull}67564[#67564]
 * Extends population preview chart to show actual and typical value {kibana-pull}67569[#67569]
-* Adds minor refresh button to DFA and AD Job Messages tabs {kibana-pull}67750[#67750]
+* Adds minor refresh button to {dfanalytics} and {anomaly-detect} Job Messages tabs {kib-pull}67750[#67750]
 * Keeps the edit rule flyout open if there are multiple rules {kibana-pull}68174[#68174]
 * Model snapshot management {kibana-pull}68182[#68182]
 * DF Analytics: Creation wizard part 2 {kibana-pull}68462[#68462]
