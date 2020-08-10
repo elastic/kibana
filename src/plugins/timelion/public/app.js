@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { createHashHistory } from 'history';
 
-import { createKbnUrlStateStorage } from '../../kibana_utils/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../kibana_utils/public';
 import { syncQueryStateWithUrl } from '../../data/public';
 
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
@@ -63,6 +63,7 @@ export function initTimelionApp(app, deps) {
     createKbnUrlStateStorage({
       history,
       useHash: deps.core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(deps.core.notifications.toasts),
     })
   );
   app.config(watchMultiDecorator);
