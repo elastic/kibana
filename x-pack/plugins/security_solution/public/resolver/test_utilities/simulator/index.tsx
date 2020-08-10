@@ -14,8 +14,9 @@ import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
+import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
+import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -43,6 +44,11 @@ export class Simulator {
    * This is used by `debugActions`.
    */
   private readonly spyMiddleware: SpyMiddleware;
+  /**
+   * A fake simulator that allows you to explicitly simulate resize events and run animation frames
+   */
+  public readonly sideEffectSimulator: SideEffectSimulator;
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
@@ -87,11 +93,14 @@ export class Simulator {
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
 
+    this.sideEffectSimulator = sideEffectSimulatorFactory();
+
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
         resolverComponentInstanceID={this.resolverComponentInstanceID}
         history={this.history}
+        sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
@@ -174,9 +183,17 @@ export class Simulator {
   }
 
   /**
+   * This manually runs the animation frames tied to a configurable timestamp in the future
+   */
+  public runAnimationFramesTimeFromNow(time: number = 0) {
+    this.sideEffectSimulator.controls.time = new Date().getTime() + time;
+    this.sideEffectSimulator.controls.provideAnimationFrame();
+  }
+
+  /**
    * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
    *
-   * @param entityID The entity ID of the proocess node to select in
+   * @param entityID The entity ID of åthe proocess node to select in
    */
   public processNodeRelatedEventButton(entityID: string): ReactWrapper {
     return this.domNodes(
@@ -251,7 +268,14 @@ export class Simulator {
   }
 
   /**
-   * The icon element for the node detail title.
+   * Wrapper for the panning and zooming controls
+   */
+  public graphControlElement(): ReactWrapper {
+    return this.findInDOM('[data-test-subj="resolver:graph-controls"]');
+  }
+
+  /**
+   * The details of the selected node are shown in a description list. This returns the description elements of the description list.
    */
   public nodeDetailViewTitleIcon(): ReactWrapper {
     return this.domNodes('[data-test-subj="resolver:node-detail:title-icon"]');
