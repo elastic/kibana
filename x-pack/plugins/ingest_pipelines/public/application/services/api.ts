@@ -108,7 +108,7 @@ export class ApiService {
   public async simulatePipeline(testConfig: {
     documents: object[];
     verbose?: boolean;
-    pipeline: Omit<Pipeline, 'name'>;
+    pipeline: Pick<Pipeline, 'processors' | 'on_failure'>;
   }) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/simulate`,
