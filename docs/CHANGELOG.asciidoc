@@ -133,7 +133,7 @@ Machine Learning::
 * Updates APM Module to Work with Service Maps {kibana-pull}70361[#70361]
 * Changes all calls to ML endpoints to use internal user {kibana-pull}70487[#70487]
 * {dfanalytics-cap}: add ability to edit job for fields supported by API {kib-pull}70489[#70489]
-* DF Analytics: adds prompt for destination index pattern creation {kibana-pull}70651[#70651]
+* {dfanalytics-cap}: adds prompt for destination index pattern creation {kib-pull}70651[#70651]
 * Adds switch to enable model plot annotations independently {kibana-pull}70678[#70678]
 * Adds peak_model_bytes to model size stats type {kibana-pull}70825[#70825]
 * Anomaly swim lane embeddable navigation and filter actions {kibana-pull}71082[#71082]
