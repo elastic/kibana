@@ -18,18 +18,31 @@ import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  if (!enterpriseSearchUrl)
+    return (
+      <Switch>
+        <Route exact path="/setup_guide">
+          <SetupGuide />
+        </Route>
+        <Route>
+          <Redirect to="/setup_guide" />
+          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
+        </Route>
+      </Switch>
+    );
 
   return (
     <Switch>
-      <Route exact path="/">
-        {!enterpriseSearchUrl ? <Redirect to="/setup_guide" /> : <Redirect to="/engines" />}
-      </Route>
       <Route exact path="/setup_guide">
         <SetupGuide />
       </Route>
       <Route>
         <Layout navigation={<AppSearchNav />}>
           <Switch>
+            <Route exact path="/">
+              {/* For some reason a Redirect to /engines just doesn't work here - it shows a blank page */}
+              <EngineOverview />
+            </Route>
             <Route exact path="/engines">
               <EngineOverview />
             </Route>

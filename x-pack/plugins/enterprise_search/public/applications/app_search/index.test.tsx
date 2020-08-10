@@ -10,39 +10,22 @@ import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
-import { SideNav, SideNavLink } from '../shared/layout';
-import { SetupGuide } from './components/setup_guide';
-import { EngineOverview } from './components/engine_overview';
-
+import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { AppSearch, AppSearchNav } from './';
 
-describe('App Search Routes', () => {
-  describe('/', () => {
-    it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
-      (useContext as jest.Mock).mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
-      const wrapper = shallow(<AppSearch />);
+describe('AppSearch', () => {
+  it('renders', () => {
+    const wrapper = shallow(<AppSearch />);
 
-      expect(wrapper.find(Redirect)).toHaveLength(1);
-      expect(wrapper.find(EngineOverview)).toHaveLength(0);
-    });
-
-    it('renders Engine Overview when enterpriseSearchUrl is set', () => {
-      (useContext as jest.Mock).mockImplementationOnce(() => ({
-        enterpriseSearchUrl: 'https://foo.bar',
-      }));
-      const wrapper = shallow(<AppSearch />);
-
-      expect(wrapper.find(EngineOverview)).toHaveLength(1);
-      expect(wrapper.find(Redirect)).toHaveLength(0);
-    });
+    expect(wrapper.find(Layout)).toHaveLength(1);
   });
 
-  describe('/setup_guide', () => {
-    it('renders', () => {
-      const wrapper = shallow(<AppSearch />);
+  it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
+    (useContext as jest.Mock).mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
+    const wrapper = shallow(<AppSearch />);
 
-      expect(wrapper.find(SetupGuide)).toHaveLength(1);
-    });
+    expect(wrapper.find(Redirect)).toHaveLength(1);
+    expect(wrapper.find(Layout)).toHaveLength(0);
   });
 });
 
