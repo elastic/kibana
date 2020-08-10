@@ -162,6 +162,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       xTitle: defaults.xTitle || x?.label,
       yTitle: defaults.yTitle || y?.label,
     };
+    /* We want this callback to run only if open changes its state. What we want to accomplish here is to give the user a better UX.
+       By default these input fields have the axis legends. If the user changes the input text, the axis legends should also change.
+       BUT if the user cleans up the input text, it should remain empty until the user closes and reopens the panel.
+       In that case, the default axes legend should appear. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
