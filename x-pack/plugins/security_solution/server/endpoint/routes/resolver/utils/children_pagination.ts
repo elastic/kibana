@@ -9,6 +9,9 @@ import { eventSequence } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { urlEncodeCursor, SortFields, urlDecodeCursor } from './pagination';
 
+/**
+ * Pagination information for the children class.
+ */
 export interface ChildrenPaginationCursor {
   timestamp: number;
   sequence: number;
@@ -43,6 +46,11 @@ export class ChildrenPaginationBuilder {
     private readonly sequence?: number
   ) {}
 
+  /**
+   * This function validates that the parsed cursor is a ChildrenPaginationCursor.
+   *
+   * @param parsed an object parsed from an encoded cursor.
+   */
   static decode(
     parsed: ChildrenPaginationCursor | undefined
   ): ChildrenPaginationCursor | undefined {

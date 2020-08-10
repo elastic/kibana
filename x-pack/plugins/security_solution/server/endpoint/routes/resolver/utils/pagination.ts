@@ -9,6 +9,16 @@ import { eventId } from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ChildrenPaginationCursor } from './children_pagination';
 
+type SearchAfterFields = [number, string];
+
+interface PaginationCursor {
+  timestamp: number;
+  eventID: string;
+}
+
+/**
+ * Defines the sorting fields for queries that leverage pagination
+ */
 export type SortFields = [
   {
     '@timestamp': string;
@@ -16,14 +26,11 @@ export type SortFields = [
   { [x: string]: string }
 ];
 
+/**
+ * Defines a type of a function used to convert the parsed json data into a typescript type.
+ * If the function fails to transform the data it should return undefined.
+ */
 export type Decoder<T> = (parsed: T | undefined) => T | undefined;
-
-type SearchAfterFields = [number, string];
-
-interface PaginationCursor {
-  timestamp: number;
-  eventID: string;
-}
 
 /**
  * Interface for defining the returned pagination information.
@@ -34,6 +41,11 @@ export interface PaginationFields {
   searchAfter?: SearchAfterFields;
 }
 
+/**
+ * A function to encode a cursor from a pagination object.
+ *
+ * @param data Transforms a pagination cursor into a base64 encoded string
+ */
 export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCursor): string {
   const value = JSON.stringify(data);
   return Buffer.from(value, 'utf8')
@@ -43,6 +55,12 @@ export function urlEncodeCursor(data: PaginationCursor | ChildrenPaginationCurso
     .replace(/=+$/g, '');
 }
 
+/**
+ * A function to decode a cursor.
+ *
+ * @param cursor a cursor encoded by the `urlEncodeCursor` function
+ * @param decode a function to transform the parsed data into an actual type
+ */
 export function urlDecodeCursor<T>(cursor: string, decode: Decoder<T>): T | undefined {
   const fixedCursor = cursor.replace(/\-/g, '+').replace(/_/g, '/');
   const data = Buffer.from(fixedCursor, 'base64').toString('utf8');
@@ -76,6 +94,11 @@ export class PaginationBuilder {
     private readonly eventID?: string
   ) {}
 
+  /**
+   * Validates that the parsed object is actually a PaginationCursor.
+   *
+   * @param parsed an object parsed from an encoded cursor.
+   */
   static decode(parsed: PaginationCursor | undefined): PaginationCursor | undefined {
     if (parsed && parsed.timestamp && parsed.eventID) {
       const { timestamp, eventID } = parsed;
