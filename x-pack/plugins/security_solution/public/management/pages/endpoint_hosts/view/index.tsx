@@ -183,14 +183,14 @@ export const EndpointList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
-    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
+    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last Active',
     });
 
     return [
       {
         field: 'metadata.host',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostname', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
@@ -215,7 +215,7 @@ export const EndpointList = () => {
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostStatus', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Host Status',
         }),
         // eslint-disable-next-line react/display-name
@@ -227,7 +227,7 @@ export const EndpointList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpointList.hostStatusValue"
+                id="xpack.securitySolution.endpoint.list.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -237,7 +237,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policy', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
           defaultMessage: 'Integration',
         }),
         truncateText: true,
@@ -256,7 +256,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
           defaultMessage: 'Configuration Status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
@@ -284,14 +284,14 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.securitySolution.endpointList.os', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.securitySolution.endpointList.ip', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -309,7 +309,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.securitySolution.endpointList.endpointVersion', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
@@ -385,7 +385,7 @@ export const EndpointList = () => {
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">
                   <FormattedMessage
-                    id="xpack.securitySolution.endpointList.pageTitle"
+                    id="xpack.securitySolution.endpoint.list.pageTitle"
                     defaultMessage="Endpoints"
                   />
                 </h1>
@@ -393,7 +393,7 @@ export const EndpointList = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpointList.beta', {
+                label={i18n.translate('xpack.securitySolution.endpoint.list.beta', {
                   defaultMessage: 'Beta',
                 })}
               />
@@ -403,7 +403,7 @@ export const EndpointList = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.endpointList.pageSubTitle"
+                id="xpack.securitySolution.endpoint.list.pageSubTitle"
                 defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
@@ -416,7 +416,7 @@ export const EndpointList = () => {
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
-              id="xpack.securitySolution.endpointList.totalCount"
+              id="xpack.securitySolution.endpoint.list.totalCount"
               defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
               values={{ totalItemCount }}
             />

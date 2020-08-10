@@ -126,14 +126,14 @@ const EndpointsEmptyState = React.memo<{
   const policySteps = useMemo(
     () => [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepOneTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.list.stepOneTitle', {
           defaultMessage: 'Select the integration you want to use',
         }),
         children: (
           <>
             <EuiText color="subdued" size="m" grow={false}>
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.hostList.stepOne"
+                id="xpack.securitySolution.endpoint.list.stepOne"
                 defaultMessage="Select from existing integrations. This can be changed later."
               />
             </EuiText>
@@ -151,7 +151,7 @@ const EndpointsEmptyState = React.memo<{
                 return loading ? (
                   <EuiSelectableMessage>
                     <FormattedMessage
-                      id="xpack.securitySolution.endpoint.hostList.loadingPolicies"
+                      id="xpack.securitySolution.endpoint.list.loadingPolicies"
                       defaultMessage="Loading integrations"
                     />
                   </EuiSelectableMessage>
@@ -159,7 +159,7 @@ const EndpointsEmptyState = React.memo<{
                   list
                 ) : (
                   <FormattedMessage
-                    id="xpack.securitySolution.endpoint.hostList.noPolicies"
+                    id="xpack.securitySolution.endpoint.list.noPolicies"
                     defaultMessage="There are no integrations."
                   />
                 );
@@ -169,7 +169,7 @@ const EndpointsEmptyState = React.memo<{
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.hostList.stepTwoTitle', {
+        title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
           defaultMessage:
             'Enroll your agents enabled with Endpoint Security through Ingest Manager',
         }),
@@ -179,7 +179,7 @@ const EndpointsEmptyState = React.memo<{
             <EuiFlexItem>
               <EuiText color="subdued" size="m" grow={false}>
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostList.stepTwo"
+                  id="xpack.securitySolution.endpoint.list.stepTwo"
                   defaultMessage="You’ll be provided with the necessary commands to get started."
                 />
               </EuiText>
@@ -211,13 +211,13 @@ const EndpointsEmptyState = React.memo<{
       steps={policySteps}
       headerComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostList.noEndpointsPrompt"
+          id="xpack.securitySolution.endpoint.list.noEndpointsPrompt"
           defaultMessage="Next step: Enroll an Agent with Elastic Endpoint Security"
         />
       }
       bodyComponent={
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostList.noEndpointsInstructions"
+          id="xpack.securitySolution.endpoint.list.noEndpointsInstructions"
           defaultMessage="You’ve added the Endpoint Security integration. Now enroll your agents using the steps below."
         />
       }

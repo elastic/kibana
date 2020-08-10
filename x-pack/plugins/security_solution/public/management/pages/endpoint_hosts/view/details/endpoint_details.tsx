@@ -67,13 +67,13 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
   const detailsResultsUpper = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.os', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
           defaultMessage: 'OS',
         }),
         description: details.host.os.full,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.lastSeen', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
           defaultMessage: 'Last Seen',
         }),
         description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
@@ -124,7 +124,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.policy', {
           defaultMessage: 'Integration',
         }),
         description: (
@@ -139,7 +139,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.policyStatus', {
           defaultMessage: 'Configuration response',
         }),
         description: (
@@ -155,7 +155,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
             >
               <EuiText size="m">
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
+                  id="xpack.securitySolution.endpoint.details.policyStatusValue"
                   defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
                   values={{ policyStatus }}
                 />
@@ -169,7 +169,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
   const detailsResultsLower = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.ipAddress', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.ipAddress', {
           defaultMessage: 'IP Address',
         }),
         description: (
@@ -181,13 +181,13 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.hostname', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.hostname', {
           defaultMessage: 'Hostname',
         }),
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.endpointVersion', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
           defaultMessage: 'Endpoint Version',
         }),
         description: details.agent.version,
@@ -218,7 +218,7 @@ export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => 
         >
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
             defaultMessage="Reassign Configuration"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
