@@ -12,7 +12,6 @@ export const MonitorStatusTranslations = {
       'Monitor {monitorName} with url {monitorUrl} is {statusMessage} from {observerLocation}. The latest error message is {latestErrorMessage}',
     values: {
       monitorName: '{{state.monitorName}}',
-      monitorId: '{{state.monitorId}}',
       monitorUrl: '{{{state.monitorUrl}}}',
       statusMessage: '{{state.statusMessage}}',
       latestErrorMessage: '{{{state.latestErrorMessage}}}',
