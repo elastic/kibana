@@ -29,6 +29,8 @@ export interface ISearchOptions {
   signal?: AbortSignal;
   strategy?: string;
   rawRequest?: KibanaRequest;
+  stored?: boolean;
+  restore?: boolean;
 }
 
 export interface ISearchSetup {

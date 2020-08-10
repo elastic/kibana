@@ -19,6 +19,8 @@ export interface IAsyncSearchRequest extends IEsSearchRequest {
    * The ID received from the response from the initial request
    */
   id?: string;
+  stored?: boolean;
+  restore?: boolean;
 
   params?: EnhancedSearchParams;
 }

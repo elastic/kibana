@@ -290,7 +290,7 @@ export class DashboardStateManager {
     return this.appState.sessionId;
   }
 
-  public setSessionId(sessionId: string | undefined) {
+  public setSessionId(sessionId?: string) {
     this.stateContainer.transitions.set('sessionId', sessionId);
   }
 

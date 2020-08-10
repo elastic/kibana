@@ -123,11 +123,13 @@ async function asyncSearch(
     ...request.params,
   };
 
+  const { restore = false, stored = false } = options || {};
+
   // Distinguish between an ID we retrieved from a session to an
-  const storedAsyncId = request.sessionId
-    ? await sessionService.getId(options!.rawRequest!, request.sessionId, request.params?.body)
+  const storedAsyncId = restore
+    ? await sessionService.getId(options!.rawRequest!, request.sessionId!, request.params?.body)
     : undefined;
-  const asyncId = request.id ? request.id : storedAsyncId;
+  const asyncId = request.id || storedAsyncId;
 
   params.trackTotalHits = true; // Get the exact count of hits
 
@@ -143,15 +145,17 @@ async function asyncSearch(
   // DONT MERGE WITH requestCache: false,
   const query = toSnakeCase({
     ...(asyncId
-      ? {}
+      ? {
+          waitForCompletionTimeout: '100ms',
+        }
       : {
           // TODO: REMOVE
           requestCache: false,
           waitForCompletionTimeout: '100ms',
+          ...(stored ? {} : { keepAlive: '1m' }), // Extend the TTL for this search request by one minute
+          ...(batchedReduceSize && { batchedReduceSize }),
+          ...queryParams,
         }),
-    keepAlive: '1m', // Extend the TTL for this search request by one minute
-    ...(batchedReduceSize && { batchedReduceSize }),
-    ...queryParams,
   });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -162,8 +166,8 @@ async function asyncSearch(
   )) as AsyncSearchResponse<any>;
 
   // Track if ID wasn't recovered from a BG search
-  if (!storedAsyncId && request.sessionId) {
-    sessionService.trackId(options!.rawRequest!, request.sessionId, request.params?.body, id);
+  if (request.sessionId && !stored) {
+    sessionService.trackId(options!.rawRequest!, request.sessionId!, request.params?.body, id);
   }
 
   return {

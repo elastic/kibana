@@ -36,11 +36,17 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
 
         query: schema.object({}, { unknowns: 'allow' }),
 
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: schema.object(
+          {
+            stored: schema.maybe(schema.boolean()),
+            restore: schema.maybe(schema.boolean()),
+          },
+          { unknowns: 'allow' }
+        ),
       },
     },
     async (context, request, res) => {
-      const searchRequest = request.body;
+      const { stored, restore, ...searchRequest } = request.body;
       const { strategy, id } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
@@ -51,6 +57,8 @@ export function registerSearchRoute(core: CoreSetup<object, DataPluginStart>): v
           rawRequest: request,
           signal,
           strategy,
+          stored,
+          restore,
         });
         return res.ok({ body: response });
       } catch (err) {

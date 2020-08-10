@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../embeddable_plugin';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
+import { DataPublicPluginStart } from '../../../../data/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
@@ -31,7 +32,8 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  hideWriteControls: boolean,
+  searchService: DataPublicPluginStart['search']
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
@@ -45,6 +47,7 @@ export function getTopNavConfig(
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
+            getSendToBackground(actions[TopNavIds.SEND_TO_BACKGROUND], searchService),
           ];
     case ViewMode.EDIT:
       return [
@@ -57,6 +60,34 @@ export function getTopNavConfig(
       ];
     default:
       return [];
+  }
+}
+
+function getSendToBackground(action: NavAction, searchService: DataPublicPluginStart['search']) {
+  if (searchService.session.getStored()) {
+    return {
+      id: 'background-clear',
+      label: i18n.translate('dashboard.topNave.clearBackgroundAriaLabel', {
+        defaultMessage: 'Clear Background Session',
+      }),
+      description: i18n.translate('dashboard.topNave.clearBackgroundDescription', {
+        defaultMessage: 'Clear Background Session',
+      }),
+      testId: 'clearBackground',
+      run: action,
+    };
+  } else {
+    return {
+      id: 'background',
+      label: i18n.translate('dashboard.topNave.sendToBackgroundAriaLabel', {
+        defaultMessage: 'Send to Background',
+      }),
+      description: i18n.translate('dashboard.topNave.sendToBackgroundDescription', {
+        defaultMessage: 'Send to Background',
+      }),
+      testId: 'sendToBackground',
+      run: action,
+    };
   }
 }
 

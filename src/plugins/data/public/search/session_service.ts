@@ -20,23 +20,50 @@
 import uuid from 'uuid';
 
 export class SessionService {
+  private id: string;
   private sessionId: string = uuid.v4();
+  private isRestore: boolean | undefined;
+  protected isStored: boolean | undefined;
+
+  constructor() {
+    this.id = uuid.v4();
+  }
 
   public get() {
     return this.sessionId;
   }
 
-  public set(sessionId: string) {
+  public isRestoredSession() {
+    return this.isRestore;
+  }
+
+  public getStored() {
+    return this.isStored;
+  }
+
+  public restore(sessionId: string) {
     this.sessionId = sessionId;
+    this.isRestore = true;
+    this.isStored = true;
   }
 
   public start() {
     this.sessionId = uuid.v4();
+    this.isRestore = false;
+    this.isStored = false;
     return this.sessionId;
   }
 
   public clear() {
-    this.sessionId = uuid.v4();
+    this.start();
+  }
+
+  public async store(): Promise<boolean> {
+    return false;
+  }
+
+  public async getSearchIds(sessionId?: string) {
+    return undefined;
   }
 }
 

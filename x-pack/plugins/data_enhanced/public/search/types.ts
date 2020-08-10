@@ -19,7 +19,7 @@ export interface IAsyncSearchOptions extends ISearchOptions {
 
 export interface IEnhancedSessionService extends ISessionService {
   store: () => Promise<boolean>;
-  getSearchIds: (sessionId?: string) => any;
+  getSearchIds: (sessionId?: string) => Promise<any>;
 }
 
 export interface EnhancedSearchInterceptorDeps extends SearchInterceptorDeps {

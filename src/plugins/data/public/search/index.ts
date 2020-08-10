@@ -57,7 +57,7 @@ export {
   parseSearchSourceJSON,
 } from './search_source';
 
-export { SearchInterceptor, SearchEventInfo, SearchInterceptorDeps } from './search_interceptor';
+export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';
 
 export { SessionService, ISessionService } from './session_service';

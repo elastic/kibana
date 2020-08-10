@@ -9,8 +9,8 @@
     "security",
     "data"
   ],
-  "optionalPlugins": ["kibanaReact", "kibanaUtils", "usageCollection"],
+  "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["kibanaUtils"]
 }

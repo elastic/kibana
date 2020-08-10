@@ -180,6 +180,7 @@ export class SessionService {
         sessionInfo.requests.forEach(async (searchId) => {
           try {
             await sessionInfo.updateHandler(searchId);
+            this.logger.debug(`Extended expiration for ${searchId}.`);
           } catch (eUpdate) {
             this.logger.debug(
               `${sessionSavedObject.id} Error during expiration update. C'est la vie.`

@@ -30,7 +30,6 @@ import { filter, map, debounceTime, mapTo, startWith, switchMap } from 'rxjs/ope
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SearchEventInfo } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -180,11 +179,6 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
-    });
-
-    // Save session ID to URL
-    const searchEventsSubscription = searchService.subscribe((e: SearchEventInfo) => {
-      dashboardStateManager.setSessionId(e.sessionId);
     });
 
     // sync initial app filters from state to filterManager
@@ -366,7 +360,7 @@ export class DashboardAppController {
     const updateState = () => {
       const sessionId = dashboardStateManager.getSessionId();
       if (sessionId) {
-        searchService.session.set(sessionId);
+        searchService.session.restore(sessionId);
       } else {
         searchService.session.start();
       }
@@ -861,6 +855,20 @@ export class DashboardAppController {
       dashboardStateManager.setFullScreenMode(true);
       updateNavBar();
     };
+    navActions[TopNavIds.SEND_TO_BACKGROUND] = () => {
+      if (searchService.session.getStored()) {
+        dashboardStateManager.setSessionId();
+      } else {
+        const sent = searchService.sendToBackground();
+        if (sent) {
+          dashboardStateManager.setSessionId(searchService.session.get());
+          notifications.toasts.addInfo({
+            title: 'Background request has started',
+            text: "You may navigate away from this page. We'll notify you when results are ready.",
+          });
+        }
+      }
+    };
     navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(ViewMode.VIEW);
     navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(ViewMode.EDIT);
     navActions[TopNavIds.SAVE] = () => {
@@ -1112,7 +1120,8 @@ export class DashboardAppController {
       $scope.topNavMenu = getTopNavConfig(
         dashboardStateManager.getViewMode(),
         navActions,
-        dashboardConfig.getHideWriteControls()
+        dashboardConfig.getHideWriteControls(),
+        searchService
       );
       updateNavBar();
     });
@@ -1127,7 +1136,6 @@ export class DashboardAppController {
 
       dashboardStateManager.setSessionId(undefined);
       if (queryServiceSubscription) queryServiceSubscription.unsubscribe();
-      searchEventsSubscription.unsubscribe();
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();

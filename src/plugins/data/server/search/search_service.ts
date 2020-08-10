@@ -79,7 +79,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return this.getSearchStrategy(options.strategy || ES_SEARCH_STRATEGY).search(
       context,
       searchRequest,
-      { signal: options.signal }
+      options
     );
   }
 

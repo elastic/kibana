@@ -6,8 +6,6 @@
 
 import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
-import { getLongQueryNotification } from './long_query_notification';
-import { getBackgroundRunningNotification } from './background_running_notification';
 import { SearchInterceptor, UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
@@ -15,8 +13,6 @@ import { EnhancedSearchInterceptorDeps } from './types';
 import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common/search';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
-  private isRestoreCache: Map<string, boolean> = new Map();
-
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
@@ -31,7 +27,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
   public cancelPending = () => {
-    this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
@@ -40,83 +35,11 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
    * Un-schedule timing out all of the searches intercepted.
    */
-  public runBeyondTimeout = async () => {
-    this.hideToast();
+  public sendToBackground = async () => {
     this.timeoutSubscriptions.unsubscribe();
     if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
 
-    const stored = await this.deps.session.store();
-    if (stored) {
-      this.events$.next({
-        name: 'background',
-        sessionId: this.deps.session.get(),
-      });
-      this.deps.toasts.addInfo(
-        {
-          title: 'Background request has started',
-          text: getBackgroundRunningNotification({
-            viewRequests: () => {},
-          }),
-        },
-        {
-          toastLifeTimeMs: 1000000,
-        }
-      );
-    }
-  };
-
-  private shouldNotifyLongRunning = async () => {
-    const currentSessionId = this.deps.session.get();
-    if (this.isRestoreCache.get(currentSessionId) !== undefined) return false;
-
-    // set before await to avoid additional fetches
-    this.isRestoreCache.set(currentSessionId, false);
-
-    const bgSession = await this.deps.session.get();
-    const isRestore = !bgSession;
-    this.isRestoreCache.set(currentSessionId, isRestore);
-
-    setTimeout(() => {
-      this.isRestoreCache.delete(currentSessionId);
-    }, 60000);
-
-    return isRestore;
-  };
-
-  private showToastIfNewSession = async () => {
-    if (await this.shouldNotifyLongRunning()) {
-      if (this.longRunningToast) this.hideToast();
-      this.longRunningToast = this.deps.toasts.addInfo(
-        {
-          title: 'Your query is taking awhile',
-          text: getLongQueryNotification({
-            cancel: this.cancelPending,
-            runBeyondTimeout: this.runBeyondTimeout,
-          }),
-        },
-        {
-          toastLifeTimeMs: 1000000,
-        }
-      );
-    }
-  };
-
-  protected showToast = () => {
-    this.showToastIfNewSession();
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.deps.toasts.addInfo(
-      {
-        title: 'Your query is taking awhile',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
-    if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryPopupShown();
+    return await this.deps.session.store();
   };
 
   public search(
@@ -124,6 +47,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
   ): Observable<IAsyncSearchResponse> {
     let { id } = request;
+
+    request.stored = this.deps.session.getStored();
+    request.restore = this.deps.session.isRestoredSession();
 
     request.params = {
       ignoreThrottled: !this.deps.uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
@@ -133,7 +59,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     const { combinedSignal, cleanup } = this.setupTimers(options);
     const aborted$ = from(toPromise(combinedSignal));
 
-    this.pendingCount$.next(++this.pendingCount);
+    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
       expand((response: IAsyncSearchResponse) => {
@@ -152,7 +78,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
+            const stored = this.deps.session.isRestoredSession();
+            return this.runSearch({ id, stored }, combinedSignal) as Observable<
+              IAsyncSearchResponse
+            >;
           })
         );
       }),
@@ -168,7 +97,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         },
       }),
       finalize(() => {
-        this.pendingCount$.next(--this.pendingCount);
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
       })
     );

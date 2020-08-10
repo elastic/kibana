@@ -25,6 +25,7 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 export class DataEnhancedPlugin
   implements
     Plugin<void, DataEnhancedStart, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
+  private sessionService!: EnhancedSessionService;
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
@@ -35,11 +36,11 @@ export class DataEnhancedPlugin
       setupKqlQuerySuggestionProvider(core)
     );
 
-    const sessionService = new EnhancedSessionService(core.http);
+    this.sessionService = new EnhancedSessionService(core.http);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
       {
-        session: sessionService,
+        session: this.sessionService,
         toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
@@ -52,7 +53,7 @@ export class DataEnhancedPlugin
     data.enhance({
       search: {
         searchInterceptor: enhancedSearchInterceptor,
-        sessionService
+        sessionService: this.sessionService,
       },
     });
   }
@@ -65,8 +66,7 @@ export class DataEnhancedPlugin
       another application.
      */
     core.application.currentAppId$.subscribe(() => {
-      plugins.data.search.session.clear();
+      this.sessionService.clear();
     });
-
   }
 }

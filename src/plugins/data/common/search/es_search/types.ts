@@ -35,6 +35,7 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
     In particular, this argument is used to restore long running background search requests.
    */
   sessionId?: string;
+  stored?: boolean;
 }
 
 export interface IEsSearchResponse extends IKibanaSearchResponse {

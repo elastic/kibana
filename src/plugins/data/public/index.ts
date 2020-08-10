@@ -346,7 +346,6 @@ export {
   IEsSearchRequest,
   IKibanaSearchResponse,
   IKibanaSearchRequest,
-  SearchEventInfo,
   SearchRequest,
   SearchResponse,
   SearchError,

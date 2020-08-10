@@ -9,14 +9,18 @@ import { SessionService } from '../../../../../src/plugins/data/public';
 import { IEnhancedSessionService } from '../search/types';
 
 export class EnhancedSessionService extends SessionService implements IEnhancedSessionService {
-  constructor(
-    private readonly http: HttpStart,
-  ) {
+  constructor(private readonly http: HttpStart) {
     super();
   }
 
   public async store(sessionId?: string) {
-    return await this.http.post(`/internal/session/${sessionId || this.get()}/save`);
+    try {
+      const response = await this.http.post(`/internal/session/${sessionId || this.get()}/save`);
+      this.isStored = true;
+      return response;
+    } catch (e) {
+      this.isStored = false;
+    }
   }
 
   public async getSearchIds(sessionId?: string) {

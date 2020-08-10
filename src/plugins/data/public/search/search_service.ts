@@ -28,7 +28,7 @@ import { calculateBounds, TimeRange } from '../../common/query';
 
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor, SearchEventInfo } from './search_interceptor';
+import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -36,7 +36,7 @@ import {
   AggConfigs,
   getCalculateAutoTimeExpression,
 } from './aggs';
-import { SessionService } from './session_service';
+import { SessionService, ISessionService } from './session_service';
 import { ISearchGeneric } from './types';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
@@ -64,6 +64,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
    */
   private calculateBounds = (timeRange: TimeRange) =>
     calculateBounds(timeRange, { forceNow: getForceNow() });
+  sessionService!: ISessionService;
 
   public setup(
     core: CoreSetup,
@@ -98,11 +99,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
      * their own search collector instances
      */
-    const sessionService = new SessionService();
+    this.sessionService = new SessionService();
 
     this.searchInterceptor = new SearchInterceptor(
       {
-        session: sessionService,
+        session: this.sessionService,
         toasts: core.notifications.toasts,
         http: core.http,
         uiSettings: core.uiSettings,
@@ -116,6 +117,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
+        this.sessionService = enhancements.sessionService;
       },
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
@@ -153,20 +155,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search,
-      session: sessionService,
+      sendToBackground: () => {
+        return this.searchInterceptor.sendToBackground();
+      },
+      session: this.sessionService,
       usageCollector: this.usageCollector!,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
-      },
-      subscribe: (handler: (e: SearchEventInfo) => void) => {
-        return this.searchInterceptor?.getEvents$().subscribe({
-          next(e) {
-            handler(e);
-          },
-        });
       },
       __LEGACY: legacySearch,
     };
