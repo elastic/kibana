@@ -10,6 +10,23 @@ export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps']);
 
   describe('auto fit map to bounds', () => {
+    describe('initial location', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap(
+          'document example - auto fit to bounds for initial location'
+        );
+      });
+
+      it('should automatically fit to bounds on initial map load', async () => {
+        const hits = await PageObjects.maps.getHits();
+        expect(hits).to.equal('6');
+
+        const { lat, lon } = await PageObjects.maps.getView();
+        expect(Math.round(lat)).to.equal(41);
+        expect(Math.round(lon)).to.equal(-99);
+      });
+    });
+
     describe('without joins', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('document example');
