@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { JobGroup } from '../job_group';
-import { getGroupIdsUrl } from '../../../../util/get_selected_ids_url';
+import { getGroupIdsUrl, TAB_IDS } from '../../../../util/get_selected_ids_url';
 
 export function JobDescription({ job, isManagementTable }) {
   return (
@@ -18,7 +18,7 @@ export function JobDescription({ job, isManagementTable }) {
         {job.groups.map((group) => {
           if (isManagementTable === true) {
             return (
-              <a key={group} href={getGroupIdsUrl('jobs', [group])}>
+              <a key={group} href={getGroupIdsUrl(TAB_IDS.ANOMALY_DETECTION, [group])}>
                 <JobGroup name={group} />
               </a>
             );

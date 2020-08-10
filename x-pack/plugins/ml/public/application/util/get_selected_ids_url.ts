@@ -11,7 +11,7 @@ export enum TAB_IDS {
   ANOMALY_DETECTION = 'jobs',
 }
 
-function getSelectedIdsUrl(tabId, settings: any): string {
+function getSelectedIdsUrl(tabId: TAB_IDS, settings: { [key: string]: string | string[] }): string {
   // Create url for filtering by job id or group ids for kibana management table
   const encoded = rison.encode(settings);
   const url = `?mlManagement=${encoded}`;
@@ -21,7 +21,7 @@ function getSelectedIdsUrl(tabId, settings: any): string {
 }
 
 // Create url for filtering by group ids for kibana management table
-export function getGroupIdsUrl(tabId: string, ids: string[]): string {
+export function getGroupIdsUrl(tabId: TAB_IDS, ids: string[]): string {
   const settings = {
     groupIds: ids,
   };
@@ -30,7 +30,7 @@ export function getGroupIdsUrl(tabId: string, ids: string[]): string {
 }
 
 // Create url for filtering by job id for kibana management table
-export function getJobIdUrl(tabId: string, id: string): string {
+export function getJobIdUrl(tabId: TAB_IDS, id: string): string {
   const settings = {
     jobId: id,
   };
