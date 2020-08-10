@@ -39,9 +39,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${LIST_URL}?id=some-list-id`)
+          .get(`${LIST_URL}?id=$${getCreateMinimalListSchemaMock().id}`)
           .set('kbn-xsrf', 'true')
-          .send(getCreateMinimalListSchemaMock())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -59,7 +58,6 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .get(`${LIST_URL}?id=${createListBody.id}`)
           .set('kbn-xsrf', 'true')
-          .send(getCreateMinimalListSchemaMock())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);

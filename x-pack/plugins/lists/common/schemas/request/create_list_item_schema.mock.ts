@@ -14,3 +14,14 @@ export const getCreateListItemSchemaMock = (): CreateListItemSchema => ({
   meta: META,
   value: VALUE,
 });
+
+export const getCreateMinimalListItemSchemaMock = (): CreateListItemSchema => ({
+  id: LIST_ITEM_ID,
+  list_id: LIST_ID,
+  value: VALUE,
+});
+
+export const getCreateMinimalListItemSchemaMockWithoutId = (): CreateListItemSchema => ({
+  list_id: LIST_ID,
+  value: VALUE,
+});

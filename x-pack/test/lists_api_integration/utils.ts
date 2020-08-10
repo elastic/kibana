@@ -11,7 +11,7 @@ import { ListSchema } from '../../plugins/lists/common';
 import { LIST_INDEX } from '../../plugins/lists/common/constants';
 
 /**
- * Creates the lists index for use inside of beforeEach blocks of tests
+ * Creates the lists and lists items index for use inside of beforeEach blocks of tests
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param supertest The supertest client library
  */
