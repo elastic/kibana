@@ -47,6 +47,7 @@ export interface EditorFrameProps {
   onChange: (arg: {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
+    isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -165,7 +166,19 @@ export function EditorFrame(props: EditorFrameProps) {
       if (props.doc) {
         dispatch({
           type: 'VISUALIZATION_LOADED',
-          doc: props.doc,
+          doc: {
+            ...props.doc,
+            state: {
+              ...props.doc.state,
+              visualization: props.doc.visualizationType
+                ? props.visualizationMap[props.doc.visualizationType].initialize(
+                    framePublicAPI,
+                    props.doc.state.visualization,
+                    props.doc.references
+                  )
+                : props.doc.state.visualization,
+            },
+          },
         });
       } else {
         dispatch({
@@ -206,23 +219,7 @@ export function EditorFrame(props: EditorFrameProps) {
         return;
       }
 
-      const indexPatterns: DatasourceMetaData['filterableIndexPatterns'] = [];
-      Object.entries(props.datasourceMap)
-        .filter(([id, datasource]) => {
-          const stateWrapper = state.datasourceStates[id];
-          return (
-            stateWrapper &&
-            !stateWrapper.isLoading &&
-            datasource.getLayers(stateWrapper.state).length > 0
-          );
-        })
-        .forEach(([id, datasource]) => {
-          indexPatterns.push(
-            ...datasource.getMetaData(state.datasourceStates[id].state).filterableIndexPatterns
-          );
-        });
-
-      const doc = getSavedObjectFormat({
+      const { filterableIndexPatterns, doc, isSaveable } = getSavedObjectFormat({
         activeDatasources: Object.keys(state.datasourceStates).reduce(
           (datasourceMap, datasourceId) => ({
             ...datasourceMap,
@@ -235,7 +232,7 @@ export function EditorFrame(props: EditorFrameProps) {
         framePublicAPI,
       });
 
-      props.onChange({ filterableIndexPatterns: indexPatterns, doc });
+      props.onChange({ filterableIndexPatterns, doc, isSaveable });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [

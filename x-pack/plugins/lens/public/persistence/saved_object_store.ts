@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes, SavedObjectsClientContract, SavedObjectReference } from 'kibana/public';
-import { Query, Filter } from '../../../../../src/plugins/data/public';
+import {
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+} from 'kibana/public';
+import { Query } from '../../../../../src/plugins/data/public';
+import { PersistableFilter } from './filter_references';
 
 export interface Document {
   id?: string;
@@ -15,12 +20,12 @@ export interface Document {
   description?: string;
   state: {
     datasourceMetaData: {
-      filterableIndexPatterns: Array<{ id: string; }>;
+      filterableIndexPatterns: Array<{ id: string }>;
     };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
-    filters: Filter[];
+    filters: PersistableFilter[];
   };
   references: SavedObjectReference[];
 }
@@ -53,8 +58,8 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     const result = await (id
       ? this.safeUpdate(id, attributes, references)
       : this.client.create(DOC_TYPE, attributes, {
-        references
-      }));
+          references,
+        }));
 
     return { ...vis, id: result.id };
   }
@@ -65,7 +70,11 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   // deleted subtrees make it back into the object after a load.
   // This function fixes this by doing two updates - one to empty out the document setting
   // every key to null, and a second one to load the new content.
-  private async safeUpdate(id: string, attributes: SavedObjectAttributes, references: SavedObjectReference[]) {
+  private async safeUpdate(
+    id: string,
+    attributes: SavedObjectAttributes,
+    references: SavedObjectReference[]
+  ) {
     const resetAttributes: SavedObjectAttributes = {};
     Object.keys(attributes).forEach((key) => {
       resetAttributes[key] = null;

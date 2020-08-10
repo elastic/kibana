@@ -7,6 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
+import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
@@ -22,7 +23,6 @@ import {
   TriggerContext,
   VALUE_CLICK_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { SavedObjectReference } from 'kibana/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -47,6 +47,7 @@ export interface EditorFrameProps {
   onChange: (newState: {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];
     doc: Document;
+    isSaveable: boolean;
   }) => void;
   showNoDataPopover: () => void;
 }
@@ -419,11 +420,15 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: P, savedObjectReferences?: SavedObjectReference[]) => T;
+  initialize: (
+    frame: FramePublicAPI,
+    state?: P,
+    savedObjectReferences?: SavedObjectReference[]
+  ) => T;
   /**
    * Can remove any state that should not be persisted to saved object, such as UI state
    */
-  getPersistableState: (state: T) => { state: P, savedObjectReferences: SavedObjectReference[] };
+  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
 
   /**
    * Visualizations must provide at least one type for the chart switcher,

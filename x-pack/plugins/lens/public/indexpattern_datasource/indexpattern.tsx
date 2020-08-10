@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -19,7 +19,12 @@ import {
   DatasourceLayerPanelProps,
   PublicAPIProps,
 } from '../types';
-import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
+import {
+  loadInitialState,
+  changeIndexPattern,
+  changeLayerIndexPattern,
+  extractReferences,
+} from './loader';
 import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
@@ -123,17 +128,21 @@ export function getIndexPatternDatasource({
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: 'indexpattern',
 
-    async initialize(state?: IndexPatternPersistedState) {
+    async initialize(
+      persistedState?: IndexPatternPersistedState,
+      references?: SavedObjectReference[]
+    ) {
       return loadInitialState({
-        state,
+        persistedState,
+        references,
         savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
       });
     },
 
-    getPersistableState({ currentIndexPatternId, layers }: IndexPatternPrivateState) {
-      return { currentIndexPatternId, layers };
+    getPersistableState(state: IndexPatternPrivateState) {
+      return extractReferences(state);
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {

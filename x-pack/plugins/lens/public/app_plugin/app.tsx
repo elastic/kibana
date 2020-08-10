@@ -26,7 +26,7 @@ import {
   OnSaveProps,
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
-import { Document, SavedObjectStore } from '../persistence';
+import { Document, SavedObjectStore, injectFilterReferences } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -55,6 +55,7 @@ interface State {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  isSaveable: boolean;
 }
 
 export function App({
@@ -96,6 +97,7 @@ export function App({
       originatingApp,
       filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
+      isSaveable: false,
     };
   });
 
@@ -118,11 +120,7 @@ export function App({
 
   const { lastKnownDoc } = state;
 
-  const isSaveable =
-    lastKnownDoc &&
-    lastKnownDoc.expression &&
-    lastKnownDoc.expression.length > 0 &&
-    core.application.capabilities.visualize.save;
+  const savingPermitted = state.isSaveable && core.application.capabilities.visualize.save;
 
   useEffect(() => {
     // Clear app-specific filters when navigating to Lens. Necessary because Lens
@@ -177,9 +175,7 @@ export function App({
       // or when the user has configured something without saving
       if (
         core.application.capabilities.visualize.save &&
-        (state.persistedDoc?.expression
-          ? !_.isEqual(lastKnownDoc?.expression, state.persistedDoc.expression)
-          : lastKnownDoc?.expression)
+        !_.isEqual(state.persistedDoc, lastKnownDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -230,7 +226,9 @@ export function App({
             )
               .then((indexPatterns) => {
                 // Don't overwrite any pinned filters
-                data.query.filterManager.setAppFilters(doc.state.filters);
+                data.query.filterManager.setAppFilters(
+                  injectFilterReferences(doc.state.filters, doc.references)
+                );
                 setState((s) => ({
                   ...s,
                   isLoading: false,
@@ -283,7 +281,7 @@ export function App({
       return;
     }
     const [pinnedFilters, appFilters] = _.partition(
-      lastKnownDoc.state?.filters,
+      injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
       esFilters.isFilterPinned
     );
     const lastDocWithoutPinned = pinnedFilters?.length
@@ -389,7 +387,7 @@ export function App({
                         emphasize: true,
                         iconType: 'check',
                         run: () => {
-                          if (isSaveable && lastKnownDoc) {
+                          if (savingPermitted) {
                             runSave({
                               newTitle: lastKnownDoc.title,
                               newCopyOnSave: false,
@@ -399,7 +397,7 @@ export function App({
                           }
                         },
                         testId: 'lnsApp_saveAndReturnButton',
-                        disableButton: !isSaveable,
+                        disableButton: !savingPermitted,
                       },
                     ]
                   : []),
@@ -414,12 +412,12 @@ export function App({
                         }),
                   emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
-                    if (isSaveable && lastKnownDoc) {
+                    if (savingPermitted) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
                     }
                   },
                   testId: 'lnsApp_saveButton',
-                  disableButton: !isSaveable,
+                  disableButton: !savingPermitted,
                 },
               ]}
               data-test-subj="lnsApp_topNav"
@@ -500,7 +498,10 @@ export function App({
                 doc: state.persistedDoc,
                 onError,
                 showNoDataPopover,
-                onChange: ({ filterableIndexPatterns, doc }) => {
+                onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+                  if (isSaveable !== state.isSaveable) {
+                    setState((s) => ({ ...s, isSaveable }));
+                  }
                   if (!_.isEqual(state.persistedDoc, doc)) {
                     setState((s) => ({ ...s, lastKnownDoc: doc }));
                   }
