@@ -25,6 +25,7 @@ import { UMServerLibs } from '../lib';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
+import { MonitorStatusTranslations } from '../../../public/lib/alert_types/translations';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -102,6 +103,23 @@ export const getMonitorSummary = (monitorInfo: Ping) => {
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerHostname: monitorInfo.agent?.name,
   };
+};
+
+const generateMessageForOlderVersions = (fields) => {
+  let messageTemplate = MonitorStatusTranslations.defaultActionMessage;
+
+  // Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from
+  // {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}
+  messageTemplate = messageTemplate.replace('{{state.monitorName}}', fields.monitorName);
+  messageTemplate = messageTemplate.replace('{{{state.monitorUrl}}}', fields.monitorUrl);
+  messageTemplate = messageTemplate.replace('{{state.statusMessage}}', fields.statusMessage);
+  messageTemplate = messageTemplate.replace('{{state.observerLocation}}', fields.observerLocation);
+  messageTemplate = messageTemplate.replace(
+    '{{{state.latestErrorMessage}}}',
+    fields.latestErrorMessage
+  );
+
+  return messageTemplate;
 };
 
 export const getStatusMessage = (
@@ -265,14 +283,17 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         )?.monitorInfo;
 
         const monitorSummary = getMonitorSummary(downMonInfo || availMonInfo?.monitorInfo!);
+        const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
 
         alertInstance.replaceState({
           ...updateState(state, true),
           ...monitorSummary,
-          statusMessage: getStatusMessage(downMonInfo!, availMonInfo!, availability),
+          statusMessage,
         });
 
-        alertInstance.scheduleActions(MONITOR_STATUS.id);
+        alertInstance.scheduleActions(MONITOR_STATUS.id, {
+          message: generateMessageForOlderVersions({ ...monitorSummary, statusMessage }),
+        });
       });
 
       return updateState(state, downMonitorsByLocation.length > 0);
