@@ -46,14 +46,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
-      const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardJobTypeSelect',
-        'value'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualSelection = await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardJobTypeSelect',
+          'value'
+        );
+        expect(actualSelection).to.eql(
+          expectedSelection,
+          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
+        );
+      });
     },
 
     async selectJobType(jobType: string) {
