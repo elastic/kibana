@@ -123,6 +123,17 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
       key="0"
     >
       <Category
+        color="#FF0000"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="0_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
         color="#00FF00"
         isLinesOnly={false}
         isPointsOnly={true}
@@ -227,6 +238,17 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       key="0"
     >
       <Category
+        color="#ecf1f7"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="0_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="1"
+    >
+      <Category
         color="#d9e3ef"
         isLinesOnly={false}
         isPointsOnly={true}
@@ -235,7 +257,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="1"
+      key="2"
     >
       <Category
         color="#c5d5e7"
@@ -246,7 +268,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="2"
+      key="3"
     >
       <Category
         color="#b2c7df"
@@ -257,7 +279,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="3"
+      key="4"
     >
       <Category
         color="#9eb9d8"
@@ -268,7 +290,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="4"
+      key="5"
     >
       <Category
         color="#8bacd0"
@@ -279,7 +301,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="5"
+      key="6"
     >
       <Category
         color="#769fc8"
@@ -290,7 +312,7 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      key="6"
+      key="7"
     >
       <Category
         color="#6092c0"

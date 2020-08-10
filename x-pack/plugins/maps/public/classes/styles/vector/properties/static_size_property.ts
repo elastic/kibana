@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Map as MbMap } from 'mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
+  // @ts-expect-error
 } from '../symbol_utils';
+import { SizeStaticOptions } from '../../../../../common/descriptor_types';
 
-export class StaticSizeProperty extends StaticStyleProperty {
-  constructor(options, styleName) {
+export class StaticSizeProperty extends StaticStyleProperty<SizeStaticOptions> {
+  constructor(options: SizeStaticOptions, styleName: VECTOR_STYLES) {
     if (typeof options.size !== 'number') {
       super({ size: 1 }, styleName);
     } else {
@@ -20,7 +24,7 @@ export class StaticSizeProperty extends StaticStyleProperty {
     }
   }
 
-  syncHaloWidthWithMb(mbLayerId, mbMap) {
+  syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', this._options.size);
   }
 
@@ -30,12 +34,12 @@ export class StaticSizeProperty extends StaticStyleProperty {
       : SMALL_MAKI_ICON_SIZE;
   }
 
-  syncIconSizeWithMb(symbolLayerId, mbMap) {
+  syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
     const halfIconPixels = this.getIconPixelSize() / 2;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-size', this._options.size / halfIconPixels);
   }
 
-  syncCircleStrokeWidthWithMb(mbLayerId, mbMap, hasNoRadius) {
+  syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap, hasNoRadius: boolean) {
     if (hasNoRadius) {
       mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', 0);
     } else {
@@ -43,15 +47,15 @@ export class StaticSizeProperty extends StaticStyleProperty {
     }
   }
 
-  syncCircleRadiusWithMb(mbLayerId, mbMap) {
+  syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', this._options.size);
   }
 
-  syncLineWidthWithMb(mbLayerId, mbMap) {
+  syncLineWidthWithMb(mbLayerId: string, mbMap: MbMap) {
     mbMap.setPaintProperty(mbLayerId, 'line-width', this._options.size);
   }
 
-  syncLabelSizeWithMb(mbLayerId, mbMap) {
+  syncLabelSizeWithMb(mbLayerId: string, mbMap: MbMap) {
     mbMap.setLayoutProperty(mbLayerId, 'text-size', this._options.size);
   }
 }
