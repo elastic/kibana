@@ -34,6 +34,7 @@ interface Props {
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
   formatter: InfraFormatter;
+  bottomMargin: number;
 }
 
 export const NodesOverview = ({
@@ -48,6 +49,7 @@ export const NodesOverview = ({
   options,
   formatter,
   onDrilldown,
+  bottomMargin,
 }: Props) => {
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -118,6 +120,7 @@ export const NodesOverview = ({
         onFilter={handleDrilldown}
         bounds={bounds}
         dataBounds={dataBounds}
+        bottomMargin={bottomMargin}
       />
     </MapContainer>
   );
