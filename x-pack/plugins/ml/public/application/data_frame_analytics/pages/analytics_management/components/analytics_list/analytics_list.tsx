@@ -105,13 +105,17 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [selectedIdFromUrlInitialized, setSelectedIdFromUrlInitialized] = useState(false);
   useEffect(() => {
     if (selectedIdFromUrlInitialized === false && analytics.length > 0) {
-      const urlValues = getSelectedIdFromUrl(window.location.href);
+      const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
+      let queryText = '';
 
-      if (urlValues.ids !== undefined) {
-        const queryText = urlValues.isGroup ? getGroupQueryText(urlValues.ids) : urlValues.ids[0];
-        setSelectedIdFromUrlInitialized(true);
-        setSearchQueryText(queryText);
+      if (groupIds !== undefined) {
+        queryText = getGroupQueryText(groupIds);
+      } else if (jobId !== undefined) {
+        queryText = jobId;
       }
+
+      setSelectedIdFromUrlInitialized(true);
+      setSearchQueryText(queryText);
     }
   }, [selectedIdFromUrlInitialized, analytics]);
 

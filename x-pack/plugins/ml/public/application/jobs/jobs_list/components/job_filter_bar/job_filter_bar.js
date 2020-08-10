@@ -55,10 +55,12 @@ export class JobFilterBar extends Component {
   componentDidMount() {
     // If job id is selected in url, filter table to that id
     let defaultQueryText;
-    const urlValues = getSelectedIdFromUrl(window.location.href);
+    const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
 
-    if (urlValues.ids !== undefined) {
-      defaultQueryText = urlValues.isGroup ? getGroupQueryText(urlValues.ids) : urlValues.ids[0];
+    if (groupIds !== undefined) {
+      defaultQueryText = getGroupQueryText(groupIds);
+    } else if (jobId !== undefined) {
+      defaultQueryText = jobId;
     }
 
     if (defaultQueryText !== undefined) {

@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { JobGroup } from '../job_group';
-import { getSelectedIdsUrl } from '../../../../util/get_selected_ids_url';
+import { getGroupIdsUrl } from '../../../../util/get_selected_ids_url';
 
 export function JobDescription({ job, isManagementTable }) {
   return (
@@ -18,7 +18,7 @@ export function JobDescription({ job, isManagementTable }) {
         {job.groups.map((group) => {
           if (isManagementTable === true) {
             return (
-              <a key={group} href={getSelectedIdsUrl('jobs', [group], true)}>
+              <a key={group} href={getGroupIdsUrl('jobs', [group])}>
                 <JobGroup name={group} />
               </a>
             );

@@ -369,18 +369,22 @@ function getUrlVars(url) {
   });
   return vars;
 }
+
 export function getSelectedIdFromUrl(url) {
   const result = {};
   if (typeof url === 'string') {
     const isGroup = url.includes('groupIds');
-
     url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && (url.includes('jobId') || isGroup)) {
+
+    if (url.includes('mlManagement')) {
       const urlParams = getUrlVars(url);
       const decodedJson = rison.decode(urlParams.mlManagement);
 
-      result.ids = isGroup ? decodedJson.groupIds : decodedJson.jobId;
-      result.isGroup = isGroup;
+      if (isGroup) {
+        result.groupIds = decodedJson.groupIds;
+      } else {
+        result.jobId = decodedJson.jobId;
+      }
     }
   }
   return result;
