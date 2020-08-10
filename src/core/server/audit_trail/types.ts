@@ -19,43 +19,136 @@
 import { KibanaRequest } from '../http';
 
 /**
- * Event to audit.
+ * Audit event schema using ECS format.
+ * https://www.elastic.co/guide/en/ecs/1.5/index.html
  * @public
- *
- * @remarks
- * Not a complete interface.
  */
-export interface AuditableEvent {
+export interface AuditEvent {
+  /**
+   * Human readable message describing action, outcome and user.
+   *
+   * @example
+   * User 'jdoe' updated saved object 'kpis' (dashboard)
+   */
   message: string;
-  type: string;
+  event: {
+    action: string;
+    category?: EventCategory;
+    type?: EventType;
+    outcome?: EventOutcome;
+    module?: string;
+    dataset?: string;
+  };
+  user?: {
+    name: string;
+    email?: string;
+    full_name?: string;
+    hash?: string;
+    roles?: readonly string[];
+  };
+  session?: {
+    id: string;
+  };
+  kibana: {
+    /**
+     * Current space id of the request.
+     */
+    space_id?: string;
+    /**
+     * Saved object that was created, changed, deleted or accessed as part of the action.
+     */
+    saved_object?: {
+      type: string;
+      id?: string;
+    };
+    /**
+     * Array of spaces added to the saved object.
+     */
+    add_to_spaces?: readonly string[];
+    /**
+     * Array of spaces removed from the saved object.
+     */
+    delete_from_spaces?: readonly string[];
+    /**
+     * Name of the authentication provider used.
+     */
+    authentication_provider?: string;
+    /**
+     * Type of the authentication provider used.
+     */
+    authentication_type?: string;
+    /**
+     * Realm used for user authentication.
+     */
+    authentication_realm?: string;
+    /**
+     * Realm used to lookup user details.
+     */
+    lookup_realm?: string;
+  };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+  http?: {
+    request?: {
+      method?: string;
+      body?: {
+        content: string;
+      };
+    };
+    response?: {
+      status_code?: number;
+    };
+  };
+  url?: {
+    domain?: string;
+    full?: string;
+    path?: string;
+    port?: number;
+    query?: string;
+    scheme?: string;
+  };
+  trace: {
+    /**
+     * Corolation id extracted from request.
+     */
+    id: string;
+  };
 }
 
+export type EventCategory = 'database' | 'web' | 'iam' | 'authentication' | 'process';
+export type EventType = 'user' | 'group' | 'creation' | 'access' | 'change' | 'deletion';
+export type EventOutcome = 'success' | 'failure' | 'unknown';
+
+export type AuditEventDecorator<Args = undefined> = (
+  event: Pick<AuditEvent, 'user' | 'trace' | 'kibana'>,
+  args: Args
+) => AuditEvent;
+
 /**
- * Provides methods to log user actions and access events.
+ * Logs audit events scoped to the current request.
  * @public
  */
 export interface Auditor {
   /**
-   * Add a record to audit log.
-   * Service attaches to a log record:
-   * - metadata about an end-user initiating an operation
-   * - scope name, if presents
+   * Adds an event performed by the user to the audit log.
    *
    * @example
-   * How to add a record in audit log:
    * ```typescript
-   * router.get({ path: '/my_endpoint', validate: false }, async (context, request, response) => {
-   *   context.core.auditor.withAuditScope('my_plugin_operation');
-   *   const value = await context.core.elasticsearch.legacy.client.callAsCurrentUser('...');
-   *   context.core.add({ type: 'operation.type', message: 'perform an operation in ... endpoint' });
+   * context.core.auditor.add((event) => ({
+   *   ...event,
+   *   message: `User '${event.user.name}' updated saved object 'kpis' of type 'dashboard'`,
+   *   event: {
+   *     action: 'saved_object_update',
+   *     category: 'database',
+   *     type: 'change',
+   *     outcome: 'success'
+   *   }
+   * }));
    * ```
    */
-  add(event: AuditableEvent): void;
-  /**
-   * Add a high-level scope name for logged events.
-   * It helps to identify the root cause of low-level events.
-   */
-  withAuditScope(name: string): void;
+  add<Args>(decorateEvent: AuditEventDecorator<Args>, args: Args): void;
 }
 
 /**

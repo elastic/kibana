@@ -29,7 +29,7 @@ export class AuditService {
   constructor(private readonly logger: Logger) {}
 
   setup({ license, config }: AuditServiceSetupParams): AuditServiceSetup {
-    if (config.enabled) {
+    if (config.enabled && !config.appender) {
       this.licenseFeaturesSubscription = license.features$.subscribe(({ allowAuditLogging }) => {
         this.auditLoggingEnabled = allowAuditLogging;
       });

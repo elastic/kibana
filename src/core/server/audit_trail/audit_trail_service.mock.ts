@@ -30,7 +30,6 @@ const createSetupContractMock = () => {
 const createAuditorMock = () => {
   const mocked: jest.Mocked<Auditor> = {
     add: jest.fn(),
-    withAuditScope: jest.fn(),
   };
   return mocked;
 };

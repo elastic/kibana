@@ -17,6 +17,7 @@ import {
   httpServerMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
+import { Auditor, AuditorFactory } from '../../../../../src/core/server';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityAuditLoggerMock } from '../audit/index.mock';
@@ -29,16 +30,24 @@ import { Authenticator, AuthenticatorOptions } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
 import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { userLoginEvent } from './audit_events';
 
 function getMockOptions({
   providers,
   http = {},
   selector,
+  auditor = {
+    add: jest.fn(),
+  },
 }: {
   providers?: Record<string, unknown> | string[];
   http?: Partial<AuthenticatorOptions['config']['authc']['http']>;
   selector?: AuthenticatorOptions['config']['authc']['selector'];
+  auditor?: Auditor;
 } = {}) {
+  const auditorFactory: AuditorFactory = {
+    asScoped: jest.fn(() => auditor),
+  };
   return {
     auditLogger: securityAuditLoggerMock.create(),
     getCurrentUser: jest.fn(),
@@ -55,6 +64,7 @@ function getMockOptions({
     getFeatureUsageService: jest
       .fn()
       .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
+    getAuditorFactory: jest.fn(() => Promise.resolve(auditorFactory)),
   };
 }
 
@@ -215,10 +225,12 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
+    const auditor = { add: jest.fn() };
     beforeEach(() => {
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } }, auditor });
       mockOptions.session.get.mockResolvedValue(null);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
+      auditor.add.mockClear();
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -278,6 +290,62 @@ describe('Authenticator', () => {
       ).resolves.toEqual(
         AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
       );
+    });
+
+    it('adds audit event when successful.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const user = mockAuthenticatedUser();
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
+      );
+      await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+      expect(auditor.add).toHaveBeenCalledWith(
+        userLoginEvent,
+        expect.objectContaining({
+          authenticationResult: expect.objectContaining({
+            status: 'succeeded',
+            user: expect.objectContaining({
+              username: 'user',
+              roles: ['user-role'],
+            }),
+          }),
+          authentication_provider: 'basic1',
+          authentication_type: 'basic',
+        })
+      );
+    });
+
+    it('adds audit event when not successful.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const failureReason = new Error('Not Authorized');
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.failed(failureReason)
+      );
+      await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+
+      expect(auditor.add).toHaveBeenCalledWith(
+        userLoginEvent,
+        expect.objectContaining({
+          authenticationResult: expect.objectContaining({
+            status: 'failed',
+            error: failureReason,
+          }),
+          authentication_provider: 'basic1',
+          authentication_type: 'basic',
+        })
+      );
+    });
+
+    it('does not add audit event when not handled.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await expect(
+        authenticator.login(request, { provider: { type: 'token' }, value: {} })
+      ).resolves.toEqual(AuthenticationResult.notHandled());
+
+      await authenticator.login(request, { provider: { name: 'basic2' }, value: {} });
+
+      expect(auditor.add).not.toHaveBeenCalled();
     });
 
     it('creates session whenever authentication provider returns state', async () => {

@@ -4,19 +4,20 @@
 
 ## Auditor.add() method
 
-Add a record to audit log. Service attaches to a log record: - metadata about an end-user initiating an operation - scope name, if presents
+Adds an event performed by the user to the audit log.
 
 <b>Signature:</b>
 
 ```typescript
-add(event: AuditableEvent): void;
+add<Args>(decorateEvent: AuditEventDecorator<Args>, args: Args): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  event | <code>AuditableEvent</code> |  |
+|  decorateEvent | <code>AuditEventDecorator&lt;Args&gt;</code> |  |
+|  args | <code>Args</code> |  |
 
 <b>Returns:</b>
 
@@ -24,13 +25,18 @@ add(event: AuditableEvent): void;
 
 ## Example
 
-How to add a record in audit log:
 
 ```typescript
-router.get({ path: '/my_endpoint', validate: false }, async (context, request, response) => {
-  context.core.auditor.withAuditScope('my_plugin_operation');
-  const value = await context.core.elasticsearch.legacy.client.callAsCurrentUser('...');
-  context.core.add({ type: 'operation.type', message: 'perform an operation in ... endpoint' });
+context.core.auditor.add((event) => ({
+  ...event,
+  message: `User '${event.user.name}' updated saved object 'kpis' of type 'dashboard'`,
+  event: {
+    action: 'saved_object_update',
+    category: 'database',
+    type: 'change',
+    outcome: 'success'
+  }
+}));
 
 ```
 

@@ -132,6 +132,37 @@ test(`does not call the underlying logger if security audit logging is not enabl
   expect(logger.info).not.toHaveBeenCalled();
 });
 
+test(`does not call the underlying logger if an appender is specified which enables the new audit logger`, () => {
+  const pluginId = 'foo';
+
+  const logger = loggingSystemMock.createLogger();
+  const license = licenseMock.create();
+  license.features$ = new BehaviorSubject({
+    allowAuditLogging: true,
+  } as SecurityLicenseFeatures).asObservable();
+
+  const auditService = new AuditService(logger).setup({
+    license,
+    config: {
+      enabled: false,
+      appender: {
+        kind: 'console',
+        layout: {
+          kind: 'pattern',
+        },
+      },
+    },
+  });
+
+  const auditLogger = auditService.getLogger(pluginId);
+
+  const eventType = 'bar';
+  const message = 'this is my audit message';
+  auditLogger.log(eventType, message);
+
+  expect(logger.info).not.toHaveBeenCalled();
+});
+
 test(`calls the underlying logger after license upgrade`, () => {
   const pluginId = 'foo';
 

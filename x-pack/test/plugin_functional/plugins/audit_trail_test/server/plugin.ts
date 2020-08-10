@@ -18,44 +18,22 @@ export class AuditTrailTestPlugin implements Plugin {
     });
 
     const router = core.http.createRouter();
-    router.get(
-      { path: '/audit_trail_test/context/as_current_user', validate: false },
-      async (context, request, response) => {
-        context.core.auditor.withAuditScope('audit_trail_test/context/as_current_user');
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
-        return response.noContent();
-      }
-    );
 
     router.get(
-      { path: '/audit_trail_test/context/as_internal_user', validate: false },
-      async (context, request, response) => {
-        context.core.auditor.withAuditScope('audit_trail_test/context/as_internal_user');
-        await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
-        return response.noContent();
-      }
-    );
-
-    router.get(
-      { path: '/audit_trail_test/contract/as_current_user', validate: false },
+      { path: '/audit_trail_test/audit_trail_service', validate: false },
       async (context, request, response) => {
         const [coreStart] = await core.getStartServices();
-        const auditor = coreStart.auditTrail.asScoped(request);
-        auditor.withAuditScope('audit_trail_test/contract/as_current_user');
+        coreStart.auditTrail.asScoped(request);
 
-        await context.core.elasticsearch.legacy.client.callAsCurrentUser('ping');
         return response.noContent();
       }
     );
 
     router.get(
-      { path: '/audit_trail_test/contract/as_internal_user', validate: false },
+      { path: '/audit_trail_test/saved_objects_client', validate: false },
       async (context, request, response) => {
-        const [coreStart] = await core.getStartServices();
-        const auditor = coreStart.auditTrail.asScoped(request);
-        auditor.withAuditScope('audit_trail_test/contract/as_internal_user');
-
-        await context.core.elasticsearch.legacy.client.callAsInternalUser('ping');
+        await context.core.savedObjects.client.create('dashboard', {});
+        await context.core.savedObjects.client.find({ type: 'dashboard' });
         return response.noContent();
       }
     );

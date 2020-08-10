@@ -4,7 +4,7 @@
 
 ## Auditor interface
 
-Provides methods to log user actions and access events.
+Logs audit events scoped to the current request.
 
 <b>Signature:</b>
 
@@ -16,6 +16,5 @@ export interface Auditor
 
 |  Method | Description |
 |  --- | --- |
-|  [add(event)](./kibana-plugin-core-server.auditor.add.md) | Add a record to audit log. Service attaches to a log record: - metadata about an end-user initiating an operation - scope name, if presents |
-|  [withAuditScope(name)](./kibana-plugin-core-server.auditor.withauditscope.md) | Add a high-level scope name for logged events. It helps to identify the root cause of low-level events. |
+|  [add(decorateEvent, args)](./kibana-plugin-core-server.auditor.add.md) | Adds an event performed by the user to the audit log. |
 

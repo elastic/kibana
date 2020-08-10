@@ -226,10 +226,7 @@ export class Server {
     const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
 
     const auditTrailStart = this.auditTrail.start();
-
-    const elasticsearchStart = await this.elasticsearch.start({
-      auditTrail: auditTrailStart,
-    });
+    const elasticsearchStart = await this.elasticsearch.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,

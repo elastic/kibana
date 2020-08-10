@@ -9,6 +9,7 @@ import {
   KibanaRequest,
   LoggerFactory,
   HttpServiceSetup,
+  AuditorFactory,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
@@ -53,6 +54,7 @@ interface SetupAuthenticationParams {
   license: SecurityLicense;
   loggers: LoggerFactory;
   session: PublicMethodsOf<Session>;
+  getAuditorFactory(): Promise<AuditorFactory>;
 }
 
 export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication>>;
@@ -66,6 +68,7 @@ export async function setupAuthentication({
   license,
   loggers,
   session,
+  getAuditorFactory,
 }: SetupAuthenticationParams) {
   const authLogger = loggers.get('authentication');
 
@@ -91,6 +94,7 @@ export async function setupAuthentication({
     getFeatureUsageService,
     license,
     session,
+    getAuditorFactory,
   });
 
   authLogger.debug('Successfully initialized authenticator.');

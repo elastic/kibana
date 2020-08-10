@@ -30,6 +30,7 @@ import {
   LoggerFactory,
   LegacyScopedClusterClient,
   HttpServiceSetup,
+  AuditorFactory,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigSchema, ConfigType, createConfig } from '../config';
@@ -56,6 +57,7 @@ describe('setupAuthentication()', () => {
     license: jest.Mocked<SecurityLicense>;
     getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
     session: jest.Mocked<PublicMethodsOf<Session>>;
+    getAuditorFactory(): Promise<AuditorFactory>;
   };
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<LegacyScopedClusterClient>>;
   beforeEach(() => {
@@ -78,6 +80,13 @@ describe('setupAuthentication()', () => {
         .fn()
         .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
       session: sessionMock.create(),
+      getAuditorFactory: jest.fn(() =>
+        Promise.resolve({
+          asScoped: jest.fn(() => ({
+            add: jest.fn(),
+          })),
+        })
+      ),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();

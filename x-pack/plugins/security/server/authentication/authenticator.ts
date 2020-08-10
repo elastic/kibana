@@ -9,6 +9,7 @@ import {
   LoggerFactory,
   ILegacyClusterClient,
   IBasePath,
+  AuditorFactory,
 } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
@@ -36,6 +37,7 @@ import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
 import { canRedirectRequest } from './can_redirect_request';
 import { HTTPAuthorizationHeader } from './http_authentication';
+import { userLoginEvent } from './audit_events';
 
 /**
  * The shape of the login attempt.
@@ -68,6 +70,7 @@ export interface AuthenticatorOptions {
   loggers: LoggerFactory;
   clusterClient: ILegacyClusterClient;
   session: PublicMethodsOf<Session>;
+  getAuditorFactory(): Promise<AuditorFactory>;
 }
 
 // Mapping between provider key defined in the config and authentication
@@ -292,6 +295,19 @@ export class Authenticator {
           authenticationResult,
           existingSessionValue,
         });
+
+        // Checking for presence of `user` object to determine success state rather than
+        // `success()` method since that indicates a successful authentication and `redirect()`
+        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
+        if (authenticationResult.user || authenticationResult.failed()) {
+          const auditorFactory = await this.options.getAuditorFactory();
+          const auditor = auditorFactory.asScoped(request);
+          auditor.add(userLoginEvent, {
+            authenticationResult,
+            authentication_provider: providerName,
+            authentication_type: provider.type,
+          });
+        }
 
         return this.handlePreAccessRedirects(
           request,

@@ -53,8 +53,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppCategory](./kibana-plugin-core-server.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AssistanceAPIResponse](./kibana-plugin-core-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-core-server.assistantapiclientparams.md) |  |
-|  [AuditableEvent](./kibana-plugin-core-server.auditableevent.md) | Event to audit. |
-|  [Auditor](./kibana-plugin-core-server.auditor.md) | Provides methods to log user actions and access events. |
+|  [AuditEvent](./kibana-plugin-core-server.auditevent.md) | Audit event schema using ECS format. https://www.elastic.co/guide/en/ecs/1.5/index.html |
+|  [Auditor](./kibana-plugin-core-server.auditor.md) | Logs audit events scoped to the current request. |
 |  [AuditorFactory](./kibana-plugin-core-server.auditorfactory.md) | Creates [Auditor](./kibana-plugin-core-server.auditor.md) instance bound to the current user credentials. |
 |  [AuditTrailSetup](./kibana-plugin-core-server.audittrailsetup.md) |  |
 |  [Authenticated](./kibana-plugin-core-server.authenticated.md) |  |
@@ -223,6 +223,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Type Alias | Description |
 |  --- | --- |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
+|  [AuditEventDecorator](./kibana-plugin-core-server.auditeventdecorator.md) |  |
 |  [AuditTrailStart](./kibana-plugin-core-server.audittrailstart.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |

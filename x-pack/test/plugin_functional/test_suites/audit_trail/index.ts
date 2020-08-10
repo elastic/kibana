@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags('ciGroup7');
     const logFilePath = Path.resolve(
       __dirname,
-      '../../plugins/audit_trail_test/server/pattern_debug.log'
+      '../../plugins/audit_trail_test/server/audit_trail.log'
     );
     const logFile = new FileWrapper(logFilePath);
 
@@ -46,9 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await logFile.reset();
     });
 
-    it('logs current user access to elasticsearch via RequestHandlerContext', async () => {
+    it('logs audit events from saved objects client', async () => {
       await supertest
-        .get('/audit_trail_test/context/as_current_user')
+        .get('/audit_trail_test/saved_objects_client')
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
@@ -57,73 +57,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       const content = await logFile.readJSON();
-      const pingCall = content.find(
-        (c) => c.meta.scope === 'audit_trail_test/context/as_current_user'
-      );
-      expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.currentUser');
-      expect(pingCall.meta.user).to.be('elastic');
-      expect(pingCall.meta.space).to.be('default');
-    });
 
-    it('logs internal user access to elasticsearch via RequestHandlerContext', async () => {
-      await supertest
-        .get('/audit_trail_test/context/as_internal_user')
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      const createEvent = content.find((c) => c.event.action === 'saved_object_create');
+      expect(createEvent).to.be.ok();
+      expect(createEvent.trace.id).to.be.ok();
+      expect(createEvent.user.name).to.be('elastic');
+      expect(createEvent.kibana.namespace).to.be('default');
 
-      await retry.waitFor('logs event in the dest file', async () => {
-        return await logFile.isNotEmpty();
-      });
-
-      const content = await logFile.readJSON();
-      const pingCall = content.find(
-        (c) => c.meta.scope === 'audit_trail_test/context/as_internal_user'
-      );
-      expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.internalUser');
-      expect(pingCall.meta.user).to.be('elastic');
-      expect(pingCall.meta.space).to.be('default');
-    });
-
-    it('logs current user access to elasticsearch via coreStart contract', async () => {
-      await supertest
-        .get('/audit_trail_test/contract/as_current_user')
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
-      await retry.waitFor('logs event in the dest file', async () => {
-        return await logFile.isNotEmpty();
-      });
-
-      const content = await logFile.readJSON();
-      const pingCall = content.find(
-        (c) => c.meta.scope === 'audit_trail_test/contract/as_current_user'
-      );
-      expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.currentUser');
-      expect(pingCall.meta.user).to.be('elastic');
-      expect(pingCall.meta.space).to.be('default');
-    });
-
-    it('logs internal user access to elasticsearch via coreStart contract', async () => {
-      await supertest
-        .get('/audit_trail_test/contract/as_internal_user')
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
-      await retry.waitFor('logs event in the dest file', async () => {
-        return await logFile.isNotEmpty();
-      });
-
-      const content = await logFile.readJSON();
-      const pingCall = content.find(
-        (c) => c.meta.scope === 'audit_trail_test/contract/as_internal_user'
-      );
-      expect(pingCall).to.be.ok();
-      expect(pingCall.meta.type).to.be('elasticsearch.call.internalUser');
-      expect(pingCall.meta.user).to.be('elastic');
-      expect(pingCall.meta.space).to.be('default');
+      const findEvent = content.find((c) => c.event.action === 'saved_object_find');
+      expect(findEvent).to.be.ok();
+      expect(findEvent.trace.id).to.be.ok();
+      expect(findEvent.user.name).to.be('elastic');
+      expect(findEvent.kibana.namespace).to.be('default');
     });
   });
 }

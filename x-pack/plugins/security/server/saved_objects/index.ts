@@ -9,6 +9,7 @@ import {
   KibanaRequest,
   LegacyRequest,
   SavedObjectsClient,
+  AuditorFactory,
 } from '../../../../../src/core/server';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 import { AuthorizationServiceSetup } from '../authorization';
@@ -23,6 +24,7 @@ interface SetupSavedObjectsParams {
   >;
   savedObjects: CoreSetup['savedObjects'];
   getSpacesService(): SpacesService | undefined;
+  getAuditorFactory(): Promise<AuditorFactory>;
 }
 
 export function setupSavedObjects({
@@ -30,6 +32,7 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getSpacesService,
+  getAuditorFactory,
 }: SetupSavedObjectsParams) {
   const getKibanaRequest = (request: KibanaRequest | LegacyRequest) =>
     request instanceof KibanaRequest ? request : KibanaRequest.from(request);
@@ -57,6 +60,7 @@ export function setupSavedObjects({
           ),
           errors: SavedObjectsClient.errors,
           getSpacesService,
+          getScopedAuditor: async () => (await getAuditorFactory()).asScoped(request),
         })
       : client;
   });

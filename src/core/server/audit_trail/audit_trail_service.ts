@@ -27,14 +27,20 @@ const defaultAuditorFactory: AuditorFactory = {
   asScoped() {
     return {
       add() {},
-      withAuditScope() {},
     };
   },
 };
 
+/*
+ * Core service used by any plugin with auditing requirements.
+ *
+ * Audit Trail Plugin uses this service to register an Auditor Factory
+ * Dependant plugins use
+ * Responsible for providing plugins with Auditors scoped to individual requests
+ */
 export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrailStart> {
   private readonly log: Logger;
-  private auditor: AuditorFactory = defaultAuditorFactory;
+  private auditorFactory: AuditorFactory = defaultAuditorFactory;
   private readonly auditors = new WeakMap<LegacyRequest, Auditor>();
 
   constructor(core: CoreContext) {
@@ -44,10 +50,10 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
   setup() {
     return {
       register: (auditor: AuditorFactory) => {
-        if (this.auditor !== defaultAuditorFactory) {
+        if (this.auditorFactory !== defaultAuditorFactory) {
           throw new Error('An auditor factory has been already registered');
         }
-        this.auditor = auditor;
+        this.auditorFactory = auditor;
         this.log.debug('An auditor factory has been registered');
       },
     };
@@ -58,7 +64,7 @@ export class AuditTrailService implements CoreService<AuditTrailSetup, AuditTrai
       asScoped: (request: KibanaRequest) => {
         const key = ensureRawRequest(request);
         if (!this.auditors.has(key)) {
-          this.auditors.set(key, this.auditor!.asScoped(request));
+          this.auditors.set(key, this.auditorFactory!.asScoped(request));
         }
         return this.auditors.get(key)!;
       },

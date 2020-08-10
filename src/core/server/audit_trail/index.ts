@@ -18,4 +18,14 @@
  */
 
 export { AuditTrailService } from './audit_trail_service';
-export { AuditableEvent, Auditor, AuditorFactory, AuditTrailSetup, AuditTrailStart } from './types';
+export {
+  AuditEvent,
+  EventCategory,
+  EventType,
+  EventOutcome,
+  AuditEventDecorator,
+  Auditor,
+  AuditorFactory,
+  AuditTrailSetup,
+  AuditTrailStart,
+} from './types';
