@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import {
   EuiButton,
   EuiCallOut,
@@ -273,7 +271,8 @@ const EditRulePageComponent: FC = () => {
             : myScheduleRuleForm.data) as ScheduleStepRule,
           (activeFormId === RuleStep.ruleActions
             ? activeForm.data
-            : myActionsRuleForm.data) as ActionsStepRule
+            : myActionsRuleForm.data) as ActionsStepRule,
+          rule
         ),
         ...(ruleId ? { id: ruleId } : {}),
       });

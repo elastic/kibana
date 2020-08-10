@@ -79,6 +79,7 @@ export class VegaParser {
   paddingHeight?: number;
   containerDir?: ControlsLocation | ControlsDirection;
   controlsDir?: ControlsLocation;
+  searchAPI: SearchAPI;
 
   constructor(
     spec: VegaSpec | string,
@@ -92,10 +93,11 @@ export class VegaParser {
 
     this.error = undefined;
     this.warnings = [];
+    this.searchAPI = searchAPI;
 
     const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchAPI, filters, onWarn),
+      elasticsearch: new EsQueryParser(timeCache, this.searchAPI, filters, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
       url: new UrlParser(onWarn),
     };
@@ -157,7 +159,6 @@ export class VegaParser {
    */
   _compileVegaLite() {
     this.vlspec = this.spec;
-    // eslint-disable-next-line import/namespace
     const logger = vega.logger(vega.Warn); // note: eslint has a false positive here
     logger.warn = this._onWarning.bind(this);
     this.spec = vegaLite.compile(this.vlspec, logger).spec;
@@ -540,6 +541,8 @@ export class VegaParser {
    */
   async _resolveDataUrls() {
     const pending: PendingType = {};
+
+    this.searchAPI.resetSearchStats();
 
     this._findObjectDataUrls(this.spec!, (obj: Data) => {
       const url = obj.url;

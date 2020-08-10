@@ -19,6 +19,7 @@ import {
 import {
   createKbnUrlStateStorage,
   IStorageWrapper,
+  withNotifyOnErrors,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
@@ -36,7 +37,6 @@ import {
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
-  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
 
 interface State {
@@ -44,6 +44,7 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -82,22 +83,19 @@ export function App({
   onAppLeave: AppMountParameters['onAppLeave'];
   history: History;
 }) {
-  const language =
-    storage.get('kibana.userQueryLanguage') ||
-    core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
-
   const [state, setState] = useState<State>(() => {
     const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       isLoading: !!docId,
       isSaveModalVisible: false,
       indexPatternsForTopNav: [],
-      query: { query: '', language },
+      query: data.query.queryString.getDefaultQuery(),
       dateRange: {
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      filters: [],
+      originatingApp,
+      filters: data.query.filterManager.getFilters(),
       indicateNoData: false,
     };
   });
@@ -155,6 +153,7 @@ export function App({
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
     });
     const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
       data.query,
@@ -166,7 +165,14 @@ export function App({
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
     };
-  }, [data.query.filterManager, data.query.timefilter.timefilter]);
+  }, [
+    data.query.filterManager,
+    data.query.timefilter.timefilter,
+    core.notifications.toasts,
+    core.uiSettings,
+    data.query,
+    history,
+  ]);
 
   useEffect(() => {
     onAppLeave((actions) => {
@@ -213,57 +219,61 @@ export function App({
     ]);
   }, [core.application, core.chrome, core.http.basePath, state.persistedDoc]);
 
-  useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState((s) => ({ ...s, isLoading: true }));
-      docStorage
-        .load(docId)
-        .then((doc) => {
-          getAllIndexPatterns(
-            doc.state.datasourceMetaData.filterableIndexPatterns,
-            data.indexPatterns,
-            core.notifications
-          )
-            .then((indexPatterns) => {
-              // Don't overwrite any pinned filters
-              data.query.filterManager.setAppFilters(doc.state.filters);
-              setState((s) => ({
-                ...s,
-                isLoading: false,
-                persistedDoc: doc,
-                lastKnownDoc: doc,
-                query: doc.state.query,
-                indexPatternsForTopNav: indexPatterns,
-              }));
-            })
-            .catch(() => {
-              setState((s) => ({ ...s, isLoading: false }));
+  useEffect(
+    () => {
+      if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
+        setState((s) => ({ ...s, isLoading: true }));
+        docStorage
+          .load(docId)
+          .then((doc) => {
+            getAllIndexPatterns(
+              doc.state.datasourceMetaData.filterableIndexPatterns,
+              data.indexPatterns,
+              core.notifications
+            )
+              .then((indexPatterns) => {
+                // Don't overwrite any pinned filters
+                data.query.filterManager.setAppFilters(doc.state.filters);
+                setState((s) => ({
+                  ...s,
+                  isLoading: false,
+                  persistedDoc: doc,
+                  lastKnownDoc: doc,
+                  query: doc.state.query,
+                  indexPatternsForTopNav: indexPatterns,
+                }));
+              })
+              .catch(() => {
+                setState((s) => ({ ...s, isLoading: false }));
 
-              redirectTo();
-            });
-        })
-        .catch(() => {
-          setState((s) => ({ ...s, isLoading: false }));
+                redirectTo();
+              });
+          })
+          .catch(() => {
+            setState((s) => ({ ...s, isLoading: false }));
 
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
+            core.notifications.toasts.addDanger(
+              i18n.translate('xpack.lens.app.docLoadingError', {
+                defaultMessage: 'Error loading saved document',
+              })
+            );
 
-          redirectTo();
-        });
-    }
-  }, [
-    core.notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    docId,
-    // TODO: These dependencies are changing too often
-    // docStorage,
-    // redirectTo,
-    // state.persistedDoc,
-  ]);
+            redirectTo();
+          });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      core.notifications,
+      data.indexPatterns,
+      data.query.filterManager,
+      docId,
+      // TODO: These dependencies are changing too often
+      // docStorage,
+      // redirectTo,
+      // state.persistedDoc,
+    ]
+  );
 
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
@@ -321,9 +331,12 @@ export function App({
       .then(({ id }) => {
         // Prevents unnecessary network request and disables save button
         const newDoc = { ...doc, id };
+        const currentOriginatingApp = state.originatingApp;
         setState((s) => ({
           ...s,
           isSaveModalVisible: false,
+          originatingApp:
+            newlyCreated && !saveProps.returnToOrigin ? undefined : currentOriginatingApp,
           persistedDoc: newDoc,
           lastKnownDoc: newDoc,
         }));
@@ -368,7 +381,7 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
-                ...(!!originatingApp && lastKnownDoc?.id
+                ...(!!state.originatingApp && lastKnownDoc?.id
                   ? [
                       {
                         label: i18n.translate('xpack.lens.app.saveAndReturn', {
@@ -393,14 +406,14 @@ export function App({
                   : []),
                 {
                   label:
-                    lastKnownDoc?.id && !!originatingApp
+                    lastKnownDoc?.id && !!state.originatingApp
                       ? i18n.translate('xpack.lens.app.saveAs', {
                           defaultMessage: 'Save as',
                         })
                       : i18n.translate('xpack.lens.app.save', {
                           defaultMessage: 'Save',
                         }),
-                  emphasize: !originatingApp || !lastKnownDoc?.id,
+                  emphasize: !state.originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState((s) => ({ ...s, isSaveModalVisible: true }));
@@ -466,12 +479,7 @@ export function App({
                   ...s,
                   savedQuery: undefined,
                   filters: data.query.filterManager.getGlobalFilters(),
-                  query: {
-                    query: '',
-                    language:
-                      storage.get('kibana.userQueryLanguage') ||
-                      core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-                  },
+                  query: data.query.queryString.getDefaultQuery(),
                 }));
               }}
               query={state.query}
@@ -523,7 +531,7 @@ export function App({
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
+            originatingApp={state.originatingApp}
             onSave={(props) => runSave(props)}
             onClose={() => setState((s) => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{

@@ -23,18 +23,25 @@ import { AlertPanel } from './panel';
 import { Legacy } from '../legacy_shims';
 import { isInSetupMode } from '../lib/setup_mode';
 
-function getDateFromState(states: CommonAlertState[]) {
-  const timestamp = states[0].state.ui.triggeredMS;
+function getDateFromState(state: CommonAlertState) {
+  const timestamp = state.state.ui.triggeredMS;
   const tz = Legacy.shims.uiSettings.get('dateFormat:tz');
   return formatDateTimeLocal(timestamp, false, tz === 'Browser' ? null : tz);
 }
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 
+interface AlertInPanel {
+  alert: CommonAlertStatus;
+  alertState: CommonAlertState;
+}
+
 interface Props {
   alerts: { [alertTypeId: string]: CommonAlertStatus };
+  stateFilter: (state: AlertState) => boolean;
 }
 export const AlertsBadge: React.FC<Props> = (props: Props) => {
+  const { stateFilter = () => true } = props;
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode();
   const alerts = Object.values(props.alerts).filter(Boolean);
@@ -93,15 +100,20 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     );
   } else {
     const byType = {
-      [AlertSeverity.Danger]: [] as CommonAlertStatus[],
-      [AlertSeverity.Warning]: [] as CommonAlertStatus[],
-      [AlertSeverity.Success]: [] as CommonAlertStatus[],
+      [AlertSeverity.Danger]: [] as AlertInPanel[],
+      [AlertSeverity.Warning]: [] as AlertInPanel[],
+      [AlertSeverity.Success]: [] as AlertInPanel[],
     };
 
     for (const alert of alerts) {
       for (const alertState of alert.states) {
-        const state = alertState.state as AlertState;
-        byType[state.ui.severity].push(alert);
+        if (alertState.firing && stateFilter(alertState.state)) {
+          const state = alertState.state as AlertState;
+          byType[state.ui.severity].push({
+            alertState,
+            alert,
+          });
+        }
       }
     }
 
@@ -127,14 +139,14 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         {
           id: 0,
           title: `Alerts`,
-          items: list.map(({ alert, states }, index) => {
+          items: list.map(({ alert, alertState }, index) => {
             return {
               name: (
                 <Fragment>
                   <EuiText size="s">
-                    <h4>{getDateFromState(states)}</h4>
+                    <h4>{getDateFromState(alertState)}</h4>
                   </EuiText>
-                  <EuiText>{alert.label}</EuiText>
+                  <EuiText>{alert.alert.label}</EuiText>
                 </Fragment>
               ),
               panel: index + 1,
@@ -144,9 +156,9 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         ...list.map((alertStatus, index) => {
           return {
             id: index + 1,
-            title: getDateFromState(alertStatus.states),
+            title: getDateFromState(alertStatus.alertState),
             width: 400,
-            content: <AlertPanel alert={alertStatus} />,
+            content: <AlertPanel alert={alertStatus.alert} alertState={alertStatus.alertState} />,
           };
         }),
       ];
@@ -168,7 +180,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <EuiFlexGrid>
+    <EuiFlexGrid data-test-subj="monitoringSetupModeAlertBadges">
       {badges.map((badge, index) => (
         <EuiFlexItem key={index} grow={false}>
           {badge}

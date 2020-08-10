@@ -9,8 +9,8 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -52,6 +52,14 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
  * Whether or not the camera is animating, at a given time.
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
+
+/**
+ * Whether or not a given entity id is in the set of termination events.
+ */
+export const isProcessTerminated = composeSelectors(
+  dataStateSelector,
+  dataSelectors.isProcessTerminated
+);
 
 /**
  * Given a nodeID (aka entity_id) get the indexed process event.
@@ -144,26 +152,15 @@ export const relatedEventInfoByEntityId = composeSelectors(
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */
-export const uiActiveDescendantId = composeSelectors(
+export const ariaActiveDescendant = composeSelectors(
   uiStateSelector,
-  uiSelectors.activeDescendantId
+  uiSelectors.ariaActiveDescendant
 );
 
 /**
- * Returns the id of the "selected" tree node (the node that is currently "pressed" and possibly controlling other popups / components)
+ * Returns the nodeID of the selected node
  */
-export const uiSelectedDescendantId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantId
-);
-
-/**
- * Returns the entity_id of the "selected" tree node's process
- */
-export const uiSelectedDescendantProcessId = composeSelectors(
-  uiStateSelector,
-  uiSelectors.selectedDescendantProcessId
-);
+export const selectedNode = composeSelectors(uiStateSelector, uiSelectors.selectedNode);
 
 /**
  * Returns the camera state from within ResolverState
@@ -252,6 +249,14 @@ export const ariaLevel: (
 );
 
 /**
+ * the node ID of the node representing the databaseDocumentID
+ */
+export const originID: (state: ResolverState) => string | undefined = composeSelectors(
+  dataStateSelector,
+  dataSelectors.originID
+);
+
+/**
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
@@ -266,9 +271,14 @@ export const ariaFlowtoNodeID: (
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       // get a `Set` containing their node IDs
-      const nodesVisibleAtTime: Set<string> = new Set(
-        [...processNodePositions.keys()].map(uniquePidForProcess)
-      );
+      const nodesVisibleAtTime: Set<string> = new Set();
+      // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
+      for (const visibleEvent of processNodePositions.keys()) {
+        const nodeID = entityIDSafeVersion(visibleEvent);
+        if (nodeID !== undefined) {
+          nodesVisibleAtTime.add(nodeID);
+        }
+      }
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {

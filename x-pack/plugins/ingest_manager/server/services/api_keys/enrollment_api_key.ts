@@ -24,6 +24,7 @@ export async function listEnrollmentApiKeys(
 ): Promise<{ items: EnrollmentAPIKey[]; total: any; page: any; perPage: any }> {
   const { page = 1, perPage = 20, kuery } = options;
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { saved_objects, total } = await soClient.find<EnrollmentAPIKeySOAttributes>({
     type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
     page,

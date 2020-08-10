@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
@@ -21,6 +19,7 @@ import {
   name,
   namespace_type,
   tags,
+  version,
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { NamespaceType } from '../types';
@@ -42,6 +41,7 @@ export const updateExceptionListSchema = t.intersection([
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
       tags, // defaults to empty array if not set during decode
+      version, // defaults to undefined if not set during decode
     })
   ),
 ]);

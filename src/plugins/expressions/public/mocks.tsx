@@ -20,10 +20,8 @@
 import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
-/* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
 import { bfetchPluginMock } from '../../bfetch/public/mocks';
-/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;

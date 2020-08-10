@@ -6,18 +6,17 @@
 
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
-import {
-  createPackageConfigWithManifestMock,
-  createPackageConfigWithInitialManifestMock,
-} from '../../../../../../ingest_manager/common/mocks';
 import { PackageConfigServiceInterface } from '../../../../../../ingest_manager/server';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionsCache } from '../../../lib/artifacts';
+import LRU from 'lru-cache';
 import { getArtifactClientMock } from '../artifact_client.mock';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager } from './manifest_manager';
 import {
+  createPackageConfigWithManifestMock,
+  createPackageConfigWithInitialManifestMock,
   getMockManifest,
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
@@ -25,22 +24,29 @@ import {
 
 export enum ManifestManagerMockType {
   InitialSystemState,
+  ListClientPromiseRejection,
   NormalFlow,
 }
 
 export const getManifestManagerMock = (opts?: {
   mockType?: ManifestManagerMockType;
-  cache?: ExceptionsCache;
+  cache?: LRU<string, Buffer>;
+  exceptionListClient?: ExceptionListClient;
   packageConfigService?: jest.Mocked<PackageConfigServiceInterface>;
   savedObjectsClient?: ReturnType<typeof savedObjectsClientMock.create>;
 }): ManifestManager => {
-  let cache = new ExceptionsCache(5);
-  if (opts?.cache !== undefined) {
+  let cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
+  if (opts?.cache != null) {
     cache = opts.cache;
   }
 
+  let exceptionListClient = listMock.getExceptionListClient();
+  if (opts?.exceptionListClient != null) {
+    exceptionListClient = opts.exceptionListClient;
+  }
+
   let packageConfigService = createPackageConfigServiceMock();
-  if (opts?.packageConfigService !== undefined) {
+  if (opts?.packageConfigService != null) {
     packageConfigService = opts.packageConfigService;
   }
   packageConfigService.list = jest.fn().mockResolvedValue({
@@ -53,7 +59,7 @@ export const getManifestManagerMock = (opts?: {
   });
 
   let savedObjectsClient = savedObjectsClientMock.create();
-  if (opts?.savedObjectsClient !== undefined) {
+  if (opts?.savedObjectsClient != null) {
     savedObjectsClient = opts.savedObjectsClient;
   }
 
@@ -63,6 +69,11 @@ export const getManifestManagerMock = (opts?: {
       switch (mockType) {
         case ManifestManagerMockType.InitialSystemState:
           return getEmptyMockArtifacts();
+        case ManifestManagerMockType.ListClientPromiseRejection:
+          exceptionListClient.findExceptionListItem = jest
+            .fn()
+            .mockRejectedValue(new Error('unexpected thing happened'));
+          return super.buildExceptionListArtifacts('v1');
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }
@@ -87,7 +98,7 @@ export const getManifestManagerMock = (opts?: {
     artifactClient: getArtifactClientMock(savedObjectsClient),
     cache,
     packageConfigService,
-    exceptionListClient: listMock.getExceptionListClient(),
+    exceptionListClient,
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     savedObjectsClient,
   });

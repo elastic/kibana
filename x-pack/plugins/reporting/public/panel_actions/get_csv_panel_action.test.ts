@@ -9,7 +9,7 @@ import { first } from 'rxjs/operators';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { GetCsvReportPanelAction } from './get_csv_panel_action';
 
-type licenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
+type LicenseResults = 'valid' | 'invalid' | 'unavailable' | 'expired';
 
 describe('GetCsvReportPanelAction', () => {
   let core: any;
@@ -18,12 +18,16 @@ describe('GetCsvReportPanelAction', () => {
 
   beforeAll(() => {
     if (typeof window.URL.revokeObjectURL === 'undefined') {
-      Object.defineProperty(window.URL, 'revokeObjectURL', { value: () => {} });
+      Object.defineProperty(window.URL, 'revokeObjectURL', {
+        configurable: true,
+        writable: true,
+        value: () => {},
+      });
     }
   });
 
   beforeEach(() => {
-    mockLicense$ = (state: licenseResults = 'valid') => {
+    mockLicense$ = (state: LicenseResults = 'valid') => {
       return (of({
         check: jest.fn().mockImplementation(() => ({ state })),
       }) as unknown) as LicensingPluginSetup['license$'];

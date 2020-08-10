@@ -42,6 +42,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
 
   public async setup({
     http,
+    status,
     legacyPlugins,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
@@ -54,7 +55,10 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
         if (!this.legacyInternals) {
           throw new Error('Cannot render before "start"');
         }
-        const { env } = this.coreContext;
+        const env = {
+          mode: this.coreContext.env.mode,
+          packageInfo: this.coreContext.env.packageInfo,
+        };
         const basePath = http.basePath.get(request);
         const serverBasePath = http.basePath.serverBasePath;
         const settings = {
@@ -79,6 +83,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             serverBasePath,
             env,
             legacyMode: appId !== 'core',
+            anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },

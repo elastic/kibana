@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
@@ -23,17 +21,18 @@ import {
 } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import {
-  DefaultEntryArray,
   DefaultUpdateCommentsArray,
   EntriesArray,
   NamespaceType,
   UpdateCommentsArray,
+  nonEmptyEntriesArray,
 } from '../types';
 
 export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.type({
       description,
+      entries: nonEmptyEntriesArray,
       name,
       type: exceptionListItemType,
     })
@@ -43,7 +42,6 @@ export const updateExceptionListItemSchema = t.intersection([
       _tags, // defaults to empty array if not set during decode
       _version, // defaults to undefined if not set during decode
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
-      entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
       item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
