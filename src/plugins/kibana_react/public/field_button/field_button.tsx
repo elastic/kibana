@@ -20,6 +20,7 @@
 import './field_button.scss';
 import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { CommonProps } from '@elastic/eui';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -59,7 +60,7 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * Pass more button props to the actual `<button>` element
    */
-  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement>;
+  buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
 
 /**

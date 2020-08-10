@@ -175,7 +175,7 @@ export function DiscoverField({
             onClick={() => {
               togglePopover();
             }}
-            data-test-subj={`field-${field.name}-showDetails`}
+            buttonProps={{ 'data-test-subj': `field-${field.name}-showDetails` }}
             fieldIcon={dscFieldIcon}
             fieldAction={actionButton}
             fieldName={fieldName}
