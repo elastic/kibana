@@ -356,22 +356,20 @@ export class MapsAppView extends React.Component {
     );
   }
 
-  render() {
-    const { filters, isFullScreen } = this.props;
+  _addFilter = (newFilters) => {
+    newFilters.forEach((filter) => {
+      filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
+    });
+    this._onFiltersChange([...this.props.filters, ...newFilters]);
+  };
 
+  render() {
     return this.state.initialized ? (
-      <div id="maps-plugin" className={isFullScreen ? 'mapFullScreen' : ''}>
+      <div id="maps-plugin" className={this.props.isFullScreen ? 'mapFullScreen' : ''}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
         <div id="react-maps-root">
-          <MapContainer
-            addFilters={(newFilters) => {
-              newFilters.forEach((filter) => {
-                filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
-              });
-              this._onFiltersChange([...filters, ...newFilters]);
-            }}
-          />
+          <MapContainer addFilters={this._addFilter} />
         </div>
       </div>
     ) : null;
