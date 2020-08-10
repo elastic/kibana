@@ -7,6 +7,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { CasesConfigureRequest, CasesConfigureResponse } from '../../../../plugins/case/common/api';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const getConfiguration = (connector_id: string = 'connector-1'): CasesConfigureRequest => {
   return {
     connector_id,
@@ -89,6 +90,7 @@ export const getJiraConnector = () => ({
 export const removeServerGeneratedPropertiesFromConfigure = (
   config: Partial<CasesConfigureResponse>
 ): Partial<CasesConfigureResponse> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...rest } = config;
   return rest;
 };
