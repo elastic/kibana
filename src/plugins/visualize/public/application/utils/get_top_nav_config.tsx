@@ -178,7 +178,7 @@ export const getTopNavConfig = (
   };
 
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
+    ...(originatingApp && (savedVis?.id || embeddableId)
       ? [
           {
             id: 'saveAndReturn',
@@ -223,7 +223,7 @@ export const getTopNavConfig = (
           {
             id: 'save',
             label:
-              savedVis && savedVis.id && originatingApp
+              savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
                     defaultMessage: 'save as',
                   })
@@ -320,7 +320,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified
-      disableButton: (!share || embeddableId) as boolean,
+      disableButton: !share || !!embeddableId
     },
     {
       id: 'inspector',
