@@ -1320,9 +1320,9 @@
                     "config": {
                       "type": "flattened"
                     },
-                    "dataset": {
+                    "data_stream": {
                       "properties": {
-                        "name": {
+                        "dataset": {
                           "type": "keyword"
                         },
                         "type": {
