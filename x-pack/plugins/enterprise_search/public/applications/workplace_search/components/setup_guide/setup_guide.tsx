@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
-import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import GettingStarted from '../../assets/getting_started.png';
 
@@ -26,7 +26,7 @@ export const SetupGuide: React.FC = () => {
       standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
-      <SetBreadcrumbs
+      <SetPageChrome
         text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
           defaultMessage: 'Setup Guide',
         })}
