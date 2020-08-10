@@ -1,21 +1,17 @@
 [[whats-new]]
 == What's new in {minor-version}
+++++
+<titleabbrev>What's new in {minor-version}</titleabbrev>
+++++
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release, check out the release
+notes and breaking changes.
 
-//* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
-
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>. 
+Other versions: {kibana-ref-all}/7.8/release-highlights-7.8.0.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 coming[7.9.0]
 
@@ -23,5 +19,72 @@ coming[7.9.0]
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[new-platform-7-9]]
+=== A new, grown-up Kibana platform
+
+As of 7.9,
+the new development platform
+for {kib} is complete. The most immediate difference you'll notice is
+that pages load faster as you navigate {kib}. If you're a developer,
+the new platform enables you to build features faster and with greater efficiency.
+For details, check out
+https://www.elastic.co/blog/introducing-a-new-architecture-for-kibana[Introducing
+a new architecture for {kib}].
+
+[float]
+[[search-7-9]]
+=== Welcome Enterprise Search to {kib}
+
+In 7.8, we reorganized the {kib} side navigation to make our Observability
+and Security apps easier to find. In 7.9, we added Enterprise Search
+to the side nav. If you're an existing user of App Search and
+Workplace Search, you can now launch directly into those environments in {kib} and see your
+engines.
+Check out https://www.elastic.co/guide/en/app-search/current/index.html[our documentation]
+for more information.
+
+[role="screenshot"]
+image::images/7.9-whats_new_search.png[Enterprise Search is side navigation]
+
+
+[float]
+[[canvas-7-9]]
+=== Canvas variables for easy reuse
+
+You can now can create variables to easily reuse the
+strings and patterns in your Canvas elements. This is especially useful if you
+frequently copy from one element to another. For example, when you clone a large workpad and need
+to connect your elements to a new index, you can use variables to update each element
+instead. For instructions, see the
+{kibana-ref}/edit-workpads.html[Canvas documentation].
+
+[float]
+[[lens-7-9]]
+=== Multiple Y axes in Lens
+
+In Lens, you can now compare two metrics on the Y axes at the same time.
+This enables you compare and contrast data with vastly different ranges.
+For example, you might track the total page views for your web site,
+which could tally in the millions. At the same time, you're also interested
+in the percentage of web site bounce rates,
+typically between 1 and 100. You can stack both metrics on top of one
+another to quickly spot outliers.
+
+Also in 7.9, Lens debuts color pick, sort, and a fitting function.
+
+[float]
+[[alert-7-9]]
+=== New ServiceNow action in Alerts
+
+Alerting introduces a ServiceNow action that runs on the
+{kib} server when an alert condition is met. This action pushes or updates
+data to a new incident in ServiceNow. Refer to the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
+for details.
+
+[role="screenshot"]
+image::images/alert-flyout-action-type-selection.png[UI for selecting an action type]
+
 
 // end::notable-highlights[]
