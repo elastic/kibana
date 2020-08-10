@@ -33,6 +33,7 @@ import {
   getInstallationObject,
 } from '../../services/epm/packages';
 import { IngestManagerError, getHTTPResponseCode } from '../../errors';
+import { splitPkgKey } from '../../services/epm/registry';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -131,7 +132,7 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     // TODO: change epm API to /packageName/version so we don't need to do this
-    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
     const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
@@ -155,7 +156,7 @@ export const installPackageHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const { pkgkey } = request.params;
-  const [pkgName, pkgVersion] = pkgkey.split('-');
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   try {
     const res = await installPackage({
       savedObjectsClient,
