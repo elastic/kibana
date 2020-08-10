@@ -24,6 +24,7 @@ export const removeServerGeneratedProperties = (
   rule: Partial<RulesSchema>
 ): Partial<RulesSchema> => {
   const {
+    /* eslint-disable @typescript-eslint/naming-convention */
     created_at,
     updated_at,
     id,
@@ -33,6 +34,7 @@ export const removeServerGeneratedProperties = (
     last_success_message,
     status,
     status_date,
+    /* eslint-enable @typescript-eslint/naming-convention */
     ...removedProperties
   } = rule;
   return removedProperties;
@@ -46,6 +48,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
   rule: Partial<RulesSchema>
 ): Partial<RulesSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
   return additionalRuledIdRemoved;
 };
@@ -153,6 +156,7 @@ export const getSignalStatusEmptyResponse = () => ({
  */
 export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;
   return ruleWithoutId;
 };
@@ -215,6 +219,7 @@ export const getSimpleRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> => 
  */
 export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
   const rule = getSimpleRuleOutput(ruleId);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;
 };

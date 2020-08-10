@@ -20,10 +20,7 @@
 import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/server/mocks';
-
-/* eslint-disable */
 import { bfetchPluginMock } from '../../bfetch/server/mocks';
-/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;
