@@ -53,7 +53,7 @@ export class PieContainsAllZeros extends VislibError {
 export class NoResults extends VislibError {
   constructor() {
     super(
-      i18n.translate('visualizations.noResultsFoundTitle', {
+      i18n.translate('visTypeVislib.vislib.errors.noResultsFoundTitle', {
         defaultMessage: 'No results found',
       })
     );
