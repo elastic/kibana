@@ -48,37 +48,37 @@ describe('getMonitorStatus', () => {
       [],
       genBucketItem
     );
-    const exampleFilter = `{
-      "bool": {
-        "should": [
+    const exampleFilter = {
+      bool: {
+        should: [
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "apm-dev"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'apm-dev',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
+              minimum_should_match: 1,
+            },
           },
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "auto-http-0X8D6082B94BBE3B8A"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'auto-http-0X8D6082B94BBE3B8A',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
-          }
+              minimum_should_match: 1,
+            },
+          },
         ],
-        "minimum_should_match": 1
-      }
-    }`;
+        minimum_should_match: 1,
+      },
+    };
     await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -98,11 +98,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -203,11 +210,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -324,11 +338,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -378,28 +399,7 @@ describe('getMonitorStatus', () => {
       }
     `);
 
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "count": 43,
-          "location": "fairbanks",
-          "monitor_id": "foo",
-          "status": "down",
-        },
-        Object {
-          "count": 53,
-          "location": "harrisburg",
-          "monitor_id": "bar",
-          "status": "down",
-        },
-        Object {
-          "count": 44,
-          "location": "harrisburg",
-          "monitor_id": "foo",
-          "status": "down",
-        },
-      ]
-    `);
+    expect(result).toMatchInlineSnapshot(`Array []`);
   });
 
   it('fetches multiple pages of ES results', async () => {
@@ -489,57 +489,6 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "count": 43,
-          "location": "fairbanks",
-          "monitor_id": "foo",
-          "status": "down",
-        },
-        Object {
-          "count": 53,
-          "location": "harrisburg",
-          "monitor_id": "bar",
-          "status": "down",
-        },
-        Object {
-          "count": 44,
-          "location": "harrisburg",
-          "monitor_id": "foo",
-          "status": "down",
-        },
-        Object {
-          "count": 21,
-          "location": "fairbanks",
-          "monitor_id": "sna",
-          "status": "down",
-        },
-        Object {
-          "count": 21,
-          "location": "fairbanks",
-          "monitor_id": "fu",
-          "status": "down",
-        },
-        Object {
-          "count": 45,
-          "location": "fairbanks",
-          "monitor_id": "bar",
-          "status": "down",
-        },
-        Object {
-          "count": 21,
-          "location": "harrisburg",
-          "monitor_id": "sna",
-          "status": "down",
-        },
-        Object {
-          "count": 21,
-          "location": "harrisburg",
-          "monitor_id": "fu",
-          "status": "down",
-        },
-      ]
-    `);
+    expect(result).toMatchInlineSnapshot(`Array []`);
   });
 });

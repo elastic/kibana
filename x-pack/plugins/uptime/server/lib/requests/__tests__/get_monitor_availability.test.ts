@@ -12,16 +12,9 @@ import {
 } from '../get_monitor_availability';
 import { setupMockEsCompositeQuery } from './helper';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { GetMonitorAvailabilityParams } from '../../../../common/runtime_types';
+import { GetMonitorAvailabilityParams, makePing, Ping } from '../../../../common/runtime_types';
 interface AvailabilityTopHit {
-  _source: {
-    monitor: {
-      name: string;
-    };
-    url: {
-      full: string;
-    };
-  };
+  _source: Ping;
 }
 
 interface AvailabilityDoc {
@@ -46,11 +39,10 @@ interface AvailabilityDoc {
 const genBucketItem = ({
   monitorId,
   location,
-  name,
-  url,
   up,
   down,
   availabilityRatio,
+  monitorInfo,
 }: GetMonitorAvailabilityResult): AvailabilityDoc => ({
   key: {
     monitorId,
@@ -61,14 +53,7 @@ const genBucketItem = ({
     hits: {
       hits: [
         {
-          _source: {
-            monitor: {
-              name,
-            },
-            url: {
-              full: url,
-            },
-          },
+          _source: monitorInfo,
         },
       ],
     },
@@ -148,10 +133,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -271,29 +252,26 @@ describe('monitor availability', () => {
               {
                 monitorId: 'foo',
                 location: 'harrisburg',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 456,
                 down: 234,
                 availabilityRatio: 0.660869565217391,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'foo',
                 location: 'faribanks',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 450,
                 down: 240,
                 availabilityRatio: 0.652173913043478,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'bar',
                 location: 'fairbanks',
-                name: 'Bar',
-                url: 'http://bar.com',
                 up: 468,
                 down: 212,
                 availabilityRatio: 0.688235294117647,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -327,10 +305,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -417,27 +391,63 @@ describe('monitor availability', () => {
             "down": 234,
             "location": "harrisburg",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 456,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.652173913043478,
             "down": 240,
             "location": "faribanks",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 450,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.688235294117647,
             "down": 212,
             "location": "fairbanks",
             "monitorId": "bar",
-            "name": "Bar",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 468,
-            "url": "http://bar.com",
           },
         ]
       `);
@@ -459,20 +469,18 @@ describe('monitor availability', () => {
               {
                 monitorId: 'foo',
                 location: 'harrisburg',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 243,
                 down: 11,
                 availabilityRatio: 0.956692913385827,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'foo',
                 location: 'fairbanks',
-                name: 'Foo',
-                url: 'http://foo.com',
                 up: 251,
                 down: 13,
                 availabilityRatio: 0.950757575757576,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -481,20 +489,18 @@ describe('monitor availability', () => {
               {
                 monitorId: 'baz',
                 location: 'harrisburg',
-                name: 'Baz',
-                url: 'http://baz.com',
                 up: 341,
                 down: 3,
                 availabilityRatio: 0.991279069767442,
+                monitorInfo: makePing({}),
               },
               {
                 monitorId: 'baz',
                 location: 'fairbanks',
-                name: 'Baz',
-                url: 'http://baz.com',
                 up: 365,
                 down: 5,
                 availabilityRatio: 0.986486486486486,
+                monitorInfo: makePing({}),
               },
             ],
           },
@@ -515,36 +521,84 @@ describe('monitor availability', () => {
             "down": 11,
             "location": "harrisburg",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 243,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.950757575757576,
             "down": 13,
             "location": "fairbanks",
             "monitorId": "foo",
-            "name": "Foo",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 251,
-            "url": "http://foo.com",
           },
           Object {
             "availabilityRatio": 0.991279069767442,
             "down": 3,
             "location": "harrisburg",
             "monitorId": "baz",
-            "name": "Baz",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 341,
-            "url": "http://baz.com",
           },
           Object {
             "availabilityRatio": 0.986486486486486,
             "down": 5,
             "location": "fairbanks",
             "monitorId": "baz",
-            "name": "Baz",
+            "monitorInfo": Object {
+              "docId": "myDocId",
+              "monitor": Object {
+                "duration": Object {
+                  "us": 100000,
+                },
+                "id": "myId",
+                "ip": "127.0.0.1",
+                "name": undefined,
+                "status": "up",
+                "type": "myType",
+              },
+              "timestamp": "2020-07-07T01:14:08Z",
+            },
             "up": 365,
-            "url": "http://baz.com",
           },
         ]
       `);
@@ -565,10 +619,6 @@ describe('monitor availability', () => {
                   },
                   "fields": Object {
                     "top_hits": Object {
-                      "_source": Array [
-                        "monitor.name",
-                        "url.full",
-                      ],
                       "size": 1,
                       "sort": Array [
                         Object {
@@ -663,10 +713,6 @@ describe('monitor availability', () => {
                     },
                     "fields": Object {
                       "top_hits": Object {
-                        "_source": Array [
-                          "monitor.name",
-                          "url.full",
-                        ],
                         "size": 1,
                         "sort": Array [
                           Object {
@@ -833,18 +879,30 @@ describe('monitor availability', () => {
             "down": 2450,
             "location": "fairbanks",
             "monitorId": "test-node-service",
-            "name": "Test Node Service",
+            "monitorInfo": Object {
+              "monitor": Object {
+                "name": "Test Node Service",
+              },
+              "url": Object {
+                "full": "http://localhost:12349",
+              },
+            },
             "up": 821,
-            "url": "http://localhost:12349",
           },
           Object {
             "availabilityRatio": 0.5804076040417879,
             "down": 2450,
             "location": "harrisburg",
             "monitorId": "test-node-service",
-            "name": "Test Node Service",
+            "monitorInfo": Object {
+              "monitor": Object {
+                "name": "Test Node Service",
+              },
+              "url": Object {
+                "full": "http://localhost:12349",
+              },
+            },
             "up": 3389,
-            "url": "http://localhost:12349",
           },
         ]
       `);

@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { UMElasticsearchQueryFn } from '../adapters';
+import { Ping } from '../../../common/runtime_types/ping';
 
 export interface GetMonitorStatusParams {
-  filters?: unknown;
+  filters?: JsonObject;
   locations: string[];
   numTimes: number;
   timerange: { from: string; to: string };
 }
 
 export interface GetMonitorStatusResult {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
   count: number;
+  monitorInfo: Ping;
 }
 
 interface MonitorStatusKey {
@@ -78,7 +81,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
               size: 2000,
               sources: [
                 {
-                  monitor_id: {
+                  monitorId: {
                     terms: {
                       field: 'monitor.id',
                     },
@@ -102,7 +105,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
               ],
             },
             aggs: {
-              monitors_data: {
+              fields: {
                 top_hits: {
                   size: 1,
                 },
@@ -113,10 +116,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       },
     };
 
-    /**
-     * `filters` are an unparsed JSON string. We parse them and append the bool fields of the query
-     * to the bool of the parsed filters.
-     */
     if (filters?.bool) {
       esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, filters.bool);
     }
@@ -144,5 +143,9 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
 
   return monitors
     .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
+    .map(({ key, doc_count: count, fields }: any) => ({
+      ...key,
+      count,
+      monitorInfo: fields?.hits?.hits?.[0]?._source,
+    }));
 };

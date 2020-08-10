@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { GetMonitorAvailabilityParams } from '../../../common/runtime_types';
+import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
 
 export interface AvailabilityKey {
   monitorId: string;
@@ -14,12 +14,11 @@ export interface AvailabilityKey {
 
 export interface GetMonitorAvailabilityResult {
   monitorId: string;
-  location: string;
-  name: string;
-  url: string;
   up: number;
   down: number;
+  location: string;
   availabilityRatio: number | null;
+  monitorInfo: Ping;
 }
 
 export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
@@ -140,8 +139,9 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    if (filters?.bool) {
-      esParams.body.query.bool = { ...esParams.body.query.bool, ...filters.bool };
+    if (filters) {
+      const parsedFilter = JSON.parse(filters);
+      esParams.body.query.bool = { ...esParams.body.query.bool, ...parsedFilter.bool };
     }
 
     if (afterKey) {

@@ -11,10 +11,10 @@ import { UptimeAlertTypeFactory } from './types';
 import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
-  StatusCheckParams,
   StatusCheckFilters,
   DynamicSettings,
   Ping,
+  GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { updateState } from './common';
@@ -24,18 +24,25 @@ import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availabili
 import { UMServerLibs } from '../lib';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
+import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
-/**
- * Reduce a composite-key array of status results to a set of unique IDs.
- * @param items to reduce
- */
-export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce(
-    (acc, { monitor_id: monId, monitorId }) => acc.add(monId || monitorId),
-    new Set<string>()
-  );
+const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+
+const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
+  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+
+export const getUniqueIdsByLoc = (
+  downMonitorsByLocation: GetMonitorStatusResult[],
+  availabilityResults: GetMonitorAvailabilityResult[]
+) => {
+  const uniqueDownsIdsByLoc = uniqueDownMonitorIds(downMonitorsByLocation);
+  const uniqueAvailIdsByLoc = uniqueAvailMonitorIds(availabilityResults);
+
+  return new Set([...uniqueDownsIdsByLoc, ...uniqueAvailIdsByLoc]);
+};
 
 export const hasFilters = (filters?: StatusCheckFilters) => {
   if (!filters) return false;
@@ -97,163 +104,177 @@ export const getMonitorSummary = (monitorInfo: Ping) => {
   };
 };
 
-export const getAvailabilitySummary = (monitorInfo: Ping) => {
-  return {
-    monitorUrl: monitorInfo.url?.full,
-    monitorId: monitorInfo.monitor?.id,
-    monitorName: monitorInfo.monitor?.name ?? monitorInfo.monitor?.id,
-    monitorType: monitorInfo.monitor?.type,
-    latestErrorMessage: monitorInfo.error?.message,
-    observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
-    observerHostname: monitorInfo.agent?.name,
-  };
+export const getStatusMessage = (
+  downMonInfo?: Ping,
+  availMonInfo?: GetMonitorAvailabilityResult,
+  availability?: GetMonitorAvailabilityParams
+) => {
+  let statusMessage = '';
+  if (downMonInfo) {
+    statusMessage = 'down';
+  }
+  let availMessage = '';
+
+  if (availMonInfo) {
+    availMessage = `below threshold with ${(availMonInfo.availabilityRatio! * 100).toFixed(
+      2
+    )}% availability expected is ${availability?.threshold}%`;
+  }
+  if (availMonInfo && downMonInfo) {
+    return statusMessage + ' and also ' + availMessage;
+  }
+  return statusMessage + availMessage;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
-  id: 'xpack.uptime.alerts.monitorStatus',
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
-    defaultMessage: 'Uptime monitor status',
-  }),
-  validate: {
-    params: schema.object({
-      availability: schema.maybe(
-        schema.object({
-          range: schema.number(),
-          rangeUnit: schema.string(),
-          threshold: schema.string(),
-        })
-      ),
-      filters: schema.maybe(
-        schema.oneOf([
-          // deprecated
-          schema.object({
-            'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
-            'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
-            tags: schema.maybe(schema.arrayOf(schema.string())),
-            'url.port': schema.maybe(schema.arrayOf(schema.string())),
-          }),
-          schema.string(),
-        ])
-      ),
-      // deprecated
-      locations: schema.maybe(schema.arrayOf(schema.string())),
-      numTimes: schema.number(),
-      search: schema.maybe(schema.string()),
-      shouldCheckStatus: schema.maybe(schema.boolean()),
-      shouldCheckAvailability: schema.maybe(schema.boolean()),
-      timerangeCount: schema.maybe(schema.number()),
-      timerangeUnit: schema.maybe(schema.string()),
-      // deprecated
-      timerange: schema.maybe(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-        })
-      ),
-      version: schema.maybe(schema.number()),
+export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
+  uptimeAlertWrapper({
+    id: 'xpack.uptime.alerts.monitorStatus',
+    name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+      defaultMessage: 'Uptime monitor status',
     }),
-  },
-  defaultActionGroupId: MONITOR_STATUS.id,
-  actionGroups: [
-    {
-      id: MONITOR_STATUS.id,
-      name: MONITOR_STATUS.name,
+    validate: {
+      params: schema.object({
+        availability: schema.maybe(
+          schema.object({
+            range: schema.number(),
+            rangeUnit: schema.string(),
+            threshold: schema.string(),
+          })
+        ),
+        filters: schema.maybe(
+          schema.oneOf([
+            // deprecated
+            schema.object({
+              'monitor.type': schema.maybe(schema.arrayOf(schema.string())),
+              'observer.geo.name': schema.maybe(schema.arrayOf(schema.string())),
+              tags: schema.maybe(schema.arrayOf(schema.string())),
+              'url.port': schema.maybe(schema.arrayOf(schema.string())),
+            }),
+            schema.string(),
+          ])
+        ),
+        // deprecated
+        locations: schema.maybe(schema.arrayOf(schema.string())),
+        numTimes: schema.number(),
+        search: schema.maybe(schema.string()),
+        shouldCheckStatus: schema.boolean(),
+        shouldCheckAvailability: schema.boolean(),
+        timerangeCount: schema.maybe(schema.number()),
+        timerangeUnit: schema.maybe(schema.string()),
+        // deprecated
+        timerange: schema.maybe(
+          schema.object({
+            from: schema.string(),
+            to: schema.string(),
+          })
+        ),
+        version: schema.maybe(schema.number()),
+      }),
     },
-  ],
-  actionVariables: {
-    context: [
+    defaultActionGroupId: MONITOR_STATUS.id,
+    actionGroups: [
       {
-        name: 'message',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
-          {
-            defaultMessage: 'A generated message summarizing the currently down monitors',
-          }
-        ),
-      },
-      {
-        name: 'downMonitorsWithGeo',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
-          {
-            defaultMessage:
-              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
-          }
-        ),
+        id: MONITOR_STATUS.id,
+        name: MONITOR_STATUS.name,
       },
     ],
-    state: [...commonMonitorStateI18, ...commonStateTranslations],
-  },
-  async executor(
-    { params: rawParams, state, services: { alertInstanceFactory } },
-    callES,
-    dynamicSettings
-  ) {
-    const {
-      filters,
-      search,
-      numTimes,
-      timerangeCount,
-      timerangeUnit,
-      shouldCheckAvailability,
-      shouldCheckStatus,
-    } = rawParams;
+    actionVariables: {
+      context: [
+        {
+          name: 'message',
+          description: i18n.translate(
+            'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+            {
+              defaultMessage: 'A generated message summarizing the currently down monitors',
+            }
+          ),
+        },
+        {
+          name: 'downMonitorsWithGeo',
+          description: i18n.translate(
+            'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
+            {
+              defaultMessage:
+                'A generated summary that shows some or all of the monitors detected as "down" by the alert',
+            }
+          ),
+        },
+      ],
+      state: [...commonMonitorStateI18, ...commonStateTranslations],
+    },
+    async executor(
+      { params: rawParams, state, services: { alertInstanceFactory } },
+      callES,
+      dynamicSettings
+    ) {
+      const {
+        filters,
+        search,
+        numTimes,
+        timerangeCount,
+        timerangeUnit,
+        availability,
+        shouldCheckAvailability,
+        shouldCheckStatus,
+        timerange: oldVersionTimeRange,
+      } = rawParams;
 
-    const timerange = { from: `now-${String(timerangeCount) + timerangeUnit}`, to: 'now' };
+      const timerange = oldVersionTimeRange || {
+        from: `now-${String(timerangeCount) + timerangeUnit}`,
+        to: 'now',
+      };
 
-    const filterString = await formatFilterString(libs, dynamicSettings, callES, filters, search);
+      const filterString = await formatFilterString(libs, dynamicSettings, callES, filters, search);
 
-    const params: StatusCheckParams = {
-      timerange,
-      numTimes,
-      locations: [],
-      filters: filterString,
-    };
+      let availabilityResults: GetMonitorAvailabilityResult[] = [];
+      if (shouldCheckAvailability) {
+        availabilityResults = await libs.requests.getMonitorAvailability({
+          callES,
+          dynamicSettings,
+          ...availability,
+          filters: JSON.stringify(filterString) || undefined,
+        });
+      }
 
-    let availabilityResults: GetMonitorAvailabilityResult[] = [];
-    if (shouldCheckAvailability) {
-      const { availability } = rawParams;
+      let downMonitorsByLocation: GetMonitorStatusResult[] = [];
 
-      availabilityResults = await libs.requests.getMonitorAvailability({
-        callES,
-        dynamicSettings,
-        ...availability,
-        filters: filterString || undefined,
+      // if oldVersionTimeRange present means it's 7.7 format and
+      // after that shouldCheckStatus should be explicitly false
+      if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
+        downMonitorsByLocation = await libs.requests.getMonitorStatus({
+          callES,
+          dynamicSettings,
+          timerange,
+          numTimes,
+          locations: [],
+          filters: filterString,
+        });
+      }
+
+      const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
+
+      mergedIdsByLoc.forEach((monIdByLoc) => {
+        const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monIdByLoc);
+
+        const availMonInfo = availabilityResults.find(
+          ({ monitorId, location }) => monitorId + location === monIdByLoc
+        );
+
+        const downMonInfo = downMonitorsByLocation.find(
+          ({ monitorId, location }) => monitorId + location === monIdByLoc
+        )?.monitorInfo;
+
+        const monitorSummary = getMonitorSummary(downMonInfo || availMonInfo?.monitorInfo!);
+
+        alertInstance.replaceState({
+          ...updateState(state, true),
+          ...monitorSummary,
+          statusMessage: getStatusMessage(downMonInfo!, availMonInfo!, availability),
+        });
+
+        alertInstance.scheduleActions(MONITOR_STATUS.id);
       });
-    }
 
-    let downMonitorsByLocation: GetMonitorStatusResult[] = [];
-
-    if (shouldCheckStatus) {
-      downMonitorsByLocation = await libs.requests.getMonitorStatus({
-        callES,
-        dynamicSettings,
-        ...params,
-      });
-    }
-
-    const uniqueDownsIds = uniqueMonitorIds(downMonitorsByLocation);
-    const uniqueAvailIds = uniqueMonitorIds(availabilityResults);
-
-    const mergedIds = new Set([...uniqueDownsIds, ...uniqueAvailIds]);
-
-    mergedIds.forEach((monId) => {
-      const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monId);
-
-      const availMonInfo = availabilityResults.find((res) => res.monitorId === monId)?.monitorInfo;
-      const downMonInfo = availabilityResults.find((res) => res.monitorId === monId)?.monitorInfo;
-
-      const monitorSummary = getMonitorSummary(availMonInfo);
-      const monitorSummary = getMonitorSummary(availMonInfo);
-
-      alertInstance.replaceState({
-        ...updateState(state, true),
-        ...monitorSummary,
-      });
-
-      alertInstance.scheduleActions(MONITOR_STATUS.id);
-    });
-
-    return updateState(state, downMonitorsByLocation.length > 0);
-  },
-});
+      return updateState(state, downMonitorsByLocation.length > 0);
+    },
+  });

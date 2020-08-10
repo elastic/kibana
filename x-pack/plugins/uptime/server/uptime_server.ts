@@ -8,7 +8,6 @@ import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
 import { uptimeAlertTypeFactories } from './lib/alerts';
-import { uptimeAlertWrapper } from './lib/alerts/uptime_alert_wrapper';
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,
@@ -20,6 +19,6 @@ export const initUptimeServer = (
   );
 
   uptimeAlertTypeFactories.forEach((alertTypeFactory) =>
-    plugins.alerts.registerType(uptimeAlertWrapper(alertTypeFactory(server, libs, plugins)))
+    plugins.alerts.registerType(alertTypeFactory(server, libs, plugins))
   );
 };

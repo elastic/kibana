@@ -41,6 +41,16 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
+    name: 'statusMessage',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.statusMessage',
+      {
+        defaultMessage:
+          'Status message e.g down or is below availability threshold in case of availability check or both.',
+      }
+    ),
+  },
+  {
     name: 'latestErrorMessage',
     description: i18n.translate(
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastErrorMessage',
