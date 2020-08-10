@@ -6,7 +6,11 @@
 
 export { ProcessorsEditorContextProvider } from './context';
 
-export { TestConfigContextProvider, useTestConfigContext, TestConfig } from './test_config_context';
+export {
+  TestPipelineContextProvider,
+  useTestPipelineContext,
+  TestPipelineData,
+} from './test_pipeline_context';
 
 export {
   PipelineProcessorsContextProvider,

@@ -19,44 +19,43 @@ import {
   FormConfig,
 } from '../../../../../../shared_imports';
 
-import { usePipelineProcessorsContext, useTestConfigContext, TestConfig } from '../../../context';
+import {
+  usePipelineProcessorsContext,
+  useTestPipelineContext,
+  TestPipelineData,
+} from '../../../context';
 
 import { documentsSchema } from './schema';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  handleExecute: (documents: object[], verbose: boolean) => void;
+  handleExecute: (documents: object[], verbose?: boolean) => void;
   isExecuting: boolean;
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
-  const { links } = usePipelineProcessorsContext();
+  const { links, toasts } = usePipelineProcessorsContext();
 
-  const { setCurrentTestConfig, testConfig } = useTestConfigContext();
-  const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
+  const { testPipelineData } = useTestPipelineContext();
+  const {
+    config: { documents: cachedDocuments },
+  } = testPipelineData;
 
   const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
     if (!isValid) {
       return;
     }
 
-    const { documents } = formData as TestConfig;
+    const { documents } = formData as TestPipelineData;
 
-    // Update context
-    setCurrentTestConfig({
-      ...testConfig,
-      documents,
-    });
-
-    handleExecute(documents!, cachedVerbose);
+    await handleExecute({ documents: documents! }, true);
   };
 
   const { form } = useForm({
     schema: documentsSchema,
     defaultValue: {
       documents: cachedDocuments || '',
-      verbose: cachedVerbose || false,
     },
     onSubmit: executePipeline,
   });
@@ -78,7 +77,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
                   {i18n.translate(
                     'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
                     {
-                      defaultMessage: 'Learn more',
+                      defaultMessage: 'Learn more.',
                     }
                   )}
                 </EuiLink>

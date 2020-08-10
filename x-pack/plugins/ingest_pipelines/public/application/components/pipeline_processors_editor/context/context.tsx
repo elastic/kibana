@@ -10,7 +10,7 @@ import {
   PipelineProcessorsContextProvider,
   Props as ProcessorsContextProps,
 } from './processors_context';
-import { TestConfigContextProvider } from './test_config_context';
+import { TestPipelineContextProvider } from './test_pipeline_context';
 
 interface Props extends ProcessorsContextProps {
   children: React.ReactNode;
@@ -26,7 +26,7 @@ export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
   onFlyoutOpen,
 }: Props) => {
   return (
-    <TestConfigContextProvider>
+    <TestPipelineContextProvider>
       <PipelineProcessorsContextProvider
         onFlyoutOpen={onFlyoutOpen}
         links={links}
@@ -37,6 +37,6 @@ export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
       >
         {children}
       </PipelineProcessorsContextProvider>
-    </TestConfigContextProvider>
+    </TestPipelineContextProvider>
   );
 };

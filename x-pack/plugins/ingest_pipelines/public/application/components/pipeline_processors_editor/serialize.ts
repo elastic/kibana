@@ -15,8 +15,11 @@ export interface SerializeResult {
   on_failure?: Processor[];
 }
 
-const convertProcessorInternalToProcessor = (processor: ProcessorInternal): Processor => {
-  const { options, onFailure, type } = processor;
+const convertProcessorInternalToProcessor = (
+  processor: ProcessorInternal,
+  addTag?: boolean
+): Processor => {
+  const { options, onFailure, type, id } = processor;
   const outProcessor = {
     [type]: {
       ...options,
@@ -24,26 +27,36 @@ const convertProcessorInternalToProcessor = (processor: ProcessorInternal): Proc
   };
 
   if (onFailure?.length) {
-    outProcessor[type].on_failure = convertProcessors(onFailure);
+    outProcessor[type].on_failure = convertProcessors(onFailure, addTag);
   } else if (onFailure) {
     outProcessor[type].on_failure = [];
+  }
+
+  // For simulation, we add the "tag" field equal to the internal processor id
+  // so that we can map the simulate results to each processor
+  if (addTag) {
+    outProcessor[type].tag = id;
   }
 
   return outProcessor;
 };
 
-const convertProcessors = (processors: ProcessorInternal[]) => {
+const convertProcessors = (processors: ProcessorInternal[], addTag?: boolean) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertProcessorInternalToProcessor(processor));
+    convertedProcessors.push(convertProcessorInternalToProcessor(processor, addTag));
   }
+
   return convertedProcessors;
 };
 
-export const serialize = ({ processors, onFailure }: SerializeArgs): SerializeResult => {
+export const serialize = (
+  { processors, onFailure }: SerializeArgs,
+  addTag?: boolean
+): SerializeResult => {
   return {
-    processors: convertProcessors(processors),
-    on_failure: onFailure?.length ? convertProcessors(onFailure) : undefined,
+    processors: convertProcessors(processors, addTag),
+    on_failure: onFailure?.length ? convertProcessors(onFailure, addTag) : undefined,
   };
 };

@@ -10,7 +10,6 @@ import React, { FunctionComponent, memo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -25,8 +24,7 @@ import { ProcessorInternal } from '../../types';
 
 import { DocumentationButton } from './documentation_button';
 import { getProcessorFormDescriptor } from './map_processor_type_to_form';
-import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
-import { Custom } from './processors/custom';
+import { ProcessorSettingsFields } from './processor_settings_fields';
 
 export interface Props {
   isOnFailure: boolean;
@@ -37,21 +35,16 @@ export interface Props {
   esDocsBasePath: string;
 }
 
-const updateButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
-  { defaultMessage: 'Update' }
-);
-const addButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.addButtonLabel',
-  { defaultMessage: 'Add' }
-);
+const addButtonLabel = i18n.translate('xpack.ingestPipelines.addProcessorFlyout.addButtonLabel', {
+  defaultMessage: 'Add',
+});
 
 const cancelButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.settingsFormOnFailureFlyout.cancelButtonLabel',
+  'xpack.ingestPipelines.addProcessorFlyout.cancelButtonLabel',
   { defaultMessage: 'Cancel' }
 );
 
-export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
+export const AddProcessorFlyout: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     const flyoutTitleContent = isOnFailure ? (
       <FormattedMessage
@@ -105,32 +98,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ProcessorTypeField initialType={processor?.type} />
-
-            <EuiHorizontalRule />
-
-            <FormDataProvider pathsToWatch="type">
-              {(arg: any) => {
-                const { type } = arg;
-
-                if (type?.length) {
-                  const formDescriptor = getProcessorFormDescriptor(type as any);
-
-                  if (formDescriptor?.FieldsComponent) {
-                    return (
-                      <>
-                        <formDescriptor.FieldsComponent />
-                        <CommonProcessorFields />
-                      </>
-                    );
-                  }
-                  return <Custom defaultOptions={processor?.options} />;
-                }
-
-                // If the user has not yet defined a type, we do not show any settings fields
-                return null;
-              }}
-            </FormDataProvider>
+            <ProcessorSettingsFields />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="flexEnd">
@@ -145,7 +113,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
                     form.submit();
                   }}
                 >
-                  {processor ? updateButtonLabel : addButtonLabel}
+                  {addButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

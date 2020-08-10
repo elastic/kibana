@@ -58,3 +58,40 @@ export const deserialize = ({ processors, onFailure }: DeserializeArgs): Deseria
     onFailure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };
+
+/**
+ * This function takes the verbose response of the simulate API
+ * and maps the results to each processor in the pipeline by the "tag" field
+ */
+export const deserializeVerboseTestOutput = (output) => {
+  const { docs } = output;
+
+  const deserializedOutput = docs.map((doc) => {
+    if (doc.processor_results) {
+      const processorResultsById = doc.processor_results.reduce((acc, cur, index) => {
+        const resultId = cur.tag;
+
+        if (index !== 0) {
+          // Add the result from the previous processor so that the user
+          // can easily compare current output to the previous output
+          cur.prevProcessorResult = doc.processor_results[index - 1];
+        }
+
+        // The tag is added programatically as a way to map
+        // the results to each processor
+        // It is not something we need to surface to the user, so we delete it
+        delete cur.tag;
+
+        acc[resultId] = cur;
+
+        return acc;
+      }, {});
+
+      return processorResultsById;
+    }
+
+    return doc;
+  });
+
+  return deserializedOutput;
+};

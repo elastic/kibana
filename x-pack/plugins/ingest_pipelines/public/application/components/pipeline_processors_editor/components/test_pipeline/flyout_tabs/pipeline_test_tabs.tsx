@@ -29,8 +29,8 @@ export const Tabs: React.FunctionComponent<Props> = ({
       id: 'documents',
       name: (
         <FormattedMessage
-          id="xpack.ingestPipelines.tabs.documentsTabTitle"
-          defaultMessage="Documents"
+          id="xpack.ingestPipelines.tabs.configurationTabTitle"
+          defaultMessage="Configuration"
         />
       ),
     },

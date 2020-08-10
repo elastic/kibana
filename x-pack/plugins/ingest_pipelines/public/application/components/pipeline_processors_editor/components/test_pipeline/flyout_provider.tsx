@@ -17,8 +17,9 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { usePipelineProcessorsContext, useTestConfigContext } from '../../context';
+import { usePipelineProcessorsContext, useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
+import { deserializeVerboseTestOutput } from '../../deserialize';
 
 import { Tabs, Tab, OutputTab, DocumentsTab } from './flyout_tabs';
 
@@ -33,28 +34,31 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
     toasts,
   } = usePipelineProcessorsContext();
 
-  const serializedProcessors = serialize(processors.state);
-
-  const { testConfig } = useTestConfigContext();
-  const { documents: cachedDocuments, verbose: cachedVerbose } = testConfig;
+  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const {
+    config: { documents: cachedDocuments },
+    results: executeOutput,
+  } = testPipelineData;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const initialSelectedTab = cachedDocuments ? 'output' : 'documents';
-  const [selectedTab, setSelectedTab] = useState<Tab>(initialSelectedTab);
+  const [selectedTab, setSelectedTab] = useState<Tab>('documents');
 
-  const [shouldExecuteImmediately, setShouldExecuteImmediately] = useState<boolean>(false);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executeError, setExecuteError] = useState<any>(null);
-  const [executeOutput, setExecuteOutput] = useState<any>(undefined);
 
   const handleExecute = useCallback(
-    async (documents: object[], verbose?: boolean) => {
+    async (
+      { documents, verbose }: { documents?: object[]; verbose?: boolean },
+      fetchPerProcessorResults?: boolean
+    ) => {
+      const serializedProcessors = serialize(processors.state);
+
       setIsExecuting(true);
       setExecuteError(null);
 
-      const { error, data: output } = await api.simulatePipeline({
-        documents,
+      const { error, data: results } = await api.simulatePipeline({
+        documents: documents ?? cachedDocuments,
         verbose,
         pipeline: { ...serializedProcessors },
       });
@@ -66,7 +70,40 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
         return;
       }
 
-      setExecuteOutput(output);
+      // TODO handle error case here
+      if (fetchPerProcessorResults) {
+        // TODO does it make sense to call serialization twice?
+        const serializedProcessorsWithTag = serialize(processors.state, true);
+
+        // Call the simulate API again with verbose enabled so we can cache the per processor results
+        const { data: verboseResults } = await api.simulatePipeline({
+          documents: documents ?? cachedDocuments,
+          verbose: true,
+          pipeline: { ...serializedProcessorsWithTag },
+        });
+
+        setCurrentTestPipelineData({
+          type: 'updateResultsByProcessor',
+          payload: {
+            config: {
+              documents: documents ?? cachedDocuments,
+            },
+            results,
+            resultsByProcessor: deserializeVerboseTestOutput(verboseResults),
+          },
+        });
+      } else {
+        setCurrentTestPipelineData({
+          type: 'updateResults',
+          payload: {
+            config: {
+              documents: documents ?? cachedDocuments,
+              verbose,
+            },
+            results,
+          },
+        });
+      }
 
       toasts.addSuccess(
         i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
@@ -79,23 +116,8 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
       setSelectedTab('output');
     },
-    [serializedProcessors, api, toasts]
+    [api, cachedDocuments, processors.state, setCurrentTestPipelineData, toasts]
   );
-
-  useEffect(() => {
-    if (isFlyoutVisible === false && cachedDocuments) {
-      setShouldExecuteImmediately(true);
-    }
-  }, [isFlyoutVisible, cachedDocuments]);
-
-  useEffect(() => {
-    // If the user has already tested the pipeline once,
-    // use the cached test config and automatically execute the pipeline
-    if (isFlyoutVisible && shouldExecuteImmediately && cachedDocuments) {
-      setShouldExecuteImmediately(false);
-      handleExecute(cachedDocuments!, cachedVerbose);
-    }
-  }, [handleExecute, cachedDocuments, cachedVerbose, isFlyoutVisible, shouldExecuteImmediately]);
 
   let tabContent;
 
@@ -119,7 +141,12 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
       {isFlyoutVisible && (
         <EuiFlyout
           maxWidth={550}
-          onClose={() => setIsFlyoutVisible(false)}
+          onClose={() => {
+            // reset to initial state
+            setIsFlyoutVisible(false);
+            setSelectedTab('documents');
+            setExecuteError(null);
+          }}
           data-test-subj="testPipelineFlyout"
         >
           <EuiFlyoutHeader>

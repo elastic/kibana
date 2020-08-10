@@ -9,7 +9,9 @@ import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { useForm, OnFormUpdateArg, FormData } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
-import { ProcessorSettingsForm as ViewComponent } from './processor_settings_form';
+// import { ProcessorSettingsForm as ViewComponent } from './processor_settings_form';
+import { ManageProcessorFlyout } from './manage_processor';
+import { AddProcessorFlyout } from './add_processor';
 import { usePipelineProcessorsContext } from '../../context';
 
 export type ProcessorSettingsFromOnSubmitArg = Omit<ProcessorInternal, 'id'>;
@@ -65,7 +67,9 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onFormUpdate]);
 
+  const ProcessorFlyout = processor ? ManageProcessorFlyout : AddProcessorFlyout;
+
   return (
-    <ViewComponent {...rest} processor={processor} form={form} esDocsBasePath={esDocsBasePath} />
+    <ProcessorFlyout {...rest} processor={processor} form={form} esDocsBasePath={esDocsBasePath} />
   );
 };
