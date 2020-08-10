@@ -1976,29 +1976,29 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@elastic/apm-rum-core@^5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.3.0.tgz#3ae5e84eba5b5287b92458a49755f6e39e7bba5b"
-  integrity sha512-b/qAnPqi3km808BhSYo+ROpTINm3eVBQ6hNcxOELwKitS3O/HikkwRn5aPkVIhQXOVrbPSufMl1A991nrE3daA==
+"@elastic/apm-rum-core@^5.5.0":
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.5.0.tgz#e05ffd87b95420c788ed3be7cfbbbce1ff54bcf5"
+  integrity sha512-fPx65oZD495WdHQ3YA8TnzqmjqlvSxoXm0tZqXQKzKVv7CMsNkolnEPSAXFl0W5pmAVRvw6T+vMmxcVIGsCD4Q==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.1.2.tgz#274cc414074d05e33e8f0afcad25ef9a30d99452"
-  integrity sha512-2/wEaPF4EQaVzU8Qj5aYucDc+VFr7438AieON31fx8wsbvnxh9iG+iV7xky2YtT/mf53BbFgZm35L5y/pxCKwA==
+"@elastic/apm-rum-react@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-1.2.2.tgz#b92f1491bae62de0b4296264afe73171f17af022"
+  integrity sha512-KXM2qxG4p1GeDoud9jpmUA19uuQxW4M+CgtrNIXuNwITMIw46qRLyl5zOIvy9dqHodvLIvZ7RWsFtSZH4kZnAQ==
   dependencies:
-    "@elastic/apm-rum" "^5.2.0"
+    "@elastic/apm-rum" "^5.4.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.2.0.tgz#b0cfd6e5771b1e765fda2715a38c87746f49f1aa"
-  integrity sha512-l8/Ji1GMuahMCN5DsALIf+fioKi1QeY4pU0izfVI37se2/fxsMNEDpw52WxJknHdfBE0Imh3FPg4T56J5MO+IQ==
+"@elastic/apm-rum@^5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.4.0.tgz#2d87d5ca19f7f4a021c03f075d9d767894e88b3c"
+  integrity sha512-X4uaJlM28pyDOsD06serggspbTyz7Za0zFr+OWUntI6tQKu++Tn8yGsr6L2WuXhKNGhyJmrAfh13pmy9ZGyFcg==
   dependencies:
-    "@elastic/apm-rum-core" "^5.3.0"
+    "@elastic/apm-rum-core" "^5.5.0"
 
 "@elastic/charts@19.8.1":
   version "19.8.1"
@@ -12395,10 +12395,10 @@ ejs@^3.0.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-3.0.2.tgz#745b01cdcfe38c1c6a2da3bbb2d9957060a31226"
   integrity sha512-IncmUpn1yN84hy2shb0POJ80FWrfGNY0cxO9f4v+/sG7qcBvAtVWUA1IdzY/8EYUmOVhoKJVdJjNd3AZcnxOjA==
 
-elastic-apm-http-client@^9.3.0:
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-9.3.0.tgz#fcbb3b4f2af209dc304ac496438d381ef19b9b44"
-  integrity sha512-vxySk7S1oPN7uPcjv0+GLs3Y1cmN7WDVTEHBJixEDg+L6DJMysgxIGst+32Nc0ZmeU5NIjV/Ds9b+6S/yXRdIQ==
+elastic-apm-http-client@^9.4.0:
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-9.4.0.tgz#1c985923369f0c511b94d5c20f6d13aef588cb55"
+  integrity sha512-/jOZDyfzLNwHrNkPAI+AspLg0TXYXODWT+I1eoAWRCB7gP1vKvzUQAsP5iChodVqCbAj1eUNXB0KrvM6b07Thw==
   dependencies:
     breadth-filter "^2.0.0"
     container-info "^1.0.1"
@@ -12410,10 +12410,10 @@ elastic-apm-http-client@^9.3.0:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.6.0.tgz#675980951fbf2fc5606d5a95a8d0b097609ac6eb"
-  integrity sha512-T1BlWlQ3kYPIjcGaGIszaVYbsiP9aMr8V5gFxzkI7LjY9XelahOnC3u8Mmd6TWLh/QyakDcdt8J6VL3bMuR3WA==
+elastic-apm-node@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.7.0.tgz#168f0cfce8d93b5ebc82f387b158fa0924de9d7a"
+  integrity sha512-ZH3Xru6eLbUyfuNe+EnTOcKlm0B+MKduu1lCXXwEM8CDfDceW1Ks9FtmTaTeZHZW4nMacieGZMpxETrceoVk/A==
   dependencies:
     after-all-results "^2.0.0"
     async-value-promise "^1.1.1"
@@ -12421,7 +12421,7 @@ elastic-apm-node@^3.6.0:
     console-log-level "^1.4.1"
     cookie "^0.4.0"
     core-util-is "^1.0.2"
-    elastic-apm-http-client "^9.3.0"
+    elastic-apm-http-client "^9.4.0"
     end-of-stream "^1.4.4"
     error-stack-parser "^2.0.6"
     fast-safe-stringify "^2.0.7"
