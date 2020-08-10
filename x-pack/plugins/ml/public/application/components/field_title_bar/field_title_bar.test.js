@@ -82,7 +82,7 @@ describe('FieldTitleBar', () => {
 
     container.simulate('mouseout');
 
-    // Run the timers so the EuiTooltip will be visible
+    // Run the timers so the EuiTooltip will be hidden again
     jest.runAllTimers();
 
     wrapper.update();
