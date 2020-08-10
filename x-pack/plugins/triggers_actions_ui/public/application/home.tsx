@@ -22,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { Section, routeToConnectors, routeToAlerts } from './constants';
-import { getCurrentBreadcrumb } from './lib/breadcrumb';
+import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { useAppDependencies } from './app_context';
 import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
@@ -81,7 +81,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getCurrentBreadcrumb(section || 'home')]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, setBreadcrumbs]);
 
