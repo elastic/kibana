@@ -10,8 +10,6 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
 
-### New Platform
-
 1. Make sure `usageCollection` is in your optional Plugins:
 
     ```json
@@ -204,6 +202,10 @@ There are a few ways you can test that your usage collector is working properly.
 
 
 # UI Metric app
+
+The UI metrics implementation in its current state is not useful. We are working on improving the implementation to enable teams to use the data to visualize and gather information from what is being reported. Please refer to the telemetry team if you are interested in adding ui_metrics to your plugin.
+
+**Until a better implementation is introduced, please defer from adding any new ui metrics.**
 
 ## Purpose
 
