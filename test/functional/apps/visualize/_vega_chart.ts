@@ -34,7 +34,6 @@ signals: [ {
   }]
 }]}`;
 
-
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'timePicker',
