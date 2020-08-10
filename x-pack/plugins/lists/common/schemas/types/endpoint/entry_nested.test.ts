@@ -13,6 +13,11 @@ import { getEntryExistsMock } from '../entry_exists.mock';
 import { getEndpointEntryNestedMock } from './entry_nested.mock';
 import { EndpointEntryNested, endpointEntryNested } from './entry_nested';
 import { getEndpointEntryMatchAnyMock } from './entry_match_any.mock';
+import {
+  NonEmptyEndpointNestedEntriesArray,
+  nonEmptyEndpointNestedEntriesArray,
+} from './non_empty_nested_entries_array';
+import { getEndpointEntryMatchMock } from './entry_match.mock';
 
 describe('endpointEntryNested', () => {
   test('it should validate a nested entry', () => {
@@ -115,5 +120,20 @@ describe('endpointEntryNested', () => {
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(getEndpointEntryNestedMock());
+  });
+
+  test('type guard for nonEmptyEndpointNestedEntries should allow array of endpoint entries', () => {
+    const payload: NonEmptyEndpointNestedEntriesArray = [
+      getEndpointEntryMatchMock(),
+      getEndpointEntryMatchAnyMock(),
+    ];
+    const guarded = nonEmptyEndpointNestedEntriesArray.is(payload);
+    expect(guarded).toBeTruthy();
+  });
+
+  test('type guard for nonEmptyEndpointNestedEntries should disallow empty arrays', () => {
+    const payload: NonEmptyEndpointNestedEntriesArray = [];
+    const guarded = nonEmptyEndpointNestedEntriesArray.is(payload);
+    expect(guarded).toBeFalsy();
   });
 });

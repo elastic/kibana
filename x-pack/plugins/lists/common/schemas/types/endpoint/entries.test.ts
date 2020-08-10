@@ -15,7 +15,11 @@ import { getEndpointEntryMatchMock } from './entry_match.mock';
 import { getEndpointEntryMatchAnyMock } from './entry_match_any.mock';
 import { getEndpointEntryNestedMock } from './entry_nested.mock';
 import { getEndpointEntriesArrayMock } from './entries.mock';
-import { endpointEntriesArray } from './entries';
+import {
+  NonEmptyEndpointEntriesArray,
+  endpointEntriesArray,
+  nonEmptyEndpointEntriesArray,
+} from './entries';
 
 describe('Endpoint', () => {
   describe('entriesArray', () => {
@@ -35,6 +39,29 @@ describe('Endpoint', () => {
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(payload);
+    });
+
+    test('it should NOT validate an empty array', () => {
+      const payload: NonEmptyEndpointEntriesArray = [];
+      const decoded = nonEmptyEndpointEntriesArray.decode(payload);
+      const message = pipe(decoded, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "[]" supplied to "NonEmptyEndpointEntriesArray"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('type guard for nonEmptyEndpointNestedEntries should allow array of endpoint entries', () => {
+      const payload: NonEmptyEndpointEntriesArray = [getEndpointEntryMatchAnyMock()];
+      const guarded = nonEmptyEndpointEntriesArray.is(payload);
+      expect(guarded).toBeTruthy();
+    });
+
+    test('type guard for nonEmptyEndpointNestedEntries should disallow empty arrays', () => {
+      const payload: NonEmptyEndpointEntriesArray = [];
+      const guarded = nonEmptyEndpointEntriesArray.is(payload);
+      expect(guarded).toBeFalsy();
     });
 
     test('it should NOT validate an array with exists entry', () => {

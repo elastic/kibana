@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
@@ -29,7 +27,7 @@ export const nonEmptyEndpointEntriesArray = new t.Type<
   unknown
 >(
   'NonEmptyEndpointEntriesArray',
-  endpointEntriesArray.is,
+  (u: unknown): u is EndpointEntriesArray => endpointEntriesArray.is(u) && u.length > 0,
   (input, context): Either<t.Errors, EndpointEntriesArray> => {
     if (Array.isArray(input) && input.length === 0) {
       return t.failure(input, context);

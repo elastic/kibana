@@ -26,7 +26,7 @@ export const nonEmptyEndpointNestedEntriesArray = new t.Type<
   unknown
 >(
   'NonEmptyEndpointNestedEntriesArray',
-  endpointNestedEntriesArray.is,
+  (u: unknown): u is EndpointNestedEntriesArray => endpointNestedEntriesArray.is(u) && u.length > 0,
   (input, context): Either<t.Errors, EndpointNestedEntriesArray> => {
     if (Array.isArray(input) && input.length === 0) {
       return t.failure(input, context);
