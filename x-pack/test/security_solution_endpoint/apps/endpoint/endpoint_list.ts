@@ -16,9 +16,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const esClient = getService('es');
+  const log = getService('log');
   const transformId = 'endpoint_metadata_transform';
 
-  describe('host list', function () {
   describe.skip('host list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await esClient.transform.putTransform({
+        const transform = await esClient.transform.putTransform({
           transform_id: transformId,
           defer_validation: false,
           body: {
@@ -66,17 +66,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             },
           },
         });
-
-        await esClient.transform.startTransform({
+        log.info(JSON.stringify(transform));
+        const start = await esClient.transform.startTransform({
           transform_id: transformId,
           timeout: '60s',
         });
+        log.info(JSON.stringify(start));
 
         // wait for transform to apply
-        await new Promise((r) => setTimeout(r, 90000));
-        await esClient.transform.getTransformStats({
+        await sleep(120000);
+        const stats = await esClient.transform.getTransformStats({
           transform_id: transformId,
         });
+
+        log.info(JSON.stringify(stats));
         await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
