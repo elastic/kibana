@@ -336,6 +336,7 @@ export class Form extends PureComponent<FormProps> {
 
     if (pageNav?.value === 'legacy') {
       bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'mgtAdvancedSettingsForm__bottomBar--pushForNav':
           localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
       });

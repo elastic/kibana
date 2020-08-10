@@ -25,6 +25,13 @@ import {
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
+export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
+export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  {},
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
+
 // secrets definition
 
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
@@ -51,7 +58,7 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType {
+}): SlackActionType {
   return {
     id: '.slack',
     minimumLicenseRequired: 'gold',
@@ -97,11 +104,11 @@ function valdiateActionTypeConfig(
 
 async function slackExecutor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  execOptions: SlackActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
@@ -191,18 +198,21 @@ function getProxyAgent(
   }
 }
 
-function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
 }
 
-function errorResult(actionId: string, message: string): ActionTypeExecutorResult {
+function errorResult(actionId: string, message: string): ActionTypeExecutorResult<void> {
   return {
     status: 'error',
     message,
     actionId,
   };
 }
-function serviceErrorResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function serviceErrorResult(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
     defaultMessage: 'error posting slack message',
   });
@@ -214,7 +224,7 @@ function serviceErrorResult(actionId: string, serviceMessage: string): ActionTyp
   };
 }
 
-function retryResult(actionId: string, message: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, message: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
     {
@@ -233,7 +243,7 @@ function retryResultSeconds(
   actionId: string,
   message: string,
   retryAfter: number
-): ActionTypeExecutorResult {
+): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
