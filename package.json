@@ -117,9 +117,9 @@
     ]
   },
   "dependencies": {
-    "@babel/core": "^7.10.2",
-    "@babel/plugin-transform-modules-commonjs": "^7.10.1",
-    "@babel/register": "^7.10.1",
+    "@babel/core": "^7.11.1",
+    "@babel/plugin-transform-modules-commonjs": "^7.10.4",
+    "@babel/register": "^7.10.5",
     "@elastic/apm-rum": "^5.2.0",
     "@elastic/charts": "19.8.1",
     "@elastic/datemath": "5.0.3",
@@ -159,7 +159,6 @@
     "bluebird": "3.5.5",
     "boom": "^7.2.0",
     "brace": "0.11.1",
-    "browserslist-useragent": "^3.0.2",
     "cache-loader": "^4.1.0",
     "chalk": "^2.4.2",
     "check-disk-space": "^2.1.0",
@@ -290,8 +289,8 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "@babel/parser": "^7.10.2",
-    "@babel/types": "^7.10.2",
+    "@babel/parser": "^7.11.2",
+    "@babel/types": "^7.11.0",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
@@ -319,7 +318,6 @@
     "@types/babel__core": "^7.1.2",
     "@types/bluebird": "^3.1.1",
     "@types/boom": "^7.2.0",
-    "@types/browserslist-useragent": "^3.0.0",
     "@types/chance": "^1.0.0",
     "@types/cheerio": "^0.22.10",
     "@types/chromedriver": "^81.0.0",
