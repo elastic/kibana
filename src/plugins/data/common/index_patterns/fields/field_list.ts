@@ -56,6 +56,7 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
   private calcDisplayName = (name: string) =>
     this.shortDotsEnable ? shortenDottedString(name) : name;
+
   constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
     super();
     this.indexPattern = indexPattern;
