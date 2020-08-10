@@ -194,7 +194,7 @@ Platform::
 Querying & Filtering::
 * Resolves range date filter bugs and improve usability {kibana-pull}71298[#71298]
 Security::
-* Searches across spaces {kibana-pull}67644[#67644]
+* Allow saved objects to be searched across multiple spaces {kibana-pull}67644[#67644]
 SIEM::
 * [Detection Engine] Incorporate large lists to rule execution {kibana-pull}65372[#65372]
 * Updates signals index ECS mapping to 1.6-dev, add endpoint alert fields {kibana-pull}65740[#65740]
