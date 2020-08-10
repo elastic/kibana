@@ -241,16 +241,15 @@ export const pushToService = async (
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<ActionTypeExecutorResult>(
-    `${ACTION_URL}/action/${connectorId}/_execute`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        params: { subAction: 'pushToService', subActionParams: casePushParams },
-      }),
-      signal,
-    }
-  );
+  const response = await KibanaServices.get().http.fetch<
+    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
+  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
+    method: 'POST',
+    body: JSON.stringify({
+      params: { subAction: 'pushToService', subActionParams: casePushParams },
+    }),
+    signal,
+  });
 
   if (response.status === 'error') {
     throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
