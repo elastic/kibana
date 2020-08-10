@@ -590,6 +590,7 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly visualize: Record<string, string>;
     };
 }
 
