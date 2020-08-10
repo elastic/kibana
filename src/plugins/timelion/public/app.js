@@ -85,7 +85,7 @@ export function initTimelionApp(app, deps) {
   initTimelionHelpDirective(app);
   initInputFocusDirective(app);
   initTimelionTabsDirective(app, deps);
-  initTimelionTDeprecationDirective(app);
+  initTimelionTDeprecationDirective(app, deps);
   initSavedObjectFinderDirective(app, savedSheetLoader, deps.core.uiSettings);
   initSavedObjectSaveAsCheckBoxDirective(app);
   initCellsDirective(app);

@@ -19,18 +19,21 @@
 import React from 'react';
 import { TimelionDeprecation } from './timelion_deprecation';
 
-export function initTimelionTDeprecationDirective(app) {
+export function initTimelionTDeprecationDirective(app, deps) {
   app.directive('timelionDeprecation', function (reactDirective) {
     return reactDirective(
-      (props) => {
-        return <TimelionDeprecation {...props} />;
+      () => {
+        return (
+          <deps.core.i18n.Context>
+            <TimelionDeprecation links={deps.core.docLinks.links} />
+          </deps.core.i18n.Context>
+        );
       },
       [],
       {
         restrict: 'E',
         scope: {
-          activeTab: '=',
-          activateTab: '=',
+          docLinks: '=',
         },
       }
     );

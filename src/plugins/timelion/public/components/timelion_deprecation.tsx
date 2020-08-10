@@ -17,27 +17,35 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { DocLinksStart } from '../../../../core/public';
 
-export const TimelionDeprecation = () => {
-  const docLink = 'elastic.co';
+export const TimelionDeprecation = ({ links }: DocLinksStart) => {
+  const timelionDeprecationLink = links.visualize.timelionDeprecation;
   return (
     <>
-      <EuiBadge
+      <EuiCallOut
+        title={i18n.translate('timelion.deprecation.notice', {
+          defaultMessage: 'Deprecation notice',
+        })}
         color="warning"
-        onClick={() => {
-          window.open(docLink, '_blank');
-        }}
-        onClickAriaLabel={i18n.translate('advancedSettings.field.deprecationClickAreaLabel', {
-          defaultMessage: 'Click to view deprecation documentation for.',
-        })}
+        iconType="help"
       >
-        {i18n.translate('timelion.deprecation.notice', {
-          defaultMessage:
-            'Deprecation Notice, Timelion app is deprecated and will be removed on 8.0+. Click here to check the actions you can take in order to lose nothing',
-        })}
-      </EuiBadge>
+        <FormattedMessage
+          id="timelion.deprecation.message"
+          defaultMessage="Timelion app is deprecated and will be removed on 8.0+. Click {timeLionDeprecationLink} to check the actions you can take to copy your existing Timelion worksheets to a
+              dashboard."
+          values={{
+            timeLionDeprecationLink: (
+              <EuiLink href={timelionDeprecationLink} target="_blank">
+                <FormattedMessage id="timelion.deprecation.here" defaultMessage="here" />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
       <EuiSpacer size="s" />
     </>
   );
