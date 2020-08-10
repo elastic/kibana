@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import {
@@ -119,8 +121,6 @@ const OptionList = React.memo(
     );
   }
 );
-
-OptionList.displayName = 'OptionList';
 
 /**
  * A Submenu to be displayed in one of two forms:
@@ -259,8 +259,6 @@ const NodeSubMenuComponents = React.memo(
     );
   }
 );
-
-NodeSubMenuComponents.displayName = 'NodeSubMenu';
 
 export const NodeSubMenu = styled(NodeSubMenuComponents)`
   margin: 2px 0 0 0;
