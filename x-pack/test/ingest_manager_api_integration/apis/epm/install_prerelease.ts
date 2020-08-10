@@ -6,28 +6,31 @@
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
-import { deletePackage } from './install_overrides';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
-  const pkgkey = 'prerelease-0.1.0-dev.0+abc';
+  const testPackage = 'prerelease-0.1.0-dev.0+abc';
   const server = dockerServers.get('registry');
+
+  const deletePackage = async (pkgkey: string) => {
+    await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
+  };
 
   describe('installs package that has a prerelease version', async () => {
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
-        await deletePackage(supertest, pkgkey);
+        await deletePackage(testPackage);
       }
     });
 
     it('should install the package correctly', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/epm/packages/${pkgkey}`)
+          .post(`/api/ingest_manager/epm/packages/${testPackage}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       } else {
