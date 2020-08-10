@@ -28,7 +28,6 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
-import { GetAllowedTypesResponse } from '../lib';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -41,7 +40,7 @@ const SavedObjectsTablePage = ({
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
-  allowedTypes: GetAllowedTypesResponse;
+  allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -49,10 +48,6 @@ const SavedObjectsTablePage = ({
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
-  const allowedTypeNames = allowedTypes.types.map(({ name }) => name);
-  const showSharedSpacesColumn = allowedTypes.types.some(
-    ({ namespaceType }) => namespaceType === 'multiple'
-  );
 
   useEffect(() => {
     setBreadcrumbs([
@@ -67,8 +62,7 @@ const SavedObjectsTablePage = ({
 
   return (
     <SavedObjectsTable
-      allowedTypes={allowedTypeNames}
-      showSharedSpacesColumn={showSharedSpacesColumn}
+      allowedTypes={allowedTypes}
       serviceRegistry={serviceRegistry}
       actionRegistry={actionRegistry}
       columnRegistry={columnRegistry}

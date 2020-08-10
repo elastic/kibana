@@ -43,16 +43,12 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementColumn,
 } from '../../../services';
-
-const SHARE_COLUMN_ID = 'share_saved_objects_to_space';
 
 export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
-  showSharedSpacesColumn: boolean;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
@@ -82,7 +78,6 @@ interface TableState {
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
   isColumnDataLoaded: boolean;
-  columns: Array<SavedObjectsManagementColumn<unknown>>;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -93,7 +88,6 @@ export class Table extends PureComponent<TableProps, TableState> {
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
     isColumnDataLoaded: false,
-    columns: [],
   };
 
   constructor(props: TableProps) {
@@ -105,11 +99,6 @@ export class Table extends PureComponent<TableProps, TableState> {
   }
 
   loadColumnData = async () => {
-    let columns = this.props.columnRegistry.getAll();
-    if (!this.props.showSharedSpacesColumn) {
-      columns = columns.filter(({ id }) => id !== SHARE_COLUMN_ID);
-    }
-    this.setState({ columns });
     await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
     this.setState({ isColumnDataLoaded: true });
   };
@@ -171,6 +160,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       onShowRelationships,
       basePath,
       actionRegistry,
+      columnRegistry,
     } = this.props;
 
     const pagination = {
@@ -250,7 +240,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
-      ...this.state.columns.map((column) => {
+      ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,
           sortable: false,

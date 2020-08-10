@@ -26,7 +26,7 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
-import { getAllowedTypes, GetAllowedTypesResponse } from './../lib';
+import { getAllowedTypes } from './../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
@@ -34,7 +34,7 @@ interface MountParams {
   mountParams: ManagementAppMountParams;
 }
 
-let allowedObjectTypes: GetAllowedTypesResponse | undefined;
+let allowedObjectTypes: string[] | undefined;
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));

@@ -136,7 +136,6 @@ describe('SavedObjectsTable', () => {
       serviceRegistry: serviceRegistryMock.create(),
       actionRegistry: actionServiceMock.createStart(),
       columnRegistry: columnServiceMock.createStart(),
-      showSharedSpacesColumn: true,
       savedObjectsClient: savedObjects.client,
       indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       http,

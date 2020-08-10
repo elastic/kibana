@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsNamespaceType } from 'src/core/public';
+import { HttpStart } from 'src/core/public';
 
-export interface GetAllowedTypesResponse {
-  types: Array<{ name: string; namespaceType: SavedObjectsNamespaceType }>;
+interface GetAllowedTypesResponse {
+  types: string[];
 }
 
 export async function getAllowedTypes(http: HttpStart) {
   const response = await http.get<GetAllowedTypesResponse>(
     '/api/kibana/management/saved_objects/_allowed_types'
   );
-  return response;
+  return response.types;
 }
