@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  enterpriseSearchBreadcrumbs,
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
-} from './generate_breadcrumbs';
-export { SetAppSearchBreadcrumbs, SetWorkplaceSearchBreadcrumbs } from './set_breadcrumbs';
+import { AbstractStyleProperty } from './style_property';
+import { STYLE_TYPE } from '../../../../../common/constants';
+
+export class StaticStyleProperty<T> extends AbstractStyleProperty<T> {
+  static type = STYLE_TYPE.STATIC;
+}
