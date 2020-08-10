@@ -13,10 +13,9 @@ export interface Document {
   visualizationType: string | null;
   title: string;
   description?: string;
-  expression: string | null;
   state: {
     datasourceMetaData: {
-      filterableIndexPatterns: Array<{ id: string; title: string }>;
+      filterableIndexPatterns: Array<{ id: string; }>;
     };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
