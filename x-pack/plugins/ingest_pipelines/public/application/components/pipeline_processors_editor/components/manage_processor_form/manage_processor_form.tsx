@@ -40,7 +40,7 @@ export interface Props {
 }
 
 const updateButtonLabel = i18n.translate(
-  'xpack.ingestPipelines.ettingsFormOnFailureFlyout.updateButtonLabel',
+  'xpack.ingestPipelines.settingsFormOnFailureFlyout.updateButtonLabel',
   { defaultMessage: 'Update' }
 );
 

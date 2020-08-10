@@ -6,6 +6,6 @@
 
 export {
   ManageProcessorForm,
-  ManageProcessorOnSubmitArg,
+  ManageProcessorFormOnSubmitArg,
   OnSubmitHandler,
 } from './manage_processor_form.container';
