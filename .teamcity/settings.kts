@@ -1,4 +1,4 @@
-//import builds.BwcChecks
+import builds.*
 //import builds.OssChecks
 //import builds.SanityCheck
 //import builds.XpackChecks
@@ -32,14 +32,11 @@ project {
 //        }
 //    }
 
-//    subProject {
-//        id("Checks")
-//        name = "Checks"
-//
-//        buildType(SanityCheck)
-//        buildType(OssChecks)
-//        buildType(XpackChecks)
-//        buildType(BwcChecks)
-//    }
+    subProject {
+        id("OSS")
+        name = "OSS"
+
+        buildType(OssBuild)
+    }
 
 }
