@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`when a single commit is backported should make correct API requests 1`] = `
+exports[`integration when a single commit is backported should make correct API requests 1`] = `
 Array [
   Object {
     "query": "
@@ -29,7 +29,7 @@ Array [
 ]
 `;
 
-exports[`when a single commit is backported should make correct API requests 2`] = `
+exports[`integration when a single commit is backported should make correct API requests 2`] = `
 Array [
   Object {
     "query": "
@@ -46,7 +46,7 @@ Array [
 ]
 `;
 
-exports[`when a single commit is backported should make correct API requests 3`] = `
+exports[`integration when a single commit is backported should make correct API requests 3`] = `
 Array [
   Object {
     "query": "
@@ -141,7 +141,7 @@ Array [
 ]
 `;
 
-exports[`when two commits are backported should make correct API requests 1`] = `
+exports[`integration when two commits are backported should make correct API requests 1`] = `
 Array [
   Object {
     "query": "
@@ -170,7 +170,7 @@ Array [
 ]
 `;
 
-exports[`when two commits are backported should make correct API requests 2`] = `
+exports[`integration when two commits are backported should make correct API requests 2`] = `
 Array [
   Object {
     "query": "
@@ -187,7 +187,7 @@ Array [
 ]
 `;
 
-exports[`when two commits are backported should make correct API requests 3`] = `
+exports[`integration when two commits are backported should make correct API requests 3`] = `
 Array [
   Object {
     "query": "

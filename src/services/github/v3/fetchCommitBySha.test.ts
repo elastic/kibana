@@ -7,6 +7,10 @@ import { commitByShaMock } from './mocks/commitByShaMock';
 type BackportOptionsWithSha = BackportOptions & { sha: string };
 
 describe('fetchCommitBySha', () => {
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it('should return single commit with pull request', async () => {
     const options = {
       repoOwner: 'elastic',

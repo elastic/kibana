@@ -1,3 +1,4 @@
+import nock from 'nock';
 import { BackportOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { CommitSelected, CommitChoice } from '../../../types/Commit';
@@ -9,11 +10,27 @@ import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getCommitsByAuthorMock } from './mocks/getCommitsByAuthorMock';
 import { getPullRequestEdgeMock } from './mocks/getPullRequestEdgeMock';
 
+const defaultOptions = {
+  repoOwner: 'elastic',
+  repoName: 'kibana',
+  sourceBranch: 'master',
+  accessToken: 'myAccessToken',
+  username: 'sqren',
+  author: 'sqren',
+  maxNumber: 10,
+  githubApiBaseUrlV3: 'https://api.github.com',
+  githubApiBaseUrlV4: 'http://localhost/graphql',
+} as BackportOptions;
+
 const authorIdMockData = { user: { id: 'myUserId' } } as const;
 
 describe('fetchCommitsByAuthor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
   });
 
   describe('when commit has an associated pull request', () => {
@@ -34,8 +51,7 @@ describe('fetchCommitsByAuthor', () => {
         body: { data: commitsWithPullRequestsMock },
       });
 
-      const options = getDefaultOptions();
-      res = await fetchCommitsByAuthor(options);
+      res = await fetchCommitsByAuthor(defaultOptions);
     });
 
     it('Should return a list of commits with pullNumber and existing backports', () => {
@@ -138,10 +154,10 @@ describe('fetchCommitsByAuthor', () => {
         apiBaseUrl: 'http://localhost/my-custom-api',
       });
 
-      const options = getDefaultOptions({
+      await fetchCommitsByAuthor({
+        ...defaultOptions,
         githubApiBaseUrlV4: 'http://localhost/my-custom-api',
       });
-      await fetchCommitsByAuthor(options);
 
       expect(authorIdCalls.length).toBe(1);
       expect(commitsByAuthorCalls.length).toBe(1);
@@ -150,6 +166,10 @@ describe('fetchCommitsByAuthor', () => {
 });
 
 describe('getExistingTargetPullRequests', () => {
+  afterEach(() => {
+    nock.cleanAll();
+  });
+
   it('should return a result when commit messages match', () => {
     const commitMessage = 'my message (#1234)';
     const pullRequestEdge = getPullRequestEdgeMock({
@@ -249,21 +269,8 @@ async function getExistingBackportsByRepoName(
     body: { data: commitsMock },
   });
 
-  const options = getDefaultOptions({ repoName: repoName2 });
-  return fetchCommitsByAuthor(options);
-}
-
-function getDefaultOptions(options: Partial<BackportOptions> = {}) {
-  return {
-    repoOwner: 'elastic',
-    repoName: 'kibana',
-    sourceBranch: 'master',
-    accessToken: 'myAccessToken',
-    username: 'sqren',
-    author: 'sqren',
-    maxNumber: 10,
-    githubApiBaseUrlV3: 'https://api.github.com',
-    githubApiBaseUrlV4: 'http://localhost/graphql',
-    ...options,
-  } as BackportOptions;
+  return fetchCommitsByAuthor({
+    ...defaultOptions,
+    repoName: repoName2,
+  });
 }

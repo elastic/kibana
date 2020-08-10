@@ -28,5 +28,6 @@ describe('addAssigneesToPullRequest', () => {
 
     expect(res).toBe(undefined);
     scope.done();
+    nock.cleanAll();
   });
 });

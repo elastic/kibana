@@ -33,8 +33,9 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
   });
 
   afterEach(() => {
-    addLabelsScope.done();
     jest.clearAllMocks();
+    addLabelsScope.done();
+    nock.cleanAll();
   });
 
   describe('when commit has a pull request reference', () => {
@@ -89,6 +90,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       });
 
       scope.done();
+      nock.cleanAll();
     });
 
     it('returns the expected response', () => {
@@ -164,6 +166,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         targetBranch: '6.x',
       });
       scope.done();
+      nock.cleanAll();
     });
 
     it('returns the expected response', () => {
@@ -215,6 +218,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       });
 
       scope.done();
+      nock.cleanAll();
     });
 
     it('creates pull request', () => {

@@ -1,3 +1,4 @@
+import nock from 'nock';
 import * as logger from '../services/logger';
 import { mockGqlRequest } from '../test/nockHelpers';
 import { getOptions } from './options';
@@ -39,6 +40,7 @@ describe('getOptions', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    nock.cleanAll();
   });
 
   it('should use the default repository branch as sourceBranch', async () => {

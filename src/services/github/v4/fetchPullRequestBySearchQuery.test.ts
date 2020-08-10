@@ -1,3 +1,4 @@
+import nock from 'nock';
 import { BackportOptions } from '../../../options/options';
 import { mockGqlRequest } from '../../../test/nockHelpers';
 import { PromiseReturnType } from '../../../types/PromiseReturnType';
@@ -26,6 +27,10 @@ describe('fetchPullRequestBySearchQuery', () => {
       sourceBranch: 'master',
       prFilter: 'label:Team:apm',
     } as BackportOptions);
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
   });
 
   it('should make request with correct variables', () => {

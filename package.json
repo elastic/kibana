@@ -33,7 +33,7 @@
     "prepublishOnly": "tsc --project ./tsconfig.prod.json",
     "test": "jest",
     "test-private": "jest --config ./jest.config.private.js",
-    "test-all": "yarn lint && yarn test && yarn test-private",
+    "test-all": "yarn lint && jest --config ./jest.config.all.js",
     "start": "ts-node --transpile-only ./src/entrypoint.cli.ts"
   },
   "lint-staged": {
@@ -107,7 +107,7 @@
     "graphql": "^15.3.0",
     "graphql-tag": "^2.11.0",
     "husky": "^4.2.3",
-    "jest": "^26.2.2",
+    "jest": "^26.3.0",
     "jest-snapshot-serializer-ansi": "^1.0.0",
     "lint-staged": "^10.2.11",
     "lodash": "^4.17.19",

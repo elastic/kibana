@@ -4,7 +4,7 @@ import { getDevAccessToken } from './private/getDevAccessToken';
 
 const execOptions = { stdio: 'pipe', encoding: 'utf-8' } as const;
 
-describe('yargs', () => {
+describe('CLI blackbox', () => {
   let devAccessToken: string;
 
   beforeAll(async () => {
