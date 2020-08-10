@@ -307,8 +307,11 @@ describe.skip('Mappings editor: text datatype', () => {
     const indexSettings = {
       analysis: {
         analyzer: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_1: {},
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_2: {},
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           customAnalyzer_3: {},
         },
       },
