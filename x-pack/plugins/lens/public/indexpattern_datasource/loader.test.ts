@@ -13,7 +13,13 @@ import {
   changeLayerIndexPattern,
   syncExistingFields,
 } from './loader';
-import { IndexPatternPersistedState, IndexPatternPrivateState, IndexPatternField } from './types';
+import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
+import {
+  IndexPatternPersistedState,
+  IndexPatternPrivateState,
+  IndexPatternField,
+  IndexPattern,
+} from './types';
 import { documentField } from './document_field';
 
 jest.mock('./operations');
@@ -27,139 +33,118 @@ const createMockStorage = (lastData?: Record<string, string>) => {
   };
 };
 
-const sampleIndexPatterns = {
-  a: {
-    id: 'a',
-    title: 'my-fake-index-pattern',
-    timeFieldName: 'timestamp',
-    fields: [
-      {
-        name: 'timestamp',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'start_date',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        esTypes: ['keyword'],
-      },
-      {
-        name: 'dest',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        esTypes: ['keyword'],
-      },
-      documentField,
-    ],
-  },
-  b: {
-    id: 'b',
-    title: 'my-fake-restricted-pattern',
-    timeFieldName: 'timestamp',
-    fields: [
-      {
-        name: 'timestamp',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            fixed_interval: '1d',
-            delay: '7d',
-            time_zone: 'UTC',
-          },
-        },
-      },
-      {
-        name: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          // Ignored in the UI
-          histogram: {
-            agg: 'histogram',
-            interval: 1000,
-          },
-          avg: {
-            agg: 'avg',
-          },
-          max: {
-            agg: 'max',
-          },
-          min: {
-            agg: 'min',
-          },
-          sum: {
-            agg: 'sum',
-          },
-        },
-      },
-      {
-        name: 'source',
-        type: 'string',
-        aggregatable: false,
-        searchable: false,
-        scripted: true,
-        aggregationRestrictions: {
-          terms: {
-            agg: 'terms',
-          },
-        },
-        esTypes: ['keyword'],
-      },
-      documentField,
-    ],
-  },
-};
-
-function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns }) {
-  const pattern = {
-    ...sampleIndexPatterns[id],
-    fields: [
-      ...sampleIndexPatterns[id].fields,
-      {
-        name: 'description',
-        type: 'string',
-        aggregatable: false,
-        searchable: true,
-        esTypes: ['text'],
-      },
-    ],
-  };
-  return {
-    id,
-    type: 'index-pattern',
-    attributes: {
-      title: pattern.title,
-      timeFieldName: pattern.timeFieldName,
-      fields: JSON.stringify(pattern.fields.filter((f) => f.type !== 'document')),
+const indexPatternA = ({
+  id: 'a',
+  title: 'my-fake-index-pattern',
+  timeFieldName: 'timestamp',
+  fields: [
+    {
+      name: 'timestamp',
+      type: 'date',
+      aggregatable: true,
+      searchable: true,
     },
-  };
-}
+    {
+      name: 'start_date',
+      type: 'date',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'bytes',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'memory',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'source',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'dest',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    documentField,
+  ],
+} as unknown) as IndexPattern;
+
+const indexPatternB = ({
+  id: 'b',
+  title: 'my-fake-restricted-pattern',
+  timeFieldName: 'timestamp',
+  fields: [
+    {
+      name: 'timestamp',
+      type: 'date',
+      aggregatable: true,
+      searchable: true,
+      aggregationRestrictions: {
+        date_histogram: {
+          agg: 'date_histogram',
+          fixed_interval: '1d',
+          delay: '7d',
+          time_zone: 'UTC',
+        },
+      },
+    },
+    {
+      name: 'bytes',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      aggregationRestrictions: {
+        // Ignored in the UI
+        histogram: {
+          agg: 'histogram',
+          interval: 1000,
+        },
+        avg: {
+          agg: 'avg',
+        },
+        max: {
+          agg: 'max',
+        },
+        min: {
+          agg: 'min',
+        },
+        sum: {
+          agg: 'sum',
+        },
+      },
+    },
+    {
+      name: 'source',
+      type: 'string',
+      aggregatable: false,
+      searchable: false,
+      scripted: true,
+      aggregationRestrictions: {
+        terms: {
+          agg: 'terms',
+        },
+      },
+      esTypes: ['keyword'],
+    },
+    documentField,
+  ],
+} as unknown) as IndexPattern;
+
+const sampleIndexPatterns = {
+  a: indexPatternA,
+  b: indexPatternB,
+};
 
 function mockClient() {
   return ({
@@ -169,12 +154,22 @@ function mockClient() {
         { id: 'b', attributes: { title: sampleIndexPatterns.b.title } },
       ],
     })),
-    async bulkGet(indexPatterns: Array<{ id: keyof typeof sampleIndexPatterns }>) {
+  } as unknown) as Pick<SavedObjectsClientContract, 'find'>;
+}
+
+function mockIndexPatternsService() {
+  return ({
+    get: jest.fn(async (id: 'a' | 'b') => {
+      const pattern = sampleIndexPatterns[id];
       return {
-        savedObjects: indexPatterns.map(({ id }) => indexPatternSavedObject({ id })),
+        id,
+        type: undefined,
+        title: pattern.title,
+        timeFieldName: pattern.timeFieldName,
+        fields: pattern.fields,
       };
-    },
-  } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
+    }),
+  } as unknown) as Pick<IndexPatternsContract, 'get'>;
 }
 
 describe('loader', () => {
@@ -183,10 +178,11 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: sampleIndexPatterns,
         patterns: ['a', 'b'],
-        savedObjectsClient: {
-          bulkGet: jest.fn(() => Promise.reject('bulkGet should not have been called')),
-          find: jest.fn(() => Promise.reject('find should not have been called')),
-        },
+        indexPatternsService: ({
+          get: jest.fn(() =>
+            Promise.reject('mockIndexPatternService.get should not have been called')
+          ),
+        } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -198,7 +194,7 @@ describe('loader', () => {
           b: sampleIndexPatterns.b,
         },
         patterns: ['a', 'b'],
-        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
       });
 
       expect(cache).toMatchObject(sampleIndexPatterns);
@@ -208,7 +204,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['a', 'b'],
-        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
       });
 
       expect(cache).toMatchObject(sampleIndexPatterns);
@@ -218,51 +214,41 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['foo'],
-        savedObjectsClient: ({
-          ...mockClient(),
-          async bulkGet() {
-            return {
-              savedObjects: [
-                {
-                  id: 'foo',
-                  type: 'index-pattern',
-                  attributes: {
-                    title: 'Foo index',
-                    typeMeta: JSON.stringify({
-                      aggs: {
-                        date_histogram: {
-                          timestamp: {
-                            agg: 'date_histogram',
-                            fixed_interval: 'm',
-                          },
-                        },
-                        sum: {
-                          bytes: {
-                            agg: 'sum',
-                          },
-                        },
-                      },
-                    }),
-                    fields: JSON.stringify([
-                      {
-                        name: 'timestamp',
-                        type: 'date',
-                        aggregatable: true,
-                        searchable: true,
-                      },
-                      {
-                        name: 'bytes',
-                        type: 'number',
-                        aggregatable: true,
-                        searchable: true,
-                      },
-                    ]),
+        indexPatternsService: ({
+          get: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+            typeMeta: {
+              aggs: {
+                date_histogram: {
+                  timestamp: {
+                    agg: 'date_histogram',
+                    fixed_interval: 'm',
                   },
                 },
-              ],
-            };
-          },
-        } as unknown) as Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>,
+                sum: {
+                  bytes: {
+                    agg: 'sum',
+                  },
+                },
+              },
+            },
+            fields: [
+              {
+                name: 'timestamp',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
       expect(cache.foo.fields.find((f) => f.name === 'bytes')!.aggregationRestrictions).toEqual({
@@ -281,6 +267,7 @@ describe('loader', () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         storage,
       });
 
@@ -304,6 +291,7 @@ describe('loader', () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         storage,
       });
 
@@ -326,6 +314,7 @@ describe('loader', () => {
     it('should load lastUsedIndexPatternId if in localStorage', async () => {
       const state = await loadInitialState({
         savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: 'b' }),
       });
 
@@ -347,6 +336,7 @@ describe('loader', () => {
       const state = await loadInitialState({
         defaultIndexPatternId: 'b',
         savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         storage,
       });
 
@@ -399,6 +389,7 @@ describe('loader', () => {
       const state = await loadInitialState({
         state: savedState,
         savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         storage,
       });
 
@@ -437,7 +428,7 @@ describe('loader', () => {
         state,
         setState,
         id: 'a',
-        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
       });
@@ -473,9 +464,8 @@ describe('loader', () => {
         state,
         setState,
         id: 'a',
-        savedObjectsClient: {
-          ...mockClient(),
-          bulkGet: jest.fn(async () => {
+        indexPatternsService: {
+          get: jest.fn(async () => {
             throw err;
           }),
         },
@@ -532,7 +522,7 @@ describe('loader', () => {
         setState,
         indexPatternId: 'b',
         layerId: 'l1',
-        savedObjectsClient: mockClient(),
+        indexPatternsService: mockIndexPatternsService(),
         onError: jest.fn(),
         storage,
       });
@@ -601,9 +591,8 @@ describe('loader', () => {
         setState,
         indexPatternId: 'b',
         layerId: 'l0',
-        savedObjectsClient: {
-          ...mockClient(),
-          bulkGet: jest.fn(async () => {
+        indexPatternsService: {
+          get: jest.fn(async () => {
             throw err;
           }),
         },
