@@ -135,8 +135,6 @@ include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
 
 include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
-include::{kib-repo-dir}/visualize/timelion-deprecation.asciidoc[]
-
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
