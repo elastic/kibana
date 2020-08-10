@@ -1,8 +1,8 @@
 ## ES UI shared modules
 
-This plugin contains reusable code in the form of self-contained modules
-(or libraries). Each of these modules exports a set of functionality
-relevant to the domain of the module.
+This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
+
+**Please note**: Modules in ES UI shared are intended for use by the ES UI Management Team (elastic/es-ui@) only. Please reach out to us if there is something you would like to contribute or use in these modules.
 
 ## Files and folders overview
 
@@ -12,8 +12,7 @@ relevant to the domain of the module.
 
 ## Conventions for adding code
 
-When adding new functionality, look at the folders in `./__packages_do_not_import__` and consider whether your functionality falls into any of those
-modules.
+When adding new functionality, look at the folders in `./__packages_do_not_import__` and consider whether your functionality falls into any of those modules.
 
 If it does not, you should create a module and expose it to public or server code (or both) following the conventions described above.
 
