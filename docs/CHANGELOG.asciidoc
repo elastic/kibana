@@ -60,7 +60,7 @@ Alerting::
 * Adds context.reason and alertOnNoData to Inventory alerts {kibana-pull}70260[#70260]
 APM::
 * Shows `trace.id`, `transaction.id` and/or `error.id` in metadata table {kibana-pull}66376[#66376]
-* Adds error rate chart to Errors overview and detail views {kibana-pull}67327[#67327]
+* Adds error rate chart to Transaction overview and detail views {kibana-pull}67327[#67327]
 * Adds ThemeProvider to support dark mode {kibana-pull}68242[#68242]
 * Triggers Lazy-load alert {kibana-pull}68806[#68806]
 * Changes to duration formatting {kibana-pull}69039[#69039]
