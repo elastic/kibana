@@ -62,7 +62,6 @@ import {
 interface SearchExamplesAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
   http: CoreStart['http'];
   savedObjectsClient: CoreStart['savedObjects']['client'];
   navigation: NavigationPublicPluginStart;
@@ -88,7 +87,6 @@ export const SearchExamplesApp = ({
   http,
   basename,
   notifications,
-  uiSettings,
   savedObjectsClient,
   navigation,
   data,
@@ -257,7 +255,7 @@ export const SearchExamplesApp = ({
                           options={formatFieldsToComboBox(numericFields)}
                           selectedOptions={formatFieldToComboBox(selectedField)}
                           singleSelection={true}
-                          onChange={(option: any) => {
+                          onChange={(option) => {
                             const field = indexPattern.getFieldByName(option[0].label);
                             setSelectedField(field || null);
                           }}
