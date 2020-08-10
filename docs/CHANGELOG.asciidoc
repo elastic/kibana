@@ -132,7 +132,7 @@ Machine Learning::
 * Anomaly Detection: Annotations enhancements {kibana-pull}70198[#70198]
 * Updates APM Module to Work with Service Maps {kibana-pull}70361[#70361]
 * Changes all calls to ML endpoints to use internal user {kibana-pull}70487[#70487]
-* DF Analytics: add ability to edit job for fields supported by API {kibana-pull}70489[#70489]
+* {dfanalytics-cap}: add ability to edit job for fields supported by API {kib-pull}70489[#70489]
 * DF Analytics: adds prompt for destination index pattern creation {kibana-pull}70651[#70651]
 * Adds switch to enable model plot annotations independently {kibana-pull}70678[#70678]
 * Adds peak_model_bytes to model size stats type {kibana-pull}70825[#70825]
