@@ -26,7 +26,6 @@ export interface SearchExamplesPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchExamplesPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AppPluginSetupDependencies {
   developerExamples: DeveloperExamplesSetup;
 }
