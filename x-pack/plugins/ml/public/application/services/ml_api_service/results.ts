@@ -114,4 +114,11 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  getStoppedPartitions(jobId: string) {
+    return httpService.http<any>({
+      path: `${basePath()}/results/${jobId}/stopped_partitions`,
+      method: 'GET',
+    });
+  },
 });

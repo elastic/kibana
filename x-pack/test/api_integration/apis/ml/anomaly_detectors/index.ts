@@ -9,7 +9,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detectors', function () {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./get_categorizer_stats'));
-    loadTestFile(require.resolve('./get_stopped_partitions'));
   });
 }

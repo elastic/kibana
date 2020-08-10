@@ -113,7 +113,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   const getStoppedPartitions = async (jobId: string) => {
     try {
-      const fetchedStoppedPartitions = await ml.jobs.getStoppedPartitions(jobId);
+      const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(jobId);
       if (fetchedStoppedPartitions.length > 0) {
         setStoppedPartitions(fetchedStoppedPartitions);
       } else {

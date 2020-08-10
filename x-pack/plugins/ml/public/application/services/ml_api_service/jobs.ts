@@ -293,11 +293,4 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
-
-  getStoppedPartitions(jobId: string) {
-    return httpService.http<any>({
-      path: `${basePath()}/anomaly_detectors/${jobId}/stopped_partitions`,
-      method: 'GET',
-    });
-  },
 });

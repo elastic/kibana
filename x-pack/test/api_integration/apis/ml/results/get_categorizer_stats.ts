@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
 import { Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { AnomalyCategorizerStatsDoc } from '../../../../../plugins/ml/common/types/anomalies';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -64,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all the categorizer stats for job id', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
@@ -79,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats for job id for user with view permission', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .expect(404);
@@ -90,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats for job id for unauthorized user', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .expect(404);
@@ -101,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all the categorizer stats with per-partition value for job id', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
@@ -116,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats with per-partition value for user with view permission', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
@@ -128,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not fetch categorizer stats with per-partition value for unauthorized user', async () => {
       const { body } = await supertest
-        .get(`/api/ml/anomaly_detectors/${jobId}/categorizer_stats`)
+        .get(`/api/ml/results/${jobId}/categorizer_stats`)
         .query({ partitionByValue: 'sample_web_logs' })
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)

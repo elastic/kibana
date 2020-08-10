@@ -52,3 +52,9 @@ export const partitionFieldValuesSchema = schema.object({
   earliestMs: schema.number(),
   latestMs: schema.number(),
 });
+
+export const getCategorizerStatsSchema = schema.nullable(
+  schema.object({
+    partitionByValue: schema.maybe(schema.string()),
+  })
+);
