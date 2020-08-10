@@ -2007,15 +2007,6 @@
     debug "^3.1.0"
     lodash.once "^4.1.1"
 
-"@dabh/diagnostics@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@dabh/diagnostics/-/diagnostics-2.0.2.tgz#290d08f7b381b8f94607dc8f471a12c675f9db31"
-  integrity sha512-+A1YivoVDNNVCdfozHSR8v/jyuuLTMXwjWuxPFlFlUapXoGc+Gj9mDlTDDfrwl7rXCl2tNZ0kE8sIBO6YOn96Q==
-  dependencies:
-    colorspace "1.1.x"
-    enabled "2.0.x"
-    kuler "^2.0.0"
-
 "@elastic/apm-rum-core@^5.5.0":
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.5.0.tgz#e05ffd87b95420c788ed3be7cfbbbce1ff54bcf5"
