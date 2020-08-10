@@ -27,7 +27,8 @@ object DefaultRoot : GitVcsRoot({
 //  url = "https://github.com/brianseeders/${DslContext.parentProjectId.toString().toLowerCase()}.git"
 //  branch = "refs/heads/${DslContext.projectName}"
 
-  name = "kibana / teamcity"
+//  name = "kibana / teamcity"
+  name = "https://github.com/brianseeders/kibana.git"
   url = "https://github.com/brianseeders/kibana.git"
   branch = "refs/heads/teamcity"
 })
