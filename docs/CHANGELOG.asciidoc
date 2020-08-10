@@ -74,7 +74,6 @@ APM::
 * Uses HDR for percentiles {kibana-pull}64758[#64758]
 Dashboard::
 * Adds Lens drilldowns {kibana-pull}65675[#65675]
-* Enables "Explore underlying data" actions for Lens visualizations {kibana-pull}70047[#70047]
 * Improves duplicate panel positioning {kibana-pull}67461[#67461]
 Discover::
 * Multi-line kql bar {kibana-pull}70140[#70140]
@@ -99,7 +98,7 @@ Lens and visualizations::
 * Allows the user to change the tooltip mode {kibana-pull}67775[#67775]
 * Updates vega version {kibana-pull}68639[#68639]
 * Adds support for histogram type {kibana-pull}68837[#68837]
-* Adds visualization by value to dashboard {kibana-pull}69898[#69898]
+* Enables "Explore underlying data" actions for Lens visualizations {kibana-pull}70047[#70047]
 Logs::
 * Validates ML job setup time ranges {kibana-pull}66426[#66426]
 * [Alerting] "Group by" functionality {kibana-pull}68250[#68250]
