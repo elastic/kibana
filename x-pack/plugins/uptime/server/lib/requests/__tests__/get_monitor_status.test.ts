@@ -9,14 +9,14 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { setupMockEsCompositeQuery } from './helper';
 
 export interface BucketItemCriteria {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
   doc_count: number;
 }
 
 interface BucketKey {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
 }
@@ -27,19 +27,17 @@ interface BucketItem {
 }
 
 const genBucketItem = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  monitor_id,
+  monitorId,
   status,
   location,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  doc_count,
+  doc_count: count,
 }: BucketItemCriteria): BucketItem => ({
   key: {
-    monitor_id,
+    monitorId,
     status,
     location,
   },
-  doc_count,
+  doc_count: count,
 });
 
 describe('getMonitorStatus', () => {
@@ -294,19 +292,19 @@ describe('getMonitorStatus', () => {
         {
           bucketCriteria: [
             {
-              monitor_id: 'foo',
+              monitorId: 'foo',
               status: 'down',
               location: 'fairbanks',
               doc_count: 43,
             },
             {
-              monitor_id: 'bar',
+              monitorId: 'bar',
               status: 'down',
               location: 'harrisburg',
               doc_count: 53,
             },
             {
-              monitor_id: 'foo',
+              monitorId: 'foo',
               status: 'down',
               location: 'harrisburg',
               doc_count: 44,
@@ -398,33 +396,58 @@ describe('getMonitorStatus', () => {
         "index": "heartbeat-8*",
       }
     `);
+    expect(result.length).toBe(3);
 
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 43,
+          "location": "fairbanks",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 53,
+          "location": "harrisburg",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 44,
+          "location": "harrisburg",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+      ]
+    `);
   });
 
   it('fetches multiple pages of ES results', async () => {
     const criteria = [
       {
         after_key: {
-          monitor_id: 'foo',
+          monitorId: 'foo',
           location: 'harrisburg',
           status: 'down',
         },
         bucketCriteria: [
           {
-            monitor_id: 'foo',
+            monitorId: 'foo',
             status: 'down',
             location: 'fairbanks',
             doc_count: 43,
           },
           {
-            monitor_id: 'bar',
+            monitorId: 'bar',
             status: 'down',
             location: 'harrisburg',
             doc_count: 53,
           },
           {
-            monitor_id: 'foo',
+            monitorId: 'foo',
             status: 'down',
             location: 'harrisburg',
             doc_count: 44,
@@ -433,25 +456,25 @@ describe('getMonitorStatus', () => {
       },
       {
         after_key: {
-          monitor_id: 'bar',
+          monitorId: 'bar',
           status: 'down',
           location: 'fairbanks',
         },
         bucketCriteria: [
           {
-            monitor_id: 'sna',
+            monitorId: 'sna',
             status: 'down',
             location: 'fairbanks',
             doc_count: 21,
           },
           {
-            monitor_id: 'fu',
+            monitorId: 'fu',
             status: 'down',
             location: 'fairbanks',
             doc_count: 21,
           },
           {
-            monitor_id: 'bar',
+            monitorId: 'bar',
             status: 'down',
             location: 'fairbanks',
             doc_count: 45,
@@ -461,13 +484,13 @@ describe('getMonitorStatus', () => {
       {
         bucketCriteria: [
           {
-            monitor_id: 'sna',
+            monitorId: 'sna',
             status: 'down',
             location: 'harrisburg',
             doc_count: 21,
           },
           {
-            monitor_id: 'fu',
+            monitorId: 'fu',
             status: 'down',
             location: 'harrisburg',
             doc_count: 21,
@@ -489,6 +512,66 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
-    expect(result).toMatchInlineSnapshot(`Array []`);
+    expect(result.length).toBe(8);
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 43,
+          "location": "fairbanks",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 53,
+          "location": "harrisburg",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 44,
+          "location": "harrisburg",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "fairbanks",
+          "monitorId": "sna",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "fairbanks",
+          "monitorId": "fu",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 45,
+          "location": "fairbanks",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "harrisburg",
+          "monitorId": "sna",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+        Object {
+          "count": 21,
+          "location": "harrisburg",
+          "monitorId": "fu",
+          "monitorInfo": undefined,
+          "status": "down",
+        },
+      ]
+    `);
   });
 });

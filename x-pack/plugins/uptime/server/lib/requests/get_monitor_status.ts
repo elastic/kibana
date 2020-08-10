@@ -48,7 +48,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   let afterKey: MonitorStatusKey | undefined;
 
   const STATUS = 'down';
-  const monitors: any = [];
+  let monitors: any = [];
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
@@ -138,7 +138,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
     const result = await callES('search', esParams);
     afterKey = result?.aggregations?.monitors?.after_key;
 
-    monitors.concat(result?.aggregations?.monitors?.buckets || []);
+    monitors = monitors.concat(result?.aggregations?.monitors?.buckets || []);
   } while (afterKey !== undefined);
 
   return monitors
