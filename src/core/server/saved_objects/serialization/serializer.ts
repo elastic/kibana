@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import uuid from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -99,6 +97,7 @@ export class SavedObjectsSerializer {
       originId,
       attributes,
       migrationVersion,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
       version,
       references,

@@ -36,7 +36,6 @@ const enabledActionTypes = [
   'test.throw',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
 

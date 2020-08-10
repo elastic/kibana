@@ -26,16 +26,16 @@ import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { SavedObject } from '../../types';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 10485760, maxImportExportSize: 10000 } as SavedObjectConfig;
 const URL = '/api/saved_objects/_resolve_import_errors';
 
 describe(`POST ${URL}`, () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
-  let handlerContext: setupServerReturn['handlerContext'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   const mockDashboard = {
