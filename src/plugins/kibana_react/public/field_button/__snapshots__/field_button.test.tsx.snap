@@ -1,11 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`fieldAction is rendered 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+  <div
+    className="kbnFieldButton__fieldAction"
+  >
+    <span>
+      fieldAction
+    </span>
+  </div>
+</div>
+`;
+
+exports[`fieldIcon is rendered 1`] = `
+<div
+  className="kbnFieldButton"
+>
+  <button
+    className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
+  >
+    <span
+      className="kbnFieldButton__fieldIcon"
+    >
+      <span>
+        fieldIcon
+      </span>
+    </span>
+    <span
+      className="kbnFieldButton__name"
+    >
+      name
+    </span>
+  </button>
+</div>
+`;
+
 exports[`isActive defaults to false 1`] = `
 <div
   className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
   >
     <span
       className="kbnFieldButton__name"
@@ -22,6 +71,7 @@ exports[`isActive renders true 1`] = `
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
   >
     <span
       className="kbnFieldButton__name"
@@ -38,6 +88,7 @@ exports[`isDraggable is rendered 1`] = `
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
   >
     <span
       className="kbnFieldButton__name"
@@ -54,6 +105,7 @@ exports[`sizes m is applied 1`] = `
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
   >
     <span
       className="kbnFieldButton__name"
@@ -70,6 +122,7 @@ exports[`sizes s is applied 1`] = `
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
+    onClick={[Function]}
   >
     <span
       className="kbnFieldButton__name"

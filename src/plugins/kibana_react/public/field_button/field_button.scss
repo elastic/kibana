@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
-              background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
+    background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
 
   &:focus-within,
   &-isActive {
@@ -65,7 +65,7 @@
   font-size: $euiFontSizeXS;
 
   .kbnFieldButton__button {
-    padding: $euiSizeXS;
+    padding: $euiSizeM * 0.5 $euiSizeXS;
   }
 
   .kbnFieldButton__fieldIcon,
