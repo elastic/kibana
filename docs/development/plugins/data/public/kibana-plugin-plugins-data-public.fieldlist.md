@@ -21,6 +21,7 @@ export declare class FieldList extends Array<IndexPatternField> implements IInde
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [add](./kibana-plugin-plugins-data-public.fieldlist.add.md) |  | <code>(field: FieldSpec) =&gt; void</code> |  |
+|  [getAll](./kibana-plugin-plugins-data-public.fieldlist.getall.md) |  | <code>() =&gt; IndexPatternField[]</code> |  |
 |  [getByName](./kibana-plugin-plugins-data-public.fieldlist.getbyname.md) |  | <code>(name: IndexPatternField['name']) =&gt; IndexPatternField &#124; undefined</code> |  |
 |  [getByType](./kibana-plugin-plugins-data-public.fieldlist.getbytype.md) |  | <code>(type: IndexPatternField['type']) =&gt; any[]</code> |  |
 |  [remove](./kibana-plugin-plugins-data-public.fieldlist.remove.md) |  | <code>(field: IFieldType) =&gt; void</code> |  |

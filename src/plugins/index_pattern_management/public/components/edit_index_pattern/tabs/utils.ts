@@ -84,9 +84,9 @@ export function getTabs(
   fieldFilter: string,
   indexPatternListProvider: IndexPatternManagementStart['list']
 ) {
-  const totalCount = getCounts(indexPattern.fields, indexPattern.getSourceFiltering());
+  const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
-    indexPattern.fields,
+    indexPattern.fields.getAll(),
     indexPattern.getSourceFiltering(),
     fieldFilter
   );
