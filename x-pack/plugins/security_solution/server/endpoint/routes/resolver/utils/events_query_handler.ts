@@ -14,22 +14,35 @@ import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 
 /**
+ * Parameters for the RelatedEventsQueryHandler
+ */
+export interface RelatedEventsParams {
+  limit: number;
+  entityID: string;
+  indexPattern: string;
+  after?: string;
+  legacyEndpointID?: string;
+  filter?: string;
+}
+
+/**
  * This retrieves the related events for the origin node of a resolver tree.
  */
 export class RelatedEventsQueryHandler implements SingleQueryHandler<ResolverRelatedEvents> {
   private relatedEvents: ResolverRelatedEvents | undefined;
   private readonly query: EventsQuery;
-  constructor(
-    private readonly limit: number,
-    private readonly entityID: string,
-    after: string | undefined,
-    indexPattern: string,
-    legacyEndpointID: string | undefined
-  ) {
+  private readonly limit: number;
+  private readonly entityID: string;
+
+  constructor(options: RelatedEventsParams) {
+    this.limit = options.limit;
+    this.entityID = options.entityID;
+
     this.query = new EventsQuery(
-      PaginationBuilder.createBuilder(limit, after),
-      indexPattern,
-      legacyEndpointID
+      PaginationBuilder.createBuilder(this.limit, options.after),
+      options.indexPattern,
+      options.legacyEndpointID,
+      options.filter
     );
   }
 

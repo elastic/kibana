@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { esKuery } from 'src/plugins/data/server';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { PaginationBuilder } from '../utils/pagination';
