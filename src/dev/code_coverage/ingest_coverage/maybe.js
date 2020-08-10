@@ -20,6 +20,8 @@
 /* eslint new-cap: 0 */
 /* eslint no-unused-vars: 0 */
 
+import { pretty } from './utils';
+
 /**
  * Just monad used for valid values
  */
@@ -29,6 +31,7 @@ export function Just(x) {
     map: (f) => Maybe.of(f(x)),
     isJust: () => true,
     inspect: () => `Just(${x})`,
+    inspectPretty: () => `Just(${pretty(x)})`,
   };
 }
 Just.of = function of(x) {
@@ -48,6 +51,7 @@ export function Maybe(x) {
     chain: (f) => f(x),
     map: (f) => Maybe(f(x)),
     inspect: () => `Maybe(${x})`,
+    inspectPretty: () => `Maybe(${pretty(x)})`,
     nothing: () => Nothing(),
     isNothing: () => false,
     isJust: () => false,
@@ -60,9 +64,8 @@ Maybe.of = function of(x) {
 export function maybe(x) {
   return Maybe.of(x);
 }
-export function fromNullable(x) {
-  return x !== null && x !== undefined && x !== false && x !== 'undefined' ? just(x) : nothing();
-}
+export const fromNullable = (x) =>
+  x !== null && x !== undefined && x !== false && x !== 'undefined' ? just(x) : nothing();
 
 /**
  * Nothing wraps undefined or null values and prevents errors
