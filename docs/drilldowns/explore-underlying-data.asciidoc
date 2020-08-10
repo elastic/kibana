@@ -33,9 +33,9 @@ applies the filters and time range created by the events that triggered the acti
 [role="screenshot"]
 image::images/explore_data_in_chart.png[Explore underlying data from chart]
 
-You can disable this action by adding the following line to your `kibana.yml` config.
+To enable this action add the following line to your `kibana.yml` config.
 
 ["source","yml"]
 -----------
-xpack.discoverEnhanced.actions.exploreDataInChart.enabled: false
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
 -----------
