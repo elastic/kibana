@@ -6,6 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   AdvancedJobCreator,
@@ -52,16 +53,37 @@ export const CategorizationPerPartitionField: FC = () => {
   const isCategorizationJob = isCategorizationJobCreator(jobCreator);
   return (
     <Description isOptional={isCategorizationJob === false}>
-      <EuiFormRow label={'Enable per-partition categorization'}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel',
+          {
+            defaultMessage: 'Enable per-partition categorization',
+          }
+        )}
+      >
         <CategorizationPerPartitionSwitch />
       </EuiFormRow>
 
       {enablePerPartitionCategorization && (
         <>
-          <EuiFormRow label={'Stop on warn'}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel',
+              {
+                defaultMessage: 'Stop on warn',
+              }
+            )}
+          >
             <CategorizationPerPartitionStopOnWarnSwitch />
           </EuiFormRow>
-          <EuiFormRow label={'Partition field'}>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel',
+              {
+                defaultMessage: 'Partition field',
+              }
+            )}
+          >
             <CategorizationPerPartitionFieldSelect
               fields={filteredCategories}
               changeHandler={setCategorizationPartitionFieldName}
