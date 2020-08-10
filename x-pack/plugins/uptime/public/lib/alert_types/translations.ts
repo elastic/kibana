@@ -14,11 +14,9 @@ export const MonitorStatusTranslations = {
       monitorName: '{{state.monitorName}}',
       monitorId: '{{state.monitorId}}',
       monitorUrl: '{{{state.monitorUrl}}}',
-      monitorType: '{{state.monitorType}}',
       statusMessage: '{{state.statusMessage}}',
       latestErrorMessage: '{{{state.latestErrorMessage}}}',
       observerLocation: '{{state.observerLocation}}',
-      observerHostname: '{{state.observerHostname}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
