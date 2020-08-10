@@ -139,13 +139,13 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
     (layer) => layer.seriesType === 'line' || layer.seriesType === 'area'
   );
 
-  const [xaxistitle, setXaxistitle] = useState(state?.xTitle);
-  const [yaxistitle, setYaxistitle] = useState(state?.yTitle);
+  const [xAxisTitle, setXAxisTitle] = useState(state?.xTitle);
+  const [yAxisTitle, setYAxisTitle] = useState(state?.yTitle);
 
   const xyTitles = useCallback(() => {
     const defaults = {
-      xTitle: state?.xTitle,
-      yTitle: state?.yTitle,
+      xTitle: xAxisTitle,
+      yTitle: yAxisTitle,
     };
     const layer = state?.layers[0];
     if (!layer || !layer.accessors.length) {
@@ -170,30 +170,26 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       xTitle,
       yTitle,
     }: { xTitle: string | undefined; yTitle: string | undefined } = xyTitles();
-    setXaxistitle(xTitle);
-    setYaxistitle(yTitle);
+    setXAxisTitle(xTitle);
+    setYAxisTitle(yTitle);
   }, [xyTitles]);
 
-  const [tickLabelsVisibilitySettings, setTickLabelsVisibilitySettings] = useState({
-    x: state?.tickLabelsVisibilitySettings?.x ?? true,
-    y: state?.tickLabelsVisibilitySettings?.y ?? true,
-  });
-  const [gridlinesVisibilitySettings, setGridlinesVisibilitySettings] = useState({
-    x: state?.gridlinesVisibilitySettings?.x ?? true,
-    y: state?.gridlinesVisibilitySettings?.y ?? true,
-  });
-
   const onXTitleChange = (value: string): void => {
-    setXaxistitle(value);
+    setXAxisTitle(value);
     setState({ ...state, xTitle: value });
   };
 
   const onYTitleChange = (value: string): void => {
-    setYaxistitle(value);
+    setYAxisTitle(value);
     setState({ ...state, yTitle: value });
   };
 
   type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+
+  const tickLabelsVisibilitySettings = {
+    x: state?.tickLabelsVisibilitySettings?.x ?? true,
+    y: state?.tickLabelsVisibilitySettings?.y ?? true,
+  };
 
   const onTickLabelsVisibilitySettingsChange = (optionId: string): void => {
     const id = optionId as AxesSettingsConfigKeys;
@@ -203,11 +199,15 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         [id]: !tickLabelsVisibilitySettings[id],
       },
     };
-    setTickLabelsVisibilitySettings(newTickLabelsVisibilitySettings);
     setState({
       ...state,
       tickLabelsVisibilitySettings: newTickLabelsVisibilitySettings,
     });
+  };
+
+  const gridlinesVisibilitySettings = {
+    x: state?.gridlinesVisibilitySettings?.x ?? true,
+    y: state?.gridlinesVisibilitySettings?.y ?? true,
   };
 
   const onGridlinesVisibilitySettingsChange = (optionId: string): void => {
@@ -218,7 +218,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
         [id]: !gridlinesVisibilitySettings[id],
       },
     };
-    setGridlinesVisibilitySettings(newGridlinesVisibilitySettings);
     setState({
       ...state,
       gridlinesVisibilitySettings: newGridlinesVisibilitySettings,
@@ -425,7 +424,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
                 defaultMessage: 'Overwrite X-axis title',
               })}
-              value={xaxistitle || ''}
+              value={xAxisTitle || ''}
               disabled={state && 'showXAxisTitle' in state ? !state.showXAxisTitle : false}
               onChange={({ target }) => onXTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteXaxis', {
@@ -461,7 +460,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               placeholder={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {
                 defaultMessage: 'Overwrite Y-axis title',
               })}
-              value={yaxistitle || ''}
+              value={yAxisTitle || ''}
               disabled={state && 'showYAxisTitle' in state ? !state.showYAxisTitle : false}
               onChange={({ target }) => onYTitleChange(target.value)}
               aria-label={i18n.translate('xpack.lens.xyChart.overwriteYaxis', {

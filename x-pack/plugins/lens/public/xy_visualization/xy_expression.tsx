@@ -424,8 +424,7 @@ export function XYChart({
         showGridLines={gridlinesVisibilitySettings?.x}
         gridLineStyle={{ strokeWidth: 2 }}
         hide={filteredLayers[0].hide}
-        // @ts-ignore, temporary solution for not displaying the ticks
-        tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => {}}
+        tickFormat={tickLabelsVisibilitySettings?.x ? (d) => xAxisFormatter.convert(d) : () => ''}
       />
 
       {yAxesConfiguration.map((axis, index) => (
@@ -437,8 +436,7 @@ export function XYChart({
           title={showYAxisTitle ? getYAxesTitles(axis.series, index) : undefined}
           showGridLines={gridlinesVisibilitySettings?.y}
           hide={filteredLayers[0].hide}
-          // @ts-ignore, temporary solution for not displaying the ticks
-          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => axis.formatter.convert(d) : () => {}}
+          tickFormat={tickLabelsVisibilitySettings?.y ? (d) => axis.formatter.convert(d) : () => ''}
         />
       ))}
 
