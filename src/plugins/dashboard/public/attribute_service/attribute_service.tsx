@@ -18,13 +18,19 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
   IEmbeddable,
 } from '../embeddable_plugin';
-import { SavedObjectsClientContract, SimpleSavedObject, I18nStart } from '../../../../core/public';
+import {
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+  I18nStart,
+  NotificationsStart,
+} from '../../../../core/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
@@ -46,7 +52,8 @@ export class AttributeService<
   constructor(
     private type: string,
     private savedObjectsClient: SavedObjectsClientContract,
-    private i18nContext: I18nStart['Context']
+    private i18nContext: I18nStart['Context'],
+    private toasts: NotificationsStart['toasts']
   ) {}
 
   public async unwrapAttributes(input: RefType | ValType): Promise<SavedObjectAttributes> {
@@ -68,17 +75,29 @@ export class AttributeService<
       embeddable && isSavedObjectEmbeddableInput(embeddable.getInput())
         ? (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
         : undefined;
-
-    if (useRefType) {
-      if (savedObjectId) {
-        await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
-        return { savedObjectId } as RefType;
-      } else {
-        const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
-        return { savedObjectId: savedItem.id } as RefType;
-      }
-    } else {
+    if (!useRefType) {
       return { attributes: newAttributes } as ValType;
+    } else {
+      try {
+        if (savedObjectId) {
+          await this.savedObjectsClient.update(this.type, savedObjectId, newAttributes);
+          return { savedObjectId } as RefType;
+        } else {
+          const savedItem = await this.savedObjectsClient.create(this.type, newAttributes);
+          return { savedObjectId: savedItem.id } as RefType;
+        }
+      } catch (error) {
+        this.toasts.addDanger({
+          title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
+            defaultMessage: `Panel was not saved to the library. Error: {errorMessage}`,
+            values: {
+              errorMessage: error.message,
+            },
+          }),
+          'data-test-subj': 'saveDashboardFailure',
+        });
+        return Promise.reject({ error });
+      }
     }
   }
 
@@ -112,6 +131,7 @@ export class AttributeService<
           const wrappedInput = (await this.wrapAttributes(input.attributes, true)) as RefType;
           wrappedInput.title = props.newTitle;
           resolve(wrappedInput);
+          throw new Error();
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject();

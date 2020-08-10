@@ -435,7 +435,12 @@ export class DashboardPlugin
         factory: dashboardContainerFactory,
       }),
       getAttributeService: (type: string) =>
-        new AttributeService(type, core.savedObjects.client, core.i18n.Context),
+        new AttributeService(
+          type,
+          core.savedObjects.client,
+          core.i18n.Context,
+          core.notifications.toasts
+        ),
     };
   }
 
