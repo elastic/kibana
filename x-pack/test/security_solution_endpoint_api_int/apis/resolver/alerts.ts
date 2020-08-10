@@ -51,7 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should not find any alerts', async () => {
       const { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/5555/alerts`)
+        .post(`/api/endpoint/resolver/5555/alerts`)
+        .set('kbn-xsrf', 'xxx')
         .expect(200);
       expect(body.nextAlert).to.eql(null);
       expect(body.alerts).to.be.empty();
@@ -59,7 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return details for the root node', async () => {
       const { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .post(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .set('kbn-xsrf', 'xxx')
         .expect(200);
       expect(body.alerts.length).to.eql(4);
       compareArrays(tree.origin.relatedAlerts, body.alerts, true);
@@ -69,7 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('should allow alerts to be filtered', async () => {
       const filter = `not event.id:"${tree.origin.relatedAlerts[0].event.id}"`;
       const { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .post(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .set('kbn-xsrf', 'xxx')
         .send({
           filter,
         })
@@ -88,25 +91,28 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return paginated results for the root node', async () => {
       let { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2`)
+        .post(`/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2`)
+        .set('kbn-xsrf', 'xxx')
         .expect(200);
       expect(body.alerts.length).to.eql(2);
       compareArrays(tree.origin.relatedAlerts, body.alerts);
       expect(body.nextAlert).not.to.eql(null);
 
       ({ body } = await supertest
-        .get(
+        .post(
           `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
         )
+        .set('kbn-xsrf', 'xxx')
         .expect(200));
       expect(body.alerts.length).to.eql(2);
       compareArrays(tree.origin.relatedAlerts, body.alerts);
       expect(body.nextAlert).to.not.eql(null);
 
       ({ body } = await supertest
-        .get(
+        .post(
           `/api/endpoint/resolver/${tree.origin.id}/alerts?alerts=2&afterAlert=${body.nextAlert}`
         )
+        .set('kbn-xsrf', 'xxx')
         .expect(200));
       expect(body.alerts).to.be.empty();
       expect(body.nextAlert).to.eql(null);
@@ -114,7 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return the first page of information when the cursor is invalid', async () => {
       const { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?afterAlert=blah`)
+        .post(`/api/endpoint/resolver/${tree.origin.id}/alerts?afterAlert=blah`)
+        .set('kbn-xsrf', 'xxx')
         .expect(200);
       expect(body.alerts.length).to.eql(4);
       compareArrays(tree.origin.relatedAlerts, body.alerts, true);

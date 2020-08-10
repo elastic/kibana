@@ -58,7 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return details for the root node', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}`)
+          .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.events.length).to.eql(1);
         expect(body.entityID).to.eql(entityID);
@@ -68,9 +69,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns no values when there is no more data', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
-          .get(
+          .post(
             `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=${cursor}`
           )
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.events).be.empty();
         expect(body.entityID).to.eql(entityID);
@@ -79,9 +81,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return the first page of information when the cursor is invalid', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(
+          .post(
             `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=blah`
           )
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.entityID).to.eql(entityID);
         expect(body.nextEvent).to.eql(null);
@@ -89,7 +92,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return no results for an invalid endpoint ID', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=foo`)
+          .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=foo`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.nextEvent).to.eql(null);
         expect(body.entityID).to.eql(entityID);
@@ -97,16 +101,26 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should error on invalid pagination values', async () => {
-        await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=0`).expect(400);
-        await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=20000`).expect(400);
-        await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=-1`).expect(400);
+        await supertest
+          .post(`/api/endpoint/resolver/${entityID}/events?events=0`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+        await supertest
+          .post(`/api/endpoint/resolver/${entityID}/events?events=20000`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
+        await supertest
+          .post(`/api/endpoint/resolver/${entityID}/events?events=-1`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(400);
       });
     });
 
     describe('endpoint events', () => {
       it('should not find any events', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/5555/events`)
+          .post(`/api/endpoint/resolver/5555/events`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.nextEvent).to.eql(null);
         expect(body.events).to.be.empty();
@@ -114,7 +128,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return details for the root node', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.events.length).to.eql(4);
         compareArrays(tree.origin.relatedEvents, body.events, true);
@@ -124,7 +139,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow for the events to be filtered', async () => {
         const filter = `event.category:"${RelatedEventCategory.Driver}"`;
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .set('kbn-xsrf', 'xxx')
           .send({
             filter,
           })
@@ -139,25 +155,28 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return paginated results for the root node', async () => {
         let { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
+          .post(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.events.length).to.eql(2);
         compareArrays(tree.origin.relatedEvents, body.events);
         expect(body.nextEvent).not.to.eql(null);
 
         ({ body } = await supertest
-          .get(
+          .post(
             `/api/endpoint/resolver/${tree.origin.id}/events?events=2&afterEvent=${body.nextEvent}`
           )
+          .set('kbn-xsrf', 'xxx')
           .expect(200));
         expect(body.events.length).to.eql(2);
         compareArrays(tree.origin.relatedEvents, body.events);
         expect(body.nextEvent).to.not.eql(null);
 
         ({ body } = await supertest
-          .get(
+          .post(
             `/api/endpoint/resolver/${tree.origin.id}/events?events=2&afterEvent=${body.nextEvent}`
           )
+          .set('kbn-xsrf', 'xxx')
           .expect(200));
         expect(body.events).to.be.empty();
         expect(body.nextEvent).to.eql(null);
@@ -165,7 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return the first page of information when the cursor is invalid', async () => {
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
+          .post(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
+          .set('kbn-xsrf', 'xxx')
           .expect(200);
         expect(body.events.length).to.eql(4);
         compareArrays(tree.origin.relatedEvents, body.events, true);

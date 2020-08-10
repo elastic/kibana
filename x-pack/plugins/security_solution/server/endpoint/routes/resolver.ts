@@ -24,7 +24,7 @@ import { handleEntities } from './resolver/entity';
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
 
-  router.get(
+  router.post(
     {
       path: '/api/endpoint/resolver/{id}/events',
       validate: validateEvents,
@@ -33,7 +33,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleEvents(log, endpointAppContext)
   );
 
-  router.get(
+  router.post(
     {
       path: '/api/endpoint/resolver/{id}/alerts',
       validate: validateAlerts,

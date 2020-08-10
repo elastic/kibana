@@ -33,9 +33,11 @@ export const validateEvents = {
     afterEvent: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
-  body: schema.object({
-    filter: schema.maybe(schema.string()),
-  }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**
@@ -48,9 +50,11 @@ export const validateAlerts = {
     afterAlert: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
-  body: schema.object({
-    filter: schema.maybe(schema.string()),
-  }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**

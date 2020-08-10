@@ -23,7 +23,7 @@ export function handleEvents(
     const {
       params: { id },
       query: { events, afterEvent, legacyEndpointID: endpointID },
-      body: { filter },
+      body,
     } = req;
     try {
       const client = context.core.elasticsearch.legacy.client;
@@ -31,7 +31,7 @@ export function handleEvents(
       const fetcher = new Fetcher(client, id, eventsIndexPattern, alertsIndexPattern, endpointID);
 
       return res.ok({
-        body: await fetcher.events(events, afterEvent, filter),
+        body: await fetcher.events(events, afterEvent, body?.filter),
       });
     } catch (err) {
       log.warn(err);
