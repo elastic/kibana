@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { Client } from '@elastic/elasticsearch';
 
 export async function putTransform(getService: (serviceName: 'es') => Client, transformId: string) {

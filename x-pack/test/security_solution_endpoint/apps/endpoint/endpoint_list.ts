@@ -13,13 +13,12 @@ import {
 import {
   deleteTransform,
   putTransform,
-} from '../../../security_solution_endpoint_api_int/services/transform_helper';
+} from '../../../security_solution_endpoint_api_int/apis/transform_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const esClient = getService('es');
   const transformId = 'endpoint_metadata_transform';
 
   describe('host list', function () {
@@ -33,10 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
-        await esClient.transform.deleteTransform({
-          transform_id: transformId,
-          force: true,
-        });
+        await deleteTransform(getService, transformId);
 
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
