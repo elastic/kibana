@@ -320,6 +320,7 @@ export interface AlertEvent {
     dataset: string;
     module: string;
     type: string;
+    sequence: number;
   };
   Endpoint: {
     policy: {
@@ -524,6 +525,7 @@ export interface EndpointEvent {
     type: string | string[];
     id: string;
     kind: string;
+    sequence: number;
   };
   host: Host;
   network?: {
@@ -600,6 +602,7 @@ export type SafeEndpointEvent = Partial<{
     type: ECSField<string>;
     id: ECSField<string>;
     kind: ECSField<string>;
+    sequence: ECSField<number>;
   }>;
   host: Partial<{
     id: ECSField<string>;
