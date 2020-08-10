@@ -86,6 +86,20 @@ export function eventId(event: ResolverEvent): number | undefined | string {
   return event.event.id;
 }
 
+export function eventSequence(event: ResolverEvent): number | undefined {
+  if (isLegacyEvent(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
+}
+
+export function eventSequenceSafeVersion(event: SafeResolverEvent): number | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
+}
+
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {
   return firstNonNullValue(
     isLegacyEventSafeVersion(event) ? event.endgame?.serial_event_id : event.event?.id
