@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IIndexPatternFieldList, IndexPatternField } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 interface GroupedFields {
@@ -29,7 +29,7 @@ interface GroupedFields {
  * group the fields into selected, popular and unpopular, filter by fieldFilterState
  */
 export function groupFields(
-  fields: IIndexPatternFieldList | null,
+  fields: IndexPatternField[] | null,
   columns: string[],
   popularLimit: number,
   fieldCounts: Record<string, number>,
