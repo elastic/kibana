@@ -46,6 +46,15 @@ jest.mock('../use_timeline_status', () => {
   };
 });
 
+// mock for EuiSelectable's virtualization
+jest.mock('react-virtualized-auto-sizer', () => {
+  return ({
+    children,
+  }: {
+    children: (dimensions: { width: number; height: number }) => ReactElement;
+  }) => children({ width: 100, height: 500 });
+});
+
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const mockInstallPrepackagedTimelines = jest.fn();
