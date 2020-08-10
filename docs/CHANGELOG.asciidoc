@@ -126,7 +126,7 @@ Machine Learning::
 * Model snapshot management {kibana-pull}68182[#68182]
 * DF Analytics: Creation wizard part 2 {kibana-pull}68462[#68462]
 * Removes sub navigation menu from the Anomaly Detection pages {kibana-pull}68663[#68663]
-* Adds Anomaly Swimlane Embeddable to the dashboard from the Anomaly Explorer page {kibana-pull}68784[#68784]
+* Adds anomaly swim lane embeddable to the dashboard from the Anomaly Explorer page {kib-pull}68784[#68784]
 * Allows editing of model_snapshot_retention_days {kibana-pull}69003[#69003]
 * Anomaly Explorer swim lane pagination {kibana-pull}70063[#70063]
 * Anomaly Detection: Annotations enhancements {kibana-pull}70198[#70198]
