@@ -230,7 +230,7 @@ const verifyLifecycleStats = (
   }
 };
 
-export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
@@ -566,7 +566,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           ).to.eql(93932);
         });
 
-        it('returns no values when there is no more data', async () => {
+        // The children api does not support pagination currently
+        it.skip('returns no values when there is no more data', async () => {
           const { body } = await supertest
             // after is set to the document id of the last event so there shouldn't be any more after it
             .get(
@@ -577,7 +578,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.nextChild).to.eql(null);
         });
 
-        it('returns the first page of information when the cursor is invalid', async () => {
+        // The children api does not support pagination currently
+        it.skip('returns the first page of information when the cursor is invalid', async () => {
           const { body }: { body: ResolverChildren } = await supertest
             .get(
               `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=blah`
@@ -639,7 +641,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.nextChild).to.not.eql(null);
         });
 
-        it('paginates the children', async () => {
+        // children api does not support pagination currently
+        it.skip('paginates the children', async () => {
           // this gets a node should have 3 children which were created in succession so that the timestamps
           // are ordered correctly to be retrieved in a single call
           const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
@@ -668,7 +671,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.nextChild).to.be(null);
         });
 
-        it('gets all children in two queries', async () => {
+        // children api does not support pagination currently
+        it.skip('gets all children in two queries', async () => {
           // should get all the children of the origin
           let { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)

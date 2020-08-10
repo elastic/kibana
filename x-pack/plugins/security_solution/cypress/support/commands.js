@@ -32,7 +32,6 @@
 
 Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
   cy.on('window:before:load', (win) => {
-    // @ts-ignore no null, this is a temp hack see issue above
     win.fetch = null;
   });
   cy.server();

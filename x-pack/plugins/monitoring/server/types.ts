@@ -17,6 +17,7 @@ import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { CloudSetup } from '../../cloud/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -44,6 +45,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetupContract;
   alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface PluginsStart {
