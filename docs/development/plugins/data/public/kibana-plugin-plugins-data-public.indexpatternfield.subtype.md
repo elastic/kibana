@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-subType?: IFieldSubType;
+get subType(): import("../types").IFieldSubType | undefined;
 ```
