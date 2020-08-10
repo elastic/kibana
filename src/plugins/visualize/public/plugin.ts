@@ -31,7 +31,12 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
-import { Storage, createKbnUrlTracker, createKbnUrlStateStorage } from '../../kibana_utils/public';
+import {
+  Storage,
+  createKbnUrlTracker,
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup, UrlGeneratorState } from '../../share/public';
@@ -193,6 +198,7 @@ export class VisualizePlugin
           kbnUrlStateStorage: createKbnUrlStateStorage({
             history,
             useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
           kibanaLegacy: pluginsStart.kibanaLegacy,
           pluginInitializerContext: this.initializerContext,
