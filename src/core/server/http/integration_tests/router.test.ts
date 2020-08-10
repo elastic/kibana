@@ -400,7 +400,6 @@ describe('Options', () => {
             },
           },
           async (context, req, res) => {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
             return res.ok({});
           }
         );

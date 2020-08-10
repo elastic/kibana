@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
 export interface PluginARequestContext {
   ping: () => Promise<string>;
@@ -63,6 +64,56 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
         validate: false,
       },
       async (context, req, res) => {
+        return res.ok({});
+      }
+    );
+
+    router.post(
+      {
+        options: {
+          body: {
+            accepts: ['application/json'],
+          },
+          timeout: { idleSocket: 10 },
+        },
+        path: '/short_idle_socket_timeout',
+        validate: {
+          body: schema.maybe(
+            schema.object({
+              responseDelay: schema.maybe(schema.number()),
+            })
+          ),
+        },
+      },
+      async (context, req, res) => {
+        if (req.body.responseDelay) {
+          await new Promise((resolve) => setTimeout(resolve, req.body.responseDelay));
+        }
+        return res.ok({});
+      }
+    );
+
+    router.post(
+      {
+        options: {
+          body: {
+            accepts: ['application/json'],
+          },
+          timeout: { idleSocket: 5000 },
+        },
+        path: '/longer_idle_socket_timeout',
+        validate: {
+          body: schema.maybe(
+            schema.object({
+              responseDelay: schema.maybe(schema.number()),
+            })
+          ),
+        },
+      },
+      async (context, req, res) => {
+        if (req.body.responseDelay) {
+          await new Promise((resolve) => setTimeout(resolve, req.body.responseDelay));
+        }
         return res.ok({});
       }
     );

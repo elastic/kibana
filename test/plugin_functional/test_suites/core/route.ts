@@ -26,26 +26,27 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   describe('route', function () {
     describe('timeouts', function () {
-      describe('payload', function () {
-        const writeBodyCharAtATime = (request: Test, body: string, interval: number) => {
-          return new Promise((resolve, reject) => {
-            let i = 0;
-            const intervalId = setInterval(() => {
-              if (i < body.length) {
-                request.write(body[i++]);
-              } else {
-                clearInterval(intervalId);
-                request.end((err, res) => {
-                  resolve(res);
-                });
-              }
-            }, interval);
-            request.on('error', (err) => {
+      const writeBodyCharAtATime = (request: Test, body: string, interval: number) => {
+        return new Promise((resolve, reject) => {
+          let i = 0;
+          const intervalId = setInterval(() => {
+            if (i < body.length) {
+              request.write(body[i++]);
+            } else {
               clearInterval(intervalId);
-              reject(err);
-            });
+              request.end((err, res) => {
+                resolve(res);
+              });
+            }
+          }, interval);
+          request.on('error', (err) => {
+            clearInterval(intervalId);
+            reject(err);
           });
-        };
+        });
+      };
+
+      describe('payload', function () {
         it(`should timeout if POST payload sending is too slow`, async () => {
           // start the request
           const request = supertest
@@ -75,6 +76,88 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('kbn-xsrf', 'true');
 
           const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
+
+          await result.then(
+            (res) => {
+              expect(res).to.have.property('statusCode', 200);
+            },
+            (err) => {
+              expect(err).to.be(undefined);
+            }
+          );
+        });
+      });
+
+      describe('idle socket', function () {
+        it('should timeout if payload sending has too long of an idle period', async function () {
+          // start the request
+          const request = supertest
+            .post('/short_idle_socket_timeout')
+            .set('Content-Type', 'application/json')
+            .set('Transfer-Encoding', 'chunked')
+            .set('kbn-xsrf', 'true');
+
+          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 20);
+
+          await result.then(
+            (res) => {
+              expect(res).to.be(undefined);
+            },
+            (err) => {
+              expect(err.message).to.be('socket hang up');
+            }
+          );
+        });
+
+        it('should not timeout if payload sending does not have too long of an idle period', async function () {
+          // start the request
+          const request = supertest
+            .post('/longer_idle_socket_timeout')
+            .set('Content-Type', 'application/json')
+            .set('Transfer-Encoding', 'chunked')
+            .set('kbn-xsrf', 'true');
+
+          const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 10);
+
+          await result.then(
+            (res) => {
+              expect(res).to.have.property('statusCode', 200);
+            },
+            (err) => {
+              expect(err).to.be(undefined);
+            }
+          );
+        });
+
+        it('should timeout if servers response is too slow', async function () {
+          // start the request
+          const request = supertest
+            .post('/short_idle_socket_timeout')
+            .set('Content-Type', 'application/json')
+            .set('Transfer-Encoding', 'chunked')
+            .set('kbn-xsrf', 'true');
+
+          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
+
+          await result.then(
+            (res) => {
+              expect(res).to.be(undefined);
+            },
+            (err) => {
+              expect(err.message).to.be('socket hang up');
+            }
+          );
+        });
+
+        it('should not timeout if servers response is fast enough', async function () {
+          // start the request
+          const request = supertest
+            .post('/longer_idle_socket_timeout')
+            .set('Content-Type', 'application/json')
+            .set('Transfer-Encoding', 'chunked')
+            .set('kbn-xsrf', 'true');
+
+          const result = writeBodyCharAtATime(request, '{"responseDelay":100}', 0);
 
           await result.then(
             (res) => {
