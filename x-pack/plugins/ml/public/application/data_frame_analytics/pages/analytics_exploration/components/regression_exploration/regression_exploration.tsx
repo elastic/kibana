@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ExplorationPageWrapper } from '../exploration_page_wrapper';
 
 import { EvaluatePanel } from './evaluate_panel';
+import { FeatureImportanceSummary } from '../exploration_feature_importance_summary';
 
 interface Props {
   jobId: string;
@@ -25,6 +26,7 @@ export const RegressionExploration: FC<Props> = ({ jobId }) => {
         values: { jobId },
       })}
       EvaluatePanel={EvaluatePanel}
+      FeatureImportanceSummaryPanel={FeatureImportanceSummary}
     />
   );
 };

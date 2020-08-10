@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 import {
   Chart,
-  Datum,
   Settings,
   LineAnnotation,
   AnnotationDomainTypes,
@@ -16,14 +15,15 @@ import {
   ScaleType,
   Position,
   LineAnnotationDatum,
+  PartialTheme,
 } from '@elastic/charts';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 
-const style = {
+const baselineStyle = {
   line: {
     strokeWidth: 1,
-    stroke: '#ff0000',
+    stroke: 'gray',
     opacity: 1,
   },
   details: {
@@ -35,71 +35,42 @@ const style = {
   },
 };
 
-interface FeatureImportance {
-  feature_name: string;
-  importance: number;
-}
+const theme: PartialTheme = {
+  axes: {
+    tickLabel: {
+      fontSize: 30,
+    },
+  },
+};
+
 interface FeatureImportanceDecisionPathProps {
   baseline?: number;
-  featureImportance: FeatureImportance[];
+  decisionPlotData: LineAnnotationDatum[];
 }
-
-const FEATURE_NAME = 'feature_name';
-const FEATURE_IMPORTANCE = 'importance';
 
 export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProps> = ({
   baseline,
-  featureImportance,
+  decisionPlotData,
 }) => {
-  const baselineData: LineAnnotationDatum[] = [{ dataValue: baseline, details: 'baseline' }];
-
-  let mappedFeatureImportance: Datum[] = featureImportance;
-
-  if (baseline) {
-    // also plot the baseline in the decision path visualization
-    mappedFeatureImportance.push({ [FEATURE_NAME]: 'baseline', [FEATURE_IMPORTANCE]: baseline });
-
-    // get the absolute difference of the importance value to the baseline for sorting
-    mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
-      ...d,
-      difference: Math.abs(d[FEATURE_IMPORTANCE] - baseline),
-    }));
-
-    // sort so importance so it goes from bottom (baseline) to top
-    mappedFeatureImportance = mappedFeatureImportance
-      .sort((a, b) => b.difference - a.difference)
-      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
-
-    // start at the baseline and end at predicted value
-    let cumulativeSum = 0;
-    for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
-      cumulativeSum += mappedFeatureImportance[i][1];
-      mappedFeatureImportance[i][2] = cumulativeSum;
-    }
-  } else {
-    // sort so most positive importance on top -> most negative importance at bottom
-    mappedFeatureImportance = mappedFeatureImportance
-      .sort((a, b) => b[FEATURE_IMPORTANCE] - a[FEATURE_IMPORTANCE])
-      .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+  if (!decisionPlotData) {
+    return null;
   }
+  const baselineData: LineAnnotationDatum[] = [{ dataValue: baseline, details: 'baseline' }];
+  const maxDomain = _.maxBy(decisionPlotData, (d) => d[2])[2];
+  const minDomain = _.minBy(decisionPlotData, (d) => d[2])[2];
 
-  const maxDomain = _.maxBy(mappedFeatureImportance, (d) => d[1]);
-  const minDomain = _.minBy(mappedFeatureImportance, (d) => d[1]);
   // adjust the height so it's compact for items with more features
-  const heightMultiplier = mappedFeatureImportance.length > 3 ? 20 : 75;
+  const heightMultiplier = decisionPlotData.length > 3 ? 20 : 75;
   return (
     <>
-      <Chart
-        className="story-chart"
-        size={{ height: mappedFeatureImportance.length * heightMultiplier }}
-      >
-        <Settings rotation={90} />
+      <Chart className="story-chart" size={{ height: decisionPlotData.length * heightMultiplier }}>
+        <Settings theme={theme} rotation={90} />
         {baseline && (
           <LineAnnotation
             id="dfa_baseline"
             domainType={AnnotationDomainTypes.YDomain}
             dataValues={baselineData}
-            style={style}
+            style={baselineStyle}
             marker={<EuiIcon type={'annotation'} />}
           />
         )}
@@ -114,8 +85,8 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
           domain={
             minDomain && maxDomain
               ? {
-                  min: minDomain.importance,
-                  max: maxDomain.importance,
+                  min: minDomain,
+                  max: maxDomain,
                 }
               : undefined
           }
@@ -127,7 +98,7 @@ export const FeatureImportanceDecisionPath: FC<FeatureImportanceDecisionPathProp
           yScaleType={ScaleType.Linear}
           xAccessor={0}
           yAccessors={baseline ? [2] : [1]} // if baseline exist then shows the decision path else show in order of descending importance
-          data={mappedFeatureImportance}
+          data={decisionPlotData}
         />
       </Chart>
     </>

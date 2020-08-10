@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { EuiTabs, EuiTab, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FeatureImportanceDecisionPath } from './decision_path_chart';
@@ -20,11 +20,57 @@ enum DECISION_PATH_TABS {
   CHART = 'decision_path_chart',
   JSON = 'decision_path_json',
 }
+
+const FEATURE_NAME = 'feature_name';
+const FEATURE_IMPORTANCE = 'importance';
+
+export const useDecisionPathData = ({ baseline, featureImportance }: DecisionPathPopoverProps) => {
+  const [decisionPlotData, setDecisionPlotData] = useState();
+
+  useEffect(() => {
+    let mappedFeatureImportance: FeatureImportance[] = featureImportance;
+
+    if (baseline) {
+      // get the absolute difference of the importance value to the baseline for sorting
+
+      mappedFeatureImportance = mappedFeatureImportance.map((d) => ({
+        ...d,
+        difference: Math.abs(d[FEATURE_IMPORTANCE]),
+      }));
+      mappedFeatureImportance.push({
+        [FEATURE_NAME]: 'baseline',
+        [FEATURE_IMPORTANCE]: baseline,
+        difference: 0,
+      });
+
+      // sort so importance so it goes from bottom (baseline) to top
+      mappedFeatureImportance = mappedFeatureImportance
+        .sort((a, b) => b.difference - a.difference)
+        .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+
+      // start at the baseline and end at predicted value
+      let cumulativeSum = 0;
+      for (let i = mappedFeatureImportance.length - 1; i >= 0; i--) {
+        cumulativeSum += mappedFeatureImportance[i][1];
+        mappedFeatureImportance[i][2] = cumulativeSum;
+      }
+    } else {
+      // sort so most positive importance on top -> most negative importance at bottom
+      mappedFeatureImportance = featureImportance
+        // .sort((a, b) => b[FEATURE_IMPORTANCE] - a[FEATURE_IMPORTANCE])
+        .map((d) => [d[FEATURE_NAME], d[FEATURE_IMPORTANCE]]);
+    }
+    setDecisionPlotData(mappedFeatureImportance);
+  }, [baseline, featureImportance]);
+
+  return { decisionPlotData };
+};
 export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   baseline,
   featureImportance,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
+  const { decisionPlotData } = useDecisionPathData({ baseline, featureImportance });
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -36,7 +82,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       name: (
         <FormattedMessage
           id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlot"
-          defaultMessage="Decision Plot"
+          defaultMessage="Decision plot"
         />
       ),
     },
@@ -68,7 +114,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
       </div>
       {selectedTabId === DECISION_PATH_TABS.CHART && (
         <>
-          <EuiText size={'xs'}>
+          <EuiText size={'xs'} color="subdued" style={{ paddingTop: 5 }}>
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.decisionPathPlotHelpText"
               defaultMessage="SHAP decision plots use {linkedFeatureImportanceValues} to show how models arrive at the predicted values."
@@ -91,6 +137,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
           <FeatureImportanceDecisionPath
             baseline={baseline}
             featureImportance={featureImportance}
+            decisionPlotData={decisionPlotData}
           />
         </>
       )}
