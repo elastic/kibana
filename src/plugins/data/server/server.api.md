@@ -125,6 +125,7 @@ import { ResponseToolkit } from 'hapi';
 import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ScrollParams } from 'elasticsearch';
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { SearchParams } from 'elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
