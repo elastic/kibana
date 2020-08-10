@@ -37,6 +37,13 @@ project {
         name = "OSS"
 
         buildType(OssBuild)
+
+        subProject {
+          id("OSS_Functional")
+          name = "OSS Functional"
+
+          for (i in 1..12) buildType(OssCiGroup(i, OssBuild))
+        }
     }
 
 }
