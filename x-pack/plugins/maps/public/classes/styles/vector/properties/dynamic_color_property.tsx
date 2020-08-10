@@ -100,7 +100,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this._field || !this.getFieldName()) {
+    if (!this.getFieldName()) {
       return null;
     }
 
