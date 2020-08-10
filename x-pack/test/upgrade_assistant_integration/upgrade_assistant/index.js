@@ -9,6 +9,5 @@ export default function ({ loadTestFile }) {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./reindexing'));
-    loadTestFile(require.resolve('./status'));
   });
 }

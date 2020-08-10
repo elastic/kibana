@@ -11,19 +11,11 @@ import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import { getUpgradeAssistantStatus } from './es_migration_apis';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
+const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
+
 describe('getUpgradeAssistantStatus', () => {
-  const clusterStateResponse = {
-    metadata: {
-      indices: {
-        ...Object.keys(fakeDeprecations.index_settings).reduce(
-          (acc, i) => ({
-            ...acc,
-            [i]: 'open',
-          }),
-          {}
-        ),
-      },
-    },
+  const resolvedIndices = {
+    indices: fakeIndexNames.map((f) => ({ name: f, attributes: ['open'] })),
   };
   let deprecationsResponse: DeprecationAPIResponse;
 
@@ -31,8 +23,8 @@ describe('getUpgradeAssistantStatus', () => {
   (dataClient.callAsCurrentUser as jest.Mock).mockImplementation(async (api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
-    } else if (api === 'cluster.state') {
-      return clusterStateResponse;
+    } else if (path === '/_resolve/index/*') {
+      return resolvedIndices;
     } else if (api === 'indices.getMapping') {
       return {};
     } else {
