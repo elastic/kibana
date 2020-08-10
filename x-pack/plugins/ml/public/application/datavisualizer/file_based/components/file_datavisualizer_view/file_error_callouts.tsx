@@ -102,7 +102,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
         {loaded === false && (
           <>
             <FormattedMessage
-              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.revertingToPreviousSettingsDescription"
+              id="xpack.ml.fileDatavisualizer.fileErrorCallouts.applyOverridesDescription"
               defaultMessage="If you know something about this data, such as the file format or timestamp format, adding initial overrides may help us to infer the rest of the structure."
             />
             <br />
