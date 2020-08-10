@@ -41,14 +41,15 @@ const FlexItem = styled(EuiFlexItem)`
 `;
 FlexItem.displayName = 'FlexItem';
 
-const FlexGroup = styled(EuiFlexGroup)<{ $globalFullScreen: boolean }>`
-  ${({ $globalFullScreen, theme }) => `
+const FlexGroup = styled(EuiFlexGroup)<{ $globalFullScreen: boolean; $hasSibling: boolean }>`
+  ${({ $globalFullScreen, $hasSibling, theme }) => `
     border-bottom: ${theme.eui.euiBorderThin};
     margin-bottom: 1px;
     padding-bottom: 4px;
     padding-left: ${theme.eui.paddingSizes.l};
     padding-right: ${gutterTimeline};
     ${$globalFullScreen ? 'display: none;' : ''}
+    ${$hasSibling ? `border-bottom: ${theme.eui.euiBorderThin};` : 'border-bottom-width: 0px;'}
   `}
 `;
 FlexGroup.displayName = 'FlexGroup';
@@ -75,6 +76,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
       <FlexGroup
         alignItems="center"
         $globalFullScreen={globalFullScreen}
+        $hasSibling={globalHeaderPortalNode.hasChildNodes()}
         justifyContent="spaceBetween"
         wrap
       >
