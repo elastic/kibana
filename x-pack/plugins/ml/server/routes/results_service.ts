@@ -6,7 +6,6 @@
 
 import { RequestHandlerContext } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { SearchResponse } from 'elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -20,8 +19,6 @@ import { resultsServiceProvider } from '../models/results_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import { getCategorizerStatsSchema } from './schemas/results_service_schema';
-
-import { AnomalyCategorizerStatsDoc } from '../../common/types/anomalies';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
   const rs = resultsServiceProvider(context.ml!.mlClient);
@@ -74,6 +71,19 @@ function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) 
   const rs = resultsServiceProvider(context.ml!.mlClient);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+}
+
+function getCategorizerStats(context: RequestHandlerContext, params: any, query: any) {
+  const { jobId } = params;
+  const { partitionByValue } = query;
+  const rs = resultsServiceProvider(context.ml!.mlClient);
+  return rs.getCategorizerStats(jobId, partitionByValue);
+}
+
+function getStoppedPartitions(context: RequestHandlerContext, payload: any) {
+  const { jobId } = payload;
+  const rs = resultsServiceProvider(context.ml!.mlClient);
+  return rs.getStoppedPartitions(jobId);
 }
 
 /**
@@ -292,45 +302,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { jobId } = request.params;
-        const { partitionByValue } = request.query;
-        const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
-          {
-            match: {
-              result_type: 'categorizer_stats',
-            },
-          },
-        ];
-
-        if (typeof partitionByValue === 'string') {
-          mustMatchClauses.push({
-            match: {
-              partition_by_value: partitionByValue,
-            },
-          });
-        }
-        const results: SearchResponse<AnomalyCategorizerStatsDoc> = await context.ml!.mlClient.callAsCurrentUser(
-          'search',
-          {
-            index: ML_RESULTS_INDEX_PATTERN,
-            body: {
-              query: {
-                bool: {
-                  must: mustMatchClauses,
-                  filter: [
-                    {
-                      term: {
-                        job_id: jobId,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          }
-        );
+        const resp = await getCategorizerStats(context, request.params, request.query);
         return response.ok({
-          body: results ? results.hits.hits.map((r) => r._source) : [],
+          body: resp,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -358,74 +332,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const { jobId } = request.params;
-        let finalResult: Array<{ key: string; doc_count: number }> = [];
-        // first determine from job config if stop_on_warn is true
-        // if false return []
-        const jobConfigResponse = await context.ml!.mlClient.callAsInternalUser('ml.jobs', {
-          jobId,
-        });
-
-        if (!jobConfigResponse || jobConfigResponse.jobs.length !== 1) {
-          return response.customError({
-            statusCode: 404,
-            body: `Unable to find anomaly detector job with ID ${jobId}`,
-          });
-        }
-
-        const jobConfig = jobConfigResponse.jobs[0];
-        if (jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true) {
-          // search for categorizer_stats documents for the current job where the categorization_status is warn
-          // Return all the partition_field_value values from the documents found
-          const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
-            {
-              match: {
-                result_type: 'categorizer_stats',
-              },
-            },
-            {
-              match: {
-                categorization_status: 'warn',
-              },
-            },
-          ];
-          const results: SearchResponse<any> = await context.ml!.mlClient.callAsCurrentUser(
-            'search',
-            {
-              index: ML_RESULTS_INDEX_PATTERN,
-              size: 0,
-              body: {
-                query: {
-                  bool: {
-                    must: mustMatchClauses,
-                    filter: [
-                      {
-                        term: {
-                          job_id: jobId,
-                        },
-                      },
-                    ],
-                  },
-                },
-                aggs: {
-                  unique_partition_field_values: {
-                    terms: {
-                      field: 'partition_field_value',
-                    },
-                  },
-                },
-              },
-            }
-          );
-          if (Array.isArray(results.aggregations?.unique_partition_field_values?.buckets)) {
-            finalResult = results.aggregations?.unique_partition_field_values?.buckets.map(
-              (b: { key: string; doc_count: number }) => b.key
-            );
-          }
-        }
-
+        const resp = await getStoppedPartitions(context, request.params);
         return response.ok({
-          body: finalResult,
+          body: resp,
         });
       } catch (e) {
         return response.customError(wrapError(e));

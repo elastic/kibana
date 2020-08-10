@@ -12,7 +12,11 @@ import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
-import { AnomaliesTableRecord, AnomalyRecordDoc } from '../../../common/types/anomalies';
+import {
+  AnomaliesTableRecord,
+  AnomalyCategorizerStatsDoc,
+  AnomalyRecordDoc,
+} from '../../../common/types/anomalies';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -31,7 +35,7 @@ interface Influencer {
 }
 
 export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const { callAsInternalUser } = mlClusterClient;
+  const { callAsInternalUser, callAsCurrentUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -430,6 +434,105 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     return definition;
   }
 
+  async function getCategorizerStats(jobId: string, partitionByValue?: string) {
+    const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
+      {
+        match: {
+          result_type: 'categorizer_stats',
+        },
+      },
+    ];
+
+    if (typeof partitionByValue === 'string') {
+      mustMatchClauses.push({
+        match: {
+          partition_by_value: partitionByValue,
+        },
+      });
+    }
+    const results: SearchResponse<AnomalyCategorizerStatsDoc> = await callAsCurrentUser('search', {
+      index: ML_RESULTS_INDEX_PATTERN,
+      body: {
+        query: {
+          bool: {
+            must: mustMatchClauses,
+            filter: [
+              {
+                term: {
+                  job_id: jobId,
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    return results ? results.hits.hits.map((r) => r._source) : [];
+  }
+
+  async function getStoppedPartitions(jobId) {
+    let finalResult: Array<{ key: string; doc_count: number }> = [];
+    // first determine from job config if stop_on_warn is true
+    // if false return []
+    const jobConfigResponse = await callAsInternalUser('ml.jobs', {
+      jobId,
+    });
+
+    if (!jobConfigResponse || jobConfigResponse.jobs.length !== 1) {
+      throw Error(`Unable to find anomaly detector job with ID ${jobId}`);
+    }
+
+    const jobConfig = jobConfigResponse.jobs[0];
+    if (jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true) {
+      // search for categorizer_stats documents for the current job where the categorization_status is warn
+      // Return all the partition_field_value values from the documents found
+      const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
+        {
+          match: {
+            result_type: 'categorizer_stats',
+          },
+        },
+        {
+          match: {
+            categorization_status: 'warn',
+          },
+        },
+      ];
+      const results: SearchResponse<any> = await callAsCurrentUser('search', {
+        index: ML_RESULTS_INDEX_PATTERN,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              must: mustMatchClauses,
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            unique_partition_field_values: {
+              terms: {
+                field: 'partition_field_value',
+              },
+            },
+          },
+        },
+      });
+      if (Array.isArray(results.aggregations?.unique_partition_field_values?.buckets)) {
+        finalResult = results.aggregations?.unique_partition_field_values?.buckets.map(
+          (b: { key: string; doc_count: number }) => b.key
+        );
+      }
+    }
+
+    return finalResult;
+  }
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
@@ -437,5 +540,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
     getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClusterClient),
+    getCategorizerStats,
+    getStoppedPartitions,
   };
 }
