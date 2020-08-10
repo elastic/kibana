@@ -35,7 +35,7 @@ interface Influencer {
 }
 
 export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const { callAsInternalUser, callAsCurrentUser } = mlClusterClient;
+  const { callAsInternalUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -450,7 +450,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
         },
       });
     }
-    const results: SearchResponse<AnomalyCategorizerStatsDoc> = await callAsCurrentUser('search', {
+    const results: SearchResponse<AnomalyCategorizerStatsDoc> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       body: {
         query: {
@@ -470,7 +470,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     return results ? results.hits.hits.map((r) => r._source) : [];
   }
 
-  async function getStoppedPartitions(jobId) {
+  async function getStoppedPartitions(jobId: string) {
     let finalResult: Array<{ key: string; doc_count: number }> = [];
     // first determine from job config if stop_on_warn is true
     // if false return []
@@ -498,7 +498,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
           },
         },
       ];
-      const results: SearchResponse<any> = await callAsCurrentUser('search', {
+      const results: SearchResponse<any> = await callAsInternalUser('search', {
         index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
         body: {

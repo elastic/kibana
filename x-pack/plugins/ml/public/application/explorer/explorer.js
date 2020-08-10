@@ -304,7 +304,7 @@ export class Explorer extends React.Component {
                 size={'s'}
                 title={i18n.translate('xpack.ml.explorer.stoppedPartitionsExistCallout', {
                   defaultMessage:
-                    'There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection stops for partitions [{stoppedPartitions}] where the categorization status changes to warn.',
+                    'There may be fewer results than there could have been because stop_on_warn is turned on. Both categorization and subsequent anomaly detection have stopped for partitions [{stoppedPartitions}] where the categorization status has changed to warn.',
                   values: {
                     stoppedPartitions: stoppedPartitions.join(', '),
                   },

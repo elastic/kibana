@@ -22,7 +22,7 @@ export const Description: FC<Props> = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.perPartitionCategorization.enable.description"
-          defaultMessage="Enable per-partition categorization for this job."
+          defaultMessage="If per-partition categorization is enabled then categories are determined independently for each value of the partition field."
         />
       }
     >
