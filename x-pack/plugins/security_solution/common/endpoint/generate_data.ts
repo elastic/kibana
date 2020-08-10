@@ -333,6 +333,7 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
 export class EndpointDocGenerator {
   commonInfo: HostInfo;
   random: seedrandom.prng;
+  sequence: number = 0;
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
     if (typeof seed === 'string') {
       this.random = seedrandom(seed);
@@ -440,6 +441,7 @@ export class EndpointDocGenerator {
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
+        sequence: this.sequence++,
       },
       file: {
         owner: 'SYSTEM',
@@ -586,6 +588,7 @@ export class EndpointDocGenerator {
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
+        sequence: this.sequence++,
       },
       host: this.commonInfo.host,
       process: {

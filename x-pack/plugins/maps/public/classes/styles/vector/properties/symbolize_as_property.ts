@@ -6,12 +6,9 @@
 
 import { AbstractStyleProperty } from './style_property';
 import { SYMBOLIZE_AS_TYPES } from '../../../../../common/constants';
+import { SymbolizeAsOptions } from '../../../../../common/descriptor_types';
 
-export class SymbolizeAsProperty extends AbstractStyleProperty {
-  constructor(options, styleName) {
-    super(options, styleName);
-  }
-
+export class SymbolizeAsProperty extends AbstractStyleProperty<SymbolizeAsOptions> {
   isSymbolizedAsIcon = () => {
     return this.getOptions().value === SYMBOLIZE_AS_TYPES.ICON;
   };

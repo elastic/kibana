@@ -4,20 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DynamicStyleProperty } from './dynamic_style_property';
+import _ from 'lodash';
+import React from 'react';
+import { Map as MbMap } from 'mapbox-gl';
+import { DynamicStyleProperty, FieldFormatter } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
+  // @ts-expect-error
 } from '../symbol_utils';
 import { MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
-import _ from 'lodash';
-import React from 'react';
+import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
+import { IField } from '../../../fields/field';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 
-export class DynamicSizeProperty extends DynamicStyleProperty {
-  constructor(options, styleName, field, vectorLayer, getFieldFormatter, isSymbolizedAsIcon) {
+export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions> {
+  private readonly _isSymbolizedAsIcon: boolean;
+
+  constructor(
+    options: SizeDynamicOptions,
+    styleName: VECTOR_STYLES,
+    field: IField | null,
+    vectorLayer: IVectorLayer,
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter,
+    isSymbolizedAsIcon: boolean
+  ) {
     super(options, styleName, field, vectorLayer, getFieldFormatter);
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
@@ -36,7 +50,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     return super.supportsMbFeatureState();
   }
 
-  syncHaloWidthWithMb(mbLayerId, mbMap) {
+  syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {
     const haloWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
@@ -47,9 +61,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       : SMALL_MAKI_ICON_SIZE;
   }
 
-  syncIconSizeWithMb(symbolLayerId, mbMap) {
+  syncIconSizeWithMb(symbolLayerId: string, mbMap: MbMap) {
     const rangeFieldMeta = this.getRangeFieldMeta();
-    if (this._isSizeDynamicConfigComplete(this._options) && rangeFieldMeta) {
+    if (this._isSizeDynamicConfigComplete() && rangeFieldMeta) {
       const halfIconPixels = this.getIconPixelSize() / 2;
       const targetName = this.getFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
@@ -73,29 +87,29 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     }
   }
 
-  syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
+  syncCircleStrokeWidthWithMb(mbLayerId: string, mbMap: MbMap) {
     const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
-  syncCircleRadiusWithMb(mbLayerId, mbMap) {
+  syncCircleRadiusWithMb(mbLayerId: string, mbMap: MbMap) {
     const circleRadius = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 
-  syncLineWidthWithMb(mbLayerId, mbMap) {
+  syncLineWidthWithMb(mbLayerId: string, mbMap: MbMap) {
     const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
-  syncLabelSizeWithMb(mbLayerId, mbMap) {
+  syncLabelSizeWithMb(mbLayerId: string, mbMap: MbMap) {
     const lineWidth = this.getMbSizeExpression();
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
   getMbSizeExpression() {
     const rangeFieldMeta = this.getRangeFieldMeta();
-    if (!this._isSizeDynamicConfigComplete(this._options) || !rangeFieldMeta) {
+    if (!this._isSizeDynamicConfigComplete() || !rangeFieldMeta) {
       return null;
     }
 
@@ -108,7 +122,19 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
     });
   }
 
-  _getMbDataDrivenSize({ targetName, minSize, maxSize, minValue, maxValue }) {
+  _getMbDataDrivenSize({
+    targetName,
+    minSize,
+    maxSize,
+    minValue,
+    maxValue,
+  }: {
+    targetName: string;
+    minSize: number;
+    maxSize: number;
+    minValue: number;
+    maxValue: number;
+  }) {
     const stops =
       minValue === maxValue ? [maxValue, maxSize] : [minValue, minSize, maxValue, maxSize];
     return [
