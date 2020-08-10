@@ -35,12 +35,13 @@ object DefaultTemplate : Template({
 
     params {
       param("env.CI", "true")
+      param("env.TEST_BROWSER_HEADLESS", "1")
 //
 //        // For now these are just to ensure compatibility with existing Jenkins-based configuration
 //        param("env.JENKINS_URL", "%teamcity.serverUrl%")
 //        param("env.BUILD_URL", "%teamcity.serverUrl%/build/%teamcity.build.id%")
 //        param("env.JOB_NAME", "%system.teamcity.buildType.id%")
-        param("env.GIT_BRANCH", "%vcsroot.branch%")
+      param("env.GIT_BRANCH", "%vcsroot.branch%")
     }
 
 //    steps {
