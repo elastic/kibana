@@ -9,7 +9,7 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActions, useValues } from 'kea';
 
-import { SetWorkplaceSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
@@ -72,7 +72,7 @@ export const Overview: React.FC = () => {
 
   return (
     <EuiPage restrictWidth>
-      <SetBreadcrumbs isRoot />
+      <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>
