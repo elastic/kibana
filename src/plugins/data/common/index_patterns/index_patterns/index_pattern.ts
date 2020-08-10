@@ -200,7 +200,7 @@ export class IndexPattern implements IIndexPattern {
           if (err instanceof FieldTypeUnknownError) {
             const title = i18n.translate('data.indexPatterns.unknownFieldHeader', {
               values: { type: err.fieldSpec.type, name: err.fieldSpec.name },
-              defaultMessage: 'Field {name}: Unknown field type {type}',
+              defaultMessage: `Field '{name}': Unknown field type '{type}'`,
             });
 
             const text = i18n.translate('data.indexPatterns.unknownFieldErrorMessage', {

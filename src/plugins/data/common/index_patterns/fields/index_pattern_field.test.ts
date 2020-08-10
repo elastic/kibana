@@ -37,7 +37,7 @@ describe('Field', function () {
 
   const fieldValues = {
     name: 'name',
-    type: 'type',
+    type: 'string',
     script: 'script',
     lang: 'lang',
     count: 1,

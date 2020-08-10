@@ -14,7 +14,7 @@ export declare class FieldList extends Array<IndexPatternField> implements IInde
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, specs, shortDotsEnable, onNotification)](./kibana-plugin-plugins-data-public.fieldlist._constructor_.md) |  | Constructs a new instance of the <code>FieldList</code> class |
+|  [(constructor)(indexPattern, specs, shortDotsEnable)](./kibana-plugin-plugins-data-public.fieldlist._constructor_.md) |  | Constructs a new instance of the <code>FieldList</code> class |
 
 ## Properties
 

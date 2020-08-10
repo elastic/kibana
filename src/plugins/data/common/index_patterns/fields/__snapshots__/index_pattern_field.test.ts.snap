@@ -30,7 +30,7 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;
 
@@ -70,6 +70,6 @@ Object {
       "path": "path",
     },
   },
-  "type": "type",
+  "type": "string",
 }
 `;

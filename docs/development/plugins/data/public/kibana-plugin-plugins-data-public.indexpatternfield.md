@@ -14,7 +14,7 @@ export declare class IndexPatternField implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, displayName, onNotification)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
+|  [(constructor)(indexPattern, spec, displayName)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>IndexPatternField</code> class |
 
 ## Properties
 

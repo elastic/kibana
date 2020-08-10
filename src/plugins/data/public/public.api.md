@@ -581,7 +581,7 @@ export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T
 // @public (undocumented)
 export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
     // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
+    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
     // (undocumented)
     readonly add: (field: FieldSpec) => void;
     // (undocumented)
@@ -1057,8 +1057,7 @@ export interface IndexPatternAttributes {
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
-    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, onNotification: OnNotification);
+    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string);
     // (undocumented)
     get aggregatable(): boolean;
     // (undocumented)
