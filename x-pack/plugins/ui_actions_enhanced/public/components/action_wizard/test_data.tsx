@@ -11,6 +11,13 @@ import { ActionWizard } from './action_wizard';
 import { ActionFactoryDefinition, ActionFactory } from '../../dynamic_actions';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
 import { licenseMock } from '../../../../licensing/common/licensing.mock';
+import {
+  APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  TriggerId,
+  Trigger,
+} from '../../../../../../src/plugins/ui_actions/public';
 
 type ActionBaseConfig = object;
 
@@ -104,6 +111,9 @@ export const dashboardDrilldownActionFactory: ActionFactoryDefinition<
     execute: async () => alert('Navigate to dashboard!'),
     enhancements: {},
   }),
+  supportedTriggers(): any[] {
+    return [APPLY_FILTER_TRIGGER];
+  },
 };
 
 export const dashboardFactory = new ActionFactory(dashboardDrilldownActionFactory, () =>
@@ -161,16 +171,34 @@ export const urlDrilldownActionFactory: ActionFactoryDefinition<UrlDrilldownConf
     return Promise.resolve(true);
   },
   create: () => null as any,
+  supportedTriggers(): any[] {
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+  },
 };
 
 export const urlFactory = new ActionFactory(urlDrilldownActionFactory, () =>
   licenseMock.createLicense()
 );
 
+export const mockGetTriggerInfo = (triggerId: TriggerId): Trigger => {
+  const titleMap = {
+    [VALUE_CLICK_TRIGGER]: 'Click',
+    [SELECT_RANGE_TRIGGER]: 'Select range',
+    [APPLY_FILTER_TRIGGER]: 'Apply filter',
+  } as Record<any, string>;
+
+  return {
+    id: triggerId,
+    title: titleMap[triggerId] ?? 'Unknown',
+    description: (titleMap[triggerId] ?? 'Unknown') + ' description',
+  };
+};
+
 export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory<any>> }) {
   const [state, setState] = useState<{
     currentActionFactory?: ActionFactory;
     config?: ActionBaseConfig;
+    selectedTrigger?: TriggerId;
   }>({});
 
   function changeActionFactory(newActionFactory?: ActionFactory) {
@@ -201,6 +229,14 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
         }}
         currentActionFactory={state.currentActionFactory}
         context={{}}
+        onSelectedTriggerChange={(trigger) => {
+          setState({
+            ...state,
+            selectedTrigger: trigger,
+          });
+        }}
+        selectedTrigger={state.selectedTrigger}
+        getTriggerInfo={mockGetTriggerInfo}
       />
       <div style={{ marginTop: '44px' }} />
       <hr />
@@ -210,6 +246,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
         Is config valid:{' '}
         {JSON.stringify(state.currentActionFactory?.isConfigValid(state.config!) ?? false)}
       </div>
+      <div>Picked trigger: {state.selectedTrigger}</div>
     </>
   );
 }

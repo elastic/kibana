@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/ui_actions/public';
 import {
   DashboardUrlGenerator,
   DashboardUrlGeneratorState,
@@ -31,7 +32,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, ApplyGlobalFilterActionContext> {
+  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER, ApplyGlobalFilterActionContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -58,6 +59,10 @@ export class DashboardToDashboardDrilldown
     if (!config.dashboardId) return false;
     return true;
   };
+
+  public supportedTriggers(): Array<typeof APPLY_FILTER_TRIGGER> {
+    return [APPLY_FILTER_TRIGGER];
+  }
 
   public readonly getHref = async (
     config: Config,

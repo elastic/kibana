@@ -5,7 +5,11 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
+import {
+  TriggerContextMapping,
+  TriggerId,
+  UiActionsPresentable as Presentable,
+} from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
@@ -15,10 +19,16 @@ import { UiActionsActionDefinition as ActionDefinition } from '../../../../../sr
 export class ActionFactory<
   Config extends object = object,
   FactoryContext extends object = object,
-  ActionContext extends object = object
+  SupportedTriggers extends TriggerId = TriggerId,
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
 > implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
-    protected readonly def: ActionFactoryDefinition<Config, FactoryContext, ActionContext>,
+    protected readonly def: ActionFactoryDefinition<
+      Config,
+      FactoryContext,
+      SupportedTriggers,
+      ActionContext
+    >,
     protected readonly getLicence: () => ILicense
   ) {}
 
@@ -73,5 +83,9 @@ export class ActionFactory<
         return action.isCompatible(context);
       },
     };
+  }
+
+  public supportedTriggers(): SupportedTriggers[] {
+    return this.def.supportedTriggers();
   }
 }

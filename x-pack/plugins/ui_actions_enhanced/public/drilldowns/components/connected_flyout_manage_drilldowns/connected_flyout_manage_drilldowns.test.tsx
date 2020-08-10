@@ -7,7 +7,11 @@
 import React from 'react';
 import { cleanup, fireEvent, render, wait } from '@testing-library/react/pure';
 import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldowns';
-import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
+import {
+  dashboardFactory,
+  mockGetTriggerInfo,
+  urlFactory,
+} from '../../../components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
 import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { mockDynamicActionManager } from './test_data';
@@ -24,6 +28,7 @@ const FlyoutManageDrilldowns = createFlyoutManageDrilldowns({
   actionFactories: [dashboardFactory as ActionFactory, urlFactory as ActionFactory],
   storage: new Storage(new StubBrowserStorage()),
   toastService: toasts,
+  getTrigger: mockGetTriggerInfo,
 });
 
 // https://github.com/elastic/kibana/issues/59469

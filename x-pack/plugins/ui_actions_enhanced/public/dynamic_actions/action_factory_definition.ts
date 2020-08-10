@@ -8,6 +8,8 @@ import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
+  TriggerContextMapping,
+  TriggerId,
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
@@ -18,7 +20,8 @@ import {
 export interface ActionFactoryDefinition<
   Config extends object = object,
   FactoryContext extends object = object,
-  ActionContext extends object = object
+  SupportedTriggers extends TriggerId = '',
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
 >
   extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext> {
@@ -42,4 +45,6 @@ export interface ActionFactoryDefinition<
   create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
   ): ActionDefinition<ActionContext>;
+
+  supportedTriggers(): SupportedTriggers[];
 }

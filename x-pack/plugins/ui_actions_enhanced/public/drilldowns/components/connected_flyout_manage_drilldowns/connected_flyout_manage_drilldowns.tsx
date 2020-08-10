@@ -10,10 +10,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import {
-  TriggerContextMapping,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import {
@@ -52,8 +49,10 @@ export function createFlyoutManageDrilldowns({
   storage,
   toastService,
   docsLink,
+  getTrigger,
 }: {
   actionFactories: ActionFactory[];
+  getTrigger: (triggerId: TriggerId) => Trigger;
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
@@ -66,18 +65,7 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
-    // TODO: https://github.com/elastic/kibana/issues/59569
-    const selectedTriggers: Array<keyof TriggerContextMapping> = React.useMemo(
-      () => [APPLY_FILTER_TRIGGER],
-      []
-    );
-
-    const factoryContext: object = React.useMemo(
-      () => ({
-        triggers: selectedTriggers,
-      }),
-      [selectedTriggers]
-    );
+    const factoryContext: object = React.useMemo(() => ({}), []);
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
@@ -122,6 +110,7 @@ export function createFlyoutManageDrilldowns({
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
         actionConfig: drilldownToEdit.action.config as object,
         name: drilldownToEdit.action.name,
+        selectedTrigger: (drilldownToEdit.triggers[0] as TriggerId) ?? undefined,
       };
     }
 
@@ -155,7 +144,7 @@ export function createFlyoutManageDrilldowns({
             onClose={props.onClose}
             mode={route === Routes.Create ? 'create' : 'edit'}
             onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-            onSubmit={({ actionConfig, actionFactory, name }) => {
+            onSubmit={({ actionConfig, actionFactory, name, selectedTrigger }) => {
               if (route === Routes.Create) {
                 createDrilldown(
                   {
@@ -163,7 +152,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTriggers
+                  selectedTrigger ? [selectedTrigger] : []
                 );
               } else {
                 editDrilldown(
@@ -173,7 +162,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTriggers
+                  selectedTrigger ? [selectedTrigger] : []
                 );
               }
 
@@ -194,6 +183,7 @@ export function createFlyoutManageDrilldowns({
             }}
             actionFactoryContext={factoryContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
+            getTrigger={getTrigger}
           />
         );
 
@@ -280,10 +270,7 @@ function useDrilldownsStateManager(actionManager: DynamicActionManager, toastSer
     }
   }
 
-  async function createDrilldown(
-    action: SerializedAction,
-    selectedTriggers: Array<keyof TriggerContextMapping>
-  ) {
+  async function createDrilldown(action: SerializedAction, selectedTriggers: TriggerId[]) {
     await run(async () => {
       await actionManager.createEvent(action, selectedTriggers);
       toastService.addSuccess({
@@ -296,7 +283,7 @@ function useDrilldownsStateManager(actionManager: DynamicActionManager, toastSer
   async function editDrilldown(
     drilldownId: string,
     action: SerializedAction,
-    selectedTriggers: Array<keyof TriggerContextMapping>
+    selectedTriggers: TriggerId[]
   ) {
     await run(async () => {
       await actionManager.updateEvent(drilldownId, action, selectedTriggers);
