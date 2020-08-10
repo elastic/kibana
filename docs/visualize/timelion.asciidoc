@@ -505,8 +505,9 @@ image::images/timelion-conditional04.png[]
 
 For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
 
+[float]
 [[timelion-deprecation]]
-== Timelion App deprecation
+=== Timelion App deprecation
 
 In *8.0* and later, the Timelion app is going to be deprecated. There are actions you need to complete to copy your existing Timelion worksheets to a dashboard.  
 
@@ -518,7 +519,7 @@ image::images/timelion-app.png[]
 
 [float]
 [[timelion-app-to-vis]]
-=== Create Timelion visualizations from a Timelion worksheet
+==== Create Timelion visualizations from a Timelion worksheet
 
 To migrate your Timelion charts to **Visualize**, copy the expression of each graph and create a new Timelion Visualization.
 
@@ -544,7 +545,7 @@ Save the new visualization and repeat for all your charts on each sheet.
 
 [float]
 [[timelion-sheet-to-dashboard]]
-=== Create a dashboard with the Timelion visualizations
+==== Create a dashboard with the Timelion visualizations
 
 Timelion worksheets are deprecated, but they can easily be replaced by a dashboard. The process is the same as adding a new visualization to a dashboard.
 
