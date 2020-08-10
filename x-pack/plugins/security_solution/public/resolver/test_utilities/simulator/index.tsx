@@ -219,31 +219,17 @@ export class Simulator {
   }
 
   /**
-   * An element with a list of all nodes.
+   * The titles of the links that select a node in the node list view.
    */
-  public nodeListElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list"]');
+  public nodeListNodeLinkText(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link:title"]');
   }
 
   /**
-   * Return the items in the node list (the default panel view.)
+   * The icons in the links that select a node in the node list view.
    */
-  public nodeListItems(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:item"]');
-  }
-
-  /**
-   * The links that select a node in the node list view.
-   */
-  public nodeListNodeLinks(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:node-link"]');
-  }
-
-  /**
-   * The element containing the details for the selected node.
-   */
-  public nodeDetailElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail"]');
+  public nodeListNodeLinkIcons(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link:icon"]');
   }
 
   /**
@@ -261,17 +247,10 @@ export class Simulator {
   }
 
   /**
-   * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+   * The icon element for the node detail title.
    */
-  private nodeDetailEntryTitle(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
-  }
-
-  /**
-   * The details of the selected node are shown in a description list. This returns the description elements of the description list.
-   */
-  private nodeDetailEntryDescription(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
+  public nodeDetailViewTitleIcon(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:title-icon"]');
   }
 
   /**
@@ -287,8 +266,14 @@ export class Simulator {
    * The titles and descriptions (as text) from the node detail panel.
    */
   public nodeDetailDescriptionListEntries(): Array<[string, string]> {
-    const titles = this.nodeDetailEntryTitle();
-    const descriptions = this.nodeDetailEntryDescription();
+    /**
+     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     */
+    const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
+    /**
+     * The details of the selected node are shown in a description list. This returns the description elements of the description list.
+     */
+    const descriptions = this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
     const entries: Array<[string, string]> = [];
     for (let index = 0; index < Math.min(titles.length, descriptions.length); index++) {
       const title = titles.at(index).text();

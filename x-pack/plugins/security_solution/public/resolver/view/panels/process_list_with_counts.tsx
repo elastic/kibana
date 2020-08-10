@@ -110,10 +110,12 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
                   crumbEvent: '',
                 });
               }}
-              data-test-subj="resolver:node-list:node-link"
             >
-              <CubeForProcess isProcessTerminated={isTerminated} />
-              {name}
+              <CubeForProcess
+                running={!isTerminated}
+                data-test-subj="resolver:node-list:node-link:icon"
+              />
+              <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
             </EuiButtonEmpty>
           );
         },

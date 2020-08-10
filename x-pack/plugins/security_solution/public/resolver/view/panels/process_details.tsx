@@ -156,20 +156,23 @@ export const ProcessDetails = memo(function ProcessDetails({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
-  const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
+  const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h4 data-test-subj="resolver:node-detail:title" aria-describedby={titleId}>
-          <CubeForProcess isProcessTerminated={isProcessTerminated} />
-          {processName}
+        <h4 aria-describedby={titleID}>
+          <CubeForProcess
+            data-test-subj="resolver:node-detail:title-icon"
+            running={!isProcessTerminated}
+          />
+          <span data-test-subj="resolver:node-detail:title">{processName}</span>
         </h4>
       </EuiTitle>
       <EuiText>
         <EuiTextColor color="subdued">
-          <span id={titleId}>{descriptionText}</span>
+          <span id={titleID}>{descriptionText}</span>
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="l" />

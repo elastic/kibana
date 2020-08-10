@@ -71,16 +71,28 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     });
     it('should show the node details for the origin', async () => {
       await expect(
-        simulator().map(() => simulator().nodeDetailDescriptionListEntries())
-      ).toYieldEqualTo([
-        ['process.executable', 'executable'],
-        ['process.pid', '0'],
-        ['user.name', 'user.name'],
-        ['user.domain', 'user.domain'],
-        ['process.parent.pid', '0'],
-        ['process.hash.md5', 'hash.md5'],
-        ['process.args', 'args'],
-      ]);
+        simulator().map(() => {
+          const titleWrapper = simulator().nodeDetailViewTitle();
+          const titleIconWrapper = simulator().nodeDetailViewTitleIcon();
+          return {
+            title: titleWrapper.exists() ? titleWrapper.text() : null,
+            titleIcon: titleIconWrapper.exists() ? titleIconWrapper.text() : null,
+            detailEntries: simulator().nodeDetailDescriptionListEntries(),
+          };
+        })
+      ).toYieldEqualTo({
+        title: 'c',
+        titleIcon: 'Running Process',
+        detailEntries: [
+          ['process.executable', 'executable'],
+          ['process.pid', '0'],
+          ['user.name', 'user.name'],
+          ['user.domain', 'user.domain'],
+          ['process.parent.pid', '0'],
+          ['process.hash.md5', 'hash.md5'],
+          ['process.args', 'args'],
+        ],
+      });
     });
   });
 
@@ -109,19 +121,21 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
     });
   });
 
-  it('should show the node list', async () => {
-    await expect(simulator().map(() => simulator().nodeListElement().length)).toYieldEqualTo(1);
+  it('should have 3 nodes (with icons) in the node list', async () => {
+    await expect(simulator().map(() => simulator().nodeListNodeLinkText().length)).toYieldEqualTo(
+      3
+    );
+    await expect(simulator().map(() => simulator().nodeListNodeLinkIcons().length)).toYieldEqualTo(
+      3
+    );
   });
 
-  it('should have 3 nodes in the node list', async () => {
-    await expect(simulator().map(() => simulator().nodeListItems().length)).toYieldEqualTo(3);
-  });
-  describe('when there is an item in the node list and it has been clicked', () => {
+  describe('when there is an item in the node list and its text has been clicked', () => {
     beforeEach(async () => {
-      const nodeListItems = await simulator().resolveWrapper(() => simulator().nodeListItems());
-      expect(nodeListItems && nodeListItems.length).toBeTruthy();
-      if (nodeListItems) {
-        nodeListItems.first().find('button').simulate('click');
+      const nodeLinks = await simulator().resolveWrapper(() => simulator().nodeListNodeLinkText());
+      expect(nodeLinks).toBeTruthy();
+      if (nodeLinks) {
+        nodeLinks.first().simulate('click');
       }
     });
     it('should show the details for the first node', async () => {
@@ -155,7 +169,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
         await expect(
           simulator().map(() => {
             return simulator()
-              .nodeListNodeLinks()
+              .nodeListNodeLinkText()
               .map((node) => node.text());
           })
         ).toYieldEqualTo(['c', 'd', 'e']);
