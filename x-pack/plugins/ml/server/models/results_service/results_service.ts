@@ -470,20 +470,29 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     return results ? results.hits.hits.map((r) => r._source) : [];
   }
 
-  async function getStoppedPartitions(jobId: string) {
+  async function getStoppedPartitions(
+    jobIds: string[],
+    fieldToBucket?: 'job_id' | 'partition_field_value' = 'partition_field_value'
+  ) {
     let finalResult: Array<{ key: string; doc_count: number }> = [];
     // first determine from job config if stop_on_warn is true
     // if false return []
     const jobConfigResponse = await callAsInternalUser('ml.jobs', {
-      jobId,
+      jobId: jobIds,
     });
 
-    if (!jobConfigResponse || jobConfigResponse.jobs.length !== 1) {
+    if (!jobConfigResponse || jobConfigResponse.jobs.length < 1) {
       throw Error(`Unable to find anomaly detector job with ID ${jobId}`);
     }
 
-    const jobConfig = jobConfigResponse.jobs[0];
-    if (jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true) {
+    const jobIdsWithStopOnWarnSet = jobConfigResponse.jobs
+      .filter(
+        (jobConfig) =>
+          jobConfig.analysis_config?.per_partition_categorization?.stop_on_warn === true
+      )
+      .map((j) => j.job_id);
+
+    if (jobIdsWithStopOnWarnSet.length > 0) {
       // search for categorizer_stats documents for the current job where the categorization_status is warn
       // Return all the partition_field_value values from the documents found
       const mustMatchClauses: Array<Record<'match', Record<string, string>>> = [
@@ -498,6 +507,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
           },
         },
       ];
+
       const results: SearchResponse<any> = await callAsInternalUser('search', {
         index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
@@ -507,24 +517,24 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
               must: mustMatchClauses,
               filter: [
                 {
-                  term: {
-                    job_id: jobId,
+                  terms: {
+                    job_id: jobIdsWithStopOnWarnSet,
                   },
                 },
               ],
             },
           },
           aggs: {
-            unique_partition_field_values: {
+            unique_terms: {
               terms: {
-                field: 'partition_field_value',
+                field: fieldToBucket,
               },
             },
           },
         },
       });
-      if (Array.isArray(results.aggregations?.unique_partition_field_values?.buckets)) {
-        finalResult = results.aggregations?.unique_partition_field_values?.buckets.map(
+      if (Array.isArray(results.aggregations?.unique_terms?.buckets)) {
+        finalResult = results.aggregations?.unique_terms?.buckets.map(
           (b: { key: string; doc_count: number }) => b.key
         );
       }

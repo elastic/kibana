@@ -115,10 +115,15 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getStoppedPartitions(jobId: string) {
+  getStoppedPartitions(jobIds: string, fieldToBucket?: 'job_id' | 'partition_field_value') {
+    const body = JSON.stringify({
+      jobIds,
+      fieldToBucket,
+    });
     return httpService.http<any>({
-      path: `${basePath()}/results/${jobId}/stopped_partitions`,
-      method: 'GET',
+      path: `${basePath()}/results/stopped_partitions`,
+      method: 'POST',
+      body,
     });
   },
 });

@@ -18,7 +18,10 @@ import {
 import { resultsServiceProvider } from '../models/results_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
-import { getCategorizerStatsSchema } from './schemas/results_service_schema';
+import {
+  getCategorizerStatsSchema,
+  getStoppedPartitionsSchema,
+} from './schemas/results_service_schema';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
   const rs = resultsServiceProvider(context.ml!.mlClient);
@@ -81,9 +84,9 @@ function getCategorizerStats(context: RequestHandlerContext, params: any, query:
 }
 
 function getStoppedPartitions(context: RequestHandlerContext, payload: any) {
-  const { jobId } = payload;
+  const { jobIds, fieldToBucket } = payload;
   const rs = resultsServiceProvider(context.ml!.mlClient);
-  return rs.getStoppedPartitions(jobId);
+  return rs.getStoppedPartitions(jobIds, fieldToBucket);
 }
 
 /**
@@ -297,7 +300,7 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         query: getCategorizerStatsSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -320,19 +323,19 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
    * @apiSchema (params) jobIdSchema
    */
-  router.get(
+  router.post(
     {
-      path: '/api/ml/results/{jobId}/stopped_partitions',
+      path: '/api/ml/results/stopped_partitions',
       validate: {
-        params: jobIdSchema,
+        body: getStoppedPartitionsSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
-        const resp = await getStoppedPartitions(context, request.params);
+        const resp = await getStoppedPartitions(context, request.body);
         return response.ok({
           body: resp,
         });

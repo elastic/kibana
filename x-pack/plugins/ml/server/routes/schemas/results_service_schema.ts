@@ -58,3 +58,8 @@ export const getCategorizerStatsSchema = schema.nullable(
     partitionByValue: schema.maybe(schema.string()),
   })
 );
+
+export const getStoppedPartitionsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  fieldToBucket: schema.maybe(schema.string()),
+});

@@ -111,9 +111,12 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
-  const getStoppedPartitions = async (jobId: string) => {
+  const getJobsWithStoppedPartitions = async (selectedJobIds) => {
     try {
-      const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(jobId);
+      const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(
+        selectedJobIds,
+        'job_id'
+      );
       if (fetchedStoppedPartitions.length > 0) {
         setStoppedPartitions(fetchedStoppedPartitions);
       } else {
@@ -127,11 +130,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   useEffect(() => {
     if (jobIds.length > 0) {
       explorerService.updateJobSelection(jobIds);
-
-      if (jobIds.length === 1) {
-        // if it's a per partition category job and and if stop_on_warn is true
-        getStoppedPartitions(jobIds[0]);
-      }
+      getJobsWithStoppedPartitions(jobIds);
     } else {
       explorerService.clearJobs();
     }
