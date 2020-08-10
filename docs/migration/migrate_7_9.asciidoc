@@ -29,6 +29,8 @@ folder to `<root>/config` for archive distributions and `/etc/kibana` for
 package distributions. If a pre-existing keystore exists in the data directory,
 that path will continue to be used.
 
+*via https://github.com/elastic/kibana/pull/57856[#57856]*
+
 // end::notable-breaking-changes[]
 
 [float]
@@ -55,10 +57,10 @@ a request has been completely handled or aborted.
 [%collapsible]
 ====
 
-A public setup contract has been reduced to just `register`. A
+A public `setup` contract has been reduced to just `register`. A
 new interface, `sections`, which is a map of management sections provided by the plugin,
 replaces `getSection`. Public start interfaces have been removed as all
-registration should occur in the setup lifecycle.
+registration should occur in the `setup` lifecycle.
 
 *via https://github.com/elastic/kibana/pull/71144[#71144]*
 
@@ -91,7 +93,7 @@ but after the `onPreRouting` step.
 ====
 
 [[breaking_79_metric_service]]
-.Metrics API moved to start
+.The Metrics API moved to start
 [%collapsible]
 ====
 
@@ -172,12 +174,12 @@ The `createMigration` function takes four arguments:
 |===
 |Argument|Description|Type|
 
-|isMigrationNeededPredicate|A predicate that is called for each document,
+|`isMigrationNeededPredicate`|A predicate that is called for each document,
 prior to being decrypted, which confirms whether a document requires migration or not.
 This predicate is important as the decryption step is costly, and we would rather not decrypt and re-encrypt a document if we can avoid it.|function|
-|migration|A migration function which will migrate each decrypted document from the old shape to the new one.|function|
-|inputType|Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the input (the document prior to migration). If this type isn't provided, we'll assume the input doc follows the registered type. |object|
-|migratedType| Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the output (the document after migration). If this type isn't provided, we'll assume the migrated doc follows the registered type.|object|
+|`migration`|A migration function which will migrate each decrypted document from the old shape to the new one.|function|
+|`inputType`|Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the input (the document prior to migration). If this type isn't provided, we'll assume the input doc follows the registered type. |object|
+|`migratedType`| Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the output (the document after migration). If this type isn't provided, we'll assume the migrated doc follows the registered type.|object|
 |===
 
 **Example: Migrating a Value**
@@ -208,14 +210,16 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
 );
 ```
 
-In the above example you can see the following:
+In the above example, you can see the following:
 
-* In `shouldBeMigrated` we limit the migrated alerts to those whose `consumer` field equals `alerting` or is undefined.
-* In the migration function we then migrate the value of `consumer` to the value we want (`alerts` or `unknown`, depending on the current value). In this function we can assume that only documents with a `consumer` of `alerting` or `undefined` will be passed in, but it's still safest not to, and so we use the current `consumer` as the default when needed.
+* In `shouldBeMigrated`, we limit the migrated alerts to those whose `consumer` field equals `alerting` or is undefined.
+* In the migration function, we migrate the value of `consumer` to the value
+we want (`alerts` or `unknown`, depending on the current value). In this function,
+we can assume that only documents with a `consumer` of `alerting` or `undefined` will be passed in, but it's still safest not to, and so we use the current `consumer` as the default when needed.
 * Note that we haven't passed in any type definitions. This is because we can rely on the registered type, as the migration is changing a value and not the shape of the object.
 
-As we said above, an EncryptedSavedObject migration is a normal SavedObjects migration,
-and so we can plug it into the underlying SavedObject just like any other kind of migration:
+An EncryptedSavedObject migration is a normal SavedObjects migration,
+so we can plug it into the underlying SavedObject just like any other kind of migration:
 
 ```typescript
 savedObjects.registerType({
@@ -234,8 +238,8 @@ savedObjects.registerType({
 
 **Example: Migating a Type**
 
-If your migration needs to change the type by, for example,
-removing an encrypted field, you will have to specify the legacy type for the input.
+If your migration needs to change the type, for example,
+by removing an encrypted field, you will have to specify the legacy type for the input.
 
 ```ts
 encryptedSavedObjects.registerType({
@@ -267,7 +271,7 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
 );
 ```
 
-This example shows how we provide a legacy type that describes the _input_ that needs to be decrypted.
+This example shows how we provide a legacy type that describes the input that needs to be decrypted.
 The migration function will default to using the registered type to encrypt the migrated
 document after the migration is applied.
 
@@ -312,7 +316,7 @@ const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
 
 Previously, workpad templates were added through the Canvas API client side.
 Workpad templates are now stored as saved objects, so an API is no longer required for adding them.
-You can add now templates through `SavedObject` management.
+You can add templates through `SavedObject` management.
 
 *via https://github.com/elastic/kibana/pull/69438[#69438]*
 
@@ -323,8 +327,8 @@ You can add now templates through `SavedObject` management.
 [%collapsible]
 ====
 
-This PR deprecates the front end search strategy concept and removes the
-following API methods from the `data.search` plugin:
+The front end search strategy concept is now deprecated and the
+following API methods were removed from the `data.search` plugin:
 
  * `registerSearchStrategy`
  * `getSearchStrategy`
@@ -393,7 +397,7 @@ in this issue]
 ====
 
 The {es} API exposed from the `setup` contract is not available
-and will be deleted without any notice. Use the core start API instead.
+and will be deleted without notice. Use the core start API instead.
 
 ```typescript
 // before
@@ -416,7 +420,7 @@ setup(core: CoreSetup) {
 [%collapsible]
 ====
 
-The API reference docs for `state_sync` and `state_containers` are available:
+The API reference docs for `state_sync` and `state_containers` are now available:
 
 * https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/public/state_sync/kibana-plugin-plugins-kibana_utils-public-state_sync.md[state_sync]
 * https://github.com/elastic/kibana/blob/master/docs/development/plugins/kibana_utils/common/state_containers/kibana-plugin-plugins-kibana_utils-common-state_containers.md[state_containers]
@@ -458,7 +462,7 @@ setup(core){
 ====
 
 [[breaking_79_licensing]]
-.Licensing now uses {es} from start contract
+.Licensing now uses {es} from `start` contract
 [%collapsible]
 ====
 
@@ -495,14 +499,14 @@ core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['action'] })
 ```
 
 Do not circumvent the authorization model by accessing these objects directly.
-Use the `AlertsClient` instead.
+Use `AlertsClient` instead.
 
 *via https://github.com/elastic/kibana/pull/67109[#67109]*
 
 ====
 
 [[breaking_79_saved_objects_client]]
-.Saved objects now include support fo hidden types
+.Saved objects now include support for hidden types
 [%collapsible]
 ====
 
@@ -523,7 +527,7 @@ request with access to a hidden type called `hiddenType`.
 **Encrypted saved objects**
 
 The `EncryptedSavedObject` plugin no longer exposes a single client as part of its
-`Start` contract. Instead it exposes a `getClient` API that exposes the client API.
+`start` contract. Instead it exposes a `getClient` API that exposes the client API.
 The `getClient` can also specify a list of hidden types to gain access to which are hidden by default.
 
 For example, given a {kib} platform plugin that has specified `encryptedSavedObjects` as a `Setup` dependency:
@@ -548,7 +552,7 @@ This includes the following API changes:
 * Changed endpoint `/api/alert/_find` just to `/api/alerts/_find`
 * Changed `/types` to `/list_alert_types`
 * Changed POST `/api/alert` to POST `/api/alerts/alert`
-* Changed GET `/api/alert/{id}` to GET ` /api/alerts/alert/{id}`
+* Changed GET `/api/alert/{id}` to GET `/api/alerts/alert/{id}`
 * Changed PUT  `/api/alert/{id}` to PUT `/api/alerts/alert/{id}`
 * Changed DELETE `/api/alert/{id}` to DELETE `/api/alerts/alert/{id}`
 * Changed GET  `/api/alert/{id}/state` to GET `/api/alerts/alert/{id}/state`
@@ -574,7 +578,7 @@ This change:
 
 * Refactors out use of `registerLegacyApp` and uses react-router-dom for routing.
 * Implements a landing page and sidebar in the Management plugin.
-* Removes the legacy API from src/plugins/management/public/plugin.ts and related code.
+* Removes the legacy API from `src/plugins/management/public/plugin.ts` and related code.
 
 *via https://github.com/elastic/kibana/pull/66781[#66781]*
 
@@ -589,12 +593,12 @@ Interaction with the Alerting SavedObject type requires you
 to tell your `SavedObjectsClient` to include the `alert` hidden
 type as follows:
 
-```
+``` ts
 core.savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] })
 ```
 
 Do not circumvent the authorization model by accessing these objects directly.
-Use the AlertsClient instead.
+Use AlertsClient instead.
 
 *via https://github.com/elastic/kibana/pull/66719[#66719]*
 
@@ -605,7 +609,7 @@ Use the AlertsClient instead.
 [%collapsible]
 ====
 
-{kib} now allows the `getFeatures` plugin method to be called within the start lifecycle.
+{kib} now allows the `getFeatures` plugin method to be called within the `start` lifecycle.
 
 *via https://github.com/elastic/kibana/pull/66524[#66524]*
 
@@ -658,7 +662,7 @@ Links from one application to another are now automatically handled by the {kib}
 to perform the navigation without a full page refresh and the need to
 manually add a click handler to call `application.navigateToApp`.
 
-If needed, you can disable this behavior by adding the `data-disable-core-navigation`
+You can disable this behavior by adding the `data-disable-core-navigation`
 attribute on the link (`a`) element or any of its parent.
 
 This feature is not enabled for legacy applications.
@@ -719,7 +723,7 @@ const fns = exp.findFunction<MyFnExpressionFunctionDefinition>('myFn');
 ====
 
 [[breaking_79_mount]]
-.Mount ui/new_platform applications in same div structure as Core
+.Mount `ui/new_platform` applications in same div structure as Core
 [%collapsible]
 ====
 
