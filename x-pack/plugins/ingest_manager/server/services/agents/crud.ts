@@ -51,6 +51,7 @@ export async function listAgents(
     filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { saved_objects, total } = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
     sortField,

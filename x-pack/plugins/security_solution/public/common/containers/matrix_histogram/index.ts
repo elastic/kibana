@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState, useRef } from 'react';
 
@@ -34,7 +35,6 @@ export const useQuery = ({
     }
     return configIndex;
   }, [configIndex, indexToAdd]);
-
   const [, dispatchToaster] = useStateToaster();
   const refetch = useRef<inputsModel.Refetch>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -43,20 +43,54 @@ export const useQuery = ({
   const [totalCount, setTotalCount] = useState<number>(-1);
   const apolloClient = useApolloClient();
 
+  const [matrixHistogramVariables, setMatrixHistogramVariables] = useState<
+    GetMatrixHistogramQuery.Variables
+  >({
+    filterQuery: createFilter(filterQuery),
+    sourceId: 'default',
+    timerange: {
+      interval: '12h',
+      from: startDate!,
+      to: endDate!,
+    },
+    defaultIndex,
+    inspect: isInspected,
+    stackByField,
+    histogramType,
+  });
+
   useEffect(() => {
-    const matrixHistogramVariables: GetMatrixHistogramQuery.Variables = {
-      filterQuery: createFilter(filterQuery),
-      sourceId: 'default',
-      timerange: {
-        interval: '12h',
-        from: startDate!,
-        to: endDate!,
-      },
-      defaultIndex,
-      inspect: isInspected,
-      stackByField,
-      histogramType,
-    };
+    setMatrixHistogramVariables((prevVariables) => {
+      const localVariables = {
+        filterQuery: createFilter(filterQuery),
+        sourceId: 'default',
+        timerange: {
+          interval: '12h',
+          from: startDate!,
+          to: endDate!,
+        },
+        defaultIndex,
+        inspect: isInspected,
+        stackByField,
+        histogramType,
+      };
+      if (!deepEqual(prevVariables, localVariables)) {
+        return localVariables;
+      }
+      return prevVariables;
+    });
+  }, [
+    defaultIndex,
+    filterQuery,
+    histogramType,
+    indexToAdd,
+    isInspected,
+    stackByField,
+    startDate,
+    endDate,
+  ]);
+
+  useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const abortSignal = abortCtrl.signal;
@@ -102,19 +136,7 @@ export const useQuery = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    defaultIndex,
-    errorMessage,
-    filterQuery,
-    histogramType,
-    indexToAdd,
-    isInspected,
-    stackByField,
-    startDate,
-    endDate,
-    data,
-  ]);
+  }, [apolloClient, dispatchToaster, errorMessage, matrixHistogramVariables]);
 
   return { data, loading, inspect, totalCount, refetch: refetch.current };
 };
