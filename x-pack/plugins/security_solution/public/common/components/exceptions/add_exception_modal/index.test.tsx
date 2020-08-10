@@ -58,6 +58,7 @@ describe('When the add exception modal is opened', () => {
   });
 
   it('renders the loading spinner when some of the hooks are loading', () => {
+    // Mocks one of the hooks as loading
     (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
       {
         isLoading: true,
@@ -135,6 +136,7 @@ describe('When the add exception modal is opened', () => {
   });
 
   it('renders properly bulk-closeable alert data', () => {
+    // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
     (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
       {
         isLoading: false,
