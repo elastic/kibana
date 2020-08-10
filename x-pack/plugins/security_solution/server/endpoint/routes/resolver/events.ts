@@ -14,11 +14,16 @@ import { EndpointAppContext } from '../../types';
 export function handleEvents(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateEvents.params>, TypeOf<typeof validateEvents.query>> {
+): RequestHandler<
+  TypeOf<typeof validateEvents.params>,
+  TypeOf<typeof validateEvents.query>,
+  TypeOf<typeof validateEvents.body>
+> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { events, afterEvent, legacyEndpointID: endpointID, filter },
+      query: { events, afterEvent, legacyEndpointID: endpointID },
+      body: { filter },
     } = req;
     try {
       const client = context.core.elasticsearch.legacy.client;

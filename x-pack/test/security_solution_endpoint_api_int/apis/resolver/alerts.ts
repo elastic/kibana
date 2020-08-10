@@ -69,7 +69,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('should allow alerts to be filtered', async () => {
       const filter = `not event.id:"${tree.origin.relatedAlerts[0].event.id}"`;
       const { body }: { body: ResolverRelatedAlerts } = await supertest
-        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts?filter=${filter}`)
+        .get(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .send({
+          filter,
+        })
         .expect(200);
       expect(body.alerts.length).to.eql(3);
       compareArrays(tree.origin.relatedAlerts, body.alerts);

@@ -124,7 +124,10 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow for the events to be filtered', async () => {
         const filter = `event.category:"${RelatedEventCategory.Driver}"`;
         const { body }: { body: ResolverRelatedEvents } = await supertest
-          .get(`/api/endpoint/resolver/${tree.origin.id}/events?filter=${filter}`)
+          .get(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .send({
+            filter,
+          })
           .expect(200);
         expect(body.events.length).to.eql(2);
         compareArrays(tree.origin.relatedEvents, body.events);

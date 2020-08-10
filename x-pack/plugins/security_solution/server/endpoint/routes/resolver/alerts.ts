@@ -14,11 +14,16 @@ import { EndpointAppContext } from '../../types';
 export function handleAlerts(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateAlerts.params>, TypeOf<typeof validateAlerts.query>> {
+): RequestHandler<
+  TypeOf<typeof validateAlerts.params>,
+  TypeOf<typeof validateAlerts.query>,
+  TypeOf<typeof validateAlerts.body>
+> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { alerts, afterAlert, legacyEndpointID: endpointID, filter },
+      query: { alerts, afterAlert, legacyEndpointID: endpointID },
+      body: { filter },
     } = req;
     try {
       const client = context.core.elasticsearch.legacy.client;

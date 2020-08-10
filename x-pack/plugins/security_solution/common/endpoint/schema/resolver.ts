@@ -32,6 +32,8 @@ export const validateEvents = {
     events: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+  body: schema.object({
     filter: schema.maybe(schema.string()),
   }),
 };
@@ -45,6 +47,8 @@ export const validateAlerts = {
     alerts: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterAlert: schema.maybe(schema.string()),
     legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+  body: schema.object({
     filter: schema.maybe(schema.string()),
   }),
 };
