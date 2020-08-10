@@ -320,7 +320,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified
-      disableButton: !share || !!embeddableId
+      disableButton: !share || !!embeddableId,
     },
     {
       id: 'inspector',
