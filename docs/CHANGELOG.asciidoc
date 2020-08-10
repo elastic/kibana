@@ -395,8 +395,6 @@ Querying & Filtering::
 will be cancelled when navigating away as well as when the input is updated (and a new request is issued {kibana-pull}69769[#69769]
 Reporting::
 * Fixes a bug where the Kibana server could crash if the Reporting server-side headless browser crashes {kibana-pull}71989[#71989]
-Security::
-* Clones role button going to edit page {kibana-pull}70768[#70768]
 Sharing::
 * Adds panel flyout opens 2 flyouts {kibana-pull}65861[#65861]
 SIEM::
