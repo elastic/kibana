@@ -6,48 +6,9 @@
 
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource } from './../source';
-import * as topojson from 'topojson-client';
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
 export class AbstractVectorSource extends AbstractSource {
-  static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
-    let fetchedJson;
-    try {
-      // TODO proxy map.regionmap url requests through kibana server and then use kfetch
-      // Can not use kfetch because fetchUrl may point to external URL. (map.regionmap)
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        throw new Error('Request failed');
-      }
-      fetchedJson = await response.json();
-    } catch (e) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-          defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-          values: { fetchUrl },
-        })
-      );
-    }
-
-    if (format === 'geojson') {
-      return fetchedJson;
-    }
-
-    if (format === 'topojson') {
-      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-      return topojson.feature(fetchedJson, features);
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-        values: { format },
-      })
-    );
-  }
-
   /**
    * factory function creating a new field-instance
    * @param fieldName
