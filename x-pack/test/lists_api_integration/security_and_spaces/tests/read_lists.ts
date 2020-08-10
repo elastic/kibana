@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${LIST_URL}?id=$${getCreateMinimalListSchemaMock().id}`)
+          .get(`${LIST_URL}?id=${getCreateMinimalListSchemaMock().id}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
 
