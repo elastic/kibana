@@ -162,6 +162,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       xTitle: defaults.xTitle || x?.label,
       yTitle: defaults.yTitle || y?.label,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
