@@ -67,9 +67,9 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
         />
 
         <BasicTable
-          // @ts-ignore the Columns<T, U> type is not as specific as EUI's...
+          // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
           columns={columns}
-          // @ts-ignore ...which leads to `networks` not "matching" the columns
+          // @ts-expect-error ...which leads to `networks` not "matching" the columns
           items={networks}
           pagination={pagination}
           sorting={sorting}

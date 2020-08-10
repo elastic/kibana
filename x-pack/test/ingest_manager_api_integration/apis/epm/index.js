@@ -12,6 +12,8 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./ilm'));
     loadTestFile(require.resolve('./install_overrides'));
     loadTestFile(require.resolve('./install_remove_assets'));
-    loadTestFile(require.resolve('./install_errors'));
+    loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./update_assets'));
+    loadTestFile(require.resolve('./data_stream'));
   });
 }

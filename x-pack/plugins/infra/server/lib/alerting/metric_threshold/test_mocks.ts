@@ -68,6 +68,7 @@ export const emptyRateResponse = {
       buckets: [
         {
           doc_count: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           aggregatedValue_max: { value: null },
         },
       ],

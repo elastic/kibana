@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
@@ -130,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
         const toTime = 'Oct 28, 2018 @ 23:59:59.999';
         // Sometimes popovers take some time to appear in Firefox (#71979)
-        await retry.try(async () => {
+        await retry.tryForTime(20000, async () => {
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
