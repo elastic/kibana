@@ -90,7 +90,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.data[0].index_count).to.be(1);
       expect(stats.stack_stats.data[0].doc_count).to.be(0);
       expect(stats.stack_stats.data[0].ecs_index_count).to.be(0);
-      expect(stats.stack_stats.data[0].size_in_bytes).to.be.greaterThan(0);
+      expect(stats.stack_stats.data[0].size_in_bytes).to.be.a('number');
     });
 
     it('should pull local stats and validate fields', async () => {
