@@ -271,7 +271,7 @@ export class Simulator {
    * Wrapper for the panning and zooming controls
    */
   public graphControlElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:graph-controls"]');
+    return this.domNodes('[data-test-subj="resolver:graph-controls"]');
   }
 
   /**

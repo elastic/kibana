@@ -5,7 +5,7 @@
  */
 
 import { Simulator } from '../test_utilities/simulator';
-import { oneAncestorTwoChildren } from '../data_access_layer/mocks/one_ancestor_two_children';
+import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { nudgeAnimationDuration } from '../store/camera/scaling_constants';
 import '../test_utilities/extend_jest';
 
@@ -18,7 +18,7 @@ describe('graph controls', () => {
     const {
       metadata: { databaseDocumentID, entityIDs },
       dataAccessLayer,
-    } = oneAncestorTwoChildren();
+    } = noAncestorsTwoChildren();
 
     simulator = new Simulator({
       dataAccessLayer,
@@ -96,6 +96,73 @@ describe('graph controls', () => {
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
 
       expect(originNode.getDOMNode()).toHaveStyle(originalPositionStyle);
+    });
+  });
+
+  describe('zoom', () => {
+    const originalSizeStyle = { width: '360px', height: '120px' };
+    describe('buttons', () => {
+      it('should zoom in', () => {
+        const originNode = simulator.processNodeElements({ entityID: originEntityID });
+        expect(originNode.getDOMNode()).toHaveStyle(originalSizeStyle);
+
+        const zoomInButton = simulator.graphControlElement().find('[data-test-subj="zoom-in"]');
+        zoomInButton.simulate('click');
+        simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
+
+        expect(originNode.getDOMNode()).toHaveStyle({
+          width: '427.7538290724795px',
+          height: '142.5846096908265px',
+        });
+      });
+      it('should zoom out', () => {
+        const originNode = simulator.processNodeElements({ entityID: originEntityID });
+        expect(originNode.getDOMNode()).toHaveStyle(originalSizeStyle);
+
+        const zoomInButton = simulator.graphControlElement().find('[data-test-subj="zoom-out"]');
+        zoomInButton.simulate('click');
+        simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
+
+        expect(originNode.getDOMNode()).toHaveStyle({
+          width: '303.0461709275204px',
+          height: '101.01539030917347px',
+        });
+      });
+    });
+
+    describe('slider', () => {
+      it('should zoom in', () => {
+        const originNode = simulator.processNodeElements({ entityID: originEntityID });
+        expect(originNode.getDOMNode()).toHaveStyle(originalSizeStyle);
+
+        const zoomSlider = simulator
+          .graphControlElement()
+          .find('[data-test-subj="zoom-slider"]')
+          .last();
+        zoomSlider.simulate('change', { target: { value: 0.8 } });
+        simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
+
+        expect(originNode.getDOMNode()).toHaveStyle({
+          width: '525.6000000000001px',
+          height: '175.20000000000005px',
+        });
+      });
+      it('should zoom out', () => {
+        const originNode = simulator.processNodeElements({ entityID: originEntityID });
+        expect(originNode.getDOMNode()).toHaveStyle(originalSizeStyle);
+
+        const zoomSlider = simulator
+          .graphControlElement()
+          .find('[data-test-subj="zoom-slider"]')
+          .last();
+        zoomSlider.simulate('change', { target: { value: 0.2 } });
+        simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
+
+        expect(originNode.getDOMNode()).toHaveStyle({
+          width: '201.60000000000002px',
+          height: '67.2px',
+        });
+      });
     });
   });
 });
