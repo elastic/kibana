@@ -27,13 +27,13 @@ export class BeatsManagementPlugin implements Plugin<{}, {}, SetupDeps, StartDep
     private readonly initializerContext: PluginInitializerContext<BeatsManagementConfigType>
   ) {}
 
-  public async setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.initializerContext.config.create();
 
     return {};
   }
 
-  public async start(core: CoreStart, { licensing }: StartDeps) {
+  public start(core: CoreStart, { licensing }: StartDeps) {
     return {};
   }
 }

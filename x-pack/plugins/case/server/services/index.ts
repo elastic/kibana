@@ -118,7 +118,7 @@ export interface CaseServiceSetup {
 
 export class CaseService {
   constructor(private readonly log: Logger) {}
-  public setup = async ({ authentication }: CaseServiceDeps): Promise<CaseServiceSetup> => ({
+  public setup = ({ authentication }: CaseServiceDeps): CaseServiceSetup => ({
     deleteCase: async ({ client, caseId }: GetCaseArgs) => {
       try {
         this.log.debug(`Attempting to GET case ${caseId}`);

@@ -101,7 +101,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     return this.eventLogService;
   }
 
-  async start(core: CoreStart): Promise<IEventLogClientService> {
+  start(core: CoreStart): IEventLogClientService {
     this.systemLogger.debug('starting plugin');
 
     if (!this.esContext) throw new Error('esContext not initialized');

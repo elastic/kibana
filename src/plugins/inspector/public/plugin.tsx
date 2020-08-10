@@ -67,7 +67,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
     this.views.register(getDataViewDescription(core.uiSettings));

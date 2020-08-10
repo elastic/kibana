@@ -23,10 +23,7 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
     };
   }
 
-  public async setup(
-    core: CoreSetup,
-    { alerts, features }: AlertingBuiltinsDeps
-  ): Promise<IService> {
+  public setup(core: CoreSetup, { alerts, features }: AlertingBuiltinsDeps): IService {
     features.registerFeature(BUILT_IN_ALERTS_FEATURE);
 
     registerBuiltInAlertTypes({
@@ -38,7 +35,7 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
     return this.service;
   }
 
-  public async start(core: CoreStart): Promise<IService> {
+  public start(core: CoreStart): IService {
     return this.service;
   }
 

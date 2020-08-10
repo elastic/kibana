@@ -48,13 +48,13 @@ export class SpacesService {
 
   constructor(private readonly log: Logger) {}
 
-  public async setup({
+  public setup({
     http,
     getStartServices,
     authorization,
     config$,
     auditLogger,
-  }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
+  }: SpacesServiceDeps): SpacesServiceSetup {
     const getSpaceId = (request: RequestFacade) => {
       // Currently utilized by reporting
       const isFakeRequest = typeof (request as any).getBasePath === 'function';

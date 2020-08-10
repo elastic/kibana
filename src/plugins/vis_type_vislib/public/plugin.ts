@@ -72,7 +72,7 @@ type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, vo
 export class VisTypeVislibPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
   ) {

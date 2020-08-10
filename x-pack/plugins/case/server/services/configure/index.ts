@@ -47,7 +47,7 @@ export interface CaseConfigureServiceSetup {
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
-  public setup = async (): Promise<CaseConfigureServiceSetup> => ({
+  public setup = (): CaseConfigureServiceSetup => ({
     delete: async ({ client, caseConfigureId }: GetCaseConfigureArgs) => {
       try {
         this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);

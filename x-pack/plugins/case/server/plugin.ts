@@ -57,11 +57,11 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    const caseService = await caseServicePlugin.setup({
+    const caseService = caseServicePlugin.setup({
       authentication: plugins.security != null ? plugins.security.authc : null,
     });
-    const caseConfigureService = await caseConfigureServicePlugin.setup();
-    const userActionService = await userActionServicePlugin.setup();
+    const caseConfigureService = caseConfigureServicePlugin.setup();
+    const userActionService = userActionServicePlugin.setup();
 
     const router = core.http.createRouter();
     initCaseApi({

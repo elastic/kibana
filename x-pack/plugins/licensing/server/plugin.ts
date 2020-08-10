@@ -222,7 +222,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return error.message;
   }
 
-  public async start() {
+  public start() {
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
     }

@@ -78,7 +78,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {

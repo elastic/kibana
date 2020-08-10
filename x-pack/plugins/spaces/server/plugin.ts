@@ -64,15 +64,12 @@ export class Plugin {
     this.log = initializerContext.logger.get();
   }
 
-  public async start() {}
+  public start() {}
 
-  public async setup(
-    core: CoreSetup<PluginsStart>,
-    plugins: PluginsSetup
-  ): Promise<SpacesPluginSetup> {
+  public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
     const service = new SpacesService(this.log);
 
-    const spacesService = await service.setup({
+    const spacesService = service.setup({
       http: core.http,
       getStartServices: core.getStartServices,
       authorization: plugins.security ? plugins.security.authz : null,

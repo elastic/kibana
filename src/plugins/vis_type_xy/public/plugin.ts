@@ -56,7 +56,7 @@ type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, void>;
 export class VisTypeXyPlugin implements Plugin<VisTypeXyPluginSetup, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
   ) {

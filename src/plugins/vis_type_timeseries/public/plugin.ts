@@ -50,14 +50,14 @@ export interface MetricsPluginStartDependencies {
 }
 
 /** @internal */
-export class MetricsPlugin implements Plugin<Promise<void>, void> {
+export class MetricsPlugin implements Plugin {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { expressions, visualizations, charts }: MetricsPluginSetupDependencies
   ) {

@@ -100,7 +100,7 @@ export class IngestManagerPlugin
     return {};
   }
 
-  public async start(core: CoreStart): Promise<IngestManagerStart> {
+  public start(core: CoreStart): IngestManagerStart {
     let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
 
     return {

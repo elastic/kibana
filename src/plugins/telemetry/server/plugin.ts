@@ -74,7 +74,7 @@ export class TelemetryPlugin implements Plugin {
     });
   }
 
-  public async setup(
+  public setup(
     { elasticsearch, http, savedObjects }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsSetup
   ) {

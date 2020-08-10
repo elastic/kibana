@@ -50,10 +50,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  ): RecursiveReadonly<PluginSetupContract> {
     this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
 
     defineRoutes({

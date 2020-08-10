@@ -39,7 +39,7 @@ export interface CaseUserActionServiceSetup {
 
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
-  public setup = async (): Promise<CaseUserActionServiceSetup> => ({
+  public setup = (): CaseUserActionServiceSetup => ({
     getUserActions: async ({ client, caseId }: GetCaseUserActionArgs) => {
       try {
         const caseUserActionInfo = await client.find({

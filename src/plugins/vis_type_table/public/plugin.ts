@@ -39,7 +39,7 @@ export interface TablePluginStartDependencies {
 }
 
 /** @internal */
-export class TableVisPlugin implements Plugin<Promise<void>, void> {
+export class TableVisPlugin implements Plugin {
   initializerContext: PluginInitializerContext;
   createBaseVisualization: any;
 
@@ -47,10 +47,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
     this.initializerContext = initializerContext;
   }
 
-  public async setup(
-    core: CoreSetup,
-    { expressions, visualizations }: TablePluginSetupDependencies
-  ) {
+  public setup(core: CoreSetup, { expressions, visualizations }: TablePluginSetupDependencies) {
     expressions.registerFunction(createTableVisFn);
     visualizations.createBaseVisualization(
       getTableVisTypeDefinition(core, this.initializerContext)
