@@ -180,14 +180,14 @@ export class HttpServer {
             app: kibanaRouteState,
             ext: {
               onPreAuth: {
-                method: (request, reply) => {
+                method: (request, h) => {
                   if (timeout?.idleSocket) {
                     request.raw.req.socket.setTimeout(timeout?.idleSocket);
                   } else if (fakeSocketTimeout) {
                     request.raw.req.socket.setTimeout(this.config!.socketTimeout || 0);
                   }
 
-                  return reply.continue;
+                  return h.continue;
                 },
               },
             },
