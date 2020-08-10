@@ -57,6 +57,7 @@ export {
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
   setStateToKbnUrl,
+  withNotifyOnErrors,
 } from './state_management/url';
 export {
   syncState,
