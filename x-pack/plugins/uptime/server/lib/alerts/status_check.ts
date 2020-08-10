@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import Mustache from 'mustache';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery, IIndexPattern } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
@@ -18,14 +19,14 @@ import {
 } from '../../../common/runtime_types';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { updateState } from './common';
-import { commonMonitorStateI18, commonStateTranslations } from './translations';
+import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import { UMServerLibs } from '../lib';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
-import { MonitorStatusTranslations } from '../../../public/lib/alert_types/translations';
+import { MonitorStatusTranslations } from '../../../common/translations';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -105,21 +106,13 @@ export const getMonitorSummary = (monitorInfo: Ping) => {
   };
 };
 
-const generateMessageForOlderVersions = (fields) => {
-  let messageTemplate = MonitorStatusTranslations.defaultActionMessage;
+const generateMessageForOlderVersions = (fields: Record<string, any>) => {
+  const messageTemplate = MonitorStatusTranslations.defaultActionMessage;
 
   // Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from
   // {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}
-  messageTemplate = messageTemplate.replace('{{state.monitorName}}', fields.monitorName);
-  messageTemplate = messageTemplate.replace('{{{state.monitorUrl}}}', fields.monitorUrl);
-  messageTemplate = messageTemplate.replace('{{state.statusMessage}}', fields.statusMessage);
-  messageTemplate = messageTemplate.replace('{{state.observerLocation}}', fields.observerLocation);
-  messageTemplate = messageTemplate.replace(
-    '{{{state.latestErrorMessage}}}',
-    fields.latestErrorMessage
-  );
 
-  return messageTemplate;
+  return Mustache.render(messageTemplate, { state: { ...fields } });
 };
 
 export const getStatusMessage = (
@@ -129,19 +122,36 @@ export const getStatusMessage = (
 ) => {
   let statusMessage = '';
   if (downMonInfo) {
-    statusMessage = 'down';
+    statusMessage = DOWN_LABEL;
   }
-  let availMessage = '';
+  let availabilityMessage = '';
 
   if (availMonInfo) {
-    availMessage = `below threshold with ${(availMonInfo.availabilityRatio! * 100).toFixed(
-      2
-    )}% availability expected is ${availability?.threshold}%`;
+    availabilityMessage = i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.availabilityMessage',
+      {
+        defaultMessage:
+          'below threshold with {availabilityRatio}% availability expected is {expectedAvailability}%',
+        values: {
+          availabilityRatio: (availMonInfo.availabilityRatio! * 100).toFixed(2),
+          expectedAvailability: availability?.threshold,
+        },
+      }
+    );
   }
   if (availMonInfo && downMonInfo) {
-    return statusMessage + ' and also ' + availMessage;
+    return i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.downAndAvailabilityMessage',
+      {
+        defaultMessage: '{statusMessage} and also {availabilityMessage}',
+        values: {
+          statusMessage,
+          availabilityMessage,
+        },
+      }
+    );
   }
-  return statusMessage + availMessage;
+  return statusMessage + availabilityMessage;
 };
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>

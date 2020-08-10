@@ -192,6 +192,9 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
+          Object {
+            "message": "Monitor first with url  is down from harrisburg. The latest error message is ",
+          },
         ]
       `);
     });
@@ -718,15 +721,27 @@ describe('status check alert', () => {
         Array [
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
+            Object {
+              "message": "Monitor Foo with url https://foo.com is below threshold with 99.28% availability expected is 99.34% from harrisburg. The latest error message is ",
+            },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
+            Object {
+              "message": "Monitor Foo with url https://foo.com is below threshold with 98.03% availability expected is 99.34% from fairbanks. The latest error message is ",
+            },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
+            Object {
+              "message": "Monitor Unreliable with url https://unreliable.co is below threshold with 90.92% availability expected is 99.34% from fairbanks. The latest error message is ",
+            },
           ],
           Array [
             "xpack.uptime.alerts.actionGroups.monitorStatus",
+            Object {
+              "message": "Monitor no-name with url https://no-name.co is below threshold with 90.92% availability expected is 99.34% from fairbanks. The latest error message is ",
+            },
           ],
         ]
       `);

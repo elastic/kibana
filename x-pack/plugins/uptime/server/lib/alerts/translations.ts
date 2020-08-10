@@ -311,3 +311,7 @@ export const durationAnomalyTranslations = {
     },
   ],
 };
+
+export const DOWN_LABEL = i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
+  defaultMessage: 'down',
+});
