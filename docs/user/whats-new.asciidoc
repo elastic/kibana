@@ -8,7 +8,7 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release, check out the release
 notes and breaking changes.
 
-Other versions: {kibana-ref-all}/7.8/release-highlights-7.8.0.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+Other versions: {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
 {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
 | {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
@@ -58,7 +58,7 @@ strings and patterns in your Canvas elements. This is especially useful if you
 frequently copy from one element to another. For example, when you clone a large workpad and need
 to connect your elements to a new index, you can use variables to update each element
 instead. For instructions, see the
-{kibana-ref}/edit-workpads.html[Canvas documentation].
+{kibana-ref}/canvas.html[Canvas documentation].
 
 [float]
 [[lens-7-9]]
