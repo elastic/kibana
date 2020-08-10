@@ -135,7 +135,7 @@ describe('Reporting Config Schema', () => {
               proxy: {
                 enabled: true,
                 server: 'http://example.com:8080',
-                bypass: ['foo.example.com', 'bar.example.com', 'bats.example.com'],
+                bypass: ['*.example.com', '*bar.example.com', 'bats.example.com'],
               },
             },
           },
@@ -144,8 +144,8 @@ describe('Reporting Config Schema', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "bypass": Array [
-          "foo.example.com",
-          "bar.example.com",
+          "*.example.com",
+          "*bar.example.com",
           "bats.example.com",
         ],
         "enabled": true,
