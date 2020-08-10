@@ -27,22 +27,4 @@ export const sourceGroups = {
     'winlogbeat-*',
     'blobbeat-*',
   ],
-  // [SOURCE_GROUPS.host]: [
-  //   'apm-*-transaction*',
-  //   'endgame-*',
-  //   'logs-*',
-  //   'packetbeat-*',
-  //   'winlogbeat-*',
-  // ],
-  // [SOURCE_GROUPS.detections]: ['signals-*'],
-  // [SOURCE_GROUPS.timeline]: [
-  //   'apm-*-transaction*',
-  //   'auditbeat-*',
-  //   'endgame-*',
-  //   'filebeat-*',
-  //   'logs-*',
-  //   'packetbeat-*',
-  //   'winlogbeat-*',
-  // ],
-  // [SOURCE_GROUPS.network]: ['auditbeat-*', 'filebeat-*'],
 };
