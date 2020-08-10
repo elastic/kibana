@@ -114,7 +114,8 @@ function getAggParamsToRender({
       paramEditor = get(aggParams, param.name);
     }
 
-    if (!paramEditor && agg.type.name !== 'count') {
+    if (!paramEditor) {
+      if (agg.type.name === 'count' && param.type === 'json') return;
       paramEditor = get(aggParamsMap, ['common', param.type]);
     }
 
