@@ -47,7 +47,7 @@ import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 import { TableProvider } from './table';
 import { ToastsProvider } from './toasts';
-import { DataGridProvider } from './dagta_grid';
+import { DataGridProvider } from './data_grid';
 import {
   PieChartProvider,
   ElasticChartProvider,
