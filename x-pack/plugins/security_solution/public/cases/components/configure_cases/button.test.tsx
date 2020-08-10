@@ -96,11 +96,12 @@ describe('Configuration button', () => {
     );
 
     newWrapper.find('[data-test-subj="configure-case-button"]').first().simulate('mouseOver');
-    // EuiToolTip mounts children after a 250ms delay
+    // EuiToolTip mounts children after a 250ms delay,
+    // thus using a 300ms delay to avoid flakyness.
     setTimeout(
       () =>
         expect(newWrapper.find('.euiToolTipPopover').text()).toBe(`${titleTooltip}${msgTooltip}`),
-      250
+      300
     );
   });
 });

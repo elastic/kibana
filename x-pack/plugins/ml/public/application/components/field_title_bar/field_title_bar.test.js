@@ -70,7 +70,8 @@ describe('FieldTitleBar', () => {
     expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
 
     container.simulate('mouseover');
-    // EuiToolTip mounts children after a 250ms delay
+    // EuiToolTip mounts children after a 250ms delay,
+    // thus using a 300ms delay to avoid flakyness.
     setTimeout(() => {
       wrapper.update();
       expect(wrapper.find('EuiToolTip').children()).toHaveLength(2);
@@ -78,6 +79,6 @@ describe('FieldTitleBar', () => {
       wrapper.update();
       expect(wrapper.find('EuiToolTip').children()).toHaveLength(1);
       done();
-    }, 250);
+    }, 300);
   });
 });

@@ -35,8 +35,9 @@ describe('FieldTypeIcon', () => {
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
 
     container.simulate('mouseover');
-    // EuiToolTip mounts children after a 250ms delay
-    setTimeout(() => expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2), 250);
+    // EuiToolTip mounts children after a 250ms delay,
+    // thus using a 300ms delay to avoid flakyness.
+    setTimeout(() => expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2), 300);
 
     container.simulate('mouseout');
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
