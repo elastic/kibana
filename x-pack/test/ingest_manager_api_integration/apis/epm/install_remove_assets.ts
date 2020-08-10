@@ -85,11 +85,6 @@ export default function (providerContext: FtrProviderContext) {
           id: 'metrics-*',
         });
         expect(resIndexPatternMetrics.id).equal('metrics-*');
-        const resIndexPatternEvents = await kibanaServer.savedObjects.get({
-          type: 'index-pattern',
-          id: 'events-*',
-        });
-        expect(resIndexPatternEvents.id).equal('events-*');
         const resDashboard = await kibanaServer.savedObjects.get({
           type: 'dashboard',
           id: 'sample_dashboard',
