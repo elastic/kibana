@@ -109,7 +109,6 @@ export const useEditTimelineBatchActions = ({
         </>
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       selectedItems,
       deleteTimelines,
