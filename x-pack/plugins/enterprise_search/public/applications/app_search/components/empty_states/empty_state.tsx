@@ -9,7 +9,7 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../shared/telemetry';
-import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 import { EngineOverviewHeader } from '../engine_overview_header';
@@ -33,7 +33,7 @@ export const EmptyState: React.FC = () => {
 
   return (
     <EuiPage restrictWidth>
-      <SetBreadcrumbs isRoot />
+      <SetPageChrome isRoot />
 
       <EuiPageBody>
         <EngineOverviewHeader />

@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+=======
+readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+>>>>>>> master
 ```

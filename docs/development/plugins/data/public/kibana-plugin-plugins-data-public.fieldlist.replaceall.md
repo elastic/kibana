@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 replaceAll: (specs: FieldSpec[]) => void;
+=======
+readonly replaceAll: (specs: FieldSpec[]) => void;
+>>>>>>> master
 ```

@@ -110,6 +110,7 @@ describe('FieldEditor', () => {
   beforeEach(() => {
     indexPattern = ({
       fields: getFieldListMock(fields),
+      // fields: fields as IIndexPatternFieldList,
       getFormatterForField: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });

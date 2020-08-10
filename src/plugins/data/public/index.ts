@@ -245,7 +245,12 @@ export const indexPatterns = {
   formatHitProvider,
 };
 
-export { IndexPatternsContract, IndexPattern, IndexPatternField } from './index_patterns';
+export {
+  IndexPatternsContract,
+  IndexPattern,
+  IIndexPatternFieldList,
+  IndexPatternField,
+} from './index_patterns';
 
 export {
   IIndexPattern,

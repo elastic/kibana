@@ -7,7 +7,11 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 toSpec: () => {
+=======
+readonly toSpec: () => {
+>>>>>>> master
         count: number;
         script: string | undefined;
         lang: string | undefined;

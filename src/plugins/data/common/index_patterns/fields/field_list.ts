@@ -25,9 +25,8 @@ import { IndexPattern } from '../index_patterns';
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
 /*
-export interface IIndexPatternFieldList {
+export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   add(field: FieldSpec): void;
-  getAll(): Map<string, IndexPatternField>;
   getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
   getByType(type: IndexPatternField['type']): IndexPatternField[];
   remove(field: IFieldType): void;
@@ -35,8 +34,6 @@ export interface IIndexPatternFieldList {
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
 
-  filter: Map<string, IndexPatternField>['filter'];
-  map: Map<string, IndexPatternField>['map'];
 }
 */
 

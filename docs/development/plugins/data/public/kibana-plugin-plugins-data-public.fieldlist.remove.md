@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 remove: (field: IFieldType) => void;
+=======
+readonly remove: (field: IFieldType) => void;
+>>>>>>> master
 ```

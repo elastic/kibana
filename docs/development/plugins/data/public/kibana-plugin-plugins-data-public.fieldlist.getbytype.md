@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 getByType: (type: IndexPatternField['type']) => any[];
+=======
+readonly getByType: (type: IndexPatternField['type']) => any[];
+>>>>>>> master
 ```

@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 update: (field: FieldSpec) => void;
+=======
+readonly update: (field: FieldSpec) => void;
+>>>>>>> master
 ```

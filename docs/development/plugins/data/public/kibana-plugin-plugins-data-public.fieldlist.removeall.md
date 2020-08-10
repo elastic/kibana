@@ -7,5 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
+<<<<<<< HEAD
 removeAll: () => void;
+=======
+readonly removeAll: () => void;
+>>>>>>> master
 ```
