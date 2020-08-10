@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
@@ -15,14 +16,13 @@ const ACTION_TYPE_ID = '.slack';
 const services: Services = actionsMock.createServices();
 
 let actionType: SlackActionType;
+let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  actionType = getActionType({
-    async executor(options) {
-      return { status: 'ok', actionId: options.actionId };
-    },
-    configurationUtilities: actionsConfigMock.create(),
-  });
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
+  actionType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ACTION_TYPE_ID);
+  mockedLogger = logger;
+  expect(actionType).toBeTruthy();
 });
 
 describe('action registeration', () => {
@@ -155,6 +155,7 @@ describe('execute()', () => {
         "text": "slack mockExecutor success: this invocation should succeed",
       }
     `);
+    // expect(mockedLogger.info).toHaveBeenCalledWith('Create proxy agent for ');
   });
 
   test('calls the mock executor with failure', async () => {

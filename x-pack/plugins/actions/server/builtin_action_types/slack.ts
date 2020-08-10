@@ -7,7 +7,7 @@
 import { URL } from 'url';
 import { curry } from 'lodash';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { HttpProxyAgent } from 'http-proxy-agent';
+import HttpProxyAgent from 'http-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
@@ -20,7 +20,6 @@ import {
   ActionType,
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
-  ExecutorType,
   ProxySettings,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -114,7 +113,7 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
 
-  let proxyAgent: HttpsProxyAgent | undefined;
+  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
   if (execOptions.proxySettings) {
     proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
   }
@@ -190,7 +189,7 @@ function getProxyAgent(
       port: Number(proxyUrl.port),
       protocol: proxyUrl.protocol,
       headers: proxySettings.proxyHeaders,
-      // do not fail on invalid certs
+      // do not fail on invalid certs if value is false
       rejectUnauthorized: proxySettings.rejectUnauthorizedCertificates,
     });
   } else {
