@@ -4,7 +4,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 object OssBuild : BuildType({
-    name = "OSS Build"
+    name = "Build"
     paused = true
     description = "Generates OSS Build Distribution artifact"
 

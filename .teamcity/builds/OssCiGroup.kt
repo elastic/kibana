@@ -2,8 +2,8 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.*
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 class OssCiGroup(val ciGroup: Int, val build: BuildType) : BuildType({
-    id("Kibana_OssCiGroup_${ciGroup}")
-    name = "OSS CI Group ${ciGroup}"
+    id("OssCiGroup_${ciGroup}")
+    name = "CI Group ${ciGroup}"
     paused = true
 
     steps {

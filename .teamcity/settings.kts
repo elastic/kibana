@@ -10,10 +10,10 @@ import templates.DefaultTemplate
 version = "2020.1"
 
 project {
-    vcsRoot(DefaultRoot)
-    template(DefaultTemplate)
+  vcsRoot(DefaultRoot)
+  template(DefaultTemplate)
 
-    defaultTemplate = DefaultTemplate
+  defaultTemplate = DefaultTemplate
 
 //    buildType {
 //        id("Intake")
@@ -32,18 +32,42 @@ project {
 //        }
 //    }
 
+  subProject {
+    id("OSS")
+    name = "OSS Distro"
+
+    buildType(OssBuild)
+
     subProject {
-        id("OSS")
-        name = "OSS"
+      id("OSS_Functional")
+      name = "Functional"
 
-        buildType(OssBuild)
+      val ciGroups = (1..12).map { OssCiGroup(it, OssBuild) }
 
-        subProject {
-          id("OSS_Functional")
-          name = "OSS Functional"
+      buildType {
+        id("CIGroups_Composite")
+        name = "CI Groups"
+        type = BuildTypeSettings.Type.COMPOSITE
 
-          for (i in 1..12) buildType(OssCiGroup(i, OssBuild))
+        dependencies {
+          for (ciGroup in ciGroups) {
+            snapshot(ciGroup) {
+              reuseBuilds = ReuseBuilds.SUCCESSFUL
+              onDependencyCancel = FailureAction.CANCEL
+              onDependencyFailure = FailureAction.CANCEL
+              synchronizeRevisions = true
+            }
+          }
         }
-    }
+      }
 
+
+      subProject {
+        id("CIGroups")
+        name = "CI Groups"
+
+        for (ciGroup in ciGroups) buildType(ciGroup)
+      }
+    }
+  }
 }
