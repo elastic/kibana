@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 

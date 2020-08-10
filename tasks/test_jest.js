@@ -22,7 +22,7 @@ const { resolve } = require('path');
 module.exports = function (grunt) {
   grunt.registerTask('test:jest', function () {
     const done = this.async();
-    runJest(resolve(__dirname, '../scripts/jest.js')).then(done, done);
+    runJest(resolve(__dirname, '../scripts/jest.js'), ['--maxWorkers=10']).then(done, done);
   });
 
   grunt.registerTask('test:jest_integration', function () {
@@ -30,10 +30,10 @@ module.exports = function (grunt) {
     runJest(resolve(__dirname, '../scripts/jest_integration.js')).then(done, done);
   });
 
-  function runJest(jestScript) {
+  function runJest(jestScript, args = []) {
     const serverCmd = {
       cmd: 'node',
-      args: [jestScript, '--ci'],
+      args: [jestScript, '--ci', ...args],
       opts: { stdio: 'inherit' },
     };
 

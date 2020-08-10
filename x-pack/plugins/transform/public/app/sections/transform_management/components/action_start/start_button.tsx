@@ -95,7 +95,7 @@ export const StartButton: FC<StartButtonProps> = ({ items, forceDisable, onClick
       iconType="play"
       isDisabled={buttonDisabled}
       onClick={() => onClick(items)}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>

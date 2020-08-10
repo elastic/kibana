@@ -12,7 +12,7 @@ import {
   TestBedConfig,
   findTestSubject,
 } from '../../../../../test_utils';
-import { TemplateList } from '../../../public/application/sections/home/template_list'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateList } from '../../../public/application/sections/home/template_list';
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, TestSubjects } from '../helpers';
 

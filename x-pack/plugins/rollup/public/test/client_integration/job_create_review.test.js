@@ -25,7 +25,9 @@ jest.mock('../../kibana_services', () => {
 
 const { setup } = pageHelpers.jobCreate;
 
-describe('Create Rollup Job, step 6: Review', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/69783
+// FLAKY: https://github.com/elastic/kibana/issues/70043
+describe.skip('Create Rollup Job, step 6: Review', () => {
   let find;
   let exists;
   let actions;
