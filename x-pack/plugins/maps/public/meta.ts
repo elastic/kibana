@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 
-import fetch from 'node-fetch';
+import url from 'url';
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -54,9 +54,9 @@ export async function getEmsTmsServices(): Promise<TMSService[]> {
   return getEMSClient().getTMSServices();
 }
 
-function relativeToAbsolute(url: string): string {
+function relativeToAbsolute(aUrl: string): string {
   const a = document.createElement('a');
-  a.setAttribute('href', url);
+  a.setAttribute('href', aUrl);
   return a.href;
 }
 
@@ -84,8 +84,25 @@ export function getEMSClient(): EMSClient {
       tileApiUrl,
       fileApiUrl,
       landingPageUrl: getEmsLandingPageUrl(),
-      fetchFunction(url: string) {
-        return fetch(url);
+      async fetchFunction(aUrl: string) {
+        const http = getHttp();
+        const parsedUrl = url.parse(aUrl, true);
+        const rawUrl = url.format({
+          protocol: parsedUrl.protocol,
+          slashes: parsedUrl.slashes,
+          auth: parsedUrl.auth,
+          hostname: parsedUrl.hostname,
+          port: parsedUrl.port,
+          pathname: parsedUrl.pathname,
+        });
+        return {
+          json: async () => {
+            return await http.fetch(rawUrl, {
+              method: 'GET',
+              query: parsedUrl.query,
+            });
+          },
+        };
       },
       proxyPath,
     });

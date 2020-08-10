@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
+import { FeatureCollection, GeoJSON, GeoJsonProperties, Geometry } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
@@ -88,3 +88,8 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   getMaxZoom(): number;
   getLayerName(): string;
 }
+
+export async function getGeoJson(
+  { format, featureCollectionPath, fetchUrl },
+  { format: string, featureCollectionPath: string, fetchUrl: string }
+): FeatureCollection;

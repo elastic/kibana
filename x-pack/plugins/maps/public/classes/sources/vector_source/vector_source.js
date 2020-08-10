@@ -7,6 +7,11 @@
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource } from './../source';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { getHttp } from '../../../kibana_services';
+import url from 'url';
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+import * as topojson from 'topojson-client';
 
 export class AbstractVectorSource extends AbstractSource {
   /**
@@ -98,4 +103,47 @@ export class AbstractVectorSource extends AbstractSource {
   getSyncMeta() {
     return {};
   }
+}
+
+export async function getGeoJson({ format, featureCollectionPath, fetchUrl }) {
+  const http = getHttp();
+  let fetchedJson;
+  try {
+    const parsedUrl = url.parse(fetchUrl, true);
+    const rawUrl = url.format({
+      protocol: parsedUrl.protocol,
+      slashes: parsedUrl.slashes,
+      auth: parsedUrl.auth,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
+      pathname: parsedUrl.pathname,
+    });
+    fetchedJson = await http.fetch(rawUrl, {
+      method: 'GET',
+      query: parsedUrl.query,
+    });
+  } catch (e) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
+        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
+        values: { fetchUrl },
+      })
+    );
+  }
+
+  if (format === 'geojson') {
+    return fetchedJson;
+  }
+
+  if (format === 'topojson') {
+    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
+    return topojson.feature(fetchedJson, features);
+  }
+
+  throw new Error(
+    i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
+      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
+      values: { format },
+    })
+  );
 }

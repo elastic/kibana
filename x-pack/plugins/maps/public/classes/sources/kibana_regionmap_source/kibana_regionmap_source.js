@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from '../vector_source';
+import { AbstractVectorSource, getGeoJson } from '../vector_source';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
-import { getHttp } from '../../../kibana_services';
-import _ from 'lodash';
-import * as topojson from 'topojson-client';
-import url from 'url';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
@@ -103,46 +99,3 @@ registerSource({
   ConstructorFunction: KibanaRegionmapSource,
   type: SOURCE_TYPES.REGIONMAP_FILE,
 });
-
-async function getGeoJson({ format, featureCollectionPath, fetchUrl }) {
-  const http = getHttp();
-  let fetchedJson;
-  try {
-    const parsedUrl = url.parse(fetchUrl, true);
-    const rawUrl = url.format({
-      protocol: parsedUrl.protocol,
-      slashes: parsedUrl.slashes,
-      auth: parsedUrl.auth,
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port,
-      pathname: parsedUrl.pathname,
-    });
-    fetchedJson = await http.fetch(rawUrl, {
-      method: 'GET',
-      query: parsedUrl.query,
-    });
-  } catch (e) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-        values: { fetchUrl },
-      })
-    );
-  }
-
-  if (format === 'geojson') {
-    return fetchedJson;
-  }
-
-  if (format === 'topojson') {
-    const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-    return topojson.feature(fetchedJson, features);
-  }
-
-  throw new Error(
-    i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-      values: { format },
-    })
-  );
-}
