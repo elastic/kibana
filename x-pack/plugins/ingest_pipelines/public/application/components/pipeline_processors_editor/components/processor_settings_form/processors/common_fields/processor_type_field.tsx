@@ -81,7 +81,8 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
           const descriptor = getProcessorDescriptor(type);
           selectedOptions = descriptor
             ? [{ label: descriptor.label, value: type }]
-            : [{ label: type, value: type }];
+            : // If there is no label for this processor type, just use the type as the label
+              [{ label: type, value: type }];
         } else {
           selectedOptions = [];
         }
