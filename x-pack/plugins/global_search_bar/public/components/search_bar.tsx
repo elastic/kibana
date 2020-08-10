@@ -143,7 +143,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         inputRef: (ref: HTMLInputElement) => {
           setSearchRef(ref);
         },
-        'aria-label': i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+        'aria-label': i18n.translate('xpack.globalSearchBar.primaryNav.screenReaderLabel', {
           defaultMessage: 'Search for anything...',
         }),
       }}
@@ -203,7 +203,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                 >
                   <EuiFlexItem grow={false} component="p">
                     <FormattedMessage
-                      id="searchBar.shortcut"
+                      id="xpack.globalSearchBar.searchBar.shortcut"
                       defaultMessage="Quickly search using {shortcut}"
                       values={{
                         shortcut: <EuiBadge>{isWindows ? 'Command + S' : 'Ctrl + S'}</EuiBadge>,
