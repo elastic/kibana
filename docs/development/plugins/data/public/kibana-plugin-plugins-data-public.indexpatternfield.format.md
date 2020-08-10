@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-format: any;
+get format(): FieldFormat;
 ```

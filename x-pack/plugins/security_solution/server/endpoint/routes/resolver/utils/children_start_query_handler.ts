@@ -11,7 +11,7 @@ import { ChildrenQuery } from '../queries/children';
 import { QueryInfo } from '../queries/multi_searcher';
 import { QueryHandler } from './fetch';
 import { ChildrenNodesHelper } from './children_helper';
-import { PaginationBuilder } from './pagination';
+import { ChildrenPaginationBuilder } from './children_pagination';
 
 /**
  * Retrieve the start lifecycle events for the children of a resolver tree.
@@ -32,7 +32,7 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
     private readonly legacyEndpointID: string | undefined
   ) {
     this.query = new ChildrenQuery(
-      PaginationBuilder.createBuilder(limit, after),
+      ChildrenPaginationBuilder.createBuilder(limit, after),
       indexPattern,
       legacyEndpointID
     );
@@ -56,8 +56,13 @@ export class ChildrenStartQueryHandler implements QueryHandler<ChildrenNodesHelp
     }
 
     this.limitLeft = this.limit - this.childrenHelper.getNumNodes();
+
+    if (this.limitLeft < 0) {
+      this.limitLeft = 0;
+    }
+
     this.query = new ChildrenQuery(
-      PaginationBuilder.createBuilder(this.limitLeft),
+      ChildrenPaginationBuilder.createBuilder(this.limitLeft),
       this.indexPattern,
       this.legacyEndpointID
     );
