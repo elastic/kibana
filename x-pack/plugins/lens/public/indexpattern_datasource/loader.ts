@@ -70,9 +70,10 @@ export async function loadIndexPatterns({
           }
         });
       }
+
       return {
         ...acc,
-        [id]: {
+        [id as string]: {
           ...indexPattern,
           fields: newFields,
         },
