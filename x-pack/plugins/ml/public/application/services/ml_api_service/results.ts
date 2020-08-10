@@ -115,7 +115,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getStoppedPartitions(jobIds: string, fieldToBucket?: 'job_id' | 'partition_field_value') {
+  getStoppedPartitions(jobIds: string[], fieldToBucket?: 'job_id' | 'partition_field_value') {
     const body = JSON.stringify({
       jobIds,
       fieldToBucket,

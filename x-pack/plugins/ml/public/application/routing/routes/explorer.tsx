@@ -111,7 +111,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
-  const getJobsWithStoppedPartitions = async (selectedJobIds) => {
+  const getJobsWithStoppedPartitions = async (selectedJobIds: string[]) => {
     try {
       const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(
         selectedJobIds,

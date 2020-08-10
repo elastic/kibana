@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
         job_id: jobId,
         ...commonJobConfig,
         analysis_config: {
-          bucket_span: '15m',
+          bucket_span: '1m',
           categorization_field_name: 'message',
           per_partition_categorization: { enabled: true, stop_on_warn: stopOnWarn },
           detectors: [
@@ -68,9 +68,12 @@ export default ({ getService }: FtrProviderContext) => {
   const testSetUps: TestConfig[] = [
     setupTestConfigs(`${testJobId}_t`, true),
     setupTestConfigs(`${testJobId}_f`, false),
-    setupTestConfigs(`${testJobId}_viewer`, false),
-    setupTestConfigs(`${testJobId}_unauthorized`, false),
+    setupTestConfigs(`${testJobId}_viewer`, true),
+    setupTestConfigs(`${testJobId}_unauthorized`, true),
+    setupTestConfigs(`${testJobId}_t_2`, true),
   ];
+
+  const testJobIds = testSetUps.map((t) => t.jobId);
 
   describe('get stopped_partitions', function () {
     before(async () => {
@@ -90,8 +93,9 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fetch all the stopped partitions correctly', async () => {
       const { jobId } = testSetUps[0];
       const { body } = await supertest
-        .get(`/api/ml/results/${jobId}/stopped_partitions`)
+        .post(`/api/ml/results/stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
@@ -106,8 +110,9 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return empty array if stopped_on_warn is false', async () => {
       const { jobId } = testSetUps[1];
       const { body } = await supertest
-        .get(`/api/ml/results/${jobId}/stopped_partitions`)
+        .post(`/api/ml/results/stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
 
@@ -115,11 +120,30 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.length(0);
     });
 
-    it('should not fetch stopped partitions for user with view permission', async () => {
+    it('should fetch stopped partitions for user with view permission', async () => {
       const { jobId } = testSetUps[2];
       const { body } = await supertest
-        .get(`/api/ml/results/${jobId}/stopped_partitions`)
+        .post(`/api/ml/results/stopped_partitions`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .send({ jobIds: [jobId] })
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      expect(body).to.be.an('array');
+      if (body.length > 0) {
+        body.forEach((partitionValue: string) => {
+          expect(partitionValue).to.be.a('string');
+        });
+      }
+    });
+
+    it('should not fetch stopped partitions for unauthorized user', async () => {
+      const { jobId } = testSetUps[3];
+
+      const { body } = await supertest
+        .post(`/api/ml/results/stopped_partitions`)
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS)
         .expect(404);
 
@@ -127,17 +151,36 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.message).to.be('Not Found');
     });
 
-    it('should not fetch stopped partitions for unauthorized user', async () => {
-      const { jobId } = testSetUps[3];
-
+    it('should fetch stopped partitions for multiple job ids', async () => {
       const { body } = await supertest
-        .get(`/api/ml/results/${jobId}/stopped_partitions`)
-        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .post(`/api/ml/results/stopped_partitions`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .send({ jobIds: testJobIds })
         .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .expect(200);
 
-      expect(body.error).to.be('Not Found');
-      expect(body.message).to.be('Not Found');
+      expect(body).to.be.an('array');
+      if (body.length > 0) {
+        body.forEach((partitionValue: string) => {
+          expect(partitionValue).to.be.a('string');
+        });
+      }
+    });
+
+    it('should fetch list of jobs with stopped_partitions for multiple job ids', async () => {
+      const { body } = await supertest
+        .post(`/api/ml/results/stopped_partitions`)
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .send({ jobIds: testJobIds, fieldToBucket: 'job_id' })
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      expect(body).to.be.an('array');
+      if (body.length > 0) {
+        body.forEach((jobId: string) => {
+          expect(testJobIds).to.contain(jobId);
+        });
+      }
     });
   });
 };

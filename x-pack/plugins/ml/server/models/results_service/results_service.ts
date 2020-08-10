@@ -17,6 +17,7 @@ import {
   AnomalyCategorizerStatsDoc,
   AnomalyRecordDoc,
 } from '../../../common/types/anomalies';
+import { MlJobsResponse } from '../job_service/jobs';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -472,17 +473,17 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
 
   async function getStoppedPartitions(
     jobIds: string[],
-    fieldToBucket?: 'job_id' | 'partition_field_value' = 'partition_field_value'
+    fieldToBucket: 'job_id' | 'partition_field_value' = 'partition_field_value'
   ) {
     let finalResult: Array<{ key: string; doc_count: number }> = [];
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const jobConfigResponse = await callAsInternalUser('ml.jobs', {
+    const jobConfigResponse: MlJobsResponse = await callAsInternalUser('ml.jobs', {
       jobId: jobIds,
     });
 
     if (!jobConfigResponse || jobConfigResponse.jobs.length < 1) {
-      throw Error(`Unable to find anomaly detector job with ID ${jobId}`);
+      throw Error(`Unable to find anomaly detector jobs ${jobIds.join(', ')}`);
     }
 
     const jobIdsWithStopOnWarnSet = jobConfigResponse.jobs
