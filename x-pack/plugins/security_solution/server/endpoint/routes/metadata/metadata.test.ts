@@ -12,6 +12,7 @@ import {
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -26,12 +27,11 @@ import {
   HostStatus,
 } from '../../../../common/endpoint/types';
 import { SearchResponse } from 'elasticsearch';
-import { registerEndpointRoutes } from './index';
+import { registerEndpointRoutes, endpointFilters } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -170,7 +170,7 @@ describe('test endpoint route', () => {
           },
         ],
 
-        filter: 'not host.ip:10.140.73.246',
+        filters: { kql: 'not host.ip:10.140.73.246' },
       },
     });
 
@@ -306,11 +306,11 @@ describe('test endpoint route', () => {
       });
 
       mockAgentService.getAgentStatusById = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockAgentService.getAgent = jest.fn().mockImplementation(() => {
-        throw Boom.notFound('Agent not found');
+        SavedObjectsErrorHelpers.createGenericNotFoundError();
       });
 
       mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
@@ -392,6 +392,53 @@ describe('test endpoint route', () => {
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
       expect(mockResponse.customError).toBeCalled();
     });
+  });
+});
+
+describe('Filters Schema Test', () => {
+  it('accepts a single host status', () => {
+    expect(
+      endpointFilters.validate({
+        host_status: ['error'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts multiple host status filters', () => {
+    expect(
+      endpointFilters.validate({
+        host_status: ['offline', 'unenrolling'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('rejects invalid statuses', () => {
+    expect(() =>
+      endpointFilters.validate({
+        host_status: ['foobar'],
+      })
+    ).toThrowError();
+  });
+
+  it('accepts a KQL string', () => {
+    expect(
+      endpointFilters.validate({
+        kql: 'whatever.field',
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts KQL + status', () => {
+    expect(
+      endpointFilters.validate({
+        kql: 'thing.var',
+        host_status: ['online'],
+      })
+    ).toBeTruthy();
+  });
+
+  it('accepts no filters', () => {
+    expect(endpointFilters.validate({})).toBeTruthy();
   });
 });
 

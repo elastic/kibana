@@ -230,6 +230,10 @@ describe('FixedScroll directive', function () {
           $to = els[names.to];
         });
 
+        afterAll(() => {
+          delete angular.element.prototype.scrollLeft;
+        });
+
         test('transfers the scrollLeft', function () {
           expect(spyJQueryScrollLeft.callCount).toBe(0);
           expect(spyJQLiteScrollLeft.callCount).toBe(0);

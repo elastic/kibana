@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Chance from 'chance'; // eslint-disable-line
+import Chance from 'chance';
 // @ts-ignore
 import request from 'request';
 import uuidv4 from 'uuid/v4';

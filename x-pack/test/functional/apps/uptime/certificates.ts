@@ -14,8 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/70493
-  describe.skip('certificates', function () {
+  describe('certificates', function () {
     before(async () => {
       await makeCheck({ es, tls: true });
       await uptime.goToRoot(true);
@@ -26,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('can navigate to cert page', async () => {
-      await uptimeService.cert.isUptimeDataMissing();
+      await uptimeService.common.waitUntilDataIsLoaded();
       await uptimeService.cert.hasViewCertButton();
       await uptimeService.navigation.goToCertificates();
     });
@@ -58,6 +57,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const certId = getSha256();
         const { monitorId } = await makeCheck({
           es,
+          monitorId: 'cert-test-check-id',
+          fields: {
+            monitor: {
+              name: 'Cert Test Check',
+            },
+            url: {
+              full: 'https://site-to-check.com/',
+            },
+          },
           tls: {
             sha256: certId,
           },

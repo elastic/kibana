@@ -7,7 +7,7 @@
 import {
   entityId,
   parentEntityId,
-  isProcessStart,
+  isProcessRunning,
   getAncestryAsArray,
 } from '../../../../../common/endpoint/models/event';
 import {
@@ -16,7 +16,7 @@ import {
   ResolverChildren,
 } from '../../../../../common/endpoint/types';
 import { createChild } from './node';
-import { PaginationBuilder } from './pagination';
+import { ChildrenPaginationBuilder } from './children_pagination';
 
 /**
  * This class helps construct the children structure when building a resolver tree.
@@ -99,7 +99,7 @@ export class ChildrenNodesHelper {
     for (const event of startEvents) {
       const parentID = parentEntityId(event);
       const entityID = entityId(event);
-      if (parentID && entityID && isProcessStart(event)) {
+      if (parentID && entityID && isProcessRunning(event)) {
         // don't actually add the start event to the node, because that'll be done in
         // a different call
         const childNode = this.getOrCreateChildNode(entityID);
@@ -162,7 +162,7 @@ export class ChildrenNodesHelper {
     for (const nodeEntityID of nodes.values()) {
       const cachedNode = this.entityToNodeCache.get(nodeEntityID);
       if (cachedNode) {
-        cachedNode.nextChild = PaginationBuilder.buildCursor(startEvents);
+        cachedNode.nextChild = ChildrenPaginationBuilder.buildCursor(startEvents);
       }
     }
   }

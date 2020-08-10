@@ -17,16 +17,20 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
+import { SearchUsage } from '../collectors/usage';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
 export const esSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
+      logger.info(`search ${JSON.stringify(request.params)}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 
@@ -41,15 +45,22 @@ export const esSearchStrategyProvider = (
         ...request.params,
       };
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
+      try {
+        const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          'search',
+          params,
+          options
+        )) as SearchResponse<any>;
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+        if (usage) usage.trackSuccess(rawResponse.took);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+      } catch (e) {
+        if (usage) usage.trackError();
+        throw e;
+      }
     },
   };
 };

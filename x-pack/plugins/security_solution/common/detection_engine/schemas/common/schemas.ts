@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
 import { RiskScore } from '../types/risk_score';
@@ -222,8 +222,9 @@ export const risk_score_mapping_value = t.string;
 export const risk_score_mapping_item = t.exact(
   t.type({
     field: risk_score_mapping_field,
-    operator,
     value: risk_score_mapping_value,
+    operator,
+    risk_score: riskScoreOrUndefined,
   })
 );
 

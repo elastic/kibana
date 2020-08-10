@@ -218,6 +218,7 @@ class AgentConfigService {
     if (!baseAgentConfig) {
       throw new Error('Agent config not found');
     }
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { namespace, monitoring_enabled } = baseAgentConfig;
     const newAgentConfig = await this.create(
       soClient,
@@ -233,16 +234,14 @@ class AgentConfigService {
     if (baseAgentConfig.package_configs.length) {
       const newPackageConfigs = (baseAgentConfig.package_configs as PackageConfig[]).map(
         (packageConfig: PackageConfig) => {
-          const { id: packageConfigId, ...newPackageConfig } = packageConfig;
+          const { id: packageConfigId, version, ...newPackageConfig } = packageConfig;
           return newPackageConfig;
         }
       );
-      await packageConfigService.bulkCreate(
-        soClient,
-        newPackageConfigs,
-        newAgentConfig.id,
-        options
-      );
+      await packageConfigService.bulkCreate(soClient, newPackageConfigs, newAgentConfig.id, {
+        ...options,
+        bumpConfigRevision: false,
+      });
     }
 
     // Get updated config
@@ -336,7 +335,7 @@ class AgentConfigService {
       throw new Error('Agent configuration not found');
     }
 
-    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
+    const { id: defaultConfigId } = await this.ensureDefaultAgentConfig(soClient);
     if (id === defaultConfigId) {
       throw new Error('The default agent configuration cannot be deleted');
     }
@@ -395,6 +394,7 @@ class AgentConfigService {
       outputs: {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
             outputs[name] = {
               type,

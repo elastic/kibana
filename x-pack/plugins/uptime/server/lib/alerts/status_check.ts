@@ -21,7 +21,7 @@ import {
   MonitorAvailabilityType,
   DynamicSettings,
 } from '../../../common/runtime_types';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
 import { commonStateTranslations } from './translations';
@@ -36,6 +36,7 @@ const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
  * @param items to reduce
  */
 export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   items.reduce((acc, { monitor_id }) => {
     acc.add(monitor_id);
     return acc;

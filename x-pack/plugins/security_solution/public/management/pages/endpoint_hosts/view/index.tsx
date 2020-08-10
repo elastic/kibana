@@ -46,9 +46,10 @@ import {
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath, getHostDetailsPath, getPolicyDetailPath } from '../../../common/routing';
+import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { HostAction } from '../store/action';
+import { HostPolicyLink } from './components/host_policy_link';
 
 const HostListNavLink = memo<{
   name: string;
@@ -88,6 +89,7 @@ export const HostList = () => {
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
+    hostsExist,
   } = useHostSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -236,32 +238,31 @@ export const HostList = () => {
       {
         field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policy', {
-          defaultMessage: 'Policy',
+          defaultMessage: 'Integration',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
-          const toRoutePath = getPolicyDetailPath(policy.id);
-          const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <HostListNavLink
-              name={policy.name}
-              href={toRouteUrl}
-              route={toRoutePath}
-              dataTestSubj="policyNameCellLink"
-            />
+            <HostPolicyLink
+              policyId={policy.id}
+              className="eui-textTruncate"
+              data-test-subj="policyNameCellLink"
+            >
+              {policy.name}
+            </HostPolicyLink>
           );
         },
       },
       {
         field: 'metadata.Endpoint.policy.applied',
         name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
-          defaultMessage: 'Policy Status',
+          defaultMessage: 'Configuration Status',
         }),
-        // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
           const toRoutePath = getHostDetailsPath({
             name: 'hostPolicyResponse',
+            ...queryParams,
             selected_host: item.metadata.host.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
@@ -329,7 +330,7 @@ export const HostList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (!loading && listData && listData.length > 0) {
+    if (hostsExist) {
       return (
         <EuiBasicTable
           data-test-subj="hostListTable"
@@ -338,6 +339,7 @@ export const HostList = () => {
           error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
+          loading={loading}
         />
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -356,19 +358,20 @@ export const HostList = () => {
       );
     }
   }, [
-    listData,
-    policyItems,
-    columns,
     loading,
+    hostsExist,
+    policyItemsLoading,
+    policyItems,
+    listData,
+    columns,
+    listError?.message,
     paginationSetup,
     onTableChange,
-    listError?.message,
-    handleCreatePolicyClick,
     handleDeployEndpointsClick,
-    handleSelectableOnChange,
     selectedPolicyId,
+    handleSelectableOnChange,
     selectionOptions,
-    policyItemsLoading,
+    handleCreatePolicyClick,
   ]);
 
   return (
