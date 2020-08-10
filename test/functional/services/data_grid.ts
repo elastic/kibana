@@ -25,43 +25,28 @@ interface TabbedGridData {
 }
 
 export function DataGridProvider({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   class DataGrid {
-    async getColumnsData() {
-      const columns: TabbedGridData['columns'] = [];
-      const header = await retry.try(async () => await testSubjects.find('dataGridHeader'));
-
-      for (const column of await header.findAllByClassName('euiDataGridHeaderCell__content')) {
-        columns.push(await column.getVisibleText());
-      }
-
-      return columns;
-    }
-
-    async getRowsData() {
-      const rows: TabbedGridData['rows'] = [];
-      const rowsElements = await retry.try(async () => await testSubjects.findAll('dataGridRow'));
-
-      for (const rowElement of rowsElements) {
-        const rowData = [];
-        const dataGridRowCells = await rowElement.findAllByTestSubject('dataGridRowCell');
-
-        for (const cell of dataGridRowCells) {
-          rowData.push(await cell.getVisibleText());
-        }
-
-        rows.push(rowData);
-      }
-
-      return rows;
-    }
-
     async getDataGridTableData(): Promise<TabbedGridData> {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+
+      const columns = $('.euiDataGridHeaderCell__content')
+        .toArray()
+        .map((cell) => $(cell).text());
+      const rows = $.findTestSubjects('dataGridRow')
+        .toArray()
+        .map((row) =>
+          $(row)
+            .find('.euiDataGridRowCell__truncate')
+            .toArray()
+            .map((cell) => $(cell).text())
+        );
+
       return {
-        columns: await this.getColumnsData(),
-        rows: await this.getRowsData(),
+        columns,
+        rows,
       };
     }
   }
