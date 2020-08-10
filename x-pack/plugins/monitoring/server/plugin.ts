@@ -328,8 +328,22 @@ export class Plugin {
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
-            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
-            getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
+            getAlertsClient: () => {
+              try {
+                return plugins.alerts.getAlertsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
+            getActionsClient: () => {
+              try {
+                return plugins.actions.getActionsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
             server: {
               config: legacyConfigWrapper,
               newPlatform: {
