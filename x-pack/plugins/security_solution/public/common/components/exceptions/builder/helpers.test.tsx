@@ -161,10 +161,7 @@ describe('Exception builder helpers', () => {
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
         const expected: IIndexPattern = {
-          fields: [
-            { ...getField('nestedField.child') },
-            { ...getField('nestedField.nestedChild.doublyNestedChild') },
-          ],
+          fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
           title: 'logstash-*',
         };
@@ -243,7 +240,7 @@ describe('Exception builder helpers', () => {
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
         const expected: IIndexPattern = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
+          fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
           title: 'logstash-*',
         };
@@ -405,7 +402,7 @@ describe('Exception builder helpers', () => {
           aggregatable: false,
           count: 0,
           esTypes: ['text'],
-          name: 'nestedField.child',
+          name: 'child',
           readFromDocValues: false,
           scripted: false,
           searchable: true,
@@ -600,7 +597,7 @@ describe('Exception builder helpers', () => {
             aggregatable: false,
             count: 0,
             esTypes: ['text'],
-            name: 'nestedField.child',
+            name: 'child',
             readFromDocValues: false,
             scripted: false,
             searchable: true,

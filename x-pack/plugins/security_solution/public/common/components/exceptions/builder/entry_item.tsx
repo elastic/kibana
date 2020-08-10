@@ -5,6 +5,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
@@ -28,6 +29,10 @@ import {
   getEntryOnListChange,
 } from './helpers';
 import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../../autocomplete/operators';
+
+const MyValuesInput = styled(EuiFlexItem)`
+  overflow: hidden;
+`;
 
 interface EntryItemProps {
   entry: FormattedBuilderEntry;
@@ -257,12 +262,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     >
       <EuiFlexItem grow={false}>{renderFieldInput(showLabel)}</EuiFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <EuiFlexItem grow={6}>
+      <MyValuesInput grow={6}>
         {renderFieldValueInput(
           showLabel,
           entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
         )}
-      </EuiFlexItem>
+      </MyValuesInput>
     </EuiFlexGroup>
   );
 };
