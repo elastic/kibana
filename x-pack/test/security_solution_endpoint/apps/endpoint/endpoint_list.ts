@@ -10,13 +10,16 @@ import {
   deleteMetadataCurrentStream,
   deleteMetadataStream,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import {
+  deleteTransform,
+  putTransform,
+} from '../../../security_solution_endpoint_api_int/services/transform_helper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const esClient = getService('es');
-  const log = getService('log');
   const transformId = 'endpoint_metadata_transform';
 
   describe('host list', function () {
@@ -26,58 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await esClient.transform.putTransform({
-          transform_id: transformId,
-          defer_validation: false,
-          body: {
-            source: {
-              index: 'metrics-endpoint.metadata-default',
-            },
-            dest: {
-              index: 'metrics-endpoint.metadata_current-default',
-            },
-            pivot: {
-              group_by: {
-                'agent.id': {
-                  terms: {
-                    field: 'agent.id',
-                  },
-                },
-              },
-              aggregations: {
-                HostDetails: {
-                  scripted_metric: {
-                    init_script: "state.timestamp_latest = 0L; state.last_doc=''",
-                    map_script:
-                      "def current_date = doc['@timestamp'].getValue().toInstant().toEpochMilli(); if (current_date > state.timestamp_latest) {state.timestamp_latest = current_date;state.last_doc = new HashMap(params['_source']);}",
-                    combine_script: 'return state',
-                    reduce_script:
-                      "def last_doc = '';def timestamp_latest = 0L; for (s in states) {if (s.timestamp_latest > (timestamp_latest)) {timestamp_latest = s.timestamp_latest; last_doc = s.last_doc;}} return last_doc",
-                  },
-                },
-              },
-            },
-            description: 'collapse and update the latest document for each host',
-            frequency: '1m',
-            sync: {
-              time: {
-                field: 'event.created',
-                delay: '60s',
-              },
-            },
-          },
-        });
-
-        await esClient.transform.startTransform({
-          transform_id: transformId,
-          timeout: '60s',
-        });
-
-        // wait for transform to apply
-        await sleep(70000);
-        await esClient.transform.getTransformStats({
-          transform_id: transformId,
-        });
+        await putTransform(getService, transformId);
         await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
@@ -240,6 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe.skip('when there is no data,', () => {
       before(async () => {
+        await deleteTransform(getService, transformId);
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
