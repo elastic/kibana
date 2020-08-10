@@ -19,14 +19,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const transformId = 'endpoint_metadata_transform';
 
-  describe.skip('host list', function () {
+  describe('host list', function () {
     this.tags('ciGroup7');
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
     describe('when there is data,', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        const transform = await esClient.transform.putTransform({
+        await esClient.transform.putTransform({
           transform_id: transformId,
           defer_validation: false,
           body: {
@@ -47,11 +47,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               aggregations: {
                 HostDetails: {
                   scripted_metric: {
-                    init_script: '',
-                    map_script: "state.doc = new HashMap(params['_source'])",
+                    init_script: "state.timestamp_latest = 0L; state.last_doc=''",
+                    map_script:
+                      "def current_date = doc['@timestamp'].getValue().toInstant().toEpochMilli(); if (current_date > state.timestamp_latest) {state.timestamp_latest = current_date;state.last_doc = new HashMap(params['_source']);}",
                     combine_script: 'return state',
                     reduce_script:
-                      "def all_docs = []; for (s in states) {     all_docs.add(s.doc); }  all_docs.sort((HashMap o1, HashMap o2)->o1['@timestamp'].millis.compareTo(o2['@timestamp'].millis)); def size = all_docs.size(); return all_docs[size-1];",
+                      "def last_doc = '';def timestamp_latest = 0L; for (s in states) {if (s.timestamp_latest > (timestamp_latest)) {timestamp_latest = s.timestamp_latest; last_doc = s.last_doc;}} return last_doc",
                   },
                 },
               },
@@ -66,20 +67,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             },
           },
         });
-        log.info(JSON.stringify(transform));
-        const start = await esClient.transform.startTransform({
+
+        await esClient.transform.startTransform({
           transform_id: transformId,
           timeout: '60s',
         });
-        log.info(JSON.stringify(start));
 
         // wait for transform to apply
-        await sleep(120000);
-        const stats = await esClient.transform.getTransformStats({
+        await sleep(70000);
+        await esClient.transform.getTransformStats({
           transform_id: transformId,
         });
-
-        log.info(JSON.stringify(stats));
         await pageObjects.endpoint.navigateToHostList();
       });
       after(async () => {
@@ -110,6 +108,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'Last Active',
           ],
           [
+            'rezzani-7.example.com',
+            'Error',
+            'Default',
+            'Failure',
+            'windows 10.0',
+            '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
+            '6.8.0',
+            'Jan 24, 2020 @ 16:06:09.541',
+          ],
+          [
             'cadmann-4.example.com',
             'Error',
             'Default',
@@ -127,16 +135,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'windows 10.0',
             '10.46.229.234',
             '6.0.0',
-            'Jan 24, 2020 @ 16:06:09.541',
-          ],
-          [
-            'rezzani-7.example.com',
-            'Error',
-            'Default',
-            'Failure',
-            'windows 10.0',
-            '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
-            '6.8.0',
             'Jan 24, 2020 @ 16:06:09.541',
           ],
         ];
@@ -240,7 +238,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('when there is no data,', () => {
+    describe.skip('when there is no data,', () => {
       before(async () => {
         // clear out the data and reload the page
         await deleteMetadataStream(getService);

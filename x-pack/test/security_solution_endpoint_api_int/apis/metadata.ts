@@ -60,11 +60,12 @@ export default function ({ getService }: FtrProviderContext) {
               aggregations: {
                 HostDetails: {
                   scripted_metric: {
-                    init_script: '',
-                    map_script: "state.doc = new HashMap(params['_source'])",
+                    init_script: "state.timestamp_latest = 0L; state.last_doc=''",
+                    map_script:
+                      "def current_date = doc['@timestamp'].getValue().toInstant().toEpochMilli(); if (current_date > state.timestamp_latest) {state.timestamp_latest = current_date;state.last_doc = new HashMap(params['_source']);}",
                     combine_script: 'return state',
                     reduce_script:
-                      "def all_docs = []; for (s in states) {     all_docs.add(s.doc); }  all_docs.sort((HashMap o1, HashMap o2)->o1['@timestamp'].millis.compareTo(o2['@timestamp'].millis)); def size = all_docs.size(); return all_docs[size-1];",
+                      "def last_doc = '';def timestamp_latest = 0L; for (s in states) {if (s.timestamp_latest > (timestamp_latest)) {timestamp_latest = s.timestamp_latest; last_doc = s.last_doc;}} return last_doc",
                   },
                 },
               },
@@ -231,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
-        const variantValue = 'Windows Server 2012';
+        const variantValue = 'Windows Pro';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
@@ -241,12 +242,12 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total).to.eql(1);
+        expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
           body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.Ext.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
-        expect(body.hosts.length).to.eql(1);
+        expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -267,7 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        // expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -309,7 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        // expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts[0].host_status).to.eql('error');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
