@@ -1,10 +1,5 @@
-import builds.*
-//import builds.OssChecks
-//import builds.SanityCheck
-//import builds.XpackChecks
+import builds.oss.OssBuild
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
-//import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.notifications
-//import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
 import templates.DefaultTemplate
 
 version = "2020.1"
@@ -15,16 +10,6 @@ project {
 
   defaultTemplate = DefaultTemplate
 
-//    buildType {
-//        id("Intake")
-//        name = "Intake"
-//        type = BuildTypeSettings.Type.COMPOSITE
-//
-//        dependsOn(OssChecks, XpackChecks, BwcChecks) {
-//            onDependencyFailure = FailureAction.ADD_PROBLEM
-//            onDependencyCancel = FailureAction.ADD_PROBLEM
-//        }
-//
 //        triggers {
 //            vcs {
 //                perCheckinTriggering = true
@@ -61,6 +46,7 @@ project {
         }
       }
 
+      buildType(OssVisualRegression(OssBuild))
 
       subProject {
         id("CIGroups")
