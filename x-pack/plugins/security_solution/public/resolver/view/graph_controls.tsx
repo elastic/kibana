@@ -125,6 +125,7 @@ const GraphControlsComponent = React.memo(
         className={className}
         graphControlsBackground={colorMap.graphControlsBackground}
         graphControlsIconColor={colorMap.graphControls}
+        data-test-subj="resolver:graph-controls"
       >
         <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
           <div className="panning-controls-top">
