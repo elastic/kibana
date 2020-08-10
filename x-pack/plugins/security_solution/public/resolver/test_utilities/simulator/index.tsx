@@ -47,7 +47,7 @@ export class Simulator {
   /**
    * Simulator which allows you to explicitly simulate resize events and trigger animation frames
    */
-  public readonly sideEffectSimulator: SideEffectSimulator;
+  private readonly sideEffectSimulator: SideEffectSimulator;
 
   constructor({
     dataAccessLayer,
@@ -186,7 +186,7 @@ export class Simulator {
    * This manually runs the animation frames tied to a configurable timestamp in the future
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
-    this.sideEffectSimulator.controls.time = new Date().getTime() + time;
+    this.sideEffectSimulator.controls.time = time;
     this.sideEffectSimulator.controls.provideAnimationFrame();
   }
 
