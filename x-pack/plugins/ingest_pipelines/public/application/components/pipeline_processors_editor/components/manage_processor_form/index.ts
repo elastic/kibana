@@ -5,7 +5,7 @@
  */
 
 export {
-  ProcessorSettingsForm,
-  ProcessorSettingsFromOnSubmitArg,
+  ManageProcessorForm,
+  ManageProcessorOnSubmitArg,
   OnSubmitHandler,
-} from './processor_settings_form.container';
+} from './manage_processor_form.container';

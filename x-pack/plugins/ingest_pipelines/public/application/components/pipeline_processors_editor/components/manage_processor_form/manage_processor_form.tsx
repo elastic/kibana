@@ -101,7 +101,7 @@ const getFlyoutTitle = (isOnFailure: boolean, isExistingProcessor: boolean) => {
   );
 };
 
-export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
+export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     useEffect(
       () => {

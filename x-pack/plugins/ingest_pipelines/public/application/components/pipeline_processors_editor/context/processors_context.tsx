@@ -42,7 +42,7 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ProcessorSettingsForm,
+  ManageProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
@@ -230,7 +230,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       )}
 
       {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ProcessorSettingsForm
+        <ManageProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}

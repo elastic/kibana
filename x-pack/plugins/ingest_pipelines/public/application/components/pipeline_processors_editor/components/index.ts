@@ -5,10 +5,10 @@
  */
 
 export {
-  ProcessorSettingsForm,
-  ProcessorSettingsFromOnSubmitArg,
+  ManageProcessorForm,
+  ManageProcessorFormOnSubmitArg,
   OnSubmitHandler,
-} from './processor_settings_form';
+} from './manage_processor_form';
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
