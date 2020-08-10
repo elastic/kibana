@@ -35,6 +35,7 @@ import {
 // TYPES
 interface ManageSource {
   browserFields: BrowserFields;
+  defaultPatterns: string[];
   docValueFields: DocValueFields[];
   errorMessage: string | null;
   id: SourceGroupsType;
@@ -47,6 +48,7 @@ interface ManageSource {
 interface ManageSourceInit extends Partial<ManageSource> {
   id: SourceGroupsType;
 }
+
 type ManageSourceGroupById = {
   [id in SourceGroupsType]?: ManageSource;
 };
@@ -98,6 +100,7 @@ export interface UseSourceManager extends ManageSourcerer {
 // DEFAULTS/INIT
 export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) => ({
   browserFields: EMPTY_BROWSER_FIELDS,
+  defaultPatterns: defaultIndex,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
   id,
@@ -193,10 +196,13 @@ export const useSourceManager = (): UseSourceManager => {
       const filterIndexAdd = (indexToAdd ?? []).filter((item) => item !== NO_ALERT_INDEX);
       if (!isEmpty(filterIndexAdd)) {
         return onlyCheckIndexToAdd
-          ? filterIndexAdd
-          : [...state.availableIndexPatterns, ...filterIndexAdd];
+          ? filterIndexAdd.sort()
+          : [
+              ...state.availableIndexPatterns,
+              ...filterIndexAdd.filter((index) => !state.availableIndexPatterns.includes(index)),
+            ].sort();
       }
-      return state.availableIndexPatterns;
+      return state.availableIndexPatterns.sort();
     },
     [state.availableIndexPatterns]
   );
@@ -216,7 +222,6 @@ export const useSourceManager = (): UseSourceManager => {
         setAvailableIndexPatterns(result);
         setIsIndexPatternsLoading(false);
       } catch (error) {
-        console.log('error in fetch titles', error);
         setIsIndexPatternsLoading(false);
       }
     }
@@ -255,25 +260,28 @@ export const useSourceManager = (): UseSourceManager => {
       let isSubscribed = true;
       const abortCtrl = new AbortController();
       const defaultIndex = getDefaultIndex(indexToAdd, onlyCheckIndexToAdd);
+      const selectedPatterns = defaultIndex.filter((pattern) =>
+        state.availableIndexPatterns.includes(pattern)
+      );
       if (state.sourceGroups[id] == null) {
         dispatch({
           type: 'SET_SOURCE',
           id,
-          defaultIndex,
-          payload: { id },
+          defaultIndex: selectedPatterns,
+          payload: { defaultPatterns: defaultIndex, id },
         });
       }
+
       async function fetchSource() {
         if (!apolloClient) return;
         setIsSourceLoading({ id, loading: true });
-
         try {
           const result = await apolloClient.query<SourceQuery.Query, SourceQuery.Variables>({
             query: sourceQuery,
             fetchPolicy: 'network-only',
             variables: {
               sourceId: 'default', // always
-              defaultIndex,
+              defaultIndex: selectedPatterns,
             },
             context: {
               fetchOptions: {
@@ -285,23 +293,23 @@ export const useSourceManager = (): UseSourceManager => {
             dispatch({
               type: 'SET_SOURCE',
               id,
-              defaultIndex,
+              defaultIndex: selectedPatterns,
               payload: {
                 browserFields: getBrowserFields(
-                  defaultIndex.join(),
+                  selectedPatterns.join(),
                   get('data.source.status.indexFields', result)
                 ),
                 docValueFields: getDocValueFields(
-                  defaultIndex.join(),
+                  selectedPatterns.join(),
                   get('data.source.status.indexFields', result)
                 ),
                 errorMessage: null,
                 id,
                 indexPattern: getIndexFields(
-                  defaultIndex.join(),
+                  selectedPatterns.join(),
                   get('data.source.status.indexFields', result)
                 ),
-                indexPatterns: defaultIndex,
+                indexPatterns: selectedPatterns,
                 indicesExist: indicesExistOrDataTemporarilyUnavailable(
                   get('data.source.status.indicesExist', result)
                 ),
@@ -310,12 +318,11 @@ export const useSourceManager = (): UseSourceManager => {
             });
           }
         } catch (error) {
-          console.log('ERROR!!!!', error);
           if (isSubscribed) {
             dispatch({
               type: 'SET_SOURCE',
               id,
-              defaultIndex,
+              defaultIndex: selectedPatterns,
               payload: {
                 errorMessage: error.message,
                 id,
@@ -333,7 +340,13 @@ export const useSourceManager = (): UseSourceManager => {
         return abortCtrl.abort();
       };
     },
-    [apolloClient, getDefaultIndex, setIsSourceLoading, state.sourceGroups]
+    [
+      apolloClient,
+      getDefaultIndex,
+      setIsSourceLoading,
+      state.availableIndexPatterns,
+      state.sourceGroups,
+    ]
   );
 
   const initializeSourceGroup = useCallback(
@@ -370,11 +383,11 @@ export const useSourceManager = (): UseSourceManager => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isIndexPatternsLoading]);
+
   return {
     ...state,
     getManageSourceGroupById,
     initializeSourceGroup,
-    isIndexPatternsLoading: state.isIndexPatternsLoading,
     setActiveSourceGroupId,
     updateSourceGroupIndicies,
   };

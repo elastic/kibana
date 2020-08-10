@@ -7,18 +7,21 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { getSourceDefaults, useSourceManager, UseSourceManager } from '.';
-import { mockSource } from './mocks';
-import { SOURCE_GROUPS, sourceGroups } from './constants';
-
-const isStringifiedComparisonEqual = (a: {}, b: {}): boolean =>
-  JSON.stringify(a) === JSON.stringify(b);
-
+import {
+  mockSourceSelections,
+  mockSourceGroup,
+  mockSourceGroups,
+  mockPatterns,
+  mockSource,
+} from './mocks';
+import { SOURCE_GROUPS } from './constants';
+const mockSourceDefaults = mockSource(SOURCE_GROUPS.default);
 jest.mock('../../lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       data: {
         indexPatterns: {
-          getTitles: jest.fn().mockImplementation(() => Promise.resolve(['winlogbeat-*'])),
+          getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
         },
       },
     },
@@ -26,26 +29,153 @@ jest.mock('../../lib/kibana', () => ({
 }));
 jest.mock('../../utils/apollo_context', () => ({
   useApolloClient: jest.fn().mockReturnValue({
-    query: jest.fn().mockImplementation(() => Promise.resolve(mockSource)),
+    query: jest.fn().mockImplementation(() => Promise.resolve(mockSourceDefaults)),
   }),
 }));
 
-describe('Index Fields & Browser Fields', () => {
+describe('Sourcerer Hooks', () => {
   const testId = SOURCE_GROUPS.default;
-  const sourceDefaults = getSourceDefaults(testId, []);
+  const uninitializedId = SOURCE_GROUPS.host;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
-  it('initilizes an undefined timeline', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
-        useSourceManager()
-      );
-      await waitForNextUpdate();
-      expect(result.current.isIndexPatternsLoading).toBeTruthy();
-      // const uninitializedSourceGroup = result.current.getManageSourceGroupById(testId);
-      // expect(isStringifiedComparisonEqual(uninitializedSourceGroup, sourceDefaults)).toBeTruthy();
+  describe('Initialization', () => {
+    it('initializes loading default index patterns', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        expect(result.current).toEqual({
+          activeSourceGroupId: 'default',
+          availableIndexPatterns: [],
+          availableSourceGroupIds: [],
+          isIndexPatternsLoading: true,
+          sourceGroups: {},
+          getManageSourceGroupById: result.current.getManageSourceGroupById,
+          initializeSourceGroup: result.current.initializeSourceGroup,
+          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
+          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
+        });
+      });
+    });
+    it('initializes loading default source group', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(result.current).toEqual({
+          activeSourceGroupId: 'default',
+          availableIndexPatterns: mockPatterns,
+          availableSourceGroupIds: [],
+          isIndexPatternsLoading: false,
+          sourceGroups: {},
+          getManageSourceGroupById: result.current.getManageSourceGroupById,
+          initializeSourceGroup: result.current.initializeSourceGroup,
+          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
+          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
+        });
+      });
+    });
+    it('initialize completes with formatted source group data', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        expect(result.current).toEqual({
+          activeSourceGroupId: testId,
+          availableIndexPatterns: mockPatterns,
+          availableSourceGroupIds: [testId],
+          isIndexPatternsLoading: false,
+          sourceGroups: {
+            default: mockSourceGroup(testId),
+          },
+          getManageSourceGroupById: result.current.getManageSourceGroupById,
+          initializeSourceGroup: result.current.initializeSourceGroup,
+          setActiveSourceGroupId: result.current.setActiveSourceGroupId,
+          updateSourceGroupIndicies: result.current.updateSourceGroupIndicies,
+        });
+      });
+    });
+  });
+  describe('Methods', () => {
+    it('getManageSourceGroupById: initialized source group returns defaults', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        const initializedSourceGroup = result.current.getManageSourceGroupById(testId);
+        expect(initializedSourceGroup).toEqual(mockSourceGroup(testId));
+      });
+    });
+    it('getManageSourceGroupById: uninitialized source group returns defaults', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        const uninitializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
+        expect(uninitializedSourceGroup).toEqual(getSourceDefaults(uninitializedId, mockPatterns));
+      });
+    });
+    it('initializeSourceGroup: initializes source group', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        result.current.initializeSourceGroup(
+          uninitializedId,
+          mockSourceGroups[uninitializedId],
+          true
+        );
+        await waitForNextUpdate();
+        const initializedSourceGroup = result.current.getManageSourceGroupById(uninitializedId);
+        expect(initializedSourceGroup.indexPatterns).toEqual(mockSourceSelections[uninitializedId]);
+      });
+    });
+    it('setActiveSourceGroupId: active source group id gets set only if it gets initialized first', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        expect(result.current.activeSourceGroupId).toEqual(testId);
+        result.current.setActiveSourceGroupId(uninitializedId);
+        expect(result.current.activeSourceGroupId).toEqual(testId);
+        result.current.initializeSourceGroup(uninitializedId);
+        result.current.setActiveSourceGroupId(uninitializedId);
+        expect(result.current.activeSourceGroupId).toEqual(uninitializedId);
+      });
+    });
+    it('updateSourceGroupIndicies: updates source group indicies', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<string, UseSourceManager>(() =>
+          useSourceManager()
+        );
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        await waitForNextUpdate();
+        let sourceGroup = result.current.getManageSourceGroupById(testId);
+        expect(sourceGroup.indexPatterns).toEqual(mockSourceSelections[testId]);
+        result.current.updateSourceGroupIndicies(testId, ['endgame-*', 'filebeat-*']);
+        await waitForNextUpdate();
+        sourceGroup = result.current.getManageSourceGroupById(testId);
+        expect(sourceGroup.indexPatterns).toEqual(['endgame-*', 'filebeat-*']);
+      });
     });
   });
 });

@@ -13,3 +13,23 @@ export const SOURCERER = i18n.translate('xpack.securitySolution.indexPatterns.so
 export const CHANGE_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
   defaultMessage: 'Change index patterns',
 });
+
+export const ADD_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.add', {
+  defaultMessage: 'Configure Kibana index patterns',
+});
+
+export const CONFIGURE_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.indexPatterns.configure',
+  {
+    defaultMessage:
+      'Configure additional Kibana index patterns to see them become available in the Security Solution',
+  }
+);
+
+export const DISABLED_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.indexPatterns.disabled',
+  {
+    defaultMessage:
+      'Disabled index patterns are recommended on this page, but first need to be configured in your Kibana index pattern settings',
+  }
+);

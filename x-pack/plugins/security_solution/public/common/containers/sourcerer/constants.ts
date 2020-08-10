@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SOURCERER_FEATURE_FLAG_ON = true;
+export const SOURCERER_FEATURE_FLAG_ON = false;
 
 export enum SOURCE_GROUPS {
   default = 'default',
@@ -23,25 +23,26 @@ export const sourceGroups = {
     'endgame-*',
     'filebeat-*',
     'logs-*',
-    'packetbeat-*',
+    // 'packetbeat-*',
     'winlogbeat-*',
+    'blobbeat-*',
   ],
-  [SOURCE_GROUPS.host]: [
-    'apm-*-transaction*',
-    'endgame-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  [SOURCE_GROUPS.detections]: ['signals-*'],
-  [SOURCE_GROUPS.timeline]: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'logs-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  [SOURCE_GROUPS.network]: ['auditbeat-*', 'filebeat-*'],
+  // [SOURCE_GROUPS.host]: [
+  //   'apm-*-transaction*',
+  //   'endgame-*',
+  //   'logs-*',
+  //   'packetbeat-*',
+  //   'winlogbeat-*',
+  // ],
+  // [SOURCE_GROUPS.detections]: ['signals-*'],
+  // [SOURCE_GROUPS.timeline]: [
+  //   'apm-*-transaction*',
+  //   'auditbeat-*',
+  //   'endgame-*',
+  //   'filebeat-*',
+  //   'logs-*',
+  //   'packetbeat-*',
+  //   'winlogbeat-*',
+  // ],
+  // [SOURCE_GROUPS.network]: ['auditbeat-*', 'filebeat-*'],
 };
