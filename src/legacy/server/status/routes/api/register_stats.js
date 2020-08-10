@@ -19,6 +19,7 @@
 
 import Joi from 'joi';
 import boom from 'boom';
+import { defaultsDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
 import { getKibanaInfoForStats } from '../../lib';
@@ -120,10 +121,9 @@ export function registerStatsApi(usageCollection, server, config, kbnServer) {
                     },
                   };
                 } else {
-                  accum = {
-                    ...accum,
-                    [usageKey]: usage[usageKey],
-                  };
+                  // I don't think we need to it this for the above conditions, but do it for most as it will
+                  // match the behavior done in monitoring/bulk_uploader
+                  defaultsDeep(accum, { [usageKey]: usage[usageKey] });
                 }
 
                 return accum;

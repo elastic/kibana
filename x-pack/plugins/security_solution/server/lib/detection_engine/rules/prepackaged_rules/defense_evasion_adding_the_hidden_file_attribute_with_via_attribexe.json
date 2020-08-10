@@ -4,7 +4,8 @@
   ],
   "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

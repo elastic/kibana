@@ -7,14 +7,14 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryExistsMock } from './entry_exists.mock';
 import { EntryExists, entriesExists } from './entry_exists';
 
 describe('entriesExists', () => {
   test('it should validate an entry', () => {
-    const payload = { ...getEntryExistsMock() };
+    const payload = getEntryExistsMock();
     const decoded = entriesExists.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -23,7 +23,7 @@ describe('entriesExists', () => {
   });
 
   test('it should validate when "operator" is "included"', () => {
-    const payload = { ...getEntryExistsMock() };
+    const payload = getEntryExistsMock();
     const decoded = entriesExists.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -32,7 +32,7 @@ describe('entriesExists', () => {
   });
 
   test('it should validate when "operator" is "excluded"', () => {
-    const payload = { ...getEntryExistsMock() };
+    const payload = getEntryExistsMock();
     payload.operator = 'excluded';
     const decoded = entriesExists.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -41,7 +41,7 @@ describe('entriesExists', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate when "field" is empty string', () => {
+  test('it should FAIL validation when "field" is empty string', () => {
     const payload: Omit<EntryExists, 'field'> & { field: string } = {
       ...getEntryExistsMock(),
       field: '',
@@ -56,16 +56,16 @@ describe('entriesExists', () => {
   test('it should strip out extra keys', () => {
     const payload: EntryExists & {
       extraKey?: string;
-    } = { ...getEntryExistsMock() };
+    } = getEntryExistsMock();
     payload.extraKey = 'some extra key';
     const decoded = entriesExists.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({ ...getEntryExistsMock() });
+    expect(message.schema).toEqual(getEntryExistsMock());
   });
 
-  test('it should not validate when "type" is not "exists"', () => {
+  test('it should FAIL validation when "type" is not "exists"', () => {
     const payload: Omit<EntryExists, 'type'> & { type: string } = {
       ...getEntryExistsMock(),
       type: 'match',

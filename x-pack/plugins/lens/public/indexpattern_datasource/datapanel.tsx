@@ -409,7 +409,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       filters,
       chartsThemeService: charts.theme,
     }),
-    [core, data, currentIndexPattern, dateRange, query, filters, localState.nameFilter]
+    [
+      core,
+      data,
+      currentIndexPattern,
+      dateRange,
+      query,
+      filters,
+      localState.nameFilter,
+      charts.theme,
+    ]
   );
 
   return (

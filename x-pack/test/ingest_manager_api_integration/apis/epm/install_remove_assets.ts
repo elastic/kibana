@@ -23,7 +23,10 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
   const installPackage = async (pkg: string) => {
-    await supertest.post(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest
+      .post(`/api/ingest_manager/epm/packages/${pkg}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true });
   };
 
   describe('installs and uninstalls all assets', async () => {
@@ -82,11 +85,6 @@ export default function (providerContext: FtrProviderContext) {
           id: 'metrics-*',
         });
         expect(resIndexPatternMetrics.id).equal('metrics-*');
-        const resIndexPatternEvents = await kibanaServer.savedObjects.get({
-          type: 'index-pattern',
-          id: 'events-*',
-        });
-        expect(resIndexPatternEvents.id).equal('events-*');
         const resDashboard = await kibanaServer.savedObjects.get({
           type: 'dashboard',
           id: 'sample_dashboard',
@@ -107,6 +105,66 @@ export default function (providerContext: FtrProviderContext) {
           id: 'sample_search',
         });
         expect(resSearch.id).equal('sample_search');
+      });
+      it('should have installed placeholder indices', async function () {
+        const resLogsIndexPatternPlaceholder = await es.transport.request({
+          method: 'GET',
+          path: `/logs-index_pattern_placeholder`,
+        });
+        expect(resLogsIndexPatternPlaceholder.statusCode).equal(200);
+        const resMetricsIndexPatternPlaceholder = await es.transport.request({
+          method: 'GET',
+          path: `/metrics-index_pattern_placeholder`,
+        });
+        expect(resMetricsIndexPatternPlaceholder.statusCode).equal(200);
+      });
+      it('should have created the correct saved object', async function () {
+        const res = await kibanaServer.savedObjects.get({
+          type: 'epm-packages',
+          id: 'all_assets',
+        });
+        expect(res.attributes).eql({
+          installed_kibana: [
+            {
+              id: 'sample_dashboard',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_dashboard2',
+              type: 'dashboard',
+            },
+            {
+              id: 'sample_search',
+              type: 'search',
+            },
+            {
+              id: 'sample_visualization',
+              type: 'visualization',
+            },
+          ],
+          installed_es: [
+            {
+              id: 'logs-all_assets.test_logs-0.1.0',
+              type: 'ingest_pipeline',
+            },
+            {
+              id: 'logs-all_assets.test_logs',
+              type: 'index_template',
+            },
+            {
+              id: 'metrics-all_assets.test_metrics',
+              type: 'index_template',
+            },
+          ],
+          es_index_patterns: {
+            test_logs: 'logs-all_assets.test_logs-*',
+            test_metrics: 'metrics-all_assets.test_metrics-*',
+          },
+          name: 'all_assets',
+          version: '0.1.0',
+          internal: false,
+          removable: true,
+        });
       });
     });
 
@@ -191,6 +249,18 @@ export default function (providerContext: FtrProviderContext) {
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
+      });
+      it('should have removed the saved object', async function () {
+        let res;
+        try {
+          res = await kibanaServer.savedObjects.get({
+            type: 'epm-packages',
+            id: 'all_assets',
+          });
+        } catch (err) {
+          res = err;
+        }
+        expect(res.response.data.statusCode).equal(404);
       });
     });
   });

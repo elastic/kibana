@@ -214,6 +214,14 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
     },
     {
+      field: DataFrameAnalyticsListColumn.memoryStatus,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.memoryStatus', {
+        defaultMessage: 'Memory status',
+      }),
+      truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobMemoryStatus',
+    },
+    {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.analyticsList.sourceIndex', {
         defaultMessage: 'Source index',
@@ -258,6 +266,7 @@ export const useColumns = (
       }),
       actions,
       width: isManagementTable === true ? '100px' : '150px',
+      'data-test-subj': 'mlAnalyticsTableColumnActions',
     },
   ];
 

@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { DefaultUpdateCommentsArray } from './default_update_comments_array';
 import { UpdateCommentsArray } from './update_comment';
@@ -39,7 +39,6 @@ describe('default_update_comments_array', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
-      'Invalid value "1" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -50,7 +49,6 @@ describe('default_update_comments_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
       'Invalid value "some string" supplied to "Array<({| comment: NonEmptyString |} & Partial<{| id: NonEmptyString |}>)>"',
     ]);
     expect(message.schema).toEqual({});

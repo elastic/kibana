@@ -12,21 +12,18 @@ import { getEntryExistsMock } from './entry_exists.mock';
 import { getEntryNestedMock } from './entry_nested.mock';
 
 export const getListAndNonListEntriesArrayMock = (): EntriesArray => [
-  { ...getEntryMatchMock() },
-  { ...getEntryMatchAnyMock() },
-  { ...getEntryListMock() },
-  { ...getEntryExistsMock() },
-  { ...getEntryNestedMock() },
+  getEntryMatchMock(),
+  getEntryMatchAnyMock(),
+  getEntryListMock(),
+  getEntryExistsMock(),
+  getEntryNestedMock(),
 ];
 
-export const getListEntriesArrayMock = (): EntriesArray => [
-  { ...getEntryListMock() },
-  { ...getEntryListMock() },
-];
+export const getListEntriesArrayMock = (): EntriesArray => [getEntryListMock(), getEntryListMock()];
 
 export const getEntriesArrayMock = (): EntriesArray => [
-  { ...getEntryMatchMock() },
-  { ...getEntryMatchAnyMock() },
-  { ...getEntryExistsMock() },
-  { ...getEntryNestedMock() },
+  getEntryMatchMock(),
+  getEntryMatchAnyMock(),
+  getEntryExistsMock(),
+  getEntryNestedMock(),
 ];
