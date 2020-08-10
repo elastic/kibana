@@ -20,11 +20,12 @@ jest.mock('./hooks/use_field_value_autocomplete');
 describe('AutocompleteFieldMatchAnyComponent', () => {
   const getValueSuggestionsMock = jest
     .fn()
-    .mockResolvedValue([false, ['value 3', 'value 4'], jest.fn()]);
+    .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
 
   beforeAll(() => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
+      true,
       ['value 1', 'value 2'],
       getValueSuggestionsMock,
     ]);
