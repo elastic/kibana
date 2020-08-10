@@ -45,7 +45,7 @@ export class Simulator {
    */
   private readonly spyMiddleware: SpyMiddleware;
   /**
-   * A fake simulator that allows you to explicitly simulate resize events and run animation frames
+   * Simulator which allows you to explicitly simulate resize events and trigger animation frames
    */
   public readonly sideEffectSimulator: SideEffectSimulator;
 
@@ -193,7 +193,7 @@ export class Simulator {
   /**
    * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
    *
-   * @param entityID The entity ID of åthe proocess node to select in
+   * @param entityID The entity ID of the proocess node to select in
    */
   public processNodeRelatedEventButton(entityID: string): ReactWrapper {
     return this.domNodes(
