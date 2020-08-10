@@ -119,7 +119,11 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
-          .send({ filter: 'not host.ip:10.46.229.234' })
+          .send({
+            filters: {
+              kql: 'not host.ip:10.46.229.234',
+            },
+          })
           .expect(200);
         expect(body.total).to.eql(2);
         expect(body.hosts.length).to.eql(2);
@@ -141,7 +145,9 @@ export default function ({ getService }: FtrProviderContext) {
                 page_index: 0,
               },
             ],
-            filter: `not host.ip:${notIncludedIp}`,
+            filters: {
+              kql: `not host.ip:${notIncludedIp}`,
+            },
           })
           .expect(200);
         expect(body.total).to.eql(2);
@@ -166,7 +172,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.os.Ext.variant:${variantValue}`,
+            filters: {
+              kql: `host.os.Ext.variant:${variantValue}`,
+            },
           })
           .expect(200);
         expect(body.total).to.eql(2);
@@ -185,7 +193,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `host.ip:${targetEndpointIp}`,
+            filters: {
+              kql: `host.ip:${targetEndpointIp}`,
+            },
           })
           .expect(200);
         expect(body.total).to.eql(1);
@@ -204,7 +214,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `not Endpoint.policy.applied.status:success`,
+            filters: {
+              kql: `not Endpoint.policy.applied.status:success`,
+            },
           })
           .expect(200);
         const statuses: Set<string> = new Set(
@@ -223,7 +235,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `elastic.agent.id:${targetElasticAgentId}`,
+            filters: {
+              kql: `elastic.agent.id:${targetElasticAgentId}`,
+            },
           })
           .expect(200);
         expect(body.total).to.eql(1);
@@ -243,7 +257,9 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: '',
+            filters: {
+              kql: '',
+            },
           })
           .expect(200);
         expect(body.total).to.eql(numberOfHostsInFixture);

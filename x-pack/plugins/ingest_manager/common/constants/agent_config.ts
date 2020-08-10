@@ -5,7 +5,7 @@
  */
 import { AgentConfigStatus, DefaultPackages } from '../types';
 
-export const AGENT_CONFIG_SAVED_OBJECT_TYPE = 'ingest-agent-configs';
+export const AGENT_CONFIG_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
 
 export const DEFAULT_AGENT_CONFIG = {
   name: 'Default config',

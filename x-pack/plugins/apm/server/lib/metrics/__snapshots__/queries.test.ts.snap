@@ -2,6 +2,11 @@
 
 exports[`metrics queries with a service node name fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -67,11 +72,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -95,12 +95,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -156,11 +160,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -189,12 +188,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
@@ -252,11 +255,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -290,12 +288,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -351,11 +353,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -384,12 +381,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with a service node name fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -432,11 +433,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "metric",
             },
           },
           Object {
@@ -468,12 +464,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -539,11 +539,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -573,12 +568,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -634,11 +633,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -673,12 +667,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
@@ -736,11 +734,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -780,12 +773,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -841,11 +838,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -880,12 +872,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries with service_node_name_missing fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -931,11 +927,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -970,12 +961,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches cpu chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "processCPUAverage": Object {
@@ -1041,11 +1036,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1064,12 +1054,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "heapMemoryCommitted": Object {
@@ -1125,11 +1119,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1153,12 +1142,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "memoryUsedAvg": Object {
@@ -1216,11 +1209,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1249,12 +1237,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches non heap memory chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "nonHeapMemoryCommitted": Object {
@@ -1310,11 +1302,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1338,12 +1325,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`metrics queries without a service node name fetches thread count chart data 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "threadCount": Object {
@@ -1389,11 +1380,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -1417,6 +1403,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
