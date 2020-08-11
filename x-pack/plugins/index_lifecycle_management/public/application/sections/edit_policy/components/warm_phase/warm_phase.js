@@ -38,7 +38,6 @@ import { MinAgeInput } from '../min_age_input';
 export class WarmPhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
-    showNodeDetailsFlyout: PropTypes.func.isRequired,
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
@@ -47,7 +46,6 @@ export class WarmPhase extends PureComponent {
   render() {
     const {
       setPhaseData,
-      showNodeDetailsFlyout,
       phaseData,
       errors,
       isShowingErrors,
@@ -152,7 +150,6 @@ export class WarmPhase extends PureComponent {
                 <NodeAllocation
                   phase={PHASE_WARM}
                   setPhaseData={setPhaseData}
-                  showNodeDetailsFlyout={showNodeDetailsFlyout}
                   errors={errors}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}
