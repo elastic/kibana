@@ -17,6 +17,8 @@ import {
   AnomalyCategorizerStatsDoc,
   AnomalyRecordDoc,
 } from '../../../common/types/anomalies';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
+
 import { MlJobsResponse } from '../job_service/jobs';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
@@ -33,6 +35,10 @@ export interface CriteriaField {
 interface Influencer {
   fieldName: string;
   fieldValue: any;
+}
+
+export interface GetStoppedPartitionResult {
+  jobs: string[] | Record<string, string[]>;
 }
 
 export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
@@ -473,9 +479,11 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
 
   async function getStoppedPartitions(
     jobIds: string[],
-    fieldToBucket: 'job_id' | 'partition_field_value' = 'partition_field_value'
-  ) {
-    let finalResult: Array<{ key: string; doc_count: number }> = [];
+    fieldToBucket: typeof JOB_ID | typeof PARTITION_FIELD_VALUE = PARTITION_FIELD_VALUE
+  ): Promise<GetStoppedPartitionResult> {
+    let finalResults: GetStoppedPartitionResult = {
+      jobs: {},
+    };
     // first determine from job config if stop_on_warn is true
     // if false return []
     const jobConfigResponse: MlJobsResponse = await callAsInternalUser('ml.jobs', {
@@ -493,6 +501,34 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       )
       .map((j) => j.job_id);
 
+    let aggs: any;
+    if (fieldToBucket === JOB_ID) {
+      // if bucketing by job_id, then return list of job_ids with at least one stopped_partitions
+      aggs = {
+        unique_terms: {
+          terms: {
+            field: JOB_ID,
+          },
+        },
+      };
+    } else {
+      // if bucketing by partition field value, then return list of unique stopped_partitions for each job
+      aggs = {
+        jobs: {
+          terms: {
+            field: JOB_ID,
+          },
+          aggs: {
+            unique_stopped_partitions: {
+              terms: {
+                field: PARTITION_FIELD_VALUE,
+              },
+            },
+          },
+        },
+      };
+    }
+
     if (jobIdsWithStopOnWarnSet.length > 0) {
       // search for categorizer_stats documents for the current job where the categorization_status is warn
       // Return all the partition_field_value values from the documents found
@@ -508,7 +544,6 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
           },
         },
       ];
-
       const results: SearchResponse<any> = await callAsInternalUser('search', {
         index: ML_RESULTS_INDEX_PATTERN,
         size: 0,
@@ -525,23 +560,27 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
               ],
             },
           },
-          aggs: {
-            unique_terms: {
-              terms: {
-                field: fieldToBucket,
-              },
-            },
-          },
+          aggs,
         },
       });
-      if (Array.isArray(results.aggregations?.unique_terms?.buckets)) {
-        finalResult = results.aggregations?.unique_terms?.buckets.map(
-          (b: { key: string; doc_count: number }) => b.key
+      if (fieldToBucket === JOB_ID) {
+        finalResults = {
+          jobs: results.aggregations?.unique_terms?.buckets.map(
+            (b: { key: string; doc_count: number }) => b.key
+          ),
+        };
+      } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
+        const jobs: Record<string, string[]> = {};
+        results.aggregations.jobs.buckets.forEach(
+          (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
+            jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);
+          }
         );
+        finalResults.jobs = jobs;
       }
     }
 
-    return finalResult;
+    return finalResults;
   }
 
   return {

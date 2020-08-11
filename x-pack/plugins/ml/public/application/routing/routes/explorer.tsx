@@ -32,6 +32,7 @@ import { useUrlState } from '../../util/url_state';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
+import { JOB_ID } from '../../../../common/constants/anomalies';
 
 export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/explorer',
@@ -115,10 +116,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     try {
       const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(
         selectedJobIds,
-        'job_id'
+        JOB_ID
       );
-      if (fetchedStoppedPartitions.length > 0) {
-        setStoppedPartitions(fetchedStoppedPartitions);
+      if (fetchedStoppedPartitions.jobs.length > 0) {
+        setStoppedPartitions(fetchedStoppedPartitions.jobs);
       } else {
         setStoppedPartitions(undefined);
       }

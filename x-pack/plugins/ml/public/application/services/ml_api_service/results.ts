@@ -10,6 +10,8 @@ import { HttpService } from '../http_service';
 import { basePath } from './index';
 
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
+
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
@@ -115,7 +117,10 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getStoppedPartitions(jobIds: string[], fieldToBucket?: 'job_id' | 'partition_field_value') {
+  getStoppedPartitions(
+    jobIds: string[],
+    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+  ) {
     const body = JSON.stringify({
       jobIds,
       fieldToBucket,
