@@ -20,7 +20,8 @@ import { unzip } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const getTestSpec = (expression: string) => `{
+const getTestSpec = (expression: string) => `
+{
 config: { "kibana": {"renderer": "svg"} }
 $schema: https://vega.github.io/schema/vega/v5.json
 marks: [{
@@ -225,13 +226,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Vega extension functions', () => {
       beforeEach(async () => {
-        await PageObjects.vegaChart.cleanSpec();
         await filterBar.removeAllFilters();
       });
 
       const fillSpecAndGo = async (newSpec: string) => {
-        await PageObjects.vegaChart.cleanSpec();
-        await PageObjects.vegaChart.typeInSpec(newSpec);
+        await PageObjects.vegaChart.fillSpec(newSpec);
         await PageObjects.visEditor.clickGo();
 
         const viewContainer = await PageObjects.vegaChart.getViewContainer();
