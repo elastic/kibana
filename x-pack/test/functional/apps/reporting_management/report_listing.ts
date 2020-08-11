@@ -76,16 +76,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // scan page 1
       let tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_1 = `[Logs] File Type Scatter Plot\nvisualization\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
-[Logs] File Type Scatter Plot\nvisualization\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
-[Logs] Heatmap\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Logs] Heatmap\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Flights] Flight Delays\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-[Flights] Flight Delays\nvisualization\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
-pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-[Flights] Flight Cancellations\nvisualization\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
-[Flights] Markdown Instructions\nvisualization\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM`;
+      const PAGE_CONTENT_1 = `[Logs] File Type Scatter Plot\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
+[Logs] File Type Scatter Plot\n2020-04-21 @ 07:01 PM\ntest_user\nCompleted at 2020-04-21 @ 07:02 PM
+[Logs] Heatmap\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
+[Logs] Heatmap\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
+[Flights] Flight Delays\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
+[Flights] Flight Delays\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:01 PM
+pdf\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
+pdf\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
+[Flights] Flight Cancellations\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM
+[Flights] Markdown Instructions\n2020-04-21 @ 06:59 PM\ntest_user\nCompleted at 2020-04-21 @ 07:00 PM`;
+
       expect(tableText).to.be(PAGE_CONTENT_1);
 
       // click page 2
@@ -97,15 +98,16 @@ pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:0
 
       // scan page 2
       tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_2 = `[eCommerce] Revenue Tracking\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[Logs] Web Traffic\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[Flights] Overview\ncanvas workpad\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
-[eCommerce] Revenue Dashboard\ndashboard\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
-[Logs] Web Traffic\ndashboard\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
-[Flights] Global Flight Dashboard\ndashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
-[Flights] Global Flight Dashboard\ndashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
-report4csv\n2020-04-21 @ 06:55 PM\ntest_user\nCompleted at 2020-04-21 @ 06:56 PM - Max size reached\nreport3csv\n2020-04-21 @ 06:55 PM
-test_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached\nreport2csv\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached`;
+      const PAGE_CONTENT_2 = `[eCommerce] Revenue Tracking\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
+[Logs] Web Traffic\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
+[Flights] Overview\n2020-04-21 @ 06:58 PM\ntest_user\nCompleted at 2020-04-21 @ 06:59 PM
+[eCommerce] Revenue Dashboard\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
+[Logs] Web Traffic\n2020-04-21 @ 06:57 PM\ntest_user\nCompleted at 2020-04-21 @ 06:58 PM
+[Flights] Global Flight Dashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
+[Flights] Global Flight Dashboard\n2020-04-21 @ 06:56 PM\ntest_user\nCompleted at 2020-04-21 @ 06:57 PM
+report4csv\nsearch\n2020-04-21 @ 06:55 PM\ntest_user\nCompleted at 2020-04-21 @ 06:56 PM - Max size reached
+report3csv\nsearch\n2020-04-21 @ 06:55 PM\ntest_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached
+report2csv\nsearch\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached`;
       expect(tableText).to.be(PAGE_CONTENT_2);
 
       // click page 3
@@ -114,7 +116,7 @@ test_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached\nreport2csv\n20
 
       // scan page 3
       tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
-      const PAGE_CONTENT_3 = `report1csv\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:54 PM - Max size reached`;
+      const PAGE_CONTENT_3 = `report1csv\nsearch\n2020-04-21 @ 06:54 PM\ntest_user\nCompleted at 2020-04-21 @ 06:54 PM - Max size reached`;
       expect(tableText).to.be(PAGE_CONTENT_3);
     });
   });
