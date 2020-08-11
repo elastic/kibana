@@ -20,7 +20,7 @@ export interface Document {
   description?: string;
   state: {
     datasourceMetaData: {
-      filterableIndexPatterns: Array<{ id: string }>;
+      numberFilterableIndexPatterns: number;
     };
     datasourceStates: Record<string, unknown>;
     visualization: unknown;

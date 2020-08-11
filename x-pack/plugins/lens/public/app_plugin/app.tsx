@@ -26,7 +26,12 @@ import {
   OnSaveProps,
   checkForDuplicateTitle,
 } from '../../../../../src/plugins/saved_objects/public';
-import { Document, SavedObjectStore, injectFilterReferences } from '../persistence';
+import {
+  Document,
+  SavedObjectStore,
+  injectFilterReferences,
+  getFilterableIndexPatternIds,
+} from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -220,7 +225,7 @@ export function App({
           .load(docId)
           .then((doc) => {
             getAllIndexPatterns(
-              doc.state.datasourceMetaData.filterableIndexPatterns,
+              getFilterableIndexPatternIds(doc),
               data.indexPatterns,
               core.notifications
             )
@@ -244,7 +249,7 @@ export function App({
                 redirectTo();
               });
           })
-          .catch(() => {
+          .catch((e) => {
             setState((s) => ({ ...s, isLoading: false }));
 
             core.notifications.toasts.addDanger(
@@ -509,8 +514,8 @@ export function App({
                   // Update the cached index patterns if the user made a change to any of them
                   if (
                     state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-                    filterableIndexPatterns.find(
-                      ({ id }) =>
+                    filterableIndexPatterns.some(
+                      (id) =>
                         !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
                     )
                   ) {
@@ -551,12 +556,12 @@ export function App({
 }
 
 export async function getAllIndexPatterns(
-  ids: Array<{ id: string }>,
+  ids: string[],
   indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
   try {
-    return await Promise.all(ids.map(({ id }) => indexPatternsService.get(id)));
+    return await Promise.all(ids.map((id) => indexPatternsService.get(id)));
   } catch (e) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.lens.app.indexPatternLoadingError', {

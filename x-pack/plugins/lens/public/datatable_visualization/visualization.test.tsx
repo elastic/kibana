@@ -48,20 +48,6 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    it('should persist the internal state', () => {
-      const expectedState: DatatableVisualizationState = {
-        layers: [
-          {
-            layerId: 'baz',
-            columns: ['a', 'b', 'c'],
-          },
-        ],
-      };
-      expect(datatableVisualization.getPersistableState(expectedState)).toEqual(expectedState);
-    });
-  });
-
   describe('#getLayerIds', () => {
     it('return the layer ids', () => {
       const state: DatatableVisualizationState = {

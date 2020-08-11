@@ -66,12 +66,6 @@ describe('metric_visualization', () => {
     });
   });
 
-  describe('#getPersistableState', () => {
-    it('persists the state as given', () => {
-      expect(metricVisualization.getPersistableState(exampleState())).toEqual(exampleState());
-    });
-  });
-
   describe('#getConfiguration', () => {
     it('can add a metric when there is no accessor', () => {
       expect(

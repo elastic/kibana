@@ -59,9 +59,7 @@ export interface EditorFrameInstance {
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
   registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
-  registerVisualization: <T, P>(
-    visualization: Visualization<T, P> | Promise<Visualization<T, P>>
-  ) => void;
+  registerVisualization: <T>(visualization: Visualization<T> | Promise<Visualization<T>>) => void;
 }
 
 export interface EditorFrameStart {
@@ -134,7 +132,7 @@ export interface DatasourceSuggestion<T = unknown> {
 }
 
 export interface DatasourceMetaData {
-  filterableIndexPatterns: Array<{ id: string; title: string }>;
+  filterableIndexPatterns: string[];
 }
 
 export type StateSetter<T> = (newState: T | ((prevState: T) => T)) => void;
@@ -410,7 +408,7 @@ export interface VisualizationType {
   label: string;
 }
 
-export interface Visualization<T = unknown, P = unknown> {
+export interface Visualization<T = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -420,15 +418,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (
-    frame: FramePublicAPI,
-    state?: P,
-    savedObjectReferences?: SavedObjectReference[]
-  ) => T;
-  /**
-   * Can remove any state that should not be persisted to saved object, such as UI state
-   */
-  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  initialize: (frame: FramePublicAPI, state?: T) => T;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,

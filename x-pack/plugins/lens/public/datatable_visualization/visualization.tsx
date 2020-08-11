@@ -24,10 +24,7 @@ function newLayerState(layerId: string): LayerState {
   };
 }
 
-export const datatableVisualization: Visualization<
-  DatatableVisualizationState,
-  DatatableVisualizationState
-> = {
+export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -73,8 +70,6 @@ export const datatableVisualization: Visualization<
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions({
     table,

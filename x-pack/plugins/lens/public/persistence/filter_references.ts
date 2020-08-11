@@ -7,6 +7,7 @@
 import { Filter } from 'src/plugins/data/public';
 import { SavedObjectReference } from 'kibana/public';
 import { FilterMeta } from 'src/plugins/data/common';
+import { Document } from './saved_object_store';
 
 export interface PersistableFilterMeta extends FilterMeta {
   indexRefName?: string;
@@ -14,6 +15,20 @@ export interface PersistableFilterMeta extends FilterMeta {
 
 export interface PersistableFilter extends Filter {
   meta: PersistableFilterMeta;
+}
+
+export function getFilterableIndexPatternIds(doc: Document) {
+  return new Array(doc.state.datasourceMetaData.numberFilterableIndexPatterns)
+    .fill(undefined)
+    .map((_, index) => {
+      return doc.references.find(({ name }) => name === `filterable-index-pattern-${index}`)!.id;
+    });
+}
+
+export function filterableIndexPatternIdsToReferences(filterableIndexPatternIds: string[]) {
+  return filterableIndexPatternIds.map((id, index) => {
+    return { type: 'index-pattern', id, name: `filterable-index-pattern-${index}` };
+  });
 }
 
 export function extractFilterReferences(

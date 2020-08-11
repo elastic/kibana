@@ -34,6 +34,7 @@ import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public'
 import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 export interface LensEmbeddableConfiguration {
+  expression: string | null;
   savedVis: Document;
   editUrl: string;
   editPath: string;
@@ -56,6 +57,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   private expressionRenderer: ReactExpressionRendererType;
   private getTrigger: UiActionsStart['getTrigger'] | undefined;
+  private expression: string | null;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
@@ -72,7 +74,14 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
     getTrigger: UiActionsStart['getTrigger'] | undefined,
-    { savedVis, editPath, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
+    {
+      expression,
+      savedVis,
+      editPath,
+      editUrl,
+      editable,
+      indexPatterns,
+    }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
   ) {
@@ -95,6 +104,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
     this.getTrigger = getTrigger;
     this.expressionRenderer = expressionRenderer;
+    this.expression = expression;
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
@@ -149,7 +159,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
-        expression={this.savedVis.expression}
+        expression={this.expression}
         context={this.currentContext}
         handleEvent={this.handleEvent}
       />,

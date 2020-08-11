@@ -74,7 +74,10 @@ export function EditorFrame(props: EditorFrameProps) {
             state.datasourceStates[datasourceId].isLoading
           ) {
             datasource
-              .initialize(state.datasourceStates[datasourceId].state || undefined)
+              .initialize(
+                state.datasourceStates[datasourceId].state || undefined,
+                props.doc?.references
+              )
               .then((datasourceState) => {
                 if (!isUnmounted) {
                   dispatch({
@@ -173,8 +176,7 @@ export function EditorFrame(props: EditorFrameProps) {
               visualization: props.doc.visualizationType
                 ? props.visualizationMap[props.doc.visualizationType].initialize(
                     framePublicAPI,
-                    props.doc.state.visualization,
-                    props.doc.references
+                    props.doc.state.visualization
                   )
                 : props.doc.state.visualization,
             },

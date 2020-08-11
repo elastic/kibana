@@ -7,6 +7,7 @@
 import { Capabilities, HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { toExpression } from '@kbn/interpreter/target/common';
 import {
   IndexPatternsContract,
   IndexPattern,
@@ -20,9 +21,11 @@ import {
   IContainer,
 } from '../../../../../../src/plugins/embeddable/public';
 import { Embeddable } from './embeddable';
-import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
+import { SavedObjectIndexStore, DOC_TYPE, getFilterableIndexPatternIds } from '../../persistence';
 import { getEditPath } from '../../../common';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { buildExpression } from '../editor_frame/expression_helpers';
+import { Datasource, Visualization, DatasourcePublicAPI, FramePublicAPI } from '../../types';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -32,6 +35,8 @@ interface StartServices {
   expressionRenderer: ReactExpressionRendererType;
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
+  datasources: Record<string, Datasource<unknown, unknown>>;
+  visualizations: Record<string, Visualization<unknown>>;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -73,27 +78,82 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       timefilter,
       expressionRenderer,
       uiActions,
+      datasources,
+      visualizations,
     } = await this.getStartServices();
     const store = new SavedObjectIndexStore(savedObjectsClient);
     const savedVis = await store.load(savedObjectId);
 
-    const promises = savedVis.state.datasourceMetaData.filterableIndexPatterns.map(
-      async ({ id }) => {
-        try {
-          return await indexPatternService.get(id);
-        } catch (error) {
-          // Unable to load index pattern, ignore error as the index patterns are only used to
-          // configure the filter and query bar - there is still a good chance to get the visualization
-          // to show.
-          return null;
-        }
+    const promises = getFilterableIndexPatternIds(savedVis).map(async (id) => {
+      try {
+        return await indexPatternService.get(id);
+      } catch (error) {
+        // Unable to load index pattern, ignore error as the index patterns are only used to
+        // configure the filter and query bar - there is still a good chance to get the visualization
+        // to show.
+        return null;
       }
-    );
+    });
     const indexPatterns = (
       await Promise.all(promises)
     ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
       Boolean(indexPattern)
     );
+
+    const datasourceStates: Record<string, { isLoading: boolean; state: unknown }> = {};
+
+    await Promise.all(
+      Object.entries(datasources).map(([datasourceId, datasource]) => {
+        if (savedVis.state.datasourceStates[datasourceId]) {
+          return datasource
+            .initialize(savedVis.state.datasourceStates[datasourceId], savedVis.references)
+            .then((datasourceState) => {
+              datasourceStates[datasourceId] = { isLoading: false, state: datasourceState };
+            });
+        }
+      })
+    );
+
+    const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
+    Object.keys(datasources)
+      .filter((id) => datasourceStates[id])
+      .forEach((id) => {
+        const datasourceState = datasourceStates[id].state;
+        const datasource = datasources[id];
+
+        const layers = datasource.getLayers(datasourceState);
+        layers.forEach((layer) => {
+          datasourceLayers[layer] = datasource.getPublicAPI({
+            state: datasourceState,
+            layerId: layer,
+            dateRange: { fromDate: 'now', toDate: 'now' },
+          });
+        });
+      });
+
+    const framePublicAPI: FramePublicAPI = {
+      datasourceLayers,
+      dateRange: { fromDate: 'now', toDate: 'now' },
+      query: savedVis.state.query,
+      filters: savedVis.state.filters,
+
+      addNewLayer() {
+        throw new Error('adding new layer is not allowed in embedded mode');
+      },
+
+      removeLayers() {
+        throw new Error('removing layers is not allowed in embedded mode');
+      },
+    };
+
+    const expression = buildExpression({
+      visualization: visualizations[savedVis.visualizationType!],
+      visualizationState: savedVis.state.visualization,
+      datasourceMap: datasources,
+      datasourceStates,
+      framePublicAPI,
+      removeDateRange: true,
+    });
 
     return new Embeddable(
       timefilter,
@@ -105,6 +165,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         editUrl: coreHttp.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
         editable: await this.isEditable(),
         indexPatterns,
+        expression: expression ? toExpression(expression) : null,
       },
       input,
       parent

@@ -8,6 +8,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { Observable, Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
@@ -68,6 +70,10 @@ export class EditorFrameService {
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
+      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+        collectAsyncDefinitions(this.datasources),
+        collectAsyncDefinitions(this.visualizations),
+      ]);
       return {
         capabilities: coreStart.application.capabilities,
         savedObjectsClient: coreStart.savedObjects.client,
@@ -76,6 +82,8 @@ export class EditorFrameService {
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
+        datasources: resolvedDatasources,
+        visualizations: resolvedVisualizations,
       };
     };
 
@@ -88,7 +96,7 @@ export class EditorFrameService {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
       },
       registerVisualization: (visualization) => {
-        this.visualizations.push(visualization as Visualization<unknown, unknown>);
+        this.visualizations.push(visualization as Visualization<unknown>);
       },
     };
   }

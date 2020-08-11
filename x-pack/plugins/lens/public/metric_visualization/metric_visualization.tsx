@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter/target/common';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, FramePublicAPI, OperationMetadata } from '../types';
-import { State, PersistableState } from './types';
+import { State } from './types';
 import chartMetricSVG from '../assets/chart_metric.svg';
 
 const toExpression = (
@@ -39,7 +39,7 @@ const toExpression = (
   };
 };
 
-export const metricVisualization: Visualization<State, PersistableState> = {
+export const metricVisualization: Visualization<State> = {
   id: 'lnsMetric',
 
   visualizationTypes: [
@@ -87,8 +87,6 @@ export const metricVisualization: Visualization<State, PersistableState> = {
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getConfiguration(props) {
     return {
