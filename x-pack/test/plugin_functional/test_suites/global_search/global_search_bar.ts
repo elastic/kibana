@@ -6,30 +6,34 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { GlobalSearchResult } from '../../../../plugins/global_search/common/types';
-// import { GlobalSearchTestApi } from '../../plugins/global_search_test/public/types';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  // const { common } = getPageObjects(['common']);
-  // const browser = getService('browser');
-
-  // const findResultsWithAPI = async (t: string): Promise<GlobalSearchResult[]> => {
-  //   return browser.executeAsync(async (term, cb) => {
-  //     const { start } = window.__coreProvider;
-  //     const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
-  //     globalSearchTestApi.findTest(term).then(cb);
-  //   }, t);
-  // };
-
   describe('GlobalSearchBar', function () {
-    beforeEach(async function () {
-      // await common.navigateToApp('globalSearchTestApp');
+    const { common } = getPageObjects(['common']);
+    const find = getService('find');
+    const testSubjects = getService('testSubjects');
+    const browser = getService('browser');
+
+    before(async () => {
+      await common.navigateToApp('home');
     });
 
-    it('works', async () => {
-      // const results = await findResultsWithAPI('no_match');
-      // TODO
-      expect(true).to.be(true);
+    it('basically works', async () => {
+      const field = await testSubjects.find('header-search');
+      await field.click();
+
+      expect((await testSubjects.findAll('header-search-option')).length).to.be(15);
+
+      field.type('d');
+
+      const options = await testSubjects.findAll('header-search-option');
+
+      expect(options.length).to.be(6);
+
+      await options[1].click();
+
+      expect(await browser.getCurrentUrl()).to.contain('discover');
+      expect(await (await find.activeElement()).getTagName()).to.be('body');
     });
   });
 }

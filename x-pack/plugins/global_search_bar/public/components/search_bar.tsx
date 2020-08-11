@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, FocusEvent } from 'react';
 import {
   EuiSelectable,
   EuiPopover,
@@ -51,6 +51,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
   const [options, _setOptions] = useState([] as GlobalSearchResult[]);
   // const [isLoading, setLoadingState] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
+  const [panelRef, setPanelRef] = useState<HTMLElement | null>(null);
   const isWindows = navigator.platform.toLowerCase().indexOf('win') >= 0;
 
   const onSearch = useCallback(
@@ -111,7 +112,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
-      if (event.key === 's' && (isWindows ? event.ctrlKey : event.metaKey)) {
+      if (event.key === 's' && event.ctrlKey) {
         if (searchRef) {
           event.preventDefault();
           searchRef.focus();
@@ -136,7 +137,11 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
         onFocus: () => {
           setSearchFocus(true);
         },
-        onBlur: () => setSearchFocus(false),
+        onBlur: (e: FocusEvent<HTMLInputElement>) => {
+          if (!panelRef?.contains(e.relatedTarget as HTMLButtonElement)) {
+            setSearchFocus(false);
+          }
+        },
         placeholder: 'Search for anything...',
         incremental: true,
         compressed: true,
@@ -154,7 +159,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       options={options}
       // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
       renderOption={(option: EuiSelectableOption & GlobalSearchResult) => (
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" data-test-subj="header-search-option">
           <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
           <EuiFlexItem>{option.title}</EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -180,6 +185,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           await navigateToUrl(url);
           // a simplified "get first tabbale element" with likely subjects
           (document.activeElement as HTMLElement).blur();
+          setSearchFocus(false);
         }
       }}
     >
@@ -191,6 +197,8 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
             closePopover={() => setSearchFocus(false)}
             panelPaddingSize={'none'}
             hasArrow={false}
+            panelRef={setPanelRef}
+            className="foo"
           >
             <div style={{ width: '600px' }}>{list}</div>
             <EuiPopoverFooter>
@@ -206,7 +214,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
                       id="xpack.globalSearchBar.searchBar.shortcut"
                       defaultMessage="Quickly search using {shortcut}"
                       values={{
-                        shortcut: <EuiBadge>{isWindows ? 'Command + S' : 'Ctrl + S'}</EuiBadge>,
+                        shortcut: <EuiBadge>{isWindows ? 'Ctrl + S' : 'Command + S'}</EuiBadge>,
                       }}
                     />
                   </EuiFlexItem>
