@@ -5,7 +5,9 @@
  */
 
 import { Dispatch } from 'react';
+import { NotificationsSetup } from 'src/core/public';
 import { OnFormUpdateArg } from '../../../shared_imports';
+import { ApiService } from '../../services';
 import { SerializeResult } from './serialize';
 import { OnActionHandler, ProcessorInfo } from './components';
 import { ProcessorsDispatch, State as ProcessorsReducerState } from './processors_reducer';
@@ -75,6 +77,8 @@ export interface ContextValueState {
 
 export interface ContextValue {
   links: Links;
+  toasts: NotificationsSetup['toasts'];
+  api: ApiService;
   onTreeAction: OnActionHandler;
   state: ContextValueState;
 }
