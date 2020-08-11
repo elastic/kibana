@@ -7,5 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-count?: number;
+get count(): number;
+
+set count(count: number);
 ```

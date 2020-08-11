@@ -38,7 +38,6 @@ function getFieldTypes(cards: FieldVisConfig[]) {
   return fieldTypes.sort();
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');

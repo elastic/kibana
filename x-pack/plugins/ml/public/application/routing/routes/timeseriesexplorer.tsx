@@ -6,7 +6,7 @@
 
 import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { usePrevious } from 'react-use';
+import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';

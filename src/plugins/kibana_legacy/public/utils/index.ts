@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './migrate_legacy_query';
 export * from './system_api';
 export * from './normalize_path';
 // @ts-ignore

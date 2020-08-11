@@ -16,7 +16,6 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
 }));
 
 import * as Rx from 'rxjs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { LevelLogger } from '../';

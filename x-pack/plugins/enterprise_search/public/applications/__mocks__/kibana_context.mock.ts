@@ -13,5 +13,6 @@ import { httpServiceMock } from 'src/core/public/mocks';
 export const mockKibanaContext = {
   http: httpServiceMock.createSetupContract(),
   setBreadcrumbs: jest.fn(),
+  setDocTitle: jest.fn(),
   enterpriseSearchUrl: 'http://localhost:3002',
 };

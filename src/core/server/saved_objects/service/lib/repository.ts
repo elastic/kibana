@@ -1244,6 +1244,7 @@ export class SavedObjectsRepository {
           response
         )[0] as any;
 
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { [type]: attributes, references, updated_at } = documentToSave;
         if (error) {
           return {
