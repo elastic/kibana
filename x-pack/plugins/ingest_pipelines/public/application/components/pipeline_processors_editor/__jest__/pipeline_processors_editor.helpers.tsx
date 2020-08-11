@@ -7,7 +7,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import {
-  PipelineProcessorsContextProvider,
+  ProcessorsEditorContextProvider,
   Props,
   ProcessorsEditor,
   GlobalOnFailureProcessorsEditor,
@@ -62,9 +62,9 @@ jest.mock('react-virtualized', () => {
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
-    <PipelineProcessorsContextProvider {...props}>
+    <ProcessorsEditorContextProvider {...props}>
       <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
-    </PipelineProcessorsContextProvider>
+    </ProcessorsEditorContextProvider>
   ),
   {
     doMountAsync: false,

@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ActionType,
-  Services,
-  ActionTypeExecutorOptions,
-  ActionTypeExecutorResult,
-} from '../types';
+import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType } from './slack';
+import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 
@@ -19,11 +14,13 @@ const ACTION_TYPE_ID = '.slack';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: SlackActionType;
 
 beforeAll(() => {
   actionType = getActionType({
-    async executor() {},
+    async executor(options) {
+      return { status: 'ok', actionId: options.actionId };
+    },
     configurationUtilities: actionsConfigMock.create(),
   });
 });
@@ -119,7 +116,7 @@ describe('validateActionTypeSecrets()', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockSlackExecutor(options: ActionTypeExecutorOptions) {
+    async function mockSlackExecutor(options: SlackActionTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
       if (message == null) throw new Error('message property required in parameter');
@@ -134,7 +131,7 @@ describe('execute()', () => {
         text: `slack mockExecutor success: ${message}`,
         actionId: '',
         status: 'ok',
-      } as ActionTypeExecutorResult;
+      } as ActionTypeExecutorResult<void>;
     }
 
     actionType = getActionType({

@@ -19,17 +19,17 @@ import {
 const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo
-): Array<RegistryStream & { dataset: { type: string; name: string } }> => {
-  const streams: Array<RegistryStream & { dataset: { type: string; name: string } }> = [];
+): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
+  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
 
   (packageInfo.datasets || []).forEach((dataset) => {
     (dataset.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
         streams.push({
           ...stream,
-          dataset: {
+          data_stream: {
             type: dataset.type,
-            name: dataset.name,
+            dataset: dataset.name,
           },
         });
       }
@@ -76,12 +76,9 @@ export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageC
         packageInfo
       ).map((packageStream) => {
         const stream: PackageConfigInputStream = {
-          id: `${packageInput.type}-${packageStream.dataset.name}`,
+          id: `${packageInput.type}-${packageStream.data_stream.dataset}`,
           enabled: packageStream.enabled === false ? false : true,
-          dataset: {
-            name: packageStream.dataset.name,
-            type: packageStream.dataset.type,
-          },
+          data_stream: packageStream.data_stream,
         };
         if (packageStream.vars && packageStream.vars.length) {
           stream.vars = packageStream.vars.reduce(varsReducer, {});

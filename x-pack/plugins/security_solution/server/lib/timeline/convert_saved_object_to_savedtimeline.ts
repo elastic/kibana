@@ -37,7 +37,6 @@ const getTimelineTypeAndStatus = (
   status: TimelineStatus | null = TimelineStatus.active
 ) => {
   // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-  // @ts-ignore
   if (timelineType === 'draft') {
     return {
       timelineType: TimelineType.default,

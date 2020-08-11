@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 
 import { RuleTypeSchema } from '../../../../../common/detection_engine/types';
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   author,
   building_block_type,
@@ -18,7 +17,6 @@ import {
   timestamp_override,
   threshold,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 import {
   listArray,
   listArrayOrUndefined,

@@ -10,11 +10,11 @@ import { assertCloseTo } from '../assert_close_to';
 describe('getHistogramInterval', () => {
   it('specifies the interval necessary to divide a given timespan into equal buckets, rounded to the nearest integer, expressed in ms', () => {
     const interval = getHistogramInterval('now-15m', 'now', 10);
-    assertCloseTo(interval, 90000, 10);
+    assertCloseTo(interval, 90000, 20);
   });
 
   it('will supply a default constant value for bucketCount when none is provided', () => {
     const interval = getHistogramInterval('now-15m', 'now');
-    assertCloseTo(interval, 36000, 10);
+    assertCloseTo(interval, 36000, 20);
   });
 });

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-esTypes?: string[];
+get esTypes(): string[] | undefined;
 ```

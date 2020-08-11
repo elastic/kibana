@@ -6,30 +6,12 @@
 import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
 import { showApiError } from '../../services/api_errors';
-import { loadNodes, loadNodeDetails } from '../../services/api';
+import { loadNodeDetails } from '../../services/api';
 import { SET_SELECTED_NODE_ATTRS } from '../../constants';
 
 export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);
 export const setSelectedPrimaryShardCount = createAction('SET_SELECTED_PRIMARY_SHARED_COUNT');
 export const setSelectedReplicaCount = createAction('SET_SELECTED_REPLICA_COUNT');
-export const fetchedNodes = createAction('FETCHED_NODES');
-let fetchingNodes = false;
-export const fetchNodes = () => async (dispatch) => {
-  try {
-    if (!fetchingNodes) {
-      fetchingNodes = true;
-      const nodes = await loadNodes();
-      dispatch(fetchedNodes(nodes));
-    }
-  } catch (err) {
-    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage', {
-      defaultMessage: 'Error loading node attribute information',
-    });
-    showApiError(err, title);
-  } finally {
-    fetchingNodes = false;
-  }
-};
 
 export const fetchedNodeDetails = createAction(
   'FETCHED_NODE_DETAILS',

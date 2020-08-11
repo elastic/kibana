@@ -7,7 +7,8 @@
     "Build systems, like Jenkins, may start processes in the `/tmp` directory. These can be exempted by name or by username."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

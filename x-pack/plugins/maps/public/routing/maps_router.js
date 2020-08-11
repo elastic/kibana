@@ -7,8 +7,11 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { getCoreI18n } from '../kibana_services';
-import { createKbnUrlStateStorage } from '../../../../../src/plugins/kibana_utils/public';
+import { getCoreI18n, getToasts } from '../kibana_services';
+import {
+  createKbnUrlStateStorage,
+  withNotifyOnErrors,
+} from '../../../../../src/plugins/kibana_utils/public';
 import { getStore } from './store_operations';
 import { Provider } from 'react-redux';
 import { LoadListAndRender } from './routes/list/load_list_and_render';
@@ -19,7 +22,11 @@ export let kbnUrlStateStorage;
 
 export async function renderApp(context, { appBasePath, element, history, onAppLeave }) {
   goToSpecifiedPath = (path) => history.push(path);
-  kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+  kbnUrlStateStorage = createKbnUrlStateStorage({
+    useHash: false,
+    history,
+    ...withNotifyOnErrors(getToasts()),
+  });
 
   render(<App history={history} appBasePath={appBasePath} onAppLeave={onAppLeave} />, element);
 

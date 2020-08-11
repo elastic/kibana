@@ -106,6 +106,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     indexPatternName: '',
     isIncludingSystemIndices: false,
   };
+
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {

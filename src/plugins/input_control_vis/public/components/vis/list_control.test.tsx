@@ -49,7 +49,7 @@ test('renders ListControl', () => {
       intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('disableMsg', () => {
@@ -66,5 +66,5 @@ test('disableMsg', () => {
       intl={{} as any}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

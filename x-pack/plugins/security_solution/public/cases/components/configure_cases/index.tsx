@@ -52,6 +52,7 @@ interface ConfigureCasesComponentProps {
 }
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);

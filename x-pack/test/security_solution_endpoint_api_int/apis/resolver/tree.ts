@@ -230,7 +230,7 @@ const verifyLifecycleStats = (
   }
 };
 
-export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const resolver = getService('resolverGenerator');
@@ -537,7 +537,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       describe('legacy events', () => {
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
         const entityID = '94041';
-        const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MiJ9';
 
         it('returns child process lifecycle events', async () => {
           const { body }: { body: ResolverChildren } = await supertest
@@ -567,12 +566,19 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns no values when there is no more data', async () => {
-          const { body } = await supertest
-            // after is set to the document id of the last event so there shouldn't be any more after it
+          let { body }: { body: ResolverChildren } = await supertest
             .get(
-              `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=${cursor}`
+              // there should only be a single child for this node
+              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&children=1`
             )
             .expect(200);
+          expect(body.nextChild).to.not.be(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&afterChild=${body.nextChild}`
+            )
+            .expect(200));
           expect(body.childNodes).be.empty();
           expect(body.nextChild).to.eql(null);
         });

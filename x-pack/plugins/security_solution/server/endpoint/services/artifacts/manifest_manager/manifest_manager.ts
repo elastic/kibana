@@ -237,10 +237,11 @@ export class ManifestManager {
       const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
         page,
         perPage: 20,
-        kuery: 'ingest-package-configs.package.name:endpoint',
+        kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
       for (const packageConfig of items) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
         if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
           const oldManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {
