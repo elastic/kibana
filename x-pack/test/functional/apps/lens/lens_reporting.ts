@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
@@ -28,11 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not cause PDF reports to fail', async () => {
-      await pageObjects.common.navigateToApp('dashboard');
+      await PageObjects.common.navigateToApp('dashboard');
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
-      await pageObjects.reporting.openPdfReportingPanel();
-      await pageObjects.reporting.clickGenerateReportButton();
-      const url = await pageObjects.reporting.getReportURL(60000);
+      await PageObjects.reporting.openPdfReportingPanel();
+      await PageObjects.reporting.clickGenerateReportButton();
+      const url = await PageObjects.reporting.getReportURL(60000);
 
       expect(url).to.be.ok();
     });

@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const pageObjects = getPageObjects(['reporting', 'common', 'discover']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'discover']);
   const filterBar = getService('filterBar');
 
   describe('Discover', () => {
@@ -25,51 +25,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV button', () => {
-      beforeEach(() => pageObjects.common.navigateToApp('discover'));
+      beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
       it('is not available if new', async () => {
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
       });
 
       it('becomes available when saved', async () => {
-        await pageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('becomes available/not available when a saved search is created, changed and saved again', async () => {
         // create new search, csv export is not available
-        await pageObjects.discover.clickNewSearchButton();
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         // save search, csv export is available
-        await pageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         // add filter, csv export is not available
         await filterBar.addFilter('currency', 'is', 'EUR');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
         // save search again, csv export is available
-        await pageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton 2');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('generates a report with data', async () => {
-        await pageObjects.discover.clickNewSearchButton();
-        await pageObjects.reporting.setTimepickerInDataRange();
-        await pageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.canReportBeCreated()).to.be(true);
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInDataRange();
+        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
       });
 
       it('generates a report with no data', async () => {
-        await pageObjects.reporting.setTimepickerInNoDataRange();
-        await pageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
-        await pageObjects.reporting.openCsvReportingPanel();
-        expect(await pageObjects.reporting.canReportBeCreated()).to.be(true);
+        await PageObjects.reporting.setTimepickerInNoDataRange();
+        await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
+        await PageObjects.reporting.openCsvReportingPanel();
+        expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
       });
     });
   });

@@ -17,7 +17,7 @@ const mkdirAsync = promisify(fs.mkdir);
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -43,16 +43,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Print PDF button', () => {
       it('is not available if new', async () => {
-        await pageObjects.common.navigateToApp('dashboard');
-        await pageObjects.dashboard.clickNewDashboard();
-        await pageObjects.reporting.openPdfReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.reporting.openPdfReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
       });
 
       it('becomes available when saved', async () => {
-        await pageObjects.dashboard.saveDashboard('My PDF Dashboard');
-        await pageObjects.reporting.openPdfReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
+        await PageObjects.reporting.openPdfReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
@@ -61,14 +61,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
-        await pageObjects.common.navigateToApp('dashboard');
-        await pageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await pageObjects.reporting.openPdfReportingPanel();
-        await pageObjects.reporting.checkUsePrintLayout();
-        await pageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.checkUsePrintLayout();
+        await PageObjects.reporting.clickGenerateReportButton();
 
-        const url = await pageObjects.reporting.getReportURL(60000);
-        const res = await pageObjects.reporting.getResponse(url);
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const res = await PageObjects.reporting.getResponse(url);
 
         expect(res.statusCode).to.equal(200);
         expect(res.headers['content-type']).to.equal('application/pdf');
@@ -77,16 +77,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Print PNG button', () => {
       it('is not available if new', async () => {
-        await pageObjects.common.navigateToApp('dashboard');
-        await pageObjects.dashboard.clickNewDashboard();
-        await pageObjects.reporting.openPngReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.reporting.openPngReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
       });
 
       it('becomes available when saved', async () => {
-        await pageObjects.dashboard.saveDashboard('My PNG Dash');
-        await pageObjects.reporting.openPngReportingPanel();
-        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.dashboard.saveDashboard('My PNG Dash');
+        await PageObjects.reporting.openPngReportingPanel();
+        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
@@ -108,15 +108,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         this.timeout(300000);
 
-        await pageObjects.common.navigateToApp('dashboard');
-        await pageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await pageObjects.reporting.openPngReportingPanel();
-        await pageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-        await pageObjects.reporting.clickGenerateReportButton();
-        await pageObjects.reporting.removeForceSharedItemsContainerSize();
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
-        const url = await pageObjects.reporting.getReportURL(60000);
-        const reportData = await pageObjects.reporting.getRawPdfReportData(url);
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'dashboard_preserve_layout';
         const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
         const percentSimilar = await checkIfPngsMatch(

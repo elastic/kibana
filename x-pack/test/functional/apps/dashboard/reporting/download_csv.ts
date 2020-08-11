@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
 
   describe('Reporting Download CSV', () => {
     before('initialize tests', async () => {
@@ -41,8 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Downloads a CSV export of a saved search panel', async function () {
-      await pageObjects.common.navigateToApp('dashboard');
-      await pageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
       const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-EcommerceData');
       await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
