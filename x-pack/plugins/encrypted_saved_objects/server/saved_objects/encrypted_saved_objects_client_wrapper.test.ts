@@ -409,7 +409,7 @@ describe('#bulkUpdate', () => {
       saved_objects: [{ id: 'some-id', type: 'unknown-type', attributes, references: [] }],
     };
 
-    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
+    mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
     await expect(
       wrapper.bulkUpdate(
@@ -418,10 +418,10 @@ describe('#bulkUpdate', () => {
       )
     ).resolves.toEqual(mockedResponse);
 
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
       [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
-      { overwrite: true }
+      {}
     );
   });
 
@@ -543,6 +543,160 @@ describe('#bulkUpdate', () => {
     );
   });
 
+  it('handles mixed encrypted and non encrypted objects', async () => {
+    const encryptedDocs = [
+      {
+        id: 'some-encrypted-id',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one',
+          attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
+          attrThree: 'three',
+        },
+      },
+      {
+        id: 'some-encrypted-id-2',
+        type: 'known-type',
+        attributes: {
+          attrOne: 'one 2',
+          attrSecret: 'secret 2',
+          attrNotSoSecret: 'not-so-secret 2',
+          attrThree: 'three 2',
+        },
+      },
+    ];
+
+    mockBaseClient.bulkCreate.mockResolvedValue({
+      saved_objects: encryptedDocs.map((doc) => ({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          attrSecret: `*${doc.attributes.attrSecret}*`,
+          attrNotSoSecret: `*${doc.attributes.attrNotSoSecret}*`,
+        },
+        references: [],
+      })),
+    });
+
+    const nonEncyptedDoc = {
+      id: 'some-id',
+      type: 'unknown-type',
+      attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+      references: [],
+    };
+    mockBaseClient.bulkUpdate.mockResolvedValue({
+      saved_objects: [nonEncyptedDoc],
+    });
+
+    await expect(
+      wrapper.bulkUpdate(
+        [
+          { ...encryptedDocs[0] },
+          {
+            type: 'unknown-type',
+            id: 'some-id',
+            attributes: nonEncyptedDoc.attributes,
+            version: 'some-version',
+          },
+          { ...encryptedDocs[1] },
+        ],
+        {}
+      )
+    ).resolves.toEqual({
+      saved_objects: [
+        {
+          id: 'some-encrypted-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
+          references: [],
+        },
+        {
+          id: 'some-id',
+          type: 'unknown-type',
+          attributes: nonEncyptedDoc.attributes,
+          references: [],
+        },
+        {
+          id: 'some-encrypted-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one 2',
+            attrNotSoSecret: 'not-so-secret 2',
+            attrThree: 'three 2',
+          },
+          references: [],
+        },
+      ],
+    });
+
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(2);
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-encrypted-id' },
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-encrypted-id-2' },
+      {
+        attrOne: 'one 2',
+        attrSecret: 'secret 2',
+        attrNotSoSecret: 'not-so-secret 2',
+        attrThree: 'three 2',
+      },
+      { user: mockAuthenticatedUser() }
+    );
+
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          id: 'some-encrypted-id',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
+        },
+        {
+          id: 'some-encrypted-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one 2',
+            attrSecret: '*secret 2*',
+            attrNotSoSecret: '*not-so-secret 2*',
+            attrThree: 'three 2',
+          },
+        },
+      ],
+      { overwrite: true }
+    );
+
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'unknown-type',
+          id: 'some-id',
+          attributes: nonEncyptedDoc.attributes,
+          version: 'some-version',
+        },
+      ],
+      {}
+    );
+  });
+
   describe('namespace', () => {
     const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
       const docs = [
@@ -623,7 +777,7 @@ describe('#bulkUpdate', () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
 
     const failureReason = new Error('Something bad happened...');
-    mockBaseClient.bulkCreate.mockRejectedValue(failureReason);
+    mockBaseClient.bulkUpdate.mockRejectedValue(failureReason);
 
     await expect(
       wrapper.bulkUpdate(
@@ -632,10 +786,10 @@ describe('#bulkUpdate', () => {
       )
     ).rejects.toThrowError(failureReason);
 
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkUpdate).toHaveBeenCalledWith(
       [{ type: 'unknown-type', id: 'some-id', attributes, version: 'some-version' }],
-      { overwrite: true }
+      {}
     );
   });
 });

@@ -137,15 +137,29 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
+    const { nonEncryptedObjects, encryptableObjects, idsInOrder } = objects.reduce<{
+      nonEncryptedObjects: Array<SavedObjectsBulkUpdateObject<T>>;
+      encryptableObjects: Array<SavedObjectsBulkUpdateObject<T>>;
+      idsInOrder: string[];
+    }>(
+      (partition, object) => {
+        if (this.options.service.isRegistered(object.type)) {
+          partition.encryptableObjects.push(object);
+        } else {
+          partition.nonEncryptedObjects.push(object);
+        }
+        partition.idsInOrder.push(object.id);
+        return partition;
+      },
+      { nonEncryptedObjects: [], encryptableObjects: [], idsInOrder: [] }
+    );
+
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
     const encryptedObjects = await Promise.all(
-      objects.map(async (object) => {
+      encryptableObjects.map(async (object) => {
         const { type, id, attributes } = object;
-        if (!this.options.service.isRegistered(type)) {
-          return object;
-        }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
@@ -163,10 +177,22 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
 
     return await this.handleEncryptedAttributesInBulkResponse(
-      await this.options.baseClient.bulkCreate(encryptedObjects, {
-        ...options,
-        overwrite: true,
-      }),
+      {
+        saved_objects: this.mergeBulkResponsesInOrder(
+          idsInOrder,
+          encryptedObjects.length
+            ? (
+                await this.options.baseClient.bulkCreate(encryptedObjects, {
+                  ...options,
+                  overwrite: true,
+                })
+              ).saved_objects
+            : [],
+          nonEncryptedObjects.length
+            ? (await this.options.baseClient.bulkUpdate(nonEncryptedObjects, options)).saved_objects
+            : []
+        ),
+      },
       objects
     );
   }
@@ -311,5 +337,27 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     return response;
+  }
+
+  /**
+   * merges two bulkResponses into one maintaining the order as specified in `idsInOrder`.
+   * pushes any response with without a clear index to the bottom maintaining its relative position
+   * @param idsInOrder array of string object IDs whose order dictates the final merged response
+   * @param responses array of responses to merge
+   */
+  private mergeBulkResponsesInOrder<
+    T,
+    R extends
+      | SavedObjectsBulkResponse<T>
+      | SavedObjectsFindResponse<T>
+      | SavedObjectsBulkUpdateResponse<T>
+  >(idsInOrder: string[], ...responses: Array<R['saved_objects']>): R['saved_objects'] {
+    const ResponsesById = new Map();
+    for (const response of responses) {
+      for (const object of response) {
+        ResponsesById.set(object.id, object);
+      }
+    }
+    return idsInOrder.map((id) => ResponsesById.get(id));
   }
 }
