@@ -317,7 +317,7 @@ export class Simulator {
   }
 
   /**
-   * Wrapper for the zoom slider button
+   * Wrapper for the zoom slider
    */
   public zoomSliderElement(): ReactWrapper {
     return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-slider"]');
