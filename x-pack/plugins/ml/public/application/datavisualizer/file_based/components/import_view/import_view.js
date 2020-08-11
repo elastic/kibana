@@ -340,17 +340,24 @@ export class ImportView extends Component {
       return;
     }
 
-    const { exists } = await ml.checkIndexExists({ index });
-    const indexNameError = exists ? (
-      <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
-        defaultMessage="Index name already exists"
-      />
-    ) : (
-      isIndexNameValid(index)
-    );
+    try {
+      const { exists } = await ml.checkIndexExists({ index });
+      const indexNameError = exists ? (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+          defaultMessage="Index name already exists"
+        />
+      ) : (
+        isIndexNameValid(index)
+      );
 
-    this.setState({ checkingValidIndex: false, indexNameError });
+      this.setState({ checkingValidIndex: false, indexNameError });
+    } catch (e) {
+      // user doesn't have permission to call _field_caps.
+      // assume index name is ok and allow it to fail on creation
+      console.error('Error checking if index exists', e);
+      this.setState({ checkingValidIndex: false, indexNameError: '' });
+    }
   }, 500);
 
   onIndexPatternChange = (e) => {
