@@ -13,41 +13,41 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { HostResultList, AppLocation } from '../../../../../common/endpoint/types';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 
-import { hostMiddlewareFactory } from './middleware';
+import { endpointMiddlewareFactory } from './middleware';
 
-import { hostListReducer } from './reducer';
+import { endpointListReducer } from './reducer';
 
 import { uiQueryParams } from './selectors';
-import { mockHostResultList } from './mock_host_result_list';
-import { HostState, HostIndexUIQueryParams } from '../types';
+import { mockEndpointResultList } from './mock_endpoint_result_list';
+import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import {
   MiddlewareActionSpyHelper,
   createSpyMiddleware,
 } from '../../../../common/store/test_utils';
-import { getHostListPath } from '../../../common/routing';
+import { getEndpointListPath } from '../../../common/routing';
 
-describe('host list pagination: ', () => {
+describe('endpoint list pagination: ', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let history: History<AppLocation['state']>;
   let store: Store;
-  let queryParams: () => HostIndexUIQueryParams;
+  let queryParams: () => EndpointIndexUIQueryParams;
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let actionSpyMiddleware;
   const getEndpointListApiResponse = (): HostResultList => {
-    return mockHostResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
   };
 
-  let historyPush: (params: HostIndexUIQueryParams) => void;
+  let historyPush: (params: EndpointIndexUIQueryParams) => void;
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart();
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     history = createBrowserHistory();
-    const middleware = hostMiddlewareFactory(fakeCoreStart, depsStart);
-    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
-    store = createStore(hostListReducer, applyMiddleware(middleware, actionSpyMiddleware));
+    const middleware = endpointMiddlewareFactory(fakeCoreStart, depsStart);
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
+    store = createStore(endpointListReducer, applyMiddleware(middleware, actionSpyMiddleware));
 
     history.listen((location) => {
       store.dispatch({ type: 'userChangedUrl', payload: location });
@@ -55,12 +55,12 @@ describe('host list pagination: ', () => {
 
     queryParams = () => uiQueryParams(store.getState());
 
-    historyPush = (nextQueryParams: HostIndexUIQueryParams): void => {
-      return history.push(getHostListPath({ name: 'hostList', ...nextQueryParams }));
+    historyPush = (nextQueryParams: EndpointIndexUIQueryParams): void => {
+      return history.push(getEndpointListPath({ name: 'endpointList', ...nextQueryParams }));
     };
   });
 
-  describe('when the user enteres the host list for the first time', () => {
+  describe('when the user enteres the endpoint list for the first time', () => {
     it('the api is called with page_index and page_size defaulting to 0 and 10 respectively', async () => {
       const apiResponse = getEndpointListApiResponse();
       fakeHttpServices.post.mockResolvedValue(apiResponse);
@@ -70,10 +70,10 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: getHostListPath({ name: 'hostList' }),
+          pathname: getEndpointListPath({ name: 'endpointList' }),
         },
       });
-      await waitForAction('serverReturnedHostList');
+      await waitForAction('serverReturnedEndpointList');
       expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
         body: JSON.stringify({
           paging_properties: [{ page_index: '0' }, { page_size: '10' }],

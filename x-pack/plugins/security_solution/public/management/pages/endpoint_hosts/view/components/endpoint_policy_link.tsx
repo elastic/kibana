@@ -6,7 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { useHostSelector } from '../hooks';
+import { useEndpointSelector } from '../hooks';
 import { nonExistingPolicies } from '../../store/selectors';
 import { getPolicyDetailPath } from '../../../../common/routing';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -18,12 +18,12 @@ import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/end
  * the `nonExistingPolicies` value in the store. If it does not exist, then regular
  * text is returned.
  */
-export const HostPolicyLink = memo<
+export const EndpointPolicyLink = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {
     policyId: string;
   }
 >(({ policyId, children, onClick, ...otherProps }) => {
-  const missingPolicies = useHostSelector(nonExistingPolicies);
+  const missingPolicies = useEndpointSelector(nonExistingPolicies);
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { toRoutePath, toRouteUrl } = useMemo(() => {
     const toPath = getPolicyDetailPath(policyId);
@@ -50,4 +50,4 @@ export const HostPolicyLink = memo<
   );
 });
 
-HostPolicyLink.displayName = 'HostPolicyLink';
+EndpointPolicyLink.displayName = 'EndpointPolicyLink';

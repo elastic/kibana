@@ -19,18 +19,18 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { useHostSelector, useAgentDetailsIngestUrl } from '../hooks';
+import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
-import { getHostDetailsPath } from '../../../../common/routing';
+import { getEndpointDetailsPath } from '../../../../common/routing';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { AgentDetailsReassignConfigAction } from '../../../../../../../ingest_manager/public';
-import { HostPolicyLink } from '../components/host_policy_link';
+import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -51,15 +51,15 @@ const LinkToExternalApp = styled.div`
 
 const openReassignFlyoutSearch = '?openReassignFlyout=true';
 
-export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
+export const EndpointDetails = memo(({ details }: { details: HostMetadata }) => {
   const agentId = details.elastic.agent.id;
   const {
     url: agentDetailsUrl,
     appId: ingestAppId,
     appPath: agentDetailsAppPath,
   } = useAgentDetailsIngestUrl(agentId);
-  const queryParams = useHostSelector(uiQueryParams);
-  const policyStatus = useHostSelector(
+  const queryParams = useEndpointSelector(uiQueryParams);
+  const policyStatus = useEndpointSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
@@ -67,13 +67,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const detailsResultsUpper = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.os', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.os', {
           defaultMessage: 'OS',
         }),
         description: details.host.os.full,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.lastSeen', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
           defaultMessage: 'Last Seen',
         }),
         description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
@@ -83,19 +83,19 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
 
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { selected_host, show, ...currentUrlParams } = queryParams;
+    const { selected_endpoint, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
-        getHostDetailsPath({
-          name: 'hostPolicyResponse',
+        getEndpointDetailsPath({
+          name: 'endpointPolicyResponse',
           ...currentUrlParams,
-          selected_host: details.host.id,
+          selected_endpoint: details.host.id,
         })
       ),
-      getHostDetailsPath({
-        name: 'hostPolicyResponse',
+      getEndpointDetailsPath({
+        name: 'endpointPolicyResponse',
         ...currentUrlParams,
-        selected_host: details.host.id,
+        selected_endpoint: details.host.id,
       }),
     ];
   }, [details.host.id, formatUrl, queryParams]);
@@ -110,7 +110,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       onDoneNavigateTo: [
         'securitySolution:administration',
         {
-          path: getHostDetailsPath({ name: 'hostDetails', selected_host: details.host.id }),
+          path: getEndpointDetailsPath({
+            name: 'endpointDetails',
+            selected_endpoint: details.host.id,
+          }),
         },
       ],
     },
@@ -121,22 +124,22 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const detailsResultsPolicy = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.policy', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.policy', {
           defaultMessage: 'Integration',
         }),
         description: (
           <>
-            <HostPolicyLink
+            <EndpointPolicyLink
               policyId={details.Endpoint.policy.applied.id}
               data-test-subj="policyDetailsValue"
             >
               {details.Endpoint.policy.applied.name}
-            </HostPolicyLink>
+            </EndpointPolicyLink>
           </>
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.policyStatus', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.policyStatus', {
           defaultMessage: 'Configuration response',
         }),
         description: (
@@ -152,7 +155,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
             >
               <EuiText size="m">
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.host.details.policyStatusValue"
+                  id="xpack.securitySolution.endpoint.details.policyStatusValue"
                   defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
                   values={{ policyStatus }}
                 />
@@ -166,7 +169,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const detailsResultsLower = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.ipAddress', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.ipAddress', {
           defaultMessage: 'IP Address',
         }),
         description: (
@@ -178,13 +181,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.hostname', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.hostname', {
           defaultMessage: 'Hostname',
         }),
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.securitySolution.endpoint.host.details.endpointVersion', {
+        title: i18n.translate('xpack.securitySolution.endpoint.details.endpointVersion', {
           defaultMessage: 'Endpoint Version',
         }),
         description: details.agent.version,
@@ -197,13 +200,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsUpper}
-        data-test-subj="hostDetailsUpperList"
+        data-test-subj="endpointDetailsUpperList"
       />
       <EuiHorizontalRule margin="m" />
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsPolicy}
-        data-test-subj="hostDetailsPolicyList"
+        data-test-subj="endpointDetailsPolicyList"
       />
       <LinkToExternalApp>
         <LinkToApp
@@ -211,11 +214,11 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           appPath={agentDetailsWithFlyoutPath}
           href={agentDetailsWithFlyoutUrl}
           onClick={handleReassignEndpointsClick}
-          data-test-subj="hostDetailsLinkToIngest"
+          data-test-subj="endpointDetailsLinkToIngest"
         >
           <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
           <FormattedMessage
-            id="xpack.securitySolution.endpoint.host.details.linkToIngestTitle"
+            id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
             defaultMessage="Reassign Configuration"
           />
           <EuiIcon type="popout" className="linkToAppPopoutIcon" />
@@ -225,10 +228,10 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       <EuiDescriptionList
         type="column"
         listItems={detailsResultsLower}
-        data-test-subj="hostDetailsLowerList"
+        data-test-subj="endpointDetailsLowerList"
       />
     </>
   );
 });
 
-HostDetails.displayName = 'HostDetails';
+EndpointDetails.displayName = 'EndpointDetails';
