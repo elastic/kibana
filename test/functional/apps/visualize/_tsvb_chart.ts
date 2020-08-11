@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(20000, async () => {
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-          await PageObjects.common.sleep(2500);
+          await PageObjects.common.sleep(2000);
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
