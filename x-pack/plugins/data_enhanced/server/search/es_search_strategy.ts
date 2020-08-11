@@ -9,6 +9,7 @@ import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
+import { AsyncSearchGet } from '@elastic/elasticsearch/api/requestParams';
 import {
   SharedGlobalConfig,
   RequestHandlerContext,
@@ -25,13 +26,6 @@ import {
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
-
-interface AsyncSearchResponse<T = any> {
-  id: string;
-  is_partial: boolean;
-  is_running: boolean;
-  response: SearchResponse<T>;
-}
 
 interface EnhancedEsSearchResponse extends IEsSearchResponse {
   is_partial: boolean;
@@ -82,11 +76,8 @@ export const enhancedEsSearchStrategyProvider = (
 
   const cancel = async (context: RequestHandlerContext, id: string) => {
     logger.info(`cancel ${id}`);
-    const method = 'DELETE';
-    const path = encodeURI(`/_async_search/${id}`);
-    await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
-      method,
-      path,
+    await context.core.elasticsearch.client.asCurrentUser.asyncSearch.delete({
+      id,
     });
   };
 
@@ -107,25 +98,31 @@ async function asyncSearch(
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
 
-  const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
-
   // Only report partial results every 64 shards; this should be reduced when we actually display partial results
   const batchedReduceSize = request.id ? undefined : 64;
 
-  const querystring = toSnakeCase({
+  const asyncOptions = {
     waitForCompletionTimeout: '100ms', // Wait up to 100ms for the response to return
     keepAlive: '1m', // Extend the TTL for this search request by one minute
-    ...(batchedReduceSize && { batchedReduceSize }),
-    ...queryParams,
-  });
+  };
 
-  const esResponse = (await caller.transport.request({
-    method,
-    path,
-    body,
-    querystring,
-  })) as ApiResponse<AsyncSearchResponse>;
+  let esResponse;
+  if (request.id) {
+    esResponse = await caller.asyncSearch.get(
+      toSnakeCase({
+        id: request.id,
+        ...asyncOptions,
+      }) as AsyncSearchGet
+    );
+  } else {
+    esResponse = await caller.asyncSearch.submit(
+      toSnakeCase({
+        ...asyncOptions,
+        ...(batchedReduceSize && { batchedReduceSize }),
+        ...queryParams,
+      })
+    );
+  }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, response, is_partial, is_running } = esResponse.body;
