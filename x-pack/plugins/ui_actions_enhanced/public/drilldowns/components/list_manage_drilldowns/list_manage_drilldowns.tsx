@@ -64,8 +64,6 @@ export function ListManageDrilldowns({
   const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
     {
       name: 'Name',
-      truncateText: true,
-      width: showTriggerColumn ? '33%' : '50%',
       'data-test-subj': 'drilldownListItemName',
       render: (drilldown: DrilldownListItem) => (
         <div>
@@ -118,6 +116,7 @@ export function ListManageDrilldowns({
     },
     {
       align: 'right',
+      width: '64px',
       render: (drilldown: DrilldownListItem) => (
         <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
           {txtEditDrilldown}

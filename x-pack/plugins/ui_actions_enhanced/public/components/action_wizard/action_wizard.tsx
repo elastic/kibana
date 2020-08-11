@@ -18,9 +18,15 @@ import {
   EuiCheckableCard,
   EuiTextColor,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { txtChangeButton } from './i18n';
+import {
+  txtChangeButton,
+  txtTriggerPickerHelpText,
+  txtTriggerPickerHelpTooltip,
+  txtTriggerPickerLabel,
+} from './i18n';
 import './action_wizard.scss';
 import { ActionFactory } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
@@ -75,6 +81,8 @@ export interface ActionWizardProps {
    * List of possible triggers in current context
    */
   supportedTriggers: TriggerId[];
+
+  triggerPickerDocsLink?: string;
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -88,6 +96,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onSelectedTriggersChange,
   getTriggerInfo,
   supportedTriggers,
+  triggerPickerDocsLink,
 }) => {
   // auto pick action factory if there is only 1 available
   if (
@@ -124,6 +133,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         selectedTriggers={selectedTriggers}
         getTriggerInfo={getTriggerInfo}
         onSelectedTriggersChange={onSelectedTriggersChange}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
     );
   }
@@ -144,6 +154,7 @@ interface TriggerPickerProps {
   selectedTriggers?: TriggerId[];
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
   onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  triggerPickerDocsLink?: string;
 }
 
 const TriggerPicker: React.FC<TriggerPickerProps> = ({
@@ -151,6 +162,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   selectedTriggers,
   getTriggerInfo,
   onSelectedTriggersChange,
+  triggerPickerDocsLink,
 }) => {
   const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
@@ -159,11 +171,10 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
         children: (
           <EuiText size="s">
             <h5>
-              {/* TODO: i18n*/}
-              Show drilldown for:{' '}
-              <EuiToolTip position="top" content="Here is some tooltip text">
+              {txtTriggerPickerLabel}{' '}
+              <EuiToolTip position="top" content={txtTriggerPickerHelpTooltip}>
                 <EuiText size="xs">
-                  <a href="#">What&apos;s this?</a>
+                  <EuiLink href={triggerPickerDocsLink}>{txtTriggerPickerHelpText}</EuiLink>
                 </EuiText>
               </EuiToolTip>
             </h5>
@@ -215,6 +226,7 @@ interface SelectedActionFactoryProps {
   selectedTriggers?: TriggerId[];
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
   onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
+  triggerPickerDocsLink?: string;
 }
 
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
@@ -230,6 +242,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   selectedTriggers,
   getTriggerInfo,
   onSelectedTriggersChange,
+  triggerPickerDocsLink,
 }) => {
   return (
     <div
@@ -265,6 +278,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
             getTriggerInfo={getTriggerInfo}
             selectedTriggers={selectedTriggers}
             onSelectedTriggersChange={onSelectedTriggersChange}
+            triggerPickerDocsLink={triggerPickerDocsLink}
           />
         </>
       )}

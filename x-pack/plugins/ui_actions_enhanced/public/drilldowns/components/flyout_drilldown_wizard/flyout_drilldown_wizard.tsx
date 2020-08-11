@@ -196,6 +196,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         selectedTriggers={wizardConfig.selectedTriggers}
         supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
+        triggerPickerDocsLink={docsLink}
       />
       {mode === 'edit' && (
         <>

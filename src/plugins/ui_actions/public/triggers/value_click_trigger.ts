@@ -17,11 +17,16 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Trigger } from '.';
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
-  title: 'Single click',
-  description: 'A single point clicked on a visualization',
+  title: i18n.translate('uiActions.triggers.valueClickTitle', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('uiActions.triggers.valueClickDescription', {
+    defaultMessage: 'A single point clicked on a visualization',
+  }),
 };

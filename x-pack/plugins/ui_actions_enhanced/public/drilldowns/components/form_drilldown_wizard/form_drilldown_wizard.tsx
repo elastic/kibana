@@ -46,6 +46,8 @@ export interface FormDrilldownWizardProps {
    * List of possible triggers in current context
    */
   supportedTriggers: TriggerId[];
+
+  triggerPickerDocsLink?: string;
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
@@ -61,6 +63,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   selectedTriggers,
   getTriggerInfo,
   supportedTriggers,
+  triggerPickerDocsLink,
 }) => {
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown}>
@@ -113,6 +116,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         getTriggerInfo={getTriggerInfo}
         selectedTriggers={selectedTriggers}
         supportedTriggers={supportedTriggers}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
     </EuiFormRow>
   );
