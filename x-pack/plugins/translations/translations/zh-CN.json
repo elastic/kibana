@@ -7299,7 +7299,6 @@
     "xpack.idxMgmt.componentTemplatesSelector.filters.mappingsLabel": "映射",
     "xpack.idxMgmt.componentTemplatesSelector.loadingComponentsDescription": "正在加载组件模板……",
     "xpack.idxMgmt.componentTemplatesSelector.loadingComponentsErrorMessage": "加载组件时出错",
-    "xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel": "未选择任何组件模板。",
     "xpack.idxMgmt.componentTemplatesSelector.removeItemIconLabel": "移除",
     "xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder": "搜索组件模板",
     "xpack.idxMgmt.componentTemplatesSelector.searchResult.emptyPrompt.clearSearchButtonLabel": "清除搜索",

@@ -48,6 +48,12 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       // which we don't do here.
       delete data.overlapping;
 
+      if (data.template.mappings === undefined) {
+        // Adding some extra logic to return an empty object for "mappings" as ES does not
+        // return one in that case (empty objects _are_ returned for "settings" and "aliases")
+        data.template.mappings = {};
+      }
+
       if (filters) {
         filteredTemplate = Object.entries(filters).reduce(
           (acc, [key, value]) => {
@@ -76,8 +82,8 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.idxMgmt.simulateTemplate.emptyFilterdResult"
-            defaultMessage="Nothing to preview with the current filters."
+            id="xpack.idxMgmt.simulateTemplate.noFilterSelected"
+            defaultMessage="You need to include at least one of the above filters."
           />
         }
         iconType="pin"

@@ -100,8 +100,8 @@ export const SimulateTemplateFlyoutContent = ({
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.simulateTemplate.descriptionText"
-                defaultMessage="This is the final template that will be applied to your indices based on the
-                components templates you have selected and any overrides you've added."
+                defaultMessage="This is the final template that will be applied to matching indices based on the
+                component templates you have selected and any overrides you've added."
               />
             </p>
           </EuiText>
