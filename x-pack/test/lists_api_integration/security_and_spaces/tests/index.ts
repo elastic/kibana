@@ -20,6 +20,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./delete_lists'));
     loadTestFile(require.resolve('./delete_list_items'));
     loadTestFile(require.resolve('./find_lists'));
+    loadTestFile(require.resolve('./find_list_items'));
     loadTestFile(require.resolve('./import_list_items'));
   });
 };
