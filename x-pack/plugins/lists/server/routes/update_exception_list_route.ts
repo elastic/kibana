@@ -69,7 +69,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           });
           if (list == null) {
             return siemResponse.error({
-              body: `exception list id: "${id}" found found`,
+              body: `exception list id: "${id}" not found`,
               statusCode: 404,
             });
           } else {
