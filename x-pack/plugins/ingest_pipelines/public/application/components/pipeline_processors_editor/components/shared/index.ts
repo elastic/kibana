@@ -5,11 +5,7 @@
  */
 
 export {
-  createUrlOverrides,
-  hasImportPermission,
-  processResults,
-  readFile,
-  getMaxBytes,
-  getMaxBytesFormatted,
-  DEFAULT_LINES_TO_SAMPLE,
-} from './utils';
+  getProcessorDescriptor,
+  mapProcessorTypeToDescriptor,
+  ProcessorType,
+} from './map_processor_type_to_form';
