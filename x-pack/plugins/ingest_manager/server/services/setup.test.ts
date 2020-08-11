@@ -4,41 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { xpackMocks } from '../../../../../x-pack/mocks';
+import { RegistryError } from '../errors';
+import { createAppContextStartContractMock } from '../mocks';
+import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+
+const mockedMethodThrowsCustom = () =>
+  jest.fn().mockImplementation(() => {
+    throw new Error('SO method mocked to throw');
+  });
+
+const mockedMethodThrowsRegistry = () =>
+  jest.fn().mockImplementation(() => {
+    throw new RegistryError('Registry method mocked to throw');
+  });
 
 describe('setupIngestManager', () => {
-  it('returned promise should reject if errors thrown', async () => {
-    const { savedObjectsClient, callClusterMock } = makeErrorMocks();
-    const setupPromise = setupIngestManager(savedObjectsClient, callClusterMock);
-    await expect(setupPromise).rejects.toThrow('mocked');
+  let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+
+  beforeEach(async () => {
+    context = xpackMocks.createRequestHandlerContext();
+    // prevents `Logger not set.` and other appContext errors
+    appContextService.start(createAppContextStartContractMock());
   });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
+    appContextService.stop();
+  });
+
+  describe('should reject with any error thrown underneath', () => {
+    it('with plain Error', async () => {
+      const soClient = context.core.savedObjects.client;
+      soClient.create = mockedMethodThrowsCustom();
+      soClient.find = mockedMethodThrowsCustom();
+      soClient.get = mockedMethodThrowsCustom();
+      soClient.update = mockedMethodThrowsCustom();
+
+      const setupPromise = setupIngestManager(soClient, jest.fn());
+      await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
+      await expect(setupPromise).rejects.toThrow(Error);
+    });
+
+    it('with RegistryError', async () => {
+      const soClient = context.core.savedObjects.client;
+      soClient.create = mockedMethodThrowsRegistry();
+      soClient.find = mockedMethodThrowsRegistry();
+      soClient.get = mockedMethodThrowsRegistry();
+      soClient.update = mockedMethodThrowsRegistry();
+
+      const setupPromise = setupIngestManager(soClient, jest.fn());
+      await expect(setupPromise).rejects.toThrow('Registry method mocked to throw');
+      await expect(setupPromise).rejects.toThrow(RegistryError);
+    });
+  });
+
+  // describe('caching setup result', () => {
+  //   it('should not cache failures', async () => {});
+  //   it('should cache successes', async () => {});
+  // });
 });
-
-function makeErrorMocks() {
-  jest.mock('./app_context'); // else fails w/"Logger not set."
-  jest.mock('./epm/registry/registry_url', () => {
-    return {
-      fetchUrl: () => {
-        throw new Error('mocked registry#fetchUrl');
-      },
-    };
-  });
-
-  const callClusterMock = jest.fn();
-  const savedObjectsClient = savedObjectsClientMock.create();
-  savedObjectsClient.find = jest.fn().mockImplementation(() => {
-    throw new Error('mocked SO#find');
-  });
-  savedObjectsClient.get = jest.fn().mockImplementation(() => {
-    throw new Error('mocked SO#get');
-  });
-  savedObjectsClient.update = jest.fn().mockImplementation(() => {
-    throw new Error('mocked SO#update');
-  });
-
-  return {
-    savedObjectsClient,
-    callClusterMock,
-  };
-}
