@@ -51,7 +51,7 @@ export const LogAnalysisModuleListCard: React.FC<{
         <RecreateJobButton hasSetupCapabilities={hasSetupCapabilities} onClick={onViewSetup} />
         <EuiButtonEmpty {...viewInMlLinkProps}>
           <FormattedMessage
-            id="xpack.infra.logs.analysy.viewInMlButtonLabel"
+            id="xpack.infra.logs.analysis.viewInMlButtonLabel"
             defaultMessage="View in Machine Learning"
           />
         </EuiButtonEmpty>
