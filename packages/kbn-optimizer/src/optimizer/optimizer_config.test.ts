@@ -121,7 +121,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 3,
+        "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
@@ -149,7 +149,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 3,
+        "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
@@ -177,7 +177,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 3,
+        "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
@@ -207,7 +207,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 3,
+        "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
@@ -234,7 +234,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "filters": Array [],
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 3,
+        "maxWorkerCount": 2,
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
@@ -449,7 +449,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          15,
+          21,
         ],
         "results": Array [
           Object {
@@ -475,7 +475,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          17,
+          23,
         ],
         "results": Array [
           Object {
@@ -499,7 +499,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          16,
+          22,
         ],
         "results": Array [
           Object {
