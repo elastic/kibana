@@ -17,6 +17,7 @@ export interface UptimeThemeContextValues {
     baseTheme?: Theme;
     theme?: PartialTheme;
   };
+  isDark: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ const defaultContext: UptimeThemeContextValues = {
     baseTheme: LIGHT_THEME,
     theme: EUI_CHARTS_THEME_LIGHT.theme,
   },
+  isDark: false,
 };
 
 export const UptimeThemeContext = createContext(defaultContext);
@@ -72,6 +74,7 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
         baseTheme: darkMode ? DARK_THEME : LIGHT_THEME,
         theme: darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
       },
+      isDark: darkMode,
     };
   }, [colors, darkMode]);
 

@@ -13,12 +13,14 @@ import {
   Position,
   timeFormatter,
   BrushEndListener,
+  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { getChartDateLabel, seriesHasDownValues } from '../../../lib/helper';
 import { useUrlParams } from '../../../hooks';
@@ -40,6 +42,7 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
   const {
     colors: { danger },
     chartTheme,
+    isDark,
   } = useContext(UptimeThemeContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
@@ -57,13 +60,20 @@ export const MonitorBarSeries = ({ histogramSeries }: MonitorBarSeriesProps) => 
 
   const id = 'downSeries';
 
+  const customPartialTheme: PartialTheme = {
+    background: {
+      color: isDark ? euiDarkVars.euiColorLightestShade : euiLightVars.euiColorLightestShade,
+    },
+  };
+
   return seriesHasDownValues(histogramSeries) ? (
     <div style={{ height: 50, width: '100%', maxWidth: '1200px', marginRight: 15 }}>
       <Chart>
         <Settings
           xDomain={{ min: absoluteDateRangeStart, max: absoluteDateRangeEnd }}
           onBrushEnd={onBrushEnd}
-          {...chartTheme}
+          baseTheme={chartTheme.baseTheme}
+          theme={{ ...chartTheme.theme, ...customPartialTheme }}
         />
         <Axis
           hide
