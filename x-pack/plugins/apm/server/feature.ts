@@ -60,3 +60,38 @@ export const APM_FEATURE = {
 
 export const APM_SERVICE_MAPS_FEATURE_NAME = 'APM service maps';
 export const APM_SERVICE_MAPS_LICENSE_TYPE = 'platinum';
+
+export const RUM_FEATURE = {
+  id: 'client_side_monitoring',
+  name: i18n.translate('xpack.apm.featureRegistry.csmFeatureName', {
+    defaultMessage: 'Client Side Monitoring',
+  }),
+  order: 901,
+  icon: 'apmApp',
+  navLinkId: 'client_side_monitoring',
+  app: ['client_side_monitoring', 'kibana'],
+  catalogue: ['client_side_monitoring'],
+  privileges: {
+    all: {
+      app: ['client_side_monitoring', 'kibana'],
+      api: ['client_side_monitoring', 'client_side_monitoring_write'],
+      catalogue: ['client_side_monitoring'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+
+      ui: ['show', 'save'],
+    },
+    read: {
+      app: ['client_side_monitoring', 'kibana'],
+      api: ['client_side_monitoring'],
+      catalogue: ['client_side_monitoring'],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['show'],
+    },
+  },
+};

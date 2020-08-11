@@ -30,6 +30,7 @@ import {
   APM_FEATURE,
   APM_SERVICE_MAPS_FEATURE_NAME,
   APM_SERVICE_MAPS_LICENSE_TYPE,
+  RUM_FEATURE,
 } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
@@ -126,6 +127,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     });
 
     plugins.features.registerFeature(APM_FEATURE);
+    plugins.features.registerFeature(RUM_FEATURE);
     plugins.licensing.featureUsage.register(
       APM_SERVICE_MAPS_FEATURE_NAME,
       APM_SERVICE_MAPS_LICENSE_TYPE
