@@ -494,10 +494,7 @@ describe('import timelines', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        [
-          'Invalid value "undefined" supplied to "file"',
-          'Invalid value "undefined" supplied to "file"',
-        ].join(',')
+        'Invalid value "undefined" supplied to "file"'
       );
     });
   });
@@ -923,10 +920,7 @@ describe('import timeline templates', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        [
-          'Invalid value "undefined" supplied to "file"',
-          'Invalid value "undefined" supplied to "file"',
-        ].join(',')
+        'Invalid value "undefined" supplied to "file"'
       );
     });
   });
