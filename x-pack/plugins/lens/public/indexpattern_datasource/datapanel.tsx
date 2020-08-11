@@ -38,7 +38,7 @@ import { syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 import { FieldsAccordion } from './fields_accordion';
-import { esQuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esQuery, IndexPattern as DataIndexPattern } from '../../../../../src/plugins/data/public';
 
 export type Props = DatasourceDataPanelProps<IndexPatternPrivateState> & {
   data: DataPublicPluginStart;
@@ -77,7 +77,7 @@ const fieldTypeNames: Record<DataType, string> = {
 // Wrapper around esQuery.buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
-  indexPattern: IIndexPattern,
+  indexPattern: DataIndexPattern,
   query: Query,
   filters: Filter[],
   queryConfig: EsQueryConfig
@@ -129,7 +129,7 @@ export function IndexPatternDataPanel({
     }));
 
   const dslQuery = buildSafeEsQuery(
-    indexPatterns[currentIndexPatternId] as IIndexPattern,
+    indexPatterns[currentIndexPatternId] as DataIndexPattern,
     query,
     filters,
     esQuery.getEsQueryConfig(core.uiSettings)

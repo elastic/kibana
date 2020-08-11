@@ -21,12 +21,7 @@ import { eventsStackByOptions } from '../../../hosts/pages/navigation';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { histogramConfigs } from '../../../hosts/pages/navigation/events_query_tab_body';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, esQuery, IndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
@@ -46,7 +41,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   combinedQueries?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   indexToAdd?: string[] | null;
   onlyField?: string;
   query?: Query;

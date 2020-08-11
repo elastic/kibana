@@ -17,10 +17,10 @@ import {
 } from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
 import {
-  IIndexPattern,
   Query,
   EsQueryConfig,
   Filter,
+  IndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));
@@ -110,7 +110,7 @@ export const combineQueries = ({
 }: {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   browserFields: BrowserFields;
   filters: Filter[];
   kqlQuery: Query;

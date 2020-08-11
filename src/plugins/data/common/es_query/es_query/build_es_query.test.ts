@@ -21,15 +21,15 @@ import { buildEsQuery } from './build_es_query';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { decorateQuery } from './decorate_query';
-import { IIndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../index_patterns';
 import { MatchAllFilter } from '../filters';
-import { fields } from '../../index_patterns/mocks';
+import { getFieldListMock } from '../../index_patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {
-  const indexPattern: IIndexPattern = ({
-    fields,
-  } as unknown) as IIndexPattern;
+  const indexPattern = ({
+    fields: getFieldListMock,
+  } as unknown) as IndexPattern;
 
   describe('buildEsQuery', () => {
     it('should return the parameters of an Elasticsearch bool query', () => {

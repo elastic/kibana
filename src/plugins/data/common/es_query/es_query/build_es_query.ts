@@ -21,7 +21,7 @@ import { groupBy, has } from 'lodash';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { IIndexPattern } from '../../index_patterns';
+import { IndexPattern } from '../../index_patterns';
 import { Filter } from '../filters';
 import { Query } from '../../query/types';
 
@@ -41,7 +41,7 @@ export interface EsQueryConfig {
  * config contains dateformat:tz
  */
 export function buildEsQuery(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: IndexPattern | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {

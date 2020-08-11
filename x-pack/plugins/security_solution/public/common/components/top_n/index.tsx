@@ -10,12 +10,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
-import {
-  esQuery,
-  Filter,
-  Query,
-  IIndexPattern,
-} from '../../../../../../../src/plugins/data/public';
+import { esQuery, Filter, Query, IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -73,7 +68,7 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 interface OwnProps {
   browserFields: BrowserFields;
   field: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   indexToAdd: string[] | null;
   timelineId?: string;
   toggleTopN: () => void;

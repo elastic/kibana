@@ -12,6 +12,7 @@ import {
   esQuery,
   esKuery,
   IIndexPattern,
+  IndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -89,7 +90,7 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   queries: Query[];
   filters: Filter[];
 }) => {

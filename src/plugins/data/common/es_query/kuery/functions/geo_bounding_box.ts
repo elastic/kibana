@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
+import { IndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: any) {
   params = _.pick(params, 'topLeft', 'bottomRight');
@@ -37,7 +37,7 @@ export function buildNodeParams(fieldName: string, params: any) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPattern,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

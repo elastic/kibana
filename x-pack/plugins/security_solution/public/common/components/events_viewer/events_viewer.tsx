@@ -26,12 +26,7 @@ import { combineQueries, resolverIsShowing } from '../../../timelines/components
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, esQuery, IndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
@@ -95,7 +90,7 @@ interface Props {
   headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;

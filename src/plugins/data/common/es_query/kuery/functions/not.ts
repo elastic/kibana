@@ -18,7 +18,7 @@
  */
 
 import * as ast from '../ast';
-import { IIndexPattern, KueryNode } from '../../..';
+import { IndexPattern, KueryNode } from '../../..';
 
 export function buildNodeParams(child: KueryNode) {
   return {
@@ -28,7 +28,7 @@ export function buildNodeParams(child: KueryNode) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPattern,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

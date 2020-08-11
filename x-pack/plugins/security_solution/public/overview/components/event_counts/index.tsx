@@ -14,12 +14,7 @@ import { filterHostData } from '../../../hosts/pages/navigation/alerts_query_tab
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { filterNetworkData } from '../../../network/pages/navigation/alerts_query_tab_body';
-import {
-  Filter,
-  esQuery,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/public';
+import { Filter, esQuery, IndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 const HorizontalSpacer = styled(EuiFlexItem)`
@@ -31,7 +26,7 @@ const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters?: Filter[];
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   query?: Query;
 }
 

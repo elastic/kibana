@@ -8,7 +8,7 @@ import { isEmpty, get } from 'lodash/fp';
 import { useEffect, useState, Dispatch, SetStateAction } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
@@ -29,13 +29,13 @@ interface FetchIndexPatternReturn {
   isLoading: boolean;
   indices: string[];
   indicesExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: IndexPattern;
 }
 
 export type Return = [FetchIndexPatternReturn, Dispatch<SetStateAction<string[]>>];
 
 const DEFAULT_BROWSER_FIELDS = {};
-const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
+const DEFAULT_INDEX_PATTERNS = ({ fields: [], title: '' } as unknown) as IndexPattern;
 const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 
 // Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
@@ -107,7 +107,7 @@ export const useFetchIndexPatterns = (
                   indexPatterns: getIndexFields(
                     indices.join(),
                     get('data.source.status.indexFields', result)
-                  ),
+                  ) as IndexPattern,
                 });
               }
             },

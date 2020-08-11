@@ -7,7 +7,7 @@
 import {
   Filter,
   Query,
-  IIndexPattern,
+  IndexPattern,
   isFilterDisabled,
   buildEsQuery,
   EsQueryConfig,
@@ -27,10 +27,10 @@ export const getQueryFilter = (
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
 ) => {
-  const indexPattern: IIndexPattern = {
+  const indexPattern = ({
     fields: [],
     title: index.join(),
-  };
+  } as unknown) as IndexPattern;
 
   const config: EsQueryConfig = {
     allowLeadingWildcards: true,
@@ -69,7 +69,7 @@ export const getQueryFilter = (
 
 export const buildExceptionFilter = (
   exceptionQueries: Query[],
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPattern,
   config: EsQueryConfig,
   excludeExceptions: boolean,
   chunkSize: number

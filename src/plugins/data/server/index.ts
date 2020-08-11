@@ -229,3 +229,5 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
 };
+
+export type { IndexPattern } from '../common';

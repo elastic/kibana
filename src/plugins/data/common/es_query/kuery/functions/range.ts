@@ -24,7 +24,7 @@ import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { IndexPattern, KueryNode, IFieldType, IndexPatternField } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
   const paramsToMap = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -44,7 +44,7 @@ export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPattern,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {
@@ -70,7 +70,7 @@ export function toElasticsearchQuery(
       name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
       type: '',
-    });
+    } as IndexPatternField);
   }
 
   const queries = fields!.map((field: IFieldType) => {
