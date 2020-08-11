@@ -41,7 +41,10 @@ object DefaultTemplate : Template({
 //        param("env.JENKINS_URL", "%teamcity.serverUrl%")
 //        param("env.BUILD_URL", "%teamcity.serverUrl%/build/%teamcity.build.id%")
 //        param("env.JOB_NAME", "%system.teamcity.buildType.id%")
+
+      param("env.BUILD_ID", "%build.number%")
       param("env.GIT_BRANCH", "%vcsroot.branch%")
+      param("env.branch_specifier", "%vcsroot.branch%")
     }
 
 //    steps {

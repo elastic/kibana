@@ -28,6 +28,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
                 mv /home/agent/work/kibana-build-oss/kibana-8.0.0-SNAPSHOT-linux-x86_64/* /home/agent/work/kibana-build-oss/
 
                 source ./src/dev/ci_setup/setup.sh
+                source ./src/dev/ci_setup/setup_percy.sh
 
                 node scripts/functional_tests \
                   --debug --bail \
