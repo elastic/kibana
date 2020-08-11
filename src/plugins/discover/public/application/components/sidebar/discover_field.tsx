@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
@@ -73,15 +73,9 @@ export function DiscoverField({
   selected,
   useShortDots,
 }: DiscoverFieldProps) {
-  const addLabel = i18n.translate('discover.fieldChooser.discoverField.addButtonLabel', {
-    defaultMessage: 'Add',
-  });
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
     values: { field: field.name },
-  });
-  const removeLabel = i18n.translate('discover.fieldChooser.discoverField.removeButtonLabel', {
-    defaultMessage: 'Remove',
   });
   const removeLabelAria = i18n.translate(
     'discover.fieldChooser.discoverField.removeButtonAriaLabel',
