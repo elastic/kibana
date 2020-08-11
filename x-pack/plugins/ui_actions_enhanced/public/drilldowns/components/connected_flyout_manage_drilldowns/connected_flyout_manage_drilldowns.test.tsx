@@ -10,6 +10,7 @@ import { createFlyoutManageDrilldowns } from './connected_flyout_manage_drilldow
 import {
   dashboardFactory,
   mockGetTriggerInfo,
+  mockSupportedTriggers,
   urlFactory,
 } from '../../../components/action_wizard/test_data';
 import { StubBrowserStorage } from '../../../../../../../src/test_utils/public/stub_browser_storage';
@@ -41,7 +42,12 @@ beforeEach(() => {
 });
 
 test('Allows to manage drilldowns', async () => {
-  const screen = render(<FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />);
+  const screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+    />
+  );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
@@ -108,7 +114,12 @@ test('Allows to manage drilldowns', async () => {
 });
 
 test('Can delete multiple drilldowns', async () => {
-  const screen = render(<FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />);
+  const screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+    />
+  );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
 
@@ -148,6 +159,7 @@ test('Create only mode', async () => {
       dynamicActionManager={mockDynamicActionManager}
       viewMode={'create'}
       onClose={onClose}
+      supportedTriggers={mockSupportedTriggers}
     />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
@@ -168,7 +180,11 @@ test('Create only mode', async () => {
 
 test('After switching between action factories state is restored', async () => {
   const screen = render(
-    <FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} viewMode={'create'} />
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      viewMode={'create'}
+      supportedTriggers={mockSupportedTriggers}
+    />
   );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
@@ -205,7 +221,12 @@ test("Error when can't save drilldown changes", async () => {
   jest.spyOn(mockDynamicActionManager, 'createEvent').mockImplementationOnce(async () => {
     throw error;
   });
-  const screen = render(<FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />);
+  const screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+    />
+  );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   fireEvent.click(screen.getByText(/Create new/i));
@@ -223,7 +244,12 @@ test("Error when can't save drilldown changes", async () => {
 });
 
 test('Should show drilldown welcome message. Should be able to dismiss it', async () => {
-  let screen = render(<FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />);
+  let screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+    />
+  );
 
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
@@ -233,7 +259,12 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();
   cleanup();
 
-  screen = render(<FlyoutManageDrilldowns dynamicActionManager={mockDynamicActionManager} />);
+  screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+    />
+  );
   // wait for initial render. It is async because resolving compatible action factories is async
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();

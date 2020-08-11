@@ -23,7 +23,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
-  selectedTrigger?: TriggerId;
+  selectedTriggers?: TriggerId[];
 }
 
 export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
@@ -45,6 +45,11 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   docsLink?: string;
 
   getTrigger: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 function useWizardConfigState(
@@ -55,7 +60,7 @@ function useWizardConfigState(
     setName: (name: string) => void;
     setActionConfig: (actionConfig: object) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
-    setSelectedTrigger: (triggerId?: TriggerId) => void;
+    setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
 ] {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
@@ -110,10 +115,10 @@ function useWizardConfigState(
           });
         }
       },
-      setSelectedTrigger: (selectedTrigger?: TriggerId) => {
+      setSelectedTriggers: (selectedTriggers: TriggerId[] = []) => {
         setWizardConfig({
           ...wizardConfig,
-          selectedTrigger,
+          selectedTriggers,
         });
       },
     },
@@ -133,10 +138,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   actionFactoryContext,
   docsLink,
   getTrigger,
+  supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
   const [
     wizardConfig,
-    { setActionFactory, setActionConfig, setName, setSelectedTrigger },
+    { setActionFactory, setActionConfig, setName, setSelectedTriggers },
   ] = useWizardConfigState(initialDrilldownWizardConfig);
 
   const isActionValid = (
@@ -145,7 +151,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
-    if (!wizardConfig.selectedTrigger) return false;
+    if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
 
     return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
   };
@@ -186,8 +192,9 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         onActionFactoryChange={setActionFactory}
         actionFactories={drilldownActionFactories}
         actionFactoryContext={actionFactoryContext!}
-        onSelectedTriggerChange={setSelectedTrigger}
-        selectedTrigger={wizardConfig.selectedTrigger}
+        onSelectedTriggersChange={setSelectedTriggers}
+        selectedTriggers={wizardConfig.selectedTriggers}
+        supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
       />
       {mode === 'edit' && (

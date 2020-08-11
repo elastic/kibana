@@ -24,6 +24,9 @@ const actionFactoryDefinition1: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const actionFactoryDefinition2: ActionFactoryDefinition = {
@@ -36,6 +39,9 @@ const actionFactoryDefinition2: ActionFactoryDefinition = {
     execute: async () => {},
     getDisplayName: () => name,
   }),
+  supportedTriggers() {
+    return ['VALUE_CLICK_TRIGGER'];
+  },
 };
 
 const event1: SerializedEvent = {

@@ -22,8 +22,6 @@ import { Trigger } from '.';
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
   id: VALUE_CLICK_TRIGGER,
-  // This is empty string to hide title of ui_actions context menu that appears
-  // when this trigger is executed.
-  title: '',
-  description: 'Value was clicked',
+  title: 'Single click',
+  description: 'A single point clicked on a visualization',
 };

@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
+import intersection from 'lodash/intersection';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -33,6 +34,11 @@ interface ConnectedFlyoutManageDrilldownsProps {
   dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 /**
@@ -69,7 +75,8 @@ export function createFlyoutManageDrilldowns({
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
-      factoryContext
+      factoryContext,
+      props.supportedTriggers
     );
 
     const [route, setRoute] = useState<Routes>(
@@ -110,7 +117,7 @@ export function createFlyoutManageDrilldowns({
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
         actionConfig: drilldownToEdit.action.config as object,
         name: drilldownToEdit.action.name,
-        selectedTrigger: (drilldownToEdit.triggers[0] as TriggerId) ?? undefined,
+        selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
       };
     }
 
@@ -129,6 +136,7 @@ export function createFlyoutManageDrilldowns({
           : !actionFactory.isCompatibleLicence()
           ? insufficientLicenseLevel
           : undefined,
+        triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as TriggerId)),
       };
     }
 
@@ -144,7 +152,7 @@ export function createFlyoutManageDrilldowns({
             onClose={props.onClose}
             mode={route === Routes.Create ? 'create' : 'edit'}
             onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-            onSubmit={({ actionConfig, actionFactory, name, selectedTrigger }) => {
+            onSubmit={({ actionConfig, actionFactory, name, selectedTriggers }) => {
               if (route === Routes.Create) {
                 createDrilldown(
                   {
@@ -152,7 +160,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTrigger ? [selectedTrigger] : []
+                  selectedTriggers
                 );
               } else {
                 editDrilldown(
@@ -162,7 +170,7 @@ export function createFlyoutManageDrilldowns({
                     config: actionConfig,
                     factoryId: actionFactory.id,
                   },
-                  selectedTrigger ? [selectedTrigger] : []
+                  selectedTriggers
                 );
               }
 
@@ -183,12 +191,21 @@ export function createFlyoutManageDrilldowns({
             }}
             actionFactoryContext={factoryContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
+            supportedTriggers={props.supportedTriggers}
             getTrigger={getTrigger}
           />
         );
 
       case Routes.Manage:
       default:
+        // show trigger column in case if there is more then 1 possible trigger in current context
+        const showTriggerColumn =
+          intersection(
+            props.supportedTriggers,
+            actionFactories
+              .map((factory) => factory.supportedTriggers())
+              .reduce((res, next) => res.concat(next), [])
+          ).length > 1;
         return (
           <FlyoutListManageDrilldowns
             docsLink={docsLink}
@@ -208,6 +225,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Create);
             }}
             onClose={props.onClose}
+            showTriggerColumn={showTriggerColumn}
           />
         );
     }
@@ -216,7 +234,8 @@ export function createFlyoutManageDrilldowns({
 
 function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
   actionFactories: ActionFactory[],
-  context: Context
+  context: Context,
+  supportedTriggers: TriggerId[]
 ) {
   const [compatibleActionFactories, setCompatibleActionFactories] = useState<ActionFactory[]>();
   useEffect(() => {
@@ -226,13 +245,18 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
         actionFactories.map((factory) => factory.isCompatible(context))
       );
       if (canceled) return;
-      setCompatibleActionFactories(actionFactories.filter((_, i) => compatibility[i]));
+
+      const compatibleFactories = actionFactories.filter((_, i) => compatibility[i]);
+      const triggerSupportedFactories = compatibleFactories.filter((factory) =>
+        factory.supportedTriggers().some((trigger) => supportedTriggers.includes(trigger))
+      );
+      setCompatibleActionFactories(triggerSupportedFactories);
     }
     updateCompatibleFactoriesForContext();
     return () => {
       canceled = true;
     };
-  }, [context, actionFactories]);
+  }, [context, actionFactories, supportedTriggers]);
 
   return compatibleActionFactories;
 }

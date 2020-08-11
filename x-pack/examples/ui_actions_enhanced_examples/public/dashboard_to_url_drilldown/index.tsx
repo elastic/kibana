@@ -5,11 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
 import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
   try {
@@ -31,7 +35,9 @@ export type CollectConfigProps = CollectConfigPropsBase<Config>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 
-export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext> {
+export class DashboardToUrlDrilldown
+  implements
+    Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 8;
@@ -41,6 +47,10 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
   public readonly getDisplayName = () => 'Go to URL (example)';
 
   public readonly euiIcon = 'link';
+
+  supportedTriggers(): Array<typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+    return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
+  }
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
     <>

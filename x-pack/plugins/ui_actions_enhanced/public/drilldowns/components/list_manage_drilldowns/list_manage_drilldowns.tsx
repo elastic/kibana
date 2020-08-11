@@ -30,6 +30,12 @@ export interface DrilldownListItem {
   drilldownName: string;
   icon?: string;
   error?: string;
+  triggers?: Trigger[];
+}
+
+interface Trigger {
+  title?: string;
+  description?: string;
 }
 
 export interface ListManageDrilldownsProps {
@@ -38,6 +44,8 @@ export interface ListManageDrilldownsProps {
   onEdit?: (id: string) => void;
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
+
+  showTriggerColumn?: boolean;
 }
 
 const noop = () => {};
@@ -49,6 +57,7 @@ export function ListManageDrilldowns({
   onEdit = noop,
   onCreate = noop,
   onDelete = noop,
+  showTriggerColumn = true,
 }: ListManageDrilldownsProps) {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
@@ -56,7 +65,7 @@ export function ListManageDrilldowns({
     {
       name: 'Name',
       truncateText: true,
-      width: '50%',
+      width: showTriggerColumn ? '33%' : '50%',
       'data-test-subj': 'drilldownListItemName',
       render: (drilldown: DrilldownListItem) => (
         <div>
@@ -85,11 +94,27 @@ export function ListManageDrilldowns({
               <EuiIcon type={drilldown.icon} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
             <EuiTextColor color="subdued">{drilldown.actionName}</EuiTextColor>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+    },
+    showTriggerColumn && {
+      name: 'Trigger',
+      textOnly: true,
+      render: (drilldown: DrilldownListItem) =>
+        drilldown.triggers?.map((trigger, idx) =>
+          trigger.description ? (
+            <EuiToolTip content={trigger.description} key={idx}>
+              <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
+            </EuiToolTip>
+          ) : (
+            <EuiTextColor color="subdued" key={idx}>
+              {trigger.title ?? 'unknown'}
+            </EuiTextColor>
+          )
+        ),
     },
     {
       align: 'right',
@@ -99,7 +124,7 @@ export function ListManageDrilldowns({
         </EuiButtonEmpty>
       ),
     },
-  ];
+  ].filter(Boolean) as Array<EuiBasicTableColumn<DrilldownListItem>>;
 
   return (
     <>

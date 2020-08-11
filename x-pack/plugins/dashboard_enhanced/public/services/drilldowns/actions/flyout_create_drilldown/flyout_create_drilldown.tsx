@@ -6,12 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionByType,
-  APPLY_FILTER_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../../../src/plugins/ui_actions/public';
+import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
@@ -47,9 +42,17 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
 
-    return supportedTriggers.some((trigger) =>
-      [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, APPLY_FILTER_TRIGGER].includes(trigger)
-    );
+    /**
+     * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
+     * and triggers that current embeddable supports
+     */
+    const allPossibleTriggers = this.params
+      .start()
+      .plugins.uiActionsEnhanced.getActionFactories()
+      .map((factory) => factory.supportedTriggers())
+      .reduce((res, next) => res.concat(next), []);
+
+    return supportedTriggers.some((trigger) => allPossibleTriggers.includes(trigger));
   }
 
   public async isCompatible(context: EmbeddableContext) {
@@ -73,6 +76,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
+          supportedTriggers={embeddable.supportedTriggers()}
         />
       ),
       {

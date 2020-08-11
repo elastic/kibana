@@ -20,7 +20,7 @@ import {
 export interface ActionFactoryDefinition<
   Config extends object = object,
   FactoryContext extends object = object,
-  SupportedTriggers extends TriggerId = '',
+  SupportedTriggers extends TriggerId = TriggerId,
   ActionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
 >
   extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,

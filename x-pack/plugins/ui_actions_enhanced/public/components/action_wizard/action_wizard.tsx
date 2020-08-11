@@ -7,7 +7,6 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,6 +14,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiFormFieldset,
+  EuiCheckableCard,
+  EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { txtChangeButton } from './i18n';
@@ -56,17 +59,22 @@ export interface ActionWizardProps {
   context: object;
 
   /**
-   * Current trigger selection
+   * Current triggers selection
    */
-  selectedTrigger?: TriggerId;
+  selectedTriggers?: TriggerId[];
 
   /**
    * Trigger selection has changed
-   * @param triggerId
+   * @param triggers
    */
-  onSelectedTriggerChange: (triggerId?: TriggerId) => void;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
 
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -76,9 +84,10 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onConfigChange,
   config,
   context,
-  selectedTrigger,
-  onSelectedTriggerChange,
+  selectedTriggers,
+  onSelectedTriggersChange,
   getTriggerInfo,
+  supportedTriggers,
 }) => {
   // auto pick action factory if there is only 1 available
   if (
@@ -90,14 +99,15 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   }
 
   // auto pick selected trigger if none is picked
-  if (currentActionFactory && !selectedTrigger) {
-    const triggers = currentActionFactory.supportedTriggers();
+  if (currentActionFactory && !((selectedTriggers?.length ?? 0) > 0)) {
+    const triggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
     if (triggers.length > 0) {
-      onSelectedTriggerChange(triggers[0]);
+      onSelectedTriggersChange([triggers[0]]);
     }
   }
 
   if (currentActionFactory && config) {
+    const allTriggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
     return (
       <SelectedActionFactory
         actionFactory={currentActionFactory}
@@ -105,14 +115,15 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         onDeselect={() => {
           onActionFactoryChange(undefined);
         }}
-        context={{ ...context, trigger: selectedTrigger ?? null }}
+        context={{ ...context, triggers: selectedTriggers ?? [] }}
         config={config}
         onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
-        selectedTrigger={selectedTrigger}
+        allTriggers={allTriggers}
+        selectedTriggers={selectedTriggers}
         getTriggerInfo={getTriggerInfo}
-        onSelectedTriggerChange={onSelectedTriggerChange}
+        onSelectedTriggersChange={onSelectedTriggersChange}
       />
     );
   }
@@ -130,43 +141,66 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 
 interface TriggerPickerProps {
   triggers: TriggerId[];
-  selectedTrigger?: TriggerId;
+  selectedTriggers?: TriggerId[];
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
-  onSelectedTriggerChange: (triggerId?: TriggerId) => void;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
 }
 
 const TriggerPicker: React.FC<TriggerPickerProps> = ({
   triggers,
-  selectedTrigger,
+  selectedTriggers,
   getTriggerInfo,
-  onSelectedTriggerChange,
+  onSelectedTriggersChange,
 }) => {
+  const selectedTrigger = selectedTriggers ? selectedTriggers[0] : undefined;
   return (
-    <>
-      <EuiText size="s">
-        <h5>
-          Show drilldown on:{' '}
-          <EuiToolTip position="top" content="Here is some tooltip text">
-            <EuiText size="xs">
-              <a href="#">What&apos;s this?</a>
-            </EuiText>
-          </EuiToolTip>
-        </h5>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButtonGroup
-        legend="Pick a trigger..."
-        name="primary"
-        options={triggers.map((triggerId) => ({
-          id: triggerId,
-          label: getTriggerInfo(triggerId)?.title ?? 'Unknown',
-        }))}
-        onChange={(id) => onSelectedTriggerChange(id as TriggerId)}
-        color="primary"
-        idSelected={selectedTrigger}
-        buttonSize={'m'}
-      />
-    </>
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiText size="s">
+            <h5>
+              {/* TODO: i18n*/}
+              Show drilldown for:{' '}
+              <EuiToolTip position="top" content="Here is some tooltip text">
+                <EuiText size="xs">
+                  <a href="#">What&apos;s this?</a>
+                </EuiText>
+              </EuiToolTip>
+            </h5>
+          </EuiText>
+        ),
+      }}
+      style={{ maxWidth: `80%` }}
+    >
+      {triggers.map((trigger) => (
+        <React.Fragment key={trigger}>
+          <EuiCheckableCard
+            id={trigger}
+            label={
+              <>
+                <EuiTitle size={'xxs'}>
+                  <span>{getTriggerInfo(trigger)?.title ?? 'Unknown'}</span>
+                </EuiTitle>
+                {getTriggerInfo(trigger)?.description && (
+                  <div>
+                    <EuiText size={'s'}>
+                      <EuiTextColor color={'subdued'}>
+                        {getTriggerInfo(trigger)?.description}
+                      </EuiTextColor>
+                    </EuiText>
+                  </div>
+                )}
+              </>
+            }
+            name={trigger}
+            value={trigger}
+            checked={selectedTrigger === trigger}
+            onChange={() => onSelectedTriggersChange([trigger])}
+          />
+          <EuiSpacer size={'s'} />
+        </React.Fragment>
+      ))}
+    </EuiFormFieldset>
   );
 };
 
@@ -177,9 +211,10 @@ interface SelectedActionFactoryProps {
   onConfigChange: (config: object) => void;
   showDeselect: boolean;
   onDeselect: () => void;
-  selectedTrigger?: TriggerId;
+  allTriggers: TriggerId[];
+  selectedTriggers?: TriggerId[];
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
-  onSelectedTriggerChange: (triggerId?: TriggerId) => void;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
 }
 
 export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
@@ -191,9 +226,10 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   onConfigChange,
   config,
   context,
-  selectedTrigger,
+  allTriggers,
+  selectedTriggers,
   getTriggerInfo,
-  onSelectedTriggerChange,
+  onSelectedTriggersChange,
 }) => {
   return (
     <div
@@ -221,14 +257,14 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           )}
         </EuiFlexGroup>
       </header>
-      {actionFactory.supportedTriggers().length > 1 && (
+      {allTriggers.length > 1 && (
         <>
           <EuiSpacer size="l" />
           <TriggerPicker
-            triggers={actionFactory.supportedTriggers()}
+            triggers={allTriggers}
             getTriggerInfo={getTriggerInfo}
-            selectedTrigger={selectedTrigger}
-            onSelectedTriggerChange={onSelectedTriggerChange}
+            selectedTriggers={selectedTriggers}
+            onSelectedTriggersChange={onSelectedTriggersChange}
           />
         </>
       )}
@@ -312,3 +348,11 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     </EuiFlexGroup>
   );
 };
+
+function getTriggersForActionFactory(
+  actionFactory: ActionFactory,
+  allTriggers: TriggerId[]
+): TriggerId[] {
+  debugger;
+  return actionFactory.supportedTriggers().filter((trigger) => allTriggers.includes(trigger));
+}

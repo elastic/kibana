@@ -19,6 +19,7 @@ const def: ActionFactoryDefinition = {
     getDisplayName: () => name,
     enhancements: {},
   }),
+  supportedTriggers: () => [],
 };
 
 describe('License & ActionFactory', () => {

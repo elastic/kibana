@@ -30,17 +30,22 @@ export interface FormDrilldownWizardProps {
   actionFactories?: ActionFactory[];
 
   /**
-   * Current trigger selection
+   * Current triggers selection
    */
-  selectedTrigger?: TriggerId;
+  selectedTriggers?: TriggerId[];
 
   /**
    * Trigger selection has changed
-   * @param triggerId
+   * @param triggers
    */
-  onSelectedTriggerChange: (triggerId?: TriggerId) => void;
+  onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
 
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
@@ -52,9 +57,10 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   onActionFactoryChange = noopFn,
   actionFactories = [],
   actionFactoryContext,
-  onSelectedTriggerChange,
-  selectedTrigger,
+  onSelectedTriggersChange,
+  selectedTriggers,
   getTriggerInfo,
+  supportedTriggers,
 }) => {
   const nameFragment = (
     <EuiFormRow label={txtNameOfDrilldown}>
@@ -103,9 +109,10 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         onActionFactoryChange={(actionFactory) => onActionFactoryChange(actionFactory)}
         onConfigChange={(config) => onActionConfigChange(config)}
         context={actionFactoryContext}
-        onSelectedTriggerChange={onSelectedTriggerChange}
+        onSelectedTriggersChange={onSelectedTriggersChange}
         getTriggerInfo={getTriggerInfo}
-        selectedTrigger={selectedTrigger}
+        selectedTriggers={selectedTriggers}
+        supportedTriggers={supportedTriggers}
       />
     </EuiFormRow>
   );
