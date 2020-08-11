@@ -137,21 +137,33 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
-    const { nonEncryptedObjects, encryptableObjects, idsInOrder } = objects.reduce<{
+    const {
+      nonEncryptedObjects,
+      nonEncryptedObjectsIndicies,
+      encryptableObjects,
+      encryptableObjectsIndicies,
+    } = objects.reduce<{
       nonEncryptedObjects: Array<SavedObjectsBulkUpdateObject<T>>;
       encryptableObjects: Array<SavedObjectsBulkUpdateObject<T>>;
-      idsInOrder: string[];
+      nonEncryptedObjectsIndicies: number[];
+      encryptableObjectsIndicies: number[];
     }>(
-      (partition, object) => {
+      (partition, object, index) => {
         if (this.options.service.isRegistered(object.type)) {
           partition.encryptableObjects.push(object);
+          partition.encryptableObjectsIndicies.push(index);
         } else {
           partition.nonEncryptedObjects.push(object);
+          partition.nonEncryptedObjectsIndicies.push(index);
         }
-        partition.idsInOrder.push(object.id);
         return partition;
       },
-      { nonEncryptedObjects: [], encryptableObjects: [], idsInOrder: [] }
+      {
+        nonEncryptedObjects: [],
+        encryptableObjects: [],
+        nonEncryptedObjectsIndicies: [],
+        encryptableObjectsIndicies: [],
+      }
     );
 
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
@@ -178,20 +190,36 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return await this.handleEncryptedAttributesInBulkResponse(
       {
-        saved_objects: this.mergeBulkResponsesInOrder(
-          idsInOrder,
-          encryptedObjects.length
-            ? (
-                await this.options.baseClient.bulkCreate(encryptedObjects, {
-                  ...options,
-                  overwrite: true,
-                })
-              ).saved_objects
-            : [],
-          nonEncryptedObjects.length
-            ? (await this.options.baseClient.bulkUpdate(nonEncryptedObjects, options)).saved_objects
-            : []
-        ),
+        saved_objects: [
+          // match up each object in the response with
+          // the index it had in the original input.
+          // if the object didn't have an index then assign
+          // the max possible index so it'll get pushed to the bottom
+          ...this.zip(
+            encryptedObjects.length
+              ? (
+                  await this.options.baseClient.bulkCreate(encryptedObjects, {
+                    ...options,
+                    overwrite: true,
+                  })
+                ).saved_objects
+              : [],
+            encryptableObjectsIndicies,
+            Number.MAX_VALUE
+          ),
+          ...this.zip(
+            nonEncryptedObjects.length
+              ? (await this.options.baseClient.bulkUpdate(nonEncryptedObjects, options))
+                  .saved_objects
+              : [],
+            nonEncryptedObjectsIndicies,
+            Number.MAX_VALUE
+          ),
+        ]
+          // sort by the index in the original input
+          .sort(([, leftIndex], [, rightIndex]) => leftIndex - rightIndex)
+          // drop the index now that we've sorted
+          .map(([object]) => object),
       },
       objects
     );
@@ -340,24 +368,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   }
 
   /**
-   * merges two bulkResponses into one maintaining the order as specified in `idsInOrder`.
-   * pushes any response with without a clear index to the bottom maintaining its relative position
-   * @param idsInOrder array of string object IDs whose order dictates the final merged response
-   * @param responses array of responses to merge
+   * Zip two arrays together so each cell contains a tupple of two item, one from each array in that index.
+   * All items from the left array will be retained, and only as many items as needed will be pulled from right
+   * @param left array of items of any type
+   * @param right array of items of any type
+   * @param defaultZipValue default value to use when pulling from the left array and
+   *   a corresponding item is missing in the right array
    */
-  private mergeBulkResponsesInOrder<
-    T,
-    R extends
-      | SavedObjectsBulkResponse<T>
-      | SavedObjectsFindResponse<T>
-      | SavedObjectsBulkUpdateResponse<T>
-  >(idsInOrder: string[], ...responses: Array<R['saved_objects']>): R['saved_objects'] {
-    const ResponsesById = new Map();
-    for (const response of responses) {
-      for (const object of response) {
-        ResponsesById.set(object.id, object);
-      }
-    }
-    return idsInOrder.map((id) => ResponsesById.get(id));
+  private zip<T, G>(left: T[], right: G[], defaultZipValue: G) {
+    return left.map<[T, G]>((leftItem, index) => [leftItem, right[index] ?? defaultZipValue]);
   }
 }
