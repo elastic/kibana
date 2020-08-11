@@ -112,7 +112,7 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
   useEffect(() => {
     const openSearch = (event: KeyboardEvent) => {
-      if (event.key === 's' && event.ctrlKey) {
+      if (event.key === 's' && (isWindows ? event.ctrlKey : event.metaKey)) {
         if (searchRef) {
           event.preventDefault();
           searchRef.focus();
