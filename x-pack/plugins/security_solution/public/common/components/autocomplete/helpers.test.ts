@@ -5,7 +5,7 @@
  */
 
 import '../../../common/mock/match_media';
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
 import {
   EXCEPTION_OPERATORS,

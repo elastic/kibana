@@ -14,7 +14,7 @@ import {
   getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
-  hasUnsavedChanges,
+  getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
   replaceLayerList,
@@ -44,9 +44,7 @@ function mapStateToProps(state = {}) {
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
     filters: getFilters(state),
-    hasUnsavedChanges: (savedMap, initialLayerListConfig) => {
-      return hasUnsavedChanges(state, savedMap, initialLayerListConfig);
-    },
+    layerListConfigOnly: getLayerListConfigOnly(state),
     query: getQuery(state),
     timeFilters: getTimeFilters(state),
   };

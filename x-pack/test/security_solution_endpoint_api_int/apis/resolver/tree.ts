@@ -537,7 +537,6 @@ export default function ({ getService }: FtrProviderContext) {
       describe('legacy events', () => {
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
         const entityID = '94041';
-        const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MiJ9';
 
         it('returns child process lifecycle events', async () => {
           const { body }: { body: ResolverChildren } = await supertest
@@ -566,20 +565,25 @@ export default function ({ getService }: FtrProviderContext) {
           ).to.eql(93932);
         });
 
-        // The children api does not support pagination currently
-        it.skip('returns no values when there is no more data', async () => {
-          const { body } = await supertest
-            // after is set to the document id of the last event so there shouldn't be any more after it
+        it('returns no values when there is no more data', async () => {
+          let { body }: { body: ResolverChildren } = await supertest
             .get(
-              `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=${cursor}`
+              // there should only be a single child for this node
+              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&children=1`
             )
             .expect(200);
+          expect(body.nextChild).to.not.be(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/94041/children?legacyEndpointID=${endpointID}&afterChild=${body.nextChild}`
+            )
+            .expect(200));
           expect(body.childNodes).be.empty();
           expect(body.nextChild).to.eql(null);
         });
 
-        // The children api does not support pagination currently
-        it.skip('returns the first page of information when the cursor is invalid', async () => {
+        it('returns the first page of information when the cursor is invalid', async () => {
           const { body }: { body: ResolverChildren } = await supertest
             .get(
               `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=blah`
@@ -641,8 +645,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.nextChild).to.not.eql(null);
         });
 
-        // children api does not support pagination currently
-        it.skip('paginates the children', async () => {
+        it('paginates the children', async () => {
           // this gets a node should have 3 children which were created in succession so that the timestamps
           // are ordered correctly to be retrieved in a single call
           const distantChildEntityID = Array.from(tree.childrenLevels[0].values())[0].id;
@@ -671,8 +674,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(body.nextChild).to.be(null);
         });
 
-        // children api does not support pagination currently
-        it.skip('gets all children in two queries', async () => {
+        it('gets all children in two queries', async () => {
           // should get all the children of the origin
           let { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
