@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TestPipelineButton } from './button';
+export { AddDocumentsButton } from './button';
+
+export { OutputButton } from './output_button';
+
+export { DocumentsDropdown } from './documents_dropdown';

@@ -9,12 +9,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { usePipelineProcessorsContext } from '../pipeline_processors_editor/context';
+import {
+  usePipelineProcessorsContext,
+  useTestPipelineContext,
+} from '../pipeline_processors_editor/context';
 
 import {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  TestPipelineButton,
+  AddDocumentsButton,
+  OutputButton,
+  DocumentsDropdown,
 } from '../pipeline_processors_editor';
 
 export interface Props {
@@ -23,6 +28,13 @@ export interface Props {
 
 export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { links } = usePipelineProcessorsContext();
+  const { testPipelineData } = useTestPipelineContext();
+
+  const {
+    config: { documents: cachedDocuments },
+    results,
+  } = testPipelineData;
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -61,7 +73,10 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
         <LoadFromJsonButton onDone={onLoadJson} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <TestPipelineButton />
+        {cachedDocuments?.length ? <DocumentsDropdown /> : <AddDocumentsButton />}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <OutputButton isDisabled={Boolean(results) === false} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

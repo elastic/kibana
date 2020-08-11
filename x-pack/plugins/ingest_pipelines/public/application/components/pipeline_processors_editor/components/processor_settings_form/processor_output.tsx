@@ -100,6 +100,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
               </p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* TODO fix: duplicate code */}
               {documents && documents.length > 1 && (
                 <EuiPagination
                   pageCount={documents.length}

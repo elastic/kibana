@@ -14,4 +14,10 @@ export { OnUpdateHandlerArg, OnUpdateHandler } from './types';
 
 export { SerializeResult } from './serialize';
 
-export { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineButton } from './components';
+export {
+  LoadFromJsonButton,
+  OnDoneLoadJsonHandler,
+  AddDocumentsButton,
+  OutputButton,
+  DocumentsDropdown,
+} from './components';
