@@ -82,3 +82,29 @@ export const removeListItemServerGeneratedProperties = (
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
 };
+
+// Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
+export const waitFor = async (
+  functionToTest: () => Promise<boolean>,
+  maxTimeout: number = 5000,
+  timeoutWait: number = 10
+) => {
+  await new Promise(async (resolve, reject) => {
+    let found = false;
+    let numberOfTries = 0;
+    while (!found && numberOfTries < Math.floor(maxTimeout / timeoutWait)) {
+      const itPasses = await functionToTest();
+      if (itPasses) {
+        found = true;
+      } else {
+        numberOfTries++;
+      }
+      await new Promise((resolveTimeout) => setTimeout(resolveTimeout, timeoutWait));
+    }
+    if (found) {
+      resolve();
+    } else {
+      reject(new Error('timed out waiting for function condition to be true'));
+    }
+  });
+};
