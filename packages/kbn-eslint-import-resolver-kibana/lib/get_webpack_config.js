@@ -46,12 +46,7 @@ exports.getWebpackConfig = function (kibanaPath, projectRoot, config) {
     resolve: {
       extensions: ['.js', '.json', '.ts', '.tsx'],
       mainFields: ['browser', 'main'],
-      modules: [
-        'webpackShims',
-        'node_modules',
-        fromKibana('webpackShims'),
-        fromKibana('node_modules'),
-      ],
+      modules: ['node_modules', fromKibana('node_modules')],
       alias,
       unsafeCache: true,
     },

@@ -27,7 +27,6 @@ const {
   getProjectRoot,
   getWebpackConfig,
   isFile,
-  isProbablyWebpackShim,
   getIsPathRequest,
   resolveWebpackAlias,
 } = require('./lib');
@@ -110,12 +109,8 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
     }
   }
 
-  // only use the node resolver if the importRequest is a path, or is
-  // a module request but not one that's probably a webpackShim. This
-  // prevents false positives as webpackShims are likely to be resolved
-  // to the node_modules directory by the node resolver, but we want
-  // them to resolve to the actual shim
-  if (isPathRequest || !isProbablyWebpackShim(importRequest, file)) {
+  // only use the node resolver if the importRequest is a path
+  if (isPathRequest) {
     const nodeResult = tryNodeResolver(importRequest, file, config);
     if (nodeResult && nodeResult.found) {
       return nodeResult;

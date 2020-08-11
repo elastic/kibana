@@ -40,7 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
-  '**/{webpackShims,__mocks__}/**/*',
+  '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
@@ -99,7 +99,6 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  '**/webpackShims',
   'src/babel-*',
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
@@ -147,9 +146,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
   'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
-  'webpackShims/elasticsearch-browser.js',
-  'webpackShims/moment-timezone.js',
-  'webpackShims/ui-bootstrap.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',

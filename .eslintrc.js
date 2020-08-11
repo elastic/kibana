@@ -457,7 +457,6 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
@@ -605,7 +604,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',

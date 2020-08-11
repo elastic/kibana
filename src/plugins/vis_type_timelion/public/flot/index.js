@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import './webpackShims/jquery.flot';
-import './webpackShims/jquery.flot.time';
-import './webpackShims/jquery.flot.symbol';
-import './webpackShims/jquery.flot.crosshair';
-import './webpackShims/jquery.flot.selection';
-import './webpackShims/jquery.flot.stack';
-import './webpackShims/jquery.flot.axislabels';
+import './jquery.flot';
+import './jquery.flot.time';
+import './jquery.flot.symbol';
+import './jquery.flot.crosshair';
+import './jquery.flot.selection';
+import './jquery.flot.stack';
+import './jquery.flot.axislabels';
