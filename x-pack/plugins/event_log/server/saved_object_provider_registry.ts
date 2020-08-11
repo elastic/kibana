@@ -28,16 +28,7 @@ export class SavedObjectProviderRegistry {
   public registerProvider(type: string, provider: SavedObjectProvider) {
     if (this.providers.has(type)) {
       throw new Error(
-        i18n.translate(
-          'xpack.eventLog.savedObjectProviderRegistry.registerProvider.duplicateProvider',
-          {
-            defaultMessage:
-              'The Event Log has already registered a Provider for the Save Object type "{type}".',
-            values: {
-              type,
-            },
-          }
-        )
+        `The Event Log has already registered a Provider for the Save Object type "${type}".`
       );
     }
     this.providers.set(type, provider);
@@ -55,6 +46,9 @@ export class SavedObjectProviderRegistry {
       );
     }
 
+    // `scopedProviders` is a cache of providers which are scoped t othe current request.
+    // The client will only instantiate a provider on-demand and it will cache each
+    // one to enable the request to reuse each provider.
     const scopedProviders = new Map<string, SavedObjectGetter>();
     const defaultGetter = this.defaultProvider(request);
     return (type: string, id: string) => {

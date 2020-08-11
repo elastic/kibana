@@ -22,7 +22,7 @@ interface EventLogServiceCtorParams {
   esContext: EsContext;
   kibanaUUID: string;
   systemLogger: SystemLogger;
-  savedObjectProviderRegistry: PublicMethodsOf<SavedObjectProviderRegistry>;
+  savedObjectProviderRegistry: SavedObjectProviderRegistry;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -31,7 +31,7 @@ export class EventLogService implements IEventLogService {
   private esContext: EsContext;
   private systemLogger: SystemLogger;
   private registeredProviderActions: Map<string, Set<string>>;
-  private savedObjectProviderRegistry: PublicMethodsOf<SavedObjectProviderRegistry>;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   public readonly kibanaUUID: string;
 

@@ -117,4 +117,24 @@ describe('EventLogService', () => {
     const eventLogger = service.getLogger({});
     expect(eventLogger).toBeTruthy();
   });
+
+  describe('registerSavedObjectProvider', () => {
+    test('register SavedObject Providers in the registry', () => {
+      const params = {
+        esContext,
+        systemLogger,
+        kibanaUUID: '42',
+        savedObjectProviderRegistry,
+        config: {
+          enabled: true,
+          logEntries: true,
+          indexEntries: true,
+        },
+      };
+      const service = new EventLogService(params);
+      const provider = jest.fn();
+      service.registerSavedObjectProvider('myType', provider);
+      expect(savedObjectProviderRegistry.registerProvider).toHaveBeenCalledWith('myType', provider);
+    });
+  });
 });

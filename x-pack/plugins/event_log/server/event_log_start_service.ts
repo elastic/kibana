@@ -17,14 +17,14 @@ export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectProviderRegistry: PublicMethodsOf<SavedObjectProviderRegistry>;
+  savedObjectProviderRegistry: SavedObjectProviderRegistry;
   spacesService?: SpacesServiceSetup;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClientService implements IEventLogClientService {
   private esContext: EsContext;
-  private savedObjectProviderRegistry: PublicMethodsOf<SavedObjectProviderRegistry>;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
   private spacesService?: SpacesServiceSetup;
 
   constructor({

@@ -6,15 +6,12 @@
 
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
-type Schema = PublicMethodsOf<SavedObjectProviderRegistry>;
-
 const createSavedObjectProviderRegistryMock = () => {
-  const mocked: jest.Mocked<Schema> = {
+  return ({
     registerProvider: jest.fn(),
     registerDefaultProvider: jest.fn(),
     getProvidersClient: jest.fn(),
-  };
-  return mocked;
+  } as unknown) as jest.Mocked<SavedObjectProviderRegistry>;
 };
 
 export const savedObjectProviderRegistryMock = {
