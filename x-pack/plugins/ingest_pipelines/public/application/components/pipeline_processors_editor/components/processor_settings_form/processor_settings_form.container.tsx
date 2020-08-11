@@ -50,8 +50,9 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
     [onSubmit]
   );
 
+  const maybeProcessorOptions = processor?.options;
   const { form } = useForm({
-    defaultValue: { fields: processor?.options },
+    defaultValue: { fields: maybeProcessorOptions ?? {} },
     onSubmit: handleSubmit,
   });
 

@@ -73,11 +73,11 @@ const typeConfig: FieldConfig = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   return (
-    <UseField config={typeConfig} defaultValue={initialType} path="type">
+    <UseField<string[]> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
-        if ((typeField.value as string[]).length) {
-          const [type] = typeField.value as string[];
+        if (typeField.value?.length) {
+          const [type] = typeField.value;
           const descriptor = getProcessorDescriptor(type);
           selectedOptions = descriptor
             ? [{ label: descriptor.label, value: type }]

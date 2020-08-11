@@ -7,16 +7,18 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionComponent } from 'react';
 
-import { Append } from './processors/append';
-import { Bytes } from './processors/bytes';
-import { Circle } from './processors/circle';
-import { Convert } from './processors/convert';
-import { CSV } from './processors/csv';
-import { DateProcessor } from './processors/date';
-import { DateIndexName } from './processors/date_index_name';
-import { Dissect } from './processors/dissect';
-import { DotExpander } from './processors/dot_expander';
-import { Drop } from './processors/drop';
+import {
+  Append,
+  Bytes,
+  Circle,
+  Convert,
+  CSV,
+  DateProcessor,
+  DateIndexName,
+  Dissect,
+  DotExpander,
+  Drop,
+} from '../processor_settings_form/processors';
 
 // import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';
