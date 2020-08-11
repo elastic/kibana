@@ -122,8 +122,8 @@ export class VegaParser {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
             defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
-[Vega]({vegaSchemaUrl}) or
-[Vega-Lite]({vegaLiteSchemaUrl}).
+Vega (see {vegaSchemaUrl}) or 
+Vega-Lite (see {vegaLiteSchemaUrl}).
 The URL is an identifier only. Kibana and your browser will never access this URL.`,
             values: {
               schemaParam: '"$schema"',
