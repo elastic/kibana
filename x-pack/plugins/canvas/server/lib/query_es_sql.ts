@@ -56,7 +56,7 @@ export const queryEsSQL = async (
       return {
         id: sanitizeName(name),
         name: sanitizeName(name),
-        meta: { type: normalizeType(meta.type) },
+        meta: { type: normalizeType(type) },
       };
     });
     const columnNames = map(columns, 'name');
