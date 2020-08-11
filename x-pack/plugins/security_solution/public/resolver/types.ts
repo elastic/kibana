@@ -11,10 +11,10 @@ import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
 import { ResolverAction } from './store/actions';
 import {
-  ResolverEvent,
   ResolverRelatedEvents,
   ResolverTree,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../common/endpoint/types';
 
 /**
@@ -155,7 +155,7 @@ export interface IndexedEdgeLineSegment extends BBox {
  */
 export interface IndexedProcessNode extends BBox {
   type: 'processNode';
-  entity: ResolverEvent;
+  entity: SafeResolverEvent;
   position: Vector2;
 }
 
@@ -280,21 +280,21 @@ export interface IndexedProcessTree {
   /**
    * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, ResolverEvent[]>;
+  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, ResolverEvent>;
+  idToProcess: Map<string, SafeResolverEvent>;
 }
 
 /**
  * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ResolverEvent, number>;
+export type ProcessWidths = Map<SafeResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ResolverEvent, Vector2>;
+export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -346,11 +346,11 @@ export interface EdgeLineSegment {
  * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ResolverEvent;
+  process: SafeResolverEvent;
   width: number;
 } & (
   | {
-      parent: ResolverEvent;
+      parent: SafeResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -433,7 +433,7 @@ export interface IsometricTaxiLayout {
   /**
    * A map of events to position. Each event represents its own node.
    */
-  processNodePositions: Map<ResolverEvent, Vector2>;
+  processNodePositions: Map<SafeResolverEvent, Vector2>;
   /**
    * A map of edge-line segments, which graphically connect nodes.
    */
@@ -442,7 +442,7 @@ export interface IsometricTaxiLayout {
   /**
    * defines the aria levels for nodes.
    */
-  ariaLevels: Map<ResolverEvent, number>;
+  ariaLevels: Map<SafeResolverEvent, number>;
 }
 
 /**
