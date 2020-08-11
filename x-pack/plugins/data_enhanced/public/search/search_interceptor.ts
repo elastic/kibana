@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { createHash } from 'crypto';
 import { SearchInterceptor, UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
 import { EnhancedSearchInterceptorDeps } from './types';
-import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common/search';
+import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
 
 interface SessionInfo {
   requests: Record<string, string>;
@@ -74,7 +74,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   public search(
     request: IAsyncSearchRequest,
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-  ): Observable<IAsyncSearchResponse> {
+  ) {
     let { id } = request;
 
     request.stored = this.deps.session.getStored();
@@ -90,15 +90,15 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
-      expand((response: IAsyncSearchResponse) => {
+    return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (!response.is_running && response.is_partial)) {
+        if (!response || (!response.isRunning && response.isPartial)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) {
+        if (!response.isRunning) {
           return EMPTY;
         }
 
@@ -111,7 +111,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // Send future requests using just the ID from the response
           mergeMap(() => {
             const stored = this.deps.session.isRestoredSession();
-            return this.runSearch({ id, stored }, combinedSignal) as Observable<
+            return this.runSearch({ id, stored }, combinedSignal, options?.strategy) as Observable<
               IAsyncSearchResponse
             >;
           })

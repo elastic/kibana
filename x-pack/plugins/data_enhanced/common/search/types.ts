@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IEsSearchRequest,
-  IEsSearchResponse,
-  ISearchRequestParams,
-} from '../../../../../src/plugins/data/common';
+import { IEsSearchRequest, ISearchRequestParams } from '../../../../../src/plugins/data/common';
 
 export interface EnhancedSearchParams extends ISearchRequestParams {
   ignoreThrottled: boolean;
@@ -23,17 +19,6 @@ export interface IAsyncSearchRequest extends IEsSearchRequest {
   restore?: boolean;
 
   params?: EnhancedSearchParams;
-}
-
-export interface IAsyncSearchResponse extends IEsSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  is_running?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  is_partial?: boolean;
 }
 
 export interface IEnhancedEsSearchRequest extends IEsSearchRequest {

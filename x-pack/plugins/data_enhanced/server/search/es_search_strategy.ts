@@ -177,9 +177,9 @@ async function asyncSearch(
 
   return {
     id,
-    is_partial,
-    is_running,
     restored: !!storedAsyncId,
+    isPartial: is_partial,
+    isRunning: is_running,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };

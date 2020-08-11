@@ -39,5 +39,13 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 }
 
 export interface IEsSearchResponse extends IKibanaSearchResponse {
+  /**
+   * Indicates whether async search is still in flight
+   */
+  isRunning?: boolean;
+  /**
+   * Indicates whether the results returned are complete or partial
+   */
+  isPartial?: boolean;
   rawResponse: SearchResponse<any>;
 }

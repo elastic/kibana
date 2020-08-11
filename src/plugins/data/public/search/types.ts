@@ -38,6 +38,7 @@ import { GetInternalStartServicesFn } from '../types';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
+  strategy?: string;
 }
 
 export type ISearch = (
@@ -45,14 +46,9 @@ export type ISearch = (
   options?: ISearchOptions
 ) => Observable<IKibanaSearchResponse>;
 
-// Service API types
-export interface IStrategyOptions extends ISearchOptions {
-  strategy?: string;
-}
-
 export type ISearchGeneric = (
   request: IEsSearchRequest,
-  options?: IStrategyOptions
+  options?: ISearchOptions
 ) => Observable<IEsSearchResponse>;
 
 export interface ISearchStartLegacy {

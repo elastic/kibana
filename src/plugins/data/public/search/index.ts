@@ -41,7 +41,6 @@ export {
   FetchOptions,
   SearchRequest,
   SearchResponse,
-  getSearchErrorType,
   getSearchParamsFromRequest,
 } from './fetch';
 
