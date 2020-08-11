@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiButton, EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
@@ -129,9 +129,8 @@ export function DiscoverField({
   let actionButton;
   if (field.name !== '_source' && !selected) {
     actionButton = (
-      <EuiButton
-        fill
-        size="s"
+      <EuiButtonIcon
+        iconType="plusInCircleFilled"
         className="dscSidebarItem__action"
         onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
           ev.preventDefault();
@@ -140,14 +139,13 @@ export function DiscoverField({
         }}
         data-test-subj={`fieldToggle-${field.name}`}
         arial-label={addLabelAria}
-      >
-        {addLabel}
-      </EuiButton>
+      />
     );
   } else if (field.name !== '_source' && selected) {
     actionButton = (
-      <EuiButton
+      <EuiButtonIcon
         color="danger"
+        iconType="cross"
         className="dscSidebarItem__action"
         onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
           ev.preventDefault();
@@ -156,9 +154,7 @@ export function DiscoverField({
         }}
         data-test-subj={`fieldToggle-${field.name}`}
         arial-label={removeLabelAria}
-      >
-        {removeLabel}
-      </EuiButton>
+      />
     );
   }
 
