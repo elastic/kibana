@@ -211,9 +211,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
               properties: {
                 id: { type: 'keyword' },
                 enabled: { type: 'boolean' },
-                dataset: {
+                data_stream: {
                   properties: {
-                    name: { type: 'keyword' },
+                    dataset: { type: 'keyword' },
                     type: { type: 'keyword' },
                   },
                 },

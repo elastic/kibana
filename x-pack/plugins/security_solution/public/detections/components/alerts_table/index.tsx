@@ -147,13 +147,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote, notes }: CreateTimelineProps) => {
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
       updateTimeline({
         duplicate: true,
+        forceNotes: true,
         from: fromTimeline,
         id: 'timeline-1',
-        notes: [],
+        notes,
         timeline: {
           ...timeline,
           show: true,

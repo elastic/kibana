@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -40,8 +39,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('Observer location', () => {
-    const start = moment().subtract('15', 'm').toISOString();
-    const end = moment().toISOString();
+    const start = '~ 15 minutes ago';
+    const end = 'now';
 
     before(async () => {
       await addMonitorWithNoLocation();
