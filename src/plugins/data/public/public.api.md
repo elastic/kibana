@@ -585,6 +585,8 @@ export class FieldList extends Array<IndexPatternField> implements IIndexPattern
     // (undocumented)
     readonly add: (field: FieldSpec) => void;
     // (undocumented)
+    readonly getAll: () => IndexPatternField[];
+    // (undocumented)
     readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
     // (undocumented)
     readonly getByType: (type: IndexPatternField['type']) => any[];
@@ -880,6 +882,8 @@ export interface IIndexPattern {
 export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     // (undocumented)
     add(field: FieldSpec): void;
+    // (undocumented)
+    getAll(): IndexPatternField[];
     // (undocumented)
     getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
     // (undocumented)
