@@ -97,7 +97,7 @@ const CaptureSchema = schema.object({
         bypass: schema.conditional(
           schema.siblingRef('enabled'),
           true,
-          schema.arrayOf(schema.string({ hostname: true })),
+          schema.arrayOf(schema.string()),
           schema.maybe(schema.never())
         ),
       }),
