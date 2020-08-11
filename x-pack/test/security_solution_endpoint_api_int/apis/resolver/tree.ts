@@ -6,7 +6,6 @@
 import expect from '@kbn/expect';
 import {
   ResolverAncestry,
-  ResolverRelatedEvents,
   ResolverChildren,
   ResolverTree,
   LegacyEndpointEvent,
