@@ -87,6 +87,7 @@ export const VisualizeEditor = () => {
       hasUnappliedChanges={hasUnappliedChanges}
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
+      setOriginatingApp={setOriginatingApp}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

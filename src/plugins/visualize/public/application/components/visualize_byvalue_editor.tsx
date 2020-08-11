@@ -92,6 +92,7 @@ export const VisualizeByValueEditor = () => {
       hasUnappliedChanges={hasUnappliedChanges}
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
+      setOriginatingApp={setOriginatingApp}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
