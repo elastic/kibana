@@ -35,17 +35,6 @@ const fieldsConfig: FieldsConfig = {
       }
     ),
   },
-  ignore_missing: {
-    type: FIELD_TYPES.TOGGLE,
-    defaultValue: false,
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.circleForm.ignoreMissingFieldLabel',
-      {
-        defaultMessage: 'Ignore missing',
-      }
-    ),
-  },
   error_distance: {
     type: FIELD_TYPES.NUMBER,
     deserializer: (v) => (typeof v === 'number' && !isNaN(v) ? v : 1.0),

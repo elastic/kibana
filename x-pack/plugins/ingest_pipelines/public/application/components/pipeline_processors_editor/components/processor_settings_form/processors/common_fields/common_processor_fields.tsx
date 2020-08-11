@@ -15,6 +15,8 @@ import {
   ToggleField,
 } from '../../../../../../../shared_imports';
 
+import { TextEditor } from '../../field_components';
+
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
   serializer: (v) => (v === false ? undefined : v),
@@ -47,7 +49,18 @@ export const CommonProcessorFields: FunctionComponent = () => {
     <>
       <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
 
-      <UseField config={ifConfig} component={Field} path="fields.if" />
+      <UseField
+        config={ifConfig}
+        component={TextEditor}
+        componentProps={{
+          editorProps: {
+            language: 'painless',
+            height: 75,
+            options: { minimap: { enabled: false } },
+          },
+        }}
+        path="fields.if"
+      />
 
       <UseField config={tagConfig} component={Field} path="fields.tag" />
     </>

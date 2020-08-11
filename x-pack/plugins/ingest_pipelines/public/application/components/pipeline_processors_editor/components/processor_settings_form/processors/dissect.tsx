@@ -8,6 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TextEditor } from '../field_components';
 
 import {
   FieldConfig,
@@ -61,7 +62,17 @@ export const Dissect: FunctionComponent = () => {
     <>
       <FieldNameField />
 
-      <UseField config={fieldsConfig.pattern} component={Field} path="fields.pattern" />
+      <UseField
+        config={fieldsConfig.pattern}
+        component={TextEditor}
+        componentProps={{
+          editorProps: {
+            height: 75,
+            options: { minimap: { enabled: false } },
+          },
+        }}
+        path="fields.pattern"
+      />
 
       <UseField
         config={fieldsConfig.append_separator}
