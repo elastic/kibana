@@ -96,7 +96,7 @@ export const ImportDataModalComponent = ({
         }
         if (importResponse.errors.length > 0) {
           const formattedErrors = importResponse.errors.map((e) =>
-            failedDetailed(e.rule_id, e.error.status_code, e.error.message)
+            failedDetailed(e.rule_id ?? e.id, e.error.status_code, e.error.message)
           );
           displayErrorToast(errorMessage, formattedErrors, dispatchToaster);
         }
