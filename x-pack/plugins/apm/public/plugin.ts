@@ -134,12 +134,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         setHelpExtension(coreStart);
         setReadonlyBadge(coreStart);
 
-        // Automatically creates static index pattern and stores as saved object
-        createStaticIndexPattern().catch((e) => {
-          // eslint-disable-next-line no-console
-          console.log('Error creating static index pattern', e);
-        });
-
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
     });
