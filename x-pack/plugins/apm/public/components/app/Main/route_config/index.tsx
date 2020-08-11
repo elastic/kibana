@@ -226,7 +226,7 @@ export const routes: BreadcrumbRoute[] = [
     path: '/link-to/transaction-group',
     component: TransactionOverviewRedirectPage,
     breadcrumb: null,
-    name: RouteName.LINK_TO_TRACE,
+    name: RouteName.LINK_TO_TRANSACTION_GROUP,
   },
   {
     exact: true,
