@@ -37,7 +37,9 @@ export interface MyState extends PersistableState {
   value: number,
 }
 
-const migrate = (state: unknown, version: string) => {
+type MyStateOld = MyStateV76 | MyStateV77 | MyState;
+
+const migrate = (state: MyStateOld, version: string) => {
   let v76 = version === '7.6' ? state as MyStateV76 : undefined;
   let v77 = version === '7.7' ? state as MyStateV77 : undefined;
   let v78 = version === '7.8' ? state as MyState : undefined;
@@ -63,7 +65,9 @@ const extract = (state: MyState) => {
   return [{ ...state, objectId: 'mystate.objectId' }, references];
 }
 
-export const persistableStateDefinition = { migrate, inject, extract };
+export type MyStatePersistableStateDefinition = PersistableStateDefinition<MyOldState, MyState>;
+
+export const persistableStateDefinition: MyStatePersistableStateDefinition = { migrate, inject, extract };
 
 persistableStateService.register(MY_STATE_ID, persistableStateDefinition);
 ```
@@ -88,11 +92,14 @@ We plan to implement `PersistableStateRegistry ` which will be exposed under `Pe
 ```ts
 export interface PersistableState extends Serializable {}
 
-export interface PersistableStateDefinition<P extends PersistableState = PersistableState> {
+export interface PersistableStateDefinition<
+  Old extends PersistableState = PersistableState, 
+  P extends PersistableState = PersistableState
+> {
   id: string,
   // migrate function receives state and version string and should return latest state version
   // default is identity function
-  migrate: (state: unknown, version: string) => P,
+  migrate: (state: Old, version: string) => P,
   // inject function receives state and a list of references and should return state with references injected
   // default is identity function
   inject: (state: P, references: SavedObjectReference[]) => P,
