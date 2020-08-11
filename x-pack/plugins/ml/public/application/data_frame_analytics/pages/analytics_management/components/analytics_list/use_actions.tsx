@@ -43,7 +43,7 @@ export const useActions = (
   let modals: JSX.Element | null = null;
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
-    getViewAction(isManagementTable),
+    getViewAction(),
   ];
 
   // isManagementTable will be the same for the lifecycle of the component

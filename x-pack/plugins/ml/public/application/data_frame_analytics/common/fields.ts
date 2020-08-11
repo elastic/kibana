@@ -47,6 +47,7 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
   ES_FIELD_TYPES.SCALED_FLOAT,
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 export const isKeywordAndTextType = (fieldName: string): boolean => {

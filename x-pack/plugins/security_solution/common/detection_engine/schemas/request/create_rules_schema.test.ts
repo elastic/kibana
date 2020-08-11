@@ -1298,6 +1298,7 @@ describe('create rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getCreateRulesSchemaMock();
     const payload: CreateRulesSchema = {
       ...noMaxSignals,
@@ -1453,6 +1454,7 @@ describe('create rules schema', () => {
   });
 
   test('it generates a uuid v4 whenever you omit the rule_id', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { rule_id, ...noRuleId } = getCreateRulesSchemaMock();
     const decoded = createRulesSchema.decode(noRuleId);
     const checked = exactCheck(noRuleId, decoded);
@@ -1513,11 +1515,13 @@ describe('create rules schema', () => {
         exceptions_list: [
           {
             id: 'some_uuid',
+            list_id: 'list_id_single',
             namespace_type: 'single',
             type: 'detection',
           },
           {
-            id: 'some_uuid',
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
             namespace_type: 'agnostic',
             type: 'endpoint',
           },
@@ -1600,6 +1604,7 @@ describe('create rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
         'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
