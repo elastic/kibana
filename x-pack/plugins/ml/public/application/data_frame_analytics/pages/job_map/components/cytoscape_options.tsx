@@ -60,16 +60,20 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'border-color': (el: cytoscape.NodeSingular) =>
           el.selected() ? theme.euiColorPrimary : theme.euiColorMediumShade,
         'border-width': 2,
+        // @ts-ignore
         color: theme.textColors.default,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
         'font-size': theme.euiFontSizeXS,
+        // @ts-ignore
         'min-zoomed-font-size': theme.euiSizeL,
         label: 'data(label)',
         shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
         'text-background-color': theme.euiColorLightestShade,
         'text-background-opacity': 0,
+        // @ts-ignore
         'text-background-padding': theme.paddingSizes.xs,
         'text-background-shape': 'roundrectangle',
+        // @ts-ignore
         'text-margin-y': theme.paddingSizes.s,
         'text-max-width': '200px',
         'text-valign': 'bottom',
@@ -86,6 +90,7 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'overlay-opacity': 0,
         'target-arrow-color': lineColor,
         'target-arrow-shape': 'triangle',
+        // @ts-ignore
         'target-distance-from-node': theme.paddingSizes.xs,
         width: 1,
         'source-arrow-shape': 'none',

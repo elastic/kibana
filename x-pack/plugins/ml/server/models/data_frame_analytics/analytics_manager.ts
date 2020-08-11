@@ -5,11 +5,11 @@
  */
 
 import Boom from 'boom';
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { JOB_MAP_NODE_TYPES } from '../../../public/application/data_frame_analytics/pages/job_map/common'; // eslint-disable-line
 
 export class AnalyticsManager {
-  private _client: IScopedClusterClient['callAsCurrentUser'];
+  private _client: ILegacyScopedClusterClient['callAsInternalUser'];
 
   constructor(client: any) {
     this._client = client;

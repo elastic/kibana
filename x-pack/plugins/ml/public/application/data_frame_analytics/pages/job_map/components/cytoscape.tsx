@@ -75,16 +75,8 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
         layout.run();
       }
     },
-    [cy]
+    [cy, height, width]
   );
-
-  // Trigger a custom "data" event when data changes
-  useEffect(() => {
-    if (cy) {
-      cy.add(elements);
-      cy.trigger('data');
-    }
-  }, [cy, elements]);
 
   // Set up cytoscape event handlers
   useEffect(() => {
@@ -110,7 +102,15 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
         cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
-  }, [cy, dataHandler]);
+  }, [cy, elements, height, width]);
+
+  // Trigger a custom "data" event when data changes
+  useEffect(() => {
+    if (cy) {
+      cy.add(elements);
+      cy.trigger('data');
+    }
+  }, [cy, elements]);
 
   return (
     <CytoscapeContext.Provider value={cy}>

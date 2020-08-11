@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import {
   getAnalysisType,
@@ -17,8 +17,6 @@ import {
 import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { getJobMapUrl, DataFrameAnalyticsListRow } from '../analytics_list/common';
-
-import { getViewLinkStatus } from './get_view_link_status';
 
 interface MapButtonProps {
   item: DataFrameAnalyticsListRow;

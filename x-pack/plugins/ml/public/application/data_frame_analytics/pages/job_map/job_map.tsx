@@ -9,8 +9,10 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import cytoscape from 'cytoscape';
+
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { ml } from '../../../services/ml_api_service';
+// TODO: don't use dep cache - switch to hook
 import { getToastNotifications } from '../../../util/dependency_cache';
 import { useRefDimensions } from './components/use_ref_dimensions';
 
@@ -64,6 +66,7 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
       idToUse,
       treatAsRoot
     );
+    // console.log('----- ANALYTICS MAP ----', JSON.stringify(analyticsMap, null, 2)); // remove
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
 
     if (fetchError !== null) {
@@ -104,10 +107,10 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
     setError(undefined);
   }
 
-  const { ref: wrapperRef, width, height } = useRefDimensions();
+  const { ref, width, height } = useRefDimensions();
 
   return (
-    <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={wrapperRef}>
+    <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) }} ref={ref}>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <JobMapTitle analyticsId={analyticsId} />
