@@ -509,47 +509,43 @@ For additional information on Timelion conditional capabilities, go to https://w
 [[timelion-deprecation]]
 === Timelion App deprecation
 
-In *8.0* and later, the Timelion app - deprecated since 7.0 - is going to be removed. There are actions you need to complete to copy your existing Timelion worksheets to a dashboard.  
+Deprecated since 7.0, the Timelion app will be removed in 8.0. If you have any Timelion worksheets, you must migrate them to a dashboard.
 
-NOTE: Only the Timelion app is deprecated, not Timelion as a visualization (on dashboards and in the visualize application) or Timelion in Canvas. 
-
-[role="screenshot"]
-image::images/timelion-app.png[]
-{nbsp}
+NOTE: Only the Timelion app is deprecated. {kib} continues to support Timelion visualizations on dashboards, in Visualize, and in Canvas. 
 
 [float]
 [[timelion-app-to-vis]]
 ==== Create a dashboard from a Timelion worksheet
 
-Timelion worksheets are deprecated, but they can easily be replaced by a dashboard. The process is the same as adding a new visualization to a dashboard but the Timelion charts should also be migrated to **Visualize**. 
+To replace a Timelion worksheet with a dashboard, follow the same process for adding a visualization. 
+In addition, you must migrate the Timelion graphs to Visualize.
 
-Open the menu, click **Dashboard**, then click **Create dashboard**.
+. Open the menu, click **Dashboard**, then click **Create dashboard**.
 
-On the dashboard, click **Create New**, then select the Timelion visualization.
-
+. On the dashboard, click **Create New**, then select the Timelion visualization.
++
 [role="screenshot"]
 image::images/timelion-create-new-dashboard.png[]
 {nbsp}
-
-
++
 The only thing you need is the Timelion expression for each graph.
 
-Open Timelion app on a new tab, select the chart you want to copy, and copy its expression.
-
+. Open Timelion app on a new tab, select the chart you want to copy, and copy its expression.
++
 [role="screenshot"]
 image::images/timelion-copy-expression.png[]
 {nbsp}
 
-Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
-
+. Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
++
 [role="screenshot"]
 image::images/timelion-vis-paste-expression.png[]
 {nbsp}
 
-Click to save the new visualization, give it a name, and hit **Save and Return**.
-
+. Save the new visualization, give it a name, and hit **Save and Return**.
++
 Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
-
++
 [role="screenshot"]
 image::images/timelion-dashboard.png[]
 {nbsp}
