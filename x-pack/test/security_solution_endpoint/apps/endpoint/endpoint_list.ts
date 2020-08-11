@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const expectedData = [
           [
             'Hostname',
-            'Endpoint Status',
+            'Agent Status',
             'Integration',
             'Configuration Status',
             'Operating System',

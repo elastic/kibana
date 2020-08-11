@@ -216,7 +216,7 @@ export const EndpointList = () => {
       {
         field: 'host_status',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
-          defaultMessage: 'Endpoint Status',
+          defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
