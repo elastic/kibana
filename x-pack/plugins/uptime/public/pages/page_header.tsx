@@ -7,12 +7,12 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { UptimeDatePicker } from '../components/common/uptime_date_picker';
 import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 
 interface PageHeaderProps {
   headingText: string | JSX.Element;
@@ -58,7 +58,6 @@ export const PageHeader = React.memo(
       ) : null;
 
     const kibana = useKibana();
-    const history = useHistory();
 
     const extraLinkComponents = !extraLinks ? null : (
       <EuiFlexGroup alignItems="flexEnd" responsive={false}>
@@ -66,13 +65,13 @@ export const PageHeader = React.memo(
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
+          <ReactRouterEuiButtonEmpty
             data-test-subj="settings-page-link"
             iconType="gear"
-            href={history.createHref({ pathname: SETTINGS_ROUTE })}
+            to={SETTINGS_ROUTE}
           >
             {SETTINGS_LINK_TEXT}
-          </EuiButtonEmpty>
+          </ReactRouterEuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

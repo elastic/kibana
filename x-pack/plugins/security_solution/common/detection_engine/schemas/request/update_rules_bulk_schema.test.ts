@@ -123,7 +123,6 @@ describe('update_rules_bulk_schema', () => {
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
       'Invalid value "undefined" supplied to "risk_score"',
-      'Invalid value "undefined" supplied to "risk_score"',
     ]);
     expect(output.schema).toEqual({});
   });
