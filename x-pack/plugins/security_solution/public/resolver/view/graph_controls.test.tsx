@@ -31,45 +31,36 @@ describe('graph controls', () => {
   });
 
   describe('when the graph controls load', () => {
-    it('should display all cardinal panning buttons and the center button', () => {
-      const westPanButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:west-button"]');
-      const southPanButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:west-button"]');
-      const eastPanButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:west-button"]');
-      const northPanButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:west-button"]');
-      const centerButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:center-button"]');
-
-      expect(westPanButton.length).toBe(1);
-      expect(southPanButton.length).toBe(1);
-      expect(eastPanButton.length).toBe(1);
-      expect(northPanButton.length).toBe(1);
-      expect(centerButton.length).toBe(1);
+    it('should display all cardinal panning buttons and the center button', async () => {
+      await expect(
+        simulator.map(() => ({
+          westPanButton: simulator.westPanElement().length,
+          southPanButton: simulator.southPanElement().length,
+          eastPanButton: simulator.eastPanElement().length,
+          northPanButton: simulator.northPanElement().length,
+          centerButton: simulator.centerPanElement().length,
+        }))
+      ).toYieldEqualTo({
+        westPanButton: 1,
+        southPanButton: 1,
+        eastPanButton: 1,
+        northPanButton: 1,
+        centerButton: 1,
+      });
     });
 
-    it('should display the zoom buttons and slider', () => {
-      const zoomInButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:zoom-in"]');
-      const zoomOutButton = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:zoom-out"]');
-      const zoomSlider = simulator
-        .graphControlElement()
-        .find('[data-test-subj="resolver:graph-controls:zoom-slider"]');
-
-      expect(zoomInButton.length).toBe(1);
-      expect(zoomOutButton.length).toBe(1);
-      // Zoom slider is an EUI component that enzyme renders as EUIRangeTrack, EUIRangeSlider, input element
-      expect(zoomSlider.length).toBeGreaterThan(0);
+    it('should display the zoom buttons and slider', async () => {
+      await expect(
+        simulator.map(() => ({
+          zoomInButton: simulator.zoomInElement().length,
+          zoomOutButton: simulator.zoomOutElement().length,
+          zoomSlider: simulator.zoomSliderElement().length,
+        }))
+      ).toYieldEqualTo({
+        zoomInButton: 1,
+        zoomOutButton: 1,
+        zoomSlider: 1,
+      });
     });
   });
 
@@ -86,12 +77,8 @@ describe('graph controls', () => {
     });
 
     describe('when the user clicks the west panning button', () => {
-      let westPanButton: ReactWrapper;
       beforeEach(() => {
-        westPanButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:west-button"]');
-        westPanButton.simulate('click');
+        simulator.westPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -101,12 +88,8 @@ describe('graph controls', () => {
     });
 
     describe('when the user clicks the south panning button', () => {
-      let southPanButton: ReactWrapper;
       beforeEach(() => {
-        southPanButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:south-button"]');
-        southPanButton.simulate('click');
+        simulator.southPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -116,12 +99,8 @@ describe('graph controls', () => {
     });
 
     describe('when the user clicks the east panning button', () => {
-      let eastPanButton: ReactWrapper;
       beforeEach(() => {
-        eastPanButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:east-button"]');
-        eastPanButton.simulate('click');
+        simulator.eastPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -131,12 +110,8 @@ describe('graph controls', () => {
     });
 
     describe('when the user clicks the north panning button', () => {
-      let northPanButton: ReactWrapper;
       beforeEach(() => {
-        northPanButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:north-button"]');
-        northPanButton.simulate('click');
+        simulator.northPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -146,19 +121,10 @@ describe('graph controls', () => {
     });
 
     describe('when the user clicks the center panning button', () => {
-      let northPanButton: ReactWrapper;
-      let centerButton: ReactWrapper;
       beforeEach(() => {
-        northPanButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:north-button"]');
-        centerButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:center-button"]');
-
-        northPanButton.simulate('click');
+        simulator.northPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
-        centerButton.simulate('click');
+        simulator.centerPanElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -182,10 +148,7 @@ describe('graph controls', () => {
 
     describe('when the zoom in button is clicked', () => {
       beforeEach(() => {
-        const zoomInButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:zoom-in"]');
-        zoomInButton.simulate('click');
+        simulator.zoomInElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -199,10 +162,7 @@ describe('graph controls', () => {
 
     describe('when the zoom out button is clicked', () => {
       beforeEach(() => {
-        const zoomOutButton = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:zoom-out"]');
-        zoomOutButton.simulate('click');
+        simulator.zoomOutElement().simulate('click');
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -218,11 +178,7 @@ describe('graph controls', () => {
       beforeEach(() => {
         expect(originNode.getDOMNode()).toHaveStyle(originalSizeStyle);
 
-        const zoomSlider = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:zoom-slider"]')
-          .last();
-        zoomSlider.simulate('change', { target: { value: 0.8 } });
+        simulator.zoomSliderElement().simulate('change', { target: { value: 0.8 } });
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
@@ -236,11 +192,7 @@ describe('graph controls', () => {
 
     describe('when the slider is moved downwards', () => {
       beforeEach(() => {
-        const zoomSlider = simulator
-          .graphControlElement()
-          .find('[data-test-subj="resolver:graph-controls:zoom-slider"]')
-          .last(); // The last element rendered is the actual slider input element
-        zoomSlider.simulate('change', { target: { value: 0.2 } });
+        simulator.zoomSliderElement().simulate('change', { target: { value: 0.2 } });
         simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
       });
 
