@@ -27,6 +27,6 @@ export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
     defaultMessage: 'Apply filter',
   }),
   description: i18n.translate('uiActions.triggers.applyFilterDescription', {
-    defaultMessage: 'When kibana filtered is applied. Could be a single value or range filter.',
+    defaultMessage: 'When kibana filter is applied. Could be a single value or a range filter.',
   }),
 };
