@@ -15,7 +15,7 @@ import {
 import { ServerApiError } from '../../../common/types';
 import { GetPackagesResponse } from '../../../../../ingest_manager/common';
 
-export interface HostState {
+export interface EndpointState {
   /** list of host **/
   hosts: HostInfo[];
   /** number of items per page */
@@ -53,15 +53,15 @@ export interface HostState {
   /** tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: Record<string, boolean>;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
-  hostsExist: boolean;
+  endpointsExist: boolean;
 }
 
 /**
  * Query params on the host page parsed from the URL
  */
-export interface HostIndexUIQueryParams {
-  /** Selected host id shows host details flyout */
-  selected_host?: string;
+export interface EndpointIndexUIQueryParams {
+  /** Selected endpoint id shows host details flyout */
+  selected_endpoint?: string;
   /** How many items to show in list */
   page_size?: string;
   /** Which page to show */
