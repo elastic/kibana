@@ -14,6 +14,10 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
   background-image: url('./side_nav_bg.svg');
   background-repeat: no-repeat;
 
+  @include euiBreakpoint('xs', 's', 'm') {
+    padding: $euiSize $euiSizeML;
+  }
+
   &__icon {
     display: flex;
     align-items: center;

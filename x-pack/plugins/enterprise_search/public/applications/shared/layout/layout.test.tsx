@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { EuiPageSideBar, EuiButton } from '@elastic/eui';
 
 import { Layout } from './';
 
@@ -21,6 +22,18 @@ describe('Layout', () => {
 
     expect(wrapper.find('.enterpriseSearchLayout__sideBar')).toHaveLength(1);
     expect(wrapper.find('.nav-test')).toHaveLength(1);
+  });
+
+  it('renders navigation toggle state', () => {
+    const wrapper = shallow(<Layout navigation={<nav className="nav-test">Hello World</nav>} />);
+    expect(wrapper.find(EuiPageSideBar).prop('className')).not.toContain('--isOpen');
+    expect(wrapper.find(EuiButton).prop('iconType')).toEqual('arrowRight');
+
+    const toggle = wrapper.find('[data-test-subj="enterpriseSearchNavToggle"]');
+    toggle.simulate('click');
+
+    expect(wrapper.find(EuiPageSideBar).prop('className')).toContain('--isOpen');
+    expect(wrapper.find(EuiButton).prop('iconType')).toEqual('arrowDown');
   });
 
   it('renders children', () => {
