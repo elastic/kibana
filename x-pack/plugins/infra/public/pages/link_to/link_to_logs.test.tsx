@@ -96,6 +96,25 @@ describe('LinkToLogsPage component', () => {
       );
     });
 
+    it('redirects to the stream filtered for a host using a specific source id', () => {
+      const { history } = renderRoutes(
+        <Switch>
+          <Route path="/link-to" component={LinkToLogsPage} />
+        </Switch>
+      );
+
+      history.push('/link-to/OTHER_SOURCE/host-logs/HOST_NAME');
+
+      expect(history.location.pathname).toEqual('/stream');
+
+      const searchParams = new URLSearchParams(history.location.search);
+      expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
+        `"(expression:'HOST_FIELD: HOST_NAME',kind:kuery)"`
+      );
+      expect(searchParams.get('logPosition')).toEqual(null);
+    });
+
     it('renders a loading page while loading the source configuration', () => {
       useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
 
