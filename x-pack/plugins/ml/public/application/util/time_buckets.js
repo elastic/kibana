@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
-// import ary from 'lodash/ary';
+import ary from 'lodash/ary';
+import sortBy from 'lodash/sortBy';
 import assign from 'lodash/assign';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -91,9 +91,9 @@ TimeBuckets.prototype.setBounds = function (input) {
     bounds = Array.isArray(input) ? input : [];
   }
 
-  const moments = _(bounds).map(_.ary(moment, 1)).sortBy(Number);
+  const moments = sortBy(bounds.map(ary(moment, 1)), Number);
 
-  const valid = moments.size() === 2 && moments.every(isValidMoment);
+  const valid = moments.length === 2 && moments.every(isValidMoment);
   if (!valid) {
     this.clearBounds();
     throw new Error('invalid bounds set: ' + input);
