@@ -53,6 +53,86 @@ describe('LinkToLogsPage component', () => {
     useLogSourceMock.mockRestore();
   });
 
+  describe('default route', () => {
+    it('redirects to the stream at a given time filtered for a user-defined criterion', () => {
+      const { history } = renderRoutes(
+        <Switch>
+          <Route path="/link-to" component={LinkToLogsPage} />
+        </Switch>
+      );
+
+      history.push('/link-to?time=1550671089404&filter=FILTER_FIELD:FILTER_VALUE');
+
+      expect(history.location.pathname).toEqual('/stream');
+
+      const searchParams = new URLSearchParams(history.location.search);
+      expect(searchParams.get('sourceId')).toEqual('default');
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
+        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+      );
+      expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
+        `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
+      );
+    });
+
+    it('redirects to the stream using a specific source id', () => {
+      const { history } = renderRoutes(
+        <Switch>
+          <Route path="/link-to" component={LinkToLogsPage} />
+        </Switch>
+      );
+
+      history.push('/link-to/OTHER_SOURCE');
+
+      expect(history.location.pathname).toEqual('/stream');
+
+      const searchParams = new URLSearchParams(history.location.search);
+      expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logPosition')).toEqual(null);
+    });
+  });
+
+  describe('logs route', () => {
+    it('redirects to the stream at a given time filtered for a user-defined criterion', () => {
+      const { history } = renderRoutes(
+        <Switch>
+          <Route path="/link-to" component={LinkToLogsPage} />
+        </Switch>
+      );
+
+      history.push('/link-to/logs?time=1550671089404&filter=FILTER_FIELD:FILTER_VALUE');
+
+      expect(history.location.pathname).toEqual('/stream');
+
+      const searchParams = new URLSearchParams(history.location.search);
+      expect(searchParams.get('sourceId')).toEqual('default');
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
+        `"(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"`
+      );
+      expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
+        `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
+      );
+    });
+
+    it('redirects to the stream using a specific source id', () => {
+      const { history } = renderRoutes(
+        <Switch>
+          <Route path="/link-to" component={LinkToLogsPage} />
+        </Switch>
+      );
+
+      history.push('/link-to/OTHER_SOURCE/logs');
+
+      expect(history.location.pathname).toEqual('/stream');
+
+      const searchParams = new URLSearchParams(history.location.search);
+      expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
+      expect(searchParams.get('logFilter')).toMatchInlineSnapshot(`"(expression:'',kind:kuery)"`);
+      expect(searchParams.get('logPosition')).toEqual(null);
+    });
+  });
+
   describe('host-logs route', () => {
     it('redirects to the stream filtered for a host', () => {
       const { history } = renderRoutes(
