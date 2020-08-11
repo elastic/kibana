@@ -55,6 +55,10 @@ export function timestampSafeVersion(event: SafeResolverEvent): string | undefin
     : firstNonNullValue(event?.['@timestamp']);
 }
 
+/**
+ * The `@timestamp` for the event, as a `Date` object.
+ * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
+ */
 export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | undefined {
   const value = timestampSafeVersion(event);
   if (value === undefined) {

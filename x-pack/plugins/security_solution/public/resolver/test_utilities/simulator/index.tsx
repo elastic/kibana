@@ -184,9 +184,13 @@ export class Simulator {
     );
   }
 
-  public processNodeSubmenu(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:map:node-submenu"]');
+  /**
+   * The items in the submenu that is opened by expanding a node in the map.
+   */
+  public processNodeSubmenuItems(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
   }
+
   /**
    * Return the selected node query string values.
    */

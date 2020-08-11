@@ -68,14 +68,17 @@ const OptionList = React.memo(
             label: string;
             prepend?: ReactNode;
           } => {
+            const dataTestSubj = 'resolver:map:node-submenu-item';
             return opt.prefix
               ? {
                   label: opt.optionTitle,
                   prepend: <span>{opt.prefix} </span>,
+                  'data-test-subj': dataTestSubj,
                 }
               : {
                   label: opt.optionTitle,
                   prepend: <span />,
+                  'data-test-subj': dataTestSubj,
                 };
           })
     );
@@ -114,7 +117,6 @@ const OptionList = React.memo(
         options={options}
         {...selectableProps}
         isLoading={isLoading}
-        data-test-subj="resolver:map:node-submenu"
       >
         {(list) => <OptionListItem>{list}</OptionListItem>}
       </EuiSelectable>

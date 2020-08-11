@@ -164,14 +164,8 @@ describe('Resolver, when analyzing a tree that has two related events for the or
       });
       it('should open the submenu', async () => {
         await expect(
-          /* eslint-disable array-callback-return */
-          simulator.map(() => {
-            const wrapper = simulator.processNodeSubmenu();
-            if (wrapper.exists()) {
-              return simulator.processNodeSubmenu().text();
-            }
-          })
-        ).toYieldEqualTo('2 registry');
+          simulator.map(() => simulator.processNodeSubmenuItems().map((node) => node.text()))
+        ).toYieldEqualTo(['2 registry']);
       });
     });
   });
