@@ -27,7 +27,7 @@ interface Props {
 export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
-      <Span data-test-subj={val}>
+      <Span data-test-subj={val} className="eui-textNoWrap">
         <EuiToolTip content={val}>
           <EmptyButton>{text} </EmptyButton>
         </EuiToolTip>
@@ -45,9 +45,9 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
     );
   };
   return (
-    <>
+    <span>
       <ShaComponent text="SHA 1" val={cert?.sha1?.toUpperCase() ?? ''} />
       <ShaComponent text="SHA 256" val={cert?.sha256?.toUpperCase() ?? ''} />
-    </>
+    </span>
   );
 };
