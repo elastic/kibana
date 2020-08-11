@@ -35,7 +35,13 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
   router.get(
     {
       path: `${MAIN_ENTRY}/list`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          page: schema.string({ defaultValue: '0' }),
+          size: schema.string({ defaultValue: '10' }),
+          ids: schema.maybe(schema.string()),
+        }),
+      },
     },
     userHandler(async (user, context, req, res) => {
       // ensure the async dependencies are loaded
@@ -50,7 +56,7 @@ export function registerJobInfoRoutes(reporting: ReportingCore) {
         page: queryPage = '0',
         size: querySize = '10',
         ids: queryIds = null,
-      } = req.query as ListQuery;
+      } = req.query as ListQuery; // NOTE: type inference is not working here. userHandler breaks it?
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
