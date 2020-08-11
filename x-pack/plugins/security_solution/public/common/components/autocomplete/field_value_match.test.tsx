@@ -5,9 +5,10 @@
  */
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { act } from '@testing-library/react';
 
 import {
   fields,
@@ -19,6 +20,8 @@ import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete'
 jest.mock('./hooks/use_field_value_autocomplete');
 
 describe('AutocompleteFieldMatchComponent', () => {
+  let wrapper: ReactWrapper;
+
   const getValueSuggestionsMock = jest
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
@@ -32,8 +35,13 @@ describe('AutocompleteFieldMatchComponent', () => {
     ]);
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    wrapper.unmount();
+  });
+
   test('it renders disabled if "isDisabled" is true', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -60,7 +68,7 @@ describe('AutocompleteFieldMatchComponent', () => {
   });
 
   test('it renders loading if "isLoading" is true', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -92,7 +100,7 @@ describe('AutocompleteFieldMatchComponent', () => {
   });
 
   test('it allows user to clear values if "isClearable" is true', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -119,7 +127,7 @@ describe('AutocompleteFieldMatchComponent', () => {
   });
 
   test('it correctly displays selected value', () => {
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -148,7 +156,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it invokes "onChange" when new value created', async () => {
     const mockOnChange = jest.fn();
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -176,7 +184,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
   test('it invokes "onChange" when new value selected', async () => {
     const mockOnChange = jest.fn();
-    const wrapper = mount(
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -202,9 +210,8 @@ describe('AutocompleteFieldMatchComponent', () => {
     expect(mockOnChange).toHaveBeenCalledWith('value 1');
   });
 
-  test('it invokes updateSuggestions when new value searched', async () => {
-    const mockOnChange = jest.fn();
-    const wrapper = mount(
+  test('it refreshes autocomplete with search query when new value searched', () => {
+    wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <AutocompleteFieldMatchComponent
           placeholder="Placeholder text"
@@ -218,23 +225,26 @@ describe('AutocompleteFieldMatchComponent', () => {
           isLoading={false}
           isClearable={false}
           isDisabled={false}
-          onChange={mockOnChange}
+          onChange={jest.fn()}
         />
       </ThemeProvider>
     );
+    act(() => {
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onSearchChange: (a: string) => void;
+      }).onSearchChange('value 1');
+    });
 
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onSearchChange: (a: string) => void;
-    }).onSearchChange('value 1');
-
-    expect(getValueSuggestionsMock).toHaveBeenCalledWith({
-      fieldSelected: getField('machine.os.raw'),
-      patterns: {
+    expect(useFieldValueAutocomplete).toHaveBeenCalledWith({
+      selectedField: getField('machine.os.raw'),
+      operatorType: 'match',
+      query: 'value 1',
+      fieldValue: '',
+      indexPattern: {
         id: '1234',
         title: 'logstash-*',
         fields,
       },
-      value: 'value 1',
     });
   });
 
@@ -253,7 +263,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     });
 
     test('it displays combo box with only true or false options when field type is boolean', () => {
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
             placeholder="Placeholder text"
@@ -285,7 +295,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     test('it invokes "onChange" with "true" when selected', () => {
       const mockOnChange = jest.fn();
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
             placeholder="Placeholder text"
@@ -313,7 +323,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     test('it invokes "onChange" with "false" when selected', () => {
       const mockOnChange = jest.fn();
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
             placeholder="Placeholder text"
@@ -353,7 +363,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     });
 
     test('it number input when field type is number', () => {
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
             placeholder="Placeholder text"
@@ -379,7 +389,7 @@ describe('AutocompleteFieldMatchComponent', () => {
 
     test('it invokes "onChange" with numeric value when inputted', () => {
       const mockOnChange = jest.fn();
-      const wrapper = mount(
+      wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
           <AutocompleteFieldMatchComponent
             placeholder="Placeholder text"

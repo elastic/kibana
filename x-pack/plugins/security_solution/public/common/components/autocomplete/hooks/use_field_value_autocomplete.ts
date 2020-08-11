@@ -11,11 +11,14 @@ import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/d
 import { useKibana } from '../../../../common/lib/kibana';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
-type Func = (args: {
+interface FuncArgs {
   fieldSelected: IFieldType | undefined;
   value: string | string[] | undefined;
+  searchQuery: string;
   patterns: IIndexPattern | undefined;
-}) => void;
+}
+
+type Func = (args: FuncArgs) => void;
 
 export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func | null];
 
@@ -23,6 +26,7 @@ export interface UseFieldValueAutocompleteProps {
   selectedField: IFieldType | undefined;
   operatorType: OperatorTypeEnum;
   fieldValue: string | string[] | undefined;
+  query: string;
   indexPattern: IIndexPattern | undefined;
 }
 /**
@@ -33,6 +37,7 @@ export const useFieldValueAutocomplete = ({
   selectedField,
   operatorType,
   fieldValue,
+  query,
   indexPattern,
 }: UseFieldValueAutocompleteProps): UseFieldValueAutocompleteReturn => {
   const { services } = useKibana();
@@ -46,20 +51,7 @@ export const useFieldValueAutocomplete = ({
     const abortCtrl = new AbortController();
 
     const fetchSuggestions = debounce(
-      async ({
-        fieldSelected,
-        value,
-        patterns,
-      }: {
-        fieldSelected: IFieldType | undefined;
-        value: string | string[] | undefined;
-        patterns: IIndexPattern | undefined;
-      }) => {
-        const inputValue: string | string[] = value ?? '';
-        const userSuggestion: string = Array.isArray(inputValue)
-          ? inputValue[inputValue.length - 1] ?? ''
-          : inputValue;
-
+      async ({ fieldSelected, value, searchQuery, patterns }: FuncArgs) => {
         try {
           if (isSubscribed) {
             if (fieldSelected == null || patterns == null) {
@@ -87,7 +79,7 @@ export const useFieldValueAutocomplete = ({
             const newSuggestions = await services.data.autocomplete.getValueSuggestions({
               indexPattern: patterns,
               field,
-              query: userSuggestion.trim(),
+              query: searchQuery,
               signal: abortCtrl.signal,
             });
 
@@ -112,6 +104,7 @@ export const useFieldValueAutocomplete = ({
       fetchSuggestions({
         fieldSelected: selectedField,
         value: fieldValue,
+        searchQuery: query,
         patterns: indexPattern,
       });
     }
@@ -122,7 +115,7 @@ export const useFieldValueAutocomplete = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [services.data.autocomplete, selectedField, operatorType, fieldValue, indexPattern]);
+  }, [services.data.autocomplete, selectedField, operatorType, fieldValue, indexPattern, query]);
 
   return [isLoading, isSuggestingValues, suggestions, updateSuggestions.current];
 };

@@ -37,11 +37,13 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
   isRequired = false,
   onChange,
 }): JSX.Element => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
-  const [isLoadingSuggestions, , suggestions, updateSuggestions] = useFieldValueAutocomplete({
+  const [isLoadingSuggestions, , suggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH_ANY,
     fieldValue: selectedValue,
+    query: searchQuery,
     indexPattern,
   });
   const getLabel = useCallback((option: string): string => option, []);
@@ -65,14 +67,8 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
     onChange(newValues);
   };
 
-  const onSearchChange = (searchVal: string) => {
-    if (updateSuggestions != null) {
-      updateSuggestions({
-        fieldSelected: selectedField,
-        value: searchVal,
-        patterns: indexPattern,
-      });
-    }
+  const handleSearchChange = (searchVal: string) => {
+    setSearchQuery(searchVal);
   };
 
   const onCreateOption = (option: string) => onChange([...(selectedValue || []), option]);
@@ -106,7 +102,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
       options={comboOptions}
       selectedOptions={selectedComboOptions}
       onChange={handleValuesChange}
-      onSearchChange={onSearchChange}
+      onSearchChange={handleSearchChange}
       onCreateOption={onCreateOption}
       isInvalid={!isValid}
       onFocus={setIsTouchedValue}

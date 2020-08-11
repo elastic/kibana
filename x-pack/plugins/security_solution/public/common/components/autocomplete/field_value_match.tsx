@@ -39,16 +39,13 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   fieldInputWidth,
   onChange,
 }): JSX.Element => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [touched, setIsTouched] = useState(false);
-  const [
-    isLoadingSuggestions,
-    isSuggestingValues,
-    suggestions,
-    updateSuggestions,
-  ] = useFieldValueAutocomplete({
+  const [isLoadingSuggestions, isSuggestingValues, suggestions] = useFieldValueAutocomplete({
     selectedField,
     operatorType: OperatorTypeEnum.MATCH,
     fieldValue: selectedValue,
+    query: searchQuery,
     indexPattern,
   });
   const getLabel = useCallback((option: string): string => option, []);
@@ -78,13 +75,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
   };
 
   const handleSearchChange = (searchVal: string): void => {
-    if (updateSuggestions != null) {
-      updateSuggestions({
-        fieldSelected: selectedField,
-        value: searchVal,
-        patterns: indexPattern,
-      });
-    }
+    setSearchQuery(searchVal);
   };
 
   const handleNonComboBoxInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {

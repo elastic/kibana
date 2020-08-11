@@ -50,6 +50,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
         options: optionsMemo,
         selectedOptions: selectedOptionsMemo,
         getLabel,
+        selectedField: undefined,
       }),
     [optionsMemo, selectedOptionsMemo, getLabel]
   );

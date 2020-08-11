@@ -50,6 +50,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: undefined,
+          query: '',
         })
       );
       await waitForNextUpdate();
@@ -69,6 +70,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       await waitForNextUpdate();
@@ -91,6 +93,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       await waitForNextUpdate();
@@ -113,6 +116,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.EXISTS,
           fieldValue: '',
           indexPattern: undefined,
+          query: '',
         })
       );
       await waitForNextUpdate();
@@ -147,6 +151,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
@@ -186,6 +191,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
@@ -226,6 +232,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
@@ -251,6 +258,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
@@ -285,6 +293,7 @@ describe('useFieldValueAutocomplete', () => {
           operatorType: OperatorTypeEnum.MATCH,
           fieldValue: '',
           indexPattern: stubIndexPatternWithFields,
+          query: '',
         })
       );
       // Note: initial `waitForNextUpdate` is hook initialization
@@ -300,6 +309,7 @@ describe('useFieldValueAutocomplete', () => {
           fieldSelected: getField('@tags'),
           value: 'hello',
           patterns: stubIndexPatternWithFields,
+          searchQuery: '',
         });
       }
 

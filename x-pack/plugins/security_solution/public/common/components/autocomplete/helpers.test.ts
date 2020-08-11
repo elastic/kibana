@@ -125,6 +125,7 @@ describe('helpers', () => {
         options: [],
         selectedOptions: ['option1'],
         getLabel: (t: string) => t,
+        selectedField: getField('ip'),
       });
 
       expect(result).toEqual({ comboOptions: [], labels: [], selectedComboOptions: [] });
@@ -135,6 +136,7 @@ describe('helpers', () => {
         options: ['option1', 'option2', 'option3'],
         selectedOptions: [],
         getLabel: (t: string) => t,
+        selectedField: getField('ip'),
       });
 
       expect(result).toEqual({
@@ -159,6 +161,7 @@ describe('helpers', () => {
         options: ['option1', 'option2', 'option3'],
         selectedOptions: ['option4'],
         getLabel: (t: string) => t,
+        selectedField: getField('ip'),
       });
 
       expect(result).toEqual({
@@ -183,6 +186,7 @@ describe('helpers', () => {
         options: ['option1', 'option2', 'option3'],
         selectedOptions: ['option2'],
         getLabel: (t: string) => t,
+        selectedField: getField('ip'),
       });
 
       expect(result).toEqual({
@@ -201,6 +205,32 @@ describe('helpers', () => {
         selectedComboOptions: [
           {
             label: 'option2',
+          },
+        ],
+      });
+    });
+
+    test('it returns boolean options when "selectedField" is of type boolean', () => {
+      const result = getGenericComboBoxProps<string>({
+        options: [],
+        selectedOptions: ['true'],
+        getLabel: (t: string) => t,
+        selectedField: getField('ssl'),
+      });
+
+      expect(result).toEqual({
+        comboOptions: [
+          {
+            label: 'true',
+          },
+          {
+            label: 'false',
+          },
+        ],
+        labels: ['true', 'false'],
+        selectedComboOptions: [
+          {
+            label: 'true',
           },
         ],
       });
