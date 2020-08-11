@@ -16,7 +16,6 @@ import each from 'lodash/each';
 import find from 'lodash/find';
 import sortBy from 'lodash/sortBy';
 import map from 'lodash/map';
-import first from 'lodash/first';
 import reduce from 'lodash/reduce';
 
 import { buildConfig } from './explorer_chart_config_builder';
@@ -342,7 +341,7 @@ export const anomalyDataChange = function (
           chartPoint.numberOfCauses = causes.length;
           if (causes.length === 1) {
             // If only a single cause, copy actual and typical values to the top level.
-            const cause = first(record.causes);
+            const cause = record.causes[0];
             chartPoint.actual = cause.actual;
             chartPoint.typical = cause.typical;
           }
