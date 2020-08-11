@@ -30,7 +30,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
                 source ./src/dev/ci_setup/setup.sh
                 source ./src/dev/ci_setup/setup_percy.sh
 
-                node scripts/functional_tests \
+                yarn percy exec -t 10000 -- -- node scripts/functional_tests \
                   --debug --bail \
                   --kibana-install-dir "/home/agent/work/kibana-build-oss/" \
                   --config test/visual_regression/config.ts;
