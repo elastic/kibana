@@ -30,7 +30,7 @@
     "@kbn/es": "1.0.0",
     "@kbn/plugin-helpers": "7.1.5",
     "@kbn/test": "1.0.0",
-    "@types/angular": "1.6.50",
+    "@types/angular": "^1.6.56",
     "@types/d3-array": "^1.2.1",
     "@types/d3-scale": "^2.0.0",
     "@types/d3-shape": "^1.2.2",
