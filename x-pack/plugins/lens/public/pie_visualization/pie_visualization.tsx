@@ -122,6 +122,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
             supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
             filterOperations: bucketedOperations,
             required: true,
+            dataTestSubj: 'lnsPie_groupByDimensionPanel',
           },
           {
             groupId: 'metric',
@@ -133,6 +134,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
             supportsMoreColumns: !layer.metric,
             filterOperations: numberMetricOperations,
             required: true,
+            dataTestSubj: 'lnsPie_sizeByDimensionPanel',
           },
         ],
       };
@@ -150,6 +152,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           supportsMoreColumns: sortedColumns.length < MAX_PIE_BUCKETS,
           filterOperations: bucketedOperations,
           required: true,
+          dataTestSubj: 'lnsPie_sliceByDimensionPanel',
         },
         {
           groupId: 'metric',
@@ -161,6 +164,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           supportsMoreColumns: !layer.metric,
           filterOperations: numberMetricOperations,
           required: true,
+          dataTestSubj: 'lnsPie_sizeByDimensionPanel',
         },
       ],
     };
