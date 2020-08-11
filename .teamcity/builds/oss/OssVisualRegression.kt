@@ -6,6 +6,10 @@ class OssVisualRegression(val build: BuildType) : BuildType({
     name = "Visual Regression"
     paused = true
 
+    params {
+      password("env.PERCY_TOKEN", "credentialsJSON:1ef0e984-a184-4f1c-a9be-282182cb262d", display = ParameterDisplay.HIDDEN)
+    }
+
     steps {
         script {
             scriptContent = """
