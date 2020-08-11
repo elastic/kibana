@@ -15,5 +15,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_prerelease'));
     loadTestFile(require.resolve('./install_remove_assets'));
     loadTestFile(require.resolve('./install_update'));
+    loadTestFile(require.resolve('./update_assets'));
+    loadTestFile(require.resolve('./data_stream'));
   });
 }
