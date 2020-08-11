@@ -5,7 +5,6 @@
  */
 
 import { RequestHandlerContext, ILegacyScopedClusterClient } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
@@ -16,6 +15,7 @@ import {
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
+  analyticsMapQuerySchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
 } from './schemas/data_analytics_schema';
@@ -34,13 +34,13 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-function getAnalyticsMap(context: RequestHandlerContext, analyticsId: string) {
-  const analytics = new AnalyticsManager(context.ml!.mlClient.callAsCurrentUser);
+function getAnalyticsMap(client: ILegacyScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.callAsInternalUser);
   return analytics.getAnalyticsMap(analyticsId);
 }
 
-function getExtendedMap(context: RequestHandlerContext, analyticsId: string) {
-  const analytics = new AnalyticsManager(context.ml!.mlClient.callAsCurrentUser);
+function getExtendedMap(client: ILegacyScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(client.callAsInternalUser);
   return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
 }
 
@@ -148,13 +148,11 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics/map/{analyticsId}',
       validate: {
-        params: schema.object({
-          analyticsId: schema.string(),
-        }),
-        query: schema.maybe(schema.object({ treatAsRoot: schema.maybe(schema.any()) })),
+        params: analyticsIdSchema,
+        query: analyticsMapQuerySchema,
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
         // @ts-ignore
@@ -162,7 +160,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         const caller =
           treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
 
-        const results = await caller(context, analyticsId);
+        const results = await caller(legacyClient, analyticsId);
 
         return response.ok({
           body: results,

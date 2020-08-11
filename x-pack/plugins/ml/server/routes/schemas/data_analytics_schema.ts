@@ -81,3 +81,7 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
+
+export const analyticsMapQuerySchema = schema.maybe(
+  schema.object({ treatAsRoot: schema.maybe(schema.any()) })
+);
