@@ -25,9 +25,18 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setNodesDetailsResponse = (nodeAttributes: string, response: HttpResponse = []) => {
+    server.respondWith(`/api/index_lifecycle_management/nodes/${nodeAttributes}/details`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setPoliciesResponse,
     setNodesListResponse,
+    setNodesDetailsResponse,
   };
 };
 
