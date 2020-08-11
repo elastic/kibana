@@ -18,25 +18,23 @@
  */
 import { difference, map } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
-import { DiscoverServices } from '../../../../build_services';
 
 export function getIndexPatternFieldList(
   indexPattern: IndexPattern,
-  fieldCounts: Record<string, number>,
-  { data }: DiscoverServices
+  fieldCounts: Record<string, number>
 ) {
-  if (!indexPattern || !fieldCounts) return data.indexPatterns.createFieldList(indexPattern);
+  if (!indexPattern || !fieldCounts) return [];
 
-  const fieldSpecs = indexPattern.fields.slice(0);
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
+  const unknownTypes: IndexPatternField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
-    fieldSpecs.push({
+    unknownTypes.push({
       name: String(unknownFieldName),
       type: 'unknown',
     } as IndexPatternField);
   });
 
-  return data.indexPatterns.createFieldList(indexPattern, fieldSpecs);
+  return [...indexPattern.fields, ...unknownTypes];
 }
