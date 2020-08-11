@@ -9,6 +9,7 @@ import axios from 'axios';
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
 import * as i18n from './translations';
+import { Logger } from '../../../../../../src/core/server';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 import { ProxySettings } from '../../types';
@@ -21,6 +22,7 @@ const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
@@ -44,6 +46,8 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
+        proxySettings,
       });
 
       return { ...res.data.result };
@@ -59,6 +63,8 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         url: incidentUrl,
+        logger,
+        proxySettings,
         params,
       });
 
@@ -75,6 +81,8 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,
+        logger,
+        proxySettings,
         method: 'post',
         data: { ...(incident as Record<string, unknown>) },
       });
@@ -97,7 +105,9 @@ export const createExternalService = (
       const res = await patch({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data: { ...(incident as Record<string, unknown>) },
+        proxySettings,
       });
 
       return {

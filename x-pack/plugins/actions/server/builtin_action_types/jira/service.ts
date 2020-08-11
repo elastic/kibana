@@ -7,6 +7,7 @@
 import axios from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
 import {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
@@ -28,6 +29,7 @@ const VIEW_INCIDENT_URL = `browse`;
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
@@ -56,6 +58,7 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
         proxySettings,
       });
 
@@ -77,6 +80,7 @@ export const createExternalService = (
       const res = await request<CreateIncidentRequest>({
         axios: axiosInstance,
         url: `${incidentUrl}`,
+        logger,
         method: 'post',
         data: {
           fields: { ...incident, project: { key: projectKey }, issuetype: { name: 'Task' } },
@@ -105,6 +109,7 @@ export const createExternalService = (
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data: { fields: { ...incident } },
         proxySettings,
       });
@@ -133,6 +138,7 @@ export const createExternalService = (
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
+        logger,
         data: { body: comment.comment },
         proxySettings,
       });

@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 
+import { Logger } from '../../../../../../src/core/server';
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import {
   ResilientPublicConfigurationType,
@@ -60,6 +61,7 @@ export const formatUpdateRequest = ({
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
+  logger: Logger,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
@@ -89,6 +91,7 @@ export const createExternalService = (
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}/${id}`,
+        logger,
         params: {
           text_content_output_format: 'objects_convert',
         },
@@ -109,6 +112,7 @@ export const createExternalService = (
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
+        logger,
         data: {
           ...incident,
           description: {
@@ -142,6 +146,7 @@ export const createExternalService = (
         axios: axiosInstance,
         method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
+        logger,
         data,
         proxySettings,
       });
@@ -174,6 +179,7 @@ export const createExternalService = (
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),
+        logger,
         data: { text: { format: 'text', content: comment.comment } },
         proxySettings,
       });

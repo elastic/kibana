@@ -68,17 +68,16 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
-    if (!transportConfig.secure) {
+    if (proxySettings && !transportConfig.secure) {
       transportConfig.tls = {
-        // do not fail on invalid certs
-        rejectUnauthorized: false,
+        // do not fail on invalid certs if value is false
+        rejectUnauthorized: proxySettings?.rejectUnauthorizedCertificates,
       };
     }
-  }
-
-  if (proxySettings) {
-    transportConfig.proxy = proxySettings.proxyUrl;
-    transportConfig.headers = proxySettings.proxyHeaders;
+    if (proxySettings) {
+      transportConfig.proxy = proxySettings.proxyUrl;
+      transportConfig.headers = proxySettings.proxyHeaders;
+    }
   }
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);

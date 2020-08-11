@@ -81,6 +81,7 @@ async function executor(
       config,
       secrets,
     },
+    logger,
     execOptions.proxySettings
   );
 

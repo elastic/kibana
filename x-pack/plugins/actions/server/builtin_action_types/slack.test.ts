@@ -7,9 +7,15 @@
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
+import {
+  getActionType,
+  SlackActionType,
+  SlackActionTypeExecutorOptions,
+  ActionParamsType,
+} from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
+import { createActionTypeRegistry } from './index.test';
 
 const ACTION_TYPE_ID = '.slack';
 
@@ -83,6 +89,7 @@ describe('validateActionTypeSecrets()', () => {
 
   test('should validate and pass when the slack webhookUrl is whitelisted', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
         ensureWhitelistedUri: (url) => {
@@ -98,6 +105,7 @@ describe('validateActionTypeSecrets()', () => {
 
   test('config validation returns an error if the specified URL isnt whitelisted', () => {
     actionType = getActionType({
+      logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
         ensureWhitelistedHostname: (url) => {
@@ -135,7 +143,7 @@ describe('execute()', () => {
     }
 
     actionType = getActionType({
-      executor: mockSlackExecutor,
+      logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
     });
   });

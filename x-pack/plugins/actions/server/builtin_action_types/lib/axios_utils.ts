@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AxiosInstance,
-  Method,
-  AxiosResponse,
-  AxiosProxyConfig,
-  AxiosBasicCredentials,
-} from 'axios';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
+import { Logger } from '../../../../../../src/core/server';
 import { ProxySettings } from '../../types';
+import { getProxyAgent } from './get_proxy_agent';
 
 export const request = async <T = unknown>({
   axios,
   url,
+  logger,
   method = 'get',
   data,
   params,
@@ -27,6 +23,7 @@ export const request = async <T = unknown>({
 }: {
   axios: AxiosInstance;
   url: string;
+  logger: Logger;
   method?: Method;
   data?: T;
   params?: unknown;
@@ -41,63 +38,33 @@ export const request = async <T = unknown>({
     params,
     auth,
     // use httpsAgent and embedded proxy: false, to be able to handle fail on invalid certs
-    httpsAgent: getProxyAgent(proxySettings),
-    proxy: getProxy(proxySettings),
+    httpsAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
+    proxy: false, // the same way as it done for IncomingWebhook in
     headers,
     validateStatus,
   });
-};
-
-const getProxyAgent = (proxySettings?: ProxySettings): HttpsProxyAgent | undefined => {
-  if (!proxySettings) {
-    return undefined;
-  }
-  const proxyUrl = new URL(proxySettings.proxyUrl);
-  const proxy = {
-    host: proxyUrl.host,
-    port: proxyUrl.port,
-    protocol: proxyUrl.protocol,
-    headers: proxySettings.proxyHeaders,
-  };
-
-  if (/^https/.test(proxyUrl.protocol)) {
-    return new HttpsProxyAgent({
-      ...proxy,
-      // do not fail on invalid certs
-      rejectUnauthorized: false,
-    });
-  }
-  return undefined;
-};
-
-const getProxy = (proxySettings?: ProxySettings): AxiosProxyConfig | false => {
-  if (!proxySettings) {
-    return false;
-  }
-  const proxyUrl = new URL(proxySettings.proxyUrl);
-  if (/^http:/.test(proxyUrl.protocol)) {
-    return {
-      host: proxyUrl.host,
-      port: Number(proxyUrl.port),
-    };
-  }
-  return false;
 };
 
 export const patch = async <T = unknown>({
   axios,
   url,
   data,
+  logger,
+  proxySettings,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
+  logger: Logger;
+  proxySettings?: ProxySettings;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
     url,
+    logger,
     method: 'patch',
     data,
+    proxySettings,
   });
 };
 

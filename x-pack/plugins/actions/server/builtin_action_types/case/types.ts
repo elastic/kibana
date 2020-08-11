@@ -9,6 +9,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TypeOf } from '@kbn/config-schema';
+import { Logger } from '../../../../../../src/core/server';
 
 import {
   ExternalIncidentServiceConfigurationSchema,
@@ -125,8 +126,10 @@ export interface CreateExternalServiceBasicArgs {
   api: ExternalServiceApi;
   createExternalService: (
     credentials: ExternalServiceCredentials,
+    logger: Logger,
     proxySettings?: ProxySettings
   ) => ExternalService;
+  logger: Logger;
 }
 
 export interface CreateExternalServiceArgs extends CreateExternalServiceBasicArgs {

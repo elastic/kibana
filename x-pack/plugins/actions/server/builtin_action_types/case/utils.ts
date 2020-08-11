@@ -67,6 +67,7 @@ export const mapParams = (
 export const createConnectorExecutor = ({
   api,
   createExternalService,
+  logger,
 }: CreateExternalServiceBasicArgs) => async (
   execOptions: ActionTypeExecutorOptions<
     ExternalIncidentServiceConfiguration,
@@ -88,6 +89,7 @@ export const createConnectorExecutor = ({
       config,
       secrets,
     },
+    logger,
     execOptions.proxySettings
   );
 
@@ -125,10 +127,11 @@ export const createConnector = ({
   validate,
   createExternalService,
   validationSchema,
+  logger,
 }: CreateExternalServiceArgs) => {
   return ({
     configurationUtilities,
-    executor = createConnectorExecutor({ api, createExternalService }),
+    executor = createConnectorExecutor({ api, createExternalService, logger }),
   }: CreateActionTypeArgs): ActionType => ({
     ...config,
     validate: {

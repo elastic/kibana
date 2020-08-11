@@ -144,6 +144,7 @@ export async function executor(
       axios: axiosInstance,
       method,
       url,
+      logger,
       ...basicAuth,
       headers,
       data,

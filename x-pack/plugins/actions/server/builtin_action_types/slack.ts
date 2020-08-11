@@ -16,13 +16,9 @@ import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
-import {
-  ActionType,
-  ActionTypeExecutorOptions,
-  ActionTypeExecutorResult,
-  ProxySettings,
-} from '../types';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { getProxyAgent } from './lib/get_proxy_agent';
 
 export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -126,6 +122,8 @@ async function slackExecutor(
     });
     result = await webhook.send(message);
   } catch (err) {
+    logger.warn(`error on ${actionId} webhook event: ${err.message}`);
+
     if (err.original == null || err.original.response == null) {
       return serviceErrorResult(actionId, err.message);
     }
@@ -156,6 +154,8 @@ async function slackExecutor(
         },
       }
     );
+    logger.warn(`error on ${actionId} slack action: ${errMessage}`);
+
     return errorResult(actionId, errMessage);
   }
 
@@ -174,27 +174,6 @@ async function slackExecutor(
   }
 
   return successResult(actionId, result);
-}
-
-function getProxyAgent(
-  proxySettings: ProxySettings,
-  logger: Logger
-): HttpsProxyAgent | HttpProxyAgent {
-  // logger.log(`Create proxy agent for ${proxySettings.proxyUrl}.`);
-
-  if (/^https/.test(proxySettings.proxyUrl)) {
-    const proxyUrl = new URL(proxySettings.proxyUrl);
-    return new HttpsProxyAgent({
-      host: proxyUrl.hostname,
-      port: Number(proxyUrl.port),
-      protocol: proxyUrl.protocol,
-      headers: proxySettings.proxyHeaders,
-      // do not fail on invalid certs if value is false
-      rejectUnauthorized: proxySettings.rejectUnauthorizedCertificates,
-    });
-  } else {
-    return new HttpProxyAgent(proxySettings.proxyUrl);
-  }
 }
 
 function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
