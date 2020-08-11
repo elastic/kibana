@@ -4288,7 +4288,6 @@
     "visTypeVega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage": "データには {urlParam}、{valuesParam}、 {sourceParam} の内複数を含めることができません",
     "visTypeVega.vegaParser.hostConfigIsDeprecatedWarningMessage": "{deprecatedConfigName} は廃止されました。代わりに {newConfigName} を使用してください。",
     "visTypeVega.vegaParser.hostConfigValueTypeErrorMessage": "{configName} が含まれている場合、オブジェクトでなければなりません",
-    "visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage": "インプット仕様で {schemaParam} が指定されていないため、デフォルトで {defaultSchema} になります",
     "visTypeVega.vegaParser.invalidVegaSpecErrorMessage": "無効な Vega 仕様",
     "visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage": "{configName} が含まれている場合、オブジェクトでなければなりません",
     "visTypeVega.vegaParser.mapStyleValueTypeWarningMessage": "{mapStyleConfigName} は {mapStyleConfigFirstAllowedValue} か {mapStyleConfigSecondAllowedValue} のどちらかです",
