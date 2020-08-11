@@ -53,7 +53,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
         },
       },
       size: 1,
-      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'error'],
+      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
       sort: {
         '@timestamp': { order: 'desc' },
       },

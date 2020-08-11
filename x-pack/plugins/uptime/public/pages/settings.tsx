@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -34,6 +33,7 @@ import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
   VALUE_MUST_BE_AN_INTEGER,
 } from '../../common/translations';
+import { ReactRouterEuiButtonEmpty } from '../components/common/react_router_helpers';
 import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 
 interface SettingsPageFieldErrors {
@@ -145,19 +145,17 @@ export const SettingsPage: React.FC = () => {
     </>
   );
 
-  const history = useHistory();
-
   return (
     <>
-      <EuiButtonEmpty
+      <ReactRouterEuiButtonEmpty
         color="primary"
         data-test-subj="uptimeSettingsToOverviewLink"
         iconType="arrowLeft"
-        href={history.createHref({ pathname: OVERVIEW_ROUTE })}
+        to={OVERVIEW_ROUTE}
         size="s"
       >
         {Translations.settings.returnToOverviewLinkLabel}
-      </EuiButtonEmpty>
+      </ReactRouterEuiButtonEmpty>
       <EuiSpacer size="s" />
       <EuiPanel>
         <EuiFlexGroup>

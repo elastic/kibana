@@ -52,8 +52,6 @@ describe('EnhancedSearchInterceptor', () => {
       trackLongQueryPopupShown: jest.fn(),
       trackLongQueryDialogDismissed: jest.fn(),
       trackLongQueryRunBeyondTimeout: jest.fn(),
-      trackError: jest.fn(),
-      trackSuccess: jest.fn(),
     };
 
     searchInterceptor = new EnhancedSearchInterceptor(
@@ -458,7 +456,6 @@ describe('EnhancedSearchInterceptor', () => {
       expect(next.mock.calls[1][0]).toStrictEqual(timedResponses[1].value);
       expect(error).not.toHaveBeenCalled();
       expect(mockUsageCollector.trackLongQueryRunBeyondTimeout).toBeCalledTimes(1);
-      expect(mockUsageCollector.trackSuccess).toBeCalledTimes(1);
     });
   });
 });

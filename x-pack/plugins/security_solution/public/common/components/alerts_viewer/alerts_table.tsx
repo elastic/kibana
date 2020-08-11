@@ -58,7 +58,6 @@ const defaultAlertsFilters: Filter[] = [
 interface Props {
   timelineId: TimelineIdLiteral;
   endDate: string;
-  eventsViewerBodyHeight?: number;
   startDate: string;
   pageFilters?: Filter[];
 }
@@ -66,7 +65,6 @@ interface Props {
 const AlertsTableComponent: React.FC<Props> = ({
   timelineId,
   endDate,
-  eventsViewerBodyHeight,
   startDate,
   pageFilters = [],
 }) => {
@@ -93,7 +91,6 @@ const AlertsTableComponent: React.FC<Props> = ({
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
-      height={eventsViewerBodyHeight}
       id={timelineId}
       start={startDate}
     />

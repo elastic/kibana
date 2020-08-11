@@ -20,7 +20,6 @@ export async function getNewsFeed({ core }: { core: AppMountContext['core'] }): 
   try {
     return await core.http.get('https://feeds.elastic.co/observability-solution/v8.0.0.json');
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error('Error while fetching news feed', e);
     return { items: [] };
   }

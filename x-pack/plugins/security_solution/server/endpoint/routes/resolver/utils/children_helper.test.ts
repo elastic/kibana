@@ -10,12 +10,12 @@ import {
   TreeNode,
 } from '../../../../../common/endpoint/generate_data';
 import { ChildrenNodesHelper } from './children_helper';
-import { eventId, isStart } from '../../../../../common/endpoint/models/event';
+import { eventId, isProcessRunning } from '../../../../../common/endpoint/models/event';
 
 function getStartEvents(events: Event[]): Event[] {
   const startEvents: Event[] = [];
   for (const event of events) {
-    if (isStart(event)) {
+    if (isProcessRunning(event)) {
       startEvents.push(event);
     }
   }

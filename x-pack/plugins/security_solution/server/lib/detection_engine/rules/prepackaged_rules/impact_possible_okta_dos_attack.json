@@ -20,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Okta"
+    "Okta",
+    "SecOps",
+    "Monitoring",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

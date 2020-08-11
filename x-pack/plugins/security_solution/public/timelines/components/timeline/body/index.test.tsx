@@ -22,7 +22,6 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';
 
-const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
   columnId: '@timestamp',
@@ -65,7 +64,6 @@ describe('Body', () => {
     data: mockTimelineData,
     docValueFields: [],
     eventIdToNoteIds: {},
-    height: testBodyHeight,
     id: 'timeline-test',
     isSelectAllChecked: false,
     getNotesByIds: mockGetNotesByIds,

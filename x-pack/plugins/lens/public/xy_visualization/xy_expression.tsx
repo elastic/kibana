@@ -180,7 +180,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
-  }, []);
+  }, [setState]);
 
   return (
     <VisualizationContainer className="lnsXyExpression__container" isReady={state.isReady}>

@@ -4,7 +4,8 @@
   ],
   "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

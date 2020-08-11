@@ -172,7 +172,7 @@ export class Fetcher {
     );
 
     // now that we have all the start events get the full lifecycle nodes
-    childrenLifecycleHandler.search(this.client);
+    await childrenLifecycleHandler.search(this.client);
 
     const tree = new Tree(this.id, {
       ancestry: ancestryHandler.getResults(),
