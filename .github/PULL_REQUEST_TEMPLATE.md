@@ -15,4 +15,4 @@ Delete any items that are not applicable to this PR.
 
 ### For maintainers
 
-- [ ] This was checked for breaking API changes and was [labeled appropriately](https://www.elastic.co/guide/en/kibana/7.x/contributing.html#kibana-release-notes-process)
+- [ ] This was checked for breaking API changes and was [labeled appropriately](https://www.elastic.co/guide/en/kibana/master/contributing.html#kibana-release-notes-process)
