@@ -356,7 +356,9 @@ export class Authenticator {
     const sessionValue = await this.getSessionValue(request);
     if (sessionValue) {
       await this.session.clear(request);
-      return this.providers.get(sessionValue.provider.name)!.logout(request, sessionValue.state);
+      return this.providers
+        .get(sessionValue.provider.name)!
+        .logout(request, sessionValue.state ?? null);
     }
 
     const queryStringProviderName = (request.query as Record<string, string>)?.provider;

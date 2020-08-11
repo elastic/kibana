@@ -1743,6 +1743,24 @@ describe('Authenticator', () => {
       );
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request, null);
+      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+    });
+
+    it('if session does not exist and provider name is not available, returns whatever authentication provider returns.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.get.mockResolvedValue(null);
+
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      await expect(authenticator.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
+      expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request);
       expect(mockOptions.session.clear).not.toHaveBeenCalled();
     });
 
@@ -1754,6 +1772,7 @@ describe('Authenticator', () => {
         DeauthenticationResult.notHandled()
       );
 
+      expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
       expect(mockOptions.session.clear).not.toHaveBeenCalled();
     });
   });

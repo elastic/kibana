@@ -105,7 +105,12 @@ export class SessionTimeout implements ISessionTimeout {
   private fetchSessionInfoAndResetTimers = async (extend = false) => {
     const method = extend ? 'POST' : 'GET';
     try {
+      // If session doesn't exist anymore we should log user out.
       const result = await this.http.fetch(SESSION_ROUTE, { method, asSystemRequest: !extend });
+      if (!result) {
+        this.sessionExpired.logout();
+        return;
+      }
 
       this.handleSessionInfoAndResetTimers(result);
 

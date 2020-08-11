@@ -605,19 +605,26 @@ describe('OIDCAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented or does not include access token.', async () => {
+    it('returns `notHandled` if state is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, undefined as any)).resolves.toEqual(
         DeauthenticationResult.notHandled()
       );
 
-      await expect(provider.logout(request, {} as any)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
-      );
+      await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('redirects to logged out view if state is `null` or does not include access token.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(provider.logout(request, null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
+      );
       await expect(provider.logout(request, { nonce: 'x', realm: 'oidc1' })).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();

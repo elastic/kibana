@@ -417,43 +417,47 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async logout(request: KibanaRequest, state: ProviderState) {
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if (!state || !state.accessToken) {
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
       this.logger.debug('There is no elasticsearch access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      const logoutBody = {
-        body: {
-          token: state.accessToken,
-          refresh_token: state.refreshToken,
-        },
-      };
-      // This operation should be performed on behalf of the user with a privilege that normal
-      // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
-      const { redirect } = await this.options.client.callAsInternalUser(
-        'shield.oidcLogout',
-        logoutBody
-      );
+    if (state?.accessToken) {
+      try {
+        const logoutBody = {
+          body: {
+            token: state.accessToken,
+            refresh_token: state.refreshToken,
+          },
+        };
+        // This operation should be performed on behalf of the user with a privilege that normal
+        // user usually doesn't have `cluster:admin/xpack/security/oidc/logout`.
+        const { redirect } = await this.options.client.callAsInternalUser(
+          'shield.oidcLogout',
+          logoutBody
+        );
 
-      this.logger.debug('User session has been successfully invalidated.');
+        this.logger.debug('User session has been successfully invalidated.');
 
-      // Having non-null `redirect` field within logout response means that the OpenID Connect realm configuration
-      // supports RP initiated Single Logout and we should redirect user to the specified location in the OpenID Connect
-      // Provider to properly complete logout.
-      if (redirect != null) {
-        this.logger.debug('Redirecting user to the OpenID Connect Provider to complete logout.');
-        return DeauthenticationResult.redirectTo(redirect);
+        // Having non-null `redirect` field within logout response means that the OpenID Connect realm configuration
+        // supports RP initiated Single Logout and we should redirect user to the specified location in the OpenID Connect
+        // Provider to properly complete logout.
+        if (redirect != null) {
+          this.logger.debug('Redirecting user to the OpenID Connect Provider to complete logout.');
+          return DeauthenticationResult.redirectTo(redirect);
+        }
+      } catch (err) {
+        this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
+        return DeauthenticationResult.failed(err);
       }
-
-      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
-    } catch (err) {
-      this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
-      return DeauthenticationResult.failed(err);
     }
+
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
   }
 
   /**

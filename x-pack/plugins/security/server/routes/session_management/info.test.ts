@@ -98,7 +98,7 @@ describe('Info session routes', () => {
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )
-      ).resolves.toEqual({ status: 200, options: {} });
+      ).resolves.toEqual({ status: 204, options: {} });
     });
   });
 });

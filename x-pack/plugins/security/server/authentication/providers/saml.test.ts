@@ -1019,11 +1019,18 @@ describe('SAMLAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
-      await expect(provider.logout(request, {} as any)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('redirects to logged out view if state is `null` or does not include access token.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(provider.logout(request, null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
       await expect(provider.logout(request, { somethingElse: 'x' } as any)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut)
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();

@@ -231,7 +231,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState) {
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
@@ -249,36 +249,38 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // redirect to the `loggedOut` URL instead.
     const isIdPInitiatedSLORequest = isSAMLRequestQuery(request.query);
     const isSPInitiatedSLOResponse = isSAMLResponseQuery(request.query);
-    if (!state?.accessToken && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
+    if (state === undefined && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
       this.logger.debug('There is no SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
-      // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
-      // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
-      // for the new session as well.
-      const redirect = isIdPInitiatedSLORequest
-        ? await this.performIdPInitiatedSingleLogout(request)
-        : state
-        ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
-        : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
-          null;
+    if (state?.accessToken || isIdPInitiatedSLORequest || isSPInitiatedSLOResponse) {
+      try {
+        // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
+        // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
+        // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
+        // for the new session as well.
+        const redirect = isIdPInitiatedSLORequest
+          ? await this.performIdPInitiatedSingleLogout(request)
+          : state
+          ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
+          : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
+            null;
 
-      // Having non-null `redirect` field within logout response means that IdP
-      // supports SAML Single Logout and we should redirect user to the specified
-      // location to properly complete logout.
-      if (redirect != null) {
-        this.logger.debug('Redirecting user to Identity Provider to complete logout.');
-        return DeauthenticationResult.redirectTo(redirect);
+        // Having non-null `redirect` field within logout response means that IdP
+        // supports SAML Single Logout and we should redirect user to the specified
+        // location to properly complete logout.
+        if (redirect != null) {
+          this.logger.debug('Redirecting user to Identity Provider to complete logout.');
+          return DeauthenticationResult.redirectTo(redirect);
+        }
+      } catch (err) {
+        this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
+        return DeauthenticationResult.failed(err);
       }
-
-      return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
-    } catch (err) {
-      this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
-      return DeauthenticationResult.failed(err);
     }
+
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
   }
 
   /**
