@@ -8,9 +8,11 @@ import { History } from 'history';
 import { Observable } from 'rxjs';
 
 // @public
-export const createKbnUrlStateStorage: ({ useHash, history }?: {
+export const createKbnUrlStateStorage: ({ useHash, history, onGetError, onSetError, }?: {
     useHash: boolean;
     history?: History<any> | undefined;
+    onGetError?: ((error: Error) => void) | undefined;
+    onSetError?: ((error: Error) => void) | undefined;
 }) => IKbnUrlStateStorage;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "Storage"

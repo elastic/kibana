@@ -9,8 +9,10 @@ Creates [IKbnUrlStateStorage](./kibana-plugin-plugins-kibana_utils-public-state_
 <b>Signature:</b>
 
 ```typescript
-createKbnUrlStateStorage: ({ useHash, history }?: {
+createKbnUrlStateStorage: ({ useHash, history, onGetError, onSetError, }?: {
     useHash: boolean;
     history?: History<any> | undefined;
+    onGetError?: ((error: Error) => void) | undefined;
+    onSetError?: ((error: Error) => void) | undefined;
 }) => IKbnUrlStateStorage
 ```
