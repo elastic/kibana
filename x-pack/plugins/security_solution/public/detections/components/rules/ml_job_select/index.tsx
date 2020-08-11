@@ -19,7 +19,7 @@ import {
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
-import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   ML_JOB_SELECT_PLACEHOLDER_TEXT,
@@ -81,7 +81,7 @@ interface MlJobSelectProps {
 export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
   const jobId = field.value as string;
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  const { loading, jobs } = useInstalledSecurityJobs();
+  const { loading, jobs } = useSecurityJobs(false);
   const mlUrl = useKibana().services.application.getUrlForApp('ml');
   const handleJobChange = useCallback(
     (machineLearningJobId: string) => {
