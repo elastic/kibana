@@ -23,22 +23,6 @@ import {
 } from '../../containers/logs/log_source/log_source.mock';
 import { LinkToLogsPage } from './link_to_logs';
 
-// TODO: create re-usable mock?
-// jest.mock('../../containers/logs/log_source', () => ({
-//   useLogSource: ({ sourceId }: { fetch: HttpSetup['fetch']; sourceId: string }) => ({
-//     loadSourceConfiguration: jest.fn(),
-//     sourceConfiguration: {
-//       configuration: {
-//         fields: {
-//           container: 'CONTAINER_FIELD',
-//           host: 'HOST_FIELD',
-//           pod: 'POD_FIELD',
-//         },
-//       },
-//     },
-//     isLoading: sourceId === 'perpetuallyLoading',
-//   }),
-// }));
 jest.mock('../../containers/logs/log_source');
 const useLogSourceMock = useLogSource as jest.MockedFunction<typeof useLogSource>;
 
