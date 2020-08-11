@@ -5,7 +5,8 @@
     "skipLibCheck": true
   },
   "include": [
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "../../../../typings/**/*"
   ],
   "exclude": []
 }
