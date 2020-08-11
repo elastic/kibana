@@ -5,8 +5,7 @@
  */
 
 export {
-  enterpriseSearchBreadcrumbs,
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
-} from './generate_breadcrumbs';
-export { SetAppSearchBreadcrumbs, SetWorkplaceSearchBreadcrumbs } from './set_breadcrumbs';
+  getProcessorDescriptor,
+  mapProcessorTypeToDescriptor,
+  ProcessorType,
+} from './map_processor_type_to_form';

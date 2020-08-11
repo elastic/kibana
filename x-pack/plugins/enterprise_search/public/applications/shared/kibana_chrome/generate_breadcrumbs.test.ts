@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { generateBreadcrumb } from './generate_breadcrumbs';
-import { appSearchBreadcrumbs, enterpriseSearchBreadcrumbs, workplaceSearchBreadcrumbs } from './';
+import {
+  generateBreadcrumb,
+  appSearchBreadcrumbs,
+  enterpriseSearchBreadcrumbs,
+  workplaceSearchBreadcrumbs,
+} from './generate_breadcrumbs';
 
 import { mockHistory as mockHistoryUntyped } from '../../__mocks__';
 const mockHistory = mockHistoryUntyped as any;

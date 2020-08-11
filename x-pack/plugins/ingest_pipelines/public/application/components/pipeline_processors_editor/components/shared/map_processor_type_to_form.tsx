@@ -10,7 +10,7 @@ import { FunctionComponent } from 'react';
 // import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';
 
-interface FieldsFormDescriptor {
+interface FieldDescriptor {
   FieldsComponent?: FunctionComponent;
   docLinkPath: string;
   /**
@@ -19,7 +19,9 @@ interface FieldsFormDescriptor {
   label: string;
 }
 
-const mapProcessorTypeToFormDescriptor: Record<string, FieldsFormDescriptor> = {
+type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
+
+export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
   append: {
     FieldsComponent: undefined, // TODO: Implement
     docLinkPath: '/append-processor.html',
@@ -262,12 +264,10 @@ const mapProcessorTypeToFormDescriptor: Record<string, FieldsFormDescriptor> = {
   },
 };
 
-export const types = Object.keys(mapProcessorTypeToFormDescriptor).sort();
+export type ProcessorType = keyof typeof mapProcessorTypeToDescriptor;
 
-export type ProcessorType = keyof typeof mapProcessorTypeToFormDescriptor;
-
-export const getProcessorFormDescriptor = (
+export const getProcessorDescriptor = (
   type: ProcessorType | string
-): FieldsFormDescriptor | undefined => {
-  return mapProcessorTypeToFormDescriptor[type as ProcessorType];
+): FieldDescriptor | undefined => {
+  return mapProcessorTypeToDescriptor[type as ProcessorType];
 };

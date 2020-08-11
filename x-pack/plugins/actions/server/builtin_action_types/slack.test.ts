@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http from 'http';
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
@@ -180,5 +181,68 @@ describe('execute()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
     );
+  });
+
+  describe('proxy support', function () {
+    const proxyPort = 3434;
+    const proxyUrl = `http://localhost:${proxyPort}`;
+
+    let proxyHit = false;
+    let proxyConnectHit = false;
+
+    const proxy = http.createServer(function (req, res) {
+      proxyHit = true;
+      // Our test proxy simply returns an empty 200 response, since we only
+      // care about the download promise being resolved.
+      res.writeHead(200);
+      res.end();
+    });
+
+    proxy.on('connect', (req, socket) => {
+      // When the proxy is hit with a HTTPS request instead of a HTTP request,
+      // the above call handler will never be triggered. Instead the client
+      // sends a CONNECT request to the proxy, so that the proxy can setup
+      // a HTTPS connection between the client and the upstream server.
+      // We just intercept this CONNECT call here, write it an empty response
+      // and close the socket, which will fail the actual request, but we know
+      // that it tried to use the proxy.
+      proxyConnectHit = true;
+      socket.write('\r\n\r\n');
+      socket.end();
+    });
+
+    function expectProxyHit() {
+      expect(proxyHit).toBe(true);
+    }
+
+    function expectNoProxyHit() {
+      expect(proxyHit).toBe(false);
+      expect(proxyConnectHit).toBe(false);
+    }
+
+    beforeAll(function (done) {
+      proxy.listen(proxyPort, done);
+    });
+
+    beforeEach(function () {
+      proxyHit = false;
+      proxyConnectHit = false;
+    });
+
+    test('should use http_proxy env variable', async () => {
+      await actionType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+        proxySettings: {
+          proxyUrl,
+          rejectUnauthorizedCertificates: false,
+        },
+      });
+
+      expectProxyHit();
+    });
   });
 });
