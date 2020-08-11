@@ -48,8 +48,7 @@ import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';
 
-export interface RenderDeps {
-  pluginInitializerContext: PluginInitializerContext;
+export interface DashboardServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   navigation: NavigationStart;
@@ -76,28 +75,28 @@ export interface RenderDeps {
   restorePreviousUrl: () => void;
 }
 
-let angularModuleInstance: IModule | null = null;
+const angularModuleInstance: IModule | null = null;
 
-export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
-  if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule();
-    // global routing stuff
-    configureAppAngularModule(
-      angularModuleInstance,
-      { core: deps.core, env: deps.pluginInitializerContext.env },
-      true,
-      deps.scopedHistory
-    );
-    initDashboardApp(angularModuleInstance, deps);
-  }
+// export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
+//   if (!angularModuleInstance) {
+//     angularModuleInstance = createLocalAngularModule();
+//     // global routing stuff
+//     configureAppAngularModule(
+//       angularModuleInstance,
+//       { core: deps.core, env: deps.pluginInitializerContext.env },
+//       true,
+//       deps.scopedHistory
+//     );
+//     initDashboardApp(angularModuleInstance, deps);
+//   }
 
-  const $injector = mountDashboardApp(appBasePath, element);
+//   const $injector = mountDashboardApp(appBasePath, element);
 
-  return () => {
-    ($injector.get('kbnUrlStateStorage') as any).cancel();
-    $injector.get('$rootScope').$destroy();
-  };
-};
+//   return () => {
+//     ($injector.get('kbnUrlStateStorage') as any).cancel();
+//     $injector.get('$rootScope').$destroy();
+//   };
+// };
 
 const mainTemplate = (basePath: string) => `<div ng-view class="dshAppContainer">
   <base href="${basePath}" />

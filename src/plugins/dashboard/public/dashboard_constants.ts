@@ -20,6 +20,7 @@
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
+  EDIT_DASHBOARD_URL: '/view',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
@@ -27,5 +28,5 @@ export const DashboardConstants = {
 };
 
 export function createDashboardEditUrl(id: string) {
-  return `/view/${id}`;
+  return `${EDIT_DASHBOARD_URL}/${id}`;
 }

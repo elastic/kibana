@@ -51,11 +51,7 @@ import {
   ExitFullScreenButtonProps,
 } from '../../kibana_react/public';
 import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
-import {
-  initAngularBootstrap,
-  KibanaLegacySetup,
-  KibanaLegacyStart,
-} from '../../kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
@@ -98,7 +94,7 @@ interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }
 
-interface SetupDependencies {
+export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
@@ -108,7 +104,7 @@ interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-interface StartDependencies {
+export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
   embeddable: EmbeddableStart;
@@ -142,38 +138,27 @@ declare module '../../../plugins/ui_actions/public' {
 }
 
 export class DashboardPlugin
-  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
-  constructor(private initializerContext: PluginInitializerContext) {}
-
+  implements Plugin<Setup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   public setup(
-    core: CoreSetup<StartDependencies, DashboardStart>,
-    { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
+    core: CoreSetup<DashboardStartDependencies, DashboardStart>,
+    {
+      share,
+      uiActions,
+      embeddable,
+      home,
+      kibanaLegacy,
+      data,
+      usageCollection,
+    }: DashboardSetupDependencies
   ): Setup {
-    const expandPanelAction = new ExpandPanelAction();
-    uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
-    const startServices = core.getStartServices();
-
-    if (share) {
-      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
-        createDashboardUrlGenerator(async () => {
-          const [coreStart, , selfStart] = await startServices;
-          return {
-            appBasePath: coreStart.application.getUrlForApp('dashboards'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
-          };
-        })
-      );
-    }
-
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
 
@@ -212,14 +197,18 @@ export class DashboardPlugin
       };
     };
 
-    const factory = new DashboardContainerFactoryDefinition(
-      getStartServices,
-      () => this.currentHistory!
-    );
-    embeddable.registerEmbeddableFactory(factory.type, factory);
-
-    const placeholderFactory = new PlaceholderEmbeddableFactory();
-    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+    if (share) {
+      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
+        createDashboardUrlGenerator(async () => {
+          const [coreStart, , selfStart] = await core.getStartServices();
+          return {
+            appBasePath: coreStart.application.getUrlForApp('dashboards'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
+          };
+        })
+      );
+    }
 
     const {
       appMounted,
@@ -250,6 +239,15 @@ export class DashboardPlugin
       getHistory: () => this.currentHistory!,
     });
 
+    const factory = new DashboardContainerFactoryDefinition(
+      getStartServices,
+      () => this.currentHistory!
+    );
+    embeddable.registerEmbeddableFactory(factory.type, factory);
+
+    const placeholderFactory = new PlaceholderEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+
     this.getActiveUrl = getActiveUrl;
     this.stopUrlTracking = () => {
       stopUrlTracker();
@@ -264,58 +262,18 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
+        const { mountApp } = await import('./application/dashboard_router');
         appMounted();
-        const {
-          embeddable: embeddableStart,
-          navigation,
-          share: shareStart,
-          data: dataStart,
-          kibanaLegacy: { dashboardConfig, navigateToDefaultApp, navigateToLegacyKibanaUrl },
-          savedObjects,
-        } = pluginsStart;
-
-        const deps: RenderDeps = {
-          pluginInitializerContext: this.initializerContext,
-          core: coreStart,
-          dashboardConfig,
-          navigateToDefaultApp,
-          navigateToLegacyKibanaUrl,
-          navigation,
-          share: shareStart,
-          data: dataStart,
-          savedObjectsClient: coreStart.savedObjects.client,
-          savedDashboards: dashboardStart.getSavedDashboardLoader(),
-          chrome: coreStart.chrome,
-          addBasePath: coreStart.http.basePath.prepend,
-          uiSettings: coreStart.uiSettings,
-          savedQueryService: dataStart.query.savedQueries,
-          embeddable: embeddableStart,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard,
-          embeddableCapabilities: {
-            visualizeCapabilities: coreStart.application.capabilities.visualize,
-            mapsCapabilities: coreStart.application.capabilities.maps,
-          },
-          localStorage: new Storage(localStorage),
+        return mountApp(
+          core,
           usageCollection,
-          scopedHistory: () => this.currentHistory!,
-          savedObjects,
-          restorePreviousUrl,
-        };
-        // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
-        params.element.classList.add('dshAppContainer');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
-        return () => {
-          unmount();
-          appUnMounted();
-        };
+          params.element,
+          this.currentHistory!,
+          restorePreviousUrl
+        );
       },
     };
-
-    initAngularBootstrap();
 
     core.application.register(app);
     kibanaLegacy.forwardApp(
@@ -379,7 +337,7 @@ export class DashboardPlugin
     core.application.navigateToApp('dashboards', { path: dashboardUrl });
   }
 
-  public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
+  public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications } = core;
     const {
       uiActions,
@@ -387,6 +345,10 @@ export class DashboardPlugin
     } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+
+    const expandPanelAction = new ExpandPanelAction();
+    uiActions.registerAction(expandPanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
 
     const changeViewAction = new ReplacePanelAction(
       core,
