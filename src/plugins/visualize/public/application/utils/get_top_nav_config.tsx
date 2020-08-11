@@ -247,7 +247,7 @@ export const getTopNavConfig = (
                 );
               }
             },
-            run: (anchorElement: HTMLAnchorElement) => {
+            run: (anchorElement: HTMLElement) => {
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
