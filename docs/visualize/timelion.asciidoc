@@ -526,26 +526,22 @@ In addition, you must migrate the Timelion graphs to Visualize.
 +
 [role="screenshot"]
 image::images/timelion-create-new-dashboard.png[]
-{nbsp}
 +
 The only thing you need is the Timelion expression for each graph.
 
-. Open Timelion app on a new tab, select the chart you want to copy, and copy its expression.
+. Open the Timelion app on a new tab, select the chart you want to copy, and copy its expression.
 +
 [role="screenshot"]
 image::images/timelion-copy-expression.png[]
-{nbsp}
 
 . Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
 +
 [role="screenshot"]
 image::images/timelion-vis-paste-expression.png[]
-{nbsp}
 
-. Save the new visualization, give it a name, and hit **Save and Return**.
+. Save the new visualization, give it a name, and click **Save and Return**.
 +
 Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
 +
 [role="screenshot"]
 image::images/timelion-dashboard.png[]
-{nbsp}
