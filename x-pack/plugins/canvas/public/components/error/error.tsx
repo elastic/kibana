@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
 import { ComponentStrings } from '../../../i18n';
 import { ShowDebugging } from './show_debugging';
 
+export interface Props {
+  payload: {
+    error: Error;
+  };
+}
+
 const { Error: strings } = ComponentStrings;
 
-export const Error = ({ payload }) => {
+export const Error: FC<Props> = ({ payload }) => {
   const message = get(payload, 'error.message');
 
   return (

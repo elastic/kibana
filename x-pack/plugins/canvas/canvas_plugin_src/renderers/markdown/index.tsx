@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { RendererStrings } from '../../../i18n';
+import { Return as Config } from '../../functions/browser/markdown';
 import { Markdown } from '../../../../../../src/plugins/kibana_react/public';
+import { RendererFactory } from '../../../types';
 
 const { markdown: strings } = RendererStrings;
 
-export const markdown = () => ({
+export const markdown: RendererFactory<Config> = () => ({
   name: 'markdown',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -22,7 +24,7 @@ export const markdown = () => ({
     ReactDOM.render(
       <Markdown
         className="canvasMarkdown"
-        style={fontStyle}
+        style={fontStyle as CSSProperties}
         markdown={config.content}
         openLinksInNewTab={config.openLinksInNewTab}
       />,

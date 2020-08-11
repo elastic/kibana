@@ -7,6 +7,6 @@
 import { isValidDataUrl } from '../../common/lib/dataurl';
 import { isValidHttpUrl } from '../../common/lib/httpurl';
 
-export function isValidUrl(url) {
+export function isValidUrl(url: string) {
   return isValidDataUrl(url) || isValidHttpUrl(url);
 }
