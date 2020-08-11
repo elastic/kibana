@@ -8,7 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiPageSideBar, EuiButton } from '@elastic/eui';
 
-import { Layout } from './';
+import { Layout, INavContext } from './layout';
 
 describe('Layout', () => {
   it('renders', () => {
@@ -34,6 +34,18 @@ describe('Layout', () => {
 
     expect(wrapper.find(EuiPageSideBar).prop('className')).toContain('--isOpen');
     expect(wrapper.find(EuiButton).prop('iconType')).toEqual('arrowDown');
+  });
+
+  it('passes down NavContext to navigation links', () => {
+    const wrapper = shallow(<Layout navigation={<nav />} />);
+
+    const toggle = wrapper.find('[data-test-subj="enterpriseSearchNavToggle"]');
+    toggle.simulate('click');
+    expect(wrapper.find(EuiPageSideBar).prop('className')).toContain('--isOpen');
+
+    const context = (wrapper.find('ContextProvider').prop('value') as unknown) as INavContext;
+    context.closeNavigation();
+    expect(wrapper.find(EuiPageSideBar).prop('className')).not.toContain('--isOpen');
   });
 
   it('renders children', () => {

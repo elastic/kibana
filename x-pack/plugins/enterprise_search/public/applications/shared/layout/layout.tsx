@@ -16,9 +16,15 @@ interface ILayoutProps {
   navigation: React.ReactNode;
 }
 
+export interface INavContext {
+  closeNavigation(): void;
+}
+export const NavContext = React.createContext({});
+
 export const Layout: React.FC<ILayoutProps> = ({ children, navigation }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const toggleNavigation = () => setIsNavOpen(!isNavOpen);
+  const closeNavigation = () => setIsNavOpen(false);
 
   const navClasses = classNames('enterpriseSearchLayout__sideBar', {
     'enterpriseSearchLayout__sideBar--isOpen': isNavOpen, // eslint-disable-line @typescript-eslint/naming-convention
@@ -46,7 +52,7 @@ export const Layout: React.FC<ILayoutProps> = ({ children, navigation }) => {
             })}
           </EuiButton>
         </div>
-        {navigation}
+        <NavContext.Provider value={{ closeNavigation }}>{navigation}</NavContext.Provider>
       </EuiPageSideBar>
       <EuiPageBody className="enterpriseSearchLayout__body">{children}</EuiPageBody>
     </EuiPage>

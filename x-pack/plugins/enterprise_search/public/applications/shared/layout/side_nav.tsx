@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
@@ -13,6 +13,8 @@ import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic
 import { EuiLink } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
+
+import { NavContext, INavContext } from './layout';
 
 import './side_nav.scss';
 
@@ -73,6 +75,8 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   isRoot,
   ...rest
 }) => {
+  const { closeNavigation } = useContext(NavContext) as INavContext;
+
   const { pathname } = useLocation();
   const currentPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
   const isActive = currentPath === to || (isRoot && currentPath === '');
@@ -84,11 +88,17 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   return (
     <li>
       {isExternal ? (
-        <EuiLinkExternal {...rest} className={classes} href={to} target="_blank">
+        <EuiLinkExternal
+          {...rest}
+          className={classes}
+          href={to}
+          target="_blank"
+          onClick={closeNavigation}
+        >
           {children}
         </EuiLinkExternal>
       ) : (
-        <EuiLink {...rest} className={classes} to={to}>
+        <EuiLink {...rest} className={classes} to={to} onClick={closeNavigation}>
           {children}
         </EuiLink>
       )}
