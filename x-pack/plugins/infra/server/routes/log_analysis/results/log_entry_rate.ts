@@ -13,7 +13,7 @@ import {
   GetLogEntryRateSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError, getLogEntryRateBuckets } from '../../../lib/log_analysis';
+import { getLogEntryRateBuckets } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
@@ -54,10 +54,6 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
-        }
-
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({

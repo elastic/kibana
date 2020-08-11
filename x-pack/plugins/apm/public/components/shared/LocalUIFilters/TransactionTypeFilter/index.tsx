@@ -20,7 +20,7 @@ interface Props {
   transactionTypes: string[];
 }
 
-const TransactionTypeFilter = ({ transactionTypes }: Props) => {
+function TransactionTypeFilter({ transactionTypes }: Props) {
   const {
     urlParams: { transactionType },
   } = useUrlParams();
@@ -59,6 +59,6 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
       />
     </>
   );
-};
+}
 
 export { TransactionTypeFilter };

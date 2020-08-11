@@ -36,6 +36,13 @@ const getMockObject = (
 ): RouteSpyState & TabNavigationProps => ({
   detailName,
   navTabs: {
+    case: {
+      disabled: false,
+      href: '/app/security/cases',
+      id: 'case',
+      name: 'Cases',
+      urlKey: 'case',
+    },
     hosts: {
       disabled: false,
       href: '/app/security/hosts',
@@ -225,6 +232,73 @@ describe('Navigation Breadcrumbs', () => {
           href: `securitySolution:network/ip/${ipv6Encoded}/source?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
         },
         { text: 'Flows', href: '' },
+      ]);
+    });
+
+    test('should return Alerts breadcrumbs when supplied detection pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('detections', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Detections',
+          href:
+            "securitySolution:detections?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Cases breadcrumbs when supplied case pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('case', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+    test('should return Case details breadcrumbs when supplied case details pathname', () => {
+      const sampleCase = {
+        id: 'my-case-id',
+        name: 'Case name',
+      };
+      const breadcrumbs = getBreadcrumbsForRoute(
+        {
+          ...getMockObject('case', `/${sampleCase.id}`, sampleCase.id),
+          state: { caseTitle: sampleCase.name },
+        },
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Cases',
+          href:
+            "securitySolution:case?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: sampleCase.name,
+          href: `securitySolution:case/${sampleCase.id}?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+      ]);
+    });
+    test('should return Admin breadcrumbs when supplied admin pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('administration', '/', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: '/app/security/overview' },
+        {
+          text: 'Administration',
+          href: 'securitySolution:administration',
+        },
       ]);
     });
   });

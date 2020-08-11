@@ -1,20 +1,35 @@
 [
   {
-    "name": "Process payment",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "Process payment"
+    },
+    "averageResponseTime": 1745009,
+    "transactionsPerMinute": 0.25,
+    "impact": 100,
     "sample": {
       "@timestamp": "2020-06-29T06:48:29.892Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.379730Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:39.379730Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "observer": {
         "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
@@ -34,59 +49,97 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "timestamp": { "us": 1593413309892019 },
-      "trace": { "id": "bc393b659bef63291b6fa08e6f1d3f14" },
+      "timestamp": {
+        "us": 1593413309892019
+      },
+      "trace": {
+        "id": "bc393b659bef63291b6fa08e6f1d3f14"
+      },
       "transaction": {
-        "duration": { "us": 1745009 },
+        "duration": {
+          "us": 1745009
+        },
         "id": "a58333df6d851cf1",
         "name": "Process payment",
         "result": "success",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "Worker"
       }
-    },
-    "p95": 1744896,
-    "averageResponseTime": 1745009,
-    "transactionsPerMinute": 0.25,
-    "impact": 100
+    }
   },
   {
-    "name": "GET /api",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api"
+    },
+    "averageResponseTime": 49816.15625,
+    "transactionsPerMinute": 8,
+    "impact": 91.32732325394932,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:41.454Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:06.969Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.992834Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:08.306961Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -96,11 +149,18 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:41 GMT"],
-            "Transfer-Encoding": ["chunked"],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "0"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:06 GMT"
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -130,61 +190,103 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413321454009 },
-      "trace": { "id": "0507830eeff93f7bf1a354e4031097b3" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413286969018
+      },
+      "trace": {
+        "id": "87a828bcedd44d9e872d8f552fb04aa6"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 8334 },
-        "id": "878250a8b937445d",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 25229
+        },
+        "id": "b1843afd04271423",
         "name": "GET /api",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
         "domain": "opbeans-node",
-        "full": "http://opbeans-node:3000/api/products/6",
-        "original": "/api/products/6",
-        "path": "/api/products/6",
+        "full": "http://opbeans-node:3000/api/orders/474",
+        "original": "/api/orders/474",
+        "path": "/api/orders/474",
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 81888,
-    "averageResponseTime": 49816.15625,
-    "transactionsPerMinute": 8,
-    "impact": 91.32732325394932
+    }
   },
   {
-    "name": "/dashboard",
+    "key": {
+      "service.name": "client",
+      "transaction.name": "/dashboard"
+    },
+    "averageResponseTime": 208000,
+    "transactionsPerMinute": 0.75,
+    "impact": 35.56882613781033,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:21.621Z",
-      "agent": { "name": "rum-js", "version": "5.2.0" },
-      "client": { "ip": "172.18.0.8" },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:22.625275Z" },
+      "@timestamp": "2020-06-29T06:48:07.275Z",
+      "agent": {
+        "name": "rum-js",
+        "version": "5.2.0"
+      },
+      "client": {
+        "ip": "172.18.0.8"
+      },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:08.291261Z"
+      },
       "http": {
-        "request": { "referrer": "" },
+        "request": {
+          "referrer": ""
+        },
         "response": {
           "decoded_body_size": 813,
           "encoded_body_size": 813,
@@ -199,52 +301,73 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
-        "language": { "name": "javascript" },
+        "language": {
+          "name": "javascript"
+        },
         "name": "client",
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.8" },
-      "timestamp": { "us": 1593413301621808 },
-      "trace": { "id": "ee0ce8b38b8d5945829fc1c9432538bf" },
+      "source": {
+        "ip": "172.18.0.8"
+      },
+      "timestamp": {
+        "us": 1593413287275113
+      },
+      "trace": {
+        "id": "ca86ffcac7753ec8733933bd8fd45d11"
+      },
       "transaction": {
         "custom": {
           "userConfig": {
-            "featureFlags": ["double-trouble", "4423-hotfix"],
+            "featureFlags": [
+              "double-trouble",
+              "4423-hotfix"
+            ],
             "showDashboard": true
           }
         },
-        "duration": { "us": 109000 },
-        "id": "c546a6716b681bf2",
+        "duration": {
+          "us": 342000
+        },
+        "id": "c40f735132c8e864",
         "marks": {
           "agent": {
-            "domComplete": 98,
-            "domInteractive": 87,
-            "timeToFirstByte": 3
+            "domComplete": 335,
+            "domInteractive": 327,
+            "timeToFirstByte": 16
           },
           "navigationTiming": {
-            "connectEnd": 0,
-            "connectStart": 0,
-            "domComplete": 98,
-            "domContentLoadedEventEnd": 87,
-            "domContentLoadedEventStart": 87,
-            "domInteractive": 87,
-            "domLoading": 8,
-            "domainLookupEnd": 0,
-            "domainLookupStart": 0,
+            "connectEnd": 12,
+            "connectStart": 12,
+            "domComplete": 335,
+            "domContentLoadedEventEnd": 327,
+            "domContentLoadedEventStart": 327,
+            "domInteractive": 327,
+            "domLoading": 21,
+            "domainLookupEnd": 12,
+            "domainLookupStart": 10,
             "fetchStart": 0,
-            "loadEventEnd": 98,
-            "loadEventStart": 98,
-            "requestStart": 1,
-            "responseEnd": 8,
-            "responseStart": 3
+            "loadEventEnd": 335,
+            "loadEventStart": 335,
+            "requestStart": 12,
+            "responseEnd": 17,
+            "responseStart": 16
           }
         },
         "name": "/dashboard",
-        "page": { "referer": "", "url": "http://opbeans-node:3000/dashboard" },
+        "page": {
+          "referer": "",
+          "url": "http://opbeans-node:3000/dashboard"
+        },
         "sampled": true,
-        "span_count": { "started": 8 },
+        "span_count": {
+          "started": 9
+        },
         "type": "page-load"
       },
       "url": {
@@ -261,50 +384,75 @@
         "name": "arthurdent"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "HeadlessChrome",
         "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36",
-        "os": { "name": "Linux" },
+        "os": {
+          "name": "Linux"
+        },
         "version": "79.0.3945"
       }
-    },
-    "p95": 341504,
-    "averageResponseTime": 208000,
-    "transactionsPerMinute": 0.75,
-    "impact": 35.56882613781033
+    }
   },
   {
-    "name": "DispatcherServlet#doGet",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "DispatcherServlet#doGet"
+    },
+    "averageResponseTime": 36010.53846153846,
+    "transactionsPerMinute": 3.25,
+    "impact": 26.61043592713186,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:40.104Z",
+      "@timestamp": "2020-06-29T06:48:10.529Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.706956Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.757591Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
@@ -321,77 +469,132 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Servlet API" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Servlet API"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413320104008 },
-      "trace": { "id": "90bd7780b32cc51a7f4c200b1e0c170f" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413290529006
+      },
+      "trace": {
+        "id": "66e3db4cf016b138a43d319d15174891"
+      },
       "transaction": {
-        "duration": { "us": 8896 },
-        "id": "40b22b21e92bbb20",
+        "duration": {
+          "us": 34366
+        },
+        "id": "7ea720a0175e7ffa",
         "name": "DispatcherServlet#doGet",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 1 },
+        "span_count": {
+          "dropped": 0,
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/orders",
-        "path": "/api/orders",
+        "full": "http://172.18.0.6:3000/api/products",
+        "path": "/api/products",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 34528,
-    "averageResponseTime": 36010.53846153846,
-    "transactionsPerMinute": 3.25,
-    "impact": 26.61043592713186
+    }
   },
   {
-    "name": "POST /api/orders",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "POST /api/orders"
+    },
+    "averageResponseTime": 270684,
+    "transactionsPerMinute": 0.25,
+    "impact": 15.261616628971955,
     "sample": {
       "@timestamp": "2020-06-29T06:48:39.953Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.991549Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:43.991549Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
-          "body": { "original": "[REDACTED]" },
+          "body": {
+            "original": "[REDACTED]"
+          },
           "headers": {
-            "Accept": ["application/json"],
-            "Connection": ["close"],
-            "Content-Length": ["129"],
-            "Content-Type": ["application/json"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Accept": [
+              "application/json"
+            ],
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "129"
+            ],
+            "Content-Type": [
+              "application/json"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "post",
           "socket": {
@@ -401,12 +604,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["13"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:40 GMT"],
-            "Etag": ["W/\"d-eEOWU4Cnr5DZ23ErRUeYu9oOIks\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "13"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:40 GMT"
+            ],
+            "Etag": [
+              "W/\"d-eEOWU4Cnr5DZ23ErRUeYu9oOIks\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -436,29 +651,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413319953033 },
-      "trace": { "id": "52b8fda5f6df745b990740ba18378620" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413319953033
+      },
+      "trace": {
+        "id": "52b8fda5f6df745b990740ba18378620"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 270684 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 270684
+        },
         "id": "a3afc2a112e9c893",
         "name": "POST /api/orders",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 16 },
+        "span_count": {
+          "started": 16
+        },
         "type": "request"
       },
       "url": {
@@ -469,50 +707,77 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 270336,
-    "averageResponseTime": 270684,
-    "transactionsPerMinute": 0.25,
-    "impact": 15.261616628971955
+    }
   },
   {
-    "name": "ResourceHttpRequestHandler",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "ResourceHttpRequestHandler"
+    },
+    "averageResponseTime": 14419.42857142857,
+    "transactionsPerMinute": 3.5,
+    "impact": 11.30657439844125,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:44.376Z",
+      "@timestamp": "2020-06-29T06:48:06.640Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.720380Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.517678Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
@@ -529,63 +794,100 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413324376010 },
-      "trace": { "id": "7e70dc471913473e7d3bffda9b27d720" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413286640008
+      },
+      "trace": {
+        "id": "81d8ffb0a39e755eed400f6486e15672"
+      },
       "transaction": {
-        "duration": { "us": 1420 },
-        "id": "5c4e9f4b0846c2f8",
+        "duration": {
+          "us": 2953
+        },
+        "id": "353d42a2f9046e99",
         "name": "ResourceHttpRequestHandler",
         "result": "HTTP 4xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 0 },
+        "span_count": {
+          "dropped": 0,
+          "started": 0
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/types",
-        "path": "/api/types",
+        "full": "http://172.18.0.6:3000/api/types/3",
+        "path": "/api/types/3",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 4120,
-    "averageResponseTime": 14419.42857142857,
-    "transactionsPerMinute": 3.5,
-    "impact": 11.30657439844125
+    }
   },
   {
-    "name": "/orders",
+    "key": {
+      "service.name": "client",
+      "transaction.name": "/orders"
+    },
+    "averageResponseTime": 81500,
+    "transactionsPerMinute": 0.5,
+    "impact": 9.072365225837785,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:38.358Z",
-      "agent": { "name": "rum-js", "version": "5.2.0" },
-      "client": { "ip": "172.18.0.8" },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.365914Z" },
+      "@timestamp": "2020-06-29T06:48:29.296Z",
+      "agent": {
+        "name": "rum-js",
+        "version": "5.2.0"
+      },
+      "client": {
+        "ip": "172.18.0.8"
+      },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:29.986555Z"
+      },
       "http": {
-        "request": { "referrer": "" },
-        "response": {
-          "decoded_body_size": 813,
-          "encoded_body_size": 813,
-          "transfer_size": 962
+        "request": {
+          "referrer": ""
         }
       },
       "observer": {
@@ -596,53 +898,50 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
-        "language": { "name": "javascript" },
+        "language": {
+          "name": "javascript"
+        },
         "name": "client",
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.8" },
-      "timestamp": { "us": 1593413318358392 },
-      "trace": { "id": "c1dea08a4128e776fd9965ccf8c8da99" },
+      "source": {
+        "ip": "172.18.0.8"
+      },
+      "timestamp": {
+        "us": 1593413309296660
+      },
+      "trace": {
+        "id": "978b56807e0b7a27cbc41a0dfb665f47"
+      },
       "transaction": {
         "custom": {
           "userConfig": {
-            "featureFlags": ["double-trouble", "4423-hotfix"],
+            "featureFlags": [
+              "double-trouble",
+              "4423-hotfix"
+            ],
             "showDashboard": true
           }
         },
-        "duration": { "us": 140000 },
-        "id": "4f2ea2796645d6e5",
-        "marks": {
-          "agent": {
-            "domComplete": 126,
-            "domInteractive": 116,
-            "timeToFirstByte": 3
-          },
-          "navigationTiming": {
-            "connectEnd": 0,
-            "connectStart": 0,
-            "domComplete": 126,
-            "domContentLoadedEventEnd": 116,
-            "domContentLoadedEventStart": 116,
-            "domInteractive": 116,
-            "domLoading": 20,
-            "domainLookupEnd": 0,
-            "domainLookupStart": 0,
-            "fetchStart": 0,
-            "loadEventEnd": 126,
-            "loadEventStart": 126,
-            "requestStart": 1,
-            "responseEnd": 3,
-            "responseStart": 3
-          }
+        "duration": {
+          "us": 23000
         },
+        "id": "c3801eadbdef5c7c",
         "name": "/orders",
-        "page": { "referer": "", "url": "http://opbeans-node:3000/orders" },
+        "page": {
+          "referer": "",
+          "url": "http://opbeans-node:3000/orders"
+        },
         "sampled": true,
-        "span_count": { "started": 7 },
-        "type": "page-load"
+        "span_count": {
+          "started": 1
+        },
+        "type": "route-change"
       },
       "url": {
         "domain": "opbeans-node",
@@ -652,59 +951,94 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "adastra@example.com", "id": "3", "name": "trillian" },
+      "user": {
+        "email": "arthur.dent@example.com",
+        "id": "1",
+        "name": "arthurdent"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "HeadlessChrome",
         "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36",
-        "os": { "name": "Linux" },
+        "os": {
+          "name": "Linux"
+        },
         "version": "79.0.3945"
       }
-    },
-    "p95": 140160,
-    "averageResponseTime": 81500,
-    "transactionsPerMinute": 0.5,
-    "impact": 9.072365225837785
+    }
   },
   {
-    "name": "APIRestController#customer",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#customer"
+    },
+    "averageResponseTime": 19370.6,
+    "transactionsPerMinute": 1.25,
+    "impact": 5.270496679320978,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:38.893Z",
+      "@timestamp": "2020-06-29T06:48:08.631Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.680126Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.536897Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:38 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:08 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -719,59 +1053,101 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413318893006 },
-      "trace": { "id": "efcf3446b51d080dbde1339969cf79a0" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413288631008
+      },
+      "trace": {
+        "id": "c00da24c5c793cd679ce3df47cee8f37"
+      },
       "transaction": {
-        "duration": { "us": 4594 },
-        "id": "31ef64d71933e846",
+        "duration": {
+          "us": 76826
+        },
+        "id": "3c8403055ff75866",
         "name": "APIRestController#customer",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 2 },
+        "span_count": {
+          "dropped": 0,
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/customers/235",
-        "path": "/api/customers/235",
+        "full": "http://172.18.0.6:3000/api/customers/56",
+        "path": "/api/customers/56",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 77280,
-    "averageResponseTime": 19370.6,
-    "transactionsPerMinute": 1.25,
-    "impact": 5.270496679320978
+    }
   },
   {
-    "name": "/products",
+    "key": {
+      "service.name": "client",
+      "transaction.name": "/products"
+    },
+    "averageResponseTime": 77000,
+    "transactionsPerMinute": 0.25,
+    "impact": 4.129424578484989,
     "sample": {
       "@timestamp": "2020-06-29T06:48:48.824Z",
-      "agent": { "name": "rum-js", "version": "5.2.0" },
-      "client": { "ip": "172.18.0.8" },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:49.293664Z" },
+      "agent": {
+        "name": "rum-js",
+        "version": "5.2.0"
+      },
+      "client": {
+        "ip": "172.18.0.8"
+      },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:49.293664Z"
+      },
       "http": {
-        "request": { "referrer": "" },
+        "request": {
+          "referrer": ""
+        },
         "response": {
           "decoded_body_size": 813,
           "encoded_body_size": 813,
@@ -786,23 +1162,39 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
-        "language": { "name": "javascript" },
+        "language": {
+          "name": "javascript"
+        },
         "name": "client",
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.8" },
-      "timestamp": { "us": 1593413328824656 },
-      "trace": { "id": "f6c4a9197bbd080bd45072970f251525" },
+      "source": {
+        "ip": "172.18.0.8"
+      },
+      "timestamp": {
+        "us": 1593413328824656
+      },
+      "trace": {
+        "id": "f6c4a9197bbd080bd45072970f251525"
+      },
       "transaction": {
         "custom": {
           "userConfig": {
-            "featureFlags": ["double-trouble", "4423-hotfix"],
+            "featureFlags": [
+              "double-trouble",
+              "4423-hotfix"
+            ],
             "showDashboard": true
           }
         },
-        "duration": { "us": 77000 },
+        "duration": {
+          "us": 77000
+        },
         "id": "a11ede1968973bc5",
         "marks": {
           "agent": {
@@ -829,9 +1221,14 @@
           }
         },
         "name": "/products",
-        "page": { "referer": "", "url": "http://opbeans-node:3000/products" },
+        "page": {
+          "referer": "",
+          "url": "http://opbeans-node:3000/products"
+        },
         "sampled": true,
-        "span_count": { "started": 5 },
+        "span_count": {
+          "started": 5
+        },
         "type": "page-load"
       },
       "url": {
@@ -842,29 +1239,52 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "z@example.com", "id": "4", "name": "zaphod" },
+      "user": {
+        "email": "z@example.com",
+        "id": "4",
+        "name": "zaphod"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "HeadlessChrome",
         "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36",
-        "os": { "name": "Linux" },
+        "os": {
+          "name": "Linux"
+        },
         "version": "79.0.3945"
       }
-    },
-    "p95": 76800,
-    "averageResponseTime": 77000,
-    "transactionsPerMinute": 0.25,
-    "impact": 4.129424578484989
+    }
   },
   {
-    "name": "/customers",
+    "key": {
+      "service.name": "client",
+      "transaction.name": "/customers"
+    },
+    "averageResponseTime": 33500,
+    "transactionsPerMinute": 0.5,
+    "impact": 3.5546640380951287,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:48.287Z",
-      "agent": { "name": "rum-js", "version": "5.2.0" },
-      "client": { "ip": "172.18.0.8" },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:49.292535Z" },
-      "http": { "request": { "referrer": "" } },
+      "@timestamp": "2020-06-29T06:48:35.071Z",
+      "agent": {
+        "name": "rum-js",
+        "version": "5.2.0"
+      },
+      "client": {
+        "ip": "172.18.0.8"
+      },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:36.077184Z"
+      },
+      "http": {
+        "request": {
+          "referrer": ""
+        }
+      },
       "observer": {
         "ephemeral_id": "99908b73-9813-4a73-baa6-993db405523a",
         "hostname": "aa0bd613aa4c",
@@ -873,28 +1293,49 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
-        "language": { "name": "javascript" },
+        "language": {
+          "name": "javascript"
+        },
         "name": "client",
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.8" },
-      "timestamp": { "us": 1593413328287946 },
-      "trace": { "id": "48d130530a1fc0b2b99d138d3461bad4" },
+      "source": {
+        "ip": "172.18.0.8"
+      },
+      "timestamp": {
+        "us": 1593413315071116
+      },
+      "trace": {
+        "id": "547a92e82a25387321d1b967f2dd0f48"
+      },
       "transaction": {
         "custom": {
           "userConfig": {
-            "featureFlags": ["double-trouble", "4423-hotfix"],
+            "featureFlags": [
+              "double-trouble",
+              "4423-hotfix"
+            ],
             "showDashboard": true
           }
         },
-        "duration": { "us": 39000 },
-        "id": "2f3a2b0fd3016d3e",
+        "duration": {
+          "us": 28000
+        },
+        "id": "d24f9b9dacb83450",
         "name": "/customers",
-        "page": { "referer": "", "url": "http://opbeans-node:3000/customers" },
+        "page": {
+          "referer": "",
+          "url": "http://opbeans-node:3000/customers"
+        },
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "route-change"
       },
       "url": {
@@ -905,59 +1346,94 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "adastra@example.com", "id": "3", "name": "trillian" },
+      "user": {
+        "email": "arthur.dent@example.com",
+        "id": "1",
+        "name": "arthurdent"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "HeadlessChrome",
         "original": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/79.0.3945.0 Safari/537.36",
-        "os": { "name": "Linux" },
+        "os": {
+          "name": "Linux"
+        },
         "version": "79.0.3945"
       }
-    },
-    "p95": 39040,
-    "averageResponseTime": 33500,
-    "transactionsPerMinute": 0.5,
-    "impact": 3.5546640380951287
+    }
   },
   {
-    "name": "APIRestController#customers",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#customers"
+    },
+    "averageResponseTime": 16690.75,
+    "transactionsPerMinute": 1,
+    "impact": 3.541042213287889,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:43.765Z",
+      "@timestamp": "2020-06-29T06:48:22.372Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.716850Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:25.888154Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:43 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:21 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 500
@@ -972,29 +1448,56 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413323765008 },
-      "trace": { "id": "affce4cea9b60bd5b635dc1bd2e4ce79" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413302372009
+      },
+      "trace": {
+        "id": "21dd795dc3a260b1bf7ebbbac1e86fb8"
+      },
       "transaction": {
-        "duration": { "us": 10880 },
-        "id": "cfe0a84b49b4a340",
+        "duration": {
+          "us": 14795
+        },
+        "id": "0157fc513282138f",
         "name": "APIRestController#customers",
         "result": "HTTP 5xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 2 },
+        "span_count": {
+          "dropped": 0,
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -1005,40 +1508,61 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 26432,
-    "averageResponseTime": 16690.75,
-    "transactionsPerMinute": 1,
-    "impact": 3.541042213287889
+    }
   },
   {
-    "name": "GET /log-message",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /log-message"
+    },
+    "averageResponseTime": 32667.5,
+    "transactionsPerMinute": 0.5,
+    "impact": 3.458966408120217,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:28.944Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:25.944Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.370695Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:29.976822Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1048,12 +1572,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["24"],
-            "Content-Type": ["text/html; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:28 GMT"],
-            "Etag": ["W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "24"
+            ],
+            "Content-Type": [
+              "text/html; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:25 GMT"
+            ],
+            "Etag": [
+              "W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 500
         },
@@ -1083,29 +1619,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413308944016 },
-      "trace": { "id": "afabe4cb397616f5ec35a2f3da49ba62" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413305944023
+      },
+      "trace": {
+        "id": "cd2ad726ad164d701c5d3103cbab0c81"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 26788 },
-        "id": "cc8c4261387507cf",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 38547
+        },
+        "id": "9e41667eb64dea55",
         "name": "GET /log-message",
         "result": "HTTP 5xx",
         "sampled": true,
-        "span_count": { "started": 0 },
+        "span_count": {
+          "started": 0
+        },
         "type": "request"
       },
       "url": {
@@ -1116,60 +1675,82 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 38528,
-    "averageResponseTime": 32667.5,
-    "transactionsPerMinute": 0.5,
-    "impact": 3.458966408120217
+    }
   },
   {
-    "name": "APIRestController#stats",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#stats"
+    },
+    "averageResponseTime": 15535,
+    "transactionsPerMinute": 1,
+    "impact": 3.275330415465657,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:42.549Z",
+      "@timestamp": "2020-06-29T06:48:09.912Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.715898Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.543824Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
-          "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:42 GMT"],
-            "Transfer-Encoding": ["chunked"]
-          },
           "headers_sent": true,
-          "status_code": 200
+          "status_code": 500
         },
         "version": "1.1"
       },
@@ -1181,29 +1762,56 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413322549008 },
-      "trace": { "id": "c3556e143784f94d4b4220dd40687fae" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413289912007
+      },
+      "trace": {
+        "id": "a17ceae4e18d50430ca15ecca5a3e69f"
+      },
       "transaction": {
-        "duration": { "us": 9166 },
-        "id": "ac40e567f63c3eef",
+        "duration": {
+          "us": 10930
+        },
+        "id": "9fb330060bb73271",
         "name": "APIRestController#stats",
-        "result": "HTTP 2xx",
+        "result": "HTTP 5xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 5 },
+        "span_count": {
+          "dropped": 0,
+          "started": 5
+        },
         "type": "request"
       },
       "url": {
@@ -1214,40 +1822,61 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 32064,
-    "averageResponseTime": 15535,
-    "transactionsPerMinute": 1,
-    "impact": 3.275330415465657
+    }
   },
   {
-    "name": "GET /api/customers",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/customers"
+    },
+    "averageResponseTime": 20092,
+    "transactionsPerMinute": 0.75,
+    "impact": 3.168195050736987,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:37.952Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:28.444Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.492402Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:29.982737Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1257,12 +1886,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["186769"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:37 GMT"],
-            "Etag": ["W/\"2d991-yG3J8W/roH7fSxXTudZrO27Ax9s\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "186769"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:28 GMT"
+            ],
+            "Etag": [
+              "W/\"2d991-yG3J8W/roH7fSxXTudZrO27Ax9s\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -1292,29 +1933,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413317952016 },
-      "trace": { "id": "5d99327edae38ed735e8d7a6028cf719" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413308444015
+      },
+      "trace": {
+        "id": "792fb0b00256164e88b277ec40b65e14"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 16824 },
-        "id": "071808429ec9d00b",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 26471
+        },
+        "id": "6c1f848752563d2b",
         "name": "GET /api/customers",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -1325,42 +1989,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 26368,
-    "averageResponseTime": 20092,
-    "transactionsPerMinute": 0.75,
-    "impact": 3.168195050736987
+    }
   },
   {
-    "name": "GET /api/products/:id",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/products/:id"
+    },
+    "averageResponseTime": 13516.5,
+    "transactionsPerMinute": 1,
+    "impact": 2.8112687551548836,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:24.977Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:47:57.555Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:27.004717Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:47:59.085077Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1370,12 +2059,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["231"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:24 GMT"],
-            "Etag": ["W/\"e7-kkuzj37GZDzXDh0CWqh5Gan0VO4\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "231"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:47:57 GMT"
+            ],
+            "Etag": [
+              "W/\"e7-6JlJegaJ+ir0C8I8EmmOjms1dnc\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -1401,79 +2102,127 @@
           "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
           "ecosystem-workload.config.js"
         ],
-        "pid": 137,
+        "pid": 87,
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413304977014 },
-      "trace": { "id": "b9b290bca14c99962fa9a1c509401630" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413277555176
+      },
+      "trace": {
+        "id": "8365e1763f19e4067b88521d4d9247a0"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 4482 },
-        "id": "b8d8284ff1fc25d6",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 37709
+        },
+        "id": "be2722a418272f10",
         "name": "GET /api/products/:id",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
         "domain": "opbeans-node",
-        "full": "http://opbeans-node:3000/api/products/3",
-        "original": "/api/products/3",
-        "path": "/api/products/3",
+        "full": "http://opbeans-node:3000/api/products/1",
+        "original": "/api/products/1",
+        "path": "/api/products/1",
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 37856,
-    "averageResponseTime": 13516.5,
-    "transactionsPerMinute": 1,
-    "impact": 2.8112687551548836
+    }
   },
   {
-    "name": "GET /api/types",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/types"
+    },
+    "averageResponseTime": 26992.5,
+    "transactionsPerMinute": 0.5,
+    "impact": 2.8066131947777255,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:26.443Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:47:52.935Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:29.977518Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:47:55.471071Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1483,12 +2232,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["112"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:26 GMT"],
-            "Etag": ["W/\"70-1z6hT7P1WHgBgS/BeUEVeHhOCQU\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "112"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:47:52 GMT"
+            ],
+            "Etag": [
+              "W/\"70-1z6hT7P1WHgBgS/BeUEVeHhOCQU\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -1514,33 +2275,56 @@
           "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
           "ecosystem-workload.config.js"
         ],
-        "pid": 137,
+        "pid": 63,
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413306443014 },
-      "trace": { "id": "be3f4eb50d253afc032c90eacaa85072" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413272935117
+      },
+      "trace": {
+        "id": "2946c536a33d163d0c984d00d1f3839a"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 8892 },
-        "id": "ccce129bb8c6b125",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 45093
+        },
+        "id": "103482fda88b9400",
         "name": "GET /api/types",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -1551,42 +2335,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 45248,
-    "averageResponseTime": 26992.5,
-    "transactionsPerMinute": 0.5,
-    "impact": 2.8066131947777255
+    }
   },
   {
-    "name": "GET static file",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET static file"
+    },
+    "averageResponseTime": 3492.9285714285716,
+    "transactionsPerMinute": 3.5,
+    "impact": 2.5144049360435208,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:40.953Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:47:53.427Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.992454Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:47:55.472070Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1596,15 +2405,33 @@
         },
         "response": {
           "headers": {
-            "Accept-Ranges": ["bytes"],
-            "Cache-Control": ["public, max-age=0"],
-            "Connection": ["close"],
-            "Content-Length": ["15086"],
-            "Content-Type": ["image/x-icon"],
-            "Date": ["Mon, 29 Jun 2020 06:48:40 GMT"],
-            "Etag": ["W/\"3aee-1725aff14f0\""],
-            "Last-Modified": ["Thu, 28 May 2020 11:16:06 GMT"],
-            "X-Powered-By": ["Express"]
+            "Accept-Ranges": [
+              "bytes"
+            ],
+            "Cache-Control": [
+              "public, max-age=0"
+            ],
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "15086"
+            ],
+            "Content-Type": [
+              "image/x-icon"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:47:53 GMT"
+            ],
+            "Etag": [
+              "W/\"3aee-1725aff14f0\""
+            ],
+            "Last-Modified": [
+              "Thu, 28 May 2020 11:16:06 GMT"
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -1624,32 +2451,53 @@
           "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
           "ecosystem-workload.config.js"
         ],
-        "pid": 137,
+        "pid": 63,
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413320953016 },
-      "trace": { "id": "292393440bbe04385f3c2e3715ac35fe" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413273427016
+      },
+      "trace": {
+        "id": "ec8a804fedf28fcf81d5682d69a16970"
+      },
       "transaction": {
-        "duration": { "us": 1671 },
-        "id": "d1d964ca1865dce3",
+        "duration": {
+          "us": 4934
+        },
+        "id": "ab90a62901b770e6",
         "name": "GET static file",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 0 },
+        "span_count": {
+          "started": 0
+        },
         "type": "request"
       },
       "url": {
@@ -1661,55 +2509,84 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 11900,
-    "averageResponseTime": 3492.9285714285716,
-    "transactionsPerMinute": 3.5,
-    "impact": 2.5144049360435208
+    }
   },
   {
-    "name": "APIRestController#customerWhoBought",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#customerWhoBought"
+    },
+    "averageResponseTime": 3742.153846153846,
+    "transactionsPerMinute": 3.25,
+    "impact": 2.4998634943716573,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:44.982Z",
+      "@timestamp": "2020-06-29T06:48:11.166Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.721114Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.763228Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:44 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:10 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -1724,73 +2601,121 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413324982008 },
-      "trace": { "id": "e5ce8ba877f69510e7abc3f0d11c1e4f" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413291166005
+      },
+      "trace": {
+        "id": "fa0d353eb7967b344ed37674f40b2884"
+      },
       "transaction": {
-        "duration": { "us": 2797 },
-        "id": "b8c1bd3b31b197d3",
+        "duration": {
+          "us": 4453
+        },
+        "id": "bce4ce4b09ded6ca",
         "name": "APIRestController#customerWhoBought",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 1 },
+        "span_count": {
+          "dropped": 0,
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/products/5/customers",
-        "path": "/api/products/5/customers",
+        "full": "http://172.18.0.6:3000/api/products/3/customers",
+        "path": "/api/products/3/customers",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 4464,
-    "averageResponseTime": 3742.153846153846,
-    "transactionsPerMinute": 3.25,
-    "impact": 2.4998634943716573
+    }
   },
   {
-    "name": "GET /log-error",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /log-error"
+    },
+    "averageResponseTime": 35846,
+    "transactionsPerMinute": 0.25,
+    "impact": 1.7640550505645587,
     "sample": {
       "@timestamp": "2020-06-29T06:48:07.467Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:18.533253Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:18.533253Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -1800,12 +2725,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["24"],
-            "Content-Type": ["text/html; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:07 GMT"],
-            "Etag": ["W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "24"
+            ],
+            "Content-Type": [
+              "text/html; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:07 GMT"
+            ],
+            "Etag": [
+              "W/\"18-MS3VbhH7auHMzO0fUuNF6v14N/M\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 500
         },
@@ -1835,29 +2772,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413287467017 },
-      "trace": { "id": "d518b2c4d72cd2aaf1e39bad7ebcbdbb" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413287467017
+      },
+      "trace": {
+        "id": "d518b2c4d72cd2aaf1e39bad7ebcbdbb"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 35846 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 35846
+        },
         "id": "c7a30c1b076907ec",
         "name": "GET /log-error",
         "result": "HTTP 5xx",
         "sampled": true,
-        "span_count": { "started": 0 },
+        "span_count": {
+          "started": 0
+        },
         "type": "request"
       },
       "url": {
@@ -1868,57 +2828,90 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 35840,
-    "averageResponseTime": 35846,
-    "transactionsPerMinute": 0.25,
-    "impact": 1.7640550505645587
+    }
   },
   {
-    "name": "APIRestController#topProducts",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#topProducts"
+    },
+    "averageResponseTime": 4825,
+    "transactionsPerMinute": 1.75,
+    "impact": 1.6450221426498186,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:45.587Z",
+      "@timestamp": "2020-06-29T06:48:11.778Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.770758Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.764351Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:44 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:11 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -1933,29 +2926,56 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413325587007 },
-      "trace": { "id": "4470d0cc076e22018e2dd258a25c8812" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413291778008
+      },
+      "trace": {
+        "id": "d65e9816f1f6db3961867f7b6d1d4e6a"
+      },
       "transaction": {
-        "duration": { "us": 4070 },
-        "id": "cb860b712121d0d8",
+        "duration": {
+          "us": 4168
+        },
+        "id": "a72f4bb8149ecdc5",
         "name": "APIRestController#topProducts",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 1 },
+        "span_count": {
+          "dropped": 0,
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -1966,40 +2986,61 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 7344,
-    "averageResponseTime": 4825,
-    "transactionsPerMinute": 1.75,
-    "impact": 1.6450221426498186
+    }
   },
   {
-    "name": "GET /api/products/top",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/products/top"
+    },
+    "averageResponseTime": 33097,
+    "transactionsPerMinute": 0.25,
+    "impact": 1.6060533780113861,
     "sample": {
       "@timestamp": "2020-06-29T06:48:01.200Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:02.734903Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:02.734903Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2009,12 +3050,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["2"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:01 GMT"],
-            "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "2"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:01 GMT"
+            ],
+            "Etag": [
+              "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2044,29 +3097,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413281200133 },
-      "trace": { "id": "195f32efeb6f91e2f71b6bc8bb74ae3a" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413281200133
+      },
+      "trace": {
+        "id": "195f32efeb6f91e2f71b6bc8bb74ae3a"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 33097 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 33097
+        },
         "id": "22e72956dfc8967a",
         "name": "GET /api/products/top",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
@@ -2077,42 +3153,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 33024,
-    "averageResponseTime": 33097,
-    "transactionsPerMinute": 0.25,
-    "impact": 1.6060533780113861
+    }
   },
   {
-    "name": "GET /api/products",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/products"
+    },
+    "averageResponseTime": 6583,
+    "transactionsPerMinute": 1,
+    "impact": 1.2172278724376455,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:23.477Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:21.475Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:27.001228Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:26.996210Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2122,12 +3223,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["1023"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:23 GMT"],
-            "Etag": ["W/\"3ff-VyOxcDApb+a/lnjkm9FeTOGSDrs\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "1023"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:21 GMT"
+            ],
+            "Etag": [
+              "W/\"3ff-VyOxcDApb+a/lnjkm9FeTOGSDrs\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2157,29 +3270,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413303477028 },
-      "trace": { "id": "9f26158b9a3915577b3cccc17636ea01" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413301475015
+      },
+      "trace": {
+        "id": "389b26b16949c7f783223de4f14b788c"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 7150 },
-        "id": "27ff4add22ac2e1b",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 6775
+        },
+        "id": "d2d4088a0b104fb4",
         "name": "GET /api/products",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -2190,46 +3326,79 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 8160,
-    "averageResponseTime": 6583,
-    "transactionsPerMinute": 1,
-    "impact": 1.2172278724376455
+    }
   },
   {
-    "name": "POST /api",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "POST /api"
+    },
+    "averageResponseTime": 20011,
+    "transactionsPerMinute": 0.25,
+    "impact": 0.853921734857215,
     "sample": {
       "@timestamp": "2020-06-29T06:48:25.478Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:27.005671Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:27.005671Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
-          "body": { "original": "[REDACTED]" },
+          "body": {
+            "original": "[REDACTED]"
+          },
           "headers": {
-            "Accept": ["application/json"],
-            "Connection": ["close"],
-            "Content-Length": ["129"],
-            "Content-Type": ["application/json"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Accept": [
+              "application/json"
+            ],
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "129"
+            ],
+            "Content-Type": [
+              "application/json"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "post",
           "socket": {
@@ -2239,12 +3408,24 @@
         },
         "response": {
           "headers": {
-            "Allow": ["GET"],
-            "Connection": ["close"],
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:25 GMT"],
-            "Transfer-Encoding": ["chunked"],
-            "X-Powered-By": ["Express"]
+            "Allow": [
+              "GET"
+            ],
+            "Connection": [
+              "close"
+            ],
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:25 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 405
         },
@@ -2274,29 +3455,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413305478010 },
-      "trace": { "id": "4bd9027dd1e355ec742970e2d6333124" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413305478010
+      },
+      "trace": {
+        "id": "4bd9027dd1e355ec742970e2d6333124"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 20011 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 20011
+        },
         "id": "94104435cf151478",
         "name": "POST /api",
         "result": "HTTP 4xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
@@ -2307,42 +3511,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 19968,
-    "averageResponseTime": 20011,
-    "transactionsPerMinute": 0.25,
-    "impact": 0.853921734857215
+    }
   },
   {
-    "name": "GET /api/types/:id",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/types/:id"
+    },
+    "averageResponseTime": 8181,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.6441916136689552,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:12.972Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:47:53.928Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:18.543436Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:47:55.472718Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2352,12 +3581,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["205"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:12 GMT"],
-            "Etag": ["W/\"cd-pFMi1QOVY6YqWe+nwcbZVviCths\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "205"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:47:53 GMT"
+            ],
+            "Etag": [
+              "W/\"cd-pFMi1QOVY6YqWe+nwcbZVviCths\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2383,33 +3624,56 @@
           "/usr/local/lib/node_modules/pm2/lib/ProcessContainer.js",
           "ecosystem-workload.config.js"
         ],
-        "pid": 137,
+        "pid": 63,
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413292972011 },
-      "trace": { "id": "aea65cef5f902dda5d8e38f9fb38864d" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413273928016
+      },
+      "trace": {
+        "id": "0becaafb422bfeb69e047bf7153aa469"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 6300 },
-        "id": "a5bdbe43ac05fae2",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 10062
+        },
+        "id": "0cee4574091bda3b",
         "name": "GET /api/types/:id",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -2420,42 +3684,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 10080,
-    "averageResponseTime": 8181,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.6441916136689552
+    }
   },
   {
-    "name": "GET /api/stats",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/stats"
+    },
+    "averageResponseTime": 5098,
+    "transactionsPerMinute": 0.75,
+    "impact": 0.582807187955318,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:39.451Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:34.949Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.984824Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:39.479316Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2465,12 +3754,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["92"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:39 GMT"],
-            "Etag": ["W/\"5c-6I+bqIiLxvkWuwBUnTxhBoK4lBk\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "92"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:34 GMT"
+            ],
+            "Etag": [
+              "W/\"5c-6I+bqIiLxvkWuwBUnTxhBoK4lBk\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2500,29 +3801,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413319451016 },
-      "trace": { "id": "a05787cb03a0af0863fab5e05de942f1" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413314949017
+      },
+      "trace": {
+        "id": "616b3b77abd5534c61d6c0438469aee2"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 5050 },
-        "id": "a7e004eba8f021ce",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 5459
+        },
+        "id": "5b4971de59d2099d",
         "name": "GET /api/stats",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 4 },
+        "span_count": {
+          "started": 4
+        },
         "type": "request"
       },
       "url": {
@@ -2533,42 +3857,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 5440,
-    "averageResponseTime": 5098,
-    "transactionsPerMinute": 0.75,
-    "impact": 0.582807187955318
+    }
   },
   {
-    "name": "GET /api/orders",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/orders"
+    },
+    "averageResponseTime": 7624.5,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.5802207655235637,
     "sample": {
       "@timestamp": "2020-06-29T06:48:35.450Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.483715Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:39.483715Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2578,12 +3927,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["2"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:35 GMT"],
-            "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "2"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:35 GMT"
+            ],
+            "Etag": [
+              "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2613,29 +3974,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413315450014 },
-      "trace": { "id": "2da70ccf10599b271f65273d169cde9f" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413315450014
+      },
+      "trace": {
+        "id": "2da70ccf10599b271f65273d169cde9f"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 8784 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 8784
+        },
         "id": "a3f4a4f339758440",
         "name": "GET /api/orders",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 2 },
+        "span_count": {
+          "started": 2
+        },
         "type": "request"
       },
       "url": {
@@ -2646,42 +4030,67 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 8800,
-    "averageResponseTime": 7624.5,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.5802207655235637
+    }
   },
   {
-    "name": "GET /api/orders/:id",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/orders/:id"
+    },
+    "averageResponseTime": 4749.666666666667,
+    "transactionsPerMinute": 0.75,
+    "impact": 0.5227447114845778,
     "sample": {
       "@timestamp": "2020-06-29T06:48:35.951Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:39.484133Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:39.484133Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2691,10 +4100,18 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["0"],
-            "Date": ["Mon, 29 Jun 2020 06:48:35 GMT"],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "0"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:35 GMT"
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 404
         },
@@ -2724,29 +4141,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413315951017 },
-      "trace": { "id": "95979caa80e6622cbbb2d308800c3016" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413315951017
+      },
+      "trace": {
+        "id": "95979caa80e6622cbbb2d308800c3016"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 3210 },
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 3210
+        },
         "id": "30344988dace0b43",
         "name": "GET /api/orders/:id",
         "result": "HTTP 4xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
@@ -2757,57 +4197,90 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 7184,
-    "averageResponseTime": 4749.666666666667,
-    "transactionsPerMinute": 0.75,
-    "impact": 0.5227447114845778
+    }
   },
   {
-    "name": "APIRestController#products",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#products"
+    },
+    "averageResponseTime": 6787,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.4839483750082622,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:27.824Z",
+      "@timestamp": "2020-06-29T06:48:13.595Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:36.087688Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.755614Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:27 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:12 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -2822,29 +4295,56 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413307824008 },
-      "trace": { "id": "a6adb17bd5a5d1c0eabb9f36cb626dd5" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413293595007
+      },
+      "trace": {
+        "id": "8519b6c3dbc32a0582228506526e1d74"
+      },
       "transaction": {
-        "duration": { "us": 5645 },
-        "id": "df3e726eaa003d96",
+        "duration": {
+          "us": 7929
+        },
+        "id": "b0354de660cd3698",
         "name": "APIRestController#products",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 3 },
+        "span_count": {
+          "dropped": 0,
+          "started": 3
+        },
         "type": "request"
       },
       "url": {
@@ -2855,40 +4355,61 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 7904,
-    "averageResponseTime": 6787,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.4839483750082622
+    }
   },
   {
-    "name": "GET /api/products/:id/customers",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /api/products/:id/customers"
+    },
+    "averageResponseTime": 4757,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.25059559560997896,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:41.956Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:22.977Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.994692Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:27.000765Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -2898,12 +4419,24 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["2"],
-            "Content-Type": ["application/json; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:41 GMT"],
-            "Etag": ["W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "2"
+            ],
+            "Content-Type": [
+              "application/json; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:22 GMT"
+            ],
+            "Etag": [
+              "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 200
         },
@@ -2933,90 +4466,146 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413321956016 },
-      "trace": { "id": "f735ac5fca8f83eebc748f4a2e009e61" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413302977008
+      },
+      "trace": {
+        "id": "da8f22fe652ccb6680b3029ab6efd284"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 3896 },
-        "id": "b24ce95c855f83a4",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 5618
+        },
+        "id": "bc51c1523afaf57a",
         "name": "GET /api/products/:id/customers",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "started": 1 },
+        "span_count": {
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
         "domain": "opbeans-node",
-        "full": "http://opbeans-node:3000/api/products/5/customers",
-        "original": "/api/products/5/customers",
-        "path": "/api/products/5/customers",
+        "full": "http://opbeans-node:3000/api/products/3/customers",
+        "original": "/api/products/3/customers",
+        "path": "/api/products/3/customers",
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 5616,
-    "averageResponseTime": 4757,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.25059559560997896
+    }
   },
   {
-    "name": "APIRestController#product",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#product"
+    },
+    "averageResponseTime": 4713.5,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.24559517890858723,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:41.941Z",
+      "@timestamp": "2020-06-29T06:48:36.383Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.709268Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:46.666467Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:41 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:36 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -3031,81 +4620,131 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413321941007 },
-      "trace": { "id": "88a2b9ca970cdd38dfa1b5646d26b897" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413316383008
+      },
+      "trace": {
+        "id": "386b450aef87fc079b20136eda542af1"
+      },
       "transaction": {
-        "duration": { "us": 4539 },
-        "id": "24ee0e4812cfed62",
+        "duration": {
+          "us": 4888
+        },
+        "id": "5a4aa02158b5658c",
         "name": "APIRestController#product",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 2 },
+        "span_count": {
+          "dropped": 0,
+          "started": 3
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/products/4",
-        "path": "/api/products/4",
+        "full": "http://172.18.0.6:3000/api/products/1",
+        "path": "/api/products/1",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 4864,
-    "averageResponseTime": 4713.5,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.24559517890858723
+    }
   },
   {
-    "name": "APIRestController#order",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#order"
+    },
+    "averageResponseTime": 3392.5,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.09374344413758617,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:33.314Z",
+      "@timestamp": "2020-06-29T06:48:07.416Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:36.137777Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:15.534378Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
@@ -3122,88 +4761,144 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413313314007 },
-      "trace": { "id": "aaf67f944393124080d1e4de804dc6eb" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413287416007
+      },
+      "trace": {
+        "id": "25c46380df3d44a192ed07279a08b329"
+      },
       "transaction": {
-        "duration": { "us": 2503 },
-        "id": "f7f9f5e0f8a3a0d4",
+        "duration": {
+          "us": 4282
+        },
+        "id": "d4d5b23c685d2ee5",
         "name": "APIRestController#order",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 1 },
+        "span_count": {
+          "dropped": 0,
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
         "domain": "172.18.0.6",
-        "full": "http://172.18.0.6:3000/api/orders/906",
-        "path": "/api/orders/906",
+        "full": "http://172.18.0.6:3000/api/orders/391",
+        "path": "/api/orders/391",
         "port": 3000,
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 4272,
-    "averageResponseTime": 3392.5,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.09374344413758617
+    }
   },
   {
-    "name": "APIRestController#orders",
+    "key": {
+      "service.name": "opbeans-java",
+      "transaction.name": "APIRestController#orders"
+    },
+    "averageResponseTime": 3147,
+    "transactionsPerMinute": 0.5,
+    "impact": 0.06552270160444405,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:39.500Z",
+      "@timestamp": "2020-06-29T06:48:16.028Z",
       "agent": {
         "ephemeral_id": "222af346-6dd9-45ef-ac85-d86b67edd2de",
         "name": "java",
         "version": "1.17.1-SNAPSHOT"
       },
-      "client": { "ip": "172.18.0.9" },
+      "client": {
+        "ip": "172.18.0.9"
+      },
       "container": {
         "id": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:46.706280Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:25.800962Z"
+      },
       "host": {
         "architecture": "amd64",
         "hostname": "918ebbd99b4f",
         "ip": "172.18.0.6",
         "name": "918ebbd99b4f",
-        "os": { "platform": "Linux" }
+        "os": {
+          "platform": "Linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Accept": ["*/*"],
-            "Accept-Encoding": ["gzip, deflate"],
-            "Host": ["172.18.0.6:3000"],
-            "User-Agent": ["Python/3.7 aiohttp/3.3.2"]
+            "Accept": [
+              "*/*"
+            ],
+            "Accept-Encoding": [
+              "gzip, deflate"
+            ],
+            "Host": [
+              "172.18.0.6:3000"
+            ],
+            "User-Agent": [
+              "Python/3.7 aiohttp/3.3.2"
+            ]
           },
           "method": "get",
-          "socket": { "encrypted": false, "remote_address": "172.18.0.9" }
+          "socket": {
+            "encrypted": false,
+            "remote_address": "172.18.0.9"
+          }
         },
         "response": {
           "finished": true,
           "headers": {
-            "Content-Type": ["application/json;charset=UTF-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:38 GMT"],
-            "Transfer-Encoding": ["chunked"]
+            "Content-Type": [
+              "application/json;charset=UTF-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:15 GMT"
+            ],
+            "Transfer-Encoding": [
+              "chunked"
+            ]
           },
           "headers_sent": true,
           "status_code": 200
@@ -3218,29 +4913,56 @@
         "version": "8.0.0",
         "version_major": 8
       },
-      "process": { "pid": 6, "ppid": 1, "title": "/opt/java/openjdk/bin/java" },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "process": {
+        "pid": 6,
+        "ppid": 1,
+        "title": "/opt/java/openjdk/bin/java"
+      },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "Spring Web MVC", "version": "5.0.6.RELEASE" },
-        "language": { "name": "Java", "version": "11.0.7" },
+        "framework": {
+          "name": "Spring Web MVC",
+          "version": "5.0.6.RELEASE"
+        },
+        "language": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "name": "opbeans-java",
         "node": {
           "name": "918ebbd99b4f40003cf5713c080bb8120fa3bbe7ac4a96acb3aec558ced91ec0"
         },
-        "runtime": { "name": "Java", "version": "11.0.7" },
+        "runtime": {
+          "name": "Java",
+          "version": "11.0.7"
+        },
         "version": "None"
       },
-      "source": { "ip": "172.18.0.9" },
-      "timestamp": { "us": 1593413319500008 },
-      "trace": { "id": "f89b02f09a2e7a7f2cc3478f53d4a495" },
+      "source": {
+        "ip": "172.18.0.9"
+      },
+      "timestamp": {
+        "us": 1593413296028008
+      },
+      "trace": {
+        "id": "4110227ecacbccf79894165ae5df932d"
+      },
       "transaction": {
-        "duration": { "us": 3391 },
-        "id": "41c8c4300ee2ccda",
+        "duration": {
+          "us": 2903
+        },
+        "id": "8e3732f0f0da942b",
         "name": "APIRestController#orders",
         "result": "HTTP 2xx",
         "sampled": true,
-        "span_count": { "dropped": 0, "started": 2 },
+        "span_count": {
+          "dropped": 0,
+          "started": 1
+        },
         "type": "request"
       },
       "url": {
@@ -3251,40 +4973,61 @@
         "scheme": "http"
       },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "Python/3.7 aiohttp/3.3.2"
       }
-    },
-    "p95": 3376,
-    "averageResponseTime": 3147,
-    "transactionsPerMinute": 0.5,
-    "impact": 0.06552270160444405
+    }
   },
   {
-    "name": "GET /throw-error",
+    "key": {
+      "service.name": "opbeans-node",
+      "transaction.name": "GET /throw-error"
+    },
+    "averageResponseTime": 2577,
+    "transactionsPerMinute": 0.5,
+    "impact": 0,
     "sample": {
-      "@timestamp": "2020-06-29T06:48:42.954Z",
-      "agent": { "name": "nodejs", "version": "3.6.1" },
-      "client": { "ip": "172.18.0.7" },
+      "@timestamp": "2020-06-29T06:48:19.975Z",
+      "agent": {
+        "name": "nodejs",
+        "version": "3.6.1"
+      },
+      "client": {
+        "ip": "172.18.0.7"
+      },
       "container": {
         "id": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
       },
-      "ecs": { "version": "1.5.0" },
-      "event": { "ingested": "2020-06-29T06:48:43.996435Z" },
+      "ecs": {
+        "version": "1.5.0"
+      },
+      "event": {
+        "ingested": "2020-06-29T06:48:21.012520Z"
+      },
       "host": {
         "architecture": "x64",
         "hostname": "41712ded148f",
         "ip": "172.18.0.7",
         "name": "41712ded148f",
-        "os": { "platform": "linux" }
+        "os": {
+          "platform": "linux"
+        }
       },
       "http": {
         "request": {
           "headers": {
-            "Connection": ["close"],
-            "Host": ["opbeans-node:3000"],
-            "User-Agent": ["workload/2.4.3"]
+            "Connection": [
+              "close"
+            ],
+            "Host": [
+              "opbeans-node:3000"
+            ],
+            "User-Agent": [
+              "workload/2.4.3"
+            ]
           },
           "method": "get",
           "socket": {
@@ -3294,13 +5037,27 @@
         },
         "response": {
           "headers": {
-            "Connection": ["close"],
-            "Content-Length": ["148"],
-            "Content-Security-Policy": ["default-src 'none'"],
-            "Content-Type": ["text/html; charset=utf-8"],
-            "Date": ["Mon, 29 Jun 2020 06:48:42 GMT"],
-            "X-Content-Type-Options": ["nosniff"],
-            "X-Powered-By": ["Express"]
+            "Connection": [
+              "close"
+            ],
+            "Content-Length": [
+              "148"
+            ],
+            "Content-Security-Policy": [
+              "default-src 'none'"
+            ],
+            "Content-Type": [
+              "text/html; charset=utf-8"
+            ],
+            "Date": [
+              "Mon, 29 Jun 2020 06:48:19 GMT"
+            ],
+            "X-Content-Type-Options": [
+              "nosniff"
+            ],
+            "X-Powered-By": [
+              "Express"
+            ]
           },
           "status_code": 500
         },
@@ -3330,29 +5087,52 @@
         "ppid": 1,
         "title": "node /app/server.js"
       },
-      "processor": { "event": "transaction", "name": "transaction" },
+      "processor": {
+        "event": "transaction",
+        "name": "transaction"
+      },
       "service": {
         "environment": "production",
-        "framework": { "name": "express", "version": "4.17.1" },
-        "language": { "name": "javascript" },
+        "framework": {
+          "name": "express",
+          "version": "4.17.1"
+        },
+        "language": {
+          "name": "javascript"
+        },
         "name": "opbeans-node",
         "node": {
           "name": "41712ded148f30ee09a13421780eec4304bf5049b82a0d8dbc877893be6799e4"
         },
-        "runtime": { "name": "node", "version": "12.18.1" },
+        "runtime": {
+          "name": "node",
+          "version": "12.18.1"
+        },
         "version": "1.0.0"
       },
-      "source": { "ip": "172.18.0.7" },
-      "timestamp": { "us": 1593413322954016 },
-      "trace": { "id": "9d5aee7443a43db9820f622a10dfac6e" },
+      "source": {
+        "ip": "172.18.0.7"
+      },
+      "timestamp": {
+        "us": 1593413299975019
+      },
+      "trace": {
+        "id": "106f3a55b0b0ea327d1bbe4be66c3bcc"
+      },
       "transaction": {
-        "custom": { "shoppingBasketCount": 42 },
-        "duration": { "us": 1928 },
-        "id": "8e6fc8c3f99e8fc9",
+        "custom": {
+          "shoppingBasketCount": 42
+        },
+        "duration": {
+          "us": 3226
+        },
+        "id": "247b9141552a9e73",
         "name": "GET /throw-error",
         "result": "HTTP 5xx",
         "sampled": true,
-        "span_count": { "started": 0 },
+        "span_count": {
+          "started": 0
+        },
         "type": "request"
       },
       "url": {
@@ -3363,16 +5143,18 @@
         "port": 3000,
         "scheme": "http"
       },
-      "user": { "email": "kimchy@elastic.co", "id": "42", "name": "kimchy" },
+      "user": {
+        "email": "kimchy@elastic.co",
+        "id": "42",
+        "name": "kimchy"
+      },
       "user_agent": {
-        "device": { "name": "Other" },
+        "device": {
+          "name": "Other"
+        },
         "name": "Other",
         "original": "workload/2.4.3"
       }
-    },
-    "p95": 3224,
-    "averageResponseTime": 2577,
-    "transactionsPerMinute": 0.5,
-    "impact": 0
+    }
   }
 ]

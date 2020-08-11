@@ -99,20 +99,21 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 }
 
 interface MockSetup {
-  dynamicIndexPattern: any;
   start: number;
   end: number;
-  client: any;
+  apmEventClient: any;
   internalClient: any;
   config: APMConfig;
   uiFiltersES: ESFilter[];
   indices: {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
     'apm_oss.errorIndices': string;
     'apm_oss.onboardingIndices': string;
     'apm_oss.spanIndices': string;
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
+    /* eslint-enable @typescript-eslint/naming-convention */
     apmAgentConfigurationIndex: string;
     apmCustomLinkIndex: string;
   };
@@ -148,17 +149,19 @@ export async function inspectSearchParams(
   const mockSetup = {
     start: 1528113600000,
     end: 1528977600000,
-    client: { search: spy } as any,
+    apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
     uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
     indices: {
+      /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',
       'apm_oss.errorIndices': 'myIndex',
       'apm_oss.onboardingIndices': 'myIndex',
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
+      /* eslint-enable @typescript-eslint/naming-convention */
       apmAgentConfigurationIndex: 'myIndex',
       apmCustomLinkIndex: 'myIndex',
     },
@@ -197,9 +200,11 @@ export function mountWithTheme(
   tree: React.ReactElement<any>,
   { darkMode = false } = {}
 ) {
-  const WrappingThemeProvider = (props: any) => (
-    <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
-  );
+  function WrappingThemeProvider(props: any) {
+    return (
+      <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
+    );
+  }
 
   return mount(tree, {
     wrappingComponent: WrappingThemeProvider,

@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.loadSavedVisualization('chained input control', {
         navigateToVisualize: false,
       });
+      await testSubjects.waitForEnabled('addFilter', 10000);
     });
 
     it('should disable child control when parent control is not set', async () => {

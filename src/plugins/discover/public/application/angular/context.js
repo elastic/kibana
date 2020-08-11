@@ -83,6 +83,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     timeFieldName: indexPattern.timeFieldName,
     storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
     history: getServices().history(),
+    toasts: getServices().core.notifications.toasts,
   });
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;

@@ -161,7 +161,11 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiDescriptionList onClick={showSavedViewMenu}>
+                <EuiDescriptionList
+                  style={{ cursor: 'pointer' }}
+                  compressed={true}
+                  onClick={showSavedViewMenu}
+                >
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       defaultMessage="Current view"
@@ -172,7 +176,7 @@ export function SavedViewsToolbarControls<ViewState>(props: Props<ViewState>) {
                     {currentView
                       ? currentView.name
                       : i18n.translate('xpack.infra.savedView.unknownView', {
-                          defaultMessage: 'Unknown',
+                          defaultMessage: 'No view selected',
                         })}
                   </EuiDescriptionListDescription>
                 </EuiDescriptionList>

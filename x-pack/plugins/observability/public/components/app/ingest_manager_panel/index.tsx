@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 
-export const IngestManagerPanel = () => {
+export function IngestManagerPanel() {
   return (
     <EuiPanel
       paddingSize="l"
@@ -49,4 +49,4 @@ export const IngestManagerPanel = () => {
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+}

@@ -9,29 +9,24 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { createPackageConfigServiceMock } from '../../../../../../ingest_manager/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
-import { getManifestManagerMock } from './manifest_manager.mock';
+import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
 import LRU from 'lru-cache';
 
 describe('manifest_manager', () => {
   describe('ManifestManager sanity checks', () => {
     test('ManifestManager can retrieve and diff manifests', async () => {
       const manifestManager = getManifestManagerMock();
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       expect(newManifest.diff(oldManifest!)).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+            'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
       ]);
@@ -40,23 +35,18 @@ describe('manifest_manager', () => {
     test('ManifestManager populates cache properly', async () => {
       const cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
       const manifestManager = getManifestManagerMock({ cache });
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
       expect(diffs).toEqual([
         {
           id:
-            'endpoint-exceptionlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
           id:
-            'endpoint-exceptionlist-linux-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
+            'endpoint-exceptionlist-macos-v1-0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           type: 'add',
         },
       ]);
@@ -104,13 +94,8 @@ describe('manifest_manager', () => {
     test('ManifestManager cannot dispatch incomplete (uncompressed) artifact', async () => {
       const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
       expect(dispatchErrors.length).toEqual(1);
       expect(dispatchErrors[0].message).toEqual('Invalid manifest');
@@ -119,16 +104,13 @@ describe('manifest_manager', () => {
     test('ManifestManager can dispatch manifest', async () => {
       const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
+
+      newManifest.bumpSemanticVersion();
 
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
 
@@ -140,10 +122,10 @@ describe('manifest_manager', () => {
       expect(
         packageConfigService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
       ).toEqual({
-        manifest_version: '520f6cf88b3f36a065c6ca81058d5f8690aadadf6fe857f8dec4cc37589e7283',
+        manifest_version: '1.0.1',
         schema_version: 'v1',
         artifacts: {
-          'endpoint-exceptionlist-linux-v1': {
+          'endpoint-exceptionlist-macos-v1': {
             compression_algorithm: 'zlib',
             encryption_algorithm: 'none',
             decoded_sha256: '0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
@@ -151,17 +133,7 @@ describe('manifest_manager', () => {
             decoded_size: 292,
             encoded_size: 131,
             relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-linux-v1/0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
-          },
-          'endpoint-exceptionlist-macos-v1': {
-            compression_algorithm: 'zlib',
-            encryption_algorithm: 'none',
-            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
-            decoded_size: 432,
-            encoded_size: 147,
-            relative_url:
-              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+              '/api/endpoint/artifacts/download/endpoint-exceptionlist-macos-v1/0a5a2013a79f9e60682472284a1be45ab1ff68b9b43426d00d665016612c15c8',
           },
           'endpoint-exceptionlist-windows-v1': {
             compression_algorithm: 'zlib',
@@ -180,16 +152,13 @@ describe('manifest_manager', () => {
     test('ManifestManager fails to dispatch on conflict', async () => {
       const packageConfigService = createPackageConfigServiceMock();
       const manifestManager = getManifestManagerMock({ packageConfigService });
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
       const newArtifactId = diffs[1].id;
       await newManifest.compressArtifact(newArtifactId);
+
+      newManifest.bumpSemanticVersion();
 
       packageConfigService.update.mockRejectedValueOnce({ status: 409 });
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
@@ -202,13 +171,8 @@ describe('manifest_manager', () => {
         savedObjectsClient,
       });
 
-      const oldManifest = await manifestManager.getLastComputedManifest(
-        ManifestConstants.SCHEMA_VERSION
-      );
-      const newManifest = await manifestManager.buildNewManifest(
-        ManifestConstants.SCHEMA_VERSION,
-        oldManifest!
-      );
+      const oldManifest = await manifestManager.getLastComputedManifest();
+      const newManifest = await manifestManager.buildNewManifest(oldManifest!);
       const diffs = newManifest.diff(oldManifest!);
       const oldArtifactId = diffs[0].id;
       const newArtifactId = diffs[1].id;
@@ -239,6 +203,15 @@ describe('manifest_manager', () => {
         ArtifactConstants.SAVED_OBJECT_TYPE,
         oldArtifactId
       );
+    });
+
+    test('ManifestManager handles promise rejections when building artifacts', async () => {
+      // This test won't fail on an unhandled promise rejection, but it will cause
+      // an UnhandledPromiseRejectionWarning to be printed.
+      const manifestManager = getManifestManagerMock({
+        mockType: ManifestManagerMockType.ListClientPromiseRejection,
+      });
+      await expect(manifestManager.buildNewManifest()).rejects.toThrow();
     });
   });
 });

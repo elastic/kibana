@@ -17,20 +17,17 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function VegaChartPageProvider({
   getService,
   getPageObjects,
-  updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const screenshot = getService('screenshots');
-  const log = getService('log');
-  const { visEditor, visChart } = getPageObjects(['visEditor', 'visChart']);
+  const { common } = getPageObjects(['common']);
 
   class VegaChartPage {
     public async getSpec() {
@@ -45,6 +42,19 @@ export function VegaChartPageProvider({
       return linesText.join('\n');
     }
 
+    public async typeInSpec(text: string) {
+      const editor = await testSubjects.find('vega-editor');
+      const textarea = await editor.findByClassName('ace_content');
+      await textarea.click();
+      let repeats = 20;
+      while (--repeats > 0) {
+        await browser.pressKeys(Key.ARROW_UP);
+        await common.sleep(50);
+      }
+      await browser.pressKeys(Key.ARROW_RIGHT);
+      await browser.pressKeys(text);
+    }
+
     public async getViewContainer() {
       return await find.byCssSelector('div.vgaVis__view');
     }
@@ -53,37 +63,16 @@ export function VegaChartPageProvider({
       return await find.byCssSelector('div.vgaVis__controls');
     }
 
-    /**
-     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
-     * @param {string} name The name of the baseline image.
-     * @param {object} opts Options object.
-     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
-     */
-    public async expectVisToMatchScreenshot(name: string, opts = { threshold: 0.05 }) {
-      log.debug(`expectVisToMatchScreenshot(${name})`);
-
-      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      await browser.execute(`
-          var el = document.createElement('style');
-          el.id = '__data-test-style';
-          el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
-          document.body.appendChild(el);
-        `);
-
-      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
-
-      // Reset the chart to its original state
-      await browser.execute(`
-          var el = document.getElementById('__data-test-style');
-          document.body.removeChild(el);
-        `);
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      expect(percentDifference).to.be.lessThan(opts.threshold);
+    public async getYAxisLabels() {
+      const chart = await testSubjects.find('visualizationLoader');
+      const yAxis = await chart.findByCssSelector('[aria-label^="Y-axis"]');
+      const tickGroup = await yAxis.findByClassName('role-axis-label');
+      const labels = await tickGroup.findAllByCssSelector('text');
+      const labelTexts: string[] = [];
+      for (const label of labels) {
+        labelTexts.push(await label.getVisibleText());
+      }
+      return labelTexts;
     }
   }
 

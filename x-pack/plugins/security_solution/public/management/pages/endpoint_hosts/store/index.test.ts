@@ -50,6 +50,8 @@ describe('HostList store concerns', () => {
         selectedPolicyId: undefined,
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
+        nonExistingPolicies: {},
+        hostsExist: true,
       });
     });
 

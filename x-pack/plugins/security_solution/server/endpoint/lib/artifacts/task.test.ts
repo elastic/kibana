@@ -38,7 +38,7 @@ describe('task', () => {
         taskManager: mockTaskManagerSetup,
       });
       const mockTaskManagerStart = taskManagerMock.createStart();
-      manifestTask.start({ taskManager: mockTaskManagerStart });
+      await manifestTask.start({ taskManager: mockTaskManagerStart });
       expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalled();
     });
 

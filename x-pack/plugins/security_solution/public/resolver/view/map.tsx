@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-duplicate-imports */
-
 /* eslint-disable react/display-name */
 
 import React, { useContext } from 'react';
@@ -22,7 +20,7 @@ import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
 import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
-import { entityId } from '../../../common/endpoint/models/event';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
 
 /**
@@ -69,6 +67,7 @@ export const ResolverMap = React.memo(function ({
   const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
   const { colorMap } = useResolverTheme();
   const { cleanUpQueryParams } = useResolverQueryParams();
+
   useEffectOnce(() => {
     return () => cleanUpQueryParams();
   });
@@ -108,7 +107,7 @@ export const ResolverMap = React.memo(function ({
             />
           ))}
           {[...processNodePositions].map(([processEvent, position]) => {
-            const processEntityId = entityId(processEvent);
+            const processEntityId = entityIDSafeVersion(processEvent);
             return (
               <ProcessEventDot
                 key={processEntityId}

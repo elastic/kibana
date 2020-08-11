@@ -143,6 +143,7 @@ describe('policy list store concerns', () => {
       isLoading: false,
       isDeleting: false,
       deleteStatus: undefined,
+      endpointPackageInfo: undefined,
       pageIndex: 0,
       pageSize: 10,
       total: 0,

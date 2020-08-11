@@ -7,6 +7,7 @@
   "exceptions_list": [
     {
       "id": "endpoint_list",
+      "list_id": "endpoint_list",
       "namespace_type": "agnostic",
       "type": "endpoint"
     }

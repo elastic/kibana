@@ -1,6 +1,6 @@
 [role="xpack"]
 [[monitoring-kibana]]
-=== Collect monitoring data using legacy collectors
+= Collect monitoring data using legacy collectors
 ++++
 <titleabbrev>Legacy collection methods</titleabbrev>
 ++++

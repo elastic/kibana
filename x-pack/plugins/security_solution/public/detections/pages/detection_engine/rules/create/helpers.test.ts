@@ -5,9 +5,11 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { NewRule } from '../../../../containers/detection_engine/rules';
-
+import {
+  getListMock,
+  getEndpointListMock,
+} from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
@@ -29,18 +31,11 @@ import {
 } from './helpers';
 import {
   mockDefineStepRule,
-  mockExceptionsList,
   mockQueryBar,
   mockScheduleStepRule,
   mockAboutStepRule,
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
-
-const ENDPOINT_LIST = {
-  id: ENDPOINT_LIST_ID,
-  namespace_type: 'agnostic',
-  type: 'endpoint',
-} as List;
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -391,14 +386,12 @@ describe('helpers', () => {
         },
         []
       );
-      expect(result.exceptions_list).toEqual([
-        { id: ENDPOINT_LIST_ID, namespace_type: 'agnostic', type: 'endpoint' },
-      ]);
+      expect(result.exceptions_list).toEqual([getEndpointListMock()]);
     });
 
     test('returns formatted object with detections exceptions_list', () => {
-      const result: AboutStepRuleJson = formatAboutStepData(mockData, [mockExceptionsList]);
-      expect(result.exceptions_list).toEqual([mockExceptionsList]);
+      const result: AboutStepRuleJson = formatAboutStepData(mockData, [getListMock()]);
+      expect(result.exceptions_list).toEqual([getListMock()]);
     });
 
     test('returns formatted object with both exceptions_lists', () => {
@@ -407,13 +400,13 @@ describe('helpers', () => {
           ...mockData,
           isAssociatedToEndpointList: true,
         },
-        [mockExceptionsList]
+        [getListMock()]
       );
-      expect(result.exceptions_list).toEqual([ENDPOINT_LIST, mockExceptionsList]);
+      expect(result.exceptions_list).toEqual([getEndpointListMock(), getListMock()]);
     });
 
     test('returns formatted object with pre-existing exceptions lists', () => {
-      const exceptionsLists: List[] = [ENDPOINT_LIST, mockExceptionsList];
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
       const result: AboutStepRuleJson = formatAboutStepData(
         {
           ...mockData,
@@ -425,9 +418,9 @@ describe('helpers', () => {
     });
 
     test('returns formatted object with pre-existing endpoint exceptions list disabled', () => {
-      const exceptionsLists: List[] = [ENDPOINT_LIST, mockExceptionsList];
+      const exceptionsLists: List[] = [getEndpointListMock(), getListMock()];
       const result: AboutStepRuleJson = formatAboutStepData(mockData, exceptionsLists);
-      expect(result.exceptions_list).toEqual([mockExceptionsList]);
+      expect(result.exceptions_list).toEqual([getListMock()]);
     });
 
     test('returns formatted object with empty falsePositive and references filtered out', () => {

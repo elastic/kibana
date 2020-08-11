@@ -8,12 +8,14 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { ApplicationStart } from 'kibana/public';
 
 import {
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -22,8 +24,13 @@ import { useLoadSnapshotPolicies } from '../../../../services/api';
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
-export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChange }) => {
+export const SnapshotPolicies: React.FunctionComponent<Props> = ({
+  value,
+  onChange,
+  getUrlForApp,
+}) => {
   const { error, isLoading, data, sendRequest } = useLoadSnapshotPolicies();
 
   const policies = data.map((name: string) => ({
@@ -43,6 +50,12 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
     onChange(newValue);
   };
 
+  const getUrlForSnapshotPolicyWizard = () => {
+    return getUrlForApp('management', {
+      path: `data/snapshot_restore/add_policy`,
+    });
+  };
+
   let calloutContent;
   if (error) {
     calloutContent = (
@@ -50,7 +63,6 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="policiesErrorCallout"
-          size="s"
           iconType="help"
           color="warning"
           title={
@@ -99,7 +111,19 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedMessage"
-            defaultMessage="Create a snapshot lifecycle policy to automate the creation and deletion of cluster snapshots."
+            defaultMessage="{link} to automate the creation and deletion of cluster snapshots."
+            values={{
+              link: (
+                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink',
+                    {
+                      defaultMessage: 'Create a snapshot lifecycle policy',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
         </EuiCallOut>
       </Fragment>
@@ -110,7 +134,6 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="customPolicyCallout"
-          size="s"
           iconType="help"
           color="warning"
           title={
@@ -122,7 +145,19 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({ value, onChan
         >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyMessage"
-            defaultMessage="Enter the name of an existing snapshot policy, or create a new policy with this name."
+            defaultMessage="Enter the name of an existing snapshot policy, or {link} with this name."
+            values={{
+              link: (
+                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyLink',
+                    {
+                      defaultMessage: 'create a new policy',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
         </EuiCallOut>
       </Fragment>

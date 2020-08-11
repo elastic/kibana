@@ -50,6 +50,10 @@ export interface HostState {
   selectedPolicyId?: string;
   /** Endpoint package info */
   endpointPackageInfo?: GetPackagesResponse['response'][0];
+  /** tracks the list of policies IDs used in Host metadata that may no longer exist */
+  nonExistingPolicies: Record<string, boolean>;
+  /** Tracks whether hosts exist and helps control if onboarding should be visible */
+  hostsExist: boolean;
 }
 
 /**

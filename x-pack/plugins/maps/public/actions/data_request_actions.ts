@@ -6,8 +6,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
-// @ts-ignore
-import turf from 'turf';
+import bbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
@@ -40,7 +40,7 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { DataMeta, MapExtent, MapFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds } from '../elasticsearch_geo_utils';
+import { scaleBounds, turfBboxToBounds } from '../elasticsearch_geo_utils';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -368,13 +368,7 @@ export function fitToDataBounds() {
       return;
     }
 
-    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
-    const dataBounds = {
-      minLon: turfUnionBbox[0],
-      minLat: turfUnionBbox[1],
-      maxLon: turfUnionBbox[2],
-      maxLat: turfUnionBbox[3],
-    };
+    const dataBounds = turfBboxToBounds(bbox(multiPoint(corners)));
 
     dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };

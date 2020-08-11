@@ -9,6 +9,8 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
 
+import { NavigateToPath } from '../../contexts/kibana';
+
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
@@ -27,26 +29,24 @@ import { useShowCharts } from '../../components/controls/checkbox_showcharts';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
 import { isViewBySwimLaneData } from '../../explorer/swimlane_container';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
-      defaultMessage: 'Anomaly Explorer',
-    }),
-    href: '',
-  },
-];
-
-export const explorerRoute: MlRoute = {
+export const explorerRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/explorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
+    {
+      text: i18n.translate('xpack.ml.anomalyDetection.anomalyExplorerLabel', {
+        defaultMessage: 'Anomaly Explorer',
+      }),
+      href: '',
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useResolver(undefined, undefined, deps.config, {

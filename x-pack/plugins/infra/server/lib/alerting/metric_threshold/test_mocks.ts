@@ -62,6 +62,20 @@ export const emptyMetricResponse = {
   },
 };
 
+export const emptyRateResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: [
+        {
+          doc_count: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          aggregatedValue_max: { value: null },
+        },
+      ],
+    },
+  },
+};
+
 export const basicCompositeResponse = {
   aggregations: {
     groupings: {

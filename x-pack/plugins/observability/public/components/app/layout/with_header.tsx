@@ -32,23 +32,25 @@ interface Props {
   showGiveFeedback?: boolean;
 }
 
-export const WithHeaderLayout = ({
+export function WithHeaderLayout({
   headerColor,
   bodyColor,
   children,
   restrictWidth,
   showAddData,
   showGiveFeedback,
-}: Props) => (
-  <Container color={bodyColor}>
-    <Header
-      color={headerColor}
-      restrictWidth={restrictWidth}
-      showAddData={showAddData}
-      showGiveFeedback={showGiveFeedback}
-    />
-    <Page restrictWidth={restrictWidth}>
-      <EuiPageBody>{children}</EuiPageBody>
-    </Page>
-  </Container>
-);
+}: Props) {
+  return (
+    <Container color={bodyColor}>
+      <Header
+        color={headerColor}
+        restrictWidth={restrictWidth}
+        showAddData={showAddData}
+        showGiveFeedback={showGiveFeedback}
+      />
+      <Page restrictWidth={restrictWidth}>
+        <EuiPageBody>{children}</EuiPageBody>
+      </Page>
+    </Container>
+  );
+}

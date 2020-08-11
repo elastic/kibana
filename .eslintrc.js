@@ -133,12 +133,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -529,6 +523,7 @@ module.exports = {
         'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
+        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -771,19 +766,22 @@ module.exports = {
     },
 
     /**
-     * APM overrides
+     * APM and Observability overrides
      */
     {
-      files: ['x-pack/plugins/apm/**/*.js'],
+      files: [
+        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
-        'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
-      },
-    },
-    {
-      plugins: ['react-hooks'],
-      files: ['x-pack/plugins/apm/**/*.{ts,tsx}'],
-      rules: {
+        'react/function-component-definition': [
+          'warn',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },

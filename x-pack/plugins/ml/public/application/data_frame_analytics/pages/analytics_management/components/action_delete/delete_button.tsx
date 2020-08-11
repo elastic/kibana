@@ -30,7 +30,7 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item, onClick 
       iconType="trash"
       isDisabled={isDisabled}
       onClick={onClick}
-      size="s"
+      size="xs"
     >
       {buttonText}
     </EuiButtonEmpty>

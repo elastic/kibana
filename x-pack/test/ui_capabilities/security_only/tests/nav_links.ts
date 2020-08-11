@@ -57,7 +57,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.only('management', 'foo')
+              navLinksBuilder.only('management', 'foo', 'kibana')
             );
             break;
           case 'legacy_all':

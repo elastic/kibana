@@ -11,9 +11,8 @@ import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldow
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
   TriggerContextMapping,
+  APPLY_FILTER_TRIGGER,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { useContainerState } from '../../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
@@ -67,8 +66,9 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
+    // TODO: https://github.com/elastic/kibana/issues/59569
     const selectedTriggers: Array<keyof TriggerContextMapping> = React.useMemo(
-      () => [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER],
+      () => [APPLY_FILTER_TRIGGER],
       []
     );
 

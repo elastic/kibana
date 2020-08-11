@@ -32,7 +32,11 @@ export {
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export { DashboardStart, DashboardUrlGenerator } from './plugin';
-export { DASHBOARD_APP_URL_GENERATOR, createDashboardUrlGenerator } from './url_generator';
+export {
+  DASHBOARD_APP_URL_GENERATOR,
+  createDashboardUrlGenerator,
+  DashboardUrlGeneratorState,
+} from './url_generator';
 export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 export { SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';

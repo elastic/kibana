@@ -7,12 +7,12 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { NonEmptyStringArray } from './non_empty_string_array';
 
 describe('non_empty_string_array', () => {
-  test('it should NOT validate "null"', () => {
+  test('it should FAIL validation when given "null"', () => {
     const payload: NonEmptyStringArray | null = null;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -23,7 +23,7 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate "undefined"', () => {
+  test('it should FAIL validation when given "undefined"', () => {
     const payload: NonEmptyStringArray | undefined = undefined;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -34,7 +34,7 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate a single value of an empty string ""', () => {
+  test('it should FAIL validation of single value of an empty string ""', () => {
     const payload: NonEmptyStringArray = '';
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -72,7 +72,7 @@ describe('non_empty_string_array', () => {
     expect(message.schema).toEqual(['a', 'b', 'c']);
   });
 
-  test('it should NOT validate a number', () => {
+  test('it should FAIL validation of number', () => {
     const payload: number = 5;
     const decoded = NonEmptyStringArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);

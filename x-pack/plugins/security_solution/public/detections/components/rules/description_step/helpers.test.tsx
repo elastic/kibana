@@ -331,6 +331,7 @@ describe('helpers', () => {
       const result: ListItems[] = buildSeverityDescription({
         value: 'low',
         mapping: [{ field: 'host.name', operator: 'equals', value: 'hello', severity: 'high' }],
+        isMappingChecked: true,
       });
 
       expect(result[0].title).toEqual('Severity');

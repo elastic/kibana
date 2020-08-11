@@ -140,20 +140,16 @@ export const PolicyResponse = memo(
     responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
+    const generateId = useMemo(() => htmlIdGenerator(), []);
+
     return (
       <>
         {Object.entries(responseConfig).map(([key, val]) => {
           const attentionCount = responseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
-              id={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
-              key={
-                /* eslint-disable-next-line react-hooks/rules-of-hooks */
-                useMemo(() => htmlIdGenerator()(), [])
-              }
+              id={generateId(`id_${key}`)}
+              key={generateId(`key_${key}`)}
               data-test-subj="hostDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">

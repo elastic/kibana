@@ -94,6 +94,7 @@ export const mockSelectedTimeline = [
         noteId: 'noteIdTwo',
       },
     ],
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     pinnedEventIds: { '23D_e3ABGy2SlgJPuyEh': true, eHD_e3ABGy2SlgJPsh4u: true },
   },
 ];

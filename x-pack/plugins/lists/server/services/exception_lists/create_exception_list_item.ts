@@ -64,7 +64,10 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
-  const transformedComments = transformCreateCommentsToComments({ comments, user });
+  const transformedComments = transformCreateCommentsToComments({
+    incomingComments: comments,
+    user,
+  });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
     comments: transformedComments,

@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   CreateExceptionListItemSchemaDecoded,
   createExceptionListItemSchema,
@@ -17,6 +17,7 @@ import {
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
 import { endpointDisallowedFields } from './endpoint_disallowed_fields';
+import { validateExceptionListSize } from './validate';
 
 export const createExceptionListItemRoute = (router: IRouter): void => {
   router.post(
@@ -104,6 +105,18 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
+              const listSizeError = await validateExceptionListSize(
+                exceptionLists,
+                listId,
+                namespaceType
+              );
+              if (listSizeError != null) {
+                await exceptionLists.deleteExceptionListItemById({
+                  id: createdList.id,
+                  namespaceType,
+                });
+                return siemResponse.error(listSizeError);
+              }
               return response.ok({ body: validated ?? {} });
             }
           }

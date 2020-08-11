@@ -25,10 +25,30 @@ export default function ({ getPageObjects }) {
         await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "ios"');
         await PageObjects.maps.waitForMapPanAndZoom(origView);
 
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        const { lat, lon } = await PageObjects.maps.getView();
         expect(Math.round(lat)).to.equal(43);
         expect(Math.round(lon)).to.equal(-102);
-        expect(Math.round(zoom)).to.equal(5);
+      });
+    });
+
+    describe('with joins', () => {
+      before(async () => {
+        await PageObjects.maps.loadSavedMap('join example');
+        await PageObjects.maps.enableAutoFitToBounds();
+      });
+
+      it('should automatically fit to bounds when query is applied', async () => {
+        // Set view to other side of world so no matching results
+        await PageObjects.maps.setView(0, 0, 6);
+
+        // Setting query should trigger fit to bounds and move map
+        const origView = await PageObjects.maps.getView();
+        await PageObjects.maps.setAndSubmitQuery('prop1 >= 11');
+        await PageObjects.maps.waitForMapPanAndZoom(origView);
+
+        const { lat, lon } = await PageObjects.maps.getView();
+        expect(Math.round(lat)).to.equal(0);
+        expect(Math.round(lon)).to.equal(60);
       });
     });
   });

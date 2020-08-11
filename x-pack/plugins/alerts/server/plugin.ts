@@ -129,6 +129,16 @@ export class AlertingPlugin {
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
 
+    core.capabilities.registerProvider(() => {
+      return {
+        management: {
+          insightsAndAlerting: {
+            triggersActions: true,
+          },
+        },
+      };
+    });
+
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 

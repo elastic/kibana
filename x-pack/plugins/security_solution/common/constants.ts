@@ -32,6 +32,7 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -138,6 +139,13 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated';
   Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Machine Learning constants
+ */
+export const ML_GROUP_ID = 'security';
+export const LEGACY_ML_GROUP_ID = 'siem';
+export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 
 /*
   Rule notifications options

@@ -53,6 +53,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             onClick={() => {
               setIsReassignFlyoutOpen(true);
             }}
+            disabled={!agent.active}
             key="reassignConfig"
           >
             <FormattedMessage

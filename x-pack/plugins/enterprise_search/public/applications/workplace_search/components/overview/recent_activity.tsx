@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 
 import moment from 'moment';
+import { useValues } from 'kea';
 
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,7 +18,7 @@ import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 import { getSourcePath } from '../../routes';
 
-import { IAppServerData } from './overview';
+import { OverviewLogic, IOverviewValues } from './overview_logic';
 
 import './recent_activity.scss';
 
@@ -29,10 +30,12 @@ export interface IFeedActivity {
   sourceId: string;
 }
 
-export const RecentActivity: React.FC<IAppServerData> = ({
-  organization: { name, defaultOrgName },
-  activityFeed,
-}) => {
+export const RecentActivity: React.FC = () => {
+  const {
+    organization: { name, defaultOrgName },
+    activityFeed,
+  } = useValues(OverviewLogic) as IOverviewValues;
+
   return (
     <ContentSection
       title={

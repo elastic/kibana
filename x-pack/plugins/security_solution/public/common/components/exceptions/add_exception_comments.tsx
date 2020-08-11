@@ -16,13 +16,13 @@ import {
   EuiCommentProps,
   EuiText,
 } from '@elastic/eui';
-import { Comments } from '../../../lists_plugin_deps';
+import { Comment } from '../../../shared_imports';
 import * as i18n from './translations';
 import { useCurrentUser } from '../../lib/kibana';
 import { getFormattedComments } from './helpers';
 
 interface AddExceptionCommentsProps {
-  exceptionItemComments?: Comments[];
+  exceptionItemComments?: Comment[];
   newCommentValue: string;
   newCommentOnChange: (value: string) => void;
 }

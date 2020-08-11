@@ -201,7 +201,7 @@ describe('SavedObjectsRepository', () => {
   };
 
   beforeEach(() => {
-    client = elasticsearchClientMock.createElasticSearchClient();
+    client = elasticsearchClientMock.createElasticsearchClient();
     migrator = {
       migrateDocument: jest.fn().mockImplementation(documentMigrator.migrate),
       runMigrations: async () => ({ status: 'skipped' }),

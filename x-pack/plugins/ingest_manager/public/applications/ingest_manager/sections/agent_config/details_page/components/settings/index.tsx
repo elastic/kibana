@@ -74,6 +74,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const submitUpdateAgentConfig = async () => {
       setIsLoading(true);
       try {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, namespace, monitoring_enabled } = agentConfig;
         const { data, error } = await sendUpdateAgentConfig(agentConfig.id, {
           name,

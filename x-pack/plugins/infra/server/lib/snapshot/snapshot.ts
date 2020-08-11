@@ -86,7 +86,7 @@ const requestGroupedNodes = async (
       aggregations: {
         nodes: {
           composite: {
-            size: SNAPSHOT_COMPOSITE_REQUEST_SIZE,
+            size: options.overrideCompositeSize || SNAPSHOT_COMPOSITE_REQUEST_SIZE,
             sources: getGroupedNodesSources(options),
           },
           aggs: {
@@ -142,7 +142,7 @@ const requestNodeMetrics = async (
       aggregations: {
         nodes: {
           composite: {
-            size: SNAPSHOT_COMPOSITE_REQUEST_SIZE,
+            size: options.overrideCompositeSize || SNAPSHOT_COMPOSITE_REQUEST_SIZE,
             sources: getMetricsSources(options),
           },
           aggregations: {

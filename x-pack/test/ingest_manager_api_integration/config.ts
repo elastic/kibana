@@ -9,6 +9,11 @@ import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { defineDockerServersConfig } from '@kbn/test';
 
+// Docker image to use for Ingest Manager API integration tests.
+// This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:f6b01daec8cfe355101e366de9941d35a4c3763e';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
@@ -28,10 +33,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       './apis/fixtures/test_packages'
     )}:/packages/test-packages`,
   ];
-
-  // Docker image to use for Ingest Manager API integration tests.
-  const dockerImage =
-    'docker.elastic.co/package-registry/distribution:184b85f19e8fd14363e36150173d338ff9659f01';
 
   return {
     testFiles: [require.resolve('./apis')],

@@ -11,9 +11,9 @@ import {
   encryptionAlgorithm,
   identifier,
   manifestSchemaVersion,
-  manifestVersion,
   relativeUrl,
   sha256,
+  semanticVersion,
   size,
 } from './common';
 
@@ -50,7 +50,7 @@ export type ManifestEntryDispatchSchema = t.TypeOf<typeof manifestEntryDispatchS
 
 export const manifestBaseSchema = t.exact(
   t.type({
-    manifest_version: manifestVersion,
+    manifest_version: semanticVersion,
     schema_version: manifestSchemaVersion,
   })
 );

@@ -79,10 +79,10 @@ export async function getFullEndpointExceptionList(
   schemaVersion: string
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
-  let numResponses = 0;
   let page = 1;
+  let paging = true;
 
-  do {
+  while (paging) {
     const response = await eClient.findExceptionListItem({
       listId: ENDPOINT_LIST_ID,
       namespaceType: 'agnostic',
@@ -94,17 +94,16 @@ export async function getFullEndpointExceptionList(
     });
 
     if (response?.data !== undefined) {
-      numResponses = response.data.length;
-
       exceptions.entries = exceptions.entries.concat(
         translateToEndpointExceptions(response, schemaVersion)
       );
 
+      paging = (page - 1) * 100 + response.data.length < response.total;
       page++;
     } else {
       break;
     }
-  } while (numResponses > 0);
+  }
 
   const [validated, errors] = validate(exceptions, wrappedTranslatedExceptionList);
   if (errors != null) {

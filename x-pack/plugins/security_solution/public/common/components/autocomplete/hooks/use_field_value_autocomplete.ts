@@ -11,16 +11,13 @@ import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/d
 import { useKibana } from '../../../../common/lib/kibana';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
-export type UseFieldValueAutocompleteReturn = [
-  boolean,
-  string[],
-  (args: {
-    fieldSelected: IFieldType | undefined;
-    value: string | string[] | undefined;
-    patterns: IIndexPattern | undefined;
-    signal: AbortSignal;
-  }) => void
-];
+type Func = (args: {
+  fieldSelected: IFieldType | undefined;
+  value: string | string[] | undefined;
+  patterns: IIndexPattern | undefined;
+}) => void;
+
+export type UseFieldValueAutocompleteReturn = [boolean, string[], Func | null];
 
 export interface UseFieldValueAutocompleteProps {
   selectedField: IFieldType | undefined;
@@ -41,62 +38,77 @@ export const useFieldValueAutocomplete = ({
   const { services } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const updateSuggestions = useRef(
-    debounce(
+  const updateSuggestions = useRef<Func | null>(null);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+
+    const fetchSuggestions = debounce(
       async ({
         fieldSelected,
         value,
         patterns,
-        signal,
       }: {
         fieldSelected: IFieldType | undefined;
         value: string | string[] | undefined;
         patterns: IIndexPattern | undefined;
-        signal: AbortSignal;
       }) => {
-        if (fieldSelected == null || patterns == null) {
-          return;
+        const inputValue: string | string[] = value ?? '';
+        const userSuggestion: string = Array.isArray(inputValue)
+          ? inputValue[inputValue.length - 1] ?? ''
+          : inputValue;
+
+        try {
+          if (isSubscribed) {
+            if (fieldSelected == null || patterns == null) {
+              return;
+            }
+
+            setIsLoading(true);
+
+            // Fields of type boolean should only display two options
+            if (fieldSelected.type === 'boolean') {
+              setIsLoading(false);
+              setSuggestions(['true', 'false']);
+              return;
+            }
+
+            const newSuggestions = await services.data.autocomplete.getValueSuggestions({
+              indexPattern: patterns,
+              field: fieldSelected,
+              query: userSuggestion.trim(),
+              signal: abortCtrl.signal,
+            });
+
+            setIsLoading(false);
+            setSuggestions([...newSuggestions]);
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            setSuggestions([]);
+            setIsLoading(false);
+          }
         }
-
-        setIsLoading(true);
-
-        // Fields of type boolean should only display two options
-        if (fieldSelected.type === 'boolean') {
-          setIsLoading(false);
-          setSuggestions(['true', 'false']);
-          return;
-        }
-
-        const newSuggestions = await services.data.autocomplete.getValueSuggestions({
-          indexPattern: patterns,
-          field: fieldSelected,
-          query: '',
-          signal,
-        });
-
-        setIsLoading(false);
-        setSuggestions(newSuggestions);
       },
       500
-    )
-  );
-
-  useEffect(() => {
-    const abortCtrl = new AbortController();
+    );
 
     if (operatorType !== OperatorTypeEnum.EXISTS) {
-      updateSuggestions.current({
+      fetchSuggestions({
         fieldSelected: selectedField,
         value: fieldValue,
         patterns: indexPattern,
-        signal: abortCtrl.signal,
       });
     }
 
+    updateSuggestions.current = fetchSuggestions;
+
     return (): void => {
+      isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [updateSuggestions, selectedField, operatorType, fieldValue, indexPattern]);
+  }, [services.data.autocomplete, selectedField, operatorType, fieldValue, indexPattern]);
 
   return [isLoading, suggestions, updateSuggestions.current];
 };

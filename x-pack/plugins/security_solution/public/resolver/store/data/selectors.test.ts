@@ -13,7 +13,9 @@ import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-} from '../mocks/resolver_tree';
+  mockTreeWithAllProcessesTerminated,
+  mockTreeWithNoProcessEvents,
+} from '../../mocks/resolver_tree';
 import { uniquePidForProcess } from '../../models/process_event';
 import { EndpointEvent } from '../../../../common/endpoint/types';
 
@@ -299,6 +301,34 @@ describe('data state', () => {
       expect(selectors.ariaFlowtoCandidate(state())(secondAncestorID)).toBe(null);
     });
   });
+  describe('with a tree with all processes terminated', () => {
+    const originID = 'c';
+    const firstAncestorID = 'b';
+    const secondAncestorID = 'a';
+    beforeEach(() => {
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: mockTreeWithAllProcessesTerminated({
+            originID,
+            firstAncestorID,
+            secondAncestorID,
+          }),
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should have origin as terminated', () => {
+      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+    });
+    it('should have first ancestor as termianted', () => {
+      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+    });
+    it('should have second ancestor as terminated', () => {
+      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+    });
+  });
   describe('with a tree with 2 children and no ancestors', () => {
     const originID = 'c';
     const firstChildID = 'd';
@@ -377,6 +407,28 @@ describe('data state', () => {
     });
     it('should have 4 graphable processes', () => {
       expect(selectors.graphableProcesses(state()).length).toBe(4);
+    });
+  });
+  describe('with a tree with no process events', () => {
+    beforeEach(() => {
+      const tree = mockTreeWithNoProcessEvents();
+      actions.push({
+        type: 'serverReturnedResolverData',
+        payload: {
+          result: tree,
+          // this value doesn't matter
+          databaseDocumentID: '',
+        },
+      });
+    });
+    it('should return an empty layout', () => {
+      expect(selectors.layout(state())).toMatchInlineSnapshot(`
+        Object {
+          "ariaLevels": Map {},
+          "edgeLineSegments": Array [],
+          "processNodePositions": Map {},
+        }
+      `);
     });
   });
 });

@@ -44,6 +44,7 @@ import {
   ILegacyScopedClusterClient,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
+  IScopedClusterClient,
 } from './elasticsearch';
 
 import { HttpServiceSetup, HttpServiceStart } from './http';
@@ -110,6 +111,17 @@ export {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  IClusterClient,
+  ICustomClusterClient,
+  ElasticsearchClientConfig,
+  IScopedClusterClient,
+  SearchResponse,
+  CountResponse,
+  ShardsInfo,
+  ShardsResponse,
+  Explanation,
+  GetResponse,
+  DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
 export {
@@ -360,10 +372,13 @@ export {
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
  *      all the registered types.
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - Elasticsearch
+ *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
+ *      data client which uses the credentials of the incoming request
+ *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
+ *    - {@link Auditor | uiSettings.auditor} - AuditTrail client scoped to the incoming request
  *
  * @public
  */
@@ -374,6 +389,7 @@ export interface RequestHandlerContext {
       typeRegistry: ISavedObjectTypeRegistry;
     };
     elasticsearch: {
+      client: IScopedClusterClient;
       legacy: {
         client: ILegacyScopedClusterClient;
       };

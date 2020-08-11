@@ -59,28 +59,29 @@ export const previewInventoryMetricThresholdAlert = async ({
 
     const inventoryItems = Object.keys(first(results) as any);
     const previewResults = inventoryItems.map((item) => {
-      const isNoData = results.some((result) => result[item].isNoData);
-      if (isNoData) {
-        return null;
-      }
-      const isError = results.some((result) => result[item].isError);
-      if (isError) {
-        return undefined;
-      }
-
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
-      return [...Array(numberOfExecutionBuckets)].reduce(
-        (totalFired, _, i) =>
-          totalFired +
-          (results.every((result) => {
-            const shouldFire = result[item].shouldFire as boolean[];
-            return shouldFire[Math.floor(i * alertResultsPerExecution)];
-          })
-            ? 1
-            : 0),
-        0
-      );
+      let numberOfTimesFired = 0;
+      let numberOfNoDataResults = 0;
+      let numberOfErrors = 0;
+      for (let i = 0; i < numberOfExecutionBuckets; i++) {
+        const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
+        const allConditionsFiredInMappedBucket = results.every((result) => {
+          const shouldFire = result[item].shouldFire as boolean[];
+          return shouldFire[mappedBucketIndex];
+        });
+        const someConditionsNoDataInMappedBucket = results.some((result) => {
+          const hasNoData = result[item].isNoData as boolean[];
+          return hasNoData[mappedBucketIndex];
+        });
+        const someConditionsErrorInMappedBucket = results.some((result) => {
+          return result[item].isError;
+        });
+        if (allConditionsFiredInMappedBucket) numberOfTimesFired++;
+        if (someConditionsNoDataInMappedBucket) numberOfNoDataResults++;
+        if (someConditionsErrorInMappedBucket) numberOfErrors++;
+      }
+      return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors];
     });
 
     return previewResults;

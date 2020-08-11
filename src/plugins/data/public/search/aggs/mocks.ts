@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import {
   AggConfigs,

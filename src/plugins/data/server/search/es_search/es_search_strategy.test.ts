@@ -22,6 +22,9 @@ import { pluginInitializerContextConfigMock } from '../../../../../core/server/m
 import { esSearchStrategyProvider } from './es_search_strategy';
 
 describe('ES search strategy', () => {
+  const mockLogger: any = {
+    info: () => {},
+  };
   const mockApiCaller = jest.fn().mockResolvedValue({
     _shards: {
       total: 10,
@@ -40,14 +43,14 @@ describe('ES search strategy', () => {
   });
 
   it('returns a strategy with `search`', async () => {
-    const esSearch = await esSearchStrategyProvider(mockConfig$);
+    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     expect(typeof esSearch.search).toBe('function');
   });
 
   it('calls the API caller with the params with defaults', async () => {
     const params = { index: 'logstash-*' };
-    const esSearch = await esSearchStrategyProvider(mockConfig$);
+    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
@@ -63,7 +66,7 @@ describe('ES search strategy', () => {
 
   it('calls the API caller with overridden defaults', async () => {
     const params = { index: 'logstash-*', ignoreUnavailable: false, timeout: '1000ms' };
-    const esSearch = await esSearchStrategyProvider(mockConfig$);
+    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
@@ -77,7 +80,7 @@ describe('ES search strategy', () => {
 
   it('returns total, loaded, and raw response', async () => {
     const params = { index: 'logstash-*' };
-    const esSearch = await esSearchStrategyProvider(mockConfig$);
+    const esSearch = await esSearchStrategyProvider(mockConfig$, mockLogger);
 
     const response = await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
       params,

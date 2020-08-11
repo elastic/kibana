@@ -58,7 +58,7 @@ const redirectToTracePage = ({
     },
   });
 
-export const TraceLink = () => {
+export function TraceLink() {
   const { urlParams } = useUrlParams();
   const { traceIdLink: traceId, rangeFrom, rangeTo } = urlParams;
 
@@ -93,4 +93,4 @@ export const TraceLink = () => {
       <EuiEmptyPrompt iconType="apmTrace" title={<h2>Fetching trace...</h2>} />
     </CentralizedContainer>
   );
-};
+}

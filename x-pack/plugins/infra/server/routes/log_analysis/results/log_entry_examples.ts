@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { InfraBackendLibs } from '../../../lib/infra_types';
-import { NoLogAnalysisResultsIndexError, getLogEntryExamples } from '../../../lib/log_analysis';
+import { getLogEntryExamples } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import {
   getLogEntryExamplesRequestPayloadRT,
@@ -66,10 +66,6 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
-        }
-
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
         }
 
         return response.customError({

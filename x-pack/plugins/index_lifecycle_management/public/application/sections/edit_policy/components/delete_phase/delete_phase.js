@@ -123,6 +123,7 @@ export class DeletePhase extends PureComponent {
               <SnapshotPolicies
                 value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
                 onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
+                getUrlForApp={this.props.getUrlForApp}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

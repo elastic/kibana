@@ -19,6 +19,7 @@ export {
   ActionType,
   ActionTypeRegistryContract,
   AlertTypeParamsExpressionProps,
+  ValidationResult,
   ActionVariable,
 } from './types';
 export {

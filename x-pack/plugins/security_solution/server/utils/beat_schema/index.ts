@@ -77,10 +77,16 @@ const convertFieldsToAssociativeArray = (
     : {};
 
 export const getIndexAlias = (defaultIndex: string[], indexName: string): string => {
-  const found = defaultIndex.find((index) => `\\${indexName}`.match(`\\${index}`) != null);
-  if (found != null) {
-    return found;
-  } else {
+  try {
+    const found = defaultIndex.find((index) => `\\${indexName}`.match(`\\${index}`) != null);
+    if (found != null) {
+      return found;
+    } else {
+      return 'unknown';
+    }
+  } catch (error) {
+    // if we encounter an error because the index contains invalid regular expressions then we should return an unknown
+    // rather than blow up with a toaster error upstream
     return 'unknown';
   }
 };

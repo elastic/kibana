@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getRumOverviewProjection } from '../../projections/rum_overview';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import {
   Setup,
   SetupTimeRange,
@@ -45,9 +45,9 @@ export async function getClientMetrics({
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
   const { backEnd, domInteractive, pageViews } = response.aggregations!;
 
   // Divide by 1000 to convert ms into seconds

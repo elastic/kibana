@@ -46,14 +46,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
-      const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardJobTypeSelect',
-        'value'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualSelection = await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardJobTypeSelect',
+          'value'
+        );
+        expect(actualSelection).to.eql(
+          expectedSelection,
+          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
+        );
+      });
     },
 
     async selectJobType(jobType: string) {
@@ -335,18 +337,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async continueToAdditionalOptionsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertAdditionalOptionsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertAdditionalOptionsStepActive();
+      });
     },
 
     async continueToDetailsStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertDetailsStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertDetailsStepActive();
+      });
     },
 
     async continueToCreateStep() {
-      await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
-      await this.assertCreateStepActive();
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertCreateStepActive();
+      });
     },
 
     async assertModelMemoryInputExists() {

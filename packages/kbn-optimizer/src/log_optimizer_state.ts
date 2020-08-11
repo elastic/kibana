@@ -104,7 +104,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
-          return true;
+          return;
         }
 
         if (state.phase === 'issue') {
@@ -119,7 +119,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             }
           }
           log.indent(-4);
-          return true;
+          return;
         }
 
         if (state.phase === 'success') {
@@ -135,7 +135,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             );
           }
 
-          return true;
+          return;
         }
 
         throw new Error(`unhandled optimizer message: ${inspect(update)}`);

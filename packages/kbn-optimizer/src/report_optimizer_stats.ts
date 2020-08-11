@@ -21,7 +21,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
-import { CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter, CiStatsMetrics, ToolingLog } from '@kbn/dev-utils';
 
 import { OptimizerUpdate$ } from './run_optimizer';
 import { OptimizerState, OptimizerConfig } from './optimizer';
@@ -67,7 +67,11 @@ const getFiles = (dir: string, parent?: string) =>
     return true;
   });
 
-export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
+export function reportOptimizerStats(
+  reporter: CiStatsReporter,
+  config: OptimizerConfig,
+  log: ToolingLog
+) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     let lastState: OptimizerState | undefined;
     return update$.pipe(
@@ -98,10 +102,18 @@ export function reportOptimizerStats(reporter: CiStatsReporter, config: Optimize
                 const miscFiles = outputFiles.filter(
                   (f) => f !== entry && !asyncChunks.includes(f)
                 );
+
+                if (asyncChunks.length) {
+                  log.verbose(bundle.id, 'async chunks', asyncChunks);
+                }
+                if (miscFiles.length) {
+                  log.verbose(bundle.id, 'misc files', asyncChunks);
+                }
+
                 const sumSize = (files: Entry[]) =>
                   files.reduce((acc: number, f) => acc + f.stats!.size, 0);
 
-                return [
+                const metrics: CiStatsMetrics = [
                   {
                     group: `@kbn/optimizer bundle module count`,
                     id: bundle.id,
@@ -123,6 +135,10 @@ export function reportOptimizerStats(reporter: CiStatsReporter, config: Optimize
                     value: sumSize(miscFiles),
                   },
                 ];
+
+                log.info(bundle.id, 'metrics', metrics);
+
+                return metrics;
               })
             )
           );

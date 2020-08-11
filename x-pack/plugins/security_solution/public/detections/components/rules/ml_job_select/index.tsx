@@ -41,7 +41,7 @@ const HelpText: React.FC<{ href: string; showEnableWarning: boolean }> = ({
   <>
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
-      defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “siem” to those jobs in the {machineLearning} application to make them appear here."
+      defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of “security” to those jobs in the {machineLearning} application to make them appear here."
       values={{
         machineLearning: (
           <EuiLink href={href} target="_blank">

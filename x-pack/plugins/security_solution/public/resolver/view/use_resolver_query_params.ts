@@ -20,12 +20,12 @@ export function useResolverQueryParams() {
   const history = useHistory();
   const urlSearch = useLocation().search;
   const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
-  const uniqueCrumbIdKey: string = `resolver-id:${resolverComponentInstanceID}`;
-  const uniqueCrumbEventKey: string = `resolver-event:${resolverComponentInstanceID}`;
+  const uniqueCrumbIdKey: string = `resolver-${resolverComponentInstanceID}-id`;
+  const uniqueCrumbEventKey: string = `resolver-${resolverComponentInstanceID}-event`;
   const pushToQueryParams = useCallback(
     (newCrumbs: CrumbInfo) => {
-      // Construct a new set of params from the current set (minus empty params)
-      // by assigning the new set of params provided in `newCrumbs`
+      // Construct a new set of parameters from the current set (minus empty parameters)
+      // by assigning the new set of parameters provided in `newCrumbs`
       const crumbsToPass = {
         ...querystring.parse(urlSearch.slice(1)),
         [uniqueCrumbIdKey]: newCrumbs.crumbId,

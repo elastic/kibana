@@ -6,13 +6,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class NoLogAnalysisResultsIndexError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
-
 export class NoLogAnalysisMlJobError extends Error {
   constructor(message?: string) {
     super(message);
