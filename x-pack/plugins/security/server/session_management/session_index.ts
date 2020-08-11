@@ -128,8 +128,9 @@ export class SessionIndex {
 
   /**
    * Promise that tracks session index initialization process. We'll need to get rid of this as soon
-   * as Core provides support for plugin statuses. With this we won't mark Security as `Green` until
-   * index is fully initialized and hence consumers won't be able to call any API we provide.
+   * as Core provides support for plugin statuses (https://github.com/elastic/kibana/issues/41983).
+   * With this we won't mark Security as `Green` until index is fully initialized and hence consumers
+   * won't be able to call any APIs we provide.
    */
   private indexInitialization?: Promise<void>;
 
@@ -348,6 +349,8 @@ export class SessionIndex {
    * Trigger a removal of any outdated session values.
    */
   async cleanUp() {
+    this.options.logger.debug(`Running cleanup routine.`);
+
     const now = Date.now();
 
     // Always try to delete sessions with expired lifespan (even if it's not configured right now).

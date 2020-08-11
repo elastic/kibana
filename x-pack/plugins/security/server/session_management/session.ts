@@ -77,7 +77,7 @@ export interface SessionValueContentToEncrypt {
 
 export class Session {
   /**
-   * Session timeout in ms. If `null` session will stay active until the browser is closed.
+   * Session idle timeout in ms. If `null`, a session will stay active until its max lifespan is reached.
    */
   private readonly idleTimeout: Duration | null;
 
@@ -177,8 +177,8 @@ export class Session {
     >
   ) {
     const [sid, aad] = await Promise.all([
-      this.randomBytes(256).then((sidBuffer) => sidBuffer.toString('base64')),
-      this.randomBytes(256).then((aadBuffer) => aadBuffer.toString('base64')),
+      this.randomBytes(32).then((sidBuffer) => sidBuffer.toString('base64')),
+      this.randomBytes(32).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 
     const sessionLogger = this.getLoggerForSID(sid);

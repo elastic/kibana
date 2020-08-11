@@ -187,8 +187,8 @@ describe('Session', () => {
 
   describe('#create', () => {
     it('creates session value', async () => {
-      const mockSID = Buffer.from([1, ...Array(255).keys()]).toString('base64');
-      const mockAAD = Buffer.from([2, ...Array(255).keys()]).toString('base64');
+      const mockSID = Buffer.from([1, ...Array(31).keys()]).toString('base64');
+      const mockAAD = Buffer.from([2, ...Array(31).keys()]).toString('base64');
 
       const mockSessionIndexValue = sessionIndexMock.createValue({
         sid: mockSID,
@@ -219,7 +219,7 @@ describe('Session', () => {
       expect(mockSessionIndex.create).toHaveBeenCalledWith({
         sid: mockSID,
         content:
-          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJCqBD0WihwGK2mc3zjHg70tqUpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMMPFetOkRITDI+NMz7e3JcMofnDboRnvg==',
+          'AwABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9PgQAAQIDBAUGBwgJCpgMitlj6jACf9fYYa66WkuUpJsdgbWevIEfo6mN827f0lGcKDNPzN+vDMMPFetOkRITDI+NMz7e3JcMofnDboRnvg==',
         provider: { name: 'basic1', type: 'basic' },
         usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
         idleTimeoutExpiration: now + 123,

@@ -5,7 +5,12 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { HttpServiceSetup, ILegacyClusterClient, Logger } from '../../../../../src/core/server';
+import {
+  HttpServiceSetup,
+  ILegacyClusterClient,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '../../../../../src/core/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../task_manager/server';
 import { ConfigType } from '../config';
 import { OnlineStatusRetryScheduler } from '../elasticsearch';
@@ -90,25 +95,11 @@ export class SessionManagementService {
   start({ online$, taskManager }: SessionManagementServiceStartParams) {
     this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
       try {
-        await this.sessionIndex.initialize();
+        await Promise.all([this.sessionIndex.initialize(), this.scheduleCleanupTask(taskManager)]);
       } catch (err) {
         scheduleRetry();
       }
     });
-
-    taskManager
-      .ensureScheduled({
-        id: SESSION_INDEX_CLEANUP_TASK_NAME,
-        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
-        scope: ['security'],
-        schedule: { interval: `${this.config.session.cleanupInterval.asSeconds()}s` },
-        params: {},
-        state: {},
-      })
-      .then(
-        () => this.logger.debug('Successfully scheduled session index cleanup task.'),
-        (err) => this.logger.error(`Failed to register session index cleanup task: ${err.message}`)
-      );
   }
 
   stop() {
@@ -116,5 +107,54 @@ export class SessionManagementService {
       this.statusSubscription.unsubscribe();
       this.statusSubscription = undefined;
     }
+  }
+
+  private async scheduleCleanupTask(taskManager: TaskManagerStartContract) {
+    let currentTask;
+    try {
+      currentTask = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.logger.error(`Failed to retrieve session index cleanup task: ${err.message}`);
+        throw err;
+      }
+
+      this.logger.debug('Session index cleanup task is not scheduled yet.');
+    }
+
+    // Check if currently scheduled task is scheduled with the correct interval.
+    const cleanupInterval = `${this.config.session.cleanupInterval.asSeconds()}s`;
+    if (currentTask && currentTask.schedule?.interval !== cleanupInterval) {
+      this.logger.debug(
+        'Session index cleanup interval has changed, the cleanup task will be rescheduled.'
+      );
+
+      try {
+        await taskManager.remove(SESSION_INDEX_CLEANUP_TASK_NAME);
+      } catch (err) {
+        // We may have multiple instances of Kibana that are removing old task definition at the
+        // same time. If we get 404 here then task was removed by another instance, it's fine.
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          this.logger.error(`Failed to remove old session index cleanup task: ${err.message}`);
+          throw err;
+        }
+      }
+    }
+
+    try {
+      await taskManager.ensureScheduled({
+        id: SESSION_INDEX_CLEANUP_TASK_NAME,
+        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
+        scope: ['security'],
+        schedule: { interval: cleanupInterval },
+        params: {},
+        state: {},
+      });
+    } catch (err) {
+      this.logger.error(`Failed to register session index cleanup task: ${err.message}`);
+      throw err;
+    }
+
+    this.logger.debug('Successfully scheduled session index cleanup task.');
   }
 }

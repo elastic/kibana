@@ -35,7 +35,7 @@ export interface SessionCookieValue {
 
   /**
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
-   * active until the browser is closed.
+   * active until the max lifespan is reached.
    */
   idleTimeoutExpiration: number | null;
 

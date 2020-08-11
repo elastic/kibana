@@ -71,6 +71,9 @@ export class ElasticsearchService {
   start(): ElasticsearchServiceStart {
     return {
       clusterClient: this.#clusterClient!,
+
+      // We'll need to get rid of this as soon as Core's Elasticsearch service exposes this
+      // functionality in the scope of https://github.com/elastic/kibana/issues/41983.
       watchOnlineStatus$: () => {
         const RETRY_SCALE_DURATION = 100;
         const RETRY_TIMEOUT_MAX = 10000;

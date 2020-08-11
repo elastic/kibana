@@ -122,23 +122,93 @@ describe('SessionManagementService', () => {
       ).toBeUndefined();
     });
 
-    it('initializes session index when Elasticsearch goes online', async () => {
+    it('initializes session index and schedules session index cleanup task when Elasticsearch goes online', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({ online$: mockStatusSubject.asObservable(), taskManager: mockTaskManager });
 
       // ES isn't online yet.
       expect(mockSessionIndexInitialize).not.toHaveBeenCalled();
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
 
       const mockScheduleRetry = jest.fn();
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
+        id: SESSION_INDEX_CLEANUP_TASK_NAME,
+        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
+        scope: ['security'],
+        schedule: { interval: '3600s' },
+        params: {},
+        state: {},
+      });
 
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
 
       expect(mockScheduleRetry).not.toHaveBeenCalled();
+    });
+
+    it('removes old cleanup task if cleanup interval changes', async () => {
+      const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
+      service.start({ online$: mockStatusSubject.asObservable(), taskManager: mockTaskManager });
+
+      mockTaskManager.get.mockResolvedValue({ schedule: { interval: '2000s' } } as any);
+
+      // ES isn't online yet.
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+
+      const mockScheduleRetry = jest.fn();
+      mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
+      await nextTick();
+
+      expect(mockTaskManager.get).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.get).toHaveBeenCalledWith(SESSION_INDEX_CLEANUP_TASK_NAME);
+
+      expect(mockTaskManager.remove).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.remove).toHaveBeenCalledWith(SESSION_INDEX_CLEANUP_TASK_NAME);
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
+        id: SESSION_INDEX_CLEANUP_TASK_NAME,
+        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
+        scope: ['security'],
+        schedule: { interval: '3600s' },
+        params: {},
+        state: {},
+      });
+    });
+
+    it('does not remove old cleanup task if cleanup interval does not change', async () => {
+      const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
+      service.start({ online$: mockStatusSubject.asObservable(), taskManager: mockTaskManager });
+
+      mockTaskManager.get.mockResolvedValue({ schedule: { interval: '3600s' } } as any);
+
+      // ES isn't online yet.
+      expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+
+      const mockScheduleRetry = jest.fn();
+      mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
+      await nextTick();
+
+      expect(mockTaskManager.get).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.get).toHaveBeenCalledWith(SESSION_INDEX_CLEANUP_TASK_NAME);
+
+      expect(mockTaskManager.remove).not.toHaveBeenCalled();
+
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
+        id: SESSION_INDEX_CLEANUP_TASK_NAME,
+        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
+        scope: ['security'],
+        schedule: { interval: '3600s' },
+        params: {},
+        state: {},
+      });
     });
 
     it('schedules retry if index initialization fails', async () => {
@@ -151,12 +221,14 @@ describe('SessionManagementService', () => {
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(1);
 
       // Still fails.
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
 
       // And finally succeeds, retry is not scheduled.
@@ -165,22 +237,38 @@ describe('SessionManagementService', () => {
       mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
       await nextTick();
       expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(3);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(3);
       expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
     });
 
-    it('schedules session index cleanup task', async () => {
+    it('schedules retry if cleanup task registration fails', async () => {
       const mockStatusSubject = new Subject<OnlineStatusRetryScheduler>();
       service.start({ online$: mockStatusSubject.asObservable(), taskManager: mockTaskManager });
 
+      mockTaskManager.ensureScheduled.mockRejectedValue(new Error('ugh :/'));
+
+      const mockScheduleRetry = jest.fn();
+      mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
+      await nextTick();
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
-        id: SESSION_INDEX_CLEANUP_TASK_NAME,
-        taskType: SESSION_INDEX_CLEANUP_TASK_NAME,
-        scope: ['security'],
-        schedule: { interval: '3600s' },
-        params: {},
-        state: {},
-      });
+      expect(mockScheduleRetry).toHaveBeenCalledTimes(1);
+
+      // Still fails.
+      mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
+      await nextTick();
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(2);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(2);
+      expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
+
+      // And finally succeeds, retry is not scheduled.
+      mockTaskManager.ensureScheduled.mockResolvedValue(undefined as any);
+
+      mockStatusSubject.next({ scheduleRetry: mockScheduleRetry });
+      await nextTick();
+      expect(mockSessionIndexInitialize).toHaveBeenCalledTimes(3);
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledTimes(3);
+      expect(mockScheduleRetry).toHaveBeenCalledTimes(2);
     });
   });
 
