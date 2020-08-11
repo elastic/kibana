@@ -353,6 +353,5 @@ function getTriggersForActionFactory(
   actionFactory: ActionFactory,
   allTriggers: TriggerId[]
 ): TriggerId[] {
-  debugger;
   return actionFactory.supportedTriggers().filter((trigger) => allTriggers.includes(trigger));
 }
