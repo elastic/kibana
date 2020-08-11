@@ -7,7 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { ConfigSchema } from '.';
-import { ObservabilityPluginSetup } from '../../observability/public';
+import {
+  FetchDataParams,
+  ObservabilityPluginSetup,
+} from '../../observability/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -33,15 +36,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import { AlertType } from '../common/alert_types';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { createCallApmApi } from './services/rest/createCallApmApi';
-import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { setReadonlyBadge } from './updateBadge';
-import { createStaticIndexPattern } from './services/rest/index_pattern';
-import {
-  fetchOverviewPageData,
-  hasData,
-} from './services/rest/apm_overview_fetchers';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -71,7 +66,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     this.initializerContext = initializerContext;
   }
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
-    createCallApmApi(core.http);
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
 
@@ -79,12 +73,39 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
 
     if (plugins.observability) {
+      const getApmDataHelper = async () => {
+        const { fetchOverviewPageData, hasData } = await import(
+          './services/rest/apm_overview_fetchers'
+        );
+
+        return { fetchOverviewPageData, hasData };
+      };
       plugins.observability.dashboard.register({
         appName: 'apm',
-        fetchData: fetchOverviewPageData,
-        hasData,
+        hasData: async () => {
+          const dataHelper = await getApmDataHelper();
+          return await dataHelper.hasData();
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getApmDataHelper();
+          return await dataHelper.fetchOverviewPageData(params);
+        },
       });
     }
+
+    const setupLazyStuff = async (coreStart: CoreStart) => {
+      const { createCallApmApi } = await import(
+        './services/rest/createCallApmApi'
+      );
+
+      createCallApmApi(core.http);
+
+      // render APM feedback link in global help menu
+      const { setHelpExtension } = await import('./setHelpExtension');
+      const { setReadonlyBadge } = await import('./updateBadge');
+      setHelpExtension(coreStart);
+      setReadonlyBadge(coreStart);
+    };
 
     core.application.register({
       id: 'apm',
@@ -100,11 +121,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         const { renderApp } = await import('./application');
         // Get start services
         const [coreStart] = await core.getStartServices();
+        await setupLazyStuff(coreStart);
 
-        // render APM feedback link in global help menu
-        setHelpExtension(coreStart);
-        setReadonlyBadge(coreStart);
-
+        const { createStaticIndexPattern } = await import(
+          './services/rest/index_pattern'
+        );
         // Automatically creates static index pattern and stores as saved object
         createStaticIndexPattern().catch((e) => {
           // eslint-disable-next-line no-console
@@ -129,10 +150,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         const { renderApp } = await import('./application/rumApp');
         // Get start services
         const [coreStart] = await core.getStartServices();
-
-        // render APM feedback link in global help menu
-        setHelpExtension(coreStart);
-        setReadonlyBadge(coreStart);
+        await setupLazyStuff(coreStart);
 
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
