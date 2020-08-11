@@ -32,6 +32,12 @@ export const Layout: React.FC<ILayoutProps> = ({ children, navigation }) => {
             size="s"
             iconType={isNavOpen ? 'arrowDown' : 'arrowRight'}
             iconSide="right"
+            aria-label={i18n.translate('xpack.enterpriseSearch.nav.toggleMenu', {
+              defaultMessage: 'Toggle secondary navigation',
+            })}
+            aria-expanded={isNavOpen}
+            aria-pressed={isNavOpen}
+            aria-controls="enterpriseSearchNav"
             onClick={toggleNavigation}
             data-test-subj="enterpriseSearchNavToggle"
           >

@@ -8,6 +8,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import classNames from 'classnames';
 
+import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic/eui'; // TODO: Remove EuiLinkExternal after full Kibana transition
 import { EuiLink } from '../react_router_helpers';
 
@@ -29,7 +30,12 @@ interface ISideNavProps {
 
 export const SideNav: React.FC<ISideNavProps> = ({ product, children }) => {
   return (
-    <nav>
+    <nav
+      id="enterpriseSearchNav"
+      aria-label={i18n.translate('xpack.enterpriseSearch.nav.hierarchy', {
+        defaultMessage: 'Secondary', // The main Kibana nav is primary
+      })}
+    >
       <div className={`enterpriseSearchProduct enterpriseSearchProduct--${product.ID}`}>
         <div className="enterpriseSearchProduct__icon">
           <EuiIcon type="logoEnterpriseSearch" />
