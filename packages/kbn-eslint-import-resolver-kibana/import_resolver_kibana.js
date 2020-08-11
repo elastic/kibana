@@ -100,12 +100,9 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
     }
   }
 
-  // only use the node resolver if the importRequest is a path
-  if (isPathRequest) {
-    const nodeResult = tryNodeResolver(importRequest, file, config);
-    if (nodeResult && nodeResult.found) {
-      return nodeResult;
-    }
+  const nodeResult = tryNodeResolver(importRequest, file, config);
+  if (nodeResult && nodeResult.found) {
+    return nodeResult;
   }
 
   return webpackResolver.resolve(importRequest, file, {
