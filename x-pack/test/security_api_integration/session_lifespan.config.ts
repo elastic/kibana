@@ -30,8 +30,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.security.session.lifespan=20s',
-        '--xpack.security.session.cleanupInterval=60s',
+        '--xpack.security.session.lifespan=5s',
+        '--xpack.security.session.cleanupInterval=10s',
       ],
     },
 

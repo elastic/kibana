@@ -7,13 +7,13 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import { ToolingLog } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
   const config = getService('config');
+  const log = getService('log');
   const [username, password] = config.get('servers.elasticsearch.auth').split(':');
 
   async function checkSessionCookie(sessionCookie: Cookie, providerName: string) {
@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of idle timeout', async function () {
-      this.timeout(180000);
+      this.timeout(60000);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -66,9 +66,10 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(sessionCookie, 'basic');
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Cleanup routine runs every 60s, let's wait for 120s to make sure it runs when idle timeout
+      // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
+      // idle timeout, let's wait for 30s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(120000);
+      await delay(30000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -80,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not clean up session if user is active', async function () {
-      this.timeout(180000);
+      this.timeout(60000);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -97,15 +98,14 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(sessionCookie, 'basic');
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Run 15 consequent requests with 10s delay, during this time cleanup procedure should run at
+      // Run 20 consequent requests with 1.5s delay, during this time cleanup procedure should run at
       // least twice.
-      const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
-      for (const counter of [...Array(15).keys()]) {
+      for (const counter of [...Array(20).keys()]) {
         // Session idle timeout is 15s, let's wait 10s and make a new request that would extend the session.
-        await delay(10000);
+        await delay(1500);
 
         sessionCookie = await checkSessionCookie(sessionCookie, 'basic');
-        log.info(`Session is still valid after ${(counter + 1) * 10}s`);
+        log.debug(`Session is still valid after ${(counter + 1) * 1.5}s`);
       }
 
       // Session document should still be present.

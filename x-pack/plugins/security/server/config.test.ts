@@ -793,7 +793,7 @@ describe('config schema', () => {
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 1 minute', () => {
       expect(() =>
-        ConfigSchema.validate({ session: { cleanupInterval: '59s' } })
+        ConfigSchema.validate({ session: { cleanupInterval: '59s' } }, { dist: true })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[session.cleanupInterval]: the value must be greater or equal to 1 minute."`
       );

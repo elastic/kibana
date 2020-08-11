@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of lifespan', async function () {
-      this.timeout(180000);
+      this.timeout(60000);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -63,9 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       await checkSessionCookie(sessionCookie, 'basic');
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Cleanup routine runs every 60s, let's wait for 120s to make sure it runs when lifespan is
-      // exceeded.
-      await delay(120000);
+      // Cleanup routine runs every 10s, let's wait for 30s to make sure it runs multiple times and
+      // when lifespan is exceeded.
+      await delay(30000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
