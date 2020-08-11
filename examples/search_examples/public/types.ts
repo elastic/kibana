@@ -16,28 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export const ES_SEARCH_STRATEGY = 'es';
+import { NavigationPublicPluginStart } from '../../../src/plugins/navigation/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & SearchParams;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchExamplesPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SearchExamplesPluginStart {}
 
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
-  indexType?: string;
+export interface AppPluginSetupDependencies {
+  developerExamples: DeveloperExamplesSetup;
 }
 
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
+export interface AppPluginStartDependencies {
+  navigation: NavigationPublicPluginStart;
+  data: DataPublicPluginStart;
 }

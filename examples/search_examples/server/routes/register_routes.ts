@@ -16,28 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export const ES_SEARCH_STRATEGY = 'es';
+import { IRouter } from 'kibana/server';
+import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import { registerServerSearchRoute } from './server_search_route';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & SearchParams;
-
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
-  indexType?: string;
-}
-
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
+export function registerRoutes(router: IRouter, data: DataPluginStart) {
+  registerServerSearchRoute(router, data);
 }
