@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
@@ -93,7 +93,7 @@ export const EngineOverview: React.FC = () => {
 
   return (
     <EuiPage restrictWidth className="engineOverview">
-      <SetBreadcrumbs isRoot />
+      <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EuiPageBody>
