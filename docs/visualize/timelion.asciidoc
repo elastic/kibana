@@ -532,7 +532,7 @@ image::images/timelion-create-new-dashboard.png[]
 {nbsp}
 
 
-The oly thing you need is the Timelion expression for each graph.
+The only thing you need is the Timelion expression for each graph.
 
 Open Timelion app on a new tab, select the chart you want to copy, and copy its expression.
 
@@ -546,9 +546,9 @@ Return to the other tab and paste the copied expression to the *Timelion Express
 image::images/timelion-vis-paste-expression.png[]
 {nbsp}
 
-Click to save the new visualization, give a name, and hit **Save and Return**.
+Click to save the new visualization, give it a name, and hit **Save and Return**.
 
-Your Timelion visualization will appear on the dashboard. Repeat for all your charts on each worksheet.
+Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
 
 [role="screenshot"]
 image::images/timelion-dashboard.png[]
