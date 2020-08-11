@@ -76,9 +76,17 @@ export const useFieldValueAutocomplete = ({
               return;
             }
 
+            const field =
+              fieldSelected.subType != null && fieldSelected.subType.nested != null
+                ? {
+                    ...fieldSelected,
+                    name: `${fieldSelected.subType.nested.path}.${fieldSelected.name}`,
+                  }
+                : fieldSelected;
+
             const newSuggestions = await services.data.autocomplete.getValueSuggestions({
               indexPattern: patterns,
-              field: fieldSelected,
+              field,
               query: userSuggestion.trim(),
               signal: abortCtrl.signal,
             });

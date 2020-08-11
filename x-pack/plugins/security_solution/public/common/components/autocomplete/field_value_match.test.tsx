@@ -15,6 +15,7 @@ import {
 } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
 import { AutocompleteFieldMatchComponent } from './field_value_match';
 import { useFieldValueAutocomplete } from './hooks/use_field_value_autocomplete';
+
 jest.mock('./hooks/use_field_value_autocomplete');
 
 describe('AutocompleteFieldMatchComponent', () => {
@@ -22,7 +23,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
 
-  beforeAll(() => {
+  beforeEach(() => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
       true,
@@ -30,6 +31,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       getValueSuggestionsMock,
     ]);
   });
+
   test('it renders disabled if "isDisabled" is true', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
@@ -233,6 +235,175 @@ describe('AutocompleteFieldMatchComponent', () => {
         fields,
       },
       value: 'value 1',
+    });
+  });
+
+  describe('boolean type', () => {
+    const valueSuggestionsMock = jest
+      .fn()
+      .mockResolvedValue([false, false, ['true', 'false'], jest.fn()]);
+
+    beforeEach(() => {
+      (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+        false,
+        false,
+        ['true', 'false'],
+        valueSuggestionsMock,
+      ]);
+    });
+
+    test('it displays combo box with only true or false options when field type is boolean', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AutocompleteFieldMatchComponent
+            placeholder="Placeholder text"
+            selectedField={getField('ssl')}
+            selectedValue=""
+            indexPattern={{
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            }}
+            isLoading={false}
+            isClearable={false}
+            isDisabled={false}
+            onChange={jest.fn()}
+          />
+        </ThemeProvider>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="valuesAutocompleteComboBox matchComboxBoxBoolean"]').exists()
+      ).toBeTruthy();
+      expect(
+        wrapper
+          .find('[data-test-subj="valuesAutocompleteComboBox matchComboxBoxBoolean"]')
+          .at(0)
+          .prop('options')
+      ).toEqual([{ label: 'true' }, { label: 'false' }]);
+    });
+
+    test('it invokes "onChange" with "true" when selected', () => {
+      const mockOnChange = jest.fn();
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AutocompleteFieldMatchComponent
+            placeholder="Placeholder text"
+            selectedField={getField('ssl')}
+            selectedValue=""
+            indexPattern={{
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            }}
+            isLoading={false}
+            isClearable={false}
+            isDisabled={false}
+            onChange={mockOnChange}
+          />
+        </ThemeProvider>
+      );
+
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: 'true' }]);
+
+      expect(mockOnChange).toHaveBeenCalledWith('true');
+    });
+
+    test('it invokes "onChange" with "false" when selected', () => {
+      const mockOnChange = jest.fn();
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AutocompleteFieldMatchComponent
+            placeholder="Placeholder text"
+            selectedField={getField('ssl')}
+            selectedValue=""
+            indexPattern={{
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            }}
+            isLoading={false}
+            isClearable={false}
+            isDisabled={false}
+            onChange={mockOnChange}
+          />
+        </ThemeProvider>
+      );
+
+      ((wrapper.find(EuiComboBox).props() as unknown) as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }).onChange([{ label: 'false' }]);
+
+      expect(mockOnChange).toHaveBeenCalledWith('false');
+    });
+  });
+
+  describe('number type', () => {
+    const valueSuggestionsMock = jest.fn().mockResolvedValue([false, false, [], jest.fn()]);
+
+    beforeEach(() => {
+      (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
+        false,
+        false,
+        [],
+        valueSuggestionsMock,
+      ]);
+    });
+
+    test('it number input when field type is number', () => {
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AutocompleteFieldMatchComponent
+            placeholder="Placeholder text"
+            selectedField={getField('bytes')}
+            selectedValue=""
+            indexPattern={{
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            }}
+            isLoading={false}
+            isClearable={false}
+            isDisabled={false}
+            onChange={jest.fn()}
+          />
+        </ThemeProvider>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="valueAutocompleteFieldMatchNumber"]').exists()
+      ).toBeTruthy();
+    });
+
+    test('it invokes "onChange" with numeric value when inputted', () => {
+      const mockOnChange = jest.fn();
+      const wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AutocompleteFieldMatchComponent
+            placeholder="Placeholder text"
+            selectedField={getField('bytes')}
+            selectedValue=""
+            indexPattern={{
+              id: '1234',
+              title: 'logstash-*',
+              fields,
+            }}
+            isLoading={false}
+            isClearable={false}
+            isDisabled={false}
+            onChange={mockOnChange}
+          />
+        </ThemeProvider>
+      );
+
+      wrapper
+        .find('[data-test-subj="valueAutocompleteFieldMatchNumber"] input')
+        .at(0)
+        .simulate('change', { target: { value: '8' } });
+
+      expect(mockOnChange).toHaveBeenCalledWith('8');
     });
   });
 });

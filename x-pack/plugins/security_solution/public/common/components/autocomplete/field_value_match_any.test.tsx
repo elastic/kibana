@@ -22,7 +22,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
     .fn()
     .mockResolvedValue([false, true, ['value 3', 'value 4'], jest.fn()]);
 
-  beforeAll(() => {
+  beforeEach(() => {
     (useFieldValueAutocomplete as jest.Mock).mockReturnValue([
       false,
       true,
@@ -30,6 +30,7 @@ describe('AutocompleteFieldMatchAnyComponent', () => {
       getValueSuggestionsMock,
     ]);
   });
+
   test('it renders disabled if "isDisabled" is true', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>

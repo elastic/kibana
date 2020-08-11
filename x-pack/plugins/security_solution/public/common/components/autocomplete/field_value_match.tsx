@@ -114,7 +114,7 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
     isLoadingSuggestions,
   ]);
 
-  const getDefaultInput = () => {
+  const getDefaultInput = (): JSX.Element => {
     return (
       <EuiComboBox
         placeholder={inputPlaceholder}
@@ -148,10 +148,10 @@ export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchPro
             value={
               typeof selectedValue === 'string' && selectedValue.trim().length > 0
                 ? parseFloat(selectedValue)
-                : selectedValue
+                : selectedValue ?? ''
             }
             onChange={handleNonComboBoxInputChange}
-            data-test-subj="autocompleteFieldMatchNumber"
+            data-test-subj="valueAutocompleteFieldMatchNumber"
             style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
             fullWidth
           />
