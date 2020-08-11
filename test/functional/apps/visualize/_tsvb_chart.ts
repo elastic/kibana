@@ -27,7 +27,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const security = getService('security');
-  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visualBuilder',
+    'timePicker',
+    'visChart',
+    'common',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -133,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.tryForTime(20000, async () => {
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+          await PageObjects.common.sleep(3000);
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
