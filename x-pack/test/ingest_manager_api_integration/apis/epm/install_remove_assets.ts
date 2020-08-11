@@ -82,11 +82,6 @@ export default function (providerContext: FtrProviderContext) {
           id: 'metrics-*',
         });
         expect(resIndexPatternMetrics.id).equal('metrics-*');
-        const resIndexPatternEvents = await kibanaServer.savedObjects.get({
-          type: 'index-pattern',
-          id: 'events-*',
-        });
-        expect(resIndexPatternEvents.id).equal('events-*');
         const resDashboard = await kibanaServer.savedObjects.get({
           type: 'dashboard',
           id: 'sample_dashboard',
@@ -107,6 +102,18 @@ export default function (providerContext: FtrProviderContext) {
           id: 'sample_search',
         });
         expect(resSearch.id).equal('sample_search');
+      });
+      it('should have installed placeholder indices', async function () {
+        const resLogsIndexPatternPlaceholder = await es.transport.request({
+          method: 'GET',
+          path: `/logs-index_pattern_placeholder`,
+        });
+        expect(resLogsIndexPatternPlaceholder.statusCode).equal(200);
+        const resMetricsIndexPatternPlaceholder = await es.transport.request({
+          method: 'GET',
+          path: `/metrics-index_pattern_placeholder`,
+        });
+        expect(resMetricsIndexPatternPlaceholder.statusCode).equal(200);
       });
       it('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
