@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export const commonMonitorStateI18 = [
   {
-    name: 'monitor',
+    name: 'monitorName',
     description: i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.state.monitor', {
       defaultMessage: 'A human friendly rendering of name or ID, preferring name (e.g. My Monitor)',
     }),
@@ -37,6 +37,16 @@ export const commonMonitorStateI18 = [
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorType',
       {
         defaultMessage: 'Type (e.g. HTTP/TCP) of the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'statusMessage',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.statusMessage',
+      {
+        defaultMessage:
+          'Status message e.g down or is below availability threshold in case of availability check or both.',
       }
     ),
   },
@@ -301,3 +311,7 @@ export const durationAnomalyTranslations = {
     },
   ],
 };
+
+export const DOWN_LABEL = i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
+  defaultMessage: 'down',
+});

@@ -202,9 +202,7 @@ describe('monitor status alert type', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "alertParamsExpression": [Function],
-        "defaultActionMessage": "{{context.message}}
-      Last triggered at: {{state.lastTriggeredAt}}
-      ",
+        "defaultActionMessage": "Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "name": <FormattedMessage
