@@ -34,7 +34,6 @@ import { SetPriorityInput } from '../set_priority_input';
 export class ColdPhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
-    showNodeDetailsFlyout: PropTypes.func.isRequired,
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
@@ -42,7 +41,6 @@ export class ColdPhase extends PureComponent {
   render() {
     const {
       setPhaseData,
-      showNodeDetailsFlyout,
       phaseData,
       errors,
       isShowingErrors,
@@ -114,7 +112,6 @@ export class ColdPhase extends PureComponent {
                 <NodeAllocation
                   phase={PHASE_COLD}
                   setPhaseData={setPhaseData}
-                  showNodeDetailsFlyout={showNodeDetailsFlyout}
                   errors={errors}
                   phaseData={phaseData}
                   isShowingErrors={isShowingErrors}

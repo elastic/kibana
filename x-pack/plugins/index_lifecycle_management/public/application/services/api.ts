@@ -29,9 +29,12 @@ export const useLoadNodes = () => {
   });
 };
 
-export async function loadNodeDetails(selectedNodeAttrs: string) {
-  return await sendGet(`nodes/${selectedNodeAttrs}/details`);
-}
+export const useLoadNodeDetails = (selectedNodeAttrs: string) => {
+  return useRequest({
+    path: `nodes/${selectedNodeAttrs}/details`,
+    method: 'get',
+  });
+};
 
 export async function loadIndexTemplates() {
   return await sendGet(`templates`);
