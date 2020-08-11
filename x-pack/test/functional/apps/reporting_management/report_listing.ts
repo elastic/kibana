@@ -26,6 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   const testSubjects = getService('testSubjects');
+  const findInstance = getService('find');
   const esArchiver = getService('esArchiver');
 
   describe('Listing of Reports', function () {
@@ -89,10 +90,10 @@ pdf\ndashboard\n2020-04-21 @ 07:00 PM\ntest_user\nCompleted at 2020-04-21 @ 07:0
 
       // click page 2
       await testSubjects.click('pagination-button-1');
+      await findInstance.byCssSelector('[data-test-page="1"]');
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
-      await pageObjects.common.sleep(2000);
 
       // scan page 2
       tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));
@@ -109,7 +110,7 @@ test_user\nCompleted at 2020-04-21 @ 06:55 PM - Max size reached\nreport2csv\n20
 
       // click page 3
       await testSubjects.click('pagination-button-2');
-      await pageObjects.common.sleep(2000);
+      await findInstance.byCssSelector('[data-test-page="2"]');
 
       // scan page 3
       tableText = await getTableTextFromElement(await testSubjects.find('reportJobListing'));

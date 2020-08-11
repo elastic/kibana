@@ -8,10 +8,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
-  const PageObjects = getPageObjects([
+  const pageObjects = getPageObjects([
     'reporting',
     'common',
     'dashboard',
@@ -29,38 +30,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
       await esArchiver.unload('reporting/ecommerce_kibana');
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
     });
 
     describe('Print PDF button', () => {
       it('is not available if new', async () => {
-        await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
-        await PageObjects.visualize.clickAreaChart();
-        await PageObjects.visualize.clickNewSearch('ecommerce');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
+        await pageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
+        await pageObjects.visualize.clickAreaChart();
+        await pageObjects.visualize.clickNewSearch('ecommerce');
+        await pageObjects.reporting.openPdfReportingPanel();
+        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
       });
 
       it('becomes available when saved', async () => {
-        await PageObjects.reporting.setTimepickerInDataRange();
-        await PageObjects.visEditor.clickBucket('X-axis');
-        await PageObjects.visEditor.selectAggregation('Date Histogram');
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualization('my viz');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await pageObjects.reporting.setTimepickerInDataRange();
+        await pageObjects.visEditor.clickBucket('X-axis');
+        await pageObjects.visEditor.selectAggregation('Date Histogram');
+        await pageObjects.visEditor.clickGo();
+        await pageObjects.visualize.saveVisualization('my viz');
+        await pageObjects.reporting.openPdfReportingPanel();
+        expect(await pageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('downloaded PDF has OK status', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);
 
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
+        await pageObjects.common.navigateToApp('dashboard');
+        await pageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await pageObjects.reporting.openPdfReportingPanel();
+        await pageObjects.reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        const url = await pageObjects.reporting.getReportURL(60000);
+        const res = await pageObjects.reporting.getResponse(url);
 
         expect(res.statusCode).to.equal(200);
         expect(res.headers['content-type']).to.equal('application/pdf');

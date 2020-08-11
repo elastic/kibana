@@ -14,7 +14,7 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  const PageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
+  const pageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
 
   class ReportingPage {
     async forceSharedItemsContainerSize({ width }: { width: number }) {
@@ -86,17 +86,17 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
 
     async openCsvReportingPanel() {
       log.debug('openCsvReportingPanel');
-      await PageObjects.share.openShareMenuItem('CSV Reports');
+      await pageObjects.share.openShareMenuItem('CSV Reports');
     }
 
     async openPdfReportingPanel() {
       log.debug('openPdfReportingPanel');
-      await PageObjects.share.openShareMenuItem('PDF Reports');
+      await pageObjects.share.openShareMenuItem('PDF Reports');
     }
 
     async openPngReportingPanel() {
       log.debug('openPngReportingPanel');
-      await PageObjects.share.openShareMenuItem('PNG Reports');
+      await pageObjects.share.openShareMenuItem('PNG Reports');
     }
 
     async clearToastNotifications() {
@@ -156,14 +156,14 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       log.debug('Reporting:setTimepickerInDataRange');
       const fromTime = 'Sep 19, 2015 @ 06:31:44.000';
       const toTime = 'Sep 19, 2015 @ 18:01:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async setTimepickerInNoDataRange() {
       log.debug('Reporting:setTimepickerInNoDataRange');
       const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
       const toTime = 'Sep 23, 1999 @ 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
   return new ReportingPage();
