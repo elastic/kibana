@@ -104,6 +104,7 @@ export const updateTimeline = actionCreator<{
 export const addTimeline = actionCreator<{
   id: string;
   timeline: TimelineModel;
+  savedTimeline?: boolean;
 }>('ADD_TIMELINE');
 
 export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');

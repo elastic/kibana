@@ -26,6 +26,7 @@ export async function SiemCypressTestRunner({ getService }: FtrProviderContext) 
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),

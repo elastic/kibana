@@ -82,6 +82,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   }, [details]);
 
   const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { selected_host, show, ...currentUrlParams } = queryParams;
     return [
       formatUrl(
@@ -189,7 +190,6 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         description: details.agent.version,
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [details.agent.version, details.host.hostname, details.host.ip]);
 
   return (

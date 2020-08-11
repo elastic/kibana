@@ -22,6 +22,8 @@ import { ProcessorsDispatch } from '../../processors_reducer';
 
 import { ProcessorInfo } from '../processors_tree';
 
+import { getProcessorDescriptor } from '../shared';
+
 import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
@@ -62,15 +64,19 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--selected': isMovingThisProcessor || isEditingThisProcessor,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
     const actionElementClasses = classNames({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--displayNone': isInMoveMode,
     });
 
     const inlineTextInputContainerClasses = classNames({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--displayNone': isInMoveMode && !processor.options.description,
     });
 
@@ -80,6 +86,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         : i18nTexts.cancelMoveButtonLabel;
       const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
       const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
@@ -134,7 +141,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   className="pipelineProcessorsEditor__item__processorTypeLabel"
                   color={isDimmed ? 'subdued' : undefined}
                 >
-                  <b>{processor.type}</b>
+                  <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
@@ -143,7 +150,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   onChange={(nextDescription) => {
                     let nextOptions: Record<string, any>;
                     if (!nextDescription) {
-                      const { description: __, ...restOptions } = processor.options;
+                      const { description: _description, ...restOptions } = processor.options;
                       nextOptions = restOptions;
                     } else {
                       nextOptions = {

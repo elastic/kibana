@@ -7,7 +7,8 @@
     "Certain tools or automated software may enumerate hardware information. These tools can be exempted via user name or process arguments to eliminate potential noise."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

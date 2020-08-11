@@ -5,6 +5,7 @@
  */
 
 import React, { FC } from 'react';
+import './_index.scss';
 import ReactDOM from 'react-dom';
 
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';

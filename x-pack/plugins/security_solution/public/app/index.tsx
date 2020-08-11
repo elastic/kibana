@@ -8,7 +8,6 @@ import React from 'react';
 import { Store, Action } from 'redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppMountParameters } from '../../../../../src/core/public';
 import { State } from '../common/store';
 import { StartServices } from '../types';

@@ -95,13 +95,13 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
         })}
         name="chartType"
         className="eui-displayInlineBlock"
-        data-test-subj="lnsXY_seriesType"
         options={visualizationTypes
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
+            'data-test-subj': `lnsXY_seriesType-${t.id}`,
           }))}
         idSelected={layer.seriesType}
         onChange={(seriesType) => {
@@ -379,7 +379,7 @@ const ColorPicker = ({
         }
         setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
       }, 256),
-    [state, layer, accessor, index]
+    [state, setState, layer, accessor, index]
   );
 
   const colorPicker = (
