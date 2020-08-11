@@ -178,12 +178,12 @@ export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
 
-let _embeddableService;
-export const setEmbeddableService = (embeddableService) => {
-  _embeddableService = embeddableService;
+let embeddableService;
+export const setEmbeddableService = (_embeddableService) => {
+  embeddableService = _embeddableService;
 };
 export const getEmbeddableService = () => {
-  return _embeddableService;
+  return embeddableService;
 };
 
 export let navigateToApp;
