@@ -72,15 +72,6 @@ exports.resolve = function resolveKibanaPath(importRequest, file, config) {
     return tryNodeResolver(importRequest, file, config);
   }
 
-  // these modules are simulated by webpack, so there is no
-  // path to resolve to and no reason to do any more work
-  if (importRequest.startsWith('uiExports/')) {
-    return {
-      found: true,
-      path: null,
-    };
-  }
-
   const { webpackConfig, aliasEntries } = initContext(file, config);
   let isPathRequest = getIsPathRequest(importRequest);
 
