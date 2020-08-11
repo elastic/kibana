@@ -20,6 +20,10 @@
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
+export const kbnFieldTypeUnknown = new KbnFieldType({
+  name: KBN_FIELD_TYPES.UNKNOWN,
+});
+
 export const createKbnFieldTypes = (): KbnFieldType[] => [
   new KbnFieldType({
     name: KBN_FIELD_TYPES.STRING,
@@ -103,7 +107,5 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
   new KbnFieldType({
     name: KBN_FIELD_TYPES.CONFLICT,
   }),
-  new KbnFieldType({
-    name: KBN_FIELD_TYPES.UNKNOWN,
-  }),
+  kbnFieldTypeUnknown,
 ];
