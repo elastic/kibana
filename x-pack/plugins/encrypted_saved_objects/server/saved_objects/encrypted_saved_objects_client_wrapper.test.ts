@@ -478,6 +478,7 @@ describe('#bulkUpdate', () => {
             attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
+          references: [],
         },
         {
           id: 'some-id-2',
@@ -487,6 +488,7 @@ describe('#bulkUpdate', () => {
             attrNotSoSecret: 'not-so-secret 2',
             attrThree: 'three 2',
           },
+          references: [],
         },
       ],
     });
@@ -558,7 +560,7 @@ describe('#bulkUpdate', () => {
       const options = { namespace };
 
       mockBaseClient.bulkCreate.mockResolvedValue({
-        saved_objects: docs.map((doc) => ({ ...doc, references: undefined })),
+        saved_objects: docs.map((doc) => ({ ...doc, references: [] })),
       });
 
       await expect(wrapper.bulkUpdate(docs, options)).resolves.toEqual({
@@ -571,7 +573,7 @@ describe('#bulkUpdate', () => {
               attrThree: 'three',
             },
             version: 'some-version',
-            references: undefined,
+            references: [],
           },
         ],
       });
