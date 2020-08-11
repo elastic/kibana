@@ -15,7 +15,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import each from 'lodash/each';
 import get from 'lodash/get';
-// import map from 'lodash/map';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
