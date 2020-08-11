@@ -7,12 +7,7 @@
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import {
-  getActionType,
-  SlackActionType,
-  SlackActionTypeExecutorOptions,
-  ActionParamsType,
-} from './slack';
+import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
@@ -25,8 +20,14 @@ let actionType: SlackActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ACTION_TYPE_ID);
+  const { logger } = createActionTypeRegistry();
+  actionType = getActionType({
+    async executor(options) {
+      return { status: 'ok', actionId: options.actionId };
+    },
+    configurationUtilities: actionsConfigMock.create(),
+    logger,
+  });
   mockedLogger = logger;
   expect(actionType).toBeTruthy();
 });
@@ -108,7 +109,7 @@ describe('validateActionTypeSecrets()', () => {
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedHostname: (url) => {
+        ensureWhitelistedHostname: () => {
           throw new Error(`target hostname is not whitelisted`);
         },
       },
@@ -143,6 +144,7 @@ describe('execute()', () => {
     }
 
     actionType = getActionType({
+      executor: mockSlackExecutor,
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
     });

@@ -16,7 +16,12 @@ import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ExecutorType,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { getProxyAgent } from './lib/get_proxy_agent';
 
@@ -50,9 +55,11 @@ const ParamsSchema = schema.object({
 export function getActionType({
   logger,
   configurationUtilities,
+  executor = curry(slackExecutor)({ logger }),
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
+  executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
   return {
     id: '.slack',
@@ -66,7 +73,7 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
-    executor: curry(slackExecutor)({ logger }),
+    executor,
   };
 }
 
