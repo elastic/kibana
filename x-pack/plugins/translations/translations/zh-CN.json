@@ -4289,7 +4289,6 @@
     "visTypeVega.vegaParser.dataExceedsSomeParamsUseTimesLimitErrorMessage": "数据不得包含 {urlParam}、{valuesParam} 和 {sourceParam} 中的多个值",
     "visTypeVega.vegaParser.hostConfigIsDeprecatedWarningMessage": "{deprecatedConfigName} 已弃用。请改用 {newConfigName}。",
     "visTypeVega.vegaParser.hostConfigValueTypeErrorMessage": "如果存在，{configName} 必须为对象",
-    "visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage": "输入规范未指定 {schemaParam}，其默认值为 {defaultSchema}",
     "visTypeVega.vegaParser.invalidVegaSpecErrorMessage": "Vega 规范无效",
     "visTypeVega.vegaParser.kibanaConfigValueTypeErrorMessage": "如果存在，{configName} 必须为对象",
     "visTypeVega.vegaParser.mapStyleValueTypeWarningMessage": "{mapStyleConfigName} 可能为 {mapStyleConfigFirstAllowedValue} 或 {mapStyleConfigSecondAllowedValue}",
