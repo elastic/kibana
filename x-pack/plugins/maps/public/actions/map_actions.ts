@@ -201,12 +201,12 @@ export function setQuery({
   query,
   timeFilters,
   filters = [],
-  refresh = false,
+  forceRefresh = false,
 }: {
   filters: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
-  refresh?: boolean;
+  forceRefresh?: boolean;
 }) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const prevQuery = getQuery(getState());
@@ -221,7 +221,7 @@ export function setQuery({
       query: {
         ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
-        queryLastTriggeredAt: refresh ? generateQueryTimestamp() : prevTriggeredAt,
+        queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
       filters: filters ? filters : getFilters(getState()),
     });

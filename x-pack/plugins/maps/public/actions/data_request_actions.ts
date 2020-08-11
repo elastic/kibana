@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import _ from 'lodash';
 import { Dispatch } from 'redux';
 import bbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
@@ -152,6 +153,19 @@ export function syncDataForLayer(layer: ILayer) {
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
       return;
     }
+
+    const layerDescriptor = layer.getDescriptor();
+    if (_.isEqual(layerDescriptor.__syncContext, dataRequestContext.dataFilters)) {
+      // do not perform sync for identical syncing context
+      return;
+    }
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layer.getId(),
+      propName: '__syncContext',
+      newValue: dataRequestContext.dataFilters,
+    });
+
     await layer.syncData(dataRequestContext);
   };
 }

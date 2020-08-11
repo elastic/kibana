@@ -17,6 +17,7 @@ import {
 } from '../constants';
 import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
+import { MapFilters } from './map_descriptor_types';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -165,6 +166,7 @@ export type LayerDescriptor = {
   __isInErrorState?: boolean;
   __isPreviewLayer?: boolean;
   __errorMessage?: string;
+  __syncContext?: MapFilters;
   __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;

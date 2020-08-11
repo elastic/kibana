@@ -38,6 +38,7 @@ import { getJoinAggKey } from '../../../common/get_agg_key';
 export interface ILayer {
   getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
+  getDescriptor(): LayerDescriptor;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
   getSourceDataRequest(): DataRequest | undefined;
@@ -156,6 +157,10 @@ export class AbstractLayer implements ILayer {
     // @ts-expect-error
     const mbStyle = mbMap.getStyle();
     return mbStyle.sources[sourceId].data;
+  }
+
+  getDescriptor() {
+    return this._descriptor;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {
