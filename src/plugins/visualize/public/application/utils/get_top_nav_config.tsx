@@ -234,6 +234,7 @@ export const getTopNavConfig = (
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
+            className: savedVis?.id && originatingApp ? 'saveAsButton' : '',
             testId: 'visualizeSaveButton',
             disableButton: hasUnappliedChanges,
             tooltip() {
@@ -246,7 +247,7 @@ export const getTopNavConfig = (
                 );
               }
             },
-            run: () => {
+            run: (anchorElement: HTMLAnchorElement) => {
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
@@ -284,7 +285,12 @@ export const getTopNavConfig = (
                   originatingApp={originatingApp}
                 />
               );
-              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
+              const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
+              if (
+                originatingApp === 'dashboards' &&
+                featureFlagConfig.showNewVisualizeFlow &&
+                !isSaveAsButton
+              ) {
                 createVisReference();
               } else if (savedVis) {
                 showSaveModal(saveModal, I18nContext);
