@@ -108,3 +108,19 @@ export const waitFor = async (
     }
   });
 };
+
+/**
+ * Useful for export_api testing to convert from a multi-part binary back to a string
+ * @param res Response
+ * @param callback Callback
+ */
+export const binaryToString = (res: any, callback: any): void => {
+  res.setEncoding('binary');
+  res.data = '';
+  res.on('data', (chunk: any) => {
+    res.data += chunk;
+  });
+  res.on('end', () => {
+    callback(null, Buffer.from(res.data));
+  });
+};
