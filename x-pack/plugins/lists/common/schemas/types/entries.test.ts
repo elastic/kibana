@@ -64,14 +64,7 @@ describe('Entries', () => {
         'Invalid value "undefined" supplied to "operator"',
         'Invalid value "nested" supplied to "type"',
         'Invalid value "undefined" supplied to "value"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
-        'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "list"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
-        'Invalid value "undefined" supplied to "operator"',
-        'Invalid value "nested" supplied to "type"',
       ]);
       expect(message.schema).toEqual({});
     });

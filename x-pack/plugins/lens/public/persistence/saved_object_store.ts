@@ -9,8 +9,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectReference,
 } from 'kibana/public';
-import { Query } from '../../../../../src/plugins/data/public';
 import { PersistableFilter } from './filter_references';
+import { Query } from '../../../../../src/plugins/data/public';
 
 export interface Document {
   id?: string;
