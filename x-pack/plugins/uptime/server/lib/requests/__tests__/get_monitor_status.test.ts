@@ -27,9 +27,11 @@ interface BucketItem {
 }
 
 const genBucketItem = ({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   monitor_id,
   status,
   location,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   doc_count,
 }: BucketItemCriteria): BucketItem => ({
   key: {

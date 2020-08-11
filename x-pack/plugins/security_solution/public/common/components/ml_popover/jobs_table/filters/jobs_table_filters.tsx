@@ -11,7 +11,6 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore no-exported-member
   EuiSearchBar,
 } from '@elastic/eui';
 import { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';

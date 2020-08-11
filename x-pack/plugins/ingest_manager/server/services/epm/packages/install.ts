@@ -91,18 +91,23 @@ export async function ensureInstalledPackage(options: {
   return installation;
 }
 
-export async function installPackage(options: {
+export async function installPackage({
+  savedObjectsClient,
+  pkgkey,
+  callCluster,
+  force = false,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
+  force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
-  const [pkgName, pkgVersion] = pkgkey.split('-');
+  const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semver.lt(pkgVersion, latestPackage.version))
+  if (semver.lt(pkgVersion, latestPackage.version) && !force)
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
 
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion);

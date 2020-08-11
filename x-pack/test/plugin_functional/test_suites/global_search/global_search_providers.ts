@@ -16,7 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const findResultsWithAPI = async (t: string): Promise<GlobalSearchResult[]> => {
     return browser.executeAsync(async (term, cb) => {
-      const { start } = window.__coreProvider;
+      const { start } = window._coreProvider;
       const globalSearchTestApi: GlobalSearchTestApi = start.plugins.globalSearchTest;
       globalSearchTestApi.findReal(term).then(cb);
     }, t);

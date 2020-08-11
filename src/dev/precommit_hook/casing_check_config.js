@@ -70,6 +70,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+  // packages for the ingest manager's api integration tests could be valid semver which has dashes
+  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**
@@ -176,12 +178,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

@@ -12,10 +12,15 @@ export const getApmHref = (
   basePath: string,
   dateRangeStart: string,
   dateRangeEnd: string
-) =>
-  addBasePath(
+) => {
+  const clause = summary?.state?.service?.name
+    ? `service.name: "${summary.state.service.name}"`
+    : `url.domain: "${summary.state.url?.domain}"`;
+
+  return addBasePath(
     basePath,
     `/app/apm#/services?kuery=${encodeURI(
-      `url.domain: "${summary?.state?.url?.domain}"`
+      clause
     )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
   );
+};

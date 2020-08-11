@@ -5,6 +5,7 @@
  */
 
 import { mockEndpointEvent } from './endpoint_event';
+import { mockRelatedEvent } from './related_event';
 import { ResolverTree, ResolverEvent } from '../../../../common/endpoint/types';
 
 export function mockTreeWith2AncestorsAndNoChildren({
@@ -107,6 +108,58 @@ export function mockTreeWithAllProcessesTerminated({
     },
     lifecycle: [originEvent, originEventTermination],
   } as unknown) as ResolverTree;
+}
+
+/**
+ * A valid category for a related event. E.g. "registry", "network", "file"
+ */
+type RelatedEventCategory = string;
+/**
+ * A valid type for a related event. E.g. "start", "end", "access"
+ */
+type RelatedEventType = string;
+
+/**
+ * Add/replace related event info (on origin node) for any mock ResolverTree
+ *
+ * @param treeToAddRelatedEventsTo the ResolverTree to modify
+ * @param relatedEventsToAddByCategoryAndType Iterable of `[category, type]` pairs describing related events. e.g. [['dns','info'],['registry','access']]
+ */
+export function withRelatedEventsOnOrigin(
+  treeToAddRelatedEventsTo: ResolverTree,
+  relatedEventsToAddByCategoryAndType: Iterable<[RelatedEventCategory, RelatedEventType]>
+): ResolverTree {
+  const events = [];
+  const byCategory: Record<string, number> = {};
+  const stats = {
+    totalAlerts: 0,
+    events: {
+      total: 0,
+      byCategory,
+    },
+  };
+  for (const [category, type] of relatedEventsToAddByCategoryAndType) {
+    events.push(
+      mockRelatedEvent({
+        entityID: treeToAddRelatedEventsTo.entityID,
+        timestamp: 1,
+        category,
+        type,
+      })
+    );
+    stats.events.total++;
+    stats.events.byCategory[category] = stats.events.byCategory[category]
+      ? stats.events.byCategory[category] + 1
+      : 1;
+  }
+  return {
+    ...treeToAddRelatedEventsTo,
+    stats,
+    relatedEvents: {
+      events,
+      nextEvent: null,
+    },
+  };
 }
 
 export function mockTreeWithNoAncestorsAnd2Children({

@@ -103,7 +103,6 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         setAggName(name);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggConfigDef]);
 
   const availableFields: EuiSelectOption[] = [];

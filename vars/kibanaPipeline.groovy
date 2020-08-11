@@ -108,6 +108,7 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
+    '**/target/public/.kbn-optimizer-cache',
     'target/kibana-*',
     'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',

@@ -9,14 +9,14 @@ import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
 
+let simulator: Simulator;
+let databaseDocumentID: string;
+let entityIDs: { origin: string; firstChild: string; secondChild: string };
+
+// the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
+const resolverComponentInstanceID = 'resolverComponentInstanceID';
+
 describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', () => {
-  let simulator: Simulator;
-  let databaseDocumentID: string;
-  let entityIDs: { origin: string; firstChild: string; secondChild: string };
-
-  // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
-  const resolverComponentInstanceID = 'resolverComponentInstanceID';
-
   beforeEach(async () => {
     // create a mock data access layer
     const { metadata: dataAccessLayerMetadata, dataAccessLayer } = oneAncestorTwoChildren();
@@ -79,6 +79,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
         simulator
           .processNodeElements({ entityID: entityIDs.secondChild })
           .find('button')
+          .first()
           .simulate('click');
       });
       it('should render the second child node as selected, and the first child not as not selected, and the query string should indicate that the second child is selected', async () => {
@@ -103,6 +104,55 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
           // The origin child is rendered and doesn't have `[aria-selected]`
           originLooksUnselected: true,
         });
+      });
+    });
+  });
+});
+
+describe('Resolver, when analyzing a tree that has some related events', () => {
+  beforeEach(async () => {
+    // create a mock data access layer with related events
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = oneAncestorTwoChildren({
+      withRelatedEvents: [
+        ['registry', 'access'],
+        ['registry', 'access'],
+      ],
+    });
+
+    // save a reference to the entity IDs exposed by the mock data layer
+    entityIDs = dataAccessLayerMetadata.entityIDs;
+
+    // save a reference to the `_id` supported by the mock data layer
+    databaseDocumentID = dataAccessLayerMetadata.databaseDocumentID;
+
+    // create a resolver simulator, using the data access layer and an arbitrary component instance ID
+    simulator = new Simulator({ databaseDocumentID, dataAccessLayer, resolverComponentInstanceID });
+  });
+
+  describe('when it has loaded', () => {
+    beforeEach(async () => {
+      await expect(
+        simulator.mapStateTransitions(() => ({
+          graphElements: simulator.graphElement().length,
+          graphLoadingElements: simulator.graphLoadingElement().length,
+          graphErrorElements: simulator.graphErrorElement().length,
+          originNode: simulator.processNodeElements({ entityID: entityIDs.origin }).length,
+        }))
+      ).toYieldEqualTo({
+        graphElements: 1,
+        graphLoadingElements: 0,
+        graphErrorElements: 0,
+        originNode: 1,
+      });
+    });
+
+    it('should render a related events button', async () => {
+      await expect(
+        simulator.mapStateTransitions(() => ({
+          relatedEventButtons: simulator.processNodeRelatedEventButton(entityIDs.origin).length,
+        }))
+      ).toYieldEqualTo({
+        relatedEventButtons: 1,
       });
     });
   });

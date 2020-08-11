@@ -13,6 +13,7 @@ import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
 } from './mocks/resolver_tree';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];
@@ -114,7 +115,9 @@ describe('resolver selectors', () => {
 
           // find the position of the second child
           const secondChild = selectors.processEventForID(state())(secondChildID);
-          const positionOfSecondChild = layout.processNodePositions.get(secondChild!)!;
+          const positionOfSecondChild = layout.processNodePositions.get(
+            secondChild as SafeResolverEvent
+          )!;
 
           // the child is indexed by an AABB that extends -720/2 to the left
           const leftSideOfSecondChildAABB = positionOfSecondChild[0] - 720 / 2;
@@ -130,19 +133,25 @@ describe('resolver selectors', () => {
         it('the origin should be in view', () => {
           const origin = selectors.processEventForID(state())(originID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(origin)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(origin as SafeResolverEvent)
           ).toBe(true);
         });
         it('the first child should be in view', () => {
           const firstChild = selectors.processEventForID(state())(firstChildID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(firstChild)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(firstChild as SafeResolverEvent)
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
           const secondChild = selectors.processEventForID(state())(secondChildID)!;
           expect(
-            selectors.visibleNodesAndEdgeLines(state())(0).processNodePositions.has(secondChild)
+            selectors
+              .visibleNodesAndEdgeLines(state())(0)
+              .processNodePositions.has(secondChild as SafeResolverEvent)
           ).toBe(false);
         });
         it('should return nothing as the flowto for the first child', () => {

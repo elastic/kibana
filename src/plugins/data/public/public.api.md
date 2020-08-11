@@ -576,6 +576,46 @@ export type FieldFormatsContentType = 'html' | 'text';
 // @public (undocumented)
 export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 
+// Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
+    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
+    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean, onNotification?: () => void);
+    // (undocumented)
+    readonly add: (field: FieldSpec) => void;
+    // (undocumented)
+    readonly getAll: () => IndexPatternField[];
+    // (undocumented)
+    readonly getByName: (name: IndexPatternField['name']) => IndexPatternField | undefined;
+    // (undocumented)
+    readonly getByType: (type: IndexPatternField['type']) => any[];
+    // (undocumented)
+    readonly remove: (field: IFieldType) => void;
+    // (undocumented)
+    readonly removeAll: () => void;
+    // (undocumented)
+    readonly replaceAll: (specs: FieldSpec[]) => void;
+    // (undocumented)
+    readonly toSpec: () => {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+        format: any;
+    }[];
+    // (undocumented)
+    readonly update: (field: FieldSpec) => void;
+}
+
 // @public (undocumented)
 export interface FieldMappingSpec {
     // (undocumented)
@@ -657,13 +697,6 @@ export function getDefaultQuery(language?: QueryLanguage): {
 //
 // @public (undocumented)
 export function getEsPreference(uiSettings: IUiSettingsClient_2, sessionId?: string): any;
-
-// Warning: (ae-forgotten-export) The symbol "FieldListDependencies" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "CreateIndexPatternFieldList" needs to be exported by the entry point index.d.ts
-// Warning: (ae-missing-release-tag) "getIndexPatternFieldListCreator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export const getIndexPatternFieldListCreator: ({ fieldFormats, onNotification, }: FieldListDependencies) => CreateIndexPatternFieldList;
 
 // Warning: (ae-missing-release-tag) "getKbnTypeNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -808,8 +841,6 @@ export interface IFieldType {
     sortable?: boolean;
     // (undocumented)
     subType?: IFieldSubType;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     toSpec?: () => FieldSpec;
     // (undocumented)
@@ -852,11 +883,17 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
     // (undocumented)
     add(field: FieldSpec): void;
     // (undocumented)
+    getAll(): IndexPatternField[];
+    // (undocumented)
     getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
     // (undocumented)
     getByType(type: IndexPatternField['type']): IndexPatternField[];
     // (undocumented)
     remove(field: IFieldType): void;
+    // (undocumented)
+    removeAll(): void;
+    // (undocumented)
+    replaceAll(specs: FieldSpec[]): void;
     // (undocumented)
     update(field: FieldSpec): void;
 }
@@ -931,7 +968,9 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
-    getFieldByName(name: string): IndexPatternField | void;
+    getFieldByName(name: string): IndexPatternField | undefined;
+    // (undocumented)
+    getFormatterForField(field: IndexPatternField | IndexPatternField['spec']): FieldFormat;
     // (undocumented)
     getIndex(): string;
     // (undocumented)
@@ -977,7 +1016,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     refreshFields(): Promise<void | Error | never[] | undefined>;
     // (undocumented)
-    removeScriptedField(field: IFieldType): Promise<void | Error>;
+    removeScriptedField(fieldName: string): Promise<void | Error>;
     // (undocumented)
     save(saveAttempts?: number): Promise<void | Error>;
     // (undocumented)
@@ -1028,55 +1067,85 @@ export interface IndexPatternAttributes {
     typeMeta: string;
 }
 
-// Warning: (ae-missing-release-tag) "Field" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+// Warning: (ae-missing-release-tag) "IndexPatternField" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class IndexPatternField implements IFieldType {
+    // Warning: (ae-forgotten-export) The symbol "OnNotification" needs to be exported by the entry point index.d.ts
+    constructor(indexPattern: IndexPattern, spec: FieldSpec, displayName: string, onNotification: OnNotification);
     // (undocumented)
-    $$spec: FieldSpec;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpecExportFmt" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "FieldDependencies" needs to be exported by the entry point index.d.ts
-    constructor(indexPattern: IIndexPattern, spec: FieldSpecExportFmt | FieldSpec | IndexPatternField, shortDotsEnable: boolean, { fieldFormats, onNotification }: FieldDependencies);
+    get aggregatable(): boolean;
     // (undocumented)
-    aggregatable?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "FieldSpecConflictDescriptions" needs to be exported by the entry point index.d.ts
-    //
+    get conflictDescriptions(): Record<string, string[]> | undefined;
+    set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
     // (undocumented)
-    conflictDescriptions?: FieldSpecConflictDescriptions;
+    get count(): number;
+    set count(count: number);
     // (undocumented)
-    count?: number;
+    readonly displayName: string;
     // (undocumented)
-    displayName?: string;
+    get esTypes(): string[] | undefined;
     // (undocumented)
-    esTypes?: string[];
+    get filterable(): boolean;
     // (undocumented)
-    filterable?: boolean;
+    get format(): FieldFormat;
     // (undocumented)
-    format: any;
+    readonly indexPattern: IndexPattern;
     // (undocumented)
-    indexPattern?: IIndexPattern;
+    get lang(): string | undefined;
+    set lang(lang: string | undefined);
     // (undocumented)
-    lang?: string;
+    get name(): string;
     // (undocumented)
-    name: string;
+    get readFromDocValues(): boolean;
     // (undocumented)
-    readFromDocValues?: boolean;
+    get script(): string | undefined;
+    set script(script: string | undefined);
     // (undocumented)
-    script?: string;
+    get scripted(): boolean;
     // (undocumented)
-    scripted?: boolean;
+    get searchable(): boolean;
     // (undocumented)
-    searchable?: boolean;
+    get sortable(): boolean;
     // (undocumented)
-    sortable?: boolean;
+    readonly spec: FieldSpec;
     // (undocumented)
-    subType?: IFieldSubType;
+    get subType(): import("../types").IFieldSubType | undefined;
     // (undocumented)
-    toSpec: () => FieldSpecExportFmt;
+    toJSON(): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+    };
     // (undocumented)
-    type: string;
+    toSpec(): {
+        count: number;
+        script: string | undefined;
+        lang: string | undefined;
+        conflictDescriptions: Record<string, string[]> | undefined;
+        name: string;
+        type: string;
+        esTypes: string[] | undefined;
+        scripted: boolean;
+        searchable: boolean;
+        aggregatable: boolean;
+        readFromDocValues: boolean;
+        subType: import("../types").IFieldSubType | undefined;
+        format: any;
+    };
     // (undocumented)
-    visualizable?: boolean;
+    get type(): string;
+    // (undocumented)
+    get visualizable(): boolean;
 }
 
 // Warning: (ae-missing-release-tag) "indexPatterns" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

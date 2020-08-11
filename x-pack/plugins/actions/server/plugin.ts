@@ -33,13 +33,20 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { SecurityPluginSetup } from '../../security/server';
 
 import { ActionsConfig } from './config';
-import { Services, ActionType, PreConfiguredAction } from './types';
 import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
 import { registerBuiltInActionTypes } from './builtin_action_types';
 import { registerActionsUsageCollector } from './usage';
+import {
+  Services,
+  ActionType,
+  PreConfiguredAction,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+} from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
 
@@ -70,7 +77,13 @@ export const EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
-  registerType: (actionType: ActionType) => void;
+  registerType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams
+  >(
+    actionType: ActionType<Config, Secrets, Params>
+  ): void;
 }
 
 export interface PluginStartContract {
@@ -219,7 +232,13 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     executeActionRoute(router, this.licenseState);
 
     return {
-      registerType: (actionType: ActionType) => {
+      registerType: <
+        Config extends ActionTypeConfig = ActionTypeConfig,
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+        Params extends ActionTypeParams = ActionTypeParams
+      >(
+        actionType: ActionType<Config, Secrets, Params>
+      ) => {
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
         }

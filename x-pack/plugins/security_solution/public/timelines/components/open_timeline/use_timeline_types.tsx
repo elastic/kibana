@@ -100,7 +100,7 @@ export const useTimelineTypes = ({
     (tabId, tabStyle: TimelineTabsStyle) => {
       setTimelineTypes((prevTimelineTypes) => {
         if (tabId === prevTimelineTypes && tabStyle === TimelineTabsStyle.filter) {
-          return null;
+          return tabId === TimelineType.default ? TimelineType.template : TimelineType.default;
         } else if (prevTimelineTypes !== tabId) {
           setTimelineTypes(tabId);
         }

@@ -192,6 +192,7 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
+  forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;

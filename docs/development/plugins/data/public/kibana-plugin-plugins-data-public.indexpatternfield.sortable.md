@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-sortable?: boolean;
+get sortable(): boolean;
 ```
