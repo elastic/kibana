@@ -29,6 +29,9 @@ export default function enterpriseSearchSetupGuideTests({
         await retry.try(async function () {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain('/app_search/setup_guide');
+
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('Setup Guide - App Search - Elastic');
         });
       });
     });
