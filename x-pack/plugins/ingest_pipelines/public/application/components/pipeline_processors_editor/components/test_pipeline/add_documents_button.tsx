@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiSelect } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 import { FlyoutProvider } from './flyout_provider';
 

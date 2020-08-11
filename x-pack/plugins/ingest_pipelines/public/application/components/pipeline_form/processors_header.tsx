@@ -17,7 +17,6 @@ import {
 import {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  AddDocumentsButton,
   OutputButton,
   DocumentsDropdown,
 } from '../pipeline_processors_editor';
@@ -30,10 +29,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { links } = usePipelineProcessorsContext();
   const { testPipelineData } = useTestPipelineContext();
 
-  const {
-    config: { documents: cachedDocuments },
-    results,
-  } = testPipelineData;
+  const { results } = testPipelineData;
 
   return (
     <EuiFlexGroup
@@ -73,7 +69,7 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
         <LoadFromJsonButton onDone={onLoadJson} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {cachedDocuments?.length ? <DocumentsDropdown /> : <AddDocumentsButton />}
+        <DocumentsDropdown />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <OutputButton isDisabled={Boolean(results) === false} />

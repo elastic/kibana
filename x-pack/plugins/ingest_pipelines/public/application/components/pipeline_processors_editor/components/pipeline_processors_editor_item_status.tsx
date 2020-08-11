@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, memo, useMemo } from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
+import { ProcessorStatus } from '../types';
 
-const processorsStatusConfig = {
+interface ProcessorStatusIcon {
+  icon: string;
+  iconColor: string;
+  label: string;
+}
+
+const mapProcessorStatusToIcon: Record<string, ProcessorStatusIcon> = {
   success: {
     icon: 'checkInCircleFilled',
     iconColor: 'success',
@@ -54,11 +61,11 @@ const processorsStatusConfig = {
 };
 
 interface Props {
-  processorStatus: 'success' | 'error' | 'dropped' | 'skipped' | 'inactive' | 'error_ignored';
+  processorStatus: ProcessorStatus;
 }
 
 export const PipelineProcessorsItemStatus: FunctionComponent<Props> = ({ processorStatus }) => {
-  const { icon, iconColor, label } = processorsStatusConfig[processorStatus];
+  const { icon, iconColor, label } = mapProcessorStatusToIcon[processorStatus];
 
   return (
     <EuiToolTip position="top" content={<p>{label}</p>}>

@@ -155,7 +155,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
 
     let flyoutContent: React.ReactNode;
 
-    if (activeTab === 'output') {
+    if (activeTab === 'output' && processor) {
       flyoutContent = <ProcessorOutput processor={processor} />;
     } else {
       flyoutContent = <ProcessorSettingsFields processor={processor} />;

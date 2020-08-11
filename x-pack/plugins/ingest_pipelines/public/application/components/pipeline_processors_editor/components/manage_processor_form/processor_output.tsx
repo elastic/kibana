@@ -16,10 +16,12 @@ import {
   EuiPagination,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { useTestPipelineContext } from '../../context';
+import { ProcessorInternal } from '../../types';
 
 export interface Props {
-  processor: any; // TODO fix
+  processor: ProcessorInternal;
 }
 
 export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) => {
@@ -31,13 +33,15 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
     config: { documents, selectedDocumentIndex },
   } = testPipelineData;
 
-  const processorOutput = resultsByProcessor[selectedDocumentIndex][processorId];
+  const processorOutput =
+    resultsByProcessor && resultsByProcessor[selectedDocumentIndex][processorId];
+
   const {
     prevProcessorResult,
     doc: currentResult,
     ignored_error: ignoredError,
     error,
-  } = processorOutput;
+  } = processorOutput!;
 
   return (
     <>

@@ -16,40 +16,40 @@ import {
   JsonEditorField,
   Form,
   useForm,
-  FormConfig,
 } from '../../../../../../shared_imports';
 
-import {
-  usePipelineProcessorsContext,
-  useTestPipelineContext,
-  TestPipelineData,
-} from '../../../context';
+import { usePipelineProcessorsContext, useTestPipelineContext } from '../../../context';
+import { Document } from '../../../types';
 
 import { documentsSchema } from './schema';
+import { HandleExecuteArgs } from '../flyout_provider';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
-  handleExecute: (documents: object[], verbose?: boolean) => void;
+  handleExecute: (data: HandleExecuteArgs) => void;
   isExecuting: boolean;
 }
 
 export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
-  const { links, toasts } = usePipelineProcessorsContext();
+  const { links } = usePipelineProcessorsContext();
 
   const { testPipelineData } = useTestPipelineContext();
+
   const {
     config: { documents: cachedDocuments },
   } = testPipelineData;
 
-  const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
+  const executePipeline = async () => {
+    const { isValid, data } = await form.submit();
+
     if (!isValid) {
       return;
     }
 
-    const { documents } = formData as TestPipelineData;
+    const { documents } = data as { documents: Document[] };
 
-    await handleExecute({ documents: documents! }, true);
+    handleExecute({ documents: documents!, fetchPerProcessorResults: true });
   };
 
   const { form } = useForm({
@@ -57,7 +57,6 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
     defaultValue: {
       documents: cachedDocuments || '',
     },
-    onSubmit: executePipeline,
   });
 
   return (
@@ -93,6 +92,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
         form={form}
         data-test-subj="testPipelineForm"
         isInvalid={form.isSubmitted && !form.isValid}
+        onSubmit={executePipeline}
         error={form.getErrors()}
       >
         {/* Documents editor */}
@@ -116,7 +116,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
         <EuiSpacer size="m" />
 
         <EuiButton
-          onClick={form.submit}
+          onClick={executePipeline}
           size="s"
           isLoading={isExecuting}
           disabled={form.isSubmitted && !form.isValid}

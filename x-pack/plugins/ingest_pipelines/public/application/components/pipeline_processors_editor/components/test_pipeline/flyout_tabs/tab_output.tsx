@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiCodeBlock,
   EuiSpacer,
@@ -18,31 +17,27 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { useTestPipelineContext, usePipelineProcessorsContext } from '../../../context';
+import { useTestPipelineContext } from '../../../context';
+import { HandleExecuteArgs } from '../flyout_provider';
 
 interface Props {
-  executeOutput?: { docs: object[] };
-  handleExecute: (documents: object[], verbose: boolean) => void;
+  handleExecute: (data: HandleExecuteArgs) => void;
   isExecuting: boolean;
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({
-  executeOutput,
-  handleExecute,
-  isExecuting,
-}) => {
+export const OutputTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
   const { testPipelineData } = useTestPipelineContext();
   const {
     results,
-    config: { verbose: cachedVerbose },
+    config: { verbose: cachedVerbose, documents: cachedDocuments },
   } = testPipelineData;
 
   const [isVerboseEnabled, setIsVerboseEnabled] = useState(Boolean(cachedVerbose));
 
-  const onEnableVerbose = async (isVerbose: boolean) => {
+  const onEnableVerbose = (isVerbose: boolean) => {
     setIsVerboseEnabled(isVerbose);
 
-    await handleExecute({ verbose: isVerbose });
+    handleExecute({ documents: cachedDocuments!, verbose: isVerbose });
   };
 
   let content: React.ReactNode | undefined;
@@ -86,7 +81,9 @@ export const OutputTab: React.FunctionComponent<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             size="s"
-            onClick={() => handleExecute({ verbose: isVerboseEnabled })}
+            onClick={() =>
+              handleExecute({ documents: cachedDocuments!, verbose: isVerboseEnabled })
+            }
             iconType="refresh"
           >
             <FormattedMessage

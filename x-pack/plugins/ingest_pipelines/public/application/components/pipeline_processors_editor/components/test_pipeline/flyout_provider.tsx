@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -20,11 +20,18 @@ import {
 import { usePipelineProcessorsContext, useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { deserializeVerboseTestOutput } from '../../deserialize';
+import { Document } from '../../types';
 
 import { Tabs, Tab, OutputTab, DocumentsTab } from './flyout_tabs';
 
 export interface Props {
   children: (openFlyout: () => void) => React.ReactNode;
+}
+
+export interface HandleExecuteArgs {
+  documents: Document[];
+  verbose?: boolean;
+  fetchPerProcessorResults?: boolean;
 }
 
 export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => {
@@ -35,10 +42,7 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
   } = usePipelineProcessorsContext();
 
   const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
-  const {
-    config: { documents: cachedDocuments },
-    results: executeOutput,
-  } = testPipelineData;
+  const { results: executeOutput } = testPipelineData;
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -48,17 +52,14 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
   const [executeError, setExecuteError] = useState<any>(null);
 
   const handleExecute = useCallback(
-    async (
-      { documents, verbose }: { documents?: object[]; verbose?: boolean },
-      fetchPerProcessorResults?: boolean
-    ) => {
+    async ({ documents, verbose, fetchPerProcessorResults }: HandleExecuteArgs) => {
       const serializedProcessors = serialize(processors.state);
 
       setIsExecuting(true);
       setExecuteError(null);
 
       const { error, data: results } = await api.simulatePipeline({
-        documents: documents ?? cachedDocuments,
+        documents,
         verbose,
         pipeline: { ...serializedProcessors },
       });
@@ -71,13 +72,13 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
       }
 
       // TODO handle error case here
+      // This currently is only enabled when running the pipeline from the "Documents" tab
       if (fetchPerProcessorResults) {
-        // TODO does it make sense to call serialization twice?
         const serializedProcessorsWithTag = serialize(processors.state, true);
 
-        // Call the simulate API again with verbose enabled so we can cache the per processor results
+        // We need to call the simulate API again with verbose enabled so we can cache the per-processor results
         const { data: verboseResults } = await api.simulatePipeline({
-          documents: documents ?? cachedDocuments,
+          documents,
           verbose: true,
           pipeline: { ...serializedProcessorsWithTag },
         });
@@ -86,7 +87,8 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
           type: 'updateResultsByProcessor',
           payload: {
             config: {
-              documents: documents ?? cachedDocuments,
+              documents,
+              verbose,
             },
             results,
             resultsByProcessor: deserializeVerboseTestOutput(verboseResults),
@@ -97,7 +99,7 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
           type: 'updateResults',
           payload: {
             config: {
-              documents: documents ?? cachedDocuments,
+              documents,
               verbose,
             },
             results,
@@ -116,19 +118,13 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
       setSelectedTab('output');
     },
-    [api, cachedDocuments, processors.state, setCurrentTestPipelineData, toasts]
+    [api, processors.state, setCurrentTestPipelineData, toasts]
   );
 
   let tabContent;
 
   if (selectedTab === 'output') {
-    tabContent = (
-      <OutputTab
-        executeOutput={executeOutput}
-        handleExecute={handleExecute}
-        isExecuting={isExecuting}
-      />
-    );
+    tabContent = <OutputTab handleExecute={handleExecute} isExecuting={isExecuting} />;
   } else {
     // default to "Documents" tab
     tabContent = <DocumentsTab isExecuting={isExecuting} handleExecute={handleExecute} />;

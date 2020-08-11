@@ -4,22 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useContext, useReducer } from 'react';
+import React, { useCallback, useContext, useReducer, Reducer } from 'react';
+import { DeserializedProcessorResult } from '../deserialize';
+import { ProcessorResults, Document } from '../types';
 
-// TODO need to update code to reflect new data structure
 export interface TestPipelineData {
   config: {
-    documents?: object[];
+    documents?: Document[];
     verbose?: boolean;
     selectedDocumentIndex: number;
   };
-  results?: any; // todo fix TS
-  resultsByProcessor?: any; // todo fix TS
+  results?: {
+    [key: string]: any;
+  };
+  resultsByProcessor?: DeserializedProcessorResult[];
 }
+
+type Action =
+  | {
+      type: 'updateResultsByProcessor';
+      payload: {
+        config?: {
+          documents?: Document[];
+          verbose?: boolean;
+        };
+        results?: {
+          [key: string]: any;
+        };
+        resultsByProcessor?: DeserializedProcessorResult[];
+      };
+    }
+  | {
+      type: 'updateResults';
+      payload: {
+        config?: {
+          documents?: Document[];
+          verbose?: boolean;
+        };
+        results?: {
+          [key: string]: any;
+        };
+        resultsByProcessor?: Array<DeserializedProcessorResult | ProcessorResults>;
+      };
+    }
+  | {
+      type: 'updateActiveDocument';
+      payload: Pick<TestPipelineData, 'config'>;
+    };
 
 interface TestPipelineContext {
   testPipelineData: TestPipelineData;
-  setCurrentTestPipelineData: (data: TestPipelineData) => void;
+  setCurrentTestPipelineData: (data: Action) => void;
 }
 
 const DEFAULT_TEST_PIPELINE_CONTEXT = {
@@ -43,7 +78,7 @@ export const useTestPipelineContext = () => {
   return ctx;
 };
 
-function reducer(state, action) {
+export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
   if (action.type === 'updateResultsByProcessor') {
     return {
       ...action.payload,
@@ -76,12 +111,12 @@ function reducer(state, action) {
   }
 
   return state;
-}
+};
 
 export const TestPipelineContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, DEFAULT_TEST_PIPELINE_CONTEXT.testPipelineData);
 
-  const setCurrentTestPipelineData = useCallback((data: object): void => {
+  const setCurrentTestPipelineData = useCallback((data: Action): void => {
     dispatch(data);
   }, []);
 
