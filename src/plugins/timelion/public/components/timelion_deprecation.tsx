@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
@@ -27,25 +26,23 @@ export const TimelionDeprecation = ({ links }: DocLinksStart) => {
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('timelion.deprecation.notice', {
-          defaultMessage: 'Deprecation notice',
-        })}
+        title={
+          <FormattedMessage
+            id="timelion.deprecation.message"
+            defaultMessage="Timelion app is deprecated and will be removed on 8.0+. To check the actions you can take in order to move your existing worksheets to a dashboard click {timeLionDeprecationLink}."
+            values={{
+              timeLionDeprecationLink: (
+                <EuiLink href={timelionDeprecationLink} target="_blank" external>
+                  <FormattedMessage id="timelion.deprecation.here" defaultMessage="here" />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         color="warning"
-        iconType="help"
-      >
-        <FormattedMessage
-          id="timelion.deprecation.message"
-          defaultMessage="Timelion app is deprecated and will be removed on 8.0+. Click {timeLionDeprecationLink} to check the actions you can take to copy your existing Timelion worksheets to a
-              dashboard."
-          values={{
-            timeLionDeprecationLink: (
-              <EuiLink href={timelionDeprecationLink} target="_blank">
-                <FormattedMessage id="timelion.deprecation.here" defaultMessage="here" />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+        iconType="bolt"
+        size="s"
+      />
       <EuiSpacer size="s" />
     </>
   );
