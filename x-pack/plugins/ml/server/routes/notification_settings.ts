@@ -26,13 +26,13 @@ export function notificationRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
       try {
         const params = {
           includeDefaults: true,
           filterPath: '**.xpack.notification',
         };
-        const resp = await context.ml!.mlClient.callAsCurrentUser('cluster.getSettings', params);
+        const resp = await legacyClient.callAsCurrentUser('cluster.getSettings', params);
 
         return response.ok({
           body: resp,

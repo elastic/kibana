@@ -55,10 +55,10 @@ export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
  */
 export type EditorMode =
   | { id: 'creatingProcessor'; arg: { selector: ProcessorSelector } }
-  | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
-  | { id: 'idle' }
   | { id: 'movingProcessor'; arg: ProcessorInfo }
-  | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } };
+  | { id: 'managingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
+  | { id: 'removingProcessor'; arg: { selector: ProcessorSelector } }
+  | { id: 'idle' };
 
 export interface ContextValueEditor {
   mode: EditorMode;

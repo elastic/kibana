@@ -7,11 +7,9 @@
 import classNames from 'classnames';
 import React, { FunctionComponent, memo } from 'react';
 import {
-  EuiButtonIcon,
   EuiButtonToggle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiText,
@@ -25,6 +23,8 @@ import { ProcessorsDispatch } from '../../processors_reducer';
 import { ProcessorInfo } from '../processors_tree';
 import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
 import { useTestPipelineContext } from '../../context';
+
+import { getProcessorDescriptor } from '../shared';
 
 import './pipeline_processors_editor_item.scss';
 
@@ -59,9 +59,9 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
     const isEditingThisProcessor =
-      editor.mode.id === 'editingProcessor' && processor.id === editor.mode.arg.processor.id;
+      editor.mode.id === 'managingProcessor' && processor.id === editor.mode.arg.processor.id;
     const isEditingOtherProcessor =
-      editor.mode.id === 'editingProcessor' && !isEditingThisProcessor;
+      editor.mode.id === 'managingProcessor' && !isEditingThisProcessor;
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
@@ -80,11 +80,6 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       'pipelineProcessorsEditor__item--selected': isMovingThisProcessor || isEditingThisProcessor,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
-    });
-
-    const actionElementClasses = classNames({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'pipelineProcessorsEditor__item--displayNone': isInMoveMode,
     });
 
     const inlineTextInputContainerClasses = classNames({
@@ -157,15 +152,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   color={isDimmed ? 'subdued' : undefined}
                 >
                   <EuiLink
-                    disabled={isInMoveMode}
+                    disabled={isEditorNotInIdleMode}
                     onClick={() => {
                       editor.setMode({
-                        id: 'editingProcessor',
+                        id: 'managingProcessor',
                         arg: { processor, selector },
                       });
                     }}
+                    data-test-subj="manageItemButton"
                   >
-                    <b>{processor.type}</b>
+                    <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
