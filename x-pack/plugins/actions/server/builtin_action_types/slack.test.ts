@@ -229,7 +229,7 @@ describe('execute()', () => {
       proxyConnectHit = false;
     });
 
-    test('should use http_proxy env variable', async () => {
+    test('should use http_proxy', async () => {
       await actionType.executor({
         actionId: 'some-id',
         services,
@@ -243,6 +243,18 @@ describe('execute()', () => {
       });
 
       expectProxyHit();
+    });
+
+    test('should not use http_proxy', async () => {
+      await actionType.executor({
+        actionId: 'some-id',
+        services,
+        config: {},
+        secrets: { webhookUrl: 'http://example.com' },
+        params: { message: 'this invocation should succeed' },
+      });
+
+      expectNoProxyHit();
     });
   });
 });

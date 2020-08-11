@@ -5,7 +5,10 @@
  */
 
 import axios from 'axios';
+import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
 
@@ -31,7 +34,7 @@ describe('request', () => {
   });
 
   test('it fetch correctly with defaults', async () => {
-    const res = await request({ axios, url: '/test' });
+    const res = await request({ axios, url: '/test', logger });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'get',
@@ -51,7 +54,7 @@ describe('request', () => {
   });
 
   test('it fetch correctly', async () => {
-    const res = await request({ axios, url: '/test', method: 'post', data: { id: '123' } });
+    const res = await request({ axios, url: '/test', method: 'post', logger, data: { id: '123' } });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'post',
@@ -80,7 +83,7 @@ describe('patch', () => {
   });
 
   test('it fetch correctly', async () => {
-    await patch({ axios, url: '/test', data: { id: '123' } });
+    await patch({ axios, url: '/test', data: { id: '123' }, logger });
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'patch',
       data: { id: '123' },

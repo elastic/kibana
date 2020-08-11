@@ -172,7 +172,7 @@ async function executor(
 
   let response;
   try {
-    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings });
+    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings }, logger);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',

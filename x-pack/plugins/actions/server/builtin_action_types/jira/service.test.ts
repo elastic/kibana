@@ -9,6 +9,9 @@ import axios from 'axios';
 import { createExternalService } from './service';
 import * as utils from '../lib/axios_utils';
 import { ExternalService } from '../case/types';
+import { Logger } from '../../../../../../src/core/server';
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -26,10 +29,13 @@ describe('Jira service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
-    service = createExternalService({
-      config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
-      secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-    });
+    service = createExternalService(
+      {
+        config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
+        secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+      },
+      logger
+    );
   });
 
   beforeEach(() => {
@@ -39,37 +45,49 @@ describe('Jira service', () => {
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: null, projectKey: 'CK' },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: null, projectKey: 'CK' },
+            secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without projectKey', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com', projectKey: null },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com', projectKey: null },
+            secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without username', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: 'elastic@elastic.com' },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { apiToken: '', email: 'elastic@elastic.com' },
+          },
+          logger
+        )
       ).toThrow();
     });
 
     test('throws without password', () => {
       expect(() =>
-        createExternalService({
-          config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: undefined },
-        })
+        createExternalService(
+          {
+            config: { apiUrl: 'test.com' },
+            secrets: { apiToken: '', email: undefined },
+          },
+          logger
+        )
       ).toThrow();
     });
   });
