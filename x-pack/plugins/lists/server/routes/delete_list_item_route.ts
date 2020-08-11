@@ -33,7 +33,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
           const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {
             return siemResponse.error({
-              body: `list item with id: "${id}" item not found`,
+              body: `list item with id: "${id}" not found`,
               statusCode: 404,
             });
           } else {
