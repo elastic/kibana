@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent } from '../../../../common/endpoint/types';
+import { EndpointEvent } from '../../../common/endpoint/types';
 
 /**
  * Simple mock endpoint event that works for tree layouts.
@@ -28,10 +28,29 @@ export function mockEndpointEvent({
       type: lifecycleType ? lifecycleType : 'start',
       category: 'process',
     },
+    agent: {
+      id: 'agent.id',
+      version: 'agent.version',
+      type: 'agent.type',
+    },
+    ecs: {
+      version: 'ecs.version',
+    },
+    user: {
+      name: 'user.name',
+      domain: 'user.domain',
+    },
     process: {
       entity_id: entityID,
+      executable: 'executable',
+      args: 'args',
       name,
+      pid: 0,
+      hash: {
+        md5: 'hash.md5',
+      },
       parent: {
+        pid: 0,
         entity_id: parentEntityId,
       },
     },
