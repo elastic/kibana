@@ -200,10 +200,37 @@ export class SessionService {
     }
   }
 
-  private getKey(userId: string, requestParams: SessionKeys): string {
-    return createHash(`md5`)
-      .update(JSON.stringify({ uid: userId, req: requestParams }))
-      .digest('hex');
+  private getKey(requestParams: SessionKeys): string {
+    return createHash(`md5`).update(JSON.stringify(requestParams)).digest('hex');
+  }
+
+  private getSessionInfo(request: KibanaRequest, sessionId: string) {
+    const user = this.security.authc.getCurrentUser(request);
+    const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
+    let sessionIdsInfo = this.idMapping.get(sessionId);
+    if (!sessionIdsInfo) {
+      sessionIdsInfo = {
+        userId: user!.email,
+        requests: new Map(),
+        insertTime: moment(),
+        retryCount: 0,
+        updateHandler: updateExpirationProvider(esClient),
+      };
+    }
+
+    return sessionIdsInfo;
+  }
+
+  private trackReqHash(
+    request: KibanaRequest,
+    sessionId: string,
+    reqHashKey: string,
+    searchId: string
+  ) {
+    this.logger.debug(`trackReqHash ${sessionId} ${reqHashKey} ${searchId}`);
+    const sessionIdsInfo = this.getSessionInfo(request, sessionId);
+    sessionIdsInfo.requests.set(reqHashKey, searchId);
+    this.idMapping.set(sessionId, sessionIdsInfo);
   }
 
   /**
@@ -212,9 +239,20 @@ export class SessionService {
    * @param request
    * @param sessionId
    */
-  public async store(request: KibanaRequest, sessionId: string) {
+  public async store(
+    request: KibanaRequest,
+    sessionId: string,
+    searchIds?: Record<string, string>
+  ) {
     this.logger.debug(`${sessionId} Storing`);
     const savedObjectsClient = this.savedObjects.getScopedClient(request);
+
+    if (searchIds) {
+      Object.keys(searchIds).forEach((reqHashKey) => {
+        this.trackReqHash(request, sessionId, reqHashKey, searchIds[reqHashKey]);
+      });
+    }
+
     return await this.createSavedObject(savedObjectsClient, sessionId);
   }
 
@@ -236,20 +274,8 @@ export class SessionService {
     this.logger.debug(`${sessionId} trackId ${searchId}`);
     const user = this.security.authc.getCurrentUser(request);
     if (!user) return;
-    const reqHashKey = this.getKey(user.email, requestParams);
-    const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
-    let sessionIdsInfo = this.idMapping.get(sessionId);
-    if (!sessionIdsInfo) {
-      sessionIdsInfo = {
-        userId: user.email,
-        requests: new Map(),
-        insertTime: moment(),
-        retryCount: 0,
-        updateHandler: updateExpirationProvider(esClient),
-      };
-    }
-    sessionIdsInfo.requests.set(reqHashKey, searchId);
-    this.idMapping.set(sessionId, sessionIdsInfo);
+    const reqHashKey = this.getKey(requestParams);
+    this.trackReqHash(request, sessionId, reqHashKey, searchId);
   }
 
   /**
@@ -280,7 +306,7 @@ export class SessionService {
       if (!bgSavedObject || !user) {
         return undefined;
       } else {
-        const reqHashKey = this.getKey(user.email, requestParams);
+        const reqHashKey = this.getKey(requestParams);
         const reqId = bgSavedObject.attributes.idMapping[reqHashKey];
         this.logger.debug(`${sessionId} Object found. ${reqHashKey} request ID is ${reqId}`);
         return reqId;
@@ -290,3 +316,5 @@ export class SessionService {
     }
   }
 }
+
+export type ISessionService = PublicMethodsOf<SessionService>;

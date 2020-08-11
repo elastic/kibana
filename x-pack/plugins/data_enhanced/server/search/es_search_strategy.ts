@@ -25,7 +25,7 @@ import {
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { IEsSearchResponse } from '../../../../../src/plugins/data/common/search/es_search';
-import { SessionService } from './session';
+import { ISessionService } from './session';
 
 interface AsyncSearchResponse<T> {
   id: string;
@@ -47,7 +47,7 @@ function isEnhancedEsSearchResponse(
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
-  sessionService: SessionService,
+  sessionService: ISessionService,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => {
@@ -116,12 +116,14 @@ export function updateExpirationProvider(caller: ElasticsearchClient) {
 async function asyncSearch(
   caller: LegacyAPICaller,
   request: IEnhancedEsSearchRequest,
-  sessionService: SessionService,
+  sessionService: ISessionService,
   options?: ISearchOptions
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     ...request.params,
   };
+
+  params.trackTotalHits = true; // Get the exact count of hits
 
   const { restore = false, stored = false } = options || {};
 
@@ -129,9 +131,12 @@ async function asyncSearch(
   const storedAsyncId = restore
     ? await sessionService.getId(options!.rawRequest!, request.sessionId!, request.params?.body)
     : undefined;
-  const asyncId = request.id || storedAsyncId;
 
-  params.trackTotalHits = true; // Get the exact count of hits
+  if (restore && !storedAsyncId) {
+    throw new Error('Stored not found');
+  }
+
+  const asyncId = request.id || storedAsyncId;
 
   // If we have an ID, then just poll for that ID, otherwise send the entire request body
   const { body = undefined, index = undefined, ...queryParams } = asyncId ? {} : params;
@@ -167,7 +172,7 @@ async function asyncSearch(
 
   // Track if ID wasn't recovered from a BG search
   if (request.sessionId && !stored) {
-    sessionService.trackId(options!.rawRequest!, request.sessionId!, request.params?.body, id);
+    sessionService.trackId(options!.rawRequest!, request.sessionId, request.params?.body, id);
   }
 
   return {

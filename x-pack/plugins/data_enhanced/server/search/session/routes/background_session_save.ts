@@ -13,10 +13,14 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 import { SessionSavedObjectAttributes } from '../../../../common/session';
-import { BackgroundSessionParams } from './types';
+import { BackgroundSessionParams, BackgroundSessionBody } from './types';
 
 const paramSchema = schema.object({
   sessionId: schema.string(),
+});
+
+const bodySchema = schema.object({
+  searchIds: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
 
 export function registerBackgroundSessionSaveRoute(router: IRouter): void {
@@ -25,19 +29,22 @@ export function registerBackgroundSessionSaveRoute(router: IRouter): void {
       path: '/internal/session/{sessionId}/save',
       validate: {
         params: paramSchema,
+        body: bodySchema,
       },
     },
     async (
       context: RequestHandlerContext,
-      request: KibanaRequest<BackgroundSessionParams>,
+      request: KibanaRequest<BackgroundSessionParams, void, BackgroundSessionBody>,
       res: KibanaResponseFactory
     ) => {
       const { sessionId } = request.params;
+      const { searchIds } = request.body;
 
       try {
         const savedObject: SavedObject<SessionSavedObjectAttributes> = await context.sessionService!.store(
           request,
-          sessionId
+          sessionId,
+          searchIds
         );
         return res.ok({ body: savedObject });
       } catch (err) {

@@ -392,7 +392,7 @@ describe('EnhancedSearchInterceptor', () => {
     });
   });
 
-  describe('runBeyondTimeout', () => {
+  describe('sendToBackground', () => {
     const timedResponses = [
       {
         time: 250,
@@ -418,7 +418,7 @@ describe('EnhancedSearchInterceptor', () => {
       },
     ];
 
-    test('times out if runBeyondTimeout is not called', async () => {
+    test('times out if sendToBackground is not called', async () => {
       mockFetchImplementation(timedResponses);
 
       const response = searchInterceptor.search({});
@@ -435,12 +435,12 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error.mock.calls[0][0]).toBeInstanceOf(AbortError);
     });
 
-    test('times out if runBeyondTimeout is called too late', async () => {
+    test('times out if sendToBackground is called too late', async () => {
       mockFetchImplementation(timedResponses);
 
       const response = searchInterceptor.search({});
       response.subscribe({ next, error });
-      setTimeout(() => searchInterceptor.runBeyondTimeout(), 1100);
+      setTimeout(() => searchInterceptor.sendToBackground(), 1100);
 
       await timeTravel(250);
 
@@ -458,7 +458,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error, complete });
-      setTimeout(() => searchInterceptor.runBeyondTimeout(), 500);
+      setTimeout(() => searchInterceptor.sendToBackground(), 500);
 
       await timeTravel(250);
 

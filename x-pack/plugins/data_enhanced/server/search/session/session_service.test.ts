@@ -18,7 +18,6 @@ describe('Session service', () => {
     debug: () => {},
   } as any;
   const securityMockSetup = securityMock.createSetup();
-  const updateExpirationMock = jest.fn();
   const mockApiCaller = jest.fn();
   const RealDate = Date.now;
   const MOCK_CREATION_DATE = '1985-06-22T10:20:30.000Z';
@@ -93,8 +92,8 @@ describe('Session service', () => {
     mockApiCaller.mockClear();
     bgService = new SessionService(
       mockCoreStart.savedObjects,
+      mockCoreStart.elasticsearch,
       securityMockSetup,
-      updateExpirationMock,
       loggingMock
     );
     securityMockSetup.authc.getCurrentUser.mockReturnValue({

@@ -35,10 +35,13 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
     session: {
-      set: jest.fn(),
+      restore: jest.fn(),
       get: jest.fn(),
       start: jest.fn(),
       clear: jest.fn(),
+      isRestoredSession: jest.fn(),
+      getStored: jest.fn(),
+      store: jest.fn(),
     },
     searchSource: searchSourceMock,
     __LEGACY: {
@@ -47,7 +50,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
         msearch: jest.fn(),
       },
     },
-    subscribe: jest.fn(),
+    sendToBackground: jest.fn(),
   };
 }
 

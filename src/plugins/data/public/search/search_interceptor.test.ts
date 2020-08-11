@@ -26,6 +26,7 @@ import { searchServiceMock } from './mocks';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockSearchSetup: any;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 jest.useFakeTimers();
@@ -33,13 +34,14 @@ jest.useFakeTimers();
 describe('SearchInterceptor', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockSearchSetup = searchServiceMock.createSetupContract();
     searchInterceptor = new SearchInterceptor(
       {
         toasts: mockCoreSetup.notifications.toasts,
         startServices: mockCoreSetup.getStartServices(),
         uiSettings: mockCoreSetup.uiSettings,
         http: mockCoreSetup.http,
-        session: mockSearch.session,
+        session: mockSearchSetup.session,
       },
       1000
     );
@@ -142,46 +144,6 @@ describe('SearchInterceptor', () => {
         done();
       };
       response.subscribe({ error });
-    });
-  });
-
-  describe('getPendingCount$', () => {
-    test('should observe the number of pending requests', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 200 };
-      mockCoreSetup.http.fetch.mockResolvedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
-    });
-
-    test('should observe the number of pending requests on error', () => {
-      const pendingCount$ = searchInterceptor.getPendingCount$();
-      const pendingNext = jest.fn();
-      pendingCount$.subscribe(pendingNext);
-
-      const mockResponse: any = { result: 500 };
-      mockCoreSetup.http.fetch.mockRejectedValue(mockResponse);
-      const mockRequest: IEsSearchRequest = {
-        params: {},
-      };
-      const response = searchInterceptor.search(mockRequest);
-
-      response.subscribe({
-        complete: () => {
-          expect(pendingNext.mock.calls).toEqual([[0], [1], [0]]);
-        },
-      });
     });
   });
 });

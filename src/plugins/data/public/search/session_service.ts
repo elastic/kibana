@@ -20,13 +20,12 @@
 import uuid from 'uuid';
 
 export class SessionService {
-  private id: string;
-  private sessionId: string = uuid.v4();
-  private isRestore: boolean | undefined;
-  protected isStored: boolean | undefined;
+  private sessionId!: string;
+  private isRestore!: boolean;
+  protected isStored!: boolean;
 
   constructor() {
-    this.id = uuid.v4();
+    this.start();
   }
 
   public get() {
@@ -60,10 +59,6 @@ export class SessionService {
 
   public async store(): Promise<boolean> {
     return false;
-  }
-
-  public async getSearchIds(sessionId?: string) {
-    return undefined;
   }
 }
 

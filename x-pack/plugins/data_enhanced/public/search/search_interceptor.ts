@@ -6,13 +6,19 @@
 
 import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
+import { createHash } from 'crypto';
 import { SearchInterceptor, UI_SETTINGS } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
 import { EnhancedSearchInterceptorDeps } from './types';
 import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common/search';
 
+interface SessionInfo {
+  requests: Record<string, string>;
+}
+
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private readonly idMapping: Map<string, SessionInfo>;
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
@@ -21,6 +27,26 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    */
   constructor(protected readonly deps: EnhancedSearchInterceptorDeps, requestTimeout?: number) {
     super(deps, requestTimeout);
+
+    this.idMapping = new Map();
+  }
+
+  private createHash(keys: Record<any, any>) {
+    return createHash(`md5`).update(JSON.stringify(keys)).digest('hex');
+  }
+
+  private trackRequest(request: IAsyncSearchRequest, searchId?: string) {
+    const { sessionId } = request;
+    if (sessionId && searchId && request.params) {
+      let sessionInfo = this.idMapping.get(sessionId);
+      if (!sessionInfo) {
+        sessionInfo = {
+          requests: {},
+        };
+        this.idMapping.set(sessionId, sessionInfo);
+      }
+      sessionInfo.requests[this.createHash(request.params.body)] = searchId;
+    }
   }
 
   /**
@@ -39,7 +65,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.timeoutSubscriptions.unsubscribe();
     if (this.deps.usageCollector) this.deps.usageCollector.trackLongQueryRunBeyondTimeout();
 
-    return await this.deps.session.store();
+    const sessionId = this.deps.session.get();
+    const sessionInfo = this.idMapping.get(sessionId);
+
+    return await this.deps.session.store(sessionId, sessionInfo?.requests);
   };
 
   public search(
@@ -74,6 +103,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }
 
         id = response.id;
+
+        this.trackRequest(request, id);
+
         // Delay by the given poll interval
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response

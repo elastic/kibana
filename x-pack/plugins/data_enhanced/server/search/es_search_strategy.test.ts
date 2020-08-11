@@ -7,6 +7,7 @@
 import { RequestHandlerContext } from '../../../../../src/core/server';
 import { pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+import { createMock as createSessionMock } from './session/mocks';
 
 const mockAsyncResponse = {
   id: 'foo',
@@ -34,6 +35,7 @@ describe('ES search strategy', () => {
   const mockLogger: any = {
     info: () => {},
   };
+  const mockSessionService = createSessionMock();
   const mockContext = {
     core: { elasticsearch: { legacy: { client: { callAsCurrentUser: mockApiCaller } } } },
   };
@@ -44,7 +46,11 @@ describe('ES search strategy', () => {
   });
 
   it('returns a strategy with `search`', async () => {
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     expect(typeof esSearch.search).toBe('function');
   });
@@ -53,7 +59,11 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
@@ -69,7 +79,11 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
 
@@ -85,7 +99,11 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'foo-程', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 
@@ -100,7 +118,11 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
 
     const params = { index: 'foo-程', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
       indexType: 'rollup',
@@ -118,7 +140,11 @@ describe('ES search strategy', () => {
     mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
     const params = { index: 'foo-*', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+    const esSearch = await enhancedEsSearchStrategyProvider(
+      mockConfig$,
+      mockSessionService,
+      mockLogger
+    );
 
     await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
 

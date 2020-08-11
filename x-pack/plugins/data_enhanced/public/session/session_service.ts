@@ -13,21 +13,15 @@ export class EnhancedSessionService extends SessionService implements IEnhancedS
     super();
   }
 
-  public async store(sessionId?: string) {
+  public async store(sessionId?: string, searchIdMap?: Record<string, string>) {
     try {
-      const response = await this.http.post(`/internal/session/${sessionId || this.get()}/save`);
+      const response = await this.http.post(`/internal/session/${sessionId || this.get()}/save`, {
+        body: JSON.stringify({ searchIds: searchIdMap }),
+      });
       this.isStored = true;
       return response;
     } catch (e) {
       this.isStored = false;
-    }
-  }
-
-  public async getSearchIds(sessionId?: string) {
-    try {
-      return await this.http.get(`/internal/session/${sessionId || this.get()}`);
-    } catch (e) {
-      return undefined;
     }
   }
 }

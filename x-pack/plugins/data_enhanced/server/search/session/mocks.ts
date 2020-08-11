@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface BackgroundSessionParams {
-  sessionId: string;
-}
+import { SessionService } from '.';
 
-export interface BackgroundSessionBody {
-  searchIds?: Record<string, string>;
-}
+export const createMock = (): PublicMethodsOf<SessionService> => {
+  return {
+    trackId: jest.fn(),
+    getId: jest.fn(),
+    get: jest.fn(),
+    store: jest.fn(),
+    destroy: jest.fn(),
+  };
+};
