@@ -94,6 +94,7 @@ export const useExceptionList = ({
             }
             setLoading(false);
           } else {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             const { page, per_page, total, data } = await fetchExceptionListsItemsByListIds({
               filterOptions: filters,
               http,

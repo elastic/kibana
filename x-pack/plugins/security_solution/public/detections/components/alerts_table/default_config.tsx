@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import ApolloClient from 'apollo-client';
 import { Dispatch } from 'redux';

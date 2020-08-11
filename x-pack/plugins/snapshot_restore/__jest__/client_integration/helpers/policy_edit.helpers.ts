@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
