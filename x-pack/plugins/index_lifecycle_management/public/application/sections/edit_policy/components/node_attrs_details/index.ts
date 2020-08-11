@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ProcessorSettingsForm,
-  ProcessorSettingsFromOnSubmitArg,
-  OnSubmitHandler,
-} from './processor_settings_form.container';
+export { NodeAttrsDetails } from './node_attrs_details';

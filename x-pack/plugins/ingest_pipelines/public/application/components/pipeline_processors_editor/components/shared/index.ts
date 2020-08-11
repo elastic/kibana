@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NodeAttrsDetails } from './node_attrs_details.container';
+export {
+  getProcessorDescriptor,
+  mapProcessorTypeToDescriptor,
+  ProcessorType,
+} from './map_processor_type_to_form';

@@ -87,7 +87,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.forEach((field) => {
+    indexPattern.fields.getAll().forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
