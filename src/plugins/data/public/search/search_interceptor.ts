@@ -170,7 +170,7 @@ export class SearchInterceptor {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           application: this.deps.application,
         }),

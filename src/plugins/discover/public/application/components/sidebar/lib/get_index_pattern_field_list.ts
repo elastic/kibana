@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { difference, map } from 'lodash';
+import { difference } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(
@@ -26,7 +26,7 @@ export function getIndexPatternFieldList(
   if (!indexPattern || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = map(indexPattern.fields, 'name');
+  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
   const unknownTypes: IndexPatternField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
@@ -36,5 +36,5 @@ export function getIndexPatternFieldList(
     } as IndexPatternField);
   });
 
-  return [...indexPattern.fields, ...unknownTypes];
+  return [...indexPattern.fields.getAll(), ...unknownTypes];
 }
