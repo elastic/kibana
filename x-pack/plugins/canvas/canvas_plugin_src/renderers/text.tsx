@@ -6,29 +6,18 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Debug } from '../../public/components/debug';
 import { RendererStrings } from '../../i18n';
+import { RendererFactory } from '../../types';
 
-const { debug: strings } = RendererStrings;
+const { text: strings } = RendererStrings;
 
-export const debug = () => ({
-  name: 'debug',
+export const text: RendererFactory<{ text: string }> = () => ({
+  name: 'text',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render(domNode, config, handlers) {
-    const renderDebug = () => (
-      <div style={{ width: domNode.offsetWidth, height: domNode.offsetHeight }}>
-        <Debug payload={config} />
-      </div>
-    );
-
-    ReactDOM.render(renderDebug(), domNode, () => handlers.done());
-
-    handlers.onResize(() => {
-      ReactDOM.render(renderDebug(), domNode, () => handlers.done());
-    });
-
+  render(domNode, { text: textString }, handlers) {
+    ReactDOM.render(<div>{textString}</div>, domNode, () => handlers.done());
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },
 });

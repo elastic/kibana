@@ -10,11 +10,14 @@ import '../../lib/flot-charts';
 
 import { debounce, includes } from 'lodash';
 import { RendererStrings } from '../../../i18n';
+// @ts-expect-error Untyped local: Will not convert
 import { pie as piePlugin } from './plugins/pie';
+import { Pie } from '../../functions/common/pie';
+import { RendererFactory } from '../../../types';
 
 const { pie: strings } = RendererStrings;
 
-export const pie = () => ({
+export const pie: RendererFactory<Pie> = () => ({
   name: 'pie',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -27,7 +30,10 @@ export const pie = () => ({
     config.options.legend.labelBoxBorderColor = 'transparent';
 
     if (config.font) {
-      const labelFormatter = (label, slice) => {
+      const labelFormatter = (
+        label: string,
+        slice: jquery.flot.dataSeries & { percent: number }
+      ) => {
         // font color defaults to slice color if not specified
         const fontSpec = { ...config.font.spec, color: config.font.spec.color || slice.color };
         const labelDiv = document.createElement('div');
@@ -36,23 +42,28 @@ export const pie = () => ({
         const lineBreak = document.createElement('br');
         const percentText = document.createTextNode(`${Math.round(slice.percent)}%`);
 
-        labelDiv.appendChild(labelSpan);
+        if (labelSpan) {
+          labelDiv.appendChild(labelSpan);
+        }
         labelDiv.appendChild(lineBreak);
         labelDiv.appendChild(percentText);
         return labelDiv.outerHTML;
       };
+      // @ts-ignore ignoring missing propery
       config.options.series.pie.label.formatter = labelFormatter;
 
-      const legendFormatter = (label) => {
+      const legendFormatter = (label: string) => {
         const labelSpan = document.createElement('span');
         Object.assign(labelSpan.style, config.font.spec);
         labelSpan.textContent = label;
         return labelSpan.outerHTML;
       };
+      // @ts-ignore ignoring missing propery
       config.options.legend.labelFormatter = legendFormatter;
     }
 
-    let plot;
+    let plot: jquery.flot.plot;
+
     function draw() {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) {
         return;
@@ -63,10 +74,11 @@ export const pie = () => ({
         if (!config.data || !config.data.length) {
           $(domNode).empty();
         } else {
-          plot = $.plot($(domNode), config.data, config.options);
+          // Casting config.options to any here as the flot typings do not appear to be accurate.
+          // For example, it does not have colors as a valid option.
+          plot = $.plot($(domNode), config.data, config.options as any);
         }
       } catch (e) {
-        console.log(e);
         // Nope
       }
     }

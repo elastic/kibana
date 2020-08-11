@@ -7,10 +7,12 @@
 import { getId } from '../../../public/lib/get_id';
 import { RendererStrings } from '../../../i18n';
 import { shapes } from './shapes';
+import { Output as Arguments } from '../../functions/common/progress';
+import { RendererFactory } from '../../../types';
 
 const { progress: strings } = RendererStrings;
 
-export const progress = () => ({
+export const progress: RendererFactory<Arguments> = () => ({
   name: 'progress',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -23,12 +25,13 @@ export const progress = () => ({
 
     if (shapeDef) {
       const parser = new DOMParser();
-      const [shapeSvg] = parser
-        .parseFromString(shapes[shape], 'image/svg+xml')
-        .getElementsByTagName('svg');
+      const shapeSvg = parser
+        .parseFromString(shapeDef, 'image/svg+xml')
+        .getElementsByTagName('svg')
+        .item(0)!;
 
       const initialViewBox = shapeSvg
-        .getAttribute('viewBox')
+        .getAttribute('viewBox')!
         .split(' ')
         .map((v) => parseInt(v, 10));
       let [minX, minY, width, height] = initialViewBox;
@@ -51,35 +54,35 @@ export const progress = () => ({
       const svgId = getId('svg');
       shapeSvg.id = svgId;
 
-      const [bar] = shapeSvg.getElementsByTagName('path');
+      const bar = shapeSvg.getElementsByTagName('path').item(0)!;
       bar.setAttribute('className', 'canvasProgress__background');
       bar.setAttribute('fill', 'none');
       bar.setAttribute('stroke', barColor);
       bar.setAttribute('stroke-width', `${barWeight}px`);
 
-      const value = bar.cloneNode(true);
-      value.setAttribute('className', 'canvasProgress__value');
-      value.setAttribute('stroke', valueColor);
-      value.setAttribute('stroke-width', `${valueWeight}px`);
+      const valueSvg = bar.cloneNode(true) as SVGPathElement;
+      valueSvg.setAttribute('className', 'canvasProgress__value');
+      valueSvg.setAttribute('stroke', valueColor);
+      valueSvg.setAttribute('stroke-width', `${valueWeight}px`);
 
-      const length = value.getTotalLength();
+      const length = valueSvg.getTotalLength();
       const to = length * (1 - percent);
-      value.setAttribute('stroke-dasharray', length);
-      value.setAttribute('stroke-dashoffset', Math.max(0, to));
+      valueSvg.setAttribute('stroke-dasharray', String(length));
+      valueSvg.setAttribute('stroke-dashoffset', String(Math.max(0, to)));
 
-      shapeSvg.appendChild(value);
+      shapeSvg.appendChild(valueSvg);
 
-      const [text] = shapeSvg.getElementsByTagName('text');
+      const text = shapeSvg.getElementsByTagName('text').item(0);
 
       if (label && text) {
-        text.textContent = label;
+        text.textContent = String(label);
         text.setAttribute('className', 'canvasProgress__label');
 
         if (shape === 'horizontalPill') {
-          text.setAttribute('x', parseInt(text.getAttribute('x'), 10) + offset / 2);
+          text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10) + offset / 2));
         }
         if (shape === 'verticalPill') {
-          text.setAttribute('y', parseInt(text.getAttribute('y'), 10) - offset / 2);
+          text.setAttribute('y', String(parseInt(text.getAttribute('y')!, 10) - offset / 2));
         }
 
         Object.assign(text.style, font.spec);
@@ -89,7 +92,7 @@ export const progress = () => ({
         const { width: labelWidth, height: labelHeight } = text.getBBox();
 
         if (shape === 'horizontalBar' || shape === 'horizontalPill') {
-          text.setAttribute('x', parseInt(text.getAttribute('x'), 10));
+          text.setAttribute('x', String(parseInt(text.getAttribute('x')!, 10)));
           width += labelWidth;
         }
         if (shape === 'verticalBar' || shape === 'verticalPill') {
@@ -103,8 +106,8 @@ export const progress = () => ({
       }
 
       shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
-      shapeSvg.setAttribute('width', domNode.offsetWidth);
-      shapeSvg.setAttribute('height', domNode.offsetHeight);
+      shapeSvg.setAttribute('width', String(domNode.offsetWidth));
+      shapeSvg.setAttribute('height', String(domNode.offsetHeight));
 
       if (domNode.firstChild) {
         domNode.removeChild(domNode.firstChild);
@@ -112,8 +115,8 @@ export const progress = () => ({
       domNode.appendChild(shapeSvg);
 
       handlers.onResize(() => {
-        shapeSvg.setAttribute('width', domNode.offsetWidth);
-        shapeSvg.setAttribute('height', domNode.offsetHeight);
+        shapeSvg.setAttribute('width', String(domNode.offsetWidth));
+        shapeSvg.setAttribute('height', String(domNode.offsetHeight));
       });
     }
 
