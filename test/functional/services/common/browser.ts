@@ -164,6 +164,14 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Gets the page/document title of the focused window/frame.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     */
+    public async getTitle() {
+      return await driver.getTitle();
+    }
+
+    /**
      * Navigates the focused window/frame to a new URL.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#get
      *

@@ -71,6 +71,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+  // packages for the ingest manager's api integration tests could be valid semver which has dashes
+  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**
