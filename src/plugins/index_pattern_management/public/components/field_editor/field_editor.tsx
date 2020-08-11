@@ -155,7 +155,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.map((f: IFieldType) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: IFieldType) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -197,7 +197,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     this.setState({
       isReady: true,
-      isCreating: !indexPattern.fields.find((f) => f.name === spec.name),
+      isCreating: !indexPattern.fields.getByName(spec.name),
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -804,11 +804,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     const { redirectAway } = this.props.services;
-    const index = indexPattern.fields.findIndex((f: IFieldType) => f.name === field.name);
+    const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
 
-    if (index > -1) {
+    if (fieldExists) {
       oldField = indexPattern.fields.getByName(field.name)!.spec;
       indexPattern.fields.update(field);
     } else {
