@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './field_wildcard';
+export * from './kbn_base_url';
+export * from './migrate_legacy_query';
