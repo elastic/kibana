@@ -28,7 +28,6 @@ import {
   EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
-import { RumHome } from '../../RumDashboard/RumHome';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
   defaultMessage: 'Metrics',
@@ -254,15 +253,6 @@ export const routes: BreadcrumbRoute[] = [
   },
   {
     exact: true,
-    path: '/rum-preview',
-    component: () => <RumHome />,
-    breadcrumb: i18n.translate('xpack.apm.home.rumOverview.title', {
-      defaultMessage: 'Real User Monitoring',
-    }),
-    name: RouteName.RUM_OVERVIEW,
-  },
-  {
-    exact: true,
     path: '/settings/anomaly-detection',
     component: () => (
       <Settings>
@@ -276,5 +266,15 @@ export const routes: BreadcrumbRoute[] = [
       }
     ),
     name: RouteName.ANOMALY_DETECTION,
+  },
+];
+
+export const rumRoutes: BreadcrumbRoute[] = [
+  {
+    exact: true,
+    path: '/',
+    render: renderAsRedirectTo('/client-side-monitoring'),
+    breadcrumb: 'Client Side Monitoring',
+    name: 'client-side-monitoring',
   },
 ];

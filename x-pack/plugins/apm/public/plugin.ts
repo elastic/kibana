@@ -114,6 +114,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         return renderApp(coreStart, pluginSetupDeps, params, config);
       },
     });
+
+    core.application.register({
+      id: 'client_side_monitoring',
+      title: 'Client Side Monitoring',
+      order: 8500,
+      euiIconType: 'apmApp',
+      appRoute: '/app/client-side-monitoring',
+      icon: 'plugins/apm/public/icon.svg',
+      category: DEFAULT_APP_CATEGORIES.observability,
+
+      async mount(params: AppMountParameters<unknown>) {
+        // Load application bundle
+        const { renderApp } = await import('./application/rumApp');
+        // Get start services
+        const [coreStart] = await core.getStartServices();
+
+        // render APM feedback link in global help menu
+        setHelpExtension(coreStart);
+        setReadonlyBadge(coreStart);
+
+        // Automatically creates static index pattern and stores as saved object
+        createStaticIndexPattern().catch((e) => {
+          // eslint-disable-next-line no-console
+          console.log('Error creating static index pattern', e);
+        });
+
+        return renderApp(coreStart, pluginSetupDeps, params, config);
+      },
+    });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     toggleAppLinkInNav(core, this.initializerContext.config.get());

@@ -16,7 +16,7 @@ export function RumHome() {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>End User Experience</h1>
+              <h1>Client Side Monitoring</h1>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
