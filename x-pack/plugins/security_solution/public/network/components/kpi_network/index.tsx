@@ -37,10 +37,10 @@ const euiColorVis3 = euiVisColorPalette[3];
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
-  from: number;
+  from: string;
   id: string;
   loading: boolean;
-  to: number;
+  to: string;
   narrowDateRange: UpdateDateRange;
 }
 
@@ -132,8 +132,8 @@ export const KpiNetworkBaseComponent = React.memo<{
   fieldsMapping: Readonly<StatItems[]>;
   data: KpiNetworkData;
   id: string;
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   narrowDateRange: UpdateDateRange;
 }>(({ fieldsMapping, data, id, from, to, narrowDateRange }) => {
   const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(

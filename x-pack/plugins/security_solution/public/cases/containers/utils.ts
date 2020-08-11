@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { camelCase, isArray, isObject, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { camelCase, isArray, isObject } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';

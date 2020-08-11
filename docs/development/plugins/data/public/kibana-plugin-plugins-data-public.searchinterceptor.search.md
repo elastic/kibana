@@ -2,12 +2,24 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) &gt; [search](./kibana-plugin-plugins-data-public.searchinterceptor.search.md)
 
-## SearchInterceptor.search property
+## SearchInterceptor.search() method
 
 Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when `cancelPending` is called, when the request times out, or when the original `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
 
 <b>Signature:</b>
 
 ```typescript
-search: (search: ISearchGeneric, request: IKibanaSearchRequest, options?: ISearchOptions | undefined) => import("rxjs").Observable<import("../../common/search").IEsSearchResponse<unknown>>;
+search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  request | <code>IEsSearchRequest</code> |  |
+|  options | <code>ISearchOptions</code> |  |
+
+<b>Returns:</b>
+
+`Observable<IEsSearchResponse>`
+

@@ -12,6 +12,13 @@ exports[`Listing should render with certain data pieces missing 1`] = `
         "sortable": true,
       },
       Object {
+        "field": "isOnline",
+        "name": "Alerts",
+        "render": [Function],
+        "sortable": true,
+        "width": "175px",
+      },
+      Object {
         "field": "cpu_usage",
         "name": "CPU Usage",
         "render": [Function],
@@ -105,6 +112,13 @@ exports[`Listing should render with expected props 1`] = `
         "name": "Name",
         "render": [Function],
         "sortable": true,
+      },
+      Object {
+        "field": "isOnline",
+        "name": "Alerts",
+        "render": [Function],
+        "sortable": true,
+        "width": "175px",
       },
       Object {
         "field": "cpu_usage",

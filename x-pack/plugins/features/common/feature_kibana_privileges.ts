@@ -26,13 +26,13 @@ export interface FeatureKibanaPrivileges {
    * ```
    */
   management?: {
-    [sectionId: string]: string[];
+    [sectionId: string]: readonly string[];
   };
 
   /**
    * If this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions.
    */
-  catalogue?: string[];
+  catalogue?: readonly string[];
 
   /**
    * If your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.
@@ -60,7 +60,7 @@ export interface FeatureKibanaPrivileges {
    * A generic tag name like "access:read" could be used elsewhere, and access to that API endpoint would also
    * extend to any routes you have also tagged with that name.
    */
-  api?: string[];
+  api?: readonly string[];
 
   /**
    * If your feature exposes a client-side application (most of them do!), then you can control access to them here.
@@ -73,8 +73,36 @@ export interface FeatureKibanaPrivileges {
    * ```
    *
    */
-  app?: string[];
+  app?: readonly string[];
 
+  /**
+   * If your feature requires access to specific Alert Types, then specify your access needs here.
+   * Include both Alert Types registered by the feature and external Alert Types such as built-in
+   * Alert Types and Alert Types provided by other features to which you wish to grant access.
+   */
+  alerting?: {
+    /**
+     * List of alert types which users should have full read/write access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    all: ['my-alert-type-within-my-feature']
+     *  }
+     * ```
+     */
+    all?: readonly string[];
+
+    /**
+     * List of alert types which users should have read-only access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    read: ['my-alert-type']
+     *  }
+     * ```
+     */
+    read?: readonly string[];
+  };
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */
@@ -88,7 +116,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    all: string[];
+    all: readonly string[];
 
     /**
      * List of saved object types which users should have read-only access to when granted this privilege.
@@ -99,7 +127,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    read: string[];
+    read: readonly string[];
   };
   /**
    * A list of UI Capabilities that should be granted to users with this privilege.
@@ -121,5 +149,5 @@ export interface FeatureKibanaPrivileges {
    *
    * @see UICapabilities
    */
-  ui: string[];
+  ui: readonly string[];
 }

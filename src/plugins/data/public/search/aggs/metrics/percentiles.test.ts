@@ -17,30 +17,16 @@
  * under the License.
  */
 
-import {
-  IPercentileAggConfig,
-  getPercentilesMetricAgg,
-  PercentilesMetricAggDependencies,
-} from './percentiles';
+import { IPercentileAggConfig, getPercentilesMetricAgg } from './percentiles';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { InternalStartServices } from '../../../types';
 
 describe('AggTypesMetricsPercentilesProvider class', () => {
   let aggConfigs: IAggConfigs;
-  const aggTypesDependencies: PercentilesMetricAggDependencies = {
-    getInternalStartServices: () =>
-      (({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      } as unknown) as InternalStartServices),
-  };
 
   beforeEach(() => {
-    const typesRegistry = mockAggTypesRegistry([getPercentilesMetricAgg(aggTypesDependencies)]);
+    const typesRegistry = mockAggTypesRegistry([getPercentilesMetricAgg()]);
     const field = {
       name: 'bytes',
     };
@@ -67,12 +53,12 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
           },
         },
       ],
-      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry }
     );
   });
 
   it('uses the custom label if it is set', () => {
-    const responseAggs: any = getPercentilesMetricAgg(aggTypesDependencies).getResponseAggs(
+    const responseAggs: any = getPercentilesMetricAgg().getResponseAggs(
       aggConfigs.aggs[0] as IPercentileAggConfig
     );
 

@@ -6,8 +6,8 @@
 
 import { RequestHandler, RouteMethod } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../security/server';
-import { getUserFactory } from '../../lib/get_user';
 import { ReportingCore } from '../../core';
+import { getUserFactory } from './get_user';
 
 type ReportingUser = AuthenticatedUser | null;
 const superuserRole = 'superuser';
@@ -24,7 +24,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   return <P, Q, B>(handler: RequestHandlerUser): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
       let user: ReportingUser = null;
-      if (setupDeps.security) {
+      if (setupDeps.security && setupDeps.security.license.isEnabled()) {
         // find the authenticated user, or null if security is not enabled
         user = getUser(req);
         if (!user) {

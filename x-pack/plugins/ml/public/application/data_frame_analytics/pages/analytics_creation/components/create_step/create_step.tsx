@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -18,8 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
-import { BackToListPanel } from '../back_to_list_panel';
-import { ProgressStats } from './progress_stats';
+import { CreateStepFooter } from '../create_step_footer';
 
 interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;
@@ -28,7 +27,7 @@ interface Props extends CreateAnalyticsFormProps {
 export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
   const { isAdvancedEditorValidJson, isJobCreated, isJobStarted, isValid, requestMessages } = state;
-  const { jobId } = state.form;
+  const { jobId, jobType } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
   const [showProgress, setShowProgress] = useState<boolean>(false);
@@ -45,7 +44,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   };
 
   return (
-    <Fragment>
+    <div data-test-subj="mlAnalyticsCreateJobWizardCreateStep active">
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
@@ -86,8 +85,9 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
       )}
       <EuiSpacer size="s" />
       <Messages messages={requestMessages} />
-      {isJobCreated === true && showProgress && <ProgressStats jobId={jobId} />}
-      {isJobCreated === true && <BackToListPanel />}
-    </Fragment>
+      {isJobCreated === true && (
+        <CreateStepFooter jobId={jobId} jobType={jobType!} showProgress={showProgress} />
+      )}
+    </div>
   );
 };

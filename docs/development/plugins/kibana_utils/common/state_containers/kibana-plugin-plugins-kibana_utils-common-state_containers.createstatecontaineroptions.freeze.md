@@ -4,7 +4,7 @@
 
 ## CreateStateContainerOptions.freeze property
 
-Function to use when freezing state. Supply identity function. If not provided, default deepFreeze is use.
+Function to use when freezing state. Supply identity function. If not provided, default `deepFreeze` is used.
 
 <b>Signature:</b>
 

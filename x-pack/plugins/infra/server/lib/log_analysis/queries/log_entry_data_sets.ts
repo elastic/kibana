@@ -7,14 +7,14 @@
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
-  createJobIdFilters,
+  createJobIdsFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
 } from './common';
 
 export const createLogEntryDatasetsQuery = (
-  logEntryAnalysisJobId: string,
+  jobIds: string[],
   startTime: number,
   endTime: number,
   size: number,
@@ -25,7 +25,7 @@ export const createLogEntryDatasetsQuery = (
     query: {
       bool: {
         filter: [
-          ...createJobIdFilters(logEntryAnalysisJobId),
+          ...createJobIdsFilters(jobIds),
           ...createTimeRangeFilters(startTime, endTime),
           ...createResultTypeFilters(['model_plot']),
         ],
@@ -67,7 +67,7 @@ export type LogEntryDatasetBucket = rt.TypeOf<typeof logEntryDatasetBucketRT>;
 
 export const logEntryDatasetsResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
-  rt.type({
+  rt.partial({
     aggregations: rt.type({
       dataset_buckets: rt.intersection([
         rt.type({

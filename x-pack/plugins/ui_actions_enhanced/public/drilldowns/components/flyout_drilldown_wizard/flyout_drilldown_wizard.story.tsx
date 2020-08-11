@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import * as React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { storiesOf } from '@storybook/react';
 import { FlyoutDrilldownWizard } from './index';
-import {
-  dashboardFactory,
-  urlFactory,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../components/action_wizard/test_data';
+import { dashboardFactory, urlFactory } from '../../../components/action_wizard/test_data';
 import { ActionFactory } from '../../../dynamic_actions';
 
 storiesOf('components/FlyoutDrilldownWizard', module)

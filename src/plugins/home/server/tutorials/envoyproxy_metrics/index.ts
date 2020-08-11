@@ -36,6 +36,7 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.envoyproxyMetrics.nameTitle', {
       defaultMessage: 'Envoy Proxy metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.envoyproxyMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from Envoy Proxy.',

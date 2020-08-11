@@ -19,15 +19,20 @@
 
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
+import { GetInternalStartServicesFn } from '../../../../types';
 
-export const createFilterHistogram = (aggConfig: IBucketAggConfig, key: string) => {
-  const value = parseInt(key, 10);
-  const params: RangeFilterParams = { gte: value, lt: value + aggConfig.params.interval };
+/** @internal */
+export const createFilterHistogram = (getInternalStartServices: GetInternalStartServicesFn) => {
+  return (aggConfig: IBucketAggConfig, key: string) => {
+    const { fieldFormats } = getInternalStartServices();
+    const value = parseInt(key, 10);
+    const params: RangeFilterParams = { gte: value, lt: value + aggConfig.params.interval };
 
-  return buildRangeFilter(
-    aggConfig.params.field,
-    params,
-    aggConfig.getIndexPattern(),
-    aggConfig.fieldFormatter()(key)
-  );
+    return buildRangeFilter(
+      aggConfig.params.field,
+      params,
+      aggConfig.getIndexPattern(),
+      fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
+    );
+  };
 };

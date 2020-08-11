@@ -12,7 +12,7 @@ import { updateSourceProp } from '../../actions';
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    key: selectedLayer ? `${selectedLayer.getId()}${selectedLayer.isJoinable()}` : '',
+    key: selectedLayer ? `${selectedLayer.getId()}${selectedLayer.showJoinEditor()}` : '',
     selectedLayer,
   };
 }

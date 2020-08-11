@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  // @ts-ignore no-exported-member
   EuiFilePicker,
   EuiModal,
   EuiModalBody,
@@ -24,7 +23,7 @@ import React, { useCallback, useState } from 'react';
 import {
   ImportDataResponse,
   ImportDataProps,
-} from '../../../alerts/containers/detection_engine/rules';
+} from '../../../detections/containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,

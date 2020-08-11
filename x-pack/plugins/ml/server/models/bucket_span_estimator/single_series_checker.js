@@ -13,7 +13,7 @@
 import { mlLog } from '../../client/log';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
-export function singleSeriesCheckerFactory(callAsCurrentUser) {
+export function singleSeriesCheckerFactory({ callAsCurrentUser }) {
   const REF_DATA_INTERVAL = { name: '1h', ms: 3600000 };
 
   class SingleSeriesChecker {

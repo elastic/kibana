@@ -6,14 +6,21 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 
 import { euiStyled } from '../../../../../observability/public';
 import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryContextMenuItem {
   label: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
+  href?: string;
 }
 
 interface LogEntryContextMenuProps {
@@ -40,27 +47,30 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
 }) => {
   const closeMenuAndCall = useMemo(() => {
     return (callback: LogEntryContextMenuItem['onClick']) => {
-      return () => {
+      return (e: React.MouseEvent) => {
         onClose();
-        callback();
+        callback(e);
       };
     };
   }, [onClose]);
 
   const button = (
     <ButtonWrapper>
-      <EuiButtonIcon
+      <EuiButton
+        size="s"
+        fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-        color="ghost"
-        iconType="boxesHorizontal"
         onClick={onOpen}
-      />
+        style={{ minWidth: 'auto' }}
+      >
+        <EuiIcon type="boxesHorizontal" />
+      </EuiButton>
     </ButtonWrapper>
   );
 
   const wrappedItems = useMemo(() => {
     return items.map((item, i) => (
-      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)}>
+      <EuiContextMenuItem key={i} onClick={closeMenuAndCall(item.onClick)} href={item.href}>
         {item.label}
       </EuiContextMenuItem>
     ));
@@ -87,8 +97,5 @@ const AbsoluteWrapper = euiStyled.div`
 `;
 
 const ButtonWrapper = euiStyled.div`
-  background: ${(props) => props.theme.eui.euiColorPrimary};
-  border-radius: 50%;
-  padding: 4px;
-  transform: translateY(-6px);
+  transform: translate(-6px, -6px);
 `;

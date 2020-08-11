@@ -16,7 +16,6 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type TimeUnit = 's' | 'm' | 'h' | 'd';
 export type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };
@@ -54,7 +53,7 @@ export interface ExpressionChartData {
 
 export interface AlertParams {
   criteria: MetricExpression[];
-  groupBy?: string;
+  groupBy?: string[];
   filterQuery?: string;
   sourceId?: string;
   filterQueryText?: string;

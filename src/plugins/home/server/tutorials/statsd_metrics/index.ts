@@ -33,6 +33,7 @@ export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.statsdMetrics.nameTitle', {
       defaultMessage: 'Statsd metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.statsdMetrics.shortDescription', {
       defaultMessage: 'Fetch monitoring metrics from statsd.',

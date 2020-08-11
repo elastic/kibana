@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import './_paginate.scss';
 import paginateControlsTemplate from './paginate_controls.html';
 
 export function PaginateDirectiveProvider($parse, $compile) {

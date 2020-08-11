@@ -59,7 +59,7 @@ export function agentCheckinStateConnectedAgentsFactory() {
     const internalSOClient = getInternalUserSOClient();
     const now = new Date().toISOString();
     const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = [
-      ...connectedAgentsIds.values(),
+      ...agentToUpdate.values(),
     ].map((agentId) => ({
       type: AGENT_SAVED_OBJECT_TYPE,
       id: agentId,

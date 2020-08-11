@@ -52,5 +52,6 @@ esFilters: {
     convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
     mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
+    extractTimeRange: typeof extractTimeRange;
 }
 ```

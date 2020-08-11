@@ -280,6 +280,7 @@ export class LegacyService implements CoreService {
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
+      auditTrail: startDeps.core.auditTrail,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -300,6 +301,7 @@ export class LegacyService implements CoreService {
         ),
         createRouter: () => router,
         resources: setupDeps.core.httpResources.createRegistrar(router),
+        registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
@@ -330,6 +332,7 @@ export class LegacyService implements CoreService {
       uuid: {
         getInstanceUuid: setupDeps.core.uuid.getInstanceUuid,
       },
+      auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 
@@ -372,6 +375,7 @@ export class LegacyService implements CoreService {
     // from being started multiple times in different processes.
     // We only want one REPL.
     if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('../../../cli/repl').startRepl(kbnServer);
     }
 

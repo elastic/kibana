@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   UpdateExceptionListSchemaDecoded,
   exceptionListSchema,
@@ -21,7 +21,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
   router.put(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
       validate: {
@@ -36,6 +36,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
       try {
         const {
           _tags,
+          _version,
           tags,
           name,
           description,
@@ -44,6 +45,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
           meta,
           namespace_type: namespaceType,
           type,
+          version,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
         if (id == null && listId == null) {
@@ -54,6 +56,7 @@ export const updateExceptionListRoute = (router: IRouter): void => {
         } else {
           const list = await exceptionLists.updateExceptionList({
             _tags,
+            _version,
             description,
             id,
             listId,
@@ -62,10 +65,11 @@ export const updateExceptionListRoute = (router: IRouter): void => {
             namespaceType,
             tags,
             type,
+            version,
           });
           if (list == null) {
             return siemResponse.error({
-              body: `exception list id: "${id}" found found`,
+              body: `exception list id: "${id}" not found`,
               statusCode: 404,
             });
           } else {

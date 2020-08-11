@@ -10,7 +10,7 @@
  */
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
-import { padLeft } from 'lodash';
+import { padStart } from 'lodash';
 import { Logger } from './types';
 import { TaskRunner } from './task_runner';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
@@ -182,7 +182,7 @@ function partitionListByCount<T>(list: T[], count: number): [T[], T[]] {
 
 function durationAsString(duration: Duration): string {
   const [m, s] = [duration.minutes(), duration.seconds()].map((value) =>
-    padLeft(`${value}`, 2, '0')
+    padStart(`${value}`, 2, '0')
   );
   return `${m}m ${s}s`;
 }

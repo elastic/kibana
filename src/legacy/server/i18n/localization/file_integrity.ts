@@ -33,7 +33,7 @@ export interface Integrities {
 
 export async function getIntegrityHashes(filepaths: string[]): Promise<Integrities> {
   const hashes = await Promise.all(filepaths.map(getIntegrityHash));
-  return zipObject(filepaths, hashes);
+  return zipObject(filepaths, hashes) as Integrities;
 }
 
 export async function getIntegrityHash(filepath: string): Promise<Hash | null> {

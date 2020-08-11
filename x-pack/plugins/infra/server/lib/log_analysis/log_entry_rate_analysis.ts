@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { getJobId } from '../../../common/log_analysis';
-import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError } from './errors';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logRateModelPlotResponseRT,
   createLogEntryRateQuery,
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { MlSystem } from '../../types';
+import { getJobId } from '../../../common/log_analysis';
+import type { MlSystem } from '../../types';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
@@ -30,7 +26,8 @@ export async function getLogEntryRateBuckets(
   sourceId: string,
   startTime: number,
   endTime: number,
-  bucketDuration: number
+  bucketDuration: number,
+  datasets?: string[]
 ) {
   const logRateJobId = getJobId(context.infra.spaceId, sourceId, 'log-entry-rate');
   let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
@@ -44,26 +41,19 @@ export async function getLogEntryRateBuckets(
         endTime,
         bucketDuration,
         COMPOSITE_AGGREGATION_BATCH_SIZE,
-        afterLatestBatchKey
+        afterLatestBatchKey,
+        datasets
       )
     );
 
-    if (mlModelPlotResponse._shards.total === 0) {
-      throw new NoLogAnalysisResultsIndexError(
-        `Failed to query ml result index for job ${logRateJobId}.`
-      );
-    }
-
-    const { after_key: afterKey, buckets: latestBatchBuckets } = pipe(
-      logRateModelPlotResponseRT.decode(mlModelPlotResponse),
-      map((response) => response.aggregations.timestamp_partition_buckets),
-      fold(throwErrors(createPlainError), identity)
-    );
+    const { after_key: afterKey, buckets: latestBatchBuckets = [] } =
+      decodeOrThrow(logRateModelPlotResponseRT)(mlModelPlotResponse).aggregations
+        ?.timestamp_partition_buckets ?? {};
 
     mlModelPlotBuckets = [...mlModelPlotBuckets, ...latestBatchBuckets];
     afterLatestBatchKey = afterKey;
 
-    if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
+    if (afterKey == null || latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
       break;
     }
   }
@@ -73,6 +63,7 @@ export async function getLogEntryRateBuckets(
       partitions: Array<{
         analysisBucketCount: number;
         anomalies: Array<{
+          id: string;
           actualLogEntryRate: number;
           anomalyScore: number;
           duration: number;
@@ -91,7 +82,8 @@ export async function getLogEntryRateBuckets(
     const partition = {
       analysisBucketCount: timestampPartitionBucket.filter_model_plot.doc_count,
       anomalies: timestampPartitionBucket.filter_records.top_hits_record.hits.hits.map(
-        ({ _source: record }) => ({
+        ({ _id, _source: record }) => ({
+          id: _id,
           actualLogEntryRate: record.actual[0],
           anomalyScore: record.record_score,
           duration: record.bucket_span * 1000,

@@ -6,7 +6,7 @@
 
 jest.mock('./account_management_page');
 
-import { AppMount, AppNavLinkStatus, ScopedHistory } from 'src/core/public';
+import { AppMount, AppNavLinkStatus } from 'src/core/public';
 import { UserAPIClient } from '../management';
 import { accountManagementApp } from './account_management_app';
 
@@ -54,7 +54,7 @@ describe('accountManagementApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
     });
 
     expect(coreStartMock.chrome.setBreadcrumbs).toHaveBeenCalledTimes(1);

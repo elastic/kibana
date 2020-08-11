@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { DatasourceSchema } from './datasource';
+import { PackageConfigSchema } from './package_config';
 import { AgentConfigStatus } from '../../../common';
 
 const AgentConfigBaseSchema = {
@@ -27,7 +27,10 @@ export const AgentConfigSchema = schema.object({
     schema.literal(AgentConfigStatus.Active),
     schema.literal(AgentConfigStatus.Inactive),
   ]),
-  datasources: schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(DatasourceSchema)]),
+  package_configs: schema.oneOf([
+    schema.arrayOf(schema.string()),
+    schema.arrayOf(PackageConfigSchema),
+  ]),
   updated_at: schema.string(),
   updated_by: schema.string(),
 });

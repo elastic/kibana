@@ -37,4 +37,5 @@ export const pod: InventoryModel = {
     'podNetworkTraffic',
     ...nginxRequiredMetrics,
   ],
+  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
 };

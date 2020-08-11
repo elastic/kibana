@@ -27,8 +27,8 @@ export interface HostOverviewArgs {
   hostOverview: HostItem;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
 }
 
 export interface HostOverviewReduxProps {
@@ -38,8 +38,8 @@ export interface HostOverviewReduxProps {
 export interface OwnProps extends QueryTemplateProps {
   children: (args: HostOverviewArgs) => React.ReactNode;
   hostName: string;
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
 }
 
 type HostsOverViewProps = OwnProps & HostOverviewReduxProps & WithKibanaProps;

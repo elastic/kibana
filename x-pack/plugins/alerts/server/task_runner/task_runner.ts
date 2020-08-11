@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, mapValues, omit, without } from 'lodash';
-import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
+import { pickBy, mapValues, omit, without } from 'lodash';
+import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
@@ -17,16 +17,18 @@ import {
   RawAlert,
   IntervalSchedule,
   Services,
-  AlertInfoParams,
   RawAlertInstance,
   AlertTaskState,
+  Alert,
+  AlertExecutorOptions,
+  SanitizedAlert,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
+import { AlertsClient } from '../alerts_client';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
@@ -94,8 +96,12 @@ export class TaskRunner {
     } as unknown) as KibanaRequest;
   }
 
-  async getServicesWithSpaceLevelPermissions(spaceId: string, apiKey: string | null) {
-    return this.context.getServices(this.getFakeKibanaRequest(spaceId, apiKey));
+  private getServicesWithSpaceLevelPermissions(
+    spaceId: string,
+    apiKey: string | null
+  ): [Services, PublicMethodsOf<AlertsClient>] {
+    const request = this.getFakeKibanaRequest(spaceId, apiKey);
+    return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
   }
 
   private getExecutionHandler(
@@ -104,21 +110,9 @@ export class TaskRunner {
     tags: string[] | undefined,
     spaceId: string,
     apiKey: string | null,
-    actions: RawAlert['actions'],
-    references: SavedObject['references']
+    actions: Alert['actions'],
+    alertParams: RawAlert['params']
   ) {
-    // Inject ids into actions
-    const actionsWithIds = actions.map((action) => {
-      const actionReference = references.find((obj) => obj.name === action.actionRef);
-      if (!actionReference) {
-        throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
-      }
-      return {
-        ...action,
-        id: actionReference.id,
-      };
-    });
-
     return createExecutionHandler({
       alertId,
       alertName,
@@ -126,11 +120,12 @@ export class TaskRunner {
       logger: this.logger,
       actionsPlugin: this.context.actionsPlugin,
       apiKey,
-      actions: actionsWithIds,
+      actions,
       spaceId,
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
       request: this.getFakeKibanaRequest(spaceId, apiKey),
+      alertParams,
     });
   }
 
@@ -147,27 +142,19 @@ export class TaskRunner {
 
   async executeAlertInstances(
     services: Services,
-    alertInfoParams: AlertInfoParams,
+    alert: SanitizedAlert,
+    params: AlertExecutorOptions['params'],
     executionHandler: ReturnType<typeof createExecutionHandler>,
     spaceId: string
   ): Promise<AlertTaskState> {
-    const {
-      params,
-      throttle,
-      muteAll,
-      mutedInstanceIds,
-      name,
-      tags,
-      createdBy,
-      updatedBy,
-    } = alertInfoParams;
+    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
+    const alertInstances = mapValues<Record<string, RawAlertInstance>, AlertInstance>(
       alertRawInstances,
       (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
@@ -227,9 +214,8 @@ export class TaskRunner {
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
-    const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
-      alertInstances,
-      (alertInstance: AlertInstance) => alertInstance.hasScheduledActions()
+    const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
+      alertInstance.hasScheduledActions()
     );
     const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
@@ -242,10 +228,7 @@ export class TaskRunner {
     });
 
     if (!muteAll) {
-      const enabledAlertInstances = omit<AlertInstances, AlertInstances>(
-        instancesWithScheduledActions,
-        ...mutedInstanceIds
-      );
+      const enabledAlertInstances = omit(instancesWithScheduledActions, ...mutedInstanceIds);
 
       await Promise.all(
         Object.entries(enabledAlertInstances)
@@ -260,40 +243,30 @@ export class TaskRunner {
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
-      alertInstances: mapValues<AlertInstance, RawAlertInstance>(
+      alertInstances: mapValues<Record<string, AlertInstance>, RawAlertInstance>(
         instancesWithScheduledActions,
         (alertInstance) => alertInstance.toRaw()
       ),
     };
   }
 
-  async validateAndExecuteAlert(
-    services: Services,
-    apiKey: string | null,
-    attributes: RawAlert,
-    references: SavedObject['references']
-  ) {
+  async validateAndExecuteAlert(services: Services, apiKey: string | null, alert: SanitizedAlert) {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
 
     // Validate
-    const params = validateAlertTypeParams(this.alertType, attributes.params);
+    const validatedParams = validateAlertTypeParams(this.alertType, alert.params);
     const executionHandler = this.getExecutionHandler(
       alertId,
-      attributes.name,
-      attributes.tags,
+      alert.name,
+      alert.tags,
       spaceId,
       apiKey,
-      attributes.actions,
-      references
+      alert.actions,
+      alert.params
     );
-    return this.executeAlertInstances(
-      services,
-      { ...attributes, params },
-      executionHandler,
-      spaceId
-    );
+    return this.executeAlertInstances(services, alert, validatedParams, executionHandler, spaceId);
   }
 
   async loadAlertAttributesAndRun(): Promise<Resultable<AlertTaskRunResult, Error>> {
@@ -302,17 +275,17 @@ export class TaskRunner {
     } = this.taskInstance;
 
     const apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
-    const services = await this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
+    const [services, alertsClient] = await this.getServicesWithSpaceLevelPermissions(
+      spaceId,
+      apiKey
+    );
 
     // Ensure API key is still valid and user has access
-    const { attributes, references } = await services.savedObjectsClient.get<RawAlert>(
-      'alert',
-      alertId
-    );
+    const alert = await alertsClient.get({ id: alertId });
 
     return {
       state: await promiseResult<AlertTaskState, Error>(
-        this.validateAndExecuteAlert(services, apiKey, attributes, references)
+        this.validateAndExecuteAlert(services, apiKey, alert)
       ),
       runAt: asOk(
         getNextRunAt(
@@ -320,7 +293,7 @@ export class TaskRunner {
           // we do not currently have a good way of returning the type
           // from SavedObjectsClient, and as we currenrtly require a schedule
           // and we only support `interval`, we can cast this safely
-          attributes.schedule as IntervalSchedule
+          alert.schedule
         )
       ),
     };

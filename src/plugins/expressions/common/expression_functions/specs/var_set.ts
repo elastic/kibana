@@ -25,7 +25,14 @@ interface Arguments {
   value?: any;
 }
 
-export const variableSet: ExpressionFunctionDefinition<'var_set', unknown, Arguments, unknown> = {
+export type ExpressionFunctionVarSet = ExpressionFunctionDefinition<
+  'var_set',
+  unknown,
+  Arguments,
+  unknown
+>;
+
+export const variableSet: ExpressionFunctionVarSet = {
   name: 'var_set',
   help: i18n.translate('expressions.functions.varset.help', {
     defaultMessage: 'Updates kibana global context',

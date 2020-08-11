@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));
 
-      const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
-      const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
+      const FROM = '2000-01-01T00:00:00.000Z';
+      const TO = '3000-01-01T00:00:00.000Z';
 
       it('Make sure that we get Dns data and sorting by uniqueDomains ascending', () => {
         return client
@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
               isPtrIncluded: false,
               pagination: {
@@ -65,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
             query: networkDnsQuery,
             variables: {
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               isDnsHistogram: false,
               inspect: false,
               isPtrIncluded: false,

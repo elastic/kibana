@@ -71,7 +71,7 @@ export const setupMlJob = async ({
   configTemplate,
   indexPatternName = 'auditbeat-*',
   jobIdErrorFilter = [],
-  groups = ['siem'],
+  groups = ['security'],
   prefix = '',
 }: MlSetupArgs): Promise<SetupMlResponse> => {
   const response = await KibanaServices.get().http.fetch<SetupMlResponse>(

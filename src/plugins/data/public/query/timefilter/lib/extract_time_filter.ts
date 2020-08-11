@@ -18,7 +18,8 @@
  */
 
 import { keys, partition } from 'lodash';
-import { Filter, isRangeFilter, RangeFilter } from '../../../../common';
+import { Filter, isRangeFilter, RangeFilter, TimeRange } from '../../../../common';
+import { convertRangeFilterToTimeRangeString } from './change_time_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
   const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {
@@ -34,5 +35,17 @@ export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
   return {
     restOfFilters,
     timeRangeFilter: timeRangeFilter[0] as RangeFilter | undefined,
+  };
+}
+
+export function extractTimeRange(
+  filters: Filter[],
+  timeFieldName?: string
+): { restOfFilters: Filter[]; timeRange?: TimeRange } {
+  if (!timeFieldName) return { restOfFilters: filters, timeRange: undefined };
+  const { timeRangeFilter, restOfFilters } = extractTimeFilter(timeFieldName, filters);
+  return {
+    restOfFilters,
+    timeRange: timeRangeFilter ? convertRangeFilterToTimeRangeString(timeRangeFilter) : undefined,
   };
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, uniq, compact, get } from 'lodash';
+import { defaultsDeep, uniq, compact } from 'lodash';
 
 import {
   TELEMETRY_COLLECTION_INTERVAL,
@@ -12,7 +12,6 @@ import {
 } from '../../common/constants';
 
 import { sendBulkPayload, monitoringBulk } from './lib';
-import { hasMonitoringCluster } from '../es_client/instantiate_client';
 
 /*
  * Handles internal Kibana stats collection and uploading data to Monitoring
@@ -31,13 +30,11 @@ import { hasMonitoringCluster } from '../es_client/instantiate_client';
  * @param {Object} xpackInfo server.plugins.xpack_main.info object
  */
 export class BulkUploader {
-  constructor({ config, log, interval, elasticsearch, kibanaStats }) {
+  constructor({ log, interval, elasticsearch, kibanaStats }) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
     }
 
-    this._hasDirectConnectionToMonitoringCluster = false;
-    this._productionClusterUuid = null;
     this._timer = null;
     // Hold sending and fetching usage until monitoring.bulk is successful. This means that we
     // send usage data on the second tick. But would save a lot of bandwidth fetching usage on
@@ -53,15 +50,6 @@ export class BulkUploader {
     this._cluster = elasticsearch.legacy.createClient('admin', {
       plugins: [monitoringBulk],
     });
-
-    if (hasMonitoringCluster(config.elasticsearch)) {
-      this._log.info(`Detected direct connection to monitoring cluster`);
-      this._hasDirectConnectionToMonitoringCluster = true;
-      this._cluster = elasticsearch.legacy.createClient('monitoring-direct', config.elasticsearch);
-      elasticsearch.legacy.client.callAsInternalUser('info').then((data) => {
-        this._productionClusterUuid = get(data, 'cluster_uuid');
-      });
-    }
 
     this.kibanaStats = kibanaStats;
     this.kibanaStatusGetter = null;
@@ -181,14 +169,7 @@ export class BulkUploader {
   }
 
   async _onPayload(payload) {
-    return await sendBulkPayload(
-      this._cluster,
-      this._interval,
-      payload,
-      this._log,
-      this._hasDirectConnectionToMonitoringCluster,
-      this._productionClusterUuid
-    );
+    return await sendBulkPayload(this._cluster, this._interval, payload, this._log);
   }
 
   getKibanaStats(type) {

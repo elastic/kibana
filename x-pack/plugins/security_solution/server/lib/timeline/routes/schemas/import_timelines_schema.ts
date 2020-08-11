@@ -26,6 +26,8 @@ export const ImportTimelinesSchemaRt = rt.intersection([
   }),
 ]);
 
+export type ImportTimelinesSchema = rt.TypeOf<typeof ImportTimelinesSchemaRt>;
+
 const ReadableRt = new rt.Type<Readable, Readable, unknown>(
   'ReadableRt',
   (u): u is Readable => u instanceof Readable,
@@ -36,11 +38,17 @@ const ReadableRt = new rt.Type<Readable, Readable, unknown>(
     }),
   (a) => a
 );
-export const ImportTimelinesPayloadSchemaRt = rt.type({
-  file: rt.intersection([
-    ReadableRt,
-    rt.type({
-      hapi: rt.type({ filename: rt.string }),
-    }),
-  ]),
-});
+
+const booleanInString = rt.union([rt.literal('true'), rt.literal('false')]);
+
+export const ImportTimelinesPayloadSchemaRt = rt.intersection([
+  rt.type({
+    file: rt.intersection([
+      ReadableRt,
+      rt.type({
+        hapi: rt.type({ filename: rt.string }),
+      }),
+    ]),
+  }),
+  rt.partial({ isImmutable: booleanInString }),
+]);

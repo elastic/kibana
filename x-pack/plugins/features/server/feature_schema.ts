@@ -26,6 +26,7 @@ const managementSchema = Joi.object().pattern(
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
+const alertingSchema = Joi.array().items(Joi.string());
 
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
@@ -33,6 +34,10 @@ const privilegeSchema = Joi.object({
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
+  alerting: Joi.object({
+    all: alertingSchema,
+    read: alertingSchema,
+  }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),
     read: Joi.array().items(Joi.string()).required(),
@@ -46,6 +51,10 @@ const subFeaturePrivilegeSchema = Joi.object({
   includeIn: Joi.string().allow('all', 'read', 'none').required(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: Joi.object({
+    all: alertingSchema,
+    read: alertingSchema,
+  }),
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
@@ -82,6 +91,7 @@ const schema = Joi.object({
   app: Joi.array().items(Joi.string()).required(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: alertingSchema,
   privileges: Joi.object({
     all: privilegeSchema,
     read: privilegeSchema,
@@ -113,7 +123,7 @@ export function validateFeature(feature: FeatureConfig) {
     throw validateResult.error;
   }
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
-  const { app = [], management = {}, catalogue = [] } = feature;
+  const { app = [], management = {}, catalogue = [], alerting = [] } = feature;
 
   const unseenApps = new Set(app);
 
@@ -126,7 +136,9 @@ export function validateFeature(feature: FeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  function validateAppEntry(privilegeId: string, entry: string[] = []) {
+  const unseenAlertTypes = new Set(alerting);
+
+  function validateAppEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeApp) => unseenApps.delete(privilegeApp));
 
     const unknownAppEntries = difference(entry, app);
@@ -139,7 +151,7 @@ export function validateFeature(feature: FeatureConfig) {
     }
   }
 
-  function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
+  function validateCatalogueEntry(privilegeId: string, entry: readonly string[] = []) {
     entry.forEach((privilegeCatalogue) => unseenCatalogue.delete(privilegeCatalogue));
 
     const unknownCatalogueEntries = difference(entry || [], catalogue);
@@ -152,9 +164,26 @@ export function validateFeature(feature: FeatureConfig) {
     }
   }
 
+  function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
+    const all = entry?.all ?? [];
+    const read = entry?.read ?? [];
+
+    all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
+    read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
+
+    const unknownAlertingEntries = difference([...all, ...read], alerting);
+    if (unknownAlertingEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown alerting entries: ${unknownAlertingEntries.join(', ')}`
+      );
+    }
+  }
+
   function validateManagementEntry(
     privilegeId: string,
-    managementEntry: Record<string, string[]> = {}
+    managementEntry: Record<string, readonly string[]> = {}
   ) {
     Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
       if (unseenManagement.has(managementSectionId)) {
@@ -212,6 +241,7 @@ export function validateFeature(feature: FeatureConfig) {
     validateCatalogueEntry(privilegeId, privilegeDefinition.catalogue);
 
     validateManagementEntry(privilegeId, privilegeDefinition.management);
+    validateAlertingEntry(privilegeId, privilegeDefinition.alerting);
   });
 
   const subFeatureEntries = feature.subFeatures ?? [];
@@ -221,6 +251,7 @@ export function validateFeature(feature: FeatureConfig) {
         validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
+        validateAlertingEntry(subFeaturePrivilege.id, subFeaturePrivilege.alerting);
       });
     });
   });
@@ -259,6 +290,16 @@ export function validateFeature(feature: FeatureConfig) {
       } specifies management entries which are not granted to any privileges: ${ungrantedManagement.join(
         ','
       )}`
+    );
+  }
+
+  if (unseenAlertTypes.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies alerting entries which are not granted to any privileges: ${Array.from(
+        unseenAlertTypes.values()
+      ).join(',')}`
     );
   }
 }

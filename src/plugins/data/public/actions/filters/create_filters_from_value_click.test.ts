@@ -24,10 +24,9 @@ import {
   IndexPatternsContract,
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
-import { setIndexPatterns } from '../../../public/services';
-import { mockDataServices } from '../../../public/search/aggs/test_helpers';
+import { setIndexPatterns, setSearchService } from '../../../public/services';
 import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
-import { ValueClickTriggerContext } from '../../../../embeddable/public';
+import { ValueClickContext } from '../../../../embeddable/public';
 
 const mockField = {
   name: 'bytes',
@@ -39,7 +38,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickTriggerContext['data']['data'];
+  let dataPoints: ValueClickContext['data']['data'];
 
   beforeEach(() => {
     dataPoints = [
@@ -72,9 +71,10 @@ describe('createFiltersFromValueClick', () => {
       },
     ];
 
-    mockDataServices();
+    const dataStart = dataPluginMock.createStartContract();
+    setSearchService(dataStart.search);
     setIndexPatterns(({
-      ...dataPluginMock.createStartContract().indexPatterns,
+      ...dataStart.indexPatterns,
       get: async () => ({
         id: 'logstash-*',
         fields: {

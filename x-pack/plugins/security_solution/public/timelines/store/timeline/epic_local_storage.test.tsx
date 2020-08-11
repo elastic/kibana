@@ -7,6 +7,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+// we don't have the types for waitFor just yet, so using "as waitFor" for when we do
+import { wait as waitFor } from '@testing-library/react';
+import '../../../common/mock/match_media';
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
@@ -15,6 +18,7 @@ import {
   defaultHeaders,
   createSecuritySolutionStorageMock,
   mockIndexPattern,
+  kibanaObservable,
 } from '../../../common/mock';
 
 import { createStore, State } from '../../../common/store';
@@ -38,43 +42,55 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
-
-const wait = (ms: number = 500): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
 
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   let props = {} as TimelineComponentProps;
   const sort: Sort = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
-  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
-  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
+  const startDate = '2018-03-23T18:49:23.132Z';
+  const endDate = '2018-03-24T03:33:52.253Z';
 
   const indexPattern = mockIndexPattern;
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     props = {
       browserFields: mockBrowserFields,
       columns: defaultHeaders,
       id: 'foo',
       dataProviders: mockDataProviders,
+      docValueFields: [],
       end: endDate,
       eventType: 'raw' as TimelineComponentProps['eventType'],
       filters: [],
       indexPattern,
       indexToAdd: [],
       isLive: false,
+      isLoadingSource: false,
+      isSaving: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
@@ -86,10 +102,13 @@ describe('epicLocalStorage', () => {
       onDataProviderRemoved: jest.fn(),
       onToggleDataProviderEnabled: jest.fn(),
       onToggleDataProviderExcluded: jest.fn(),
+      onToggleDataProviderType: jest.fn(),
       show: true,
       showCallOutUnauthorizedMsg: false,
       start: startDate,
+      status: TimelineStatus.active,
       sort,
+      timelineType: TimelineType.default,
       toggleColumn: jest.fn(),
       usersViewing: ['elastic'],
     };
@@ -107,8 +126,7 @@ describe('epicLocalStorage', () => {
       </TestProviders>
     );
     store.dispatch(upsertColumn({ id: 'test', index: 1, column: defaultHeaders[0] }));
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 
   it('persist timeline when removing a column ', async () => {
@@ -118,8 +136,7 @@ describe('epicLocalStorage', () => {
       </TestProviders>
     );
     store.dispatch(removeColumn({ id: 'test', columnId: '@timestamp' }));
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 
   it('persists resizing of a column', async () => {
@@ -129,8 +146,7 @@ describe('epicLocalStorage', () => {
       </TestProviders>
     );
     store.dispatch(applyDeltaToColumnWidth({ id: 'test', columnId: '@timestamp', delta: 80 }));
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 
   it('persist the resetting of the fields', async () => {
@@ -140,8 +156,7 @@ describe('epicLocalStorage', () => {
       </TestProviders>
     );
     store.dispatch(updateColumns({ id: 'test', columns: defaultHeaders }));
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 
   it('persist items per page', async () => {
@@ -151,8 +166,7 @@ describe('epicLocalStorage', () => {
       </TestProviders>
     );
     store.dispatch(updateItemsPerPage({ id: 'test', itemsPerPage: 50 }));
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 
   it('persist the sorting of a column', async () => {
@@ -170,7 +184,6 @@ describe('epicLocalStorage', () => {
         },
       })
     );
-    await wait();
-    expect(addTimelineInStorageMock).toHaveBeenCalled();
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
   });
 });

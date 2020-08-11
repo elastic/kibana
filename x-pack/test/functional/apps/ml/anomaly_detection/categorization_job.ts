@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../plugins/ml/common/constants/categorization_job';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -64,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      total_by_field_count: '30',
+      // not checking total_by_field_count as the number of categories might change
       total_over_field_count: '0',
       total_partition_field_count: '2',
       bucket_allocation_failures_count: '0',

@@ -5,87 +5,75 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import _ from 'lodash';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AttributionDescriptor } from '../../../../common/descriptor_types';
 
-export type XYZTMSSourceConfig = AttributionDescriptor & {
+export type XYZTMSSourceConfig = {
   urlTemplate: string;
+  attributionText: string;
+  attributionUrl: string;
 };
 
-export interface Props {
-  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig) => void;
+interface Props {
+  onSourceConfigChange: (sourceConfig: XYZTMSSourceConfig | null) => void;
 }
 
 interface State {
-  tmsInput: string;
-  tmsCanPreview: boolean;
+  url: string;
   attributionText: string;
   attributionUrl: string;
 }
 
 export class XYZTMSEditor extends Component<Props, State> {
   state = {
-    tmsInput: '',
-    tmsCanPreview: false,
+    url: '',
     attributionText: '',
     attributionUrl: '',
   };
 
-  _sourceConfigChange = _.debounce((updatedSourceConfig: XYZTMSSourceConfig) => {
-    if (this.state.tmsCanPreview) {
-      this.props.onSourceConfigChange(updatedSourceConfig);
-    }
-  }, 2000);
+  _previewLayer = _.debounce(() => {
+    const { url, attributionText, attributionUrl } = this.state;
 
-  _handleTMSInputChange(e: ChangeEvent<HTMLInputElement>) {
-    const url = e.target.value;
-
-    const canPreview =
+    const isUrlValid =
       url.indexOf('{x}') >= 0 && url.indexOf('{y}') >= 0 && url.indexOf('{z}') >= 0;
-    this.setState(
-      {
-        tmsInput: url,
-        tmsCanPreview: canPreview,
-      },
-      () => this._sourceConfigChange({ urlTemplate: url })
-    );
-  }
-
-  _handleTMSAttributionChange(attributionUpdate: AttributionDescriptor) {
-    this.setState(
-      {
-        attributionUrl: attributionUpdate.attributionUrl || '',
-        attributionText: attributionUpdate.attributionText || '',
-      },
-      () => {
-        const { attributionText, attributionUrl, tmsInput } = this.state;
-
-        if (tmsInput && attributionText && attributionUrl) {
-          this._sourceConfigChange({
-            urlTemplate: tmsInput,
-            attributionText,
-            attributionUrl,
-          });
+    const sourceConfig = isUrlValid
+      ? {
+          urlTemplate: url,
+          attributionText,
+          attributionUrl,
         }
-      }
-    );
-  }
+      : null;
+    this.props.onSourceConfigChange(sourceConfig);
+  }, 500);
+
+  _onUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
+    this.setState({ url: event.target.value }, this._previewLayer);
+  };
+
+  _onAttributionTextChange = (event: ChangeEvent<HTMLInputElement>) => {
+    this.setState({ attributionText: event.target.value }, this._previewLayer);
+  };
+
+  _onAttributionUrlChange = (event: ChangeEvent<HTMLInputElement>) => {
+    this.setState({ attributionUrl: event.target.value }, this._previewLayer);
+  };
 
   render() {
     const { attributionText, attributionUrl } = this.state;
     return (
-      <Fragment>
+      <EuiPanel>
         <EuiFormRow label="Url">
           <EuiFieldText
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
-            onChange={(e) => this._handleTMSInputChange(e)}
+            onChange={this._onUrlChange}
           />
         </EuiFormRow>
         <EuiFormRow
-          label="Attribution text"
+          label={i18n.translate('xpack.maps.xyztmssource.attributionTextLabel', {
+            defaultMessage: 'Attribution text',
+          })}
           isInvalid={attributionUrl !== '' && attributionText === ''}
           error={[
             i18n.translate('xpack.maps.xyztmssource.attributionText', {
@@ -93,15 +81,12 @@ export class XYZTMSEditor extends Component<Props, State> {
             }),
           ]}
         >
-          <EuiFieldText
-            placeholder={'© OpenStreetMap contributors'}
-            onChange={({ target }: ChangeEvent<HTMLInputElement>) =>
-              this._handleTMSAttributionChange({ attributionText: target.value })
-            }
-          />
+          <EuiFieldText value={attributionText} onChange={this._onAttributionTextChange} />
         </EuiFormRow>
         <EuiFormRow
-          label="Attribution link"
+          label={i18n.translate('xpack.maps.xyztmssource.attributionLinkLabel', {
+            defaultMessage: 'Attribution link',
+          })}
           isInvalid={attributionText !== '' && attributionUrl === ''}
           error={[
             i18n.translate('xpack.maps.xyztmssource.attributionLink', {
@@ -109,14 +94,9 @@ export class XYZTMSEditor extends Component<Props, State> {
             }),
           ]}
         >
-          <EuiFieldText
-            placeholder={'https://www.openstreetmap.org/copyright'}
-            onChange={({ target }: ChangeEvent<HTMLInputElement>) =>
-              this._handleTMSAttributionChange({ attributionUrl: target.value })
-            }
-          />
+          <EuiFieldText value={attributionUrl} onChange={this._onAttributionUrlChange} />
         </EuiFormRow>
-      </Fragment>
+      </EuiPanel>
     );
   }
 }

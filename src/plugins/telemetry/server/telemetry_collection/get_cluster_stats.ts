@@ -18,14 +18,14 @@
  */
 
 import { ClusterDetailsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { TIMEOUT } from './constants';
 /**
  * Get the cluster stats from the connected cluster.
  *
  * This is the equivalent to GET /_cluster/stats?timeout=30s.
  */
-export async function getClusterStats(callCluster: APICaller) {
+export async function getClusterStats(callCluster: LegacyAPICaller) {
   return await callCluster('cluster.stats', {
     timeout: TIMEOUT,
   });

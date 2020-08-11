@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-// @ts-ignore
+// @ts-expect-error
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { Table, TableProps } from './table';
@@ -41,7 +41,7 @@ const defaultProps: TableProps = {
         editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
           path: '/management/kibana/indexPatterns/patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },
@@ -68,7 +68,7 @@ const defaultProps: TableProps = {
         editUrl: '#/management/kibana/indexPatterns/patterns/1',
         inAppUrl: {
           path: '/management/kibana/indexPatterns/patterns/1',
-          uiCapabilitiesPath: 'management.kibana.index_patterns',
+          uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
     },
@@ -100,14 +100,14 @@ describe('Table', () => {
     const searchBar = findTestSubject(component, 'savedObjectSearchBar');
 
     // Send invalid query
-    searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: '?' } });
+    searchBar.simulate('keyup', { key: keys.ENTER, target: { value: '?' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
     expect(component.state().isSearchTextValid).toBe(false);
 
     onQueryChangeMock.mockReset();
 
     // Send valid query to ensure component can recover from invalid query
-    searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: 'I am valid' } });
+    searchBar.simulate('keyup', { key: keys.ENTER, target: { value: 'I am valid' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
     expect(component.state().isSearchTextValid).toBe(true);
   });

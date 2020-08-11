@@ -25,13 +25,8 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const {
-    error: errorLoadingIndices,
-    isLoading: isLoadingIndices,
-    data: { indices } = {
-      indices: [],
-    },
-  } = useLoadIndices();
+  const { error: errorLoadingIndices, isLoading: isLoadingIndices, data } = useLoadIndices();
+  const { indices, dataStreams } = data ?? { indices: [], dataStreams: [] };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -123,6 +118,7 @@ export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
           <PolicyForm
             policy={emptyPolicy}
             indices={indices}
+            dataStreams={dataStreams}
             currentUrl={pathname}
             isSaving={isSaving}
             saveError={renderSaveError()}

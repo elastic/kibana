@@ -7,6 +7,7 @@
 export const eventsIndexPattern = 'logs-endpoint.events.*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 export const metadataIndexPattern = 'metrics-endpoint.metadata-*';
-export const metadataMirrorIndexPattern = 'metrics-endpoint.metadata_mirror-*';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
+export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
+export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;

@@ -1,0 +1,87 @@
+[[running-kibana-advanced]]
+== Running {kib}
+
+Change to your local {kib} directory. Start the development server.
+
+[source,bash]
+----
+yarn start
+----
+
+____
+On Windows, you’ll need to use Git Bash, Cygwin, or a similar shell that
+exposes the `sh` command. And to successfully build you’ll need Cygwin
+optional packages zip, tar, and shasum.
+____
+
+Now you can point your web browser to http://localhost:5601 and start
+using {kib}! When running `yarn start`, {kib} will also log that it
+is listening on port 5603 due to the base path proxy, but you should
+still access {kib} on port 5601.
+
+By default, you can log in with username `elastic` and password
+`changeme`. See the `--help` options on `yarn es <command>` if
+you’d like to configure a different password.
+
+[discrete]
+=== Running {kib} in Open-Source mode
+
+If you’re looking to only work with the open-source software, supply the
+license type to `yarn es`:
+
+[source,bash]
+----
+yarn es snapshot --license oss
+----
+
+And start {kib} with only open-source code:
+
+[source,bash]
+----
+yarn start --oss
+----
+
+[discrete]
+=== Unsupported URL Type
+
+If you’re installing dependencies and seeing an error that looks
+something like
+
+....
+Unsupported URL Type: link:packages/eslint-config-kibana
+....
+
+you’re likely running `npm`. To install dependencies in {kib} you
+need to run `yarn kbn bootstrap`. For more info, see
+link:#setting-up-your-development-environment[Setting Up Your
+Development Environment] above.
+
+[discrete]
+[[customize-kibana-yml]]
+=== Customizing `config/kibana.dev.yml`
+
+The `config/kibana.yml` file stores user configuration directives.
+Since this file is checked into source control, however, developer
+preferences can’t be saved without the risk of accidentally committing
+the modified version. To make customizing configuration easier during
+development, the {kib} CLI will look for a `config/kibana.dev.yml`
+file if run with the `--dev` flag. This file behaves just like the
+non-dev version and accepts any of the
+https://www.elastic.co/guide/en/kibana/current/settings.html[standard
+settings].
+
+[discrete]
+=== Potential Optimization Pitfalls
+
+* Webpack is trying to include a file in the bundle that I deleted and
+is now complaining about it is missing
+* A module id that used to resolve to a single file now resolves to a
+directory, but webpack isn’t adapting
+* (if you discover other scenarios, please send a PR!)
+
+[discrete]
+=== Setting Up SSL
+
+{kib} includes self-signed certificates that can be used for
+development purposes in the browser and for communicating with
+{es}: `yarn start --ssl` & `yarn es snapshot --ssl`.

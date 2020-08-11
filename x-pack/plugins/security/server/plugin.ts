@@ -9,7 +9,7 @@ import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import {
   deepFreeze,
-  ICustomClusterClient,
+  ILegacyCustomClusterClient,
   CoreSetup,
   CoreStart,
   Logger,
@@ -51,7 +51,10 @@ export interface SecurityPluginSetup {
     | 'grantAPIKeyAsInternalUser'
     | 'invalidateAPIKeyAsInternalUser'
   >;
-  authz: Pick<AuthorizationServiceSetup, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  authz: Pick<
+    AuthorizationServiceSetup,
+    'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
+  >;
   license: SecurityLicense;
   audit: Pick<AuditServiceSetup, 'getLogger'>;
 
@@ -81,7 +84,7 @@ export interface PluginStartDependencies {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private clusterClient?: ICustomClusterClient;
+  private clusterClient?: ILegacyCustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
 
@@ -206,6 +209,7 @@ export class Plugin {
       authz: {
         actions: authz.actions,
         checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: authz.checkPrivilegesDynamicallyWithRequest,
         mode: authz.mode,
       },
 

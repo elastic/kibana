@@ -10,14 +10,16 @@ import { mount } from 'enzyme';
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
-import { apiPathMockResponseProviders } from '../store/policy_list/test_mock_utils';
+import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
+import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
+
+jest.mock('../../../../common/components/link_to');
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
   const policyDetailsPathUrl = getPolicyDetailPath('1');
-  const policyListPathUrl = getPoliciesPath();
+  const endpointListPath = getEndpointListPath({ name: 'endpointList' });
   const sleep = (ms = 100) => new Promise((wakeup) => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
   let history: AppContextTestRender['history'];
@@ -25,7 +27,7 @@ describe('Policy Details', () => {
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
-  let policyDatasource: ReturnType<typeof generator.generatePolicyDatasource>;
+  let policyPackageConfig: ReturnType<typeof generator.generatePolicyPackageConfig>;
   let policyView: ReturnType<typeof render>;
 
   beforeEach(() => {
@@ -75,17 +77,19 @@ describe('Policy Details', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
     beforeEach(() => {
-      policyDatasource = generator.generatePolicyDatasource();
-      policyDatasource.id = '1';
+      policyPackageConfig = generator.generatePolicyPackageConfig();
+      policyPackageConfig.id = '1';
+
+      const policyListApiHandlers = policyListApiPathHandlers();
 
       http.get.mockImplementation((...args) => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/datasources/1') {
+          if (path === '/api/ingest_manager/package_configs/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
-              item: policyDatasource,
+              item: policyPackageConfig,
               success: true,
             });
           }
@@ -101,9 +105,9 @@ describe('Policy Details', () => {
 
           // Get package data
           // Used in tests that route back to the list
-          if (apiPathMockResponseProviders[path]) {
+          if (policyListApiHandlers[path]) {
             asyncActions = asyncActions.then(async () => sleep());
-            return apiPathMockResponseProviders[path]();
+            return Promise.resolve(policyListApiHandlers[path]());
           }
         }
 
@@ -125,12 +129,12 @@ describe('Policy Details', () => {
 
       const backToListButton = pageHeaderLeft.find('EuiButtonEmpty');
       expect(backToListButton.prop('iconType')).toBe('arrowLeft');
-      expect(backToListButton.prop('href')).toBe(policyListPathUrl);
-      expect(backToListButton.text()).toBe('Back to policy list');
+      expect(backToListButton.prop('href')).toBe(endpointListPath);
+      expect(backToListButton.text()).toBe('Back to endpoint hosts');
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
       expect(pageTitle).toHaveLength(1);
-      expect(pageTitle.text()).toEqual(policyDatasource.name);
+      expect(pageTitle.text()).toEqual(policyPackageConfig.name);
     });
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
@@ -139,7 +143,7 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       backToListButton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      expect(history.location.pathname).toEqual(endpointListPath);
     });
     it('should display agent stats', async () => {
       await asyncActions;
@@ -149,7 +153,7 @@ describe('Policy Details', () => {
       );
       const agentsSummary = headerRight.find('EuiFlexGroup[data-test-subj="policyAgentsSummary"]');
       expect(agentsSummary).toHaveLength(1);
-      expect(agentsSummary.text()).toBe('Hosts5Online3Offline1Error1');
+      expect(agentsSummary.text()).toBe('Endpoints5Online3Offline1Error1');
     });
     it('should display cancel button', async () => {
       await asyncActions;
@@ -168,7 +172,11 @@ describe('Policy Details', () => {
       );
       expect(history.location.pathname).toEqual(policyDetailsPathUrl);
       cancelbutton.simulate('click', { button: 0 });
-      expect(history.location.pathname).toEqual(policyListPathUrl);
+      const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
+      expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
+        'securitySolution:administration',
+        { path: endpointListPath },
+      ]);
     });
     it('should display save button', async () => {
       await asyncActions;
@@ -200,9 +208,9 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/datasources/1') {
+            if (path === '/api/ingest_manager/package_configs/1') {
               return Promise.resolve({
-                item: policyDatasource,
+                item: policyPackageConfig,
                 success: true,
               });
             }
@@ -226,7 +234,7 @@ describe('Policy Details', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply the updates to all active endpoints assigned to this policy'
+          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent configuration.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {
@@ -245,30 +253,30 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/datasources/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_configs/1`);
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addSuccess.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'success',
-          iconType: 'check',
+          title: 'Success!',
+          text: expect.any(Function),
         });
       });
       it('should show an error notification toast if update fails', async () => {
-        policyDatasource.id = 'invalid';
+        policyPackageConfig.id = 'invalid';
         modalConfirmButton.simulate('click');
 
         await asyncActions;
         policyView.update();
 
         // Toast notification should be shown
-        const toastAddMock = coreStart.notifications.toasts.add.mock;
+        const toastAddMock = coreStart.notifications.toasts.addDanger.mock;
         expect(toastAddMock.calls).toHaveLength(1);
         expect(toastAddMock.calls[0][0]).toMatchObject({
-          color: 'danger',
-          iconType: 'alert',
+          title: 'Failed!',
+          text: expect.any(String),
         });
       });
     });

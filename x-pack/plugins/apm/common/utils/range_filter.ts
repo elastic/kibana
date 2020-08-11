@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function rangeFilter(
-  start: number,
-  end: number,
-  timestampField = '@timestamp'
-) {
+export function rangeFilter(start: number, end: number) {
   return {
-    [timestampField]: {
+    '@timestamp': {
       gte: start,
       lte: end,
       format: 'epoch_millis',

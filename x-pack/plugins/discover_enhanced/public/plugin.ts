@@ -9,12 +9,12 @@ import { PluginInitializerContext } from 'kibana/public';
 import {
   UiActionsSetup,
   UiActionsStart,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  APPLY_FILTER_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
@@ -39,6 +39,7 @@ declare module '../../../../src/plugins/ui_actions/public' {
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;
   embeddable: EmbeddableSetup;
+  kibanaLegacy?: KibanaLegacySetup;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
 }
@@ -46,6 +47,7 @@ export interface DiscoverEnhancedSetupDependencies {
 export interface DiscoverEnhancedStartDependencies {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
+  kibanaLegacy?: KibanaLegacyStart;
   share?: SharePluginStart;
   uiActions: UiActionsStart;
 }
@@ -53,7 +55,11 @@ export interface DiscoverEnhancedStartDependencies {
 export class DiscoverEnhancedPlugin
   implements
     Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies> {
-  constructor(public readonly initializerContext: PluginInitializerContext) {}
+  public readonly config: { actions: { exploreDataInChart: { enabled: boolean } } };
+
+  constructor(protected readonly context: PluginInitializerContext) {
+    this.config = context.config.get();
+  }
 
   setup(
     core: CoreSetup<DiscoverEnhancedStartDependencies>,
@@ -68,9 +74,10 @@ export class DiscoverEnhancedPlugin
       const exploreDataAction = new ExploreDataContextMenuAction(params);
       uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, exploreDataAction);
 
-      const exploreDataChartAction = new ExploreDataChartAction(params);
-      uiActions.addTriggerAction(SELECT_RANGE_TRIGGER, exploreDataChartAction);
-      uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, exploreDataChartAction);
+      if (this.config.actions.exploreDataInChart.enabled) {
+        const exploreDataChartAction = new ExploreDataChartAction(params);
+        uiActions.addTriggerAction(APPLY_FILTER_TRIGGER, exploreDataChartAction);
+      }
     }
   }
 

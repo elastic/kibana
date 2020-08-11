@@ -6,7 +6,7 @@
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
-import { BrowserFields } from '.';
+import { BrowserFields, DocValueFields } from '.';
 import { sourceQuery } from './index.gql_query';
 
 export const mocksSource = [
@@ -697,3 +697,14 @@ export const mockBrowserFields: BrowserFields = {
     },
   },
 };
+
+export const mockDocValueFields: DocValueFields[] = [
+  {
+    field: '@timestamp',
+    format: 'date_time',
+  },
+  {
+    field: 'event.end',
+    format: 'date_time',
+  },
+];

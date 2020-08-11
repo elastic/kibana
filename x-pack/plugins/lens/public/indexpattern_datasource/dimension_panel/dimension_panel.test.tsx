@@ -27,6 +27,14 @@ import { OperationMetadata } from '../../types';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const expectedIndexPatterns = {
   1: {
@@ -79,6 +87,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       indexPatternRefs: [],
       indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
+      isFirstExistenceFetch: false,
       existingFields: {
         'my-fake-index-pattern': {
           timestamp: true,
@@ -305,11 +314,11 @@ describe('IndexPatternDimensionEditorPanel', () => {
       const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
       expect(items.find(({ label }) => label === 'Minimum')!['data-test-subj']).not.toContain(
-        'Incompatible'
+        'incompatible'
       );
 
       expect(items.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
-        'Incompatible'
+        'incompatible'
       );
     });
 
@@ -592,7 +601,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         act(() => {
           wrapper
-            .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+            .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
             .simulate('click');
         });
 
@@ -603,7 +612,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).not.toHaveLength(
@@ -617,7 +626,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         wrapper
@@ -631,7 +640,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         const options = wrapper
@@ -713,7 +722,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         );
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-count"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
           .simulate('click');
 
         const newColumnState = setState.mock.calls[0][0].layers.first.columns.col2;
@@ -749,7 +758,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         );
 
         wrapper
-          .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+          .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
           .simulate('click');
 
         const options = wrapper
@@ -772,7 +781,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
         act(() => {
           wrapper
-            .find('button[data-test-subj="lns-indexPatternDimensionIncompatible-terms"]')
+            .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
             .simulate('click');
         });
 
@@ -1257,6 +1266,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           myLayer: {
             indexPatternId: 'foo',

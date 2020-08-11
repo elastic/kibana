@@ -38,12 +38,13 @@ Array [
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
     >
       <Portal
         containerInfo={
           <div
-            class="euiOverlayMask"
+            class="euiOverlayMask euiOverlayMask--belowHeader"
           />
         }
       />
@@ -442,12 +443,13 @@ Array [
       handler={[Function]}
     />
     <EuiOverlayMask
+      headerZindexLocation="below"
       onClick={[Function]}
     >
       <Portal
         containerInfo={
           <div
-            class="euiOverlayMask"
+            class="euiOverlayMask euiOverlayMask--belowHeader"
           />
         }
       />

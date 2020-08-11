@@ -22,6 +22,7 @@ import { UpdateExceptionListItemSchema } from './update_exception_list_item_sche
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _tags: _TAGS,
+  _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,

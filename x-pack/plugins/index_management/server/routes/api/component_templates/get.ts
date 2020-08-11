@@ -7,7 +7,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   deserializeComponentTemplate,
-  deserializeComponenTemplateList,
+  deserializeComponentTemplateList,
 } from '../../../../common/lib';
 import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
@@ -36,7 +36,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
         );
 
         const body = componentTemplates.map((componentTemplate) => {
-          const deserializedComponentTemplateListItem = deserializeComponenTemplateList(
+          const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
             componentTemplate,
             indexTemplates
           );

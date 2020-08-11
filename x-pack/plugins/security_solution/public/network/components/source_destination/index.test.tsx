@@ -11,6 +11,7 @@ import React from 'react';
 
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';

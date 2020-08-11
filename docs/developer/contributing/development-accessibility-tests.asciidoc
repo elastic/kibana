@@ -1,0 +1,23 @@
+[[development-accessibility-tests]]
+== Automated Accessibility Testing
+
+To run the tests locally:
+
+[arabic]
+. In one terminal window run
+`node scripts/functional_tests_server --config test/accessibility/config.ts`
+. In another terminal window run
+`node scripts/functional_test_runner.js --config test/accessibility/config.ts`
+
+To run the x-pack tests, swap the config file out for
+`x-pack/test/accessibility/config.ts`.
+
+After the server is up, you can go to this instance of {kib} at
+`localhost:5620`.
+
+The testing is done using https://github.com/dequelabs/axe-core[axe].
+The same thing that runs in CI, can be run locally using their browser
+plugins:
+
+* https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US[Chrome]
+* https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/[Firefox]

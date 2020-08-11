@@ -12,7 +12,7 @@ import { PagerDutyActionConnector } from '.././types';
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets, docLinks }) => {
+>> = ({ errors, action, editActionConfig, editActionSecrets, docLinks, readOnly }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -31,6 +31,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           fullWidth
           name="apiUrl"
           value={apiUrl || ''}
+          readOnly={readOnly}
           data-test-subj="pagerdutyApiUrlInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editActionConfig('apiUrl', e.target.value);
@@ -69,6 +70,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
           fullWidth
           isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
           name="routingKey"
+          readOnly={readOnly}
           value={routingKey || ''}
           data-test-subj="pagerdutyRoutingKeyInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {

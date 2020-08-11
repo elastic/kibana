@@ -40,6 +40,7 @@ import { getAreaOptionTabs, countLabel } from './utils/common_config';
 import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
 import { Rotates } from '../../charts/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 
 export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'area',
@@ -49,6 +50,9 @@ export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
     defaultMessage: 'Emphasize the quantity beneath a line chart',
   }),
   visualization: createVislibVisController(deps),
+  getSupportedTriggers: () => {
+    return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+  },
   visConfig: {
     defaults: {
       type: 'area',

@@ -88,12 +88,6 @@ jest.mock('../../util/string_utils', () => ({
   },
 }));
 
-jest.mock('../legacy_utils', () => ({
-  getChartContainerWidth() {
-    return 1140;
-  },
-}));
-
 jest.mock('../explorer_dashboard_service', () => ({
   explorerService: {
     setCharts: jest.fn(),
@@ -109,7 +103,7 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('call anomalyChangeListener with empty series config', (done) => {
-    anomalyDataChange([], 1486656000000, 1486670399999);
+    anomalyDataChange(1140, [], 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(1);
@@ -122,7 +116,7 @@ describe('explorerChartsContainerService', () => {
   });
 
   test('call anomalyChangeListener with actual series config', (done) => {
-    anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
+    anomalyDataChange(1140, mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -138,7 +132,7 @@ describe('explorerChartsContainerService', () => {
       return d;
     });
 
-    anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+    anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
     setImmediate(() => {
       expect(explorerService.setCharts.mock.calls.length).toBe(2);
@@ -161,7 +155,7 @@ describe('explorerChartsContainerService', () => {
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+      anomalyDataChange(1140, mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
     setImmediate(() => {

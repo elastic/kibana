@@ -40,7 +40,7 @@ interface Props {
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;
   termFields: IFieldType[];
-  topHitsSplitField?: string;
+  topHitsSplitField: string | null;
   topHitsSize: number;
 }
 
@@ -90,6 +90,9 @@ export class ScalingForm extends Component<Props, State> {
   };
 
   _onTopHitsSplitFieldChange = (topHitsSplitField?: string) => {
+    if (!topHitsSplitField) {
+      return;
+    }
     this.props.onChange({ propName: 'topHitsSplitField', value: topHitsSplitField });
   };
 
@@ -141,6 +144,7 @@ export class ScalingForm extends Component<Props, State> {
             value={this.props.topHitsSplitField}
             onChange={this._onTopHitsSplitFieldChange}
             fields={this.props.termFields}
+            isClearable={false}
             compressed
           />
         </EuiFormRow>

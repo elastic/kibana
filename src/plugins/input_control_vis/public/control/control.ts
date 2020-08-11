@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable no-multi-str*/
-
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 

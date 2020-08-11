@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Annotation } from '../../../../common/types/annotations';
+import {
+  Annotation,
+  FieldToBucket,
+  GetAnnotationsResponse,
+} from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
 
@@ -14,15 +18,19 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
+    fields: FieldToBucket[];
+    detectorIndex: number;
+    entities: any[];
   }) {
     const body = JSON.stringify(obj);
-    return http$<{ annotations: Record<string, Annotation[]> }>({
+    return http$<GetAnnotationsResponse>({
       path: `${basePath()}/annotations`,
       method: 'POST',
       body,
     });
   },
-  indexAnnotation(obj: any) {
+
+  indexAnnotation(obj: Annotation) {
     const body = JSON.stringify(obj);
     return http<any>({
       path: `${basePath()}/annotations/index`,

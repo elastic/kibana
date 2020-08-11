@@ -3,11 +3,18 @@
 This guide applies to all development within the Kibana project and is
 recommended for the development of all Kibana plugins.
 
+- [General](#general)
+- [HTML](#html)
+- [API endpoints](#api-endpoints)
+- [TypeScript/JavaScript](#typeScript/javaScript)
+- [SASS files](#sass-files)
+- [React](#react)
+
 Besides the content in this style guide, the following style guides may also apply
 to all development within the Kibana project. Please make sure to also read them:
 
-- [Accessibility style guide](https://elastic.github.io/eui/#/guidelines/accessibility)
-- [SASS style guide](https://elastic.github.io/eui/#/guidelines/sass)
+- [Accessibility style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/accessibility)
+- [SASS style guide (EUI Docs)](https://elastic.github.io/eui/#/guidelines/sass)
 
 ## General
 
@@ -581,6 +588,39 @@ providing a length property for a collection class.
 Do not use setters, they cause more problems than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
+
+## SASS files
+
+When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).
+
+All SASS (.scss) files will automatically build with the [EUI](https://elastic.github.io/eui/#/guidelines/sass) & Kibana invisibles (SASS variables, mixins, functions) from the [`globals_[theme].scss` file](src/legacy/ui/public/styles/_globals_v7light.scss).
+
+While the styles for this component will only be loaded if the component exists on the page,
+the styles **will** be global and so it is recommended to use a three letter prefix on your
+classes to ensure proper scope.
+
+**Example:**
+
+```tsx
+// component.tsx
+
+import './component.scss';
+// All other imports below the SASS import
+
+export const Component = () => {
+  return (
+    <div className="plgComponent" />
+  );
+}
+```
+
+```scss
+// component.scss
+
+.plgComponent { ... }
+```
+
+Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
 
 ## React
 

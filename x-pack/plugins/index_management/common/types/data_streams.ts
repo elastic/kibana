@@ -6,9 +6,6 @@
 
 interface TimestampFieldFromEs {
   name: string;
-  mapping: {
-    type: string;
-  };
 }
 
 type TimestampField = TimestampFieldFromEs;

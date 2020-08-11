@@ -26,7 +26,7 @@ import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
 import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
-import { mlMessageBarService } from '../../../../components/messagebar';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -255,6 +255,8 @@ export class EditJobFlyoutUI extends Component {
     };
 
     const { toasts } = this.props.kibana.services.notifications;
+    const toastNotificationService = toastNotificationServiceProvider(toasts);
+
     saveJob(this.state.job, newJobData)
       .then(() => {
         toasts.addSuccess(
@@ -270,7 +272,8 @@ export class EditJobFlyoutUI extends Component {
       })
       .catch((error) => {
         console.error(error);
-        toasts.addDanger(
+        toastNotificationService.displayErrorToast(
+          error,
           i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
             defaultMessage: 'Could not save changes to {jobId}',
             values: {
@@ -278,7 +281,6 @@ export class EditJobFlyoutUI extends Component {
             },
           })
         );
-        mlMessageBarService.notify.error(error);
       });
   };
 

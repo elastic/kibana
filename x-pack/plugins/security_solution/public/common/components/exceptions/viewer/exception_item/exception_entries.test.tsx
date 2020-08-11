@@ -115,8 +115,8 @@ describe('ExceptionEntries', () => {
 
   test('it renders nested entry', () => {
     const parentEntry = getFormattedEntryMock();
-    parentEntry.operator = null;
-    parentEntry.value = null;
+    parentEntry.operator = undefined;
+    parentEntry.value = undefined;
 
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>

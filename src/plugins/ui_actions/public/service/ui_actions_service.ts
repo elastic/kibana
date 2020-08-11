@@ -28,6 +28,7 @@ import { ActionInternal, Action, ActionDefinition, ActionContext } from '../acti
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -40,6 +41,7 @@ export interface UiActionsServiceParams {
 }
 
 export class UiActionsService {
+  public readonly executionService = new UiActionsExecutionService();
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;

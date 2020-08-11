@@ -6,7 +6,12 @@
 
 import { VectorStyle } from './vector_style';
 import { DataRequest } from '../../util/data_request';
-import { FIELD_ORIGIN, STYLE_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import {
+  FIELD_ORIGIN,
+  STYLE_TYPE,
+  VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../common/constants';
 
 jest.mock('../../../kibana_services');
 jest.mock('ui/new_platform');
@@ -42,6 +47,7 @@ class MockSource {
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
+  const mapColors = [];
   const properties = {
     fillColor: {
       type: STYLE_TYPE.STATIC,
@@ -59,7 +65,8 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     iconSize: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        color: 'a color',
+        minSize: 1,
+        maxSize: 10,
         field: { name: fieldName, origin: FIELD_ORIGIN.SOURCE },
       },
     },
@@ -75,86 +82,55 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
     const nextFields = [new MockField({ fieldName })];
-    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
+    const { hasChanges } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(
+      nextFields,
+      mapColors
+    );
     expect(hasChanges).toBe(false);
   });
 
   it('Should clear missing fields when next ordinal fields do not contain existing style property fields', () => {
     const vectorStyle = new VectorStyle({ properties }, new MockSource());
 
+    const nextFields = [new MockField({ fieldName: 'someOtherField' })];
+    const {
+      hasChanges,
+      nextStyleDescriptor,
+    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
+    expect(hasChanges).toBe(true);
+    expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
+      options: {},
+      type: 'DYNAMIC',
+    });
+    expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
+      options: {
+        minSize: 1,
+        maxSize: 10,
+      },
+      type: 'DYNAMIC',
+    });
+  });
+
+  it('Should convert dynamic styles to static styles when there are no next fields', () => {
+    const vectorStyle = new VectorStyle({ properties }, new MockSource());
+
     const nextFields = [];
     const {
       hasChanges,
       nextStyleDescriptor,
-    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields);
+    } = vectorStyle.getDescriptorWithMissingStylePropsRemoved(nextFields, mapColors);
     expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties).toEqual({
-      fillColor: {
-        options: {},
-        type: 'STATIC',
+    expect(nextStyleDescriptor.properties[VECTOR_STYLES.LINE_COLOR]).toEqual({
+      options: {
+        color: '#41937c',
       },
-      icon: {
-        options: {
-          value: 'marker',
-        },
-        type: 'STATIC',
+      type: 'STATIC',
+    });
+    expect(nextStyleDescriptor.properties[VECTOR_STYLES.ICON_SIZE]).toEqual({
+      options: {
+        size: 6,
       },
-      iconOrientation: {
-        options: {
-          orientation: 0,
-        },
-        type: 'STATIC',
-      },
-      iconSize: {
-        options: {
-          color: 'a color',
-        },
-        type: 'DYNAMIC',
-      },
-      labelText: {
-        options: {
-          value: '',
-        },
-        type: 'STATIC',
-      },
-      labelBorderColor: {
-        options: {
-          color: '#FFFFFF',
-        },
-        type: 'STATIC',
-      },
-      labelBorderSize: {
-        options: {
-          size: 'SMALL',
-        },
-      },
-      labelColor: {
-        options: {
-          color: '#000000',
-        },
-        type: 'STATIC',
-      },
-      labelSize: {
-        options: {
-          size: 14,
-        },
-        type: 'STATIC',
-      },
-      lineColor: {
-        options: {},
-        type: 'DYNAMIC',
-      },
-      lineWidth: {
-        options: {
-          size: 1,
-        },
-        type: 'STATIC',
-      },
-      symbolizeAs: {
-        options: {
-          value: 'circle',
-        },
-      },
+      type: 'STATIC',
     });
   });
 });

@@ -9,7 +9,7 @@ import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-  CallAPIOptions,
+  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   RequestHandlerContext,
   KibanaRequest,
@@ -66,7 +66,7 @@ export interface UMRouteParams {
   callES: (
     endpoint: string,
     clientParams?: Record<string, any>,
-    options?: CallAPIOptions | undefined
+    options?: LegacyCallAPIOptions | undefined
   ) => Promise<any>;
   dynamicSettings: DynamicSettings;
   savedObjectsClient: SavedObjectsClientContract;

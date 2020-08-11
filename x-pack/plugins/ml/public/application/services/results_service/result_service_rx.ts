@@ -262,8 +262,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         },
       ];
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           size: 0,
           body: {
@@ -399,8 +399,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       });
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           rest_total_hits_as_int: true,
           size: maxResults !== undefined ? maxResults : 100,
@@ -484,8 +484,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       }
 
-      return mlApiServices
-        .esSearch$({
+      return mlApiServices.results
+        .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
           size: 0,
           body: {

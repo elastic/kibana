@@ -38,13 +38,13 @@ export function Info(data: InfoProps) {
 
   const listItems = [
     {
-      title: i18n.translate('xpack.apm.serviceMap.typePopoverMetric', {
+      title: i18n.translate('xpack.apm.serviceMap.typePopoverStat', {
         defaultMessage: 'Type',
       }),
       description: type,
     },
     {
-      title: i18n.translate('xpack.apm.serviceMap.subtypePopoverMetric', {
+      title: i18n.translate('xpack.apm.serviceMap.subtypePopoverStat', {
         defaultMessage: 'Subtype',
       }),
       description: subtype,

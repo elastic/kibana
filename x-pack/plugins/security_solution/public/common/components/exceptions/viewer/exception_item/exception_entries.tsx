@@ -48,6 +48,18 @@ const MyAndOrBadgeContainer = styled(EuiFlexItem)`
   padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
+const MyActionButton = styled(EuiFlexItem)`
+  align-self: flex-end;
+`;
+
+const MyNestedValueContainer = styled.div`
+  margin-left: ${({ theme }) => theme.eui.euiSizeL};
+`;
+
+const MyNestedValue = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
   disableDelete: boolean;
@@ -74,10 +86,10 @@ const ExceptionEntriesComponent = ({
         render: (value: string | null, data: FormattedEntry) => {
           if (value != null && data.isNested) {
             return (
-              <>
-                <EuiIconTip type="grabHorizontal" size="m" />
-                {value}
-              </>
+              <MyNestedValueContainer>
+                <EuiIconTip type="nested" size="s" />
+                <MyNestedValue>{value}</MyNestedValue>
+              </MyNestedValueContainer>
             );
           } else {
             return value ?? getEmptyValue();
@@ -126,7 +138,7 @@ const ExceptionEntriesComponent = ({
   return (
     <MyEntriesDetails grow={5}>
       <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="none">
             {entries.length > 1 && (
               <EuiHideFor sizes={['xs', 's']}>
@@ -150,9 +162,9 @@ const ExceptionEntriesComponent = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
+            <MyActionButton grow={false}>
               <MyEditButton
                 size="s"
                 color="primary"
@@ -162,8 +174,8 @@ const ExceptionEntriesComponent = ({
               >
                 {i18n.EDIT}
               </MyEditButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            </MyActionButton>
+            <MyActionButton grow={false}>
               <MyRemoveButton
                 size="s"
                 color="danger"
@@ -173,7 +185,7 @@ const ExceptionEntriesComponent = ({
               >
                 {i18n.REMOVE}
               </MyRemoveButton>
-            </EuiFlexItem>
+            </MyActionButton>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

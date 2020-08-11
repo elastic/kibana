@@ -16,12 +16,17 @@ describe('useUpdateCase', () => {
   const fetchCaseUserActions = jest.fn();
   const updateCase = jest.fn();
   const updateKey: UpdateKey = 'description';
+  const onSuccess = jest.fn();
+  const onError = jest.fn();
+
   const sampleUpdate = {
     fetchCaseUserActions,
     updateKey,
     updateValue: 'updated description',
     updateCase,
     version: basicCase.version,
+    onSuccess,
+    onError,
   };
   beforeEach(() => {
     jest.clearAllMocks();
@@ -79,6 +84,7 @@ describe('useUpdateCase', () => {
       });
       expect(fetchCaseUserActions).toBeCalledWith(basicCase.id);
       expect(updateCase).toBeCalledWith(basicCase);
+      expect(onSuccess).toHaveBeenCalled();
     });
   });
 
@@ -114,6 +120,7 @@ describe('useUpdateCase', () => {
         isError: true,
         updateCaseProperty: result.current.updateCaseProperty,
       });
+      expect(onError).toHaveBeenCalled();
     });
   });
 });

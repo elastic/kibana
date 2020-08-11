@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, pluck, last, get } from 'lodash';
+import { defaults, map, last, get } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
@@ -26,7 +26,7 @@ import { DuplicateField } from '../../../../kibana_utils/common';
 import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 // @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
-import { Field } from '../fields';
+import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
 
@@ -66,7 +66,7 @@ const savedObjectsClient = {
   create: jest.fn(),
   get: jest.fn().mockImplementation(() => object),
   update: jest.fn().mockImplementation(async (type, id, body, { version }) => {
-    if (object._version !== version) {
+    if (object.version !== version) {
       throw new Object({
         res: {
           status: 409,
@@ -74,10 +74,10 @@ const savedObjectsClient = {
       });
     }
     object.attributes.title = body.title;
-    object._version += 'a';
+    object.version += 'a';
     return {
-      id: object._id,
-      _version: object._version,
+      id: object.id,
+      version: object.version,
     };
   }),
 };
@@ -109,6 +109,7 @@ function create(id: string, payload?: any): Promise<IndexPattern> {
     fieldFormats: fieldFormatsMock,
     onNotification: () => {},
     onError: () => {},
+    uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
   });
 
   setDocsourcePayload(id, payload);
@@ -169,9 +170,9 @@ describe('IndexPattern', () => {
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
       const scriptedNames = mockLogStashFields()
-        .filter((item: Field) => item.scripted === true)
-        .map((item: Field) => item.name);
-      const respNames = pluck(indexPattern.getScriptedFields(), 'name');
+        .filter((item: IndexPatternField) => item.scripted === true)
+        .map((item: IndexPatternField) => item.name);
+      const respNames = map(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
     });
@@ -213,9 +214,9 @@ describe('IndexPattern', () => {
   describe('getNonScriptedFields', () => {
     test('should return all non-scripted fields', () => {
       const notScriptedNames = mockLogStashFields()
-        .filter((item: Field) => item.scripted === false)
-        .map((item: Field) => item.name);
-      const respNames = pluck(indexPattern.getNonScriptedFields(), 'name');
+        .filter((item: IndexPatternField) => item.scripted === false)
+        .map((item: IndexPatternField) => item.name);
+      const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
       expect(respNames).toEqual(notScriptedNames);
     });
@@ -234,7 +235,7 @@ describe('IndexPattern', () => {
       const newFields = indexPattern.getNonScriptedFields();
 
       expect(newFields).toHaveLength(2);
-      expect(newFields.map((f) => f.name)).toEqual(['foo', 'bar']);
+      expect([...newFields.map((f) => f.name)]).toEqual(['foo', 'bar']);
     });
 
     test('should preserve the scripted fields', async () => {
@@ -248,8 +249,8 @@ describe('IndexPattern', () => {
       // sinon.assert.calledOnce(indexPattern.getScriptedFields);
       expect(indexPattern.getScriptedFields().map((f) => f.name)).toEqual(
         mockLogStashFields()
-          .filter((f: Field) => f.scripted)
-          .map((f: Field) => f.name)
+          .filter((f: IndexPatternField) => f.scripted)
+          .map((f: IndexPatternField) => f.name)
       );
     });
   });
@@ -277,7 +278,7 @@ describe('IndexPattern', () => {
       const scriptedFields = indexPattern.getScriptedFields();
       // expect(saveSpy.callCount).to.equal(1);
       expect(scriptedFields).toHaveLength(oldCount + 1);
-      expect((indexPattern.fields.getByName(scriptedField.name) as Field).name).toEqual(
+      expect((indexPattern.fields.getByName(scriptedField.name) as IndexPatternField).name).toEqual(
         scriptedField.name
       );
     });
@@ -286,9 +287,9 @@ describe('IndexPattern', () => {
       // const saveSpy = sinon.spy(indexPattern, 'save');
       const scriptedFields = indexPattern.getScriptedFields();
       const oldCount = scriptedFields.length;
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields)!;
 
-      await indexPattern.removeScriptedField(scriptedField);
+      await indexPattern.removeScriptedField(scriptedField.name);
 
       // expect(saveSpy.callCount).to.equal(1);
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
@@ -297,7 +298,7 @@ describe('IndexPattern', () => {
 
     test('should not allow duplicate names', async () => {
       const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = last(scriptedFields);
+      const scriptedField = last(scriptedFields) as any;
       expect.assertions(1);
       try {
         await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string', 'lang');
@@ -382,8 +383,8 @@ describe('IndexPattern', () => {
 
   test('should handle version conflicts', async () => {
     setDocsourcePayload(null, {
-      _id: 'foo',
-      _version: 'foo',
+      id: 'foo',
+      version: 'foo',
       attributes: {
         title: 'something',
       },
@@ -397,6 +398,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await pattern.init();
 
@@ -411,6 +413,7 @@ describe('IndexPattern', () => {
       fieldFormats: fieldFormatsMock,
       onNotification: () => {},
       onError: () => {},
+      uiSettingsValues: { shortDotsEnable: false, metaFields: [] },
     });
     await samePattern.init();
 

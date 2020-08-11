@@ -8,7 +8,8 @@
   "requiredPlugins": [
     "data"
   ],
-  "optionalPlugins": ["kibanaReact", "kibanaUtils"],
+  "optionalPlugins": ["kibanaReact", "kibanaUtils", "usageCollection"],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": ["kibanaReact", "kibanaUtils"]
 }

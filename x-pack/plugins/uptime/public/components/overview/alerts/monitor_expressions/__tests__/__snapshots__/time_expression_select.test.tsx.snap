@@ -14,9 +14,9 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       <div
         class="euiPopover__anchor"
       >
-        <button
+        <span
           aria-label="Open the popover for time range value field"
-          class="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+          class="euiExpression euiExpression-isUppercase euiExpression--secondary"
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
         >
           <span
@@ -30,7 +30,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
           >
             last 15
           </span>
-        </button>
+        </span>
       </div>
     </div>
   </div>
@@ -44,9 +44,9 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       <div
         class="euiPopover__anchor"
       >
-        <button
+        <span
           aria-label="Open the popover for time range unit select field"
-          class="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--secondary"
+          class="euiExpression euiExpression-isUppercase euiExpression--secondary"
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
         >
           <span
@@ -58,7 +58,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
           >
             minutes
           </span>
-        </button>
+        </span>
       </div>
     </div>
   </div>
@@ -93,62 +93,41 @@ exports[`TimeExpressionSelect component should shallow renders against props 1`]
     <AlertExpressionPopover
       aria-label="Open the popover for time range unit select field"
       content={
-        <React.Fragment>
-          <EuiTitle
-            size="xxs"
-          >
-            <h5>
-              <FormattedMessage
-                defaultMessage="Select time range unit"
-                id="xpack.uptime.alerts.monitorStatus.timerangeSelectionHeader"
-                values={Object {}}
-              />
-            </h5>
-          </EuiTitle>
-          <EuiSelectable
-            aria-label="Selectable field for the time range units alerts should use"
-            data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
-            listProps={
+        <TimeUnitSelectable
+          aria-label="Selectable field for the time range units alerts should use"
+          data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
+          headlineText="Select time range unit"
+          onChange={[Function]}
+          timeRangeOptions={
+            Array [
               Object {
-                "showIcons": true,
-              }
-            }
-            onChange={[Function]}
-            options={
-              Array [
-                Object {
-                  "aria-label": "\\"Seconds\\" time range select item",
-                  "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption",
-                  "key": "s",
-                  "label": "seconds",
-                },
-                Object {
-                  "aria-label": "\\"Minutes\\" time range select item",
-                  "checked": "on",
-                  "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption",
-                  "key": "m",
-                  "label": "minutes",
-                },
-                Object {
-                  "aria-label": "\\"Hours\\" time range select item",
-                  "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption",
-                  "key": "h",
-                  "label": "hours",
-                },
-                Object {
-                  "aria-label": "\\"Days\\" time range select item",
-                  "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.daysOption",
-                  "key": "d",
-                  "label": "days",
-                },
-              ]
-            }
-            searchable={false}
-            singleSelection={true}
-          >
-            [Function]
-          </EuiSelectable>
-        </React.Fragment>
+                "aria-label": "\\"Seconds\\" time range select item",
+                "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption",
+                "key": "s",
+                "label": "seconds",
+              },
+              Object {
+                "aria-label": "\\"Minutes\\" time range select item",
+                "checked": "on",
+                "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption",
+                "key": "m",
+                "label": "minutes",
+              },
+              Object {
+                "aria-label": "\\"Hours\\" time range select item",
+                "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption",
+                "key": "h",
+                "label": "hours",
+              },
+              Object {
+                "aria-label": "\\"Days\\" time range select item",
+                "data-test-subj": "xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.daysOption",
+                "key": "d",
+                "label": "days",
+              },
+            ]
+          }
+        />
       }
       data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitExpression"
       description=""

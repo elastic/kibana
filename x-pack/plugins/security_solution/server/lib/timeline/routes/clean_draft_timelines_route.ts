@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
@@ -14,6 +15,7 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 import { cleanDraftTimelineSchema } from './schemas/clean_draft_timelines_schema';
+import { TimelineType } from '../../../../common/types/timeline';
 
 export const cleanDraftTimelinesRoute = (
   router: IRouter,
@@ -60,10 +62,18 @@ export const cleanDraftTimelinesRoute = (
             },
           });
         }
+        const templateTimelineData =
+          request.body.timelineType === TimelineType.template
+            ? {
+                timelineType: request.body.timelineType,
+                templateTimelineId: uuid.v4(),
+                templateTimelineVersion: 1,
+              }
+            : {};
 
         const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
           ...draftTimelineDefaults,
-          timelineType: request.body.timelineType,
+          ...templateTimelineData,
         });
 
         if (newTimelineResponse.code === 200) {

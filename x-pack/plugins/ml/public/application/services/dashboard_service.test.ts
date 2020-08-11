@@ -37,7 +37,7 @@ describe('DashboardService', () => {
     // assert
     expect(mockSavedObjectClient.find).toHaveBeenCalledWith({
       type: 'dashboard',
-      perPage: 10,
+      perPage: 1000,
       search: `test*`,
       searchFields: ['title^3', 'description'],
     });

@@ -55,7 +55,7 @@ import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors } from './api/create_security_layer_descriptors';
+import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -170,6 +170,8 @@ export class MapsPlugin
     bindStartCoreAndPlugins(core, plugins);
     return {
       createSecurityLayerDescriptors,
+      registerLayerWizard,
+      registerSource,
     };
   }
 }

@@ -24,7 +24,7 @@ The majority of this logic is extracted from the grunt build that has existed fo
 
 **Config**: [lib/config.js] defines the config used to execute tasks. It is mostly used to determine absolute paths to specific locations, and to get access to the Platforms.
 
-**Platform**: [lib/platform.js] defines the Platform objects, which define the different platforms we build for. Use `config.getTargetPlatforms()` to get the list of platforms we are targeting in this build, `config.getNodePlatforms()` to get the list of platform we will download node for, or `config.getLinux/Windows/MacPlatform()` to get a specific platform.
+**Platform**: [lib/platform.js] defines the Platform objects, which define the different platforms we build for. Use `config.getTargetPlatforms()` to get the list of platforms we are targeting in this build, `config.getNodePlatforms()` to get the list of platform we will download node for, or `config.getPlatform` to get a specific platform and architecture.
 
 **Log**: We uses the `ToolingLog` defined in [../tooling_log/tooling_log.js]
 
@@ -39,14 +39,3 @@ The majority of this logic is extracted from the grunt build that has existed fo
 [lib/build.js]: ./lib/build.js
 [build_distributables.js]: ./build_distributables.js
 [../tooling_log/tooling_log.js]: ../tooling_log/tooling_log.js
-
-# Client Node Modules Cleaning
-
-We have introduced in our bundle a webpack dll for the client vendor modules in order to improve
-the optimization time both in dev and in production. As for those modules we already have the 
-code into the vendors_${chunk_number}.bundle.dll.js we have decided to delete those bundled modules from the 
-distributable node_modules folder. However, in order to accomplish this, we need to exclude 
-every node_module used in the server side code. This logic is performed 
-under `nodejs_modules/clean_client_modules_on_dll_task.js`. In case we need to add any new cli
-or any other piece of server code other than `x-pack` or `core_plugins` we'll need
-to update the globs present on `clean_client_modules_on_dll_task.js` accordingly.

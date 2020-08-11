@@ -26,4 +26,5 @@ export const storybookAliases = {
   infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
   security_solution: 'x-pack/plugins/security_solution/scripts/storybook.js',
   ui_actions_enhanced: 'x-pack/plugins/ui_actions_enhanced/scripts/storybook.js',
+  observability: 'x-pack/plugins/observability/scripts/storybook.js',
 };

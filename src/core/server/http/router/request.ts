@@ -21,8 +21,9 @@ import { Url } from 'url';
 import { Request, ApplicationState } from 'hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
+import { RecursiveReadonly } from '@kbn/utility-types';
 
-import { deepFreeze, RecursiveReadonly } from '../../../utils';
+import { deepFreeze } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
@@ -63,6 +64,16 @@ export interface KibanaRequestEvents {
    * Observable that emits once if and when the request has been aborted.
    */
   aborted$: Observable<void>;
+
+  /**
+   * Observable that emits once if and when the request has been completely handled.
+   *
+   * @remarks
+   * The request may be considered completed if:
+   * - A response has been sent to the client; or
+   * - The request was aborted.
+   */
+  completed$: Observable<void>;
 }
 
 /**
@@ -156,7 +167,7 @@ export class KibanaRequest<
     public readonly params: Params,
     public readonly query: Query,
     public readonly body: Body,
-    // @ts-ignore we will use this flag as soon as http request proxy is supported in the core
+    // @ts-expect-error we will use this flag as soon as http request proxy is supported in the core
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean
   ) {
@@ -185,23 +196,30 @@ export class KibanaRequest<
 
   private getEvents(request: Request): KibanaRequestEvents {
     const finish$ = merge(
-      fromEvent(request.raw.req, 'end'), // all data consumed
+      fromEvent(request.raw.res, 'finish'), // Response has been sent
       fromEvent(request.raw.req, 'close') // connection was closed
     ).pipe(shareReplay(1), first());
+
+    const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
+    const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
+
     return {
-      aborted$: fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$)),
+      aborted$,
+      completed$,
     } as const;
   }
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
     const { parse, maxBytes, allow, output } = request.route.settings.payload || {};
+    const timeout = request.route.settings.timeout?.socket;
 
     const options = ({
       authRequired: this.getAuthRequired(request),
       // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired: (request.route.settings.app as KibanaRouteState)?.xsrfRequired ?? true,
       tags: request.route.settings.tags || [],
+      timeout: typeof timeout === 'number' ? timeout - 1 : undefined, // We are forced to have the timeout be 1 millisecond greater than the server and payload so we subtract one here to give the user consist settings
       body: isSafeMethod(method)
         ? undefined
         : {

@@ -104,7 +104,7 @@ export const getInstalledJobs = (
   compatibleModuleIds: string[]
 ): SiemJob[] =>
   jobSummaryData
-    .filter(({ groups }) => groups.includes('siem'))
+    .filter(({ groups }) => groups.includes('siem') || groups.includes('security'))
     .map<SiemJob>((jobSummary) => ({
       ...jobSummary,
       ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),

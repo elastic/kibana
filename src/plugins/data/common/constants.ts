@@ -44,7 +44,8 @@ export const UI_SETTINGS = {
   FORMAT_NUMBER_DEFAULT_LOCALE: 'format:number:defaultLocale',
   TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: 'timepicker:refreshIntervalDefaults',
   TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
+  TIMEPICKER_TIME_DEFAULTS: 'timepicker:timeDefaults',
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
-};
+} as const;

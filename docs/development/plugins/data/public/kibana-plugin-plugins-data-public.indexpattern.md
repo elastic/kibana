@@ -14,7 +14,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(id, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
+|  [(constructor)(id, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, uiSettingsValues, })](./kibana-plugin-plugins-data-public.indexpattern._constructor_.md) |  | Constructs a new instance of the <code>IndexPattern</code> class |
 
 ## Properties
 
@@ -39,10 +39,10 @@ export declare class IndexPattern implements IIndexPattern
 |  [\_fetchFields()](./kibana-plugin-plugins-data-public.indexpattern._fetchfields.md) |  |  |
 |  [addScriptedField(name, script, fieldType, lang)](./kibana-plugin-plugins-data-public.indexpattern.addscriptedfield.md) |  |  |
 |  [create(allowOverride)](./kibana-plugin-plugins-data-public.indexpattern.create.md) |  |  |
-|  [destroy()](./kibana-plugin-plugins-data-public.indexpattern.destroy.md) |  |  |
 |  [getAggregationRestrictions()](./kibana-plugin-plugins-data-public.indexpattern.getaggregationrestrictions.md) |  |  |
 |  [getComputedFields()](./kibana-plugin-plugins-data-public.indexpattern.getcomputedfields.md) |  |  |
 |  [getFieldByName(name)](./kibana-plugin-plugins-data-public.indexpattern.getfieldbyname.md) |  |  |
+|  [getFormatterForField(field)](./kibana-plugin-plugins-data-public.indexpattern.getformatterforfield.md) |  |  |
 |  [getNonScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getnonscriptedfields.md) |  |  |
 |  [getScriptedFields()](./kibana-plugin-plugins-data-public.indexpattern.getscriptedfields.md) |  |  |
 |  [getSourceFiltering()](./kibana-plugin-plugins-data-public.indexpattern.getsourcefiltering.md) |  |  |
@@ -56,7 +56,7 @@ export declare class IndexPattern implements IIndexPattern
 |  [popularizeField(fieldName, unit)](./kibana-plugin-plugins-data-public.indexpattern.popularizefield.md) |  |  |
 |  [prepBody()](./kibana-plugin-plugins-data-public.indexpattern.prepbody.md) |  |  |
 |  [refreshFields()](./kibana-plugin-plugins-data-public.indexpattern.refreshfields.md) |  |  |
-|  [removeScriptedField(field)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
+|  [removeScriptedField(fieldName)](./kibana-plugin-plugins-data-public.indexpattern.removescriptedfield.md) |  |  |
 |  [save(saveAttempts)](./kibana-plugin-plugins-data-public.indexpattern.save.md) |  |  |
 |  [toJSON()](./kibana-plugin-plugins-data-public.indexpattern.tojson.md) |  |  |
 |  [toSpec()](./kibana-plugin-plugins-data-public.indexpattern.tospec.md) |  |  |

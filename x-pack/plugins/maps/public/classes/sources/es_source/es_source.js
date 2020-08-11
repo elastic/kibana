@@ -150,7 +150,7 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {
-          field: this._descriptor.geoField,
+          field: this.getGeoFieldName(),
         },
       },
     });
@@ -230,12 +230,12 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
-    const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
+    const geoField = indexPattern.fields.getByName(this.getGeoFieldName());
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
           defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
-          values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField },
+          values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
         })
       );
     }

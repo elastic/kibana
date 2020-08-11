@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
@@ -65,7 +66,7 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
-  const set = _.partial(_.set, rawConfig);
+  const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);

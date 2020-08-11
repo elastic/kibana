@@ -51,7 +51,7 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       });
     },
 
-    async hostFlyoutDescriptionKeys(dataTestSubj: string) {
+    async endpointFlyoutDescriptionKeys(dataTestSubj: string) {
       await testSubjects.exists(dataTestSubj);
       const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
       const $ = await detailsData.parseDomContent();
@@ -65,7 +65,7 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
         );
     },
 
-    async hostFlyoutDescriptionValues(dataTestSubj: string) {
+    async endpointFlyoutDescriptionValues(dataTestSubj: string) {
       await testSubjects.exists(dataTestSubj);
       const detailsData: WebElementWrapper = await testSubjects.find(dataTestSubj);
       const $ = await detailsData.parseDomContent();

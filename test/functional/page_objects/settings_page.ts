@@ -303,6 +303,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       );
     }
 
+    async getAllIndexPatternNames() {
+      const indexPatterns = await this.getIndexPatternList();
+      return await mapAsync(indexPatterns, async (index) => {
+        return await index.getVisibleText();
+      });
+    }
+
     async isIndexPatternListEmpty() {
       await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
       const indexPatternList = await this.getIndexPatternList();
@@ -570,8 +577,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async setScriptedFieldScript(script: string) {
       log.debug('set scripted field script = ' + script);
       const aceEditorCssSelector = '[data-test-subj="editorFieldScript"] .ace_editor';
-      await find.clickByCssSelector(aceEditorCssSelector);
-      for (let i = 0; i < 1000; i++) {
+      const editor = await find.byCssSelector(aceEditorCssSelector);
+      await editor.click();
+      const existingText = await editor.getVisibleText();
+      for (let i = 0; i < existingText.length; i++) {
         await browser.pressKeys(browser.keys.BACK_SPACE);
       }
       await browser.pressKeys(...script.split(''));

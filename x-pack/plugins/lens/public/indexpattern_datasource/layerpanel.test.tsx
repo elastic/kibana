@@ -22,6 +22,7 @@ const initialState: IndexPatternPrivateState = {
   ],
   existingFields: {},
   currentIndexPatternId: '1',
+  isFirstExistenceFetch: false,
   layers: {
     first: {
       indexPatternId: '1',

@@ -7,12 +7,12 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IEsSearchResponse<Hits = unknown> extends IKibanaSearchResponse 
+export interface IEsSearchResponse extends IKibanaSearchResponse 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [rawResponse](./kibana-plugin-plugins-data-public.iessearchresponse.rawresponse.md) | <code>SearchResponse&lt;Hits&gt;</code> |  |
+|  [rawResponse](./kibana-plugin-plugins-data-public.iessearchresponse.rawresponse.md) | <code>SearchResponse&lt;any&gt;</code> |  |
 

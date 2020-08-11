@@ -261,11 +261,16 @@ export class ClusterManager {
       /debug\.log$/,
       ...pluginInternalDirsIgnore,
       fromRoot('src/legacy/server/sass/__tmp__'),
-      fromRoot('x-pack/plugins/reporting/.chromium'),
+      fromRoot('x-pack/plugins/reporting/chromium'),
       fromRoot('x-pack/plugins/security_solution/cypress'),
       fromRoot('x-pack/plugins/apm/e2e'),
       fromRoot('x-pack/plugins/apm/scripts'),
       fromRoot('x-pack/plugins/canvas/canvas_plugin_src'), // prevents server from restarting twice for Canvas plugin changes,
+      fromRoot('x-pack/plugins/case/server/scripts'),
+      fromRoot('x-pack/plugins/lists/scripts'),
+      fromRoot('x-pack/plugins/lists/server/scripts'),
+      fromRoot('x-pack/plugins/security_solution/scripts'),
+      fromRoot('x-pack/plugins/security_solution/server/lib/detection_engine/scripts'),
       'plugins/java_languageserver',
     ];
 
@@ -349,6 +354,6 @@ export class ClusterManager {
 
   onWatcherError = (err: any) => {
     this.log.bad('failed to watch files!\n', err.stack);
-    process.exit(1); // eslint-disable-line no-process-exit
+    process.exit(1);
   };
 }

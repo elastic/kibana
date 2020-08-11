@@ -1,7 +1,7 @@
 {
   "id": "siem_winlogbeat",
-  "title": "SIEM Winlogbeat",
-  "description": "Detect unusual processes and network activity in Winlogbeat data (beta).",
+  "title": "Security: Winlogbeat",
+  "description": "Detect unusual processes and network activity in Winlogbeat data.",
   "type": "Winlogbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "winlogbeat-*",

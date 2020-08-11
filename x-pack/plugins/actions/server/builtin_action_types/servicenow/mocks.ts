@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExternalService,
-  PushToServiceApiParams,
-  ExecutorSubActionPushParams,
-  MapRecord,
-} from '../case/types';
+import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import { MapRecord } from './case_types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -35,22 +31,9 @@ const createMock = (): jest.Mocked<ExternalService> => {
         url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
       })
     ),
-    createComment: jest.fn(),
+    findIncidents: jest.fn(),
   };
 
-  service.createComment.mockImplementationOnce(() =>
-    Promise.resolve({
-      commentId: 'case-comment-1',
-      pushedDate: '2020-03-10T12:24:20.000Z',
-    })
-  );
-
-  service.createComment.mockImplementationOnce(() =>
-    Promise.resolve({
-      commentId: 'case-comment-2',
-      pushedDate: '2020-03-10T12:24:20.000Z',
-    })
-  );
   return service;
 };
 
@@ -81,7 +64,7 @@ mapping.set('short_description', {
 });
 
 const executorParams: ExecutorSubActionPushParams = {
-  caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
+  savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   externalId: 'incident-3',
   createdAt: '2020-03-13T08:34:53.450Z',
   createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -89,6 +72,10 @@ const executorParams: ExecutorSubActionPushParams = {
   updatedBy: { fullName: 'Elastic User', username: 'elastic' },
   title: 'Incident title',
   description: 'Incident description',
+  comment: 'test-alert comment',
+  severity: '1',
+  urgency: '2',
+  impact: '1',
   comments: [
     {
       commentId: 'case-comment-1',
@@ -111,7 +98,7 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalCase: { short_description: 'Incident title', description: 'Incident description' },
+  externalObject: { short_description: 'Incident title', description: 'Incident description' },
 };
 
 export { externalServiceMock, mapping, executorParams, apiParams };

@@ -28,13 +28,16 @@ describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
 
   beforeEach(() => {
-    plugin = new SearchService(coreMock.createPluginInitializerContext({}));
+    const mockLogger: any = {
+      info: () => {},
+    };
+    plugin = new SearchService(coreMock.createPluginInitializerContext({}), mockLogger);
     mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup);
+      const setup = plugin.setup(mockCoreSetup, {});
       expect(setup).toHaveProperty('registerSearchStrategy');
     });
   });

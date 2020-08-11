@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
-import { padLeft, difference, chunk } from 'lodash';
+import { padStart, difference, chunk } from 'lodash';
 import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -20,13 +20,15 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
+  readOnly: boolean;
   alertState: AlertTaskState;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
-  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>
+  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>,
+  readOnly: boolean
 ) => [
   {
     field: 'instance',
@@ -90,6 +92,7 @@ export const alertInstancesTableColumns = (
             showLabel={false}
             compressed={true}
             checked={alertInstance.isMuted}
+            disabled={readOnly}
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
             onChange={() => onMuteAction(alertInstance)}
           />
@@ -103,12 +106,13 @@ export const alertInstancesTableColumns = (
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
-    .map((value) => padLeft(`${value}`, 2, '0'))
+    .map((value) => padStart(`${value}`, 2, '0'))
     .join(':');
 }
 
 export function AlertInstances({
   alert,
+  readOnly,
   alertState: { alertInstances = {} },
   muteAlertInstance,
   unmuteAlertInstance,
@@ -162,7 +166,7 @@ export function AlertInstances({
         cellProps={() => ({
           'data-test-subj': 'cell',
         })}
-        columns={alertInstancesTableColumns(onMuteAction)}
+        columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
       />
     </Fragment>

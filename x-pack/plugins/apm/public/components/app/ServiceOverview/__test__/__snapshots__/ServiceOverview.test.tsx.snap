@@ -157,7 +157,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Go Service/transactions?"
             rel="noreferrer"
           >
             My Go Service
@@ -263,7 +263,7 @@ NodeList [
         >
           <a
             class="euiLink euiLink--primary c0"
-            href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+            href="#/services/My Python Service/transactions?"
             rel="noreferrer"
           >
             My Python Service

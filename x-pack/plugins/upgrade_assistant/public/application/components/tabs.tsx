@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { findIndex, get, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { findIndex, get } from 'lodash';
 import React from 'react';
 
 import {

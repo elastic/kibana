@@ -51,6 +51,8 @@ export type IndexPatternPrivateState = IndexPatternPersistedState & {
    * indexPatternId -> fieldName -> boolean
    */
   existingFields: Record<string, Record<string, boolean>>;
+  isFirstExistenceFetch: boolean;
+  existenceFetchFailed?: boolean;
 };
 
 export interface IndexPatternRef {

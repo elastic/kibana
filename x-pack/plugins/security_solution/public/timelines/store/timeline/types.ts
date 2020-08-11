@@ -10,6 +10,8 @@ import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { AppApolloClient } from '../../../common/lib/lib';
 import { inputsModel } from '../../../common/store/inputs';
 import { NotesById } from '../../../common/store/app/model';
+import { StartServices } from '../../../types';
+
 import { TimelineModel } from './model';
 
 export interface AutoSavedWarningMsg {
@@ -53,5 +55,6 @@ export interface TimelineEpicDependencies<State> {
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
+  kibana$: Observable<StartServices>;
   storage: Storage;
 }

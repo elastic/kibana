@@ -113,7 +113,7 @@ export class TimeBuckets {
       bounds = Array.isArray(input) ? input : [];
     }
 
-    const moments: Moment[] = sortBy(bounds, Number);
+    const moments: Moment[] = sortBy(bounds, Number) as Moment[];
 
     const valid = moments.length === 2 && moments.every(isValidMoment);
     if (!valid) {

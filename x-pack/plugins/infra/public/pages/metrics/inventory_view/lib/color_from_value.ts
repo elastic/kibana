@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { eq, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
+import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,
@@ -18,7 +18,7 @@ import {
 } from '../../../../lib/lib';
 
 const OPERATOR_TO_FN = {
-  [InfraWaffleMapRuleOperator.eq]: eq,
+  [InfraWaffleMapRuleOperator.eq]: isEqual,
   [InfraWaffleMapRuleOperator.lt]: lt,
   [InfraWaffleMapRuleOperator.lte]: lte,
   [InfraWaffleMapRuleOperator.gte]: gte,
@@ -68,8 +68,8 @@ export const calculateSteppedGradientColor = (
 
   // Since the stepped legend matches a range we need to ensure anything outside
   // the max bounds get's the maximum color.
-  if (gte(normalizedValue, last(rules).value)) {
-    return last(rules).color;
+  if (gte(normalizedValue, (last(rules) as any).value)) {
+    return (last(rules) as any).color;
   }
 
   return rules.reduce((color: string, rule) => {
@@ -79,7 +79,7 @@ export const calculateSteppedGradientColor = (
       return rule.color;
     }
     return color;
-  }, first(rules).color || defaultColor);
+  }, (first(rules) as any).color || defaultColor);
 };
 
 export const calculateStepColor = (
@@ -106,7 +106,7 @@ export const calculateGradientColor = (
     return defaultColor;
   }
   if (rules.length === 1) {
-    return last(rules).color;
+    return (last(rules) as any).color;
   }
   const { min, max } = bounds;
   const sortedRules = sortBy(rules, 'value');
@@ -116,8 +116,10 @@ export const calculateGradientColor = (
       return rule;
     }
     return acc;
-  }, first(sortedRules));
-  const endRule = sortedRules.filter((r) => r !== startRule).find((r) => r.value >= normValue);
+  }, first(sortedRules)) as any;
+  const endRule = sortedRules
+    .filter((r) => r !== startRule)
+    .find((r) => r.value >= normValue) as any;
   if (!endRule) {
     return startRule.color;
   }

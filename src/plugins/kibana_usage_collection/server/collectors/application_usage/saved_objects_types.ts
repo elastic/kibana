@@ -35,11 +35,10 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
-      properties: {
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
-      },
+      // Not indexing any of its contents because we use them "as-is" and don't search by these fields
+      // for more info, see the README.md for application_usage
+      dynamic: false,
+      properties: {},
     },
   });
 
@@ -48,11 +47,9 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
     hidden: false,
     namespaceType: 'agnostic',
     mappings: {
+      dynamic: false,
       properties: {
         timestamp: { type: 'date' },
-        appId: { type: 'keyword' },
-        numberOfClicks: { type: 'long' },
-        minutesOnScreen: { type: 'float' },
       },
     },
   });

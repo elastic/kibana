@@ -12,6 +12,7 @@ search: {
         dateHistogramInterval: typeof dateHistogramInterval;
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
+        Ipv4Address: typeof Ipv4Address;
         isValidEsInterval: typeof isValidEsInterval;
         isValidInterval: typeof isValidInterval;
         parseEsInterval: typeof parseEsInterval;

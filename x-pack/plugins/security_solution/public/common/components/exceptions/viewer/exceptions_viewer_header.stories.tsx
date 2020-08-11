@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
-import { ExceptionListType } from '../types';
+import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
@@ -23,7 +23,7 @@ storiesOf('Components|ExceptionsViewerHeader', module)
         isInitLoading={true}
         detectionsListItems={5}
         endpointListItems={2000}
-        supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+        supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
         onFilterChange={action('onClick')}
         onAddExceptionClick={action('onClick')}
       />
@@ -35,7 +35,7 @@ storiesOf('Components|ExceptionsViewerHeader', module)
         isInitLoading={false}
         detectionsListItems={5}
         endpointListItems={2000}
-        supportedListTypes={[ExceptionListType.DETECTION_ENGINE, ExceptionListType.ENDPOINT]}
+        supportedListTypes={[ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT]}
         onFilterChange={action('onClick')}
         onAddExceptionClick={action('onClick')}
       />
@@ -47,7 +47,7 @@ storiesOf('Components|ExceptionsViewerHeader', module)
         isInitLoading={false}
         detectionsListItems={0}
         endpointListItems={2000}
-        supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+        supportedListTypes={[ExceptionListTypeEnum.DETECTION]}
         onFilterChange={action('onClick')}
         onAddExceptionClick={action('onClick')}
       />
@@ -59,7 +59,7 @@ storiesOf('Components|ExceptionsViewerHeader', module)
         isInitLoading={false}
         detectionsListItems={5}
         endpointListItems={0}
-        supportedListTypes={[ExceptionListType.DETECTION_ENGINE]}
+        supportedListTypes={[ExceptionListTypeEnum.DETECTION]}
         onFilterChange={action('onClick')}
         onAddExceptionClick={action('onClick')}
       />

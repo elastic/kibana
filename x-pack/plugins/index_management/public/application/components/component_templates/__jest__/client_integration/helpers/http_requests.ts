@@ -5,7 +5,11 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
-import { ComponentTemplateListItem, ComponentTemplateDeserialized } from '../../../shared_imports';
+import {
+  ComponentTemplateListItem,
+  ComponentTemplateDeserialized,
+  ComponentTemplateSerialized,
+} from '../../../shared_imports';
 import { API_BASE_PATH } from './constants';
 
 // Register helpers to mock HTTP Requests
@@ -46,10 +50,25 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setCreateComponentTemplateResponse = (
+    response?: ComponentTemplateSerialized,
+    error?: any
+  ) => {
+    const status = error ? error.body.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('POST', `${API_BASE_PATH}/component_templates`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadComponentTemplatesResponse,
     setDeleteComponentTemplateResponse,
     setLoadComponentTemplateResponse,
+    setCreateComponentTemplateResponse,
   };
 };
 

@@ -30,6 +30,9 @@ export {
   FeatureCatalogueCategory,
   Environment,
   TutorialVariables,
+  TutorialDirectoryNoticeComponent,
+  TutorialDirectoryHeaderLinkComponent,
+  TutorialModuleNoticeComponent,
 } from './services';
 export * from '../common/instruction_variant';
 import { HomePublicPlugin } from './plugin';

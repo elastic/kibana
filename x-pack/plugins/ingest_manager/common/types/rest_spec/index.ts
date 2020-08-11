@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export * from './common';
-export * from './datasource';
+export * from './package_config';
 export * from './data_stream';
 export * from './agent';
 export * from './agent_config';

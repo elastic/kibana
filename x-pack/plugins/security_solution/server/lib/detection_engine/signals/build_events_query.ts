@@ -4,23 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+
 interface BuildEventsSearchQuery {
+  aggregations?: unknown;
   index: string[];
   from: string;
   to: string;
   filter: unknown;
   size: number;
   searchAfterSortId: string | number | undefined;
+  timestampOverride: TimestampOverrideOrUndefined;
 }
 
 export const buildEventsSearchQuery = ({
+  aggregations,
   index,
   from,
   to,
   filter,
   size,
   searchAfterSortId,
+  timestampOverride,
 }: BuildEventsSearchQuery) => {
+  const timestamp = timestampOverride ?? '@timestamp';
   const filterWithTime = [
     filter,
     {
@@ -31,7 +38,7 @@ export const buildEventsSearchQuery = ({
               should: [
                 {
                   range: {
-                    '@timestamp': {
+                    [timestamp]: {
                       gte: from,
                     },
                   },
@@ -45,7 +52,7 @@ export const buildEventsSearchQuery = ({
               should: [
                 {
                   range: {
-                    '@timestamp': {
+                    [timestamp]: {
                       lte: to,
                     },
                   },
@@ -74,15 +81,17 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      ...(aggregations ? { aggregations } : {}),
       sort: [
         {
-          '@timestamp': {
+          [timestamp]: {
             order: 'asc',
           },
         },
       ],
     },
   };
+
   if (searchAfterSortId) {
     return {
       ...searchQuery,

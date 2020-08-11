@@ -375,7 +375,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
 
-        const dateOnAllInstancesFromApiResponse = mapValues<Record<string, number>>(
+        const dateOnAllInstancesFromApiResponse = mapValues(
           alertInstances,
           ({
             meta: {

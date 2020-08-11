@@ -6,9 +6,8 @@
     app-name="'discover'"
     config="topNavMenu"
     index-patterns="[indexPattern]"
-    on-query-submit="updateQuery"
+    on-query-submit="handleRefresh"
     on-saved-query-id-change="updateSavedQueryId"
-    query="state.query"
     saved-query-id="state.savedQuery"
     screen-title="screenTitle"
     show-date-picker="indexPattern.isTimeBased()"
@@ -65,18 +64,7 @@
         <div class="dscWrapper__content" ng-show="resultState === 'ready'">
           <!-- result -->
           <div class="dscResults">
-            <button
-              class="kuiButton kuiButton--basic kuiButton--iconText dscSkipButton"
-              ng-click="showAllRows(); scrollToBottom()"
-            >
-              <span class="kuiButton__inner">
-                <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-down"></span>
-                <span
-                  i18n-id="discover.skipToBottomButtonLabel"
-                  i18n-default-message="Skip to bottom"
-                ></span>
-              </span>
-            </button>
+            <skip-bottom-button on-click="onSkipBottomButtonClick"></skip-bottom-button>
 
             <hits-counter
               hits="hits || 0"
@@ -141,11 +129,12 @@
                 on-remove-column="removeColumn"
               ></doc-table>
 
-              <a tabindex="0" id="discoverBottomMarker"></a>
+              <a tabindex="0" id="discoverBottomMarker">&#8203;</a>
 
               <div
                 ng-if="rows.length == opts.sampleSize"
                 class="dscTable__footer"
+                data-test-subj="discoverDocTableFooter"
               >
                 <span
                   i18n-id="discover.howToSeeOtherMatchingDocumentsDescription"

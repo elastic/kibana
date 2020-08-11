@@ -14,8 +14,8 @@ import {
 } from '../../../common/constants';
 import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../../types';
 import { metadata } from './metadata';
-import { scheduleTaskFnFactory } from './server/create_job';
-import { runTaskFnFactory } from './server/execute_job';
+import { scheduleTaskFnFactory } from './create_job';
+import { runTaskFnFactory } from './execute_job';
 import { JobParamsPDF, ScheduledTaskParamsPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<

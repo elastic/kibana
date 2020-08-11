@@ -2703,7 +2703,7 @@ exports[`Header renders 2`] = `
             >
               <nav
                 aria-label="breadcrumb"
-                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
+                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                 data-test-subj="breadcrumbs"
               >
                 <EuiInnerText>
@@ -6914,7 +6914,7 @@ exports[`Header renders 3`] = `
             >
               <nav
                 aria-label="breadcrumb"
-                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
+                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                 data-test-subj="breadcrumbs"
               >
                 <EuiInnerText>
@@ -12347,7 +12347,7 @@ exports[`Header renders 4`] = `
             >
               <nav
                 aria-label="breadcrumb"
-                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate euiBreadcrumbs--responsive"
+                className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                 data-test-subj="breadcrumbs"
               >
                 <EuiInnerText>

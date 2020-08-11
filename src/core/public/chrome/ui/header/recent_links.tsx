@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { EuiNavDrawerGroup } from '@elastic/eui';
 import { RecentNavLink } from './nav_link';
 

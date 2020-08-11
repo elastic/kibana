@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { Direction } from '../../../../../graphql/types';
+import * as i18n from '../translations';
 
 import { SortDirection } from '.';
 
@@ -37,8 +38,25 @@ interface Props {
 }
 
 /** Renders a sort indicator */
-export const SortIndicator = React.memo<Props>(({ sortDirection }) => (
-  <EuiIcon data-test-subj="sortIndicator" type={getDirection(sortDirection) || 'empty'} />
-));
+export const SortIndicator = React.memo<Props>(({ sortDirection }) => {
+  const direction = getDirection(sortDirection);
+
+  if (direction != null) {
+    return (
+      <EuiToolTip
+        content={
+          direction === SortDirectionIndicatorEnum.SORT_UP
+            ? i18n.SORTED_ASCENDING
+            : i18n.SORTED_DESCENDING
+        }
+        data-test-subj="sort-indicator-tooltip"
+      >
+        <EuiIcon data-test-subj="sortIndicator" type={direction} />
+      </EuiToolTip>
+    );
+  } else {
+    return <EuiIcon data-test-subj="sortIndicator" type={'empty'} />;
+  }
+});
 
 SortIndicator.displayName = 'SortIndicator';

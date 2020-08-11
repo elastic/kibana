@@ -1,0 +1,30 @@
+.lnsToolbarButton {
+  line-height: $euiButtonHeight; // Keeps alignment of text and chart icon
+  background-color: $euiColorEmptyShade;
+  border-color: $euiBorderColor;
+
+  // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
+  min-width: 0;
+
+  .lnsToolbarButton__text:empty {
+    margin: 0;
+  }
+
+  // Toolbar buttons don't look good with centered text when fullWidth
+  &[class*='fullWidth'] {
+    text-align: left;
+
+    .lnsToolbarButton__content {
+      justify-content: space-between;
+    }
+  }
+}
+
+.lnsToolbarButton--bold {
+  font-weight: $euiFontWeightBold;
+}
+
+.lnsToolbarButton--s {
+  box-shadow: none !important; // sass-lint:disable-line no-important
+  font-size: $euiFontSizeS;
+}

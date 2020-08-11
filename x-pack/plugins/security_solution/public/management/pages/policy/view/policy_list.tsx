@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, CSSProperties, useState, MouseEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 'react';
 import {
   EuiBasicTable,
   EuiText,
+  EuiTitle,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
@@ -20,11 +22,9 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiSpacer,
   EuiButton,
-  EuiSteps,
-  EuiTitle,
-  EuiProgress,
+  EuiBetaBadge,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,18 +36,21 @@ import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
+import { useToasts } from '../../../../common/lib/kibana';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { ManagementPageView } from '../../../components/management_page_view';
+import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreateDatasourceRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { MANAGEMENT_APP_ID } from '../../../common/constants';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -63,10 +66,6 @@ const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-});
-
-const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
-  textAlign: 'center',
 });
 
 const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
@@ -97,6 +96,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
         }
         isOpen={isOpen}
         closePopover={handleCloseMenu}
+        repositionOnScroll
       >
         <EuiContextMenuPanel items={items} data-test-subj="policyActionsMenu" />
       </EuiPopover>
@@ -125,10 +125,11 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
-  const { services, notifications } = useKibana();
+  const { services } = useKibana();
+  const toasts = useToasts();
   const history = useHistory();
   const location = useLocation();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -147,34 +148,33 @@ export const PolicyList = React.memo(() => {
     endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreateDatasourceRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
     'ingestManager',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
-      // to the Integration Endpoint Package Add Datasource if we have package information.
+      // to the Integration Endpoint Package Add Integration if we have package information.
       // Also,
       // We pass along soem state information so that the Ingest page can change the behaviour
       // of the cancel and submit buttons and redirect the user back to endpoint policy
       path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-datasource` : ''
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
       }`,
       state: {
-        onCancelNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onCancelNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
         onCancelUrl: formatUrl(getPoliciesPath()),
-        onSaveNavigateTo: ['securitySolution:management', { path: getPoliciesPath() }],
+        onSaveNavigateTo: [MANAGEMENT_APP_ID, { path: getPoliciesPath() }],
       },
     }
   );
 
   useEffect(() => {
     if (apiError) {
-      notifications.toasts.danger({
+      toasts.addDanger({
         title: apiError.error,
-        body: apiError.message,
-        toastLifeTimeMs: 10000,
+        text: apiError.message,
       });
     }
-  }, [apiError, dispatch, notifications.toasts]);
+  }, [apiError, dispatch, toasts]);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -182,31 +182,29 @@ export const PolicyList = React.memo(() => {
       if (deleteStatus === true) {
         setPolicyIdToDelete('');
         setShowDelete(false);
-        notifications.toasts.success({
-          toastLifeTimeMs: 10000,
+        toasts.addSuccess({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteSuccessToast', {
             defaultMessage: 'Success!',
           }),
-          body: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
-              defaultMessage="Policy has been deleted."
-            />
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails',
+            {
+              defaultMessage: 'Policy has been deleted.',
+            }
           ),
         });
       } else {
-        notifications.toasts.danger({
-          toastLifeTimeMs: 10000,
+        toasts.addDanger({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToast', {
             defaultMessage: 'Failed!',
           }),
-          body: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
+          text: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
             defaultMessage: 'Failed to delete policy',
           }),
         });
       }
     }
-  }, [notifications.toasts, deleteStatus]);
+  }, [toasts, deleteStatus]);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -323,9 +321,8 @@ export const PolicyList = React.memo(() => {
         }),
         render(pkg: Immutable<PackageData>) {
           return i18n.translate('xpack.securitySolution.endpoint.policyList.versionField', {
-            defaultMessage: '{title} v{version}',
+            defaultMessage: 'v{version}',
             values: {
-              title: pkg.title,
               version: pkg.version,
             },
           });
@@ -380,6 +377,22 @@ export const PolicyList = React.memo(() => {
     [services.application, handleDeleteOnClick, formatUrl, search]
   );
 
+  const bodyContent = useMemo(() => {
+    return policyItems && policyItems.length > 0 ? (
+      <EuiBasicTable
+        items={[...policyItems]}
+        columns={columns}
+        loading={loading}
+        pagination={paginationSetup}
+        onChange={handleTableChange}
+        data-test-subj="policyTable"
+        hasActions={false}
+      />
+    ) : (
+      <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
+    );
+  }, [policyItems, loading, columns, handleCreatePolicyClick, handleTableChange, paginationSetup]);
+
   return (
     <>
       {showDelete && (
@@ -395,9 +408,38 @@ export const PolicyList = React.memo(() => {
       <ManagementPageView
         viewType="list"
         data-test-subj="policyListPage"
-        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-          defaultMessage: 'Policies',
-        })}
+        headerLeft={
+          <>
+            <EuiFlexGroup alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="pageViewHeaderLeftTitle">
+                    <FormattedMessage
+                      id="xpack.securitySolution.policyList.pageTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+                    defaultMessage: 'Beta',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.policyList.pageSubTitle"
+                  defaultMessage="View and configure protections"
+                />
+              </p>
+            </EuiText>
+          </>
+        }
         headerRight={
           <EuiButton
             iconType="plusInCircle"
@@ -410,158 +452,27 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
-        {useMemo(() => {
-          return (
-            <>
-              {policyItems && policyItems.length > 0 ? (
-                <EuiBasicTable
-                  items={[...policyItems]}
-                  columns={columns}
-                  loading={loading}
-                  pagination={paginationSetup}
-                  onChange={handleTableChange}
-                  data-test-subj="policyTable"
-                  hasActions={false}
-                />
-              ) : (
-                <EmptyPolicyTable
-                  loading={loading}
-                  onActionClick={handleCreatePolicyClick}
-                  actionDisabled={false}
-                  dataTestSubj="emptyPolicyTable"
-                />
-              )}
-            </>
-          );
-        }, [
-          policyItems,
-          loading,
-          columns,
-          handleCreatePolicyClick,
-          handleTableChange,
-          paginationSetup,
-        ])}
-        <SpyRoute pageName={SecurityPageName.management} />
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
+        {bodyContent}
+        <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     </>
   );
 });
 
 PolicyList.displayName = 'PolicyList';
-
-const EmptyPolicyTable = React.memo<{
-  loading: boolean;
-  onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
-  actionDisabled: boolean;
-  dataTestSubj: string;
-}>(({ loading, onActionClick, actionDisabled, dataTestSubj }) => {
-  const policySteps = useMemo(
-    () => [
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepOneTitle', {
-          defaultMessage: 'Head over to Ingest Manager.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepOne"
-              defaultMessage="Here, you’ll add the Elastic Endpoint Security Integration to your Agent Configuration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepTwoTitle', {
-          defaultMessage: 'We’ll create a recommended security policy for you.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepTwo"
-              defaultMessage="You can edit this policy in the “Policies” tab after you’ve added the Elastic Endpoint integration."
-            />
-          </EuiText>
-        ),
-      },
-      {
-        title: i18n.translate('xpack.securitySolution.endpoint.policyList.stepThreeTitle', {
-          defaultMessage: 'Enroll your agents through Fleet.',
-        }),
-        children: (
-          <EuiText color="subdued" size="xs">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.stepThree"
-              defaultMessage="If you haven’t already, enroll your agents through Fleet using the same agent configuration."
-            />
-          </EuiText>
-        ),
-      },
-    ],
-    []
-  );
-  return (
-    <div data-test-subj={dataTestSubj}>
-      {loading ? (
-        <EuiProgress size="xs" color="accent" className="essentialAnimation" />
-      ) : (
-        <>
-          <EuiSpacer size="xxl" />
-          <EuiTitle size="m">
-            <h2 style={TEXT_ALIGN_CENTER}>
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyList.noPoliciesPrompt"
-                defaultMessage="Looks like you're not using Elastic Endpoint"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="xxl" />
-          <EuiText textAlign="center" color="subdued" size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.noPoliciesInstructions"
-              defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
-            />
-          </EuiText>
-          <EuiSpacer size="xxl" />
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiSteps steps={policySteps} data-test-subj={'onboardingSteps'} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={onActionClick}
-                isDisabled={actionDisabled}
-                data-test-subj="onboardingStartButton"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.policyList.emptyCreateNewButton"
-                  defaultMessage="Click here to get started"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
-    </div>
-  );
-});
-
-EmptyPolicyTable.displayName = 'EmptyPolicyTable';
 
 const ConfirmDelete = React.memo<{
   hostCount: number;

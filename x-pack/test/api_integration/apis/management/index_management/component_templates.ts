@@ -78,6 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(testComponentTemplate).to.eql({
             name: COMPONENT_NAME,
             usedBy: [],
+            isManaged: false,
             hasSettings: true,
             hasMappings: true,
             hasAliases: false,
@@ -96,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...COMPONENT,
             _kbnMeta: {
               usedBy: [],
+              isManaged: false,
             },
           });
         });
@@ -146,6 +148,10 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 10,
               },
             },
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -162,6 +168,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: REQUIRED_FIELDS_COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -177,6 +187,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             name: COMPONENT_NAME,
             template: {},
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(409);
 
@@ -233,7 +247,12 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: COMPONENT_NAME,
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(200);
 
@@ -250,7 +269,12 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             ...COMPONENT,
+            name: 'component_does_not_exist',
             version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           })
           .expect(404);
 

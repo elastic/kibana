@@ -28,10 +28,11 @@ export const IntraAppStateProvider = memo<{
 }>(({ kibanaScopedHistory, children }) => {
   const internalAppToAppState = useMemo<IntraAppState>(() => {
     return {
-      forRoute: kibanaScopedHistory.location.hash.substr(1),
+      forRoute: new URL(`${kibanaScopedHistory.location.hash.substr(1)}`, 'http://localhost')
+        .pathname,
       routeState: kibanaScopedHistory.location.state as AnyIntraAppRouteState,
     };
-  }, [kibanaScopedHistory.location.hash, kibanaScopedHistory.location.state]);
+  }, [kibanaScopedHistory.location.state, kibanaScopedHistory.location.hash]);
   return (
     <IntraAppStateContext.Provider value={internalAppToAppState}>
       {children}
@@ -57,6 +58,7 @@ export function useIntraAppState<S = AnyIntraAppRouteState>():
     // once so that it does not impact navigation to the page from within the
     // ingest app. side affect is that the browser back button would not work
     // consistently either.
+
     if (location.pathname === intraAppState.forRoute && !wasHandled.has(intraAppState)) {
       wasHandled.add(intraAppState);
       return intraAppState.routeState as S;

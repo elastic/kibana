@@ -9,11 +9,13 @@ import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowTarget } from '../../../graphql/types';
+import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
@@ -28,24 +30,36 @@ describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
       data: mockData.IpOverview,
-      endDate: new Date('2019-06-18T06:00:00.000Z').valueOf(),
+      endDate: '2019-06-18T06:00:00.000Z',
       flowTarget: FlowTarget.source,
       loading: false,
       id: 'ipOverview',
       ip: '10.10.10.10',
       isLoadingAnomaliesData: false,
       narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
-      startDate: new Date('2019-06-15T06:00:00.000Z').valueOf(),
+      startDate: '2019-06-15T06:00:00.000Z',
       type: networkModel.NetworkType.details,
       updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
         flowTarget: FlowTarget;

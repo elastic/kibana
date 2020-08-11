@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { ILegacyScopedClusterClient } from 'src/core/server';
 import { DeprecationAPIResponse } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../common/types';
 
 import { esIndicesStateCheck } from './es_indices_state_check';
 
 export async function getUpgradeAssistantStatus(
-  dataClient: IScopedClusterClient,
+  dataClient: ILegacyScopedClusterClient,
   isCloudEnabled: boolean
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = await dataClient.callAsCurrentUser('transport.request', {

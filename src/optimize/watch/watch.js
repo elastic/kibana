@@ -32,7 +32,7 @@ export default async (kbnServer) => {
    *   while the optimizer is running
    *
    * server: this process runs the entire kibana server and proxies
-   *   all requests for /bundles/* or /built_assets/dlls/* to the optmzr process
+   *   all requests for /bundles/* to the optmzr process
    *
    * @param  {string} process.env.kbnWorkerType
    */

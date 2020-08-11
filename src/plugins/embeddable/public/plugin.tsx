@@ -17,13 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  Filter,
-  TimeRange,
-  esFilters,
-} from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { getSavedObjectFinder } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -43,11 +37,10 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
-  ChartActionContext,
-  isRangeSelectTriggerContext,
-  isValueClickTriggerContext,
+  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import { AttributeService } from './lib/embeddables/attribute_service';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 
 export interface EmbeddableSetupDependencies {
@@ -82,18 +75,13 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-
-  /**
-   * Given {@link ChartActionContext} returns a list of `data` plugin {@link Filter} entries.
-   */
-  filtersFromContext: (context: ChartActionContext) => Promise<Filter[]>;
-
-  /**
-   * Returns possible time range and filters that can be constructed from {@link ChartActionContext} object.
-   */
-  filtersAndTimeRangeFromContext: (
-    context: ChartActionContext
-  ) => Promise<{ filters: Filter[]; timeRange?: TimeRange }>;
+  getAttributeService: <
+    A,
+    V extends EmbeddableInput & { attributes: A },
+    R extends SavedObjectEmbeddableInput
+  >(
+    type: string
+  ) => AttributeService<A, V, R>;
 
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
@@ -146,41 +134,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
     this.isRegistryReady = true;
 
-    const filtersFromContext: EmbeddableStart['filtersFromContext'] = async (context) => {
-      try {
-        if (isRangeSelectTriggerContext(context))
-          return await data.actions.createFiltersFromRangeSelectAction(context.data);
-        if (isValueClickTriggerContext(context))
-          return await data.actions.createFiltersFromValueClickAction(context.data);
-        // eslint-disable-next-line no-console
-        console.warn("Can't extract filters from action.", context);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('Error extracting filters from action. Returning empty filter list.', error);
-      }
-      return [];
-    };
-
-    const filtersAndTimeRangeFromContext: EmbeddableStart['filtersAndTimeRangeFromContext'] = async (
-      context
-    ) => {
-      const filters = await filtersFromContext(context);
-
-      if (!context.data.timeFieldName) return { filters };
-
-      const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-        context.data.timeFieldName,
-        filters
-      );
-
-      return {
-        filters: restOfFilters,
-        timeRange: timeRangeFilter
-          ? esFilters.convertRangeFilterToTimeRangeString(timeRangeFilter)
-          : undefined,
-      };
-    };
-
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
       embeddable,
       hideHeader,
@@ -206,8 +159,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
-      filtersFromContext,
-      filtersAndTimeRangeFromContext,
+      getAttributeService: (type: string) => new AttributeService(type, core.savedObjects.client),
       getStateTransfer: (history?: ScopedHistory) => {
         return history
           ? new EmbeddableStateTransfer(core.application.navigateToApp, history)

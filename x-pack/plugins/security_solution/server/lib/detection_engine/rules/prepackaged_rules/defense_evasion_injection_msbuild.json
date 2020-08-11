@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An instance of MSBuild, the Microsoft Build Engine, created a thread in another process. This technique is sometimes used to evade detection or elevate privileges.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Process Injection by the Microsoft Build Engine",
+  "query": "process.name:MSBuild.exe and event.action:\"CreateRemoteThread detected (rule: CreateRemoteThread)\"",
+  "risk_score": 21,
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae9",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

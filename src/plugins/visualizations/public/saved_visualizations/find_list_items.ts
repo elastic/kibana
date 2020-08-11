@@ -49,7 +49,7 @@ export async function findListItems({
     }, acc);
   }, {} as { [visType: string]: VisualizationsAppExtension });
   const searchOption = (field: string, ...defaults: string[]) =>
-    _(extensions).pluck(field).concat(defaults).compact().flatten().uniq().value() as string[];
+    _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
   const searchOptions = {
     type: searchOption('docTypes', 'visualization'),
     searchFields: searchOption('searchFields', 'title^3', 'description'),

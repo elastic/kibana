@@ -25,7 +25,7 @@ export function AgentConfigurations() {
     (callApmApi) =>
       callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
     [],
-    { preservePreviousData: false }
+    { preservePreviousData: false, showToastOnError: false }
   );
 
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });

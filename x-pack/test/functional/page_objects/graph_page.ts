@@ -83,10 +83,7 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
       return [this.getPositionAsString(x1, y1), this.getPositionAsString(x2, y2)];
     }
 
-    async isolateEdge(edge: Edge) {
-      const from = edge.sourceNode.label;
-      const to = edge.targetNode.label;
-
+    async isolateEdge(from: string, to: string) {
       // select all nodes
       await testSubjects.click('graphSelectAll');
 
@@ -107,13 +104,6 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
 
       // remove all other nodes
       await testSubjects.click('graphRemoveSelection');
-    }
-
-    async clickEdge(edge: Edge) {
-      await this.stopLayout();
-      await PageObjects.common.sleep(1000);
-      await edge.element.click();
-      await this.startLayout();
     }
 
     async stopLayout() {

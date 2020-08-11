@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { get, isEmpty, noop } from 'lodash/fp';
+
+import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
 import { Ecs, TimelineItem, TimelineNonEcsData } from '../../../../graphql/types';
@@ -15,6 +16,7 @@ import { OnPinEvent, OnUnPinEvent } from '../events';
 import { TimelineRowAction, TimelineRowActionOnClick } from './actions';
 
 import * as i18n from './translations';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -28,10 +30,19 @@ export const getPinTooltip = ({
   isPinned,
   // eslint-disable-next-line no-shadow
   eventHasNotes,
+  timelineType,
 }: {
   isPinned: boolean;
   eventHasNotes: boolean;
-}) => (isPinned && eventHasNotes ? i18n.PINNED_WITH_NOTES : isPinned ? i18n.PINNED : i18n.UNPINNED);
+  timelineType: TimelineTypeLiteral;
+}) =>
+  timelineType === TimelineType.template
+    ? i18n.DISABLE_PIN
+    : isPinned && eventHasNotes
+    ? i18n.PINNED_WITH_NOTES
+    : isPinned
+    ? i18n.PINNED
+    : i18n.UNPINNED;
 
 export interface IsPinnedParams {
   eventId: string;
@@ -55,11 +66,16 @@ export const getPinOnClick = ({
   onPinEvent,
   onUnPinEvent,
   isEventPinned,
-}: GetPinOnClickParams): (() => void) => {
+}: GetPinOnClickParams) => {
   if (!allowUnpinning) {
-    return noop;
+    return;
   }
-  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
+
+  if (isEventPinned) {
+    onUnPinEvent(eventId);
+  } else {
+    onPinEvent(eventId);
+  }
 };
 
 /**
@@ -93,13 +109,11 @@ export const getEventType = (event: Ecs): Omit<EventType, 'all'> => {
   return 'raw';
 };
 
-export const showGraphView = (graphEventId?: string) =>
-  graphEventId != null && graphEventId.length > 0;
-
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   return (
     get(['agent', 'type', 0], ecsData) === 'endpoint' &&
-    get(['process', 'entity_id'], ecsData)?.length > 0
+    get(['process', 'entity_id'], ecsData)?.length === 1 &&
+    get(['process', 'entity_id', 0], ecsData) !== ''
   );
 };
 

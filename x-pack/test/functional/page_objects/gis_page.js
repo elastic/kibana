@@ -17,6 +17,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
+  const renderable = getService('renderable');
 
   function escapeLayerName(layerName) {
     return layerName.split(' ').join('_');
@@ -132,8 +133,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openNewMap() {
       log.debug(`Open new Map`);
 
-      await this.gotoMapListingPage();
-      await testSubjects.click('newMapLink');
+      // Navigate directly because we don't need to go through the map listing
+      // page. The listing page is skipped if there are no saved objects
+      await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
+      await renderable.waitForRender();
     }
 
     async saveMap(name) {
@@ -654,6 +657,24 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async getCategorySuggestions() {
       return await comboBox.getOptionsList(`colorStopInput1`);
+    }
+
+    async enableAutoFitToBounds() {
+      await testSubjects.click('openSettingsButton');
+      const isEnabled = await testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
+      if (!isEnabled) {
+        await retry.try(async () => {
+          await testSubjects.click('autoFitToDataBoundsSwitch');
+          const ensureEnabled = await testSubjects.getAttribute(
+            'autoFitToDataBoundsSwitch',
+            'checked'
+          );
+          if (!ensureEnabled) {
+            throw new Error('autoFitToDataBoundsSwitch is not enabled');
+          }
+        });
+      }
+      await testSubjects.click('mapSettingSubmitButton');
     }
   }
   return new GisPage();

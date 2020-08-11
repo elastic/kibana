@@ -4,5 +4,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["devTools", "home"],
-  "optionalPlugins": ["usageCollection"]
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils"]
 }

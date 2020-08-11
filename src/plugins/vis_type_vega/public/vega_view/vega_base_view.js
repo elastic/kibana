@@ -147,7 +147,7 @@ export class VegaBaseView {
             defaultMessage:
               'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
             values: {
-              enableExternalUrls: 'vega.enableExternalUrls: true',
+              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
               kibanaConfigFileName: 'kibana.yml',
             },
           })
@@ -195,13 +195,9 @@ export class VegaBaseView {
     const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
     const height =
       Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
-    // Somehow the `height` signal in vega becomes zero if the height is set exactly to
-    // an even number. This is a dirty workaround for this.
-    // when vega itself is updated again, it should be checked whether this is still
-    // necessary.
-    const adjustedHeight = height + 0.00000001;
-    if (view.width() !== width || view.height() !== adjustedHeight) {
-      view.width(width).height(adjustedHeight);
+
+    if (view.width() !== width || view.height() !== height) {
+      view.width(width).height(height);
       return true;
     }
     return false;
@@ -364,6 +360,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+      view,
+      spec: vlspec || spec,
+    });
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');

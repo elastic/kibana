@@ -9,5 +9,3 @@ import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plug
 export const plugin = () => new DataEnhancedPlugin();
 
 export { DataEnhancedSetup, DataEnhancedStart };
-
-export { ASYNC_SEARCH_STRATEGY, IAsyncSearchRequest, IAsyncSearchOptions } from './search';

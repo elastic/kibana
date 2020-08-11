@@ -45,7 +45,7 @@ function getMockOptions({
   return {
     auditLogger: securityAuditLoggerMock.create(),
     getCurrentUser: jest.fn(),
-    clusterClient: elasticsearchServiceMock.createClusterClient(),
+    clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),

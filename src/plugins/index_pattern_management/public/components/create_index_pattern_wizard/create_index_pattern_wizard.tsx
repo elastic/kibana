@@ -19,10 +19,16 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPanel } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  EuiPageContent,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -31,21 +37,21 @@ import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';
 import { IndexPatternManagmentContextValue } from '../../types';
-import { MatchedIndex } from './types';
+import { MatchedItem } from './types';
 
 interface CreateIndexPatternWizardState {
   step: number;
   indexPattern: string;
-  allIndices: MatchedIndex[];
+  allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
-  isIncludingSystemIndices: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
+  selectedTimeField?: string;
+  docLinks: DocLinksStart;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -69,9 +75,9 @@ export class CreateIndexPatternWizard extends Component<
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
-      isIncludingSystemIndices: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
+      docLinks: context.services.docLinks,
     };
   }
 
@@ -80,7 +86,7 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   catchAndWarn = async (
-    asyncFn: Promise<MatchedIndex[]>,
+    asyncFn: Promise<MatchedItem[]>,
     errorValue: [] | string[],
     errorMsg: ReactElement
   ) => {
@@ -102,12 +108,6 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   fetchData = async () => {
-    this.setState({
-      allIndices: [],
-      isInitiallyLoadingIndices: true,
-      remoteClustersExist: false,
-    });
-
     const indicesFailMsg = (
       <FormattedMessage
         id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
@@ -125,31 +125,21 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(
-          this.context.services.data.search.__LEGACY.esClient,
-          this.state.indexPatternCreationType,
-          `*`,
-          MAX_SEARCH_SIZE
-        ),
+        getIndices(this.context.services.http, this.state.indexPatternCreationType, `*`, false),
         [],
         indicesFailMsg
       )
-    ).then((allIndices: MatchedIndex[]) =>
+    ).then((allIndices: MatchedItem[]) =>
       this.setState({ allIndices, isInitiallyLoadingIndices: false })
     );
 
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(
-        this.context.services.data.search.__LEGACY.esClient,
-        this.state.indexPatternCreationType,
-        `*:*`,
-        1
-      ),
+      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, false),
       ['a'],
       clustersFailMsg
-    ).then((remoteIndices: string[] | MatchedIndex[]) =>
+    ).then((remoteIndices: string[] | MatchedItem[]) =>
       this.setState({ remoteClustersExist: !!remoteIndices.length })
     );
   };
@@ -189,7 +179,7 @@ export class CreateIndexPatternWizard extends Component<
       if (isConfirmed) {
         return history.push(`/patterns/${indexPatternId}`);
       } else {
-        return false;
+        return;
       }
     }
 
@@ -201,31 +191,21 @@ export class CreateIndexPatternWizard extends Component<
     history.push(`/patterns/${createdId}`);
   };
 
-  goToTimeFieldStep = (indexPattern: string) => {
-    this.setState({ step: 2, indexPattern });
+  goToTimeFieldStep = (indexPattern: string, selectedTimeField?: string) => {
+    this.setState({ step: 2, indexPattern, selectedTimeField });
   };
 
   goToIndexPatternStep = () => {
     this.setState({ step: 1 });
   };
 
-  onChangeIncludingSystemIndices = () => {
-    this.setState((prevState) => ({
-      isIncludingSystemIndices: !prevState.isIncludingSystemIndices,
-    }));
-  };
-
   renderHeader() {
-    const { isIncludingSystemIndices } = this.state;
-
     return (
       <Header
         prompt={this.state.indexPatternCreationType.renderPrompt()}
-        showSystemIndices={this.state.indexPatternCreationType.getShowSystemIndices()}
-        isIncludingSystemIndices={isIncludingSystemIndices}
-        onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        docLinks={this.state.docLinks}
       />
     );
   }
@@ -234,7 +214,6 @@ export class CreateIndexPatternWizard extends Component<
     const {
       allIndices,
       isInitiallyLoadingIndices,
-      isIncludingSystemIndices,
       step,
       indexPattern,
       remoteClustersExist,
@@ -244,8 +223,8 @@ export class CreateIndexPatternWizard extends Component<
       return <LoadingState />;
     }
 
-    const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
-    if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
+    const hasDataIndices = allIndices.some(({ name }: MatchedItem) => !name.startsWith('.'));
+    if (!hasDataIndices && !remoteClustersExist) {
       return (
         <EmptyState
           onRefresh={this.fetchData}
@@ -254,29 +233,42 @@ export class CreateIndexPatternWizard extends Component<
       );
     }
 
+    const header = this.renderHeader();
+
     if (step === 1) {
       const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
       return (
-        <StepIndexPattern
-          allIndices={allIndices}
-          initialQuery={indexPattern || initialQuery}
-          isIncludingSystemIndices={isIncludingSystemIndices}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-          goToNextStep={this.goToTimeFieldStep}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepIndexPattern
+            allIndices={allIndices}
+            initialQuery={indexPattern || initialQuery}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+            goToNextStep={this.goToTimeFieldStep}
+            showSystemIndices={
+              this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
+            }
+          />
+        </EuiPageContent>
       );
     }
 
     if (step === 2) {
       return (
-        <StepTimeField
-          indexPattern={indexPattern}
-          goToPreviousStep={this.goToIndexPatternStep}
-          createIndexPattern={this.createIndexPattern}
-          indexPatternCreationType={this.state.indexPatternCreationType}
-        />
+        <EuiPageContent>
+          {header}
+          <EuiHorizontalRule />
+          <StepTimeField
+            indexPattern={indexPattern}
+            goToPreviousStep={this.goToIndexPatternStep}
+            createIndexPattern={this.createIndexPattern}
+            indexPatternCreationType={this.state.indexPatternCreationType}
+            selectedTimeField={this.state.selectedTimeField}
+          />
+        </EuiPageContent>
       );
     }
 
@@ -290,15 +282,11 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   render() {
-    const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div>
-          {header}
-          {content}
-        </div>
+      <>
+        {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}
           dismissToast={({ id }) => {
@@ -306,7 +294,7 @@ export class CreateIndexPatternWizard extends Component<
           }}
           toastLifeTimeMs={6000}
         />
-      </EuiPanel>
+      </>
     );
   }
 }

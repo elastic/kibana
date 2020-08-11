@@ -24,6 +24,7 @@ import { BaseStateContainer } from '../../../../kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
+import { validateTimeRange } from '../timefilter';
 
 /**
  * Helper to setup two-way syncing of global data and a state container
@@ -34,14 +35,23 @@ export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
+    queryString,
     state$,
-  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'state$'>,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   stateContainer: BaseStateContainer<S>,
-  syncConfig: { time?: boolean; refreshInterval?: boolean; filters?: FilterStateStore | boolean }
+  syncConfig: {
+    time?: boolean;
+    refreshInterval?: boolean;
+    filters?: FilterStateStore | boolean;
+    query?: boolean;
+  }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
   if (syncConfig.time) {
     syncKeys.push('time');
+  }
+  if (syncConfig.query) {
+    syncKeys.push('query');
   }
   if (syncConfig.refreshInterval) {
     syncKeys.push('refreshInterval');
@@ -132,6 +142,9 @@ export const connectToQueryState = <S extends QueryState>(
           if (syncConfig.time && changes.time) {
             newState.time = timefilter.getTime();
           }
+          if (syncConfig.query && changes.query) {
+            newState.query = queryString.getQuery();
+          }
           if (syncConfig.refreshInterval && changes.refreshInterval) {
             newState.refreshInterval = timefilter.getRefreshInterval();
           }
@@ -159,9 +172,9 @@ export const connectToQueryState = <S extends QueryState>(
       // cloneDeep is required because services are mutating passed objects
       // and state in state container is frozen
       if (syncConfig.time) {
-        const time = state.time || timefilter.getTimeDefaults();
+        const time = validateTimeRange(state.time) ? state.time : timefilter.getTimeDefaults();
         if (!_.isEqual(time, timefilter.getTime())) {
-          timefilter.setTime(_.cloneDeep(time));
+          timefilter.setTime(_.cloneDeep(time!));
         }
       }
 
@@ -169,6 +182,13 @@ export const connectToQueryState = <S extends QueryState>(
         const refreshInterval = state.refreshInterval || timefilter.getRefreshIntervalDefaults();
         if (!_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
           timefilter.setRefreshInterval(_.cloneDeep(refreshInterval));
+        }
+      }
+
+      if (syncConfig.query) {
+        const curQuery = state.query || queryString.getQuery();
+        if (!_.isEqual(curQuery, queryString.getQuery())) {
+          queryString.setQuery(_.cloneDeep(curQuery));
         }
       }
 

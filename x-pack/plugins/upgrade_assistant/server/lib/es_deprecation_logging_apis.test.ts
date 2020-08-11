@@ -12,7 +12,7 @@ import {
 
 describe('getDeprecationLoggingStatus', () => {
   it('calls cluster.getSettings', async () => {
-    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
     await getDeprecationLoggingStatus(dataClient);
     expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.getSettings', {
       includeDefaults: true,
@@ -23,7 +23,7 @@ describe('getDeprecationLoggingStatus', () => {
 describe('setDeprecationLogging', () => {
   describe('isEnabled = true', () => {
     it('calls cluster.putSettings with logger.deprecation = WARN', async () => {
-      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       await setDeprecationLogging(dataClient, true);
       expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'WARN' } },
@@ -33,7 +33,7 @@ describe('setDeprecationLogging', () => {
 
   describe('isEnabled = false', () => {
     it('calls cluster.putSettings with logger.deprecation = ERROR', async () => {
-      const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+      const dataClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       await setDeprecationLogging(dataClient, false);
       expect(dataClient.callAsCurrentUser).toHaveBeenCalledWith('cluster.putSettings', {
         body: { transient: { 'logger.deprecation': 'ERROR' } },

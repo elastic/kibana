@@ -36,6 +36,7 @@ export function apacheMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.apacheMetrics.nameTitle', {
       defaultMessage: 'Apache metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.apacheMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the Apache 2 HTTP server.',

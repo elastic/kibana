@@ -18,6 +18,7 @@ import {
   TimerangeInput,
   Maybe,
   HistogramType,
+  DocValueFieldsInput,
 } from '../../graphql/types';
 
 export * from '../../utils/typed_resolvers';
@@ -39,7 +40,7 @@ export interface FrameworkAdapter {
   callWithRequest(
     req: FrameworkRequest,
     method: 'indices.getMapping',
-    options?: IndicesGetMappingParams // eslint-disable-line
+    options?: IndicesGetMappingParams
   ): Promise<MappingResponse>;
   getIndexPatternsService(req: FrameworkRequest): FrameworkIndexPatternsService;
 }
@@ -115,6 +116,7 @@ export interface RequestBasicOptions {
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
+  docValueFields?: DocValueFieldsInput[];
 }
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {

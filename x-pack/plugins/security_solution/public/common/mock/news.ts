@@ -16,7 +16,7 @@ export const rawNewsApiResponse: RawNewsApiResponse = {
           "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
       },
       link_text: null,
-      link_url: { en: 'https://discuss.elastic.co/c/siem?blade=securitysolutionfeed' },
+      link_url: { en: 'https://discuss.elastic.co/c/security?blade=securitysolutionfeed' },
       languages: null,
       badge: { en: '7.6' },
       image_url: {

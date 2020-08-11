@@ -44,15 +44,19 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
       const {
         actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
+        author,
+        building_block_type: buildingBlockType,
         description,
         enabled,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
         language: languageOrUndefined,
+        license,
         output_index: outputIndex,
         saved_id: savedId,
         timeline_id: timelineId,
@@ -65,11 +69,16 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         interval,
         max_signals: maxSignals,
         risk_score: riskScore,
+        risk_score_mapping: riskScoreMapping,
+        rule_name_override: ruleNameOverride,
         name,
         severity,
+        severity_mapping: severityMapping,
         tags,
         threat,
+        threshold,
         throttle,
+        timestamp_override: timestampOverride,
         to,
         type,
         references,
@@ -88,7 +97,6 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -118,9 +126,14 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+        // This will create the endpoint list if it does not exist yet
+        await context.lists?.getExceptionListClient().createEndpointList();
+
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,
+          author,
+          buildingBlockType,
           description,
           enabled,
           falsePositives,
@@ -128,6 +141,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           immutable: false,
           query,
           language,
+          license,
           outputIndex: finalIndex,
           savedId,
           timelineId,
@@ -139,13 +153,18 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           index,
           interval,
           maxSignals,
-          riskScore,
           name,
+          riskScore,
+          riskScoreMapping,
+          ruleNameOverride,
           severity,
+          severityMapping,
           tags,
           to,
           type,
           threat,
+          threshold,
+          timestampOverride,
           references,
           note,
           version: 1,

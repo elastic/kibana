@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
@@ -19,8 +19,8 @@ import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 
 interface Args {
   influencers?: InfluencerInput[];
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  startDate: string;
   threshold?: number;
   skip?: boolean;
   criteriaFields?: CriteriaFields[];
@@ -67,6 +67,8 @@ export const useAnomaliesTableData = ({
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
   const siemJobIds = siemJobs.filter((job) => job.isInstalled).map((job) => job.id);
+  const startDateMs = useMemo(() => new Date(startDate).getTime(), [startDate]);
+  const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -116,7 +118,7 @@ export const useAnomaliesTableData = ({
       }
     }
 
-    fetchAnomaliesTableData(influencers, criteriaFields, startDate, endDate);
+    fetchAnomaliesTableData(influencers, criteriaFields, startDateMs, endDateMs);
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
@@ -127,8 +129,8 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(influencers),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     influencersOrCriteriaToString(criteriaFields),
-    startDate,
-    endDate,
+    startDateMs,
+    endDateMs,
     skip,
     userPermissions,
     // eslint-disable-next-line react-hooks/exhaustive-deps

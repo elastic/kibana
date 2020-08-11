@@ -6,7 +6,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiTextColor } from '@elastic/eui';
+import { StatusTag } from './location_status_tags';
 
 const BadgeItem = styled.div`
   white-space: nowrap;
@@ -17,18 +18,13 @@ const BadgeItem = styled.div`
   }
 `;
 
-interface Props {
-  color: string;
-  label: string;
-}
-
-export const TagLabel: React.FC<Props> = ({ color, label }) => {
+export const TagLabel: React.FC<StatusTag> = ({ color, label, status }) => {
   return (
     <BadgeItem>
       <EuiBadge color={color}>
-        <EuiText size="s">
+        <EuiTextColor color={status === 'down' ? 'ghost' : 'default'}>
           <h4>{label}</h4>
-        </EuiText>
+        </EuiTextColor>
       </EuiBadge>
     </BadgeItem>
   );

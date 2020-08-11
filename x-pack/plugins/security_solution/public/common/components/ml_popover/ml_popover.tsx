@@ -122,6 +122,7 @@ export const MlPopover = React.memo(() => {
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        repositionOnScroll
       >
         <UpgradeContents />
       </EuiPopover>
@@ -147,6 +148,7 @@ export const MlPopover = React.memo(() => {
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
+        repositionOnScroll
       >
         <PopoverContentsDiv data-test-subj="ml-popover-contents">
           <EuiPopoverTitle>{i18n.ML_JOB_SETTINGS}</EuiPopoverTitle>
@@ -175,7 +177,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/security/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >

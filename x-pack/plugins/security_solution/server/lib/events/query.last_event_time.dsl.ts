@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash/fp';
+
 import { LastEventTimeRequestOptions } from './types';
 import { LastEventIndexKey } from '../../graphql/types';
 import { assertUnreachable } from '../../utils/build_query';
@@ -16,6 +18,7 @@ export const buildLastEventTimeQuery = ({
   indexKey,
   details,
   defaultIndex,
+  docValueFields,
 }: LastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
     hosts: defaultIndex,
@@ -35,6 +38,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.network,
             ignoreUnavailable: true,
             body: {
+              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -52,6 +56,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
             body: {
+              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -69,6 +74,7 @@ export const buildLastEventTimeQuery = ({
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
           body: {
+            ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },

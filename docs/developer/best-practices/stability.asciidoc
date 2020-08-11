@@ -1,0 +1,66 @@
+[[stability]]
+== Stability
+
+Ensure your feature will work under all possible {kib} scenarios.
+
+[discrete]
+=== Environmental configuration scenarios
+
+* Cloud
+** Does the feature work on *cloud environment*?
+** Does it create a setting that needs to be exposed, or configured
+differently than the default, on Cloud? (whitelisting of certain
+settings/users? Ref:
+https://www.elastic.co/guide/en/cloud/current/ec-add-user-settings.html
+,
+https://www.elastic.co/guide/en/cloud/current/ec-manage-kibana-settings.html)
+** Is there a significant performance impact that may affect Cloud
+{kib} instances?
+** Does it need to be aware of running in a container? (for example
+monitoring)
+* Multiple {kib} instances
+** Pointing to the same index
+** Pointing to different indexes
+*** Should make sure that the {kib} index is not hardcoded anywhere.
+*** Should not be storing a bunch of stuff in {kib} memory.
+*** Should emulate a high availability deployment.
+*** Anticipating different timing related issues due to shared resource
+access.
+*** We need to make sure security is set up in a specific way for
+non-standard {kib} indices. (create their own custom roles)
+* {kib} running behind a reverse proxy or load balancer, without sticky
+sessions. (we have had many discuss/SDH tickets around this)
+* If a proxy/loadbalancer is running between ES and {kib}
+
+[discrete]
+=== Kibana.yml settings
+
+* Using a custom {kib} index alias
+* When optional dependencies are disabled
+** Ensure all your required dependencies are listed in kibana.json
+dependency list!
+
+[discrete]
+=== Test coverage
+
+* Does the feature have sufficient unit test coverage? (does it handle
+storeinSessions?)
+* Does the feature have sufficient Functional UI test coverage?
+* Does the feature have sufficient Rest API coverage test coverage?
+* Does the feature have sufficient Integration test coverage?
+
+[discrete]
+=== Browser coverage
+
+Refer to the list of browsers and OS {kib} supports
+https://www.elastic.co/support/matrix
+
+Does the feature work efficiently on the list of supported browsers? 
+
+[discrete]
+=== Upgrade Scenarios - Migration scenarios- 
+
+Does the feature affect old
+indices, saved objects ? - Has the feature been tested with {kib}
+aliases - Read/Write privileges of the indices before and after the
+upgrade?

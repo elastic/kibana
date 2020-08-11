@@ -4,21 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExceptionListSchema } from './exception_list_schema';
+import {
+  DATE_NOW,
+  DESCRIPTION,
+  ENDPOINT_TYPE,
+  IMMUTABLE,
+  META,
+  TIE_BREAKER,
+  USER,
+  VERSION,
+  _VERSION,
+} from '../../constants.mock';
+import { ENDPOINT_LIST_ID } from '../..';
 
+import { ExceptionListSchema } from './exception_list_schema';
 export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   _tags: ['endpoint', 'process', 'malware', 'os:linux'],
-  created_at: '2020-04-23T00:19:13.289Z',
-  created_by: 'user_name',
-  description: 'This is a sample endpoint type exception',
+  _version: _VERSION,
+  created_at: DATE_NOW,
+  created_by: USER,
+  description: DESCRIPTION,
   id: '1',
-  list_id: 'endpoint_list',
-  meta: {},
+  immutable: IMMUTABLE,
+  list_id: ENDPOINT_LIST_ID,
+  meta: META,
   name: 'Sample Endpoint Exception List',
-  namespace_type: 'single',
+  namespace_type: 'agnostic',
   tags: ['user added string for a tag', 'malware'],
-  tie_breaker_id: '77fd1909-6786-428a-a671-30229a719c1f',
-  type: 'endpoint',
-  updated_at: '2020-04-23T00:19:13.289Z',
+  tie_breaker_id: TIE_BREAKER,
+  type: ENDPOINT_TYPE,
+  updated_at: DATE_NOW,
   updated_by: 'user_name',
+  version: VERSION,
 });

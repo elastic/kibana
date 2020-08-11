@@ -10,7 +10,7 @@ const del = require('del');
 const { run } = require('@kbn/dev-utils');
 const storybook = require('@storybook/react/standalone');
 const execa = require('execa');
-const { DLL_OUTPUT } = require('./../.storybook/constants');
+const { DLL_OUTPUT } = require('./../storybook/constants');
 
 const options = {
   stdio: ['ignore', 'inherit', 'inherit'],
@@ -18,13 +18,13 @@ const options = {
 };
 
 const storybookOptions = {
-  configDir: path.resolve(__dirname, './../.storybook'),
+  configDir: path.resolve(__dirname, './../storybook'),
   mode: 'dev',
 };
 
 run(
   ({ log, flags }) => {
-    const { dll, clean, stats, site } = flags;
+    const { addon, dll, clean, stats, site } = flags;
 
     // Delete the existing DLL if we're cleaning or building.
     if (clean || dll) {
@@ -51,7 +51,7 @@ run(
         [
           'webpack',
           '--config',
-          'x-pack/plugins/canvas/.storybook/webpack.dll.config.js',
+          'x-pack/plugins/canvas/storybook/webpack.dll.config.js',
           '--progress',
           '--hide-modules',
           '--display-entrypoints',
@@ -81,13 +81,20 @@ run(
       return;
     }
 
+    // Build the addon
+    execa.sync('node', ['scripts/build'], {
+      cwd: path.resolve(__dirname, '../storybook/addon'),
+      stdio: ['ignore', 'inherit', 'inherit'],
+      buffer: false,
+    });
+
     // Build site and exit
     if (site) {
       log.success('storybook: Generating Storybook site');
       storybook({
         ...storybookOptions,
         mode: 'static',
-        outputDir: path.resolve(__dirname, './../storybook'),
+        outputDir: path.resolve(__dirname, './../storybook/build'),
       });
       return;
     }
@@ -100,6 +107,14 @@ run(
       ...options,
     });
 
+    if (addon) {
+      execa('node', ['scripts/build', '--watch'], {
+        cwd: path.resolve(__dirname, '../storybook/addon'),
+        stdio: ['ignore', 'inherit', 'inherit'],
+        buffer: false,
+      });
+    }
+
     storybook({
       ...storybookOptions,
       port: 9001,
@@ -110,8 +125,9 @@ run(
       Storybook runner for Canvas.
     `,
     flags: {
-      boolean: ['dll', 'clean', 'stats', 'site'],
+      boolean: ['addon', 'dll', 'clean', 'stats', 'site'],
       help: `
+        --addon            Watch the addon source code for changes.
         --clean            Forces a clean of the Storybook DLL and exits.
         --dll              Cleans and builds the Storybook dependency DLL and exits.
         --stats            Produces a Webpack stats file.

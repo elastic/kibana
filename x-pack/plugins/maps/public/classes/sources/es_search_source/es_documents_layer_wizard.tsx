@@ -26,7 +26,7 @@ export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: s
 export const esDocumentsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Vector data from a Kibana index pattern',
+    defaultMessage: 'Points, lines, and polygons from Elasticsearch',
   }),
   icon: 'logoElasticsearch',
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import {
   AggConfigs,
@@ -27,7 +26,6 @@ import {
 } from './';
 import { SearchAggsSetup, SearchAggsStart } from './types';
 import { mockAggTypesRegistry } from './test_helpers';
-import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 const aggTypeBaseParamMock = () => ({
   name: 'some_param',
@@ -73,7 +71,6 @@ export const searchAggsStartMock = (): SearchAggsStart => ({
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
     });
   }),
   types: mockAggTypesRegistry(),

@@ -7,13 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
-import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/server/create_job';
-import { runTaskFnFactory } from '../export_types/csv_from_savedobject/server/execute_job';
-import { getJobParamsFromRequest } from '../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { ScheduledTaskParamsPanelCsv } from '../export_types/csv_from_savedobject/types';
+import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/create_job';
+import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
+import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
 import { HandlerErrorFunction } from './types';
 
 /*
@@ -64,12 +63,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {
-        const jobDocPayload: ScheduledTaskParamsPanelCsv = await scheduleTaskFn(
-          jobParams,
-          req.headers,
-          context,
-          req
-        );
+        // FIXME: no scheduleTaskFn for immediate download
+        const jobDocPayload = await scheduleTaskFn(jobParams, req.headers, context, req);
         const {
           content_type: jobOutputContentType,
           content: jobOutputContent,
@@ -91,11 +86,12 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         return res.ok({
           body: jobOutputContent || '',
           headers: {
-            'content-type': jobOutputContentType,
+            'content-type': jobOutputContentType ? jobOutputContentType : [],
             'accept-ranges': 'none',
           },
         });
       } catch (err) {
+        logger.error(err);
         return handleError(res, err);
       }
     })

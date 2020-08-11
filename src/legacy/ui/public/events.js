@@ -107,7 +107,7 @@ export function EventsProvider(Promise) {
    */
   Events.prototype.emit = function (name) {
     const self = this;
-    const args = _.rest(arguments);
+    const args = _.tail(arguments);
 
     if (!self._listeners[name]) {
       return self._emitChain;
@@ -131,7 +131,7 @@ export function EventsProvider(Promise) {
    * @return {array[function]}
    */
   Events.prototype.listeners = function (name) {
-    return _.pluck(this._listeners[name], 'handler');
+    return _.map(this._listeners[name], 'handler');
   };
 
   return Events;

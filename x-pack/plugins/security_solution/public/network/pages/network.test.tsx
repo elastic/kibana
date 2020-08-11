@@ -16,6 +16,7 @@ import {
   mockGlobalState,
   apolloClientObservable,
   SUB_PLUGINS_REDUCER,
+  kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
 import { State, createStore } from '../../common/store';
@@ -57,8 +58,8 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
-const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
-const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+const to = '2018-03-23T18:49:23.132Z';
+const from = '2018-03-24T03:33:52.253Z';
 
 const getMockProps = () => ({
   networkPagePath: '',
@@ -139,7 +140,13 @@ describe('rendering - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable, storage);
+    const myStore = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      apolloClientObservable,
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

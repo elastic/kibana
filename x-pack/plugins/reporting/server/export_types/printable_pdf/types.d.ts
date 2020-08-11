@@ -5,7 +5,7 @@
  */
 
 import { ScheduledTaskParams } from '../../../server/types';
-import { LayoutInstance, LayoutParams } from '../common/layouts';
+import { LayoutInstance, LayoutParams } from '../../lib/layouts';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
 export interface JobParamsPDF {

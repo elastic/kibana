@@ -6,7 +6,7 @@
 
 jest.mock('./login_page');
 
-import { AppMount, ScopedHistory } from 'src/core/public';
+import { AppMount } from 'src/core/public';
 import { loginApp } from './login_app';
 
 import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
@@ -51,7 +51,7 @@ describe('loginApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      history: scopedHistoryMock.create(),
     });
 
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;

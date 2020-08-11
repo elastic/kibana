@@ -15,7 +15,6 @@ const antennaStyles = css`
   background: ${({ theme }) => theme.eui.euiColorLightShade};
   position: relative;
   width: 2px;
-  margin: 0 12px 0 0;
   &:after {
     background: ${({ theme }) => theme.eui.euiColorLightShade};
     content: '';
@@ -40,10 +39,6 @@ const BottomAntenna = styled(EuiFlexItem)`
   }
 `;
 
-const EuiFlexItemWrapper = styled(EuiFlexItem)`
-  margin: 0 12px 0 0;
-`;
-
 export const RoundedBadgeAntenna: React.FC<{ type: AndOr }> = ({ type }) => (
   <EuiFlexGroup
     className="andBadgeContainer"
@@ -52,9 +47,9 @@ export const RoundedBadgeAntenna: React.FC<{ type: AndOr }> = ({ type }) => (
     alignItems="center"
   >
     <TopAntenna data-test-subj="andOrBadgeBarTop" grow={1} />
-    <EuiFlexItemWrapper grow={false}>
+    <EuiFlexItem grow={false}>
       <RoundedBadge type={type} />
-    </EuiFlexItemWrapper>
+    </EuiFlexItem>
     <BottomAntenna data-test-subj="andOrBadgeBarBottom" grow={1} />
   </EuiFlexGroup>
 );

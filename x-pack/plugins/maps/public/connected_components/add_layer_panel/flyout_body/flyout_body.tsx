@@ -5,11 +5,10 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
 import { LayerWizard, RenderWizardArguments } from '../../../classes/layers/layer_wizard_registry';
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 type Props = RenderWizardArguments & {
   layerWizard: LayerWizard | null;
@@ -50,7 +49,7 @@ export const FlyoutBody = (props: Props) => {
     return (
       <Fragment>
         {backButton}
-        <EuiPanel>{props.layerWizard.renderWizard(renderWizardArgs)}</EuiPanel>
+        {props.layerWizard.renderWizard(renderWizardArgs)}
       </Fragment>
     );
   }

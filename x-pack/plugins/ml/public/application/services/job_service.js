@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { ml } from './ml_api_service';
 
 import { mlMessageBarService } from '../components/messagebar';
+import { getToastNotifications } from '../util/dependency_cache';
 import { isWebUrl } from '../util/url_utils';
 import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { toastNotificationServiceProvider } from '../services/toast_notification_service';
 
 const msgs = mlMessageBarService;
 let jobs = [];
@@ -417,14 +419,21 @@ class JobService {
         return { success: true };
       })
       .catch((err) => {
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
+        // TODO - all the functions in here should just return the error and not
+        // display the toast, as currently both the component and this service display
+        // errors, so we end up with duplicate toasts.
+        const toastNotifications = getToastNotifications();
+        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+        toastNotificationService.displayErrorToast(
+          err,
+          i18n.translate('xpack.ml.jobService.updateJobErrorTitle', {
             defaultMessage: 'Could not update job: {jobId}',
             values: { jobId },
           })
         );
+
         console.error('update job', err);
-        return { success: false, message: err.message };
+        return { success: false, message: err };
       });
   }
 
@@ -436,12 +445,15 @@ class JobService {
         return { success: true, messages };
       })
       .catch((err) => {
-        msgs.notify.error(
-          i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
-            defaultMessage: 'Job Validation Error: {errorMessage}',
-            values: { errorMessage: err.message },
+        const toastNotifications = getToastNotifications();
+        const toastNotificationService = toastNotificationServiceProvider(toastNotifications);
+        toastNotificationService.displayErrorToast(
+          err,
+          i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+            defaultMessage: 'Job Validation Error',
           })
         );
+
         console.log('validate job', err);
         return {
           success: false,

@@ -32,7 +32,7 @@ in ingest node and Logstash.
 This example walks you through using the *Grok Debugger*. This tool
 is automatically enabled in {kib}. 
 
-NOTE: If you're using {security}, you must have the `manage_pipeline`
+NOTE: If you're using {stack-security-features}, you must have the `manage_pipeline`
 permission to use the Grok Debugger.
 
 . Open the menu, go to *Dev Tools*, then click *Grok Debugger*.

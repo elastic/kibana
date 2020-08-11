@@ -123,7 +123,7 @@ export const PositiveRateAgg = (props) => {
             <FieldSelect
               fields={props.fields}
               type={model.type}
-              restrict={KBN_FIELD_TYPES.NUMBER}
+              restrict={[KBN_FIELD_TYPES.NUMBER]}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}

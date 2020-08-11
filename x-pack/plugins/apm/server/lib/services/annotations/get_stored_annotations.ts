@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, Logger } from 'kibana/server';
+import { LegacyAPICaller, Logger } from 'kibana/server';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
@@ -24,13 +24,11 @@ export async function getStoredAnnotations({
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-  apiCaller: APICaller;
+  apiCaller: LegacyAPICaller;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
   try {
-    const environmentFilter = getEnvironmentUiFilterES(environment);
-
     const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
       'search',
       {
@@ -51,7 +49,7 @@ export async function getStoredAnnotations({
                 { term: { 'annotation.type': 'deployment' } },
                 { term: { tags: 'apm' } },
                 { term: { [SERVICE_NAME]: serviceName } },
-                ...(environmentFilter ? [environmentFilter] : []),
+                ...getEnvironmentUiFilterES(environment),
               ],
             },
           },

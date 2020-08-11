@@ -19,6 +19,7 @@ interface DataPanelWrapperProps {
   activeDatasource: string | null;
   datasourceIsLoading: boolean;
   dispatch: (action: Action) => void;
+  showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
   query: Query;
   dateRange: FramePublicAPI['dateRange'];
@@ -26,16 +27,17 @@ interface DataPanelWrapperProps {
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
+  const { dispatch, activeDatasource } = props;
   const setDatasourceState: StateSetter<unknown> = useMemo(
     () => (updater) => {
-      props.dispatch({
+      dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
         updater,
-        datasourceId: props.activeDatasource!,
+        datasourceId: activeDatasource!,
         clearStagedPreview: true,
       });
     },
-    [props.dispatch, props.activeDatasource]
+    [dispatch, activeDatasource]
   );
 
   const datasourceProps: DatasourceDataPanelProps = {
@@ -46,6 +48,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     query: props.query,
     dateRange: props.dateRange,
     filters: props.filters,
+    showNoDataPopover: props.showNoDataPopover,
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

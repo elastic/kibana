@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should add default count metric when metrics is empty array 1`] = `
+<Fragment>
+  <div
+    className="mapMapLayerPanel__metrics"
+  >
+    <div
+      className="mapMetricEditorPanel__metricEditor"
+      key="0"
+    >
+      <MetricEditor
+        fields={Array []}
+        metric={
+          Object {
+            "type": "count",
+          }
+        }
+        metricsFilter={[Function]}
+        onChange={[Function]}
+      />
+    </div>
+  </div>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiTextAlign
+    textAlign="center"
+  >
+    <EuiButtonEmpty
+      iconType="plusInCircleFilled"
+      onClick={[Function]}
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Add metric"
+        id="xpack.maps.metricsEditor.addMetricButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </EuiTextAlign>
+</Fragment>
+`;
+
+exports[`should render metrics editor 1`] = `
+<Fragment>
+  <div
+    className="mapMapLayerPanel__metrics"
+  >
+    <div
+      className="mapMetricEditorPanel__metricEditor"
+      key="0"
+    >
+      <MetricEditor
+        fields={Array []}
+        metric={
+          Object {
+            "field": "myField",
+            "type": "sum",
+          }
+        }
+        metricsFilter={[Function]}
+        onChange={[Function]}
+      />
+    </div>
+  </div>
+  <EuiSpacer
+    size="xs"
+  />
+  <EuiTextAlign
+    textAlign="center"
+  >
+    <EuiButtonEmpty
+      iconType="plusInCircleFilled"
+      onClick={[Function]}
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Add metric"
+        id="xpack.maps.metricsEditor.addMetricButtonLabel"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </EuiTextAlign>
+</Fragment>
+`;

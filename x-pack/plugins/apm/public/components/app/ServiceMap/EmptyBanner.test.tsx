@@ -4,32 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
 import { act, wait } from '@testing-library/react';
 import cytoscape from 'cytoscape';
-import { CytoscapeContext } from './Cytoscape';
-import { EmptyBanner } from './EmptyBanner';
+import React, { ReactNode } from 'react';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 import { renderWithTheme } from '../../../utils/testHelpers';
+import { CytoscapeContext } from './Cytoscape';
+import { EmptyBanner } from './EmptyBanner';
 
 const cy = cytoscape({});
 
-const wrapper: FunctionComponent = ({ children }) => (
-  <MockApmPluginContextWrapper>
-    <CytoscapeContext.Provider value={cy}>{children}</CytoscapeContext.Provider>
-  </MockApmPluginContextWrapper>
-);
+function wrapper({ children }: { children: ReactNode }) {
+  return (
+    <MockApmPluginContextWrapper>
+      <CytoscapeContext.Provider value={cy}>
+        {children}
+      </CytoscapeContext.Provider>
+    </MockApmPluginContextWrapper>
+  );
+}
 
 describe('EmptyBanner', () => {
   describe('when cy is undefined', () => {
     it('renders null', () => {
-      const noCytoscapeWrapper: FunctionComponent = ({ children }) => (
-        <MockApmPluginContextWrapper>
-          <CytoscapeContext.Provider value={undefined}>
-            {children}
-          </CytoscapeContext.Provider>
-        </MockApmPluginContextWrapper>
-      );
+      function noCytoscapeWrapper({ children }: { children: ReactNode }) {
+        return (
+          <MockApmPluginContextWrapper>
+            <CytoscapeContext.Provider value={undefined}>
+              {children}
+            </CytoscapeContext.Provider>
+          </MockApmPluginContextWrapper>
+        );
+      }
       const component = renderWithTheme(<EmptyBanner />, {
         wrapper: noCytoscapeWrapper,
       });

@@ -17,29 +17,17 @@
  * under the License.
  */
 
-import { getGeoHashBucketAgg, GeoHashBucketAggDependencies } from './geo_hash';
+import { getGeoHashBucketAgg } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
-import { InternalStartServices } from '../../../types';
 
 describe('Geohash Agg', () => {
-  let aggTypesDependencies: GeoHashBucketAggDependencies;
   let geoHashBucketAgg: BucketAggType;
 
   beforeEach(() => {
-    aggTypesDependencies = {
-      getInternalStartServices: () =>
-        (({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-        } as unknown) as InternalStartServices),
-    };
-
-    geoHashBucketAgg = getGeoHashBucketAgg(aggTypesDependencies);
+    geoHashBucketAgg = getGeoHashBucketAgg();
   });
 
   const getAggConfigs = (params?: Record<string, any>) => {
@@ -81,7 +69,6 @@ describe('Geohash Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(),
-        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
       }
     );
   };

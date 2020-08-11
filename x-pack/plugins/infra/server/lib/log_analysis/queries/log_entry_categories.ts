@@ -46,4 +46,5 @@ export const logEntryCategoriesResponseRT = rt.intersection([
   }),
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type logEntryCategoriesResponse = rt.TypeOf<typeof logEntryCategoriesResponseRT>;

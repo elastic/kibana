@@ -19,7 +19,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
@@ -29,14 +28,6 @@ import {
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('import_rules_route', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;

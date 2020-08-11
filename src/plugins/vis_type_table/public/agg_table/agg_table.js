@@ -116,7 +116,7 @@ export function KbnAggTable(config, RecursionHelper) {
             return;
           }
 
-          self.csv.filename = (exportTitle || table.title || 'table') + '.csv';
+          self.csv.filename = (exportTitle || table.title || 'unsaved') + '.csv';
           $scope.rows = table.rows;
           $scope.formattedColumns = [];
 

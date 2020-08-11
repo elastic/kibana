@@ -22,9 +22,9 @@ describe('alert_state_route', () => {
     const alert = mockAlert();
 
     expect(
-      shallow(<AlertInstancesRoute alert={alert} {...mockApis()} />).containsMatchingElement(
-        <EuiLoadingSpinner size="l" />
-      )
+      shallow(
+        <AlertInstancesRoute readOnly={false} alert={alert} {...mockApis()} />
+      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
     ).toBeTruthy();
   });
 });

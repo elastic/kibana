@@ -44,7 +44,9 @@ describe('ErrorMarker', () => {
     return component;
   }
   function getKueryDecoded(url: string) {
-    return decodeURIComponent(url.substring(url.indexOf('kuery='), url.length));
+    return decodeURIComponent(
+      url.substring(url.indexOf('kuery='), url.indexOf('&'))
+    );
   }
   it('renders link with trace and transaction', () => {
     const component = openPopover(mark);

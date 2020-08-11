@@ -22,7 +22,7 @@ import {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
   ExecutionContext,
-} from '../../../../../../plugins/expressions/public';
+} from 'src/plugins/expressions/common';
 
 /**
  * Takes a function spec and passes in default args,

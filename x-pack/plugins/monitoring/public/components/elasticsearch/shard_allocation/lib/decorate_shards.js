@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, find, get, includes } from 'lodash';
+import { upperFirst, find, get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {
@@ -40,7 +40,7 @@ export function decorateShards(shards, nodes) {
         );
       }
     }
-    return capitalize(shard.state.toLowerCase());
+    return upperFirst(shard.state.toLowerCase());
   }
 
   return shards.map((shard) => {

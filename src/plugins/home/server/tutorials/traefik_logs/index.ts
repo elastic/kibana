@@ -37,6 +37,7 @@ export function traefikLogsSpecProvider(context: TutorialContext): TutorialSchem
     name: i18n.translate('home.tutorials.traefikLogs.nameTitle', {
       defaultMessage: 'Traefik logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.traefikLogs.shortDescription', {
       defaultMessage: 'Collect and parse access logs created by the Traefik Proxy.',

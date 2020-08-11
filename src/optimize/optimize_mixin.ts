@@ -22,8 +22,6 @@ import Hapi from 'hapi';
 // @ts-ignore not TS yet
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
-// @ts-ignore not TS yet
-import { DllCompiler } from './dynamic_dll_plugin';
 import { fromRoot } from '../core/server/utils';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
 import KbnServer, { KibanaConfig } from '../legacy/server/kbn_server';
@@ -40,7 +38,7 @@ export const optimizeMixin = async (
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* and built_assets/dlls/*
+  // on the watch setup managed by the cli. It proxies all bundles/*
   // requests to the other server. The server on 5602 is long running, in order
   // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
@@ -53,7 +51,6 @@ export const optimizeMixin = async (
   server.route(
     createBundlesRoute({
       regularBundlesPath: uiBundles.getWorkingDir(),
-      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
       basePublicPath: config.get('server.basePath'),
       builtCssPath: fromRoot('built_assets/css'),
       npUiPluginPublicDirs: getNpUiPluginPublicDirs(kbnServer),

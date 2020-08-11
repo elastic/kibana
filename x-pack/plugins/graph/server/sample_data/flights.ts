@@ -37,7 +37,7 @@ const wsState: any = {
       iconClass: 'fa-cube',
     },
   ],
-  blacklist: [],
+  blocklist: [],
   vertices: [
     {
       x: 324.55695700802687,

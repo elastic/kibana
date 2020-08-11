@@ -55,7 +55,6 @@ module.exports = {
         options: {
           presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
-        sideEffects: false,
       },
       {
         test: /\.tsx?$/,
@@ -92,6 +91,7 @@ module.exports = {
             },
           },
         ],
+        sideEffects: true,
       },
       {
         test: /\.module\.s(a|c)ss$/,
@@ -111,7 +111,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               config: {
-                path: path.resolve(KIBANA_ROOT, 'src/optimize/postcss.config.js'),
+                path: require.resolve('@kbn/optimizer/postcss.config.js'),
               },
             },
           },
@@ -188,7 +188,7 @@ module.exports = {
               prependData(loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_styling_constants.scss')
+                  path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
                 )};\n`;
               },
               webpackImporter: false,

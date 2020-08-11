@@ -25,5 +25,12 @@
     "licenseManagement"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaUtils",
+    "kibanaReact",
+    "dashboard",
+    "savedObjects"
+  ]
 }

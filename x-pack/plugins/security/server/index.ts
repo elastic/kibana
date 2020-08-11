@@ -5,11 +5,11 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { Plugin, SecurityPluginSetup, PluginSetupDependencies } from './plugin';

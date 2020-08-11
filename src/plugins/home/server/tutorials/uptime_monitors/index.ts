@@ -30,11 +30,13 @@ import {
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function uptimeMonitorsSpecProvider(context: TutorialContext): TutorialSchema {
+  const moduleName = 'uptime';
   return {
     id: 'uptimeMonitors',
     name: i18n.translate('home.tutorials.uptimeMonitors.nameTitle', {
       defaultMessage: 'Uptime Monitors',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.uptimeMonitors.shortDescription', {
       defaultMessage: 'Monitor services for their availability',

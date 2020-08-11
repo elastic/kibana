@@ -8,6 +8,7 @@ import gql from 'graphql-tag';
 
 export const ecsSchema = gql`
   scalar ToStringArray
+  scalar ToStringArrayNoNullable
 
   type EventEcsFields {
     action: ToStringArray
@@ -416,6 +417,8 @@ export const ecsSchema = gql`
     updated_by: ToStringArray
     version: ToStringArray
     note: ToStringArray
+    threshold: ToAny
+    exceptions_list: ToAny
   }
 
   type SignalField {

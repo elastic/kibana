@@ -12,8 +12,13 @@ import {
   getPrepackagedRulesStatusRequest,
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../__mocks__';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
+import { SecurityPluginSetup } from '../../../../../../security/server';
+import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
+import {
+  mockCheckTimelinesStatusBeforeInstallResult,
+  mockCheckTimelinesStatusAfterInstallResult,
+} from '../../../timeline/routes/__mocks__/import_timelines';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -38,26 +43,38 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-describe('get_prepackaged_rule_status_route', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
+jest.mock('../../../timeline/routes/utils/check_timelines_status', () => {
+  return {
+    checkTimelinesStatus: jest.fn(),
+  };
+});
 
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
+describe('get_prepackaged_rule_status_route', () => {
+  const mockGetCurrentUser = {
+    user: {
+      username: 'mockUser',
+    },
+  };
 
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let securitySetup: SecurityPluginSetup;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
+    securitySetup = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
+      },
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
+
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getPrepackagedRulesStatusRoute(server.router);
+    getPrepackagedRulesStatusRoute(server.router, createMockConfig(), securitySetup);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -98,6 +115,9 @@ describe('get_prepackaged_rule_status_route', () => {
         rules_installed: 0,
         rules_not_installed: 1,
         rules_not_updated: 0,
+        timelines_installed: 0,
+        timelines_not_installed: 0,
+        timelines_not_updated: 0,
       });
     });
 
@@ -112,6 +132,49 @@ describe('get_prepackaged_rule_status_route', () => {
         rules_installed: 1,
         rules_not_installed: 0,
         rules_not_updated: 1,
+        timelines_installed: 0,
+        timelines_not_installed: 0,
+        timelines_not_updated: 0,
+      });
+    });
+
+    test('0 timelines installed, 3 timelines not installed, 0 timelines not updated', async () => {
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+        mockCheckTimelinesStatusBeforeInstallResult
+      );
+      const request = getPrepackagedRulesStatusRequest();
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_custom_installed: 0,
+        rules_installed: 0,
+        rules_not_installed: 1,
+        rules_not_updated: 0,
+        timelines_installed: 0,
+        timelines_not_installed: 3,
+        timelines_not_updated: 0,
+      });
+    });
+
+    test('3 timelines installed, 0 timelines not installed, 0 timelines not updated', async () => {
+      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
+      (checkTimelinesStatus as jest.Mock).mockResolvedValue(
+        mockCheckTimelinesStatusAfterInstallResult
+      );
+      const request = getPrepackagedRulesStatusRequest();
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        rules_custom_installed: 0,
+        rules_installed: 0,
+        rules_not_installed: 1,
+        rules_not_updated: 0,
+        timelines_installed: 3,
+        timelines_not_installed: 0,
+        timelines_not_updated: 0,
       });
     });
   });

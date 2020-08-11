@@ -15,6 +15,7 @@ import {
 // @ts-expect-error untyped local
 import { Router as Component } from './router';
 import { State } from '../../../types';
+export * from './context';
 
 const mapDispatchToProps = {
   enableAutoplay,

@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
     it('Changing timezone changes dashboard timestamp and shows the same data', async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSettings();
-      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'EST');
+      await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'Etc/GMT+5');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
       const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();

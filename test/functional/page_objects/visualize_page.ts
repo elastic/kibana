@@ -248,11 +248,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await find.clickByCssSelector('[href="#/"]');
     }
 
-    public async clickVisualizationByName(vizName: string) {
-      log.debug('clickVisualizationByLinkText(' + vizName + ')');
-      await find.clickByPartialLinkText(vizName);
-    }
-
     public async loadSavedVisualization(vizName: string, { navigateToVisualize = true } = {}) {
       if (navigateToVisualize) {
         await this.clickLoadSavedVisButton();
@@ -261,7 +256,8 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async openSavedVisualization(vizName: string) {
-      await this.clickVisualizationByName(vizName);
+      const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
+      await testSubjects.click(dataTestSubj, 20000);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -280,7 +276,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onLandingPage() {
       log.debug(`VisualizePage.onLandingPage`);
-      return await testSubjects.exists('visualizeLandingPage');
+      return await testSubjects.exists('visualizationLandingPage');
     }
 
     public async gotoLandingPage() {
@@ -355,6 +351,16 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
+    }
+
+    public async linkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async notLinkedToOriginatingApp() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('visualizesaveAndReturnButton');
     }
   }
 

@@ -3,81 +3,106 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Moment } from 'moment';
-import { AlertExecutorOptions } from '../../../alerts/server';
-import { AlertClusterStateState, AlertCommonPerClusterMessageTokenType } from './enums';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 
-export interface AlertLicense {
-  status: string;
-  type: string;
-  expiryDateMS: number;
-  clusterUuid: string;
+export interface AlertEnableAction {
+  id: string;
+  config: { [key: string]: any };
 }
 
-export interface AlertClusterState {
-  state: AlertClusterStateState;
-  clusterUuid: string;
+export interface AlertInstanceState {
+  alertStates: AlertState[];
 }
 
-export interface AlertCommonState {
-  [clusterUuid: string]: AlertCommonPerClusterState;
+export interface AlertState {
+  cluster: AlertCluster;
+  ccs: string | null;
+  ui: AlertUiState;
 }
 
-export interface AlertCommonPerClusterState {
-  ui: AlertCommonPerClusterUiState;
+export interface AlertCpuUsageState extends AlertState {
+  cpuUsage: number;
+  nodeId: string;
+  nodeName: string;
 }
 
-export interface AlertClusterStatePerClusterState extends AlertCommonPerClusterState {
-  state: AlertClusterStateState;
-}
-
-export interface AlertLicensePerClusterState extends AlertCommonPerClusterState {
-  expiredCheckDateMS: number;
-}
-
-export interface AlertCommonPerClusterUiState {
+export interface AlertUiState {
   isFiring: boolean;
-  severity: number;
-  message: AlertCommonPerClusterMessage | null;
+  severity: AlertSeverity;
+  message: AlertMessage | null;
   resolvedMS: number;
   lastCheckedMS: number;
   triggeredMS: number;
 }
 
-export interface AlertCommonPerClusterMessage {
+export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
-  tokens?: AlertCommonPerClusterMessageToken[];
+  nextSteps?: AlertMessage[];
+  tokens?: AlertMessageToken[];
 }
 
-export interface AlertCommonPerClusterMessageToken {
+export interface AlertMessageToken {
   startToken: string;
   endToken?: string;
-  type: AlertCommonPerClusterMessageTokenType;
+  type: AlertMessageTokenType;
 }
 
-export interface AlertCommonPerClusterMessageLinkToken extends AlertCommonPerClusterMessageToken {
+export interface AlertMessageLinkToken extends AlertMessageToken {
   url?: string;
 }
 
-export interface AlertCommonPerClusterMessageTimeToken extends AlertCommonPerClusterMessageToken {
+export interface AlertMessageTimeToken extends AlertMessageToken {
   isRelative: boolean;
   isAbsolute: boolean;
+  timestamp: string | number;
 }
 
-export interface AlertLicensePerClusterUiState extends AlertCommonPerClusterUiState {
-  expirationTime: number;
+export interface AlertMessageDocLinkToken extends AlertMessageToken {
+  partialUrl: string;
 }
 
-export interface AlertCommonCluster {
+export interface AlertCluster {
   clusterUuid: string;
   clusterName: string;
 }
 
-export interface AlertCommonExecutorOptions extends AlertExecutorOptions {
-  state: AlertCommonState;
+export interface AlertCpuUsageNodeStats {
+  clusterUuid: string;
+  nodeId: string;
+  nodeName: string;
+  cpuUsage: number;
+  containerUsage: number;
+  containerPeriods: number;
+  containerQuota: number;
+  ccs: string | null;
 }
 
-export interface AlertCommonParams {
-  dateFormat: string;
-  timezone: string;
+export interface AlertData {
+  instanceKey: string;
+  clusterUuid: string;
+  ccs: string | null;
+  shouldFire: boolean;
+  severity: AlertSeverity;
+  meta: any;
+}
+
+export interface LegacyAlert {
+  prefix: string;
+  message: string;
+  resolved_timestamp: string;
+  metadata: LegacyAlertMetadata;
+  nodes?: LegacyAlertNodesChangedList;
+}
+
+export interface LegacyAlertMetadata {
+  severity: number;
+  cluster_uuid: string;
+  time: string;
+  link: string;
+}
+
+export interface LegacyAlertNodesChangedList {
+  removed: { [nodeName: string]: string };
+  added: { [nodeName: string]: string };
+  restarted: { [nodeName: string]: string };
 }

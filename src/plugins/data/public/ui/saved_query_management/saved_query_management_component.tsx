@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState, Fragment, useRef } from 'react';
+import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -88,9 +88,51 @@ export function SavedQueryManagementComponent({
     }
   }, [isOpen, activePage, savedQueryService]);
 
-  const goToPage = (pageNumber: number) => {
-    setActivePage(pageNumber);
-  };
+  const handleTogglePopover = useCallback(() => setIsOpen((currentState) => !currentState), [
+    setIsOpen,
+  ]);
+
+  const handleClosePopover = useCallback(() => setIsOpen(false), []);
+
+  const handleSave = useCallback(() => {
+    handleClosePopover();
+    onSave();
+  }, [handleClosePopover, onSave]);
+
+  const handleSaveAsNew = useCallback(() => {
+    handleClosePopover();
+    onSaveAsNew();
+  }, [handleClosePopover, onSaveAsNew]);
+
+  const handleSelect = useCallback(
+    (savedQueryToSelect) => {
+      handleClosePopover();
+      onLoad(savedQueryToSelect);
+    },
+    [handleClosePopover, onLoad]
+  );
+
+  const handleDelete = useCallback(
+    (savedQueryToDelete: SavedQuery) => {
+      const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
+        cancelPendingListingRequest.current();
+        setSavedQueries(
+          savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
+        );
+
+        if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
+          onClearSavedQuery();
+        }
+
+        await savedQueryService.deleteSavedQuery(savedQuery.id);
+        setActivePage(0);
+      };
+
+      onDeleteSavedQuery(savedQueryToDelete);
+      handleClosePopover();
+    },
+    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+  );
 
   const savedQueryDescriptionText = i18n.translate(
     'data.search.searchBar.savedQueryDescriptionText',
@@ -113,25 +155,13 @@ export function SavedQueryManagementComponent({
     }
   );
 
-  const onDeleteSavedQuery = async (savedQuery: SavedQuery) => {
-    cancelPendingListingRequest.current();
-    setSavedQueries(
-      savedQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQuery.id)
-    );
-
-    if (loadedSavedQuery && loadedSavedQuery.id === savedQuery.id) {
-      onClearSavedQuery();
-    }
-
-    await savedQueryService.deleteSavedQuery(savedQuery.id);
-    setActivePage(0);
+  const goToPage = (pageNumber: number) => {
+    setActivePage(pageNumber);
   };
 
   const savedQueryPopoverButton = (
     <EuiButtonEmpty
-      onClick={() => {
-        setIsOpen(!isOpen);
-      }}
+      onClick={handleTogglePopover}
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
       })}
@@ -159,11 +189,8 @@ export function SavedQueryManagementComponent({
         key={savedQuery.id}
         savedQuery={savedQuery}
         isSelected={!!loadedSavedQuery && loadedSavedQuery.id === savedQuery.id}
-        onSelect={(savedQueryToSelect) => {
-          onLoad(savedQueryToSelect);
-          setIsOpen(false);
-        }}
-        onDelete={(savedQueryToDelete) => onDeleteSavedQuery(savedQueryToDelete)}
+        onSelect={handleSelect}
+        onDelete={handleDelete}
         showWriteOperations={!!showSaveQuery}
       />
     ));
@@ -175,13 +202,12 @@ export function SavedQueryManagementComponent({
         id="savedQueryPopover"
         button={savedQueryPopoverButton}
         isOpen={isOpen}
-        closePopover={() => {
-          setIsOpen(false);
-        }}
+        closePopover={handleClosePopover}
         anchorPosition="downLeft"
         panelPaddingSize="none"
         buffer={-8}
         ownFocus
+        repositionOnScroll
       >
         <div
           className="kbnSavedQueryManagement__popover"
@@ -234,7 +260,7 @@ export function SavedQueryManagementComponent({
                     <EuiButton
                       size="s"
                       fill
-                      onClick={() => onSave()}
+                      onClick={handleSave}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
                         {
@@ -255,7 +281,7 @@ export function SavedQueryManagementComponent({
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
-                      onClick={() => onSaveAsNew()}
+                      onClick={handleSaveAsNew}
                       aria-label={i18n.translate(
                         'data.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
                         {
@@ -279,7 +305,7 @@ export function SavedQueryManagementComponent({
                   <EuiButton
                     size="s"
                     fill
-                    onClick={() => onSave()}
+                    onClick={handleSave}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
                       { defaultMessage: 'Save a new saved query' }
@@ -298,7 +324,7 @@ export function SavedQueryManagementComponent({
                   <EuiButtonEmpty
                     size="s"
                     flush="left"
-                    onClick={() => onClearSavedQuery()}
+                    onClick={onClearSavedQuery}
                     aria-label={i18n.translate(
                       'data.search.searchBar.savedQueryPopoverClearButtonAriaLabel',
                       { defaultMessage: 'Clear current saved query' }

@@ -24,7 +24,6 @@ import { KBN_FIELD_TYPES } from '../../../../common';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';
-import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 
 export interface AggParamsPercentiles extends BaseAggParams {
@@ -33,10 +32,6 @@ export interface AggParamsPercentiles extends BaseAggParams {
 }
 
 export type IPercentileAggConfig = IResponseAggConfig;
-
-export interface PercentilesMetricAggDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
 
 const valueProps = {
   makeLabel(this: IPercentileAggConfig) {
@@ -50,51 +45,40 @@ const valueProps = {
   },
 };
 
-export const getPercentilesMetricAgg = ({
-  getInternalStartServices,
-}: PercentilesMetricAggDependencies) => {
-  return new MetricAggType<IPercentileAggConfig>(
-    {
-      name: METRIC_TYPES.PERCENTILES,
-      title: i18n.translate('data.search.aggs.metrics.percentilesTitle', {
-        defaultMessage: 'Percentiles',
-      }),
-      makeLabel(agg) {
-        return i18n.translate('data.search.aggs.metrics.percentilesLabel', {
-          defaultMessage: 'Percentiles of {field}',
-          values: { field: agg.getFieldDisplayName() },
-        });
-      },
-      params: [
-        {
-          name: 'field',
-          type: 'field',
-          filterFieldTypes: [
-            KBN_FIELD_TYPES.NUMBER,
-            KBN_FIELD_TYPES.DATE,
-            KBN_FIELD_TYPES.HISTOGRAM,
-          ],
-        },
-        {
-          name: 'percents',
-          default: [1, 5, 25, 50, 75, 95, 99],
-        },
-        {
-          write(agg, output) {
-            output.params.keyed = false;
-          },
-        },
-      ],
-      getResponseAggs(agg) {
-        const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
-
-        return agg.getParam('percents').map((percent: any) => new ValueAggConfig(percent));
-      },
-
-      getValue: getPercentileValue,
+export const getPercentilesMetricAgg = () => {
+  return new MetricAggType<IPercentileAggConfig>({
+    name: METRIC_TYPES.PERCENTILES,
+    title: i18n.translate('data.search.aggs.metrics.percentilesTitle', {
+      defaultMessage: 'Percentiles',
+    }),
+    makeLabel(agg) {
+      return i18n.translate('data.search.aggs.metrics.percentilesLabel', {
+        defaultMessage: 'Percentiles of {field}',
+        values: { field: agg.getFieldDisplayName() },
+      });
     },
-    {
-      getInternalStartServices,
-    }
-  );
+    params: [
+      {
+        name: 'field',
+        type: 'field',
+        filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.HISTOGRAM],
+      },
+      {
+        name: 'percents',
+        default: [1, 5, 25, 50, 75, 95, 99],
+      },
+      {
+        write(agg, output) {
+          output.params.keyed = false;
+        },
+      },
+    ],
+    getResponseAggs(agg) {
+      const ValueAggConfig = getResponseAggConfigClass(agg, valueProps);
+
+      return agg.getParam('percents').map((percent: any) => new ValueAggConfig(percent));
+    },
+
+    getValue: getPercentileValue,
+  });
 };

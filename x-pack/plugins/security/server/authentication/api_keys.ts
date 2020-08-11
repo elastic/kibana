@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { ILegacyClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
 import { SecurityLicense } from '../../common/licensing';
 import { HTTPAuthorizationHeader } from './http_authentication';
 import { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';
@@ -15,7 +15,7 @@ import { BasicHTTPAuthorizationHeaderCredentials } from './http_authentication';
  */
 export interface ConstructorOptions {
   logger: Logger;
-  clusterClient: IClusterClient;
+  clusterClient: ILegacyClusterClient;
   license: SecurityLicense;
 }
 
@@ -29,6 +29,7 @@ export interface CreateAPIKeyParams {
 }
 
 interface GrantAPIKeyParams {
+  api_key: CreateAPIKeyParams;
   grant_type: 'password' | 'access_token';
   username?: string;
   password?: string;
@@ -116,7 +117,7 @@ export interface InvalidateAPIKeyResult {
  */
 export class APIKeys {
   private readonly logger: Logger;
-  private readonly clusterClient: IClusterClient;
+  private readonly clusterClient: ILegacyClusterClient;
   private readonly license: SecurityLicense;
 
   constructor({ logger, clusterClient, license }: ConstructorOptions) {
@@ -188,7 +189,7 @@ export class APIKeys {
    * Tries to grant an API key for the current user.
    * @param request Request instance.
    */
-  async grantAsInternalUser(request: KibanaRequest) {
+  async grantAsInternalUser(request: KibanaRequest, createParams: CreateAPIKeyParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
@@ -200,7 +201,7 @@ export class APIKeys {
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
-    const params = this.getGrantParams(authorizationHeader);
+    const params = this.getGrantParams(createParams, authorizationHeader);
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
@@ -281,9 +282,13 @@ export class APIKeys {
     return disabledFeature === 'api_keys';
   }
 
-  private getGrantParams(authorizationHeader: HTTPAuthorizationHeader): GrantAPIKeyParams {
+  private getGrantParams(
+    createParams: CreateAPIKeyParams,
+    authorizationHeader: HTTPAuthorizationHeader
+  ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
+        api_key: createParams,
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
       };
@@ -294,6 +299,7 @@ export class APIKeys {
         authorizationHeader.credentials
       );
       return {
+        api_key: createParams,
         grant_type: 'password',
         username: basicCredentials.username,
         password: basicCredentials.password,

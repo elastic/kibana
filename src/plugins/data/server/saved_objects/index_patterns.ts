@@ -37,7 +37,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     getInAppUrl(obj) {
       return {
         path: `/app/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'management.kibana.index_patterns',
+        uiCapabilitiesPath: 'management.kibana.indexPatterns',
       };
     },
   },
@@ -54,5 +54,5 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
       typeMeta: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations,
+  migrations: indexPatternSavedObjectTypeMigrations as any,
 };

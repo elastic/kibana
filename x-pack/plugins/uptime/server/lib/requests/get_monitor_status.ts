@@ -32,7 +32,7 @@ const formatBuckets = async (
 ): Promise<GetMonitorStatusResult[]> => {
   return buckets
     .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
+    .map(({ key, doc_count: count }: any) => ({ ...key, count }));
 };
 
 const getLocationClause = (locations: string[]) => ({
@@ -54,10 +54,10 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   const queryResults: Array<Promise<GetMonitorStatusResult[]>> = [];
   let afterKey: MonitorStatusKey | undefined;
 
+  const STATUS = 'down';
   do {
     // today this value is hardcoded. In the future we may support
     // multiple status types for this alert, and this will become a parameter
-    const STATUS = 'down';
     const esParams: any = {
       index: dynamicSettings.heartbeatIndices,
       body: {

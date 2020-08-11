@@ -5,7 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
-import { APICaller } from 'kibana/server';
+import { LegacyAPICaller } from 'kibana/server';
 
 import { LIST_INDEX } from './constants.mock';
 import { getShardMock } from './get_shard.mock';
@@ -21,5 +21,15 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
 });
 
 export const getCallClusterMock = (
-  callCluster: unknown = getEmptyCreateDocumentResponseMock()
-): APICaller => jest.fn().mockResolvedValue(callCluster);
+  response: unknown = getEmptyCreateDocumentResponseMock()
+): LegacyAPICaller => jest.fn().mockResolvedValue(response);
+
+export const getCallClusterMockMultiTimes = (
+  responses: unknown[] = [getEmptyCreateDocumentResponseMock()]
+): LegacyAPICaller => {
+  const returnJest = jest.fn();
+  responses.forEach((response) => {
+    returnJest.mockResolvedValueOnce(response);
+  });
+  return returnJest;
+};

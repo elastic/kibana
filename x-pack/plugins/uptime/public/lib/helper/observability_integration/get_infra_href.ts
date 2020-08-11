@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary } from '../../../../common/runtime_types';
+import { MonitorSummary, Ping } from '../../../../common/runtime_types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
@@ -22,7 +22,7 @@ export const getInfraContainerHref = (
       `/app/metrics/link-to/container-detail/${encodeURIComponent(ret)}`
     );
   };
-  return buildHref(summary.state.checks || [], 'container.id', getHref);
+  return buildHref(summary.state.summaryPings || [], (ping: Ping) => ping?.container?.id, getHref);
 };
 
 export const getInfraKubernetesHref = (
@@ -37,7 +37,11 @@ export const getInfraKubernetesHref = (
     return addBasePath(basePath, `/app/metrics/link-to/pod-detail/${encodeURIComponent(ret)}`);
   };
 
-  return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
+  return buildHref(
+    summary.state.summaryPings || [],
+    (ping: Ping) => ping?.kubernetes?.pod?.uid,
+    getHref
+  );
 };
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
@@ -63,5 +67,5 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
           `/app/metrics/inventory?waffleFilter=(expression:'${encodeURIComponent(ips)}',kind:kuery)`
         );
   };
-  return buildHref(summary.state.checks || [], 'monitor.ip', getHref);
+  return buildHref(summary.state.summaryPings || [], (ping: Ping) => ping?.monitor?.ip, getHref);
 };

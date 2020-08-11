@@ -17,27 +17,13 @@
  * under the License.
  */
 
-import {
-  IStdDevAggConfig,
-  getStdDeviationMetricAgg,
-  StdDeviationMetricAggDependencies,
-} from './std_deviation';
+import { IStdDevAggConfig, getStdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
-import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { InternalStartServices } from '../../../types';
 
 describe('AggTypeMetricStandardDeviationProvider class', () => {
-  const aggTypesDependencies: StdDeviationMetricAggDependencies = {
-    getInternalStartServices: () =>
-      (({
-        fieldFormats: fieldFormatsServiceMock.createStartContract(),
-        notifications: notificationServiceMock.createStartContract(),
-      } as unknown) as InternalStartServices),
-  };
-  const typesRegistry = mockAggTypesRegistry([getStdDeviationMetricAgg(aggTypesDependencies)]);
+  const typesRegistry = mockAggTypesRegistry([getStdDeviationMetricAgg()]);
   const getAggConfigs = (customLabel?: string) => {
     const field = {
       name: 'memory',
@@ -66,13 +52,13 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
           },
         },
       ],
-      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
+      { typesRegistry }
     );
   };
 
   it('uses the custom label if it is set', () => {
     const aggConfigs = getAggConfigs('custom label');
-    const responseAggs: any = getStdDeviationMetricAgg(aggTypesDependencies).getResponseAggs(
+    const responseAggs: any = getStdDeviationMetricAgg().getResponseAggs(
       aggConfigs.aggs[0] as IStdDevAggConfig
     );
 
@@ -86,7 +72,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
   it('uses the default labels if custom label is not set', () => {
     const aggConfigs = getAggConfigs();
 
-    const responseAggs: any = getStdDeviationMetricAgg(aggTypesDependencies).getResponseAggs(
+    const responseAggs: any = getStdDeviationMetricAgg().getResponseAggs(
       aggConfigs.aggs[0] as IStdDevAggConfig
     );
 

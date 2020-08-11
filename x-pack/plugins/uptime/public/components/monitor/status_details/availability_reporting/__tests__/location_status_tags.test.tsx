@@ -10,6 +10,12 @@ import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
 import { LocationStatusTags } from '../index';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
+
 describe('LocationStatusTags component', () => {
   let monitorLocations: MonitorLocation[];
 

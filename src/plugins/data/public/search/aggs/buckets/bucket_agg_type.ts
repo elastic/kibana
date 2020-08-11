@@ -21,7 +21,6 @@ import { IAggConfig } from '../agg_config';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
-import { GetInternalStartServicesFn } from '../../../types';
 
 export interface IBucketAggConfig extends IAggConfig {
   type: InstanceType<typeof BucketAggType>;
@@ -40,10 +39,6 @@ interface BucketAggTypeConfig<TBucketAggConfig extends IAggConfig>
   getKey?: (bucket: any, key: any, agg: IAggConfig) => any;
 }
 
-interface BucketAggTypeDependencies {
-  getInternalStartServices: GetInternalStartServicesFn;
-}
-
 export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfig> extends AggType<
   TBucketAggConfig,
   BucketAggParam<TBucketAggConfig>
@@ -51,11 +46,8 @@ export class BucketAggType<TBucketAggConfig extends IAggConfig = IBucketAggConfi
   getKey: (bucket: any, key: any, agg: TBucketAggConfig) => any;
   type = bucketType;
 
-  constructor(
-    config: BucketAggTypeConfig<TBucketAggConfig>,
-    dependencies: BucketAggTypeDependencies
-  ) {
-    super(config, dependencies);
+  constructor(config: BucketAggTypeConfig<TBucketAggConfig>) {
+    super(config);
 
     this.getKey =
       config.getKey ||

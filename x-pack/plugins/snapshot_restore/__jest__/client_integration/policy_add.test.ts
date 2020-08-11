@@ -3,11 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+// import helpers first, this also sets up the mocks
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../test/fixtures';
 
-import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
@@ -37,7 +40,10 @@ describe('<PolicyAdd />', () => {
   describe('on component mount', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories: [repository] });
-      httpRequestsMockHelpers.setLoadIndicesResponse({ indices: ['my_index'] });
+      httpRequestsMockHelpers.setLoadIndicesResponse({
+        indices: ['my_index'],
+        dataStreams: ['my_data_stream', 'my_other_data_stream'],
+      });
 
       testBed = await setup();
       await nextTick();
@@ -96,7 +102,7 @@ describe('<PolicyAdd />', () => {
           actions.clickNextButton();
         });
 
-        test('should require at least one index', async () => {
+        test('should require at least one index if no data streams are provided', async () => {
           const { find, form, component } = testBed;
 
           await act(async () => {
@@ -109,7 +115,22 @@ describe('<PolicyAdd />', () => {
           // Deselect all indices from list
           find('deselectIndicesLink').simulate('click');
 
-          expect(form.getErrorsMessages()).toEqual(['You must select at least one index.']);
+          expect(form.getErrorsMessages()).toEqual([
+            'You must select at least one data stream or index.',
+          ]);
+        });
+
+        test('should correctly indicate data streams with a badge', async () => {
+          const { find, component, form } = testBed;
+
+          await act(async () => {
+            // Toggle "All indices" switch
+            form.toggleEuiSwitch('allIndicesToggle', false);
+            await nextTick();
+          });
+          component.update();
+
+          expect(find('dataStreamBadge').length).toBe(2);
         });
       });
 

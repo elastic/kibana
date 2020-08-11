@@ -23,12 +23,21 @@ import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
+import { GetInternalStartServicesFn, InternalStartServices } from '../../../../types';
+import { FieldFormatsStart } from '../../../../field_formats';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 
 describe('AggConfig Filters', () => {
+  let getInternalStartServices: GetInternalStartServicesFn;
+  let fieldFormats: FieldFormatsStart;
+
+  beforeEach(() => {
+    fieldFormats = fieldFormatsServiceMock.createStartContract();
+    getInternalStartServices = () => (({ fieldFormats } as unknown) as InternalStartServices);
+  });
+
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
-    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
@@ -57,21 +66,25 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
+        { typesRegistry: mockAggTypesRegistry() }
       );
     };
 
     test('should return an range filter for histogram', () => {
       const aggConfigs = getAggConfigs();
-      const filter = createFilterHistogram(aggConfigs.aggs[0] as IBucketAggConfig, '2048');
+      const filter = createFilterHistogram(getInternalStartServices)(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        '2048'
+      );
 
+      expect(fieldFormats.deserialize).toHaveBeenCalledTimes(1);
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter).toHaveProperty('range');
       expect(filter.range).toHaveProperty('bytes');
       expect(filter.range.bytes).toHaveProperty('gte', 2048);
       expect(filter.range.bytes).toHaveProperty('lt', 3072);
-      expect(filter.meta).toHaveProperty('formattedValue', '2,048');
+      expect(filter.meta).toHaveProperty('formattedValue');
     });
   });
 });

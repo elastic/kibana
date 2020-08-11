@@ -180,10 +180,18 @@ export class FieldFormatsRegistry {
    * @param  {ES_FIELD_TYPES[]} esTypes
    * @return {FieldFormat}
    */
-  getDefaultInstancePlain(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): FieldFormat {
+  getDefaultInstancePlain(
+    fieldType: KBN_FIELD_TYPES,
+    esTypes?: ES_FIELD_TYPES[],
+    params: Record<string, any> = {}
+  ): FieldFormat {
     const conf = this.getDefaultConfig(fieldType, esTypes);
+    const instanceParams = {
+      ...conf.params,
+      ...params,
+    };
 
-    return this.getInstance(conf.id, conf.params);
+    return this.getInstance(conf.id, instanceParams);
   }
   /**
    * Returns a cache key built by the given variables for caching in memoized
@@ -233,7 +241,7 @@ export class FieldFormatsRegistry {
   parseDefaultTypeMap(value: any) {
     this.defaultMap = value;
     forOwn(this, (fn) => {
-      if (isFunction(fn) && fn.cache) {
+      if (isFunction(fn) && (fn as any).cache) {
         // clear all memoize caches
         // @ts-ignore
         fn.cache = new memoize.Cache();

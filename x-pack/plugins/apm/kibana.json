@@ -28,5 +28,10 @@
   ],
   "extraPublicDirs": [
     "public/style/variables"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "observability"
   ]
 }

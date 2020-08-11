@@ -18,11 +18,13 @@ import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 
 type WithAlertStateProps = {
   alert: Alert;
+  readOnly: boolean;
   requestRefresh: () => Promise<void>;
 } & Pick<AlertApis, 'loadAlertState'>;
 
 export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> = ({
   alert,
+  readOnly,
   requestRefresh,
   loadAlertState,
 }) => {
@@ -36,7 +38,12 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> =
   }, [alert]);
 
   return alertState ? (
-    <AlertInstances requestRefresh={requestRefresh} alert={alert} alertState={alertState} />
+    <AlertInstances
+      requestRefresh={requestRefresh}
+      alert={alert}
+      readOnly={readOnly}
+      alertState={alertState}
+    />
   ) : (
     <div
       style={{

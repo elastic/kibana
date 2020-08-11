@@ -29,8 +29,8 @@ export type StringOptions = TypeOptions<string> & {
 
 export class StringType extends Type<string> {
   constructor(options: StringOptions = {}) {
-    // We want to allow empty strings, however calling `allow('')` casues
-    // Joi to whitelist the value and skip any additional validation.
+    // We want to allow empty strings, however calling `allow('')` causes
+    // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
     // hostname case where empty strings aren't allowed anyways.
     let schema =

@@ -12,12 +12,10 @@ import { Threat, threat } from '../common/schemas';
  * Types the DefaultThreatArray as:
  *   - If null or undefined, then an empty array will be set
  */
-export const DefaultThreatArray = new t.Type<Threat, Threat, unknown>(
+export const DefaultThreatArray = new t.Type<Threat, Threat | undefined, unknown>(
   'DefaultThreatArray',
   threat.is,
   (input, context): Either<t.Errors, Threat> =>
     input == null ? t.success([]) : threat.validate(input, context),
   t.identity
 );
-
-export type DefaultThreatArrayC = typeof DefaultThreatArray;

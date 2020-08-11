@@ -30,11 +30,7 @@ describe('SelectableTimeline', () => {
     };
   });
 
-  const {
-    SelectableTimeline,
-
-    ORIGINAL_PAGE_SIZE,
-  } = jest.requireActual('./');
+  const { SelectableTimeline, ORIGINAL_PAGE_SIZE } = jest.requireActual('./');
 
   const props = {
     hideUntitled: false,
@@ -64,7 +60,7 @@ describe('SelectableTimeline', () => {
       });
     });
 
-    describe('template timeline', () => {
+    describe('timeline template', () => {
       const templateTimelineProps = { ...props, timelineType: TimelineType.template };
       beforeAll(() => {
         wrapper = shallow(<SelectableTimeline {...templateTimelineProps} />);
@@ -78,7 +74,7 @@ describe('SelectableTimeline', () => {
         const searchProps: SearchProps = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Template timeline name or description');
+        expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });
@@ -94,6 +90,7 @@ describe('SelectableTimeline', () => {
         sortField: SortFieldTimeline.updated,
         sortOrder: Direction.desc,
       },
+      status: null,
       onlyUserFavorite: false,
       timelineType: TimelineType.default,
     };

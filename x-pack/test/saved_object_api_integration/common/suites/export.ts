@@ -93,8 +93,8 @@ const getTestTitle = ({ failure, title }: ExportTestCase) => {
 };
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbiddenBulkGet = expectResponses.forbidden('bulk_get');
-  const expectForbiddenFind = expectResponses.forbidden('find');
+  const expectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
+  const expectForbiddenFind = expectResponses.forbiddenTypes('find');
   const expectResponseBody = (testCase: ExportTestCase): ExpectResponseBody => async (
     response: Record<string, any>
   ) => {

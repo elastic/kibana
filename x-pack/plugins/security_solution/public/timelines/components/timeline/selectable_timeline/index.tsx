@@ -165,7 +165,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'none'}`} color="primary" />
+          <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column">
@@ -249,24 +249,22 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     },
   };
 
-  useEffect(
-    () =>
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: 1,
-          pageSize,
-        },
-        search: searchTimelineValue,
-        sort: {
-          sortField: SortFieldTimeline.updated,
-          sortOrder: Direction.desc,
-        },
-        onlyUserFavorite: onlyFavorites,
-        timelineType,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onlyFavorites, pageSize, searchTimelineValue, timelineType]
-  );
+  useEffect(() => {
+    fetchAllTimeline({
+      pageInfo: {
+        pageIndex: 1,
+        pageSize,
+      },
+      search: searchTimelineValue,
+      sort: {
+        sortField: SortFieldTimeline.updated,
+        sortOrder: Direction.desc,
+      },
+      onlyUserFavorite: onlyFavorites,
+      status: null,
+      timelineType,
+    });
+  }, [fetchAllTimeline, onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

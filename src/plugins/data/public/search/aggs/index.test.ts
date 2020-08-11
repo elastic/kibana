@@ -22,7 +22,6 @@ import { getAggTypes } from './index';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';
 import { isMetricAggType } from './metrics/metric_agg_type';
-import { QueryStart } from '../../query';
 import { FieldFormatsStart } from '../../field_formats';
 import { InternalStartServices } from '../../types';
 
@@ -31,13 +30,13 @@ describe('AggTypesComponent', () => {
   const coreStart = coreMock.createSetup();
 
   const aggTypes = getAggTypes({
-    uiSettings: coreSetup.uiSettings,
-    query: {} as QueryStart,
+    calculateBounds: jest.fn(),
     getInternalStartServices: () =>
       (({
         notifications: coreStart.notifications,
         fieldFormats: {} as FieldFormatsStart,
       } as unknown) as InternalStartServices),
+    uiSettings: coreSetup.uiSettings,
   });
 
   const { buckets, metrics } = aggTypes;

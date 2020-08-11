@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { isEsError } from '../../../shared_imports';
 import { RouteDependencies } from '../../../types';
@@ -17,7 +17,7 @@ const paramsSchema = schema.object({
   watchId: schema.string(),
 });
 
-function deactivateWatch(dataClient: IScopedClusterClient, watchId: string) {
+function deactivateWatch(dataClient: ILegacyScopedClusterClient, watchId: string) {
   return dataClient.callAsCurrentUser('watcher.deactivateWatch', {
     id: watchId,
   });

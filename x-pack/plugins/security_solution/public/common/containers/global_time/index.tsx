@@ -18,8 +18,8 @@ interface SetQuery {
 }
 
 export interface GlobalTimeArgs {
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   setQuery: ({ id, inspect, loading, refetch }: SetQuery) => void;
   deleteQuery?: ({ id }: { id: string }) => void;
   isInitializing: boolean;

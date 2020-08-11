@@ -140,6 +140,7 @@ export function createApi() {
                   // Only return values for parameters that have runtime types,
                   // but always include query as _debug is always set even if
                   // it's not defined in the route.
+                  // @ts-ignore
                   params: pick(parsedParams, ...Object.keys(params), 'query'),
                   config,
                   logger,

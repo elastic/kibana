@@ -5,13 +5,16 @@
  */
 
 import { EuiHighlight, EuiText } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../timeline/events';
 import { WithHoverActions } from '../../../common/components/with_hover_actions';
-import { DraggableWrapperHoverContent } from '../../../common/components/drag_and_drop/draggable_wrapper_hover_content';
+import {
+  DraggableWrapperHoverContent,
+  useGetTimelineId,
+} from '../../../common/components/drag_and_drop/draggable_wrapper_hover_content';
 
 /**
  * The name of a (draggable) field
@@ -77,23 +80,34 @@ export const FieldName = React.memo<{
   fieldId: string;
   highlight?: string;
   onUpdateColumns: OnUpdateColumns;
-  timelineId: string;
-}>(({ fieldId, highlight = '', timelineId }) => {
+}>(({ fieldId, highlight = '' }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
+  const [goGetTimelineId, setGoGetTimelineId] = useState(false);
+  const timelineIdFind = useGetTimelineId(containerRef, goGetTimelineId);
+
   const toggleTopN = useCallback(() => {
-    setShowTopN(!showTopN);
-  }, [setShowTopN, showTopN]);
+    setShowTopN((prevShowTopN) => !prevShowTopN);
+  }, []);
+
+  const handleClosePopOverTrigger = useCallback(
+    () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
+    []
+  );
 
   const hoverContent = useMemo(
     () => (
       <DraggableWrapperHoverContent
+        closePopOver={handleClosePopOverTrigger}
         field={fieldId}
         showTopN={showTopN}
         toggleTopN={toggleTopN}
-        timelineId={timelineId}
+        goGetTimelineId={setGoGetTimelineId}
+        timelineId={timelineIdFind}
       />
     ),
-    [fieldId, showTopN, toggleTopN, timelineId]
+    [fieldId, handleClosePopOverTrigger, showTopN, timelineIdFind, toggleTopN]
   );
 
   const render = useCallback(
@@ -109,7 +123,16 @@ export const FieldName = React.memo<{
     [fieldId, highlight]
   );
 
-  return <WithHoverActions hoverContent={hoverContent} render={render} />;
+  return (
+    <div ref={containerRef}>
+      <WithHoverActions
+        alwaysShow={showTopN}
+        closePopOverTrigger={closePopOverTrigger}
+        hoverContent={hoverContent}
+        render={render}
+      />
+    </div>
+  );
 });
 
 FieldName.displayName = 'FieldName';

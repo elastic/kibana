@@ -30,13 +30,6 @@ describe('deleteAlertRoute', () => {
     const [config, handler] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
-    expect(config.options).toMatchInlineSnapshot(`
-      Object {
-        "tags": Array [
-          "access:alerting-all",
-        ],
-      }
-    `);
 
     alertsClient.delete.mockResolvedValueOnce({});
 

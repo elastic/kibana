@@ -46,7 +46,7 @@ describe('authorized_user_pre_routing', function () {
     mockCore = await createMockReportingCore(mockReportingConfig);
   });
 
-  it('should return from handler with null user when security is disabled', async function () {
+  it('should return from handler with a "null" user when security plugin is not found', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -66,12 +66,37 @@ describe('authorized_user_pre_routing', function () {
     expect(handlerCalled).toBe(true);
   });
 
-  it('should return with 401 when security is enabled but no authenticated user', async function () {
+  it('should return from handler with a "null" user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
+          license: {
+            isEnabled: () => false,
+          },
+        }, // disable security
+      } as unknown) as ReportingInternalSetup);
+    const authorizedUserPreRouting = authorizedUserPreRoutingFactory(mockCore);
+    const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
+
+    let handlerCalled = false;
+    authorizedUserPreRouting((user: unknown) => {
+      expect(user).toBe(null); // verify the user is a null value
+      handlerCalled = true;
+      return Promise.resolve({ status: 200, options: {} });
+    })(getMockContext(), getMockRequest(), mockResponseFactory);
+
+    expect(handlerCalled).toBe(true);
+  });
+
+  it('should return with 401 when security is enabled and the request is unauthenticated', async function () {
+    mockCore.getPluginSetupDeps = () =>
+      (({
+        // @ts-ignore
+        ...mockCore.pluginSetupDeps,
+        security: {
+          license: { isEnabled: () => true },
           authc: { getCurrentUser: () => null },
         },
       } as unknown) as ReportingInternalSetup);
@@ -87,12 +112,13 @@ describe('authorized_user_pre_routing', function () {
     });
   });
 
-  it(`should return with 403 when security is enabled but user doesn't have allowed role`, async function () {
+  it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
+          license: { isEnabled: () => true },
           authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
         },
       } as unknown) as ReportingInternalSetup);
@@ -113,6 +139,7 @@ describe('authorized_user_pre_routing', function () {
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
+          license: { isEnabled: () => true },
           authc: {
             getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
           },

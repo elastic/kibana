@@ -115,7 +115,7 @@ export class LayerWizardSelect extends Component<Props, State> {
     });
 
     return (
-      <EuiFacetGroup layout="horizontal">
+      <EuiFacetGroup layout="horizontal" gutterSize="s">
         <EuiFacetButton
           key="all"
           isSelected={!this.state.selectedCategory}
@@ -154,6 +154,7 @@ export class LayerWizardSelect extends Component<Props, State> {
           <EuiFlexItem key={layerWizard.title}>
             <EuiCard
               title={layerWizard.title}
+              titleSize="xs"
               icon={icon}
               onClick={onClick}
               description={layerWizard.description}
@@ -166,6 +167,7 @@ export class LayerWizardSelect extends Component<Props, State> {
     return (
       <>
         {this._renderCategoryFacets()}
+
         <EuiSpacer size="s" />
         <EuiFlexGrid columns={2} gutterSize="m">
           {wizardCards}

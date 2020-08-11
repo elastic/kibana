@@ -75,8 +75,8 @@ export interface AnomaliesByNetwork {
 }
 
 export interface HostOrNetworkProps {
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   narrowDateRange: NarrowDateRange;
   skip: boolean;
 }

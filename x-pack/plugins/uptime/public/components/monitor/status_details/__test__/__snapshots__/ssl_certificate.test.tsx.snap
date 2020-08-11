@@ -139,12 +139,48 @@ exports[`SSL Certificate component shallow renders 1`] = `
     }
   }
 >
-  <MonitorSSLCertificate
-    tls={
+  <ContextProvider
+    value={
       Object {
-        "not_after": "2020-04-24T11:41:38.200Z",
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
       }
     }
-  />
+  >
+    <MonitorSSLCertificate
+      tls={
+        Object {
+          "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
+          "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
+        }
+      }
+    />
+  </ContextProvider>
 </ContextProvider>
 `;

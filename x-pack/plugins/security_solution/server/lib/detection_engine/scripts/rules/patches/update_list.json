@@ -1,9 +1,15 @@
 {
-  "rule_id": "query-with-list",
+  "rule_id": "query-with-exceptions",
   "exceptions_list": [
+    { 
+      "id": "ID_HERE",
+      "namespace_type": "single",
+      "type": "endpoint"
+    },
     {
-      "id": "some_updated_fake_id",
-      "namespace_type": "single"
+      "id": "ID_HERE",
+      "namespace_type": "single",
+      "type": "detection"
     }
   ]
 }

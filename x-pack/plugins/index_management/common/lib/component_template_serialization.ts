@@ -8,6 +8,7 @@ import {
   ComponentTemplateFromEs,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
+  ComponentTemplateSerialized,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
@@ -59,28 +60,42 @@ export function deserializeComponentTemplate(
     _meta,
     _kbnMeta: {
       usedBy: indexTemplatesToUsedBy[name] || [],
+      isManaged: Boolean(_meta?.managed === true),
     },
   };
 
   return deserializedComponentTemplate;
 }
 
-export function deserializeComponenTemplateList(
+export function deserializeComponentTemplateList(
   componentTemplateEs: ComponentTemplateFromEs,
   indexTemplatesEs: TemplateFromEs[]
 ) {
   const { name, component_template: componentTemplate } = componentTemplateEs;
-  const { template } = componentTemplate;
+  const { template, _meta } = componentTemplate;
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
   const componentTemplateListItem: ComponentTemplateListItem = {
     name,
     usedBy: indexTemplatesToUsedBy[name] || [],
+    isManaged: Boolean(_meta?.managed === true),
     hasSettings: hasEntries(template.settings),
     hasMappings: hasEntries(template.mappings),
     hasAliases: hasEntries(template.aliases),
   };
 
   return componentTemplateListItem;
+}
+
+export function serializeComponentTemplate(
+  componentTemplateDeserialized: ComponentTemplateDeserialized
+): ComponentTemplateSerialized {
+  const { version, template, _meta } = componentTemplateDeserialized;
+
+  return {
+    version,
+    template,
+    _meta,
+  };
 }

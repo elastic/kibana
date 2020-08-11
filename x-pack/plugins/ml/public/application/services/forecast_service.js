@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { map } from 'rxjs/operators';
 
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ml } from './ml_api_service';
 
 // Gets a basic summary of the most recently run forecasts for the specified
@@ -48,19 +47,19 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
       filterCriteria.push(query);
     }
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: maxResults,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: maxResults,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
+          sort: [{ forecast_create_timestamp: { order: 'desc' } }],
         },
-        sort: [{ forecast_create_timestamp: { order: 'desc' } }],
-      },
-    })
+      })
       .then((resp) => {
         if (resp.hits.total !== 0) {
           obj.forecasts = resp.hits.hits.map((hit) => hit._source);
@@ -106,29 +105,29 @@ function getForecastDateRange(job, forecastId) {
     // TODO - add in criteria for detector index and entity fields (by, over, partition)
     // once forecasting with these parameters is supported.
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
-          },
-        },
-        aggs: {
-          earliest: {
-            min: {
-              field: 'timestamp',
+    ml.results
+      .anomalySearch({
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
             },
           },
-          latest: {
-            max: {
-              field: 'timestamp',
+          aggs: {
+            earliest: {
+              min: {
+                field: 'timestamp',
+              },
+            },
+            latest: {
+              max: {
+                field: 'timestamp',
+              },
             },
           },
         },
-      },
-    })
+      })
       .then((resp) => {
         obj.earliest = _.get(resp, 'aggregations.earliest.value', null);
         obj.latest = _.get(resp, 'aggregations.latest.value', null);
@@ -243,9 +242,8 @@ function getForecastData(
           min: aggType.min,
         };
 
-  return ml
-    .esSearch$({
-      index: ML_RESULTS_INDEX_PATTERN,
+  return ml.results
+    .anomalySearch$({
       size: 0,
       body: {
         query: {
@@ -343,18 +341,18 @@ function getForecastRequestStats(job, forecastId) {
       },
     ];
 
-    ml.esSearch({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      rest_total_hits_as_int: true,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
+    ml.results
+      .anomalySearch({
+        size: 1,
+        rest_total_hits_as_int: true,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
+            },
           },
         },
-      },
-    })
+      })
       .then((resp) => {
         if (resp.hits.total !== 0) {
           obj.stats = _.first(resp.hits.hits)._source;

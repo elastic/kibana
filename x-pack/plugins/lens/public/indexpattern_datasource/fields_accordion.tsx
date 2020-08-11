@@ -6,12 +6,14 @@
 
 import './datapanel.scss';
 import React, { memo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiText,
   EuiNotificationBadge,
   EuiSpacer,
   EuiAccordion,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPatternField } from './types';
@@ -19,10 +21,12 @@ import { FieldItem } from './field_item';
 import { Query, Filter } from '../../../../../src/plugins/data/public';
 import { DatasourceDataPanelProps } from '../types';
 import { IndexPattern } from './types';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 export interface FieldItemSharedProps {
   core: DatasourceDataPanelProps['core'];
   data: DataPublicPluginStart;
+  chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;
   query: Query;
@@ -42,6 +46,7 @@ export interface FieldsAccordionProps {
   fieldProps: FieldItemSharedProps;
   renderCallout: JSX.Element;
   exists: boolean;
+  showExistenceFetchError?: boolean;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -56,6 +61,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   fieldProps,
   renderCallout,
   exists,
+  showExistenceFetchError,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => {
@@ -76,7 +82,18 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
         </EuiText>
       }
       extraAction={
-        hasLoaded ? (
+        showExistenceFetchError ? (
+          <EuiIconTip
+            aria-label={i18n.translate('xpack.lens.indexPattern.existenceErrorAriaLabel', {
+              defaultMessage: 'Existence fetch failed',
+            })}
+            type="alert"
+            color="warning"
+            content={i18n.translate('xpack.lens.indexPattern.existenceErrorLabel', {
+              defaultMessage: "Field information can't be loaded",
+            })}
+          />
+        ) : hasLoaded ? (
           <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
             {fieldsCount}
           </EuiNotificationBadge>

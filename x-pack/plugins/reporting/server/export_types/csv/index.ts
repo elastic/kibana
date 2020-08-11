@@ -15,8 +15,8 @@ import {
 import { CSV_JOB_TYPE as jobType } from '../../../constants';
 import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../../types';
 import { metadata } from './metadata';
-import { scheduleTaskFnFactory } from './server/create_job';
-import { runTaskFnFactory } from './server/execute_job';
+import { scheduleTaskFnFactory } from './create_job';
+import { runTaskFnFactory } from './execute_job';
 import { JobParamsDiscoverCsv, ScheduledTaskParamsCSV } from './types';
 
 export const getExportType = (): ExportTypeDefinition<

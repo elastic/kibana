@@ -16,26 +16,23 @@ import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
-import { EndpointAlertsPluginState } from '../../endpoint_alerts';
 import { ManagementPluginState } from '../../management';
 
+export type StoreState = HostsPluginState &
+  NetworkPluginState &
+  TimelinePluginState &
+  ManagementPluginState & {
+    app: AppState;
+    dragAndDrop: DragAndDropState;
+    inputs: InputsState;
+  };
 /**
  * The redux `State` type for the Security App.
  * We use `CombinedState` to wrap our shape because we create our reducer using `combineReducers`.
  * `combineReducers` returns a type wrapped in `CombinedState`.
  * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
  */
-export type State = CombinedState<
-  HostsPluginState &
-    NetworkPluginState &
-    TimelinePluginState &
-    EndpointAlertsPluginState &
-    ManagementPluginState & {
-      app: AppState;
-      dragAndDrop: DragAndDropState;
-      inputs: InputsState;
-    }
->;
+export type State = CombinedState<StoreState>;
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
 

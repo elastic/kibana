@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IntegrationLink } from './integration_link';
 import {
@@ -26,6 +25,23 @@ interface IntegrationGroupProps {
   summary: MonitorSummary;
 }
 
+export const extractSummaryValues = (summary: Pick<MonitorSummary, 'state'>) => {
+  const domain = summary.state.url?.domain ?? '';
+
+  const firstCheck = summary.state.summaryPings?.[0];
+
+  const podUid = firstCheck?.kubernetes?.pod?.uid ?? undefined;
+  const containerId = firstCheck?.container?.id ?? undefined;
+  const ip = firstCheck?.monitor.ip ?? undefined;
+
+  return {
+    domain,
+    podUid,
+    containerId,
+    ip,
+  };
+};
+
 export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
   const {
     basePath,
@@ -36,10 +52,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
-  const domain = get<string>(summary, 'state.url.domain', '');
-  const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
-  const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
-  const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
+  const { domain, podUid, containerId, ip } = extractSummaryValues(summary);
 
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
@@ -54,16 +67,17 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
             href={getApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
             message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
-              defaultMessage: 'Check APM for domain',
+              defaultMessage: 'Show APM Data',
               description:
-                'A message explaining that when the user clicks the associated link, it will navigate to the APM app and search for the selected domain',
+                'A message explaining that when the user clicks the associated link, it will navigate to the APM app',
             })}
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.observabilityIntegrationsColumn.apmIntegrationLink.tooltip',
               {
-                defaultMessage: 'Click here to check APM for the domain "{domain}".',
+                defaultMessage:
+                  'Click here to check APM for the domain "{domain}" or explicitly defined "service name".',
                 description:
-                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain.',
+                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain or explicitly defined service name.',
                 values: {
                   domain,
                 },
@@ -97,7 +111,7 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
                 {
                   defaultMessage: 'Check Infrastructure UI for the IP "{ip}"',
                   values: {
-                    ip,
+                    ip: Array.isArray(ip) ? ip[0] : ip,
                   },
                 }
               )}
@@ -184,7 +198,12 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
               )}
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.tooltip',
-                { defaultMessage: 'Check Logging UI for the IP "{ip}"', values: { ip } }
+                {
+                  defaultMessage: 'Check Logging UI for the IP "{ip}"',
+                  values: {
+                    ip: Array.isArray(ip) ? ip[0] : ip,
+                  },
+                }
               )}
             />
           </EuiFlexItem>

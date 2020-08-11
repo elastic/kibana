@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
+import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { PLUGIN } from '../common/constants';
 
 import { ClientConfigType } from './types';
@@ -40,7 +40,7 @@ export class SnapshotRestoreUIPlugin {
     textService.setup(i18n);
     httpService.setup(http);
 
-    management.sections.getSection(ManagementSectionId.Data).registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.snapshotRestore.appTitle', {
         defaultMessage: 'Snapshot and Restore',

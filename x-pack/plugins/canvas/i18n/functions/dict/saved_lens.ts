@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { savedLens } from '../../../canvas_plugin_src/functions/common/saved_lens';
+import { savedLens } from '../../../canvas_plugin_src/functions/external/saved_lens';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../kbn_ui_ace_keyboard_mode';
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 
 describe('kbnUiAceKeyboardMode directive', () => {
   let element;
@@ -48,7 +48,7 @@ describe('kbnUiAceKeyboardMode directive', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keyCodes.ENTER;
+      ev.key = keys.ENTER;
       element.find('.kbnUiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(
@@ -61,7 +61,7 @@ describe('kbnUiAceKeyboardMode directive', () => {
       const hint = element.find('.kbnUiAceKeyboardHint');
       sinon.spy(hint[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keyCodes.ESCAPE;
+      ev.key = keys.ESCAPE;
       textarea.trigger(ev);
       expect(hint[0].focus.called).to.be(true);
       expect(hint.hasClass('kbnUiAceKeyboardHint-isInactive')).to.be(false);
@@ -101,7 +101,7 @@ describe('kbnUiAceKeyboardModeService', () => {
       const textarea = element.find('textarea');
       sinon.spy(textarea[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keyCodes.ENTER;
+      ev.key = keys.ENTER;
       element.find('.kbnUiAceKeyboardHint').trigger(ev);
       expect(textarea[0].focus.called).to.be(true);
       expect(
@@ -114,7 +114,7 @@ describe('kbnUiAceKeyboardModeService', () => {
       const hint = element.find('.kbnUiAceKeyboardHint');
       sinon.spy(hint[0], 'focus');
       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-      ev.keyCode = keyCodes.ESCAPE;
+      ev.key = keys.ESCAPE;
       textarea.trigger(ev);
       expect(hint[0].focus.called).to.be(true);
       expect(hint.hasClass('kbnUiAceKeyboardHint-isInactive')).to.be(false);

@@ -9,6 +9,7 @@ import { Plugin, Logger, CoreSetup, CoreStart, PluginInitializerContext } from '
 import { Service, IService, AlertingBuiltinsDeps } from './types';
 import { getService as getServiceIndexThreshold } from './alert_types/index_threshold';
 import { registerBuiltInAlertTypes } from './alert_types';
+import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
   private readonly logger: Logger;
@@ -22,7 +23,12 @@ export class AlertingBuiltinsPlugin implements Plugin<IService, IService> {
     };
   }
 
-  public async setup(core: CoreSetup, { alerts }: AlertingBuiltinsDeps): Promise<IService> {
+  public async setup(
+    core: CoreSetup,
+    { alerts, features }: AlertingBuiltinsDeps
+  ): Promise<IService> {
+    features.registerFeature(BUILT_IN_ALERTS_FEATURE);
+
     registerBuiltInAlertTypes({
       service: this.service,
       router: core.http.createRouter(),

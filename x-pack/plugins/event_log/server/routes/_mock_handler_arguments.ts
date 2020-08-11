@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity, merge } from 'lodash';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'src/core/server';
+
+import { httpServerMock } from 'src/core/server/mocks';
 import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(

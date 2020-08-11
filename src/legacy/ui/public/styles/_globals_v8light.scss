@@ -1,0 +1,16 @@
+// v8light global scope
+//
+// prepended to all .scss imports (from JS, when v8light theme selected)
+
+@import '@elastic/eui/src/themes/eui-amsterdam/eui_amsterdam_colors_light';
+
+@import '@elastic/eui/src/global_styling/functions/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/functions/index';
+
+@import '@elastic/eui/src/global_styling/variables/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/variables/index';
+
+@import '@elastic/eui/src/global_styling/mixins/index';
+@import '@elastic/eui/src/themes/eui-amsterdam/global_styling/mixins/index';
+
+@import './mixins';

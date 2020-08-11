@@ -20,24 +20,19 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
-
-import StatusApp from './status_app';
+// just to import eui into legacy
+import '@elastic/eui';
 
 const STATUS_PAGE_DOM_NODE_ID = 'createStatusPageReact';
 
-export function renderStatusPage(buildNum, buildSha) {
+export function renderStatusPage() {
   const node = document.getElementById(STATUS_PAGE_DOM_NODE_ID);
 
   if (!node) {
     return;
   }
 
-  render(
-    <I18nContext>
-      <StatusApp buildNum={buildNum} buildSha={buildSha} />
-    </I18nContext>,
-    node
-  );
+  render(<I18nContext>Foo</I18nContext>, node);
 }
 
 export function destroyStatusPage() {

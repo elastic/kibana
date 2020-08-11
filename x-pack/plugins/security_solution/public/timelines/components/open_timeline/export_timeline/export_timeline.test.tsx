@@ -8,7 +8,6 @@ import React from 'react';
 import { TimelineDownloader } from './export_timeline';
 import { mockSelectedTimeline } from './mocks';
 import { ReactWrapper, mount } from 'enzyme';
-import { useExportTimeline } from '.';
 
 jest.mock('../translations', () => {
   return {
@@ -32,19 +31,6 @@ describe('TimelineDownloader', () => {
     onComplete: jest.fn(),
   };
   describe('should not render a downloader', () => {
-    beforeAll(() => {
-      ((useExportTimeline as unknown) as jest.Mock).mockReturnValue({
-        enableDownloader: false,
-        setEnableDownloader: jest.fn(),
-        exportedIds: {},
-        getExportedData: jest.fn(),
-      });
-    });
-
-    afterAll(() => {
-      ((useExportTimeline as unknown) as jest.Mock).mockReset();
-    });
-
     test('Without exportedIds', () => {
       const testProps = {
         ...defaultTestProps,
@@ -65,19 +51,6 @@ describe('TimelineDownloader', () => {
   });
 
   describe('should render a downloader', () => {
-    beforeAll(() => {
-      ((useExportTimeline as unknown) as jest.Mock).mockReturnValue({
-        enableDownloader: false,
-        setEnableDownloader: jest.fn(),
-        exportedIds: {},
-        getExportedData: jest.fn(),
-      });
-    });
-
-    afterAll(() => {
-      ((useExportTimeline as unknown) as jest.Mock).mockReset();
-    });
-
     test('With selectedItems and exportedIds is given and isEnableDownloader is true', () => {
       const testProps = {
         ...defaultTestProps,

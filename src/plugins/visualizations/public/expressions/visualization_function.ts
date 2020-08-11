@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisResponseValue, PersistedState } from '../../../../plugins/visualizations/public';
 import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
-import { getTypes, getIndexPatterns, getFilterManager } from '../services';
+import { getTypes, getIndexPatterns, getFilterManager, getSearch } from '../services';
 
 interface Arguments {
   index?: string | null;
@@ -31,6 +31,7 @@ interface Arguments {
   schemas?: string;
   visConfig?: string;
   uiState?: string;
+  aggConfigs?: string;
 }
 
 export type ExpressionFunctionVisualization = ExpressionFunctionDefinition<
@@ -84,6 +85,11 @@ export const visualization = (): ExpressionFunctionVisualization => ({
       default: '"{}"',
       help: 'User interface state',
     },
+    aggConfigs: {
+      types: ['string'],
+      default: '"{}"',
+      help: 'Aggregation configurations',
+    },
   },
   async fn(input, args, { inspectorAdapters }) {
     const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};
@@ -93,6 +99,11 @@ export const visualization = (): ExpressionFunctionVisualization => ({
 
     const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
     const uiState = new PersistedState(uiStateParams);
+
+    const aggConfigsState = args.aggConfigs ? JSON.parse(args.aggConfigs) : [];
+    const aggs = indexPattern
+      ? getSearch().aggs.createAggConfigs(indexPattern, aggConfigsState)
+      : undefined;
 
     if (typeof visType.requestHandler === 'function') {
       input = await visType.requestHandler({
@@ -107,6 +118,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
         inspectorAdapters,
         queryFilter: getFilterManager(),
         forceFetch: true,
+        aggs,
       });
     }
 

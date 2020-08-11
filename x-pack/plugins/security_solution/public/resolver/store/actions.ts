@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { DataAction } from './data';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
+import { DataAction } from './data/action';
 
 /**
  * When the user wants to bring a process node front-and-center on the map.
@@ -25,17 +25,6 @@ interface UserBroughtProcessIntoView {
 }
 
 /**
- * Dispatched to notify state that a different panel needs to be displayed
- */
-interface AppDisplayedDifferentPanel {
-  readonly type: 'appDisplayedDifferentPanel';
-  /**
-   * The name of the panel to display
-   */
-  readonly payload: string;
-}
-
-/**
  * When an examination of query params in the UI indicates that state needs to
  * be updated to reflect the new selection
  */
@@ -51,26 +40,6 @@ interface AppDetectedNewIdFromQueryParams {
      */
     readonly time: number;
   };
-}
-
-/**
- * Used when the alert list selects an alert and the flyout shows resolver.
- */
-interface UserChangedSelectedEvent {
-  readonly type: 'userChangedSelectedEvent';
-  readonly payload: {
-    /**
-     * Optional because they could have unselected the event.
-     */
-    readonly selectedEvent?: ResolverEvent;
-  };
-}
-
-/**
- * Triggered by middleware when the data for resolver needs to be loaded. Used to set state in redux to 'loading'.
- */
-interface AppRequestedResolverData {
-  readonly type: 'appRequestedResolverData';
 }
 
 /**
@@ -100,12 +69,9 @@ interface AppDetectedMissingEventData {
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the process node that the user focused on (in the DOM)
-     */
-    readonly nodeId: string;
-  };
+
+  /** focused nodeID */
+  readonly payload: string;
 }
 
 /**
@@ -116,16 +82,10 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  readonly payload: {
-    /**
-     * The HTML ID used to identify the process node's element that the user selected
-     */
-    readonly nodeId: string;
-    /**
-     * The process entity_id for the process the node represents
-     */
-    readonly selectedProcessId: string;
-  };
+  /**
+   * The nodeID (aka entity_id) that was select.
+   */
+  readonly payload: string;
 }
 
 /**
@@ -136,7 +96,7 @@ interface UserSelectedResolverNode {
 interface UserSelectedRelatedEventCategory {
   readonly type: 'userSelectedRelatedEventCategory';
   readonly payload: {
-    subject: ResolverEvent;
+    subject: SafeResolverEvent;
     category?: string;
   };
 }
@@ -145,12 +105,9 @@ export type ResolverAction =
   | CameraAction
   | DataAction
   | UserBroughtProcessIntoView
-  | UserChangedSelectedEvent
-  | AppRequestedResolverData
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
   | UserSelectedRelatedEventCategory
   | AppDetectedNewIdFromQueryParams
-  | AppDisplayedDifferentPanel
   | AppDetectedMissingEventData;

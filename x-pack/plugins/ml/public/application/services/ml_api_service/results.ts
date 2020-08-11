@@ -96,4 +96,22 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       body,
     });
   },
+
+  anomalySearch(obj: any) {
+    const body = JSON.stringify(obj);
+    return httpService.http<any>({
+      path: `${basePath()}/results/anomaly_search`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  anomalySearch$(obj: any) {
+    const body = JSON.stringify(obj);
+    return httpService.http$<any>({
+      path: `${basePath()}/results/anomaly_search`,
+      method: 'POST',
+      body,
+    });
+  },
 });

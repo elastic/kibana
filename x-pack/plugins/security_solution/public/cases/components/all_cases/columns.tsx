@@ -6,6 +6,7 @@
 import React, { useCallback } from 'react';
 import {
   EuiAvatar,
+  EuiBadgeGroup,
   EuiBadge,
   EuiLink,
   EuiTableActionsColumnType,
@@ -19,7 +20,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
-import { TruncatableText } from '../../../common/components/truncatable_text';
 import * as i18n from './translations';
 
 export type CasesColumns =
@@ -33,6 +33,10 @@ const MediumShadeText = styled.p`
 
 const Spacer = styled.span`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
+const TagWrapper = styled(EuiBadgeGroup)`
+  width: 100%;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -96,7 +100,7 @@ export const getCasesColumns = (
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
           return (
-            <TruncatableText>
+            <TagWrapper>
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -106,7 +110,7 @@ export const getCasesColumns = (
                   {tag}
                 </EuiBadge>
               ))}
-            </TruncatableText>
+            </TagWrapper>
           );
         }
         return getEmptyTagValue();

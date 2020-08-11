@@ -5,33 +5,20 @@
  */
 
 import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableContract,
-} from '../../../../../../src/plugins/visualizations/public';
 
-export const isOutputWithIndexPatterns = (
+const isOutputWithIndexPatterns = (
   output: unknown
 ): output is { indexPatterns: Array<{ id: string }> } => {
   if (!output || typeof output !== 'object') return false;
   return Array.isArray((output as any).indexPatterns);
 };
 
-export const isVisualizeEmbeddable = (
-  embeddable?: IEmbeddable
-): embeddable is VisualizeEmbeddableContract =>
-  embeddable && embeddable?.type === VISUALIZE_EMBEDDABLE_TYPE ? true : false;
-
-/**
- * @returns Returns empty string if no index pattern ID found.
- */
-export const getIndexPattern = (embeddable?: IEmbeddable): string => {
-  if (!embeddable) return '';
+export const getIndexPatterns = (embeddable?: IEmbeddable): string[] => {
+  if (!embeddable) return [];
   const output = embeddable.getOutput();
 
-  if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
-    return output.indexPatterns[0].id;
-  }
-
-  return '';
+  return isOutputWithIndexPatterns(output) ? output.indexPatterns.map(({ id }) => id) : [];
 };
+
+export const hasExactlyOneIndexPattern = (embeddable?: IEmbeddable): boolean =>
+  getIndexPatterns(embeddable).length === 1;

@@ -254,7 +254,7 @@ export class PolicyTable extends Component {
         icon: 'list',
         onClick: () => {
           this.props.navigateToApp('management', {
-            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`)}`,
+            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`, true)}`,
           });
         },
       });

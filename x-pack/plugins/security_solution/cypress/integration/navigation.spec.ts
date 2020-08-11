@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ALERTS,
   CASES,
+  DETECTIONS,
   HOSTS,
-  MANAGEMENT,
+  ADMINISTRATION,
   NETWORK,
   OVERVIEW,
   TIMELINES,
@@ -17,21 +17,21 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { navigateFromHeaderTo } from '../tasks/security_header';
 
 import {
-  ALERTS_URL,
+  DETECTIONS_URL,
   CASES_URL,
   HOSTS_URL,
   KIBANA_HOME,
-  MANAGEMENT_URL,
+  ADMINISTRATION_URL,
   NETWORK_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
 } from '../urls/navigation';
 import { openKibanaNavigation, navigateFromKibanaCollapsibleTo } from '../tasks/kibana_navigation';
 import {
-  ALERTS_PAGE,
   CASES_PAGE,
+  DETECTIONS_PAGE,
   HOSTS_PAGE,
-  MANAGEMENT_PAGE,
+  ADMINISTRATION_PAGE,
   NETWORK_PAGE,
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
@@ -47,9 +47,9 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromHeaderTo(ALERTS);
-    cy.url().should('include', ALERTS_URL);
+  it('navigates to the Detections page', () => {
+    navigateFromHeaderTo(DETECTIONS);
+    cy.url().should('include', DETECTIONS_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -72,9 +72,9 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Management page', () => {
-    navigateFromHeaderTo(MANAGEMENT);
-    cy.url().should('include', MANAGEMENT_URL);
+  it('navigates to the Administration page', () => {
+    navigateFromHeaderTo(ADMINISTRATION);
+    cy.url().should('include', ADMINISTRATION_URL);
   });
 });
 
@@ -90,9 +90,9 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
-    cy.url().should('include', ALERTS_URL);
+  it('navigates to the Detections page', () => {
+    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
+    cy.url().should('include', DETECTIONS_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -115,8 +115,8 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Management page', () => {
-    navigateFromKibanaCollapsibleTo(MANAGEMENT_PAGE);
-    cy.url().should('include', MANAGEMENT_URL);
+  it('navigates to the Administration page', () => {
+    navigateFromKibanaCollapsibleTo(ADMINISTRATION_PAGE);
+    cy.url().should('include', ADMINISTRATION_URL);
   });
 });

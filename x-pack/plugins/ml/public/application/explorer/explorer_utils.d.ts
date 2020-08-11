@@ -7,8 +7,7 @@
 import { Moment } from 'moment';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-
-import { TimeBucketsInterval } from '../util/time_buckets';
+import { SwimlaneType } from './explorer_constants';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -33,6 +32,10 @@ export declare interface SwimlaneData {
 export declare interface OverallSwimlaneData extends SwimlaneData {
   earliest: number;
   latest: number;
+}
+
+export interface ViewBySwimLaneData extends OverallSwimlaneData {
+  cardinality: number;
 }
 
 export declare const getDateFormatTz: () => any;
@@ -163,22 +166,6 @@ declare interface LoadOverallDataResponse {
   overallSwimlaneData: OverallSwimlaneData;
 }
 
-export declare const loadOverallData: (
-  selectedJobs: ExplorerJob[],
-  interval: TimeBucketsInterval,
-  bounds: TimeRangeBounds
-) => Promise<LoadOverallDataResponse>;
-
-export declare const loadViewBySwimlane: (
-  fieldValues: string[],
-  bounds: SwimlaneBounds,
-  selectedJobs: ExplorerJob[],
-  viewBySwimlaneFieldName: string,
-  swimlaneLimit: number,
-  influencersFilterQuery: any,
-  noInfluencersConfigured: boolean
-) => Promise<any>;
-
 export declare const loadViewByTopFieldValuesForSelectedTime: (
   earliestMs: number,
   latestMs: number,
@@ -196,9 +183,9 @@ export declare interface FilterData {
 }
 
 export declare interface AppStateSelectedCells {
-  type: string;
+  type: SwimlaneType;
   lanes: string[];
   times: number[];
-  showTopFieldValues: boolean;
-  viewByFieldName: string;
+  showTopFieldValues?: boolean;
+  viewByFieldName?: string;
 }

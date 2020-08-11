@@ -6,13 +6,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-export class NoLogAnalysisResultsIndexError extends Error {
-  constructor(message?: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
-
 export class NoLogAnalysisMlJobError extends Error {
   constructor(message?: string) {
     super(message);
@@ -30,6 +23,13 @@ export class InsufficientLogAnalysisMlJobConfigurationError extends Error {
 export class UnknownCategoryError extends Error {
   constructor(categoryId: number) {
     super(`Unknown ml category ${categoryId}`);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class InsufficientAnomalyMlJobsConfigured extends Error {
+  constructor(message?: string) {
+    super(message);
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }

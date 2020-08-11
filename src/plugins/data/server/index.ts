@@ -86,7 +86,6 @@ import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -105,7 +104,6 @@ export const fieldFormats = {
   BoolFormat,
   BytesFormat,
   ColorFormat,
-  DateNanosFormat,
   DurationFormat,
   IpFormat,
   NumberFormat,
@@ -155,6 +153,7 @@ import {
   dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
+  Ipv4Address,
   isValidEsInterval,
   isValidInterval,
   parseEsInterval,
@@ -162,20 +161,17 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { ParsedInterval } from '../common';
+export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
 
 export {
-  ISearch,
-  ISearchCancel,
+  ISearchStrategy,
   ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
   ISearchSetup,
   ISearchStart,
-  TStrategyTypes,
-  ISearchStrategy,
   getDefaultSearchParams,
   getTotalLoaded,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace
@@ -184,6 +180,7 @@ export const search = {
     dateHistogramInterval,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
+    Ipv4Address,
     isValidEsInterval,
     isValidInterval,
     parseEsInterval,
@@ -202,6 +199,7 @@ export {
   castEsToKbnFieldTypeName,
   // query
   Filter,
+  getTime,
   Query,
   // timefilter
   RefreshInterval,

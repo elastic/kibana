@@ -15,56 +15,72 @@ exports[`appends records via multiple appenders.: file logs 2`] = `
 exports[`asLoggerFactory() only allows to create new loggers. 1`] = `
 Object {
   "@timestamp": "2012-01-31T18:33:22.011-05:00",
-  "context": "test.context",
-  "level": "TRACE",
+  "log": Object {
+    "level": "TRACE",
+    "logger": "test.context",
+  },
   "message": "buffered trace message",
-  "pid": Any<Number>,
+  "process": Object {
+    "pid": Any<Number>,
+  },
 }
 `;
 
 exports[`asLoggerFactory() only allows to create new loggers. 2`] = `
 Object {
   "@timestamp": "2012-01-31T13:33:22.011-05:00",
-  "context": "test.context",
-  "level": "INFO",
-  "message": "buffered info message",
-  "meta": Object {
-    "some": "value",
+  "log": Object {
+    "level": "INFO",
+    "logger": "test.context",
   },
-  "pid": Any<Number>,
+  "message": "buffered info message",
+  "process": Object {
+    "pid": Any<Number>,
+  },
+  "some": "value",
 }
 `;
 
 exports[`asLoggerFactory() only allows to create new loggers. 3`] = `
 Object {
   "@timestamp": "2012-01-31T08:33:22.011-05:00",
-  "context": "test.context",
-  "level": "FATAL",
+  "log": Object {
+    "level": "FATAL",
+    "logger": "test.context",
+  },
   "message": "buffered fatal message",
-  "pid": Any<Number>,
+  "process": Object {
+    "pid": Any<Number>,
+  },
 }
 `;
 
 exports[`flushes memory buffer logger and switches to real logger once config is provided: buffered messages 1`] = `
 Object {
   "@timestamp": "2012-02-01T09:33:22.011-05:00",
-  "context": "test.context",
-  "level": "INFO",
-  "message": "buffered info message",
-  "meta": Object {
-    "some": "value",
+  "log": Object {
+    "level": "INFO",
+    "logger": "test.context",
   },
-  "pid": Any<Number>,
+  "message": "buffered info message",
+  "process": Object {
+    "pid": Any<Number>,
+  },
+  "some": "value",
 }
 `;
 
 exports[`flushes memory buffer logger and switches to real logger once config is provided: new messages 1`] = `
 Object {
   "@timestamp": "2012-01-31T23:33:22.011-05:00",
-  "context": "test.context",
-  "level": "INFO",
+  "log": Object {
+    "level": "INFO",
+    "logger": "test.context",
+  },
   "message": "some new info message",
-  "pid": Any<Number>,
+  "process": Object {
+    "pid": Any<Number>,
+  },
 }
 `;
 
