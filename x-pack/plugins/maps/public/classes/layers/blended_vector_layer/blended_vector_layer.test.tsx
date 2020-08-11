@@ -8,10 +8,7 @@ import { SCALING_TYPES, SOURCE_TYPES } from '../../../../common/constants';
 import { BlendedVectorLayer } from './blended_vector_layer';
 // @ts-expect-error
 import { ESSearchSource } from '../../sources/es_search_source';
-import {
-  AbstractSourceDescriptor,
-  ESGeoGridSourceDescriptor,
-} from '../../../../common/descriptor_types';
+import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -54,9 +51,7 @@ describe('getSource', () => {
       });
 
       const source = blendedVectorLayer.getSource();
-      expect((source.cloneDescriptor() as AbstractSourceDescriptor).type).toBe(
-        SOURCE_TYPES.ES_GEO_GRID
-      );
+      expect(source.cloneDescriptor().type).toBe(SOURCE_TYPES.ES_GEO_GRID);
     });
 
     test('cluster source applyGlobalQuery should be true when document source applyGlobalQuery is true', async () => {
@@ -109,9 +104,7 @@ describe('getSource', () => {
       });
 
       const source = blendedVectorLayer.getSource();
-      expect((source.cloneDescriptor() as AbstractSourceDescriptor).type).toBe(
-        SOURCE_TYPES.ES_SEARCH
-      );
+      expect(source.cloneDescriptor().type).toBe(SOURCE_TYPES.ES_SEARCH);
     });
   });
 });
@@ -131,9 +124,7 @@ describe('cloneDescriptor', () => {
       });
 
       const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
-      expect((clonedLayerDescriptor.sourceDescriptor! as AbstractSourceDescriptor).type).toBe(
-        SOURCE_TYPES.ES_SEARCH
-      );
+      expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });
   });
@@ -152,9 +143,7 @@ describe('cloneDescriptor', () => {
       });
 
       const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
-      expect((clonedLayerDescriptor.sourceDescriptor! as AbstractSourceDescriptor).type).toBe(
-        SOURCE_TYPES.ES_SEARCH
-      );
+      expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });
   });
