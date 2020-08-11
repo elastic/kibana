@@ -1,0 +1,24 @@
+.savedObjectsManagementImportSummary__row {
+  margin-bottom: $euiSizeXS;
+}
+
+.savedObjectsManagementImportSummary__title {
+  // Constrains title to the flex item, and allows for truncation when necessary
+  min-width: 0;
+}
+
+.savedObjectsManagementImportSummary__createdCount {
+  color: $euiColorSuccess;
+}
+
+.savedObjectsManagementImportSummary__overwrittenCount {
+  color: $euiColorWarning;
+}
+
+.savedObjectsManagementImportSummary__errorCount {
+  color: $euiColorDanger;
+}
+
+.savedObjectsManagementImportSummary__icon {
+  margin-left: $euiSizeXS;
+}

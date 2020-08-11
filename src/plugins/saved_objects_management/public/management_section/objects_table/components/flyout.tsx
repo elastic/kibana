@@ -66,6 +66,7 @@ import { ISavedObjectsManagementServiceRegistry } from '../../../services';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
+import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
@@ -593,6 +594,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       loadingMessage,
       importCount,
       failedImports = [],
+      successfulImports = [],
       isLegacyFile,
       importMode,
     } = this.state;
@@ -611,11 +613,12 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    // Kept backwards compatible logic
-    if (
-      failedImports.length &&
-      (!this.hasUnmatchedReferences || (isLegacyFile === false && status === 'success'))
-    ) {
+    if (isLegacyFile === false && status === 'success') {
+      return <ImportSummary failedImports={failedImports} successfulImports={successfulImports} />;
+    }
+
+    // Import summary for failed legacy import
+    if (failedImports.length && !this.hasUnmatchedReferences) {
       return (
         <EuiCallOut
           data-test-subj="importSavedObjectsFailedWarning"
@@ -676,6 +679,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
+    // Import summary for completed legacy import
     if (status === 'success') {
       if (importCount === 0) {
         return (
