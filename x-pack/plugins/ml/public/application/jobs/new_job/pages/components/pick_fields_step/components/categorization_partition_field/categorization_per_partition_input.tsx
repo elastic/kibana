@@ -48,7 +48,7 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
       selectedOptions={selection}
       onChange={onChange}
       isClearable={true}
-      data-test-subj="mlCategorizationPerPartitionFieldNameSelect"
+      data-test-subj="mlJobWizardCategorizationPerPartitionFieldNameSelect"
     />
   );
 };

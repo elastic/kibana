@@ -28,7 +28,7 @@ export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
       disabled={false}
       checked={stopOnWarn}
       onChange={toggleStopOnWarn}
-      data-test-subj="mlJobWizardSwitchCategorizationPerPartitionStopOnWarnField"
+      data-test-subj="mlJobWizardSwitchCategorizationPerPartitionStopOnWarn"
       label={i18n.translate(
         'xpack.ml.newJob.wizard.perPartitionCategorizationtopOnWarnSwitchLabel',
         {

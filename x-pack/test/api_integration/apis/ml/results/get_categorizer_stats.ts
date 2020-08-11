@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       body.forEach((doc: AnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
-        expect(doc.partition_field_name).to.not.be(undefined);
+        expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);
         expect(doc.partition_field_value).to.not.be(undefined);
       });
     });
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       body.forEach((doc: AnomalyCategorizerStatsDoc) => {
         expect(doc.job_id).to.eql(jobId);
         expect(doc.result_type).to.eql('categorizer_stats');
-        expect(doc.partition_field_name).to.not.be(undefined);
+        expect(doc.partition_field_name).to.be(PARTITION_FIELD_NAME);
         expect(doc.partition_field_value).to.not.be(undefined);
       });
     });

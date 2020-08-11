@@ -36,7 +36,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
       disabled={false}
       checked={enablePerPartitionCategorization}
       onChange={toggleEnablePerPartitionCategorization}
-      data-test-subj="mlJobWizardSwitchCategorizationPerPartitionField"
+      data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
       label={i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel', {
         defaultMessage: 'Enable per-partition categorization',
       })}
