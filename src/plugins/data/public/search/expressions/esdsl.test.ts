@@ -44,6 +44,22 @@ jest.mock('../../services', () => ({
 
 describe('esdsl', () => {
   describe('correctly handles input', () => {
+    test('throws on invalid json input', async () => {
+      const fn = async function () {
+        await esdsl().fn(null, { dsl: 'invalid json', index: 'test', size: 0 }, {
+          inspectorAdapters: {},
+        } as any);
+      };
+
+      let errorMessage;
+      try {
+        await fn();
+      } catch (error) {
+        errorMessage = error.message;
+      }
+      expect(errorMessage).toEqual('Unexpected token i in JSON at position 0');
+    });
+
     test('adds filters', async () => {
       const result = await esdsl().fn(
         {
@@ -55,7 +71,7 @@ describe('esdsl', () => {
             },
           ],
         },
-        { dsl: '{}' },
+        { dsl: '{}', index: 'test', size: 0 },
         { inspectorAdapters: {} } as any
       );
 
@@ -74,8 +90,9 @@ describe('esdsl', () => {
           ],
         },
         {
-          dsl:
-            '{"index": "kibana_sample_data_logs", "size": 4, "body": { "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}}',
+          index: 'kibana_sample_data_logs',
+          size: 4,
+          dsl: '{"_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
         },
         { inspectorAdapters: {} } as any
       );
@@ -89,7 +106,7 @@ describe('esdsl', () => {
           type: 'kibana_context',
           query: { language: 'lucene', query: '*' },
         },
-        { dsl: '{}' },
+        { dsl: '{}', index: 'test', size: 0 },
         { inspectorAdapters: {} } as any
       );
 
@@ -103,8 +120,9 @@ describe('esdsl', () => {
           query: { language: 'lucene', query: '*' },
         },
         {
-          dsl:
-            '{"index": "kibana_sample_data_logs", "size": 4, "body": { "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}}',
+          index: 'kibana_sample_data_logs',
+          size: 4,
+          dsl: '{ "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
         },
         { inspectorAdapters: {} } as any
       );
@@ -118,11 +136,35 @@ describe('esdsl', () => {
           type: 'kibana_context',
           timeRange: { from: 'now-15m', to: 'now' },
         },
-        { dsl: '{}' },
+        { dsl: '{}', index: 'test', size: 0 },
         { inspectorAdapters: {} } as any
       );
 
       expect(result).toMatchSnapshot();
     });
+  });
+
+  test('correctly handles filter, query and timerange on context', async () => {
+    const result = await esdsl().fn(
+      {
+        type: 'kibana_context',
+        query: { language: 'lucene', query: '*' },
+        timeRange: { from: 'now-15m', to: 'now' },
+        filters: [
+          {
+            meta: { index: '1', alias: 'test', negate: false, disabled: false },
+            query: { match_phrase: { gender: 'male' } },
+          },
+        ],
+      },
+      {
+        index: 'kibana_sample_data_logs',
+        size: 4,
+        dsl: '{ "_source": false, "query": { "term": { "machine.os.keyword": "osx"}}}',
+      },
+      { inspectorAdapters: {} } as any
+    );
+
+    expect(result).toMatchSnapshot();
   });
 });

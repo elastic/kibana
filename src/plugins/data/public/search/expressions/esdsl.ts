@@ -28,6 +28,7 @@ import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
 import { IEsSearchResponse } from '../../../common/search/es_search';
 import { buildEsQuery, getEsQueryConfig } from '../../../common/es_query/es_query';
+import { DataPublicPluginStart } from '../../types';
 
 const name = 'esdsl';
 
@@ -36,6 +37,8 @@ type Output = Promise<EsRawResponse>;
 
 interface Arguments {
   dsl: string;
+  index: string;
+  size: number;
 }
 
 export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -61,29 +64,40 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
       }),
       required: true,
     },
+    index: {
+      types: ['string'],
+      help: i18n.translate('data.search.esdsl.index.help', {
+        defaultMessage: 'ElasticSearch index to query',
+      }),
+      required: true,
+    },
+    size: {
+      types: ['number'],
+      help: i18n.translate('data.search.esdsl.size.help', {
+        defaultMessage: 'ElasticSearch searchAPI size parameter',
+      }),
+      default: 10,
+    },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
-    const searchService = getSearchService();
+    const searchService: DataPublicPluginStart['search'] = getSearchService();
 
     const dsl = JSON.parse(args.dsl);
-    if (!dsl.body) dsl.body = {};
-
-    const dslBody = dsl.body;
 
     if (input) {
       const esQueryConfigs = getEsQueryConfig(getUiSettings());
       const query = buildEsQuery(
-        dslBody.index,
+        undefined, //        args.index,
         input.query || [],
         input.filters || [],
         esQueryConfigs
       );
 
-      if (!dslBody.query) {
-        dslBody.query = query;
+      if (!dsl.query) {
+        dsl.query = query;
       } else {
-        query.bool.must.push(dslBody.query);
-        dslBody.query = query;
+        query.bool.must.push(dsl.query);
+        dsl.query = query;
       }
     }
 
@@ -108,7 +122,7 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
         label: i18n.translate('data.search.es_search.indexPatternLabel', {
           defaultMessage: 'Index pattern',
         }),
-        value: dsl.index,
+        value: args.index,
         description: i18n.translate('data.search.es_search.indexPatternDescription', {
           defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
         }),
@@ -117,7 +131,18 @@ export const esdsl = (): EsdslExpressionFunctionDefinition => ({
 
     let res: IEsSearchResponse;
     try {
-      res = await searchService.search({ params: dsl }, { signal: abortSignal }).toPromise();
+      res = await searchService
+        .search(
+          {
+            params: {
+              index: args.index,
+              size: args.size,
+              body: dsl,
+            },
+          },
+          { signal: abortSignal }
+        )
+        .toPromise();
 
       const stats: RequestStatistics = {};
       const resp = res.rawResponse;

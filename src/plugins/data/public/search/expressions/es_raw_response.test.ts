@@ -440,7 +440,7 @@ describe('esRawResponse', () => {
     });
   });
 
-  test('returns docs if both docs and aggs are present on response', () => {
+  test('returns aggs if both docs and aggs are present on response', () => {
     const response: EsRawResponse = {
       type: 'es_raw_response',
       body: {

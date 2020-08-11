@@ -62,7 +62,7 @@ const parseRawDocs = (hits: SearchResponse<unknown>['hits']) => {
 };
 
 const convertResult = (body: SearchResponse<unknown>) => {
-  return body.hits.hits.length ? parseRawDocs(body.hits) : flatten(body.aggregations);
+  return !body.aggregations ? parseRawDocs(body.hits) : flatten(body.aggregations);
 };
 
 export type EsRawResponseExpressionTypeDefinition = ExpressionTypeDefinition<

@@ -1,5 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`esdsl correctly handles filter, query and timerange on context 1`] = `
+Object {
+  "body": Object {
+    "params": Object {
+      "body": Object {
+        "_source": false,
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_phrase": Object {
+                  "gender": "male",
+                },
+              },
+            ],
+            "must": Array [
+              Object {
+                "query_string": Object {
+                  "query": "*",
+                  "time_zone": true,
+                },
+              },
+              Object {
+                "term": Object {
+                  "machine.os.keyword": "osx",
+                },
+              },
+            ],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+      },
+      "index": "kibana_sample_data_logs",
+      "size": 4,
+    },
+  },
+  "type": "es_raw_response",
+}
+`;
+
 exports[`esdsl correctly handles input adds filters 1`] = `
 Object {
   "body": Object {
@@ -20,6 +61,8 @@ Object {
           },
         },
       },
+      "index": "test",
+      "size": 0,
     },
   },
   "type": "es_raw_response",
@@ -82,6 +125,8 @@ Object {
           },
         },
       },
+      "index": "test",
+      "size": 0,
     },
   },
   "type": "es_raw_response",
@@ -137,6 +182,8 @@ Object {
           },
         },
       },
+      "index": "test",
+      "size": 0,
     },
   },
   "type": "es_raw_response",
