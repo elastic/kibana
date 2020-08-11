@@ -84,12 +84,12 @@ export const EndpointList = () => {
     listLoading: loading,
     listError,
     uiQueryParams: queryParams,
-    hasSelectedEndpoint: hasSelectedHost,
+    hasSelectedEndpoint,
     policyItems,
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
-    endpointsExist: hostsExist,
+    endpointsExist,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
@@ -216,7 +216,7 @@ export const EndpointList = () => {
       {
         field: 'host_status',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
-          defaultMessage: 'Host Status',
+          defaultMessage: 'Endpoint Status',
         }),
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
@@ -330,7 +330,7 @@ export const EndpointList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (hostsExist) {
+    if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
@@ -359,7 +359,7 @@ export const EndpointList = () => {
     }
   }, [
     loading,
-    hostsExist,
+    endpointsExist,
     policyItemsLoading,
     policyItems,
     listData,
@@ -411,7 +411,7 @@ export const EndpointList = () => {
         </>
       }
     >
-      {hasSelectedHost && <EndpointDetailsFlyout />}
+      {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       {listData && listData.length > 0 && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
