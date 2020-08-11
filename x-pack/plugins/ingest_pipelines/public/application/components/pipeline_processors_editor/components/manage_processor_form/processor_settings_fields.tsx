@@ -10,7 +10,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { FormDataProvider } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
-import { getProcessorFormDescriptor } from './map_processor_type_to_form';
+import { getProcessorDescriptor } from '../shared';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
 import { Custom } from './processors/custom';
 
@@ -30,7 +30,7 @@ export const ProcessorSettingsFields: FunctionComponent<Props> = ({ processor })
           const { type } = arg;
 
           if (type?.length) {
-            const formDescriptor = getProcessorFormDescriptor(type as any);
+            const formDescriptor = getProcessorDescriptor(type as any);
 
             if (formDescriptor?.FieldsComponent) {
               return (

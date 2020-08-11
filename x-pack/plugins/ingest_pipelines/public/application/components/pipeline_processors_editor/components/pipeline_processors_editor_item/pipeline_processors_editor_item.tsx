@@ -22,6 +22,8 @@ import { ProcessorsDispatch } from '../../processors_reducer';
 
 import { ProcessorInfo } from '../processors_tree';
 
+import { getProcessorDescriptor } from '../shared';
+
 import './pipeline_processors_editor_item.scss';
 
 import { InlineTextInput } from './inline_text_input';
@@ -144,7 +146,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     }}
                     data-test-subj="manageItemButton"
                   >
-                    <b>{processor.type}</b>
+                    <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>

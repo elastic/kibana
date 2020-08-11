@@ -24,8 +24,7 @@ import {
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
-
-import { getProcessorFormDescriptor } from './map_processor_type_to_form';
+import { getProcessorDescriptor } from '../shared';
 
 import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
@@ -129,7 +128,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
               <EuiFlexItem grow={false}>
                 <FormDataProvider pathsToWatch="type">
                   {({ type }) => {
-                    const formDescriptor = getProcessorFormDescriptor(type as any);
+                    const formDescriptor = getProcessorDescriptor(type as any);
 
                     if (formDescriptor) {
                       return (
