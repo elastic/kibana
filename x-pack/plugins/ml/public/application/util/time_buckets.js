@@ -5,6 +5,10 @@
  */
 
 import _ from 'lodash';
+import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
+// import ary from 'lodash/ary';
+import assign from 'lodash/assign';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
@@ -80,7 +84,7 @@ TimeBuckets.prototype.setBounds = function (input) {
   if (!input) return this.clearBounds();
 
   let bounds;
-  if (_.isPlainObject(input)) {
+  if (isPlainObject(input)) {
     // accept the response from timefilter.getActiveBounds()
     bounds = [input.min, input.max];
   } else {
@@ -175,7 +179,7 @@ TimeBuckets.prototype.setInterval = function (input) {
     return;
   }
 
-  if (_.isString(interval)) {
+  if (isString(interval)) {
     input = interval;
     interval = parseInterval(interval);
     if (+interval === 0) {
@@ -256,7 +260,7 @@ TimeBuckets.prototype.getInterval = function () {
     if (+scaled === +interval) return interval;
 
     decorateInterval(interval, duration);
-    return _.assign(scaled, {
+    return assign(scaled, {
       preScaled: interval,
       scale: interval / scaled,
       scaled: true,
@@ -287,7 +291,7 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function (divisorSecs) {
   decorateInterval(nearestMultipleInt, this.getDuration());
 
   // Check to see if the new interval is scaled compared to the original.
-  const preScaled = _.get(interval, 'preScaled');
+  const preScaled = interval.preScaled;
   if (preScaled !== undefined && preScaled < nearestMultipleInt) {
     nearestMultipleInt.preScaled = preScaled;
     nearestMultipleInt.scale = preScaled / nearestMultipleInt;
