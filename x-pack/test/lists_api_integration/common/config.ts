@@ -15,22 +15,6 @@ interface CreateTestConfigOptions {
   ssl?: boolean;
 }
 
-// test.not-enabled is specifically not enabled
-const enabledActionTypes = [
-  '.email',
-  '.index',
-  '.pagerduty',
-  '.server-log',
-  '.servicenow',
-  '.slack',
-  '.webhook',
-  'test.authorization',
-  'test.failing',
-  'test.index-record',
-  'test.noop',
-  'test.rate-limit',
-];
-
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
 
@@ -51,7 +35,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Detection Engine API Integration Tests',
+        reportName: 'X-Pack Lists Integration Tests',
       },
       esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
@@ -67,12 +51,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
-            'localhost',
-            'some.non.existent.com',
-          ])}`,
-          `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
