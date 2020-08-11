@@ -570,7 +570,13 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
           ),
         };
       } else if (fieldToBucket === PARTITION_FIELD_VALUE) {
-        const jobs: Record<string, string[]> = {};
+        const jobs: Record<string, string[]> = jobIdsWithStopOnWarnSet.reduce(
+          (obj: Record<string, string[]>, jobId: string) => {
+            obj[jobId] = [];
+            return obj;
+          },
+          {}
+        );
         results.aggregations.jobs.buckets.forEach(
           (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
             jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);
