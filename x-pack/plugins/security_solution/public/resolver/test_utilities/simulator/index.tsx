@@ -268,10 +268,59 @@ export class Simulator {
   }
 
   /**
-   * Wrapper for the panning and zooming controls
+   * Wrapper for the west panning button
    */
-  public graphControlElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls"]');
+  public westPanElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:west-button"]');
+  }
+
+  /**
+   * Wrapper for the south panning button
+   */
+  public southPanElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:south-button"]');
+  }
+
+  /**
+   * Wrapper for the east panning button
+   */
+  public eastPanElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:east-button"]');
+  }
+
+  /**
+   * Wrapper for the north panning button
+   */
+  public northPanElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:north-button"]');
+  }
+
+  /**
+   * Wrapper for the center panning button
+   */
+  public centerPanElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:center-button"]');
+  }
+
+  /**
+   * Wrapper for the zoom in button
+   */
+  public zoomInElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-in"]');
+  }
+
+  /**
+   * Wrapper for the zoom out button
+   */
+  public zoomOutElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-out"]');
+  }
+
+  /**
+   * Wrapper for the zoom slider button
+   */
+  public zoomSliderElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-slider"]');
   }
 
   /**
