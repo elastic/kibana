@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -23,8 +23,8 @@ import {
   getStoppedPartitionsSchema,
 } from './schemas/results_service_schema';
 
-function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+function getAnomaliesTableData(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const {
     jobIds,
     criteriaFields,
@@ -53,25 +53,25 @@ function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {
   );
 }
 
-function getCategoryDefinition(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+function getCategoryDefinition(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   return rs.getCategoryDefinition(payload.jobId, payload.categoryId);
 }
 
-function getCategoryExamples(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+function getCategoryExamples(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobId, categoryIds, maxExamples } = payload;
   return rs.getCategoryExamples(jobId, categoryIds, maxExamples);
 }
 
-function getMaxAnomalyScore(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+function getMaxAnomalyScore(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobIds, earliestMs, latestMs } = payload;
   return rs.getMaxAnomalyScore(jobIds, earliestMs, latestMs);
 }
 
-function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) {
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+function getPartitionFieldsValues(legacyClient: ILegacyScopedClusterClient, payload: any) {
+  const rs = resultsServiceProvider(legacyClient);
   const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
@@ -112,9 +112,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getAnomaliesTableData(context, request.body);
+        const resp = await getAnomaliesTableData(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -144,9 +144,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getCategoryDefinition(context, request.body);
+        const resp = await getCategoryDefinition(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -176,9 +176,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getMaxAnomalyScore(context, request.body);
+        const resp = await getMaxAnomalyScore(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -208,9 +208,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getCategoryExamples(context, request.body);
+        const resp = await getCategoryExamples(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -240,9 +240,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getPartitionFieldsValues(context, request.body);
+        const resp = await getPartitionFieldsValues(legacyClient, request.body);
 
         return response.ok({
           body: resp,
@@ -269,14 +269,14 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       const body = {
         ...request.body,
         index: ML_RESULTS_INDEX_PATTERN,
       };
       try {
         return response.ok({
-          body: await context.ml!.mlClient.callAsInternalUser('search', body),
+          body: await legacyClient.callAsInternalUser('search', body),
         });
       } catch (error) {
         return response.customError(wrapError(error));
