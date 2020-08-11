@@ -13,7 +13,7 @@ import {
 } from './use_field_value_autocomplete';
 import { useKibana } from '../../../../common/lib/kibana';
 import { stubIndexPatternWithFields } from '../../../../../../../../src/plugins/data/common/index_patterns/index_pattern.stub';
-import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+import { getField } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
 jest.mock('../../../../common/lib/kibana');

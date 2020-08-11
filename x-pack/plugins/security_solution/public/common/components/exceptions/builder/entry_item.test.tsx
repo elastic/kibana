@@ -22,7 +22,7 @@ import {
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
+} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getFoundListSchemaMock } from '../../../../../../lists/common/schemas/response/found_list_schema.mock';
 import { getEmptyValue } from '../../empty_value';
 
