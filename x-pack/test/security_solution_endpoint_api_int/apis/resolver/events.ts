@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { eventId } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { ResolverRelatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -29,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
+    relatedEventsOrdered: true,
     relatedAlerts,
     children: 3,
     generations: 2,
@@ -190,6 +192,21 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.events.length).to.eql(4);
         compareArrays(tree.origin.relatedEvents, body.events, true);
         expect(body.nextEvent).to.eql(null);
+      });
+
+      it('should sort the events in descending order', async () => {
+        const { body }: { body: ResolverRelatedEvents } = await supertest
+          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        expect(body.events.length).to.eql(4);
+        // these events are created in the order they are defined in the array so the newest one is
+        // the last element in the array so let's reverse it
+        const relatedEvents = tree.origin.relatedEvents.reverse();
+        for (let i = 0; i < body.events.length; i++) {
+          expect(body.events[i].event?.category).to.equal(relatedEvents[i].event.category);
+          expect(eventId(body.events[i])).to.equal(relatedEvents[i].event.id);
+        }
       });
     });
   });

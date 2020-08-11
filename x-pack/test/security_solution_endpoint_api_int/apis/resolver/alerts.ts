@@ -127,5 +127,33 @@ export default function ({ getService }: FtrProviderContext) {
       compareArrays(tree.origin.relatedAlerts, body.alerts, true);
       expect(body.nextAlert).to.eql(null);
     });
+
+    it('should sort the alerts in ascending order', async () => {
+      const { body }: { body: ResolverRelatedAlerts } = await supertest
+        .post(`/api/endpoint/resolver/${tree.origin.id}/alerts`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      const sortedAsc = [...tree.origin.relatedAlerts].sort((event1, event2) => {
+        // this sorts the events by timestamp in ascending order
+        const diff = event1['@timestamp'] - event2['@timestamp'];
+        // if the timestamps are the same, fallback to the event.id sorted in
+        // ascending order
+        if (diff === 0) {
+          if (event1.event.id < event2.event.id) {
+            return -1;
+          }
+          if (event1.event.id > event2.event.id) {
+            return 1;
+          }
+          return 0;
+        }
+        return diff;
+      });
+
+      expect(body.alerts.length).to.eql(4);
+      for (let i = 0; i < body.alerts.length; i++) {
+        expect(eventId(body.alerts[i])).to.equal(sortedAsc[i].event.id);
+      }
+    });
   });
 }

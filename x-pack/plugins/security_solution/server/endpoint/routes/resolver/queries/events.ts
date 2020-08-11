@@ -53,7 +53,7 @@ export class EventsQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('endgame.serial_event_id'),
+      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'desc'),
     };
   }
 
@@ -79,7 +79,7 @@ export class EventsQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      ...this.pagination.buildQueryFields('event.id'),
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
     };
   }
 
