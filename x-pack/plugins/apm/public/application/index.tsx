@@ -100,7 +100,7 @@ export function ApmAppRoot({
                 <MatchedRouteProvider routes={routes}>
                   <UrlParamsProvider>
                     <LoadingIndicatorProvider>
-                      <LicenseProvider>{app} </LicenseProvider>
+                      <LicenseProvider>{app}</LicenseProvider>
                     </LoadingIndicatorProvider>
                   </UrlParamsProvider>
                 </MatchedRouteProvider>
