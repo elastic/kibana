@@ -25,8 +25,8 @@ import { TraceLink } from '../../TraceLink';
 import { CustomizeUI } from '../../Settings/CustomizeUI';
 import { AnomalyDetection } from '../../Settings/anomaly_detection';
 import {
-  EditAgentConfigurationRouteHandler,
   CreateAgentConfigurationRouteHandler,
+  EditAgentConfigurationRouteHandler,
 } from './route_handlers/agent_configuration';
 
 const metricsBreadcrumb = i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
@@ -275,6 +275,6 @@ export const rumRoutes: BreadcrumbRoute[] = [
     path: '/',
     render: renderAsRedirectTo('/client-side-monitoring'),
     breadcrumb: 'Client Side Monitoring',
-    name: 'client-side-monitoring',
+    name: RouteName.CLIENT_SIDE_MONITORING,
   },
 ];

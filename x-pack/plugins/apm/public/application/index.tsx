@@ -61,16 +61,18 @@ function App() {
   );
 }
 
-function ApmAppRoot({
+export function ApmAppRoot({
   core,
   deps,
   routerHistory,
   config,
+  app,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
   routerHistory: typeof history;
   config: ConfigSchema;
+  app: JSX.Element;
 }) {
   const i18nCore = core.i18n;
   const plugins = deps;
@@ -98,9 +100,7 @@ function ApmAppRoot({
                 <MatchedRouteProvider routes={routes}>
                   <UrlParamsProvider>
                     <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
+                      <LicenseProvider>{app} </LicenseProvider>
                     </LoadingIndicatorProvider>
                   </UrlParamsProvider>
                 </MatchedRouteProvider>
@@ -129,6 +129,7 @@ export const renderApp = (
       deps={deps}
       routerHistory={history}
       config={config}
+      app={<App />}
     />,
     element
   );
