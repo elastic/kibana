@@ -26,7 +26,7 @@ coming[7.9.0]
 
 As of 7.9,
 the new development platform
-for {kib} is complete. The most immediate difference you'll notice is
+for {kib} is complete. The most immediate difference is
 that pages load faster as you navigate {kib}. If you're a developer,
 the new platform enables you to build features faster and with greater efficiency.
 For details, check out
@@ -35,13 +35,12 @@ a new architecture for {kib}].
 
 [float]
 [[search-7-9]]
-=== Welcome Enterprise Search to {kib}
+=== Enterprise Search comes to {kib}
 
 In 7.8, we reorganized the {kib} side navigation to make our Observability
 and Security apps easier to find. In 7.9, we added Enterprise Search
-to the side nav. If you're an existing user of App Search and
-Workplace Search, you can now launch directly into those environments in {kib} and see your
-engines.
+to the side navigation. If you're an existing user of App Search and
+Workplace Search, you can now launch directly into those environments in {kib}.
 Check out https://www.elastic.co/guide/en/app-search/current/index.html[our documentation]
 for more information.
 
@@ -67,7 +66,7 @@ instead of changing the index for each individual element. For instructions, ref
 Compare two metrics on the y-axes at the same time.
 This enables you compare and contrast data of vastly different types and ranges.
 For example, you might track the total page views for your web site,
-which tallies in the millions. At the same time, you're also interested
+which tallies in the millions. But you're also interested
 in the percentage of the web site bounce rates,
 typically between 1 and 100. You can now stack both metrics on top of one
 another to quickly spot the outliers.
@@ -75,16 +74,40 @@ another to quickly spot the outliers.
 Also in 7.9, Lens debuts color pick, sort, and a fitting function.
 
 [float]
-[[alert-7-9]]
-=== New ServiceNow action in Alerts
+[[dashboard-7-9]]
+=== Dashboard to Discover explorations
 
-Alerting introduces a ServiceNow action that runs on the
-{kib} server when an alert condition is met. This action pushes or updates
-data to a new incident in ServiceNow. Refer to the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
+Navigating between dashboards was a highlight in 7.8, and 7.9 adds
+the ability to navigate from a dashboard to Discover.  The time range,
+filters, and other parameters remain the same, so you can continue your
+analysis from a new perspective. For example,
+your dashboard might have a visualization for overall HTTP responses.
+You can navigate to Discover to see the saved search
+for HTTP responses. The new {kibana-ref}/explore-underlying-data.html[*Explore underlying data*]
+action is available for visualizations
+backed by a single index pattern.
+
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+[float]
+[[alert-7-9]]
+=== ServiceNow action in Alerts
+
+Alerting introduces a ServiceNow action that pushes or updates
+data to a new incident in ServiceNow. See the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
 for details.
 
 [role="screenshot"]
 image::images/alert-flyout-action-type-selection.png[UI for selecting an action type]
 
-
 // end::notable-highlights[]
+
+[float]
+=== Give {minor-version} a try
+
+Try {minor-version} now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].
