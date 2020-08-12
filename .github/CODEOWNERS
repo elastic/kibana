@@ -68,9 +68,6 @@
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
-# Ingest managaer
-/x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
-
 # Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui
@@ -89,9 +86,12 @@
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/plugins/infra/**/*.scss @elastic/observability-design
 /x-pack/plugins/ingest_manager/ @elastic/ingest-management
+/x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/plugins/observability/ @elastic/observability-ui
+/x-pack/plugins/observability/**/*.scss @elastic/observability-design
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
