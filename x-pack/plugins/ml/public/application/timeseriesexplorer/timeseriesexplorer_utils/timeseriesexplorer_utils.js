@@ -10,7 +10,9 @@
  * Viewer dashboard.
  */
 
-import _ from 'lodash';
+import each from 'lodash/each';
+import get from 'lodash/get';
+import find from 'lodash/find';
 import moment from 'moment-timezone';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
@@ -41,7 +43,7 @@ export function createTimeSeriesJobData(jobs) {
 export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
   const metricPlotChartData = [];
   if (modelPlotEnabled === true) {
-    _.each(metricPlotData, (dataForTime, time) => {
+    each(metricPlotData, (dataForTime, time) => {
       metricPlotChartData.push({
         date: new Date(+time),
         lower: dataForTime.modelLower,
@@ -50,7 +52,7 @@ export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
       });
     });
   } else {
-    _.each(metricPlotData, (dataForTime, time) => {
+    each(metricPlotData, (dataForTime, time) => {
       metricPlotChartData.push({
         date: new Date(+time),
         value: dataForTime.actual,
@@ -66,7 +68,7 @@ export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
 // value, lower and upper keys.
 export function processForecastResults(forecastData) {
   const forecastPlotChartData = [];
-  _.each(forecastData, (dataForTime, time) => {
+  each(forecastData, (dataForTime, time) => {
     forecastPlotChartData.push({
       date: new Date(+time),
       isForecast: true,
@@ -83,7 +85,7 @@ export function processForecastResults(forecastData) {
 // i.e. array of Objects with keys date (JavaScript date) and score.
 export function processRecordScoreResults(scoreData) {
   const bucketScoreData = [];
-  _.each(scoreData, (dataForTime, time) => {
+  each(scoreData, (dataForTime, time) => {
     bucketScoreData.push({
       date: new Date(+time),
       score: dataForTime.score,
@@ -153,7 +155,7 @@ export function processDataForFocusAnomalies(
         chartPoint.anomalyScore = recordScore;
         chartPoint.function = record.function;
 
-        if (_.has(record, 'actual')) {
+        if (record.actual !== undefined) {
           // If cannot match chart point for anomaly time
           // substitute the value with the record's actual so it won't plot as null/0
           if (chartPoint.value === null) {
@@ -163,13 +165,13 @@ export function processDataForFocusAnomalies(
           chartPoint.actual = record.actual;
           chartPoint.typical = record.typical;
         } else {
-          const causes = _.get(record, 'causes', []);
+          const causes = get(record, 'causes', []);
           if (causes.length > 0) {
             chartPoint.byFieldName = record.by_field_name;
             chartPoint.numberOfCauses = causes.length;
             if (causes.length === 1) {
               // If only a single cause, copy actual and typical values to the top level.
-              const cause = _.first(record.causes);
+              const cause = record.causes[0];
               chartPoint.actual = cause.actual;
               chartPoint.typical = cause.typical;
               // substitute the value with the record's actual so it won't plot as null/0
@@ -180,7 +182,7 @@ export function processDataForFocusAnomalies(
           }
         }
 
-        if (_.has(record, 'multi_bucket_impact')) {
+        if (record.multi_bucket_impact !== undefined) {
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
       }
@@ -194,7 +196,7 @@ export function processDataForFocusAnomalies(
 // which correspond to times of scheduled events for the job.
 export function processScheduledEventsForChart(chartData, scheduledEvents) {
   if (scheduledEvents !== undefined) {
-    _.each(scheduledEvents, (events, time) => {
+    each(scheduledEvents, (events, time) => {
       const chartPoint = findNearestChartPointToTime(chartData, time);
       if (chartPoint !== undefined) {
         // Note if the scheduled event coincides with an absence of the underlying metric data,
@@ -301,7 +303,7 @@ export function calculateAggregationInterval(bounds, bucketsTarget, jobs, select
 
   // Ensure the aggregation interval is always a multiple of the bucket span to avoid strange
   // behaviour such as adjacent chart buckets holding different numbers of job results.
-  const bucketSpanSeconds = _.find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
+  const bucketSpanSeconds = find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
   let aggInterval = buckets.getIntervalToNearestMultiple(bucketSpanSeconds);
 
   // Set the interval back to the job bucket span if the auto interval is smaller.
@@ -324,8 +326,8 @@ export function calculateDefaultFocusRange(
 
   const combinedData =
     isForecastData === false ? contextChartData : contextChartData.concat(contextForecastData);
-  const earliestDataDate = _.first(combinedData).date;
-  const latestDataDate = _.last(combinedData).date;
+  const earliestDataDate = combinedData[0].date;
+  const latestDataDate = combinedData[combinedData.length - 1].date;
 
   let rangeEarliestMs;
   let rangeLatestMs;
@@ -333,8 +335,8 @@ export function calculateDefaultFocusRange(
   if (isForecastData === true) {
     // Return a range centred on the start of the forecast range, depending
     // on the time range of the forecast and data.
-    const earliestForecastDataDate = _.first(contextForecastData).date;
-    const latestForecastDataDate = _.last(contextForecastData).date;
+    const earliestForecastDataDate = contextForecastData[0].date;
+    const latestForecastDataDate = contextForecastData[contextForecastData.length - 1].date;
 
     rangeLatestMs = Math.min(
       earliestForecastDataDate.getTime() + autoZoomDuration / 2,
@@ -379,7 +381,7 @@ export function getAutoZoomDuration(jobs, selectedJob) {
   // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
   // Get the minimum bucket span of selected jobs.
   // TODO - only look at jobs for which data has been returned?
-  const bucketSpanSeconds = _.find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
+  const bucketSpanSeconds = find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
 
   // In most cases the duration can be obtained by simply multiplying the points target
   // Check that this duration returns the bucket span when run back through the
