@@ -32,7 +32,6 @@ const moduleIds = [
   'uptime_heartbeat',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');

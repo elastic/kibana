@@ -9,13 +9,17 @@ import { i18n } from '@kbn/i18n';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
-import { getData, getCoreChrome } from '../../../kibana_services';
+import {
+  getData,
+  getCoreChrome,
+  getMapsCapabilities,
+  getNavigation,
+} from '../../../kibana_services';
 import { copyPersistentState } from '../../../reducers/util';
 import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
 import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
 import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
 import { getInitialQuery } from '../../bootstrap/get_initial_query';
-import { MapsTopNavMenu } from '../../page_elements/top_nav_menu';
 import {
   getGlobalState,
   updateGlobalState,
@@ -27,6 +31,7 @@ import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { goToSpecifiedPath } from '../../maps_router';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+import { getTopNavConfig } from './top_nav_config';
 
 const unsavedChangesWarning = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesWarning', {
   defaultMessage: 'Your map has unsaved changes. Are you sure you want to leave?',
@@ -58,7 +63,10 @@ export class MapsAppView extends React.Component {
       this._updateFromGlobalState
     );
 
-    this._updateStateFromSavedQuery(this._appStateManager.getAppState().savedQuery);
+    const initialSavedQuery = this._appStateManager.getAppState().savedQuery;
+    if (initialSavedQuery) {
+      this._updateStateFromSavedQuery(initialSavedQuery);
+    }
 
     this._initMap();
 
@@ -237,18 +245,10 @@ export class MapsAppView extends React.Component {
     );
   }
 
-  _onTopNavRefreshConfig = ({ isPaused, refreshInterval }) => {
-    this._onRefreshConfigChange({
-      isPaused,
-      interval: refreshInterval,
-    });
-  };
+  _updateStateFromSavedQuery = (savedQuery) => {
+    this.setState({ savedQuery: { ...savedQuery } });
+    this._appStateManager.setQueryAndFilters({ savedQuery });
 
-  _updateStateFromSavedQuery(savedQuery) {
-    if (!savedQuery) {
-      this.setState({ savedQuery: '' });
-      return;
-    }
     const { filterManager } = getData().query;
     const savedQueryFilters = savedQuery.attributes.filters || [];
     const globalFilters = filterManager.getGlobalFilters();
@@ -266,7 +266,7 @@ export class MapsAppView extends React.Component {
       query: savedQuery.attributes.query,
       time: savedQuery.attributes.timefilter,
     });
-  }
+  };
 
   _initMap() {
     this._initMapAndLayerSettings();
@@ -295,27 +295,65 @@ export class MapsAppView extends React.Component {
   }
 
   _renderTopNav() {
-    return !this.props.isFullScreen ? (
-      <MapsTopNavMenu
-        savedMap={this.props.savedMap}
-        savedQuery={this.state.savedQuery}
-        onQueryChange={this._onQueryChange}
-        onRefreshConfigChange={this._onTopNavRefreshConfig}
+    if (this.props.isFullScreen) {
+      return null;
+    }
+
+    const topNavConfig = getTopNavConfig({
+      savedMap: this.props.savedMap,
+      isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
+      isSaveDisabled: this.props.isSaveDisabled,
+      closeFlyout: this.props.closeFlyout,
+      enableFullScreen: this.props.enableFullScreen,
+      openMapSettings: this.props.openMapSettings,
+      inspectorAdapters: this.props.inspectorAdapters,
+      setBreadcrumbs: this._setBreadcrumbs,
+    });
+
+    const { TopNavMenu } = getNavigation().ui;
+    return (
+      <TopNavMenu
+        appName="maps"
+        config={topNavConfig}
         indexPatterns={this.state.indexPatterns}
-        onFiltersChange={this._onFiltersChange}
-        onQuerySaved={(query) => {
-          this.setState({ savedQuery: query });
-          this._appStateManager.setQueryAndFilters({ savedQuery: query });
-          this._updateStateFromSavedQuery(query);
+        filters={this.props.filters}
+        query={this.props.query}
+        onQuerySubmit={({ dateRange, query }) => {
+          this._onQueryChange({
+            query,
+            time: dateRange,
+            refresh: true,
+          });
         }}
-        onSavedQueryUpdated={(query) => {
-          this.setState({ savedQuery: { ...query } });
-          this._appStateManager.setQueryAndFilters({ savedQuery: query });
-          this._updateStateFromSavedQuery(query);
+        onFiltersUpdated={this._onFiltersChange}
+        dateRangeFrom={this.props.timeFilters.from}
+        dateRangeTo={this.props.timeFilters.to}
+        isRefreshPaused={this.props.refreshConfig.isPaused}
+        refreshInterval={this.props.refreshConfig.interval}
+        onRefreshChange={({ isPaused, refreshInterval }) => {
+          this._onRefreshConfigChange({
+            isPaused,
+            interval: refreshInterval,
+          });
         }}
-        setBreadcrumbs={this._setBreadcrumbs}
+        showSearchBar={true}
+        showFilterBar={true}
+        showDatePicker={true}
+        showSaveQuery={getMapsCapabilities().saveQuery}
+        savedQuery={this.state.savedQuery}
+        onSaved={this._updateStateFromSavedQuery}
+        onSavedQueryUpdated={this._updateStateFromSavedQuery}
+        onClearSavedQuery={() => {
+          const { filterManager, queryString } = getData().query;
+          this.setState({ savedQuery: '' });
+          this._appStateManager.setQueryAndFilters({ savedQuery: '' });
+          this._onQueryChange({
+            filters: filterManager.getGlobalFilters(),
+            query: queryString.getDefaultQuery(),
+          });
+        }}
       />
-    ) : null;
+    );
   }
 
   render() {

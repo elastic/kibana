@@ -36,6 +36,7 @@ const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
  * @param items to reduce
  */
 export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   items.reduce((acc, { monitor_id }) => {
     acc.add(monitor_id);
     return acc;

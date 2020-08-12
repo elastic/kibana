@@ -24,6 +24,7 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 

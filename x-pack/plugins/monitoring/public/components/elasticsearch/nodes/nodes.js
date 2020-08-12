@@ -32,6 +32,8 @@ import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -85,7 +87,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       );
 
       let setupModeStatus = null;
-      if (setupMode && setupMode.enabled) {
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         const list = _.get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
@@ -309,7 +311,11 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];
-  if (setupMode.enabled && setupMode.data) {
+  if (
+    setupMode &&
+    setupMode.enabled &&
+    isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)
+  ) {
     // We want to create a seamless experience for the user by merging in the setup data
     // and the node data from monitoring indices in the likely scenario where some nodes
     // are using MB collection and some are using no collection
@@ -332,7 +338,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   }
 
   let setupModeCallout = null;
-  if (setupMode.enabled && setupMode.data) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}

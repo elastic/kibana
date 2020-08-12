@@ -30,7 +30,7 @@ export const CopySource: Task = {
         'src/**',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
-        '!src/**/{__tests__,__snapshots__,__mocks__}/**',
+        '!src/**/{target,__tests__,__snapshots__,__mocks__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',
         '!src/legacy/core_plugins/console/public/tests/**',

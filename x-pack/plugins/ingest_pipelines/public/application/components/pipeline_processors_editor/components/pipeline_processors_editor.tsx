@@ -21,6 +21,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
       state: { editor, processors },
     } = usePipelineProcessorsContext();
     const baseSelector = useMemo(() => [stateSlice], [stateSlice]);
+
     return (
       <ProcessorsTree
         baseSelector={baseSelector}

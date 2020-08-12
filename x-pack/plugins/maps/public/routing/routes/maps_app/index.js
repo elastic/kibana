@@ -13,6 +13,7 @@ import {
   getQueryableUniqueIndexPatternIds,
   getRefreshConfig,
   getTimeFilters,
+  hasDirtyState,
   hasUnsavedChanges,
 } from '../../../selectors/map_selectors';
 import {
@@ -26,13 +27,20 @@ import {
   setRefreshConfig,
   setSelectedLayer,
   updateFlyout,
+  enableFullScreen,
+  openMapSettings,
+  removePreviewLayers,
 } from '../../../actions';
 import { FLYOUT_STATE } from '../../../reducers/ui';
 import { getMapsCapabilities } from '../../../kibana_services';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
     isFullScreen: getIsFullScreen(state),
+    isOpenSettingsDisabled: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
+    isSaveDisabled: hasDirtyState(state),
+    inspectorAdapters: getInspectorAdapters(state),
     nextIndexPatternIds: getQueryableUniqueIndexPatternIds(state),
     flyoutDisplay: getFlyoutDisplay(state),
     refreshConfig: getRefreshConfig(state),
@@ -68,6 +76,13 @@ function mapDispatchToProps(dispatch) {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(setReadOnly(!getMapsCapabilities().save));
     },
+    closeFlyout: () => {
+      dispatch(setSelectedLayer(null));
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(removePreviewLayers());
+    },
+    enableFullScreen: () => dispatch(enableFullScreen()),
+    openMapSettings: () => dispatch(openMapSettings()),
   };
 }
 

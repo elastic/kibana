@@ -75,7 +75,7 @@ describe('get_data_telemetry', () => {
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
-            name: 'logs-nginx.access-default-000001',
+            name: '.ds-logs-nginx.access-default-000001',
             datasetName: 'nginx.access',
             datasetType: 'logs',
             shipper: 'filebeat',
@@ -84,10 +84,46 @@ describe('get_data_telemetry', () => {
             sizeInBytes: 1000,
           },
           {
-            name: 'logs-nginx.access-default-000002',
+            name: '.ds-logs-nginx.access-default-000002',
             datasetName: 'nginx.access',
             datasetType: 'logs',
             shipper: 'filebeat',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          {
+            name: '.ds-traces-something-default-000002',
+            datasetName: 'something',
+            datasetType: 'traces',
+            packageName: 'some-package',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          {
+            name: '.ds-metrics-something.else-default-000002',
+            datasetName: 'something.else',
+            datasetType: 'metrics',
+            managedBy: 'ingest-manager',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          // Filter out if it has datasetName and datasetType but none of the shipper, packageName or managedBy === 'ingest-manager'
+          {
+            name: 'some-index-that-should-not-show',
+            datasetName: 'should-not-show',
+            datasetType: 'logs',
+            isECS: true,
+            docCount: 1000,
+            sizeInBytes: 60,
+          },
+          {
+            name: 'other-index-that-should-not-show',
+            datasetName: 'should-not-show-either',
+            datasetType: 'metrics',
+            managedBy: 'me',
             isECS: true,
             docCount: 1000,
             sizeInBytes: 60,
@@ -137,6 +173,21 @@ describe('get_data_telemetry', () => {
           ecs_index_count: 2,
           doc_count: 2000,
           size_in_bytes: 1060,
+        },
+        {
+          dataset: { name: 'something', type: 'traces' },
+          package: { name: 'some-package' },
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 1000,
+          size_in_bytes: 60,
+        },
+        {
+          dataset: { name: 'something.else', type: 'metrics' },
+          index_count: 1,
+          ecs_index_count: 1,
+          doc_count: 1000,
+          size_in_bytes: 60,
         },
       ]);
     });

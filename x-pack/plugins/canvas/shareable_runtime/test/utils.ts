@@ -15,6 +15,7 @@ export const tick = (ms = 0) =>
 export const takeMountedSnapshot = (mountedComponent: ReactWrapper<{}, {}, Component>) => {
   const html = mountedComponent.html();
   const template = document.createElement('template');
+  // eslint-disable-next-line no-unsanitized/property
   template.innerHTML = html;
   return template.content.firstChild;
 };

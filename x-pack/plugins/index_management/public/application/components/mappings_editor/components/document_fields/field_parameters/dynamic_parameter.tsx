@@ -24,6 +24,7 @@ export const dynamicSerializer = (field: Field): Field => {
 
   const dynamic =
     field.dynamic_toggle === true ? true : field.dynamic_strict === true ? 'strict' : false;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_toggle, dynamic_strict, ...rest } = field;
 
   return {

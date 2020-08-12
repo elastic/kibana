@@ -14,8 +14,8 @@ import {
   findTestSubject,
 } from '../../../../../test_utils';
 import { DataStream } from '../../../common';
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { IndexManagementHome } from '../../../public/application/sections/home';
+import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {

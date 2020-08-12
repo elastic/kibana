@@ -7,7 +7,8 @@
     "PsExec is a dual-use tool that can be used for benign or malicious activity. It's important to baseline your environment to determine the amount of noise to expect from this tool."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

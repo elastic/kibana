@@ -13,7 +13,7 @@ import { Processor } from '../../../../common/types';
 import { getUseField, getFormRow, Field, useKibana } from '../../../shared_imports';
 
 import {
-  PipelineProcessorsContextProvider,
+  ProcessorsEditorContextProvider,
   GlobalOnFailureProcessorsEditor,
   ProcessorsEditor,
   OnUpdateHandler,
@@ -29,8 +29,6 @@ interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
-  isTestButtonDisabled: boolean;
-  onTestPipelineClick: () => void;
   onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
 }
@@ -45,8 +43,6 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   onProcessorsUpdate,
   isEditing,
   hasVersion,
-  isTestButtonDisabled,
-  onTestPipelineClick,
   onEditorFlyoutOpen,
 }) => {
   const { services } = useKibana();
@@ -125,20 +121,18 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
       {/* Pipeline Processors Editor */}
 
-      <PipelineProcessorsContextProvider
+      <ProcessorsEditorContextProvider
         onFlyoutOpen={onEditorFlyoutOpen}
         links={{ esDocsBasePath: services.documentation.getEsDocsBasePath() }}
+        api={services.api}
+        toasts={services.notifications.toasts}
         onUpdate={onProcessorsUpdate}
         value={{ processors, onFailure }}
       >
         <div className="pipelineProcessorsEditor">
           <EuiFlexGroup gutterSize="m" responsive={false} direction="column">
             <EuiFlexItem grow={false}>
-              <ProcessorsHeader
-                onLoadJson={onLoadJson}
-                onTestPipelineClick={onTestPipelineClick}
-                isTestButtonDisabled={isTestButtonDisabled}
-              />
+              <ProcessorsHeader onLoadJson={onLoadJson} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <ProcessorsEditor />
@@ -154,7 +148,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-      </PipelineProcessorsContextProvider>
+      </ProcessorsEditorContextProvider>
     </>
   );
 };
