@@ -22,7 +22,8 @@ export interface IngestManagerConfigType {
       host?: string;
       ca_sha256?: string;
     };
-    agentConfigRolloutConcurrency: number;
+    agentConfigRolloutRateLimitIntervalMs: number;
+    agentConfigRolloutRateLimitRequestPerInterval: number;
   };
 }
 

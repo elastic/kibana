@@ -27,13 +27,13 @@ import { loggingSystemMock } from '../../../logging/logging_system.mock';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
-    client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+    client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   };
 
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
-      client: elasticsearchClientMock.createElasticSearchClient(),
+      client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
@@ -366,7 +366,7 @@ describe('IndexMigrator', () => {
 });
 
 function withIndex(
-  client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>,
+  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>,
   opts: any = {}
 ) {
   const defaultIndex = {

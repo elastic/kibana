@@ -17,6 +17,7 @@ export interface IKibanaContext {
   enterpriseSearchUrl?: string;
   http: HttpSetup;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
+  setDocTitle(title: string): void;
 }
 
 export const KibanaContext = React.createContext({});
@@ -41,6 +42,7 @@ export const renderApp = (
           http: core.http,
           enterpriseSearchUrl: config.host,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
+          setDocTitle: core.chrome.docTitle.change,
         }}
       >
         <LicenseProvider license$={plugins.licensing.license$}>

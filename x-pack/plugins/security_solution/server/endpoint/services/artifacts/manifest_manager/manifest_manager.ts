@@ -82,18 +82,17 @@ export class ManifestManager {
   protected async buildExceptionListArtifacts(
     artifactSchemaVersion?: string
   ): Promise<InternalArtifactCompleteSchema[]> {
-    return ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.reduce<
-      Promise<InternalArtifactCompleteSchema[]>
-    >(async (acc, os) => {
+    const artifacts: InternalArtifactCompleteSchema[] = [];
+    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
       const exceptionList = await getFullEndpointExceptionList(
         this.exceptionListClient,
         os,
         artifactSchemaVersion ?? 'v1'
       );
-      const artifacts = await acc;
       const artifact = await buildArtifact(exceptionList, os, artifactSchemaVersion ?? 'v1');
-      return Promise.resolve([...artifacts, artifact]);
-    }, Promise.resolve([]));
+      artifacts.push(artifact);
+    }
+    return artifacts;
   }
 
   /**
@@ -238,10 +237,11 @@ export class ManifestManager {
       const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
         page,
         perPage: 20,
-        kuery: 'ingest-package-configs.package.name:endpoint',
+        kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
       for (const packageConfig of items) {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, revision, updated_at, updated_by, ...newPackageConfig } = packageConfig;
         if (newPackageConfig.inputs.length > 0 && newPackageConfig.inputs[0].config !== undefined) {
           const oldManifest = newPackageConfig.inputs[0].config.artifact_manifest ?? {

@@ -23,9 +23,9 @@ import { InfraSourceConfiguration } from '../../sources';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
 type ConditionResult = InventoryMetricConditions & {
-  shouldFire: boolean | boolean[];
+  shouldFire: boolean[];
   currentValue: number;
-  isNoData: boolean;
+  isNoData: boolean[];
   isError: boolean;
 };
 
@@ -71,8 +71,8 @@ export const evaluateCondition = async (
         value !== null &&
         (Array.isArray(value)
           ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : comparisonFunction(value as number, threshold)),
-      isNoData: value === null,
+          : [comparisonFunction(value as number, threshold)]),
+      isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
     };

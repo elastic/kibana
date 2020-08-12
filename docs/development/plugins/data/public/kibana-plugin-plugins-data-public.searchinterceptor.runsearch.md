@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal): Observable<IEsSearchResponse>;
+protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
 ```
 
 ## Parameters
@@ -15,7 +15,8 @@ protected runSearch(request: IEsSearchRequest, combinedSignal: AbortSignal): Obs
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  request | <code>IEsSearchRequest</code> |  |
-|  combinedSignal | <code>AbortSignal</code> |  |
+|  signal | <code>AbortSignal</code> |  |
+|  strategy | <code>string</code> |  |
 
 <b>Returns:</b>
 

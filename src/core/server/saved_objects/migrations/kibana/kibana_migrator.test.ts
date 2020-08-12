@@ -127,7 +127,7 @@ describe('KibanaMigrator', () => {
 });
 
 type MockedOptions = KibanaMigratorOptions & {
-  client: ReturnType<typeof elasticsearchClientMock.createElasticSearchClient>;
+  client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
 };
 
 const mockOptions = () => {
@@ -170,7 +170,7 @@ const mockOptions = () => {
       scrollDuration: '10m',
       skip: false,
     },
-    client: elasticsearchClientMock.createElasticSearchClient(),
+    client: elasticsearchClientMock.createElasticsearchClient(),
   };
   return options;
 };

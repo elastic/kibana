@@ -72,7 +72,9 @@ export const evaluateAlert = (
                   typeof point.value === 'number' && comparisonFunction(point.value, threshold)
               )
             : [false],
-          isNoData: (Array.isArray(points) ? last(points)?.value : points) === null,
+          isNoData: Array.isArray(points)
+            ? points.map((point) => point?.value === null || point === null)
+            : [points === null],
           isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
         };
       });

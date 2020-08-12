@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
-import { finalize, filter, tap } from 'rxjs/operators';
+import { finalize, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart, CoreStart } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
@@ -92,14 +93,18 @@ export class SearchInterceptor {
 
   protected runSearch(
     request: IEsSearchRequest,
-    combinedSignal: AbortSignal
+    signal: AbortSignal,
+    strategy?: string
   ): Observable<IEsSearchResponse> {
+    const { id, ...searchRequest } = request;
+    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
+    const body = JSON.stringify(id != null ? {} : searchRequest);
     return from(
       this.deps.http.fetch({
-        path: `/internal/search/es`,
         method: 'POST',
-        body: JSON.stringify(request),
-        signal: combinedSignal,
+        path,
+        body,
+        signal,
       })
     );
   }
@@ -122,14 +127,7 @@ export class SearchInterceptor {
       const { combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(++this.pendingCount);
 
-      return this.runSearch(request, combinedSignal).pipe(
-        tap({
-          next: (e) => {
-            if (this.deps.usageCollector) {
-              this.deps.usageCollector.trackSuccess(e.rawResponse.took);
-            }
-          },
-        }),
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -179,7 +177,7 @@ export class SearchInterceptor {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           application: this.deps.application,
         }),

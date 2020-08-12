@@ -29,7 +29,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, BundleRefs, WorkerConfig, parseDirPath } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
@@ -70,8 +70,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     plugins: [
       new CleanWebpackPlugin(),
-      new DisallowedSyntaxPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
     module: {
@@ -151,7 +151,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   options: {
                     sourceMap: !worker.dist,
                     config: {
-                      path: require.resolve('./postcss.config'),
+                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },

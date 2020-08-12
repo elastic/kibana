@@ -161,7 +161,12 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
+export {
+  EsaggsExpressionFunctionDefinition,
+  ParsedInterval,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../common';
 
 export {
   ISearchStrategy,
@@ -170,6 +175,8 @@ export {
   ISearchStart,
   getDefaultSearchParams,
   getTotalLoaded,
+  usageProvider,
+  SearchUsage,
 } from './search';
 
 // Search namespace

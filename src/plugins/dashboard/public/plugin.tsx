@@ -94,6 +94,10 @@ declare module '../../share/public' {
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
+interface DashboardFeatureFlagConfig {
+  allowByValueEmbeddables: boolean;
+}
+
 interface SetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -125,6 +129,7 @@ export interface DashboardStart {
     embeddableType: string;
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
 }
 
@@ -411,6 +416,7 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
+      dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),

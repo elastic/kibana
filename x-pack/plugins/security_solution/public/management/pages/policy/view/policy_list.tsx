@@ -377,6 +377,22 @@ export const PolicyList = React.memo(() => {
     [services.application, handleDeleteOnClick, formatUrl, search]
   );
 
+  const bodyContent = useMemo(() => {
+    return policyItems && policyItems.length > 0 ? (
+      <EuiBasicTable
+        items={[...policyItems]}
+        columns={columns}
+        loading={loading}
+        pagination={paginationSetup}
+        onChange={handleTableChange}
+        data-test-subj="policyTable"
+        hasActions={false}
+      />
+    ) : (
+      <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
+    );
+  }, [policyItems, loading, columns, handleCreatePolicyClick, handleTableChange, paginationSetup]);
+
   return (
     <>
       {showDelete && (
@@ -449,32 +465,7 @@ export const PolicyList = React.memo(() => {
             <EuiHorizontalRule margin="xs" />
           </>
         )}
-        {useMemo(() => {
-          return (
-            <>
-              {policyItems && policyItems.length > 0 ? (
-                <EuiBasicTable
-                  items={[...policyItems]}
-                  columns={columns}
-                  loading={loading}
-                  pagination={paginationSetup}
-                  onChange={handleTableChange}
-                  data-test-subj="policyTable"
-                  hasActions={false}
-                />
-              ) : (
-                <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
-              )}
-            </>
-          );
-        }, [
-          policyItems,
-          loading,
-          columns,
-          handleCreatePolicyClick,
-          handleTableChange,
-          paginationSetup,
-        ])}
+        {bodyContent}
         <SpyRoute pageName={SecurityPageName.administration} />
       </ManagementPageView>
     </>

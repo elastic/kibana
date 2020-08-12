@@ -143,7 +143,7 @@ export const PingType = t.intersection([
       response: t.partial({
         body: HttpResponseBodyType,
         bytes: t.number,
-        redirects: t.string,
+        redirects: t.array(t.string),
         status_code: t.number,
       }),
       version: t.string,

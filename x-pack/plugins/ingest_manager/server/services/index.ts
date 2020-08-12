@@ -9,6 +9,8 @@ import { AgentStatus, Agent } from '../types';
 import * as settingsService from './settings';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
+export { getRegistryUrl } from './epm/registry/registry_url';
+
 /**
  * Service to return the index pattern of EPM packages
  */

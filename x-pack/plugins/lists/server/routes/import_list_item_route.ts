@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import { importListItemQuerySchema, listSchema } from '../../common/schemas';
 import { ConfigType } from '../config';
 
@@ -41,6 +41,13 @@ export const importListItemRoute = (router: IRouter, config: ConfigType): void =
         const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = getListClient(context);
+        const listExists = await lists.getListIndexExists();
+        if (!listExists) {
+          return siemResponse.error({
+            body: `To import a list item, the index must exist first. Index "${lists.getListIndex()}" does not exist`,
+            statusCode: 400,
+          });
+        }
         if (listId != null) {
           const list = await lists.getList({ id: listId });
           if (list == null) {

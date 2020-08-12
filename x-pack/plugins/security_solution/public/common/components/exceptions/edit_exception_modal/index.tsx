@@ -31,7 +31,7 @@ import {
 import * as i18n from './translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { ExceptionBuilder } from '../builder';
+import { ExceptionBuilderComponent } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -40,6 +40,7 @@ import {
   getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
+  lowercaseHashValues,
 } from '../helpers';
 import { Loader } from '../../loader';
 
@@ -195,7 +196,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     ];
     if (exceptionListType === 'endpoint') {
       const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = enrichExceptionItemsWithOS(enriched, osTypes);
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
@@ -231,7 +232,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
             <ModalBodySection className="builder-section">
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilder
+              <ExceptionBuilderComponent
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}

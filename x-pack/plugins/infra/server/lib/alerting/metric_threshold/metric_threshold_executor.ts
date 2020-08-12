@@ -45,7 +45,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       );
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = alertResults.some((result) => result[group].isNoData);
+      const isNoData = alertResults.some((result) => last(result[group].isNoData));
       const isError = alertResults.some((result) => result[group].isError);
 
       const nextState = isError

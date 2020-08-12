@@ -9,7 +9,7 @@ import { uniqueId, startsWith } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-// @ts-ignore
+// @ts-expect-error
 import { Typeahead } from './Typeahead';
 import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';

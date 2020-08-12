@@ -15,6 +15,7 @@ import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 const testAgentId = 'testAgentId';
 const testConfigId = 'testConfigId';
 const testHostId = 'randoHostId';
+const testHostName = 'testDesktop';
 
 /** Mock OS Platform for endpoint telemetry */
 export const MockOSPlatform = 'somePlatform';
@@ -56,8 +57,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: testHostName,
+            name: testHostName,
             id: testHostId,
           },
           os: {
@@ -93,8 +94,8 @@ export const mockFleetObjectsResponse = (
             },
           },
           host: {
-            hostname: 'testDesktop',
-            name: 'testDesktop',
+            hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
+            name: hasDuplicates ? testHostName : 'oldRandoHostName',
             id: hasDuplicates ? testHostId : 'oldRandoHostId',
           },
           os: {

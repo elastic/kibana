@@ -8,21 +8,25 @@ jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
-import { ActionParamsType, ActionTypeConfigType } from './es_index';
 import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ESIndexActionType,
+  ESIndexActionTypeExecutorOptions,
+} from './es_index';
 
 const ACTION_TYPE_ID = '.index';
 
 const services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: ESIndexActionType;
 
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {
@@ -144,12 +148,12 @@ describe('params validation', () => {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const secrets = {};
-    let config: Partial<ActionTypeConfigType>;
+    let config: ActionTypeConfigType;
     let params: ActionParamsType;
-    let executorOptions: ActionTypeExecutorOptions;
+    let executorOptions: ESIndexActionTypeExecutorOptions;
 
     // minimal params
-    config = { index: 'index-value', refresh: false };
+    config = { index: 'index-value', refresh: false, executionTimeField: null };
     params = {
       documents: [{ jim: 'bob' }],
     };
@@ -215,7 +219,7 @@ describe('execute()', () => {
     `);
 
     // minimal params
-    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
     };
@@ -245,7 +249,7 @@ describe('execute()', () => {
     `);
 
     // multiple documents
-    config = { index: 'index-value', executionTimeField: undefined, refresh: false };
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ a: 1 }, { b: 2 }],
     };

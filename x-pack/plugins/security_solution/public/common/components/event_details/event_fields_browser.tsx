@@ -55,7 +55,7 @@ export const EventFieldsBrowser = React.memo<Props>(
     return (
       <div className="euiTable--compressed">
         <EuiInMemoryTable
-          // @ts-ignore items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
+          // @ts-expect-error items going in match Partial<BrowserField>, column `render` callbacks expect complete BrowserField
           items={items}
           columns={columns}
           pagination={false}
