@@ -24,11 +24,18 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: Record<string, FieldConfig> = {
+  /* Required field config */
   pattern: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
       defaultMessage: 'Pattern',
     }),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText',
+      {
+        defaultMessage: 'The pattern to apply to the field.',
+      }
+    ),
     validations: [
       {
         validator: emptyField(
@@ -39,18 +46,19 @@ const fieldsConfig: Record<string, FieldConfig> = {
       },
     ],
   },
+  /* Optional field config */
   append_separator: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
       {
-        defaultMessage: 'Append separator',
+        defaultMessage: 'Append separator (optional)',
       }
     ),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
-        defaultMessage="Default value is {value}."
+        defaultMessage="The character(s) that separate the appended fields. Default value is {value} (an empty string)."
         values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
       />
     ),
@@ -60,7 +68,12 @@ const fieldsConfig: Record<string, FieldConfig> = {
 export const Dissect: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.dissectForm.fieldNameHelpText',
+          { defaultMessage: 'The field to dissect.' }
+        )}
+      />
 
       <UseField
         config={fieldsConfig.pattern}

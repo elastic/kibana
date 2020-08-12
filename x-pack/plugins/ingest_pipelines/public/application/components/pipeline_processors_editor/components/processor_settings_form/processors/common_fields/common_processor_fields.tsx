@@ -27,12 +27,19 @@ const ignoreFailureConfig: FieldConfig = {
       defaultMessage: 'Ignore failure',
     }
   ),
+  helpText: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureHelpText',
+    { defaultMessage: 'Ignore failures for this processor.' }
+  ),
   type: FIELD_TYPES.TOGGLE,
 };
 
 const ifConfig: FieldConfig = {
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
     defaultMessage: 'Condition (optional)',
+  }),
+  helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldHelpText', {
+    defaultMessage: 'Conditionally execute this processor.',
   }),
   type: FIELD_TYPES.TEXT,
 };
@@ -41,14 +48,15 @@ const tagConfig: FieldConfig = {
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
     defaultMessage: 'Tag (optional)',
   }),
+  helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldHelpText', {
+    defaultMessage: 'An identifier for this processor. Useful for debugging and metrics.',
+  }),
   type: FIELD_TYPES.TEXT,
 };
 
 export const CommonProcessorFields: FunctionComponent = () => {
   return (
-    <>
-      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
-
+    <section>
       <UseField
         config={ifConfig}
         component={TextEditor}
@@ -63,6 +71,8 @@ export const CommonProcessorFields: FunctionComponent = () => {
       />
 
       <UseField config={tagConfig} component={Field} path="fields.tag" />
-    </>
+
+      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
+    </section>
   );
 };

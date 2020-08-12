@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FIELD_TYPES, UseField, ToggleField } from '../../../../../../../shared_imports';
 
@@ -24,9 +24,13 @@ export const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const IgnoreMissingField = () => (
+interface Props {
+  helpText?: string;
+}
+
+export const IgnoreMissingField: FunctionComponent<Props> = ({ helpText }) => (
   <UseField
-    config={fieldsConfig.ignore_missing}
+    config={{ ...fieldsConfig.ignore_missing, helpText }}
     component={ToggleField}
     path="fields.ignore_missing"
   />

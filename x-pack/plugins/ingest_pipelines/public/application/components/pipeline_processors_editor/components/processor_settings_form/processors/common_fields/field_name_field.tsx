@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FIELD_TYPES, UseField, Field, fieldValidators } from '../../../../../../../shared_imports';
 
@@ -30,6 +30,10 @@ export const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const FieldNameField = () => (
-  <UseField config={fieldsConfig.field} component={Field} path="fields.field" />
+interface Props {
+  helpText?: React.ReactNode;
+}
+
+export const FieldNameField: FunctionComponent<Props> = ({ helpText }) => (
+  <UseField config={{ ...fieldsConfig.field, helpText }} component={Field} path="fields.field" />
 );

@@ -12,7 +12,7 @@ import {
   fieldValidators,
   UseField,
   Field,
-  RadioGroupField,
+  SelectField,
   NumericField,
 } from '../../../../../../shared_imports';
 
@@ -26,7 +26,7 @@ const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldLabel', {
-      defaultMessage: 'Target field',
+      defaultMessage: 'Target field (optional)',
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.circleForm.targetFieldHelpText',
@@ -43,6 +43,13 @@ const fieldsConfig: FieldsConfig = {
       'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceFieldLabel',
       {
         defaultMessage: 'Error distance',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.circleForm.errorDistanceHelpText',
+      {
+        defaultMessage:
+          'The difference between the resulting inscribed distance from center to side and the circle’s radius (measured in meters for geo_shape, unit-less for shape).',
       }
     ),
     validations: [
@@ -67,6 +74,10 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldLabel', {
       defaultMessage: 'Shape type',
     }),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldHelpText',
+      { defaultMessage: 'Which field mapping type is to be used.' }
+    ),
     validations: [
       {
         validator: emptyField(
@@ -82,21 +93,32 @@ const fieldsConfig: FieldsConfig = {
 export const Circle: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.circleForm.fieldNameHelpText',
+          { defaultMessage: 'The string-valued field to trim whitespace from.' }
+        )}
+      />
+
+      <UseField
+        config={fieldsConfig.error_distance}
+        component={NumericField}
+        path="fields.error_distance"
+      />
 
       <UseField
         componentProps={{
           euiFieldProps: {
             options: [
               {
-                id: 'shape',
+                value: 'shape',
                 label: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeShape',
                   { defaultMessage: 'Shape' }
                 ),
               },
               {
-                id: 'geo_shape',
+                value: 'geo_shape',
                 label: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeGeoShape',
                   { defaultMessage: 'Geo-shape' }
@@ -106,14 +128,8 @@ export const Circle: FunctionComponent = () => {
           },
         }}
         config={fieldsConfig.shape_type}
-        component={RadioGroupField}
+        component={SelectField}
         path="fields.shape_type"
-      />
-
-      <UseField
-        config={fieldsConfig.error_distance}
-        component={NumericField}
-        path="fields.error_distance"
       />
 
       <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />

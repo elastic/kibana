@@ -17,7 +17,10 @@ const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldLabel', {
-      defaultMessage: 'Target field',
+      defaultMessage: 'Target field (optional)',
+    }),
+    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldHelpText', {
+      defaultMessage: 'The field to assign the converted value to',
     }),
   },
 };
@@ -25,7 +28,12 @@ const fieldsConfig: FieldsConfig = {
 export const Bytes: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.bytesForm.targetFieldHelpText',
+          { defaultMessage: 'The field to convert.' }
+        )}
+      />
 
       <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
 

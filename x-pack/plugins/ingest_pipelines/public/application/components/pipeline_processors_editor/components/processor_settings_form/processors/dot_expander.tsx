@@ -5,7 +5,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldConfig, FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
 
@@ -26,7 +28,15 @@ const fieldsConfig: Record<string, FieldConfig> = {
 export const DotExpander: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameHelpText"
+            defaultMessage="The field to expand into an object field. Requires at least one {dot} character."
+            values={{ dot: <EuiCode>{'.'}</EuiCode> }}
+          />
+        }
+      />
 
       <UseField config={fieldsConfig.path} component={Field} path="fields.path" />
     </>

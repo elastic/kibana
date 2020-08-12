@@ -24,12 +24,19 @@ import { FieldNameField } from './common_fields/field_name_field';
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
   date_rounding: {
     type: FIELD_TYPES.SELECT,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateRoundingFieldLabel',
       {
         defaultMessage: 'Date rounding',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateRoundingFieldHelpText',
+      {
+        defaultMessage: 'How to round the date when formatting the date into the index name.',
       }
     ),
     validations: [
@@ -45,14 +52,19 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
+  /* Optional fields config */
   index_name_prefix: {
     type: FIELD_TYPES.TEXT,
     serializer: (v) => (v ? v : undefined),
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldLabel',
       {
-        defaultMessage: 'Index name prefix',
+        defaultMessage: 'Index name prefix (optional)',
       }
+    ),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNamePrefixFieldHelpText',
+      { defaultMessage: 'A prefix of the index name to be prepended before the printed date.' }
     ),
   },
   index_name_format: {
@@ -61,8 +73,15 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldLabel',
       {
-        defaultMessage: 'Index name format',
+        defaultMessage: 'Index name format (optional)',
       }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.indexNameFormatFieldHelpText"
+        defaultMessage="The format to be used when printing the parsed date into the index name. Default value is {value}."
+        values={{ value: <EuiCode inline>{'yyyy-MM-dd'}</EuiCode> }}
+      />
     ),
   },
   date_formats: {
@@ -76,13 +95,13 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsFieldLabel',
       {
-        defaultMessage: 'Date formats',
+        defaultMessage: 'Date formats (optional)',
       }
     ),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateFormatsHelpText"
-        defaultMessage="Default value is {value}."
+        defaultMessage="An array of the expected date formats for parsing dates / timestamps in the document being preprocessed. Can be a java time pattern or one of the following formats: ISO8601, UNIX, UNIX_MS, or TAI64N. Default value is {value}."
         values={{ value: <EuiCode inline>{"yyyy-MM-dd'T'HH:mm:ss.SSSXX"}</EuiCode> }}
       />
     ),
@@ -93,13 +112,13 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneFieldLabel',
       {
-        defaultMessage: 'Timezone',
+        defaultMessage: 'Timezone (optional)',
       }
     ),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText"
-        defaultMessage="Default value is {timezone}"
+        defaultMessage="The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names. Default value is {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
     ),
@@ -110,14 +129,14 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.localeFieldLabel',
       {
-        defaultMessage: 'Locale',
+        defaultMessage: 'Locale (optional)',
       }
     ),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
-        defaultMessage="Default value is {timezone}"
-        values={{ timezone: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
+        defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}"
+        values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />
     ),
   },
@@ -129,7 +148,12 @@ const fieldsConfig: FieldsConfig = {
 export const DateIndexName: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.fieldNameHelpText',
+          { defaultMessage: 'The field to get the date or timestamp from.' }
+        )}
+      />
 
       <UseField
         config={fieldsConfig.date_rounding}

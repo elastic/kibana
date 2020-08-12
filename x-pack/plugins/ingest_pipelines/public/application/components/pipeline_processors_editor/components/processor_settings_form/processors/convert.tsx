@@ -22,11 +22,15 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
   type: {
     type: FIELD_TYPES.TEXT,
     defaultValue: '',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.typeFieldLabel', {
       defaultMessage: 'Type',
+    }),
+    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.typeFieldHelpText', {
+      defaultMessage: 'The type to convert the existing value to.',
     }),
     validations: [
       {
@@ -38,24 +42,27 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
+  /* Optional fields config */
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldLabel', {
-      defaultMessage: 'Target field',
+      defaultMessage: 'Target field (optional)',
     }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
-      {
-        defaultMessage: 'By default field is updated in-place.',
-      }
-    ),
+    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldLabel', {
+      defaultMessage: 'The field to assign the converted value to.',
+    }),
   },
 };
 
 export const Convert: FunctionComponent = () => {
   return (
     <>
-      <FieldNameField />
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
+          { defaultMessage: 'The field whose value is to be converted.' }
+        )}
+      />
 
       <UseField
         componentProps={{

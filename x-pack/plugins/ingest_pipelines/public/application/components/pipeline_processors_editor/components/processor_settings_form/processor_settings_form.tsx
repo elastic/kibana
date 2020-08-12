@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
@@ -121,6 +122,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = memo(
                     return (
                       <>
                         <formDescriptor.FieldsComponent />
+                        <EuiSpacer size="m" />
                         <CommonProcessorFields />
                       </>
                     );
