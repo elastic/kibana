@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { getContext, resetContext } from 'kea';
@@ -15,6 +15,8 @@ resetContext({ createStore: true });
 const store = getContext().store as Store;
 
 import { KibanaContext, IKibanaContext } from '../index';
+import { Layout } from '../shared/layout';
+import { WorkplaceSearchNav } from './components/layout/nav';
 
 import { SETUP_GUIDE_PATH } from './routes';
 
@@ -23,14 +25,35 @@ import { Overview } from './components/overview';
 
 export const WorkplaceSearch: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  if (!enterpriseSearchUrl)
+    return (
+      <Switch>
+        <Route exact path={SETUP_GUIDE_PATH}>
+          <SetupGuide />
+        </Route>
+        <Route>
+          <Redirect to={SETUP_GUIDE_PATH} />
+          <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
+        </Route>
+      </Switch>
+    );
+
   return (
     <Provider store={store}>
-      <Route exact path="/">
-        {!enterpriseSearchUrl ? <Redirect to={SETUP_GUIDE_PATH} /> : <Overview />}
-      </Route>
-      <Route path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
+      <Switch>
+        <Route path={SETUP_GUIDE_PATH}>
+          <SetupGuide />
+        </Route>
+        <Route>
+          <Layout navigation={<WorkplaceSearchNav />}>
+            <Switch>
+              <Route exact path="/">
+                <Overview />
+              </Route>
+            </Switch>
+          </Layout>
+        </Route>
+      </Switch>
     </Provider>
   );
 };
