@@ -53,6 +53,9 @@ export async function initPlugin() {
         return;
       });
     }
+    response.statusCode = 400;
+    response.end('unknown request to webhook simulator [no content]');
+    return;
   });
 }
 

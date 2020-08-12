@@ -5,6 +5,7 @@
  */
 
 import http from 'http';
+import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -71,8 +72,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      webhookServer.listen(9002);
-      webhookSimulatorURL = 'http://localhost:9002';
+      const availablePort = await getPort({ port: 9000 });
+      webhookServer.listen(availablePort);
+      webhookSimulatorURL = `http://localhost:${availablePort}`;
 
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)

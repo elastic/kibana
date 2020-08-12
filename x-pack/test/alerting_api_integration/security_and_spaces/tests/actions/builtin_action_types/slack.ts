@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import http from 'http';
+import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -22,8 +23,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      slackServer.listen(9004);
-      slackSimulatorURL = 'http://localhost:9004';
+      const availablePort = await getPort({ port: 9000 });
+      slackServer.listen(availablePort);
+      slackSimulatorURL = `http://localhost:${availablePort}`;
     });
 
     it('should return 200 when creating a slack action successfully', async () => {

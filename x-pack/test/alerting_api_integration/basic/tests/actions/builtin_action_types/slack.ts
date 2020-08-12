@@ -5,6 +5,7 @@
  */
 
 import http from 'http';
+import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
@@ -19,8 +20,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       slackServer = await getSlackServer();
-      slackServer.listen(9005);
-      slackSimulatorURL = 'http://localhost:9005';
+      const availablePort = await getPort({ port: 9000 });
+      slackServer.listen(availablePort);
+      slackSimulatorURL = `http://localhost:${availablePort}`;
     });
 
     it('should return 403 when creating a slack action', async () => {
