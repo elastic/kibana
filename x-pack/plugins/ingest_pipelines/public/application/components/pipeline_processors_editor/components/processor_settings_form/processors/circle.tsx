@@ -70,7 +70,7 @@ const fieldsConfig: FieldsConfig = {
     ],
   },
   shape_type: {
-    type: FIELD_TYPES.RADIO_GROUP,
+    type: FIELD_TYPES.SELECT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.circleForm.shapeTypeFieldLabel', {
       defaultMessage: 'Shape type',
     }),
