@@ -52,10 +52,13 @@ export async function initPlugin() {
         );
         return;
       });
+    } else {
+      request.on('end', () => {
+        response.statusCode = 400;
+        response.end('unknown request to webhook simulator [no content]');
+        return;
+      });
     }
-    response.statusCode = 400;
-    response.end('unknown request to webhook simulator [no content]');
-    return;
   });
 }
 
