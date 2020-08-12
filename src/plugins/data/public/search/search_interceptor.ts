@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { trimEnd } from 'lodash';
 import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
 import { finalize, filter } from 'rxjs/operators';
 import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IEsSearchRequest, IEsSearchResponse } from '../../common/search';
+import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
 import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
 import { SearchUsageCollector } from './collectors';
@@ -98,14 +99,20 @@ export class SearchInterceptor {
 
   protected runSearch(
     request: IEsSearchRequest,
-    signal: AbortSignal
+    signal: AbortSignal,
+    strategy?: string
   ): Observable<IEsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = id != null ? `/internal/search/es/${id}` : '/internal/search/es';
-    const method = 'POST';
+    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(id != null ? {} : searchRequest);
-    const response = this.deps.http.fetch({ path, method, body, signal });
-    return from(response);
+    return from(
+      this.deps.http.fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+    );
   }
 
   /**
@@ -126,7 +133,7 @@ export class SearchInterceptor {
       const { combinedSignal, cleanup } = this.setupTimers(options);
       this.pendingCount$.next(++this.pendingCount);
 
-      return this.runSearch(request, combinedSignal).pipe(
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         finalize(() => {
           this.pendingCount$.next(--this.pendingCount);
           cleanup();
@@ -176,7 +183,7 @@ export class SearchInterceptor {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           application: this.application,
         }),

@@ -57,7 +57,7 @@ interface PieData {
   color?: string;
 }
 
-interface Pie {
+export interface Pie {
   font: Style;
   data: PieData[];
   options: PieOptions;

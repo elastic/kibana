@@ -46,14 +46,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertJobTypeSelection(expectedSelection: string) {
-      const actualSelection = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardJobTypeSelect',
-        'value'
-      );
-      expect(actualSelection).to.eql(
-        expectedSelection,
-        `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        const actualSelection = await testSubjects.getAttribute(
+          'mlAnalyticsCreateJobWizardJobTypeSelect',
+          'value'
+        );
+        expect(actualSelection).to.eql(
+          expectedSelection,
+          `Job type selection should be '${expectedSelection}' (got '${actualSelection}')`
+        );
+      });
     },
 
     async selectJobType(jobType: string) {
@@ -226,23 +228,33 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDestIndexValue(destIndex);
     },
 
+    async waitForDependentVariableInputLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsCreateJobWizardDependentVariableSelect', {
+        timeout: 5 * 1000,
+      });
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardDependentVariableSelect loaded', {
+        timeout: 30 * 1000,
+      });
+    },
+
     async assertDependentVariableInputExists() {
       await retry.tryForTime(8000, async () => {
         await testSubjects.existOrFail(
-          'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+          '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
     },
 
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
     },
 
     async assertDependentVariableSelection(expectedSelection: string[]) {
+      await this.waitForDependentVariableInputLoaded();
       const actualSelection = await comboBox.getComboBoxSelectedOptions(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
       );
       expect(actualSelection).to.eql(
         expectedSelection,
@@ -251,8 +263,9 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async selectDependentVariable(dependentVariable: string) {
+      await this.waitForDependentVariableInputLoaded();
       await comboBox.set(
-        'mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
+        '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);

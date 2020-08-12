@@ -41,5 +41,10 @@ export async function getInitialView(
     });
   }
 
+  if (settings.initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
+    // map bounds pulled from data sources. Just use default map location
+    return null;
+  }
+
   return goto && goto.center ? goto.center : null;
 }
