@@ -7,16 +7,16 @@
 <b>Signature:</b>
 
 ```typescript
-getByType(type: Field['type']): Field[];
+getByType(type: IndexPatternField['type']): IndexPatternField[];
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>Field['type']</code> |  |
+|  type | <code>IndexPatternField['type']</code> |  |
 
 <b>Returns:</b>
 
-`Field[]`
+`IndexPatternField[]`
 

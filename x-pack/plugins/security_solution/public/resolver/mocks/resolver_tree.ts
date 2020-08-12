@@ -175,18 +175,21 @@ export function mockTreeWithNoAncestorsAnd2Children({
   secondChildID: string;
 }): ResolverTree {
   const origin: ResolverEvent = mockEndpointEvent({
+    pid: 0,
     entityID: originID,
     name: 'c',
     parentEntityId: 'none',
     timestamp: 0,
   });
   const firstChild: ResolverEvent = mockEndpointEvent({
+    pid: 1,
     entityID: firstChildID,
     name: 'd',
     parentEntityId: originID,
     timestamp: 1,
   });
   const secondChild: ResolverEvent = mockEndpointEvent({
+    pid: 2,
     entityID: secondChildID,
     name: 'e',
     parentEntityId: originID,

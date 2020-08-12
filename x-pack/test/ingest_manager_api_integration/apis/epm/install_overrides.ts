@@ -14,12 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const log = getService('log');
 
+  const mappingsPackage = 'overrides-0.1.0';
+  const server = dockerServers.get('registry');
+
   const deletePackage = async (pkgkey: string) => {
     await supertest.delete(`/api/ingest_manager/epm/packages/${pkgkey}`).set('kbn-xsrf', 'xxxx');
   };
-
-  const mappingsPackage = 'overrides-0.1.0';
-  const server = dockerServers.get('registry');
 
   describe('installs packages that include settings and mappings overrides', async () => {
     after(async () => {
