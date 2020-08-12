@@ -16,28 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export const ES_SEARCH_STRATEGY = 'es';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { AppPluginStartDependencies } from './types';
+import { SearchExamplesApp } from './components/app';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & SearchParams;
+export const renderApp = (
+  { notifications, savedObjects, http }: CoreStart,
+  { navigation, data }: AppPluginStartDependencies,
+  { appBasePath, element }: AppMountParameters
+) => {
+  ReactDOM.render(
+    <SearchExamplesApp
+      basename={appBasePath}
+      notifications={notifications}
+      savedObjectsClient={savedObjects.client}
+      navigation={navigation}
+      data={data}
+      http={http}
+    />,
+    element
+  );
 
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
-  indexType?: string;
-}
-
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
-}
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

@@ -1,0 +1,9 @@
+{
+  "id": "searchExamples",
+  "version": "7.10.0",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "data", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

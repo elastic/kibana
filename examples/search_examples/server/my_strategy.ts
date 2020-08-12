@@ -16,28 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
-export const ES_SEARCH_STRATEGY = 'es';
+import { ISearchStrategy, PluginStart } from '../../../src/plugins/data/server';
+import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & SearchParams;
-
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
-  indexType?: string;
-}
-
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
-}
+export const mySearchStrategyProvider = (data: PluginStart): ISearchStrategy => {
+  const es = data.search.getSearchStrategy('es');
+  return {
+    search: async (context, request, options): Promise<IMyStrategyResponse> => {
+      request.debug = true;
+      const esSearchRes = await es.search(context, request, options);
+      return {
+        ...esSearchRes,
+        cool: (request as IMyStrategyRequest).get_cool ? 'YES' : 'NOPE',
+      };
+    },
+    cancel: async (context, id) => {
+      if (es.cancel) {
+        es.cancel(context, id);
+      }
+    },
+  };
+};
