@@ -15,6 +15,7 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
+  isAutoRefreshEnabled,
 } from './selectors';
 import { EndpointState } from '../types';
 import {
@@ -65,10 +66,12 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: endpointResponse,
         });
 
-        dispatch({
-          type: 'serverToggledEndpointListAutoRefresh',
-          payload: true,
-        });
+        if (!isAutoRefreshEnabled(state)) {
+          dispatch({
+            type: 'serverToggledEndpointListAutoRefresh',
+            payload: true,
+          });
+        }
 
         getNonExistingPoliciesForEndpointsList(
           coreStart.http,
@@ -145,7 +148,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
     }
 
-    if (action.type === 'serverToggledEndpointListAutoRefresh') {
+    if (action.type === 'serverToggledEndpointListAutoRefresh' && isAutoRefreshEnabled(state)) {
       pollEndpointList({
         pollAction: () => {
           dispatch({
@@ -153,7 +156,15 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           });
         },
         interval: 10000,
-        stop: () => false,
+        shouldStop: () => {
+          return !isOnEndpointPage(getState());
+        },
+        stopAction: () => {
+          dispatch({
+            type: 'serverToggledEndpointListAutoRefresh',
+            payload: false,
+          });
+        },
       });
     }
 
@@ -258,24 +269,33 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   };
 };
 
-const pollEndpointList = async ({
+const pollEndpointList = ({
   pollAction,
   interval,
-  stop,
+  shouldStop,
+  stopAction,
 }: {
   pollAction: () => void;
   interval: number;
-  stop: () => boolean;
+  shouldStop: () => boolean;
+  stopAction: () => void;
 }) => {
-  const executePoll = async (resolve: () => void, reject: () => void) => {
-    if (stop() === true) {
-      return resolve();
-    } else {
-      setTimeout(pollAction, interval);
+  function sleep() {
+    return new Promise((resolve) => setTimeout(resolve, interval));
+  }
+  const executePoll = async () => {
+    while (true) {
+      await sleep();
+      if (shouldStop()) {
+        stopAction();
+        break;
+      } else {
+        pollAction();
+      }
     }
   };
 
-  return new Promise(executePoll);
+  executePoll();
 };
 
 const getNonExistingPoliciesForEndpointsList = async (

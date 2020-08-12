@@ -30,7 +30,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
   endpointsExist: true,
-  isAutoRefreshEnabled: true,
+  isAutoRefreshEnabled: false,
 };
 
 /* eslint-disable-next-line complexity */
