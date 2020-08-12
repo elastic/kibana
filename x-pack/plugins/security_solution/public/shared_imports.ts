@@ -44,7 +44,7 @@ export {
   useReadListPrivileges,
   addExceptionListItem,
   updateExceptionListItem,
-  fetchExceptionListById,
+  fetchExceptionList,
   addExceptionList,
   ExceptionIdentifiers,
   ExceptionList,

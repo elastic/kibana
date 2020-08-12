@@ -22,15 +22,15 @@ import {
   addEndpointExceptionList,
   addExceptionList,
   addExceptionListItem,
-  deleteExceptionListById,
-  deleteExceptionListItemById,
-  fetchExceptionListById,
-  fetchExceptionListItemById,
+  deleteExceptionList,
+  deleteExceptionListItem,
+  fetchExceptionList,
+  fetchExceptionListItem,
   fetchExceptionListsItemsByListIds,
   updateExceptionList,
   updateExceptionListItem,
 } from './api';
-import { ApiCallByIdProps, ApiCallByListIdProps } from './types';
+import { ApiCallByListIdProps, ApiCallListItemProps, ApiCallListProps } from './types';
 
 const abortCtrl = new AbortController();
 
@@ -297,16 +297,17 @@ describe('Exceptions Lists API', () => {
     });
   });
 
-  describe('#fetchExceptionListById', () => {
+  describe('#fetchExceptionList', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
-    test('it invokes "fetchExceptionListById" with expected url and body values', async () => {
-      await fetchExceptionListById({
+    test('it invokes "fetchExceptionList" with expected url and body values', async () => {
+      await fetchExceptionList({
         http: mockKibanaHttpService(),
         id: '1',
+        listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -314,6 +315,45 @@ describe('Exceptions Lists API', () => {
         method: 'GET',
         query: {
           id: '1',
+          list_id: 'list-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes "fetchExceptionList" with expected url and body values when "listId" is not passed in', async () => {
+      await fetchExceptionList({
+        http: mockKibanaHttpService(),
+        id: '1',
+        listId: undefined,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        method: 'GET',
+        query: {
+          id: '1',
+          list_id: undefined,
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes "fetchExceptionList" with expected url and body values when "id" not passed in', async () => {
+      await fetchExceptionList({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        method: 'GET',
+        query: {
+          id: undefined,
+          list_id: 'list-id',
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
@@ -321,9 +361,32 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns expected exception list on success', async () => {
-      const exceptionResponse = await fetchExceptionListById({
+      const exceptionResponse = await fetchExceptionList({
         http: mockKibanaHttpService(),
         id: '1',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns expected exception list on success when "listId" not provided', async () => {
+      const exceptionResponse = await fetchExceptionList({
+        http: mockKibanaHttpService(),
+        id: '1',
+        listId: undefined,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns expected exception list on success when "id" not provided', async () => {
+      const exceptionResponse = await fetchExceptionList({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -334,10 +397,11 @@ describe('Exceptions Lists API', () => {
       const payload = ({
         http: mockKibanaHttpService(),
         id: 1,
+        listId: undefined,
         namespaceType: 'single',
         signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(fetchExceptionListById(payload)).rejects.toEqual(
+      } as unknown) as ApiCallListProps & { id: number };
+      await expect(fetchExceptionList(payload)).rejects.toEqual(
         'Invalid value "1" supplied to "id"'
       );
     });
@@ -348,9 +412,10 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(badPayload);
 
       await expect(
-        fetchExceptionListById({
+        fetchExceptionList({
           http: mockKibanaHttpService(),
           id: '1',
+          listId: undefined,
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
@@ -569,16 +634,17 @@ describe('Exceptions Lists API', () => {
     });
   });
 
-  describe('#fetchExceptionListItemById', () => {
+  describe('#fetchExceptionListItem', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
-    test('it invokes "fetchExceptionListItemById" with expected url and body values', async () => {
-      await fetchExceptionListItemById({
+    test('it invokes "fetchExceptionListItem" with expected url and body values', async () => {
+      await fetchExceptionListItem({
         http: mockKibanaHttpService(),
         id: '1',
+        itemId: 'item-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -586,6 +652,45 @@ describe('Exceptions Lists API', () => {
         method: 'GET',
         query: {
           id: '1',
+          item_id: 'item-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes "fetchExceptionListItem" with expected url and body values when "id" not supplied', async () => {
+      await fetchExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        method: 'GET',
+        query: {
+          id: undefined,
+          item_id: 'item-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it invokes "fetchExceptionListItem" with expected url and body values when "itemId" not supplied', async () => {
+      await fetchExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: '1',
+        itemId: undefined,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        method: 'GET',
+        query: {
+          id: '1',
+          item_id: undefined,
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
@@ -593,9 +698,32 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns expected format when call succeeds', async () => {
-      const exceptionResponse = await fetchExceptionListItemById({
+      const exceptionResponse = await fetchExceptionListItem({
         http: mockKibanaHttpService(),
         id: '1',
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "id" not supplied', async () => {
+      const exceptionResponse = await fetchExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "itemId" not supplied', async () => {
+      const exceptionResponse = await fetchExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: '1',
+        itemId: undefined,
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -606,10 +734,11 @@ describe('Exceptions Lists API', () => {
       const payload = ({
         http: mockKibanaHttpService(),
         id: '1',
+        itemId: undefined,
         namespaceType: 'not a namespace type',
         signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { namespaceType: string };
-      await expect(fetchExceptionListItemById(payload)).rejects.toEqual(
+      } as unknown) as ApiCallListItemProps & { namespaceType: string };
+      await expect(fetchExceptionListItem(payload)).rejects.toEqual(
         'Invalid value "not a namespace type" supplied to "namespace_type"'
       );
     });
@@ -620,9 +749,10 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(badPayload);
 
       await expect(
-        fetchExceptionListItemById({
+        fetchExceptionListItem({
           http: mockKibanaHttpService(),
           id: '1',
+          itemId: 'item-id',
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
@@ -630,16 +760,17 @@ describe('Exceptions Lists API', () => {
     });
   });
 
-  describe('#deleteExceptionListById', () => {
+  describe('#deleteExceptionList', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(getExceptionListSchemaMock());
     });
 
-    test('check parameter url, body when deleting exception item', async () => {
-      await deleteExceptionListById({
+    test('check parameter url, body when deleting exception list', async () => {
+      await deleteExceptionList({
         http: mockKibanaHttpService(),
         id: '1',
+        listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -647,6 +778,45 @@ describe('Exceptions Lists API', () => {
         method: 'DELETE',
         query: {
           id: '1',
+          list_id: 'list-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when deleting exception list and "id" not supplied', async () => {
+      await deleteExceptionList({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        method: 'DELETE',
+        query: {
+          id: undefined,
+          list_id: 'list-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when deleting exception list and "listId" not supplied', async () => {
+      await deleteExceptionList({
+        http: mockKibanaHttpService(),
+        id: '1',
+        listId: undefined,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
+        method: 'DELETE',
+        query: {
+          id: '1',
+          list_id: undefined,
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
@@ -654,9 +824,32 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns expected format when call succeeds', async () => {
-      const exceptionResponse = await deleteExceptionListById({
+      const exceptionResponse = await deleteExceptionList({
         http: mockKibanaHttpService(),
         id: '1',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "id" not supplied', async () => {
+      const exceptionResponse = await deleteExceptionList({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "listId" not supplied', async () => {
+      const exceptionResponse = await deleteExceptionList({
+        http: mockKibanaHttpService(),
+        id: '1',
+        listId: undefined,
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -667,10 +860,11 @@ describe('Exceptions Lists API', () => {
       const payload = ({
         http: mockKibanaHttpService(),
         id: 1,
+        listId: 'list-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(deleteExceptionListById(payload)).rejects.toEqual(
+      } as unknown) as ApiCallListProps & { id: number };
+      await expect(deleteExceptionList(payload)).rejects.toEqual(
         'Invalid value "1" supplied to "id"'
       );
     });
@@ -681,9 +875,10 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(badPayload);
 
       await expect(
-        deleteExceptionListById({
+        deleteExceptionList({
           http: mockKibanaHttpService(),
           id: '1',
+          listId: 'list-id',
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
@@ -691,16 +886,17 @@ describe('Exceptions Lists API', () => {
     });
   });
 
-  describe('#deleteExceptionListItemById', () => {
+  describe('#deleteExceptionListItem', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(getExceptionListItemSchemaMock());
     });
 
     test('check parameter url, body when deleting exception item', async () => {
-      await deleteExceptionListItemById({
+      await deleteExceptionListItem({
         http: mockKibanaHttpService(),
         id: '1',
+        itemId: 'item-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -708,6 +904,45 @@ describe('Exceptions Lists API', () => {
         method: 'DELETE',
         query: {
           id: '1',
+          item_id: 'item-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when deleting exception item and "id" not supplied', async () => {
+      await deleteExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        method: 'DELETE',
+        query: {
+          id: undefined,
+          item_id: 'item-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when deleting exception item and "itemId" not supplied', async () => {
+      await deleteExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: '1',
+        itemId: undefined,
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
+        method: 'DELETE',
+        query: {
+          id: '1',
+          item_id: undefined,
           namespace_type: 'single',
         },
         signal: abortCtrl.signal,
@@ -715,9 +950,32 @@ describe('Exceptions Lists API', () => {
     });
 
     test('it returns expected format when call succeeds', async () => {
-      const exceptionResponse = await deleteExceptionListItemById({
+      const exceptionResponse = await deleteExceptionListItem({
         http: mockKibanaHttpService(),
         id: '1',
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "id" not supplied', async () => {
+      const exceptionResponse = await deleteExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: undefined,
+        itemId: 'item-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
+    });
+
+    test('it returns expected format when call succeeds and "itemId" not supplied', async () => {
+      const exceptionResponse = await deleteExceptionListItem({
+        http: mockKibanaHttpService(),
+        id: '1',
+        itemId: undefined,
         namespaceType: 'single',
         signal: abortCtrl.signal,
       });
@@ -728,10 +986,11 @@ describe('Exceptions Lists API', () => {
       const payload = ({
         http: mockKibanaHttpService(),
         id: 1,
+        itemId: 'item-id',
         namespaceType: 'single',
         signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(deleteExceptionListItemById(payload)).rejects.toEqual(
+      } as unknown) as ApiCallListItemProps & { id: number };
+      await expect(deleteExceptionListItem(payload)).rejects.toEqual(
         'Invalid value "1" supplied to "id"'
       );
     });
@@ -742,9 +1001,10 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(badPayload);
 
       await expect(
-        deleteExceptionListItemById({
+        deleteExceptionListItem({
           http: mockKibanaHttpService(),
           id: '1',
+          itemId: 'item-id',
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })

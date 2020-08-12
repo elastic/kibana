@@ -35,8 +35,9 @@ import {
   AddEndpointExceptionListProps,
   AddExceptionListItemProps,
   AddExceptionListProps,
-  ApiCallByIdProps,
   ApiCallByListIdProps,
+  ApiCallListItemProps,
+  ApiCallListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -206,19 +207,21 @@ export const updateExceptionListItem = async ({
  *
  * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param listId ExceptionList list_id (not ID)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListById = async ({
+export const fetchExceptionList = async ({
   http,
   id,
+  listId,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
+}: ApiCallListProps): Promise<ExceptionListSchema> => {
   const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
+    { id, list_id: listId, namespace_type: namespaceType },
     readExceptionListSchema
   );
 
@@ -226,7 +229,7 @@ export const fetchExceptionListById = async ({
     try {
       const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
         method: 'GET',
-        query: { id, namespace_type: namespaceType },
+        query: { id, list_id: listId, namespace_type: namespaceType },
         signal,
       });
 
@@ -323,19 +326,21 @@ export const fetchExceptionListsItemsByListIds = async ({
  *
  * @param http Kibana http service
  * @param id ExceptionListItem ID (not item_id)
+ * @param itemId ExceptionListItem item_id (not ID)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListItemById = async ({
+export const fetchExceptionListItem = async ({
   http,
   id,
+  itemId,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListItemSchema> => {
+}: ApiCallListItemProps): Promise<ExceptionListItemSchema> => {
   const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
+    { id, item_id: itemId, namespace_type: namespaceType },
     readExceptionListItemSchema
   );
 
@@ -343,7 +348,7 @@ export const fetchExceptionListItemById = async ({
     try {
       const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         method: 'GET',
-        query: { id, namespace_type: namespaceType },
+        query: { id, item_id: itemId, namespace_type: namespaceType },
         signal,
       });
       const [validatedResponse, errorsResponse] = validate(response, exceptionListItemSchema);
@@ -366,19 +371,21 @@ export const fetchExceptionListItemById = async ({
  *
  * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param listId ExceptionList list_id (not ID)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const deleteExceptionListById = async ({
+export const deleteExceptionList = async ({
   http,
   id,
+  listId,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListSchema> => {
+}: ApiCallListProps): Promise<ExceptionListSchema> => {
   const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
+    { id, list_id: listId, namespace_type: namespaceType },
     deleteExceptionListSchema
   );
 
@@ -386,7 +393,7 @@ export const deleteExceptionListById = async ({
     try {
       const response = await http.fetch<ExceptionListSchema>(EXCEPTION_LIST_URL, {
         method: 'DELETE',
-        query: { id, namespace_type: namespaceType },
+        query: { id, list_id: listId, namespace_type: namespaceType },
         signal,
       });
 
@@ -410,19 +417,21 @@ export const deleteExceptionListById = async ({
  *
  * @param http Kibana http service
  * @param id ExceptionListItem ID (not item_id)
+ * @param itemId ExceptionListItem item_id (not ID)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const deleteExceptionListItemById = async ({
+export const deleteExceptionListItem = async ({
   http,
   id,
+  itemId,
   namespaceType,
   signal,
-}: ApiCallByIdProps): Promise<ExceptionListItemSchema> => {
+}: ApiCallListItemProps): Promise<ExceptionListItemSchema> => {
   const [validatedRequest, errorsRequest] = validate(
-    { id, namespace_type: namespaceType },
+    { id, item_id: itemId, namespace_type: namespaceType },
     deleteExceptionListItemSchema
   );
 
@@ -430,7 +439,7 @@ export const deleteExceptionListItemById = async ({
     try {
       const response = await http.fetch<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
         method: 'DELETE',
-        query: { id, namespace_type: namespaceType },
+        query: { id, item_id: itemId, namespace_type: namespaceType },
         signal,
       });
 

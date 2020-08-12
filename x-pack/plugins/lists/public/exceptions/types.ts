@@ -61,7 +61,7 @@ export interface UseExceptionListProps {
 }
 
 export interface ExceptionIdentifiers {
-  id: string;
+  id?: string;
   listId: string;
   namespaceType: NamespaceType;
   type: ExceptionListType;
@@ -76,15 +76,33 @@ export interface ApiCallByListIdProps {
   signal: AbortSignal;
 }
 
-export interface ApiCallByIdProps {
+export interface ApiCallListProps {
   http: HttpStart;
-  id: string;
+  id: string | undefined;
+  listId: string | undefined;
   namespaceType: NamespaceType;
   signal: AbortSignal;
 }
 
-export interface ApiCallMemoProps {
-  id: string;
+export interface ApiCallListItemProps {
+  http: HttpStart;
+  id: string | undefined;
+  itemId: string | undefined;
+  namespaceType: NamespaceType;
+  signal: AbortSignal;
+}
+
+export interface ApiCallListMemoProps {
+  id: string | undefined;
+  listId: string | undefined;
+  namespaceType: NamespaceType;
+  onError: (arg: string[]) => void;
+  onSuccess: () => void;
+}
+
+export interface ApiCallListItemMemoProps {
+  id: string | undefined;
+  itemId: string | undefined;
   namespaceType: NamespaceType;
   onError: (arg: string[]) => void;
   onSuccess: () => void;

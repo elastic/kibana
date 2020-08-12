@@ -12,7 +12,7 @@ import { getExceptionListSchemaMock } from '../../../common/schemas/response/exc
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import { HttpStart } from '../../../../../../src/core/public';
-import { ApiCallByIdProps, ApiCallByListIdProps } from '../types';
+import { ApiCallByListIdProps, ApiCallListItemProps, ApiCallListProps } from '../types';
 
 import { ExceptionsApi, useApi } from './use_api';
 
@@ -26,11 +26,11 @@ describe('useApi', () => {
     jest.clearAllMocks();
   });
 
-  test('it invokes "deleteExceptionListItemById" when "deleteExceptionItem" used', async () => {
+  test('it invokes "deleteExceptionListItem" when "deleteExceptionItem" used', async () => {
     const payload = getExceptionListItemSchemaMock();
     const onSuccessMock = jest.fn();
-    const spyOnDeleteExceptionListItemById = jest
-      .spyOn(api, 'deleteExceptionListItemById')
+    const spyOnDeleteExceptionListItem = jest
+      .spyOn(api, 'deleteExceptionListItem')
       .mockResolvedValue(payload);
 
     await act(async () => {
@@ -39,30 +39,32 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = payload;
+      const { id, item_id: itemId, namespace_type: namespaceType } = payload;
 
       await result.current.deleteExceptionItem({
         id,
+        itemId,
         namespaceType,
         onError: jest.fn(),
         onSuccess: onSuccessMock,
       });
 
-      const expected: ApiCallByIdProps = {
+      const expected: ApiCallListItemProps = {
         http: mockKibanaHttpService,
         id,
+        itemId,
         namespaceType,
         signal: new AbortController().signal,
       };
 
-      expect(spyOnDeleteExceptionListItemById).toHaveBeenCalledWith(expected);
+      expect(spyOnDeleteExceptionListItem).toHaveBeenCalledWith(expected);
       expect(onSuccessMock).toHaveBeenCalled();
     });
   });
 
-  test('invokes "onError" callback if "deleteExceptionListItemById" fails', async () => {
+  test('invokes "onError" callback if "deleteExceptionListItem" fails', async () => {
     const mockError = new Error('failed to delete item');
-    jest.spyOn(api, 'deleteExceptionListItemById').mockRejectedValue(mockError);
+    jest.spyOn(api, 'deleteExceptionListItem').mockRejectedValue(mockError);
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
@@ -70,10 +72,15 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = getExceptionListItemSchemaMock();
+      const {
+        id,
+        item_id: itemId,
+        namespace_type: namespaceType,
+      } = getExceptionListItemSchemaMock();
 
       await result.current.deleteExceptionItem({
         id,
+        itemId,
         namespaceType,
         onError: onErrorMock,
         onSuccess: jest.fn(),
@@ -83,11 +90,11 @@ describe('useApi', () => {
     });
   });
 
-  test('it invokes "deleteExceptionListById" when "deleteExceptionList" used', async () => {
+  test('it invokes "deleteExceptionList" when "deleteExceptionList" used', async () => {
     const payload = getExceptionListSchemaMock();
     const onSuccessMock = jest.fn();
-    const spyOnDeleteExceptionListById = jest
-      .spyOn(api, 'deleteExceptionListById')
+    const spyOnDeleteExceptionList = jest
+      .spyOn(api, 'deleteExceptionList')
       .mockResolvedValue(payload);
 
     await act(async () => {
@@ -96,30 +103,32 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = payload;
+      const { id, list_id: listId, namespace_type: namespaceType } = payload;
 
       await result.current.deleteExceptionList({
         id,
+        listId,
         namespaceType,
         onError: jest.fn(),
         onSuccess: onSuccessMock,
       });
 
-      const expected: ApiCallByIdProps = {
+      const expected: ApiCallListProps = {
         http: mockKibanaHttpService,
         id,
+        listId,
         namespaceType,
         signal: new AbortController().signal,
       };
 
-      expect(spyOnDeleteExceptionListById).toHaveBeenCalledWith(expected);
+      expect(spyOnDeleteExceptionList).toHaveBeenCalledWith(expected);
       expect(onSuccessMock).toHaveBeenCalled();
     });
   });
 
-  test('invokes "onError" callback if "deleteExceptionListById" fails', async () => {
+  test('invokes "onError" callback if "deleteExceptionList" fails', async () => {
     const mockError = new Error('failed to delete item');
-    jest.spyOn(api, 'deleteExceptionListById').mockRejectedValue(mockError);
+    jest.spyOn(api, 'deleteExceptionList').mockRejectedValue(mockError);
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
@@ -127,10 +136,11 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = getExceptionListSchemaMock();
+      const { id, list_id: listId, namespace_type: namespaceType } = getExceptionListSchemaMock();
 
       await result.current.deleteExceptionList({
         id,
+        listId,
         namespaceType,
         onError: onErrorMock,
         onSuccess: jest.fn(),
@@ -140,11 +150,11 @@ describe('useApi', () => {
     });
   });
 
-  test('it invokes "fetchExceptionListItemById" when "getExceptionItem" used', async () => {
+  test('it invokes "fetchExceptionListItem" when "getExceptionItem" used', async () => {
     const payload = getExceptionListItemSchemaMock();
     const onSuccessMock = jest.fn();
-    const spyOnFetchExceptionListItemById = jest
-      .spyOn(api, 'fetchExceptionListItemById')
+    const spyOnFetchExceptionListItem = jest
+      .spyOn(api, 'fetchExceptionListItem')
       .mockResolvedValue(payload);
 
     await act(async () => {
@@ -153,30 +163,32 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = payload;
+      const { id, item_id: itemId, namespace_type: namespaceType } = payload;
 
       await result.current.getExceptionItem({
         id,
+        itemId,
         namespaceType,
         onError: jest.fn(),
         onSuccess: onSuccessMock,
       });
 
-      const expected: ApiCallByIdProps = {
+      const expected: ApiCallListItemProps = {
         http: mockKibanaHttpService,
         id,
+        itemId,
         namespaceType,
         signal: new AbortController().signal,
       };
 
-      expect(spyOnFetchExceptionListItemById).toHaveBeenCalledWith(expected);
+      expect(spyOnFetchExceptionListItem).toHaveBeenCalledWith(expected);
       expect(onSuccessMock).toHaveBeenCalled();
     });
   });
 
-  test('invokes "onError" callback if "fetchExceptionListItemById" fails', async () => {
+  test('invokes "onError" callback if "fetchExceptionListItem" fails', async () => {
     const mockError = new Error('failed to delete item');
-    jest.spyOn(api, 'fetchExceptionListItemById').mockRejectedValue(mockError);
+    jest.spyOn(api, 'fetchExceptionListItem').mockRejectedValue(mockError);
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
@@ -184,10 +196,15 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = getExceptionListSchemaMock();
+      const {
+        id,
+        item_id: itemId,
+        namespace_type: namespaceType,
+      } = getExceptionListItemSchemaMock();
 
       await result.current.getExceptionItem({
         id,
+        itemId,
         namespaceType,
         onError: onErrorMock,
         onSuccess: jest.fn(),
@@ -197,11 +214,11 @@ describe('useApi', () => {
     });
   });
 
-  test('it invokes "fetchExceptionListById" when "getExceptionList" used', async () => {
+  test('it invokes "fetchExceptionList" when "getExceptionList" used', async () => {
     const payload = getExceptionListSchemaMock();
     const onSuccessMock = jest.fn();
-    const spyOnFetchExceptionListById = jest
-      .spyOn(api, 'fetchExceptionListById')
+    const spyOnFetchExceptionList = jest
+      .spyOn(api, 'fetchExceptionList')
       .mockResolvedValue(payload);
 
     await act(async () => {
@@ -210,30 +227,32 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = payload;
+      const { id, list_id: listId, namespace_type: namespaceType } = payload;
 
       await result.current.getExceptionList({
         id,
+        listId,
         namespaceType,
         onError: jest.fn(),
         onSuccess: onSuccessMock,
       });
 
-      const expected: ApiCallByIdProps = {
+      const expected: ApiCallListProps = {
         http: mockKibanaHttpService,
         id,
+        listId,
         namespaceType,
         signal: new AbortController().signal,
       };
 
-      expect(spyOnFetchExceptionListById).toHaveBeenCalledWith(expected);
+      expect(spyOnFetchExceptionList).toHaveBeenCalledWith(expected);
       expect(onSuccessMock).toHaveBeenCalled();
     });
   });
 
-  test('invokes "onError" callback if "fetchExceptionListById" fails', async () => {
+  test('invokes "onError" callback if "fetchExceptionList" fails', async () => {
     const mockError = new Error('failed to delete item');
-    jest.spyOn(api, 'fetchExceptionListById').mockRejectedValue(mockError);
+    jest.spyOn(api, 'fetchExceptionList').mockRejectedValue(mockError);
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<HttpStart, ExceptionsApi>(() =>
@@ -241,10 +260,11 @@ describe('useApi', () => {
       );
       await waitForNextUpdate();
 
-      const { id, namespace_type: namespaceType } = getExceptionListSchemaMock();
+      const { id, list_id: listId, namespace_type: namespaceType } = getExceptionListSchemaMock();
 
       await result.current.getExceptionList({
         id,
+        listId,
         namespaceType,
         onError: onErrorMock,
         onSuccess: jest.fn(),

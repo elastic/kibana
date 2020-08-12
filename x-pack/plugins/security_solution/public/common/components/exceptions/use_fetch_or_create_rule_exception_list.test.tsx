@@ -30,7 +30,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let addEndpointExceptionList: jest.SpyInstance<ReturnType<
     typeof listsApi.addEndpointExceptionList
   >>;
-  let fetchExceptionListById: jest.SpyInstance<ReturnType<typeof listsApi.fetchExceptionListById>>;
+  let fetchExceptionList: jest.SpyInstance<ReturnType<typeof listsApi.fetchExceptionList>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
@@ -83,8 +83,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       .spyOn(listsApi, 'addEndpointExceptionList')
       .mockResolvedValue(newEndpointExceptionList);
 
-    fetchExceptionListById = jest
-      .spyOn(listsApi, 'fetchExceptionListById')
+    fetchExceptionList = jest
+      .spyOn(listsApi, 'fetchExceptionList')
       .mockResolvedValue(detectionExceptionList);
 
     render = (listType = detectionListType) =>
@@ -149,7 +149,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        expect(fetchExceptionListById).not.toHaveBeenCalled();
+        expect(fetchExceptionList).not.toHaveBeenCalled();
       });
     });
     it('should create a new exception list', async () => {
@@ -188,7 +188,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
+        expect(fetchExceptionList).toHaveBeenCalledTimes(2);
       });
     });
     it('does not create a new exception list', async () => {
@@ -230,8 +230,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     describe("but the rule does not have a reference to 'detection' type exception list", () => {
       beforeEach(() => {
-        fetchExceptionListById = jest
-          .spyOn(listsApi, 'fetchExceptionListById')
+        fetchExceptionList = jest
+          .spyOn(listsApi, 'fetchExceptionList')
           .mockResolvedValue(endpointExceptionList);
       });
 
@@ -267,8 +267,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
   describe("when the rule has exception list references and 'endpoint' is passed in", () => {
     beforeEach(() => {
-      fetchExceptionListById = jest
-        .spyOn(listsApi, 'fetchExceptionListById')
+      fetchExceptionList = jest
+        .spyOn(listsApi, 'fetchExceptionList')
         .mockResolvedValue(endpointExceptionList);
 
       addExceptionList = jest
@@ -282,7 +282,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
+        expect(fetchExceptionList).toHaveBeenCalledTimes(2);
       });
     });
     it('does not create a new exception list', async () => {
@@ -315,8 +315,8 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     describe("but the rule does not have a reference to 'endpoint' type exception list", () => {
       beforeEach(() => {
-        fetchExceptionListById = jest
-          .spyOn(listsApi, 'fetchExceptionListById')
+        fetchExceptionList = jest
+          .spyOn(listsApi, 'fetchExceptionList')
           .mockResolvedValue(detectionExceptionList);
       });
 

@@ -14,7 +14,7 @@ import {
   patchRule,
 } from '../../../detections/containers/detection_engine/rules/api';
 import {
-  fetchExceptionListById,
+  fetchExceptionList,
   addExceptionList,
   addEndpointExceptionList,
 } from '../../../lists_plugin_deps';
@@ -66,9 +66,10 @@ export const useFetchOrCreateRuleExceptionList = ({
         });
         if (Object.keys(possibleEndpointExceptionList).length === 0) {
           // Endpoint exception list already exists, fetch it
-          newExceptionList = await fetchExceptionListById({
+          newExceptionList = await fetchExceptionList({
             http,
             id: ENDPOINT_LIST_ID,
+            listId: ENDPOINT_LIST_ID,
             namespaceType: 'agnostic',
             signal: abortCtrl.signal,
           });
@@ -134,9 +135,10 @@ export const useFetchOrCreateRuleExceptionList = ({
       if (exceptionListReferences && exceptionListReferences.length > 0) {
         const exceptionListPromises = exceptionListReferences.map(
           (exceptionListReference: List) => {
-            return fetchExceptionListById({
+            return fetchExceptionList({
               http,
               id: exceptionListReference.id,
+              listId: exceptionListReference.list_id,
               namespaceType: exceptionListReference.namespace_type,
               signal: abortCtrl.signal,
             });

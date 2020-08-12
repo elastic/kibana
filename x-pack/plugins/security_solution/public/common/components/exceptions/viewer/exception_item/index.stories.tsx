@@ -119,13 +119,13 @@ storiesOf('Components|ExceptionItem', module)
   })
   .add('with loadingItemIds', () => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { id, namespace_type, ...rest } = getExceptionListItemSchemaMock();
+    const { id, item_id, namespace_type, ...rest } = getExceptionListItemSchemaMock();
 
     return (
       <ExceptionItem
-        loadingItemIds={[{ id, namespaceType: namespace_type }]}
+        loadingItemIds={[{ id, itemId: item_id, namespaceType: namespace_type }]}
         commentsAccordionId={'accordion--comments'}
-        exceptionItem={{ id, namespace_type, ...rest }}
+        exceptionItem={{ id, item_id, namespace_type, ...rest }}
         onDeleteException={action('onClick')}
         onEditException={action('onClick')}
       />

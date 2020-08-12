@@ -78,6 +78,7 @@ describe('ExceptionItem', () => {
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
+      itemId: 'endpoint_list_item',
       namespaceType: 'single',
     });
   });

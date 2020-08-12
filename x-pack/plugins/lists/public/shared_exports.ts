@@ -24,7 +24,7 @@ export { useReadListPrivileges } from './lists/hooks/use_read_list_privileges';
 export {
   addExceptionListItem,
   updateExceptionListItem,
-  fetchExceptionListById,
+  fetchExceptionList,
   addExceptionList,
   addEndpointExceptionList,
 } from './exceptions/api';

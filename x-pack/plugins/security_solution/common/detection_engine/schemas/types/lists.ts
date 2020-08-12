@@ -10,14 +10,20 @@ import { exceptionListType, namespaceType } from '../../../shared_imports';
 
 import { NonEmptyString } from './non_empty_string';
 
-export const list = t.exact(
-  t.type({
-    id: NonEmptyString,
-    list_id: NonEmptyString,
-    type: exceptionListType,
-    namespace_type: namespaceType,
-  })
-);
+export const list = t.intersection([
+  t.exact(
+    t.type({
+      list_id: NonEmptyString,
+      type: exceptionListType,
+      namespace_type: namespaceType,
+    })
+  ),
+  t.exact(
+    t.partial({
+      id: NonEmptyString,
+    })
+  ),
+]);
 
 export type List = t.TypeOf<typeof list>;
 export const listArray = t.array(list);

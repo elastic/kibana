@@ -9,17 +9,21 @@ import { useMemo } from 'react';
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
 import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
-import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps } from '../types';
+import {
+  ApiCallFindListsItemsMemoProps,
+  ApiCallListItemMemoProps,
+  ApiCallListMemoProps,
+} from '../types';
 import { getIdsAndNamespaces } from '../utils';
 
 export interface ExceptionsApi {
-  deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
-  deleteExceptionList: (arg: ApiCallMemoProps) => Promise<void>;
+  deleteExceptionItem: (arg: ApiCallListItemMemoProps) => Promise<void>;
+  deleteExceptionList: (arg: ApiCallListMemoProps) => Promise<void>;
   getExceptionItem: (
-    arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }
+    arg: ApiCallListItemMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }
   ) => Promise<void>;
   getExceptionList: (
-    arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
+    arg: ApiCallListMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
 }
@@ -29,16 +33,18 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
     (): ExceptionsApi => ({
       async deleteExceptionItem({
         id,
+        itemId,
         namespaceType,
         onSuccess,
         onError,
-      }: ApiCallMemoProps): Promise<void> {
+      }: ApiCallListItemMemoProps): Promise<void> {
         const abortCtrl = new AbortController();
 
         try {
-          await Api.deleteExceptionListItemById({
+          await Api.deleteExceptionListItem({
             http,
             id,
+            itemId,
             namespaceType,
             signal: abortCtrl.signal,
           });
@@ -49,16 +55,18 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async deleteExceptionList({
         id,
+        listId,
         namespaceType,
         onSuccess,
         onError,
-      }: ApiCallMemoProps): Promise<void> {
+      }: ApiCallListMemoProps): Promise<void> {
         const abortCtrl = new AbortController();
 
         try {
-          await Api.deleteExceptionListById({
+          await Api.deleteExceptionList({
             http,
             id,
+            listId,
             namespaceType,
             signal: abortCtrl.signal,
           });
@@ -69,16 +77,20 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async getExceptionItem({
         id,
+        itemId,
         namespaceType,
         onSuccess,
         onError,
-      }: ApiCallMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }): Promise<void> {
+      }: ApiCallListItemMemoProps & { onSuccess: (arg: ExceptionListItemSchema) => void }): Promise<
+        void
+      > {
         const abortCtrl = new AbortController();
 
         try {
-          const item = await Api.fetchExceptionListItemById({
+          const item = await Api.fetchExceptionListItem({
             http,
             id,
+            itemId,
             namespaceType,
             signal: abortCtrl.signal,
           });
@@ -89,16 +101,18 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async getExceptionList({
         id,
+        listId,
         namespaceType,
         onSuccess,
         onError,
-      }: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }): Promise<void> {
+      }: ApiCallListMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }): Promise<void> {
         const abortCtrl = new AbortController();
 
         try {
-          const list = await Api.fetchExceptionListById({
+          const list = await Api.fetchExceptionList({
             http,
             id,
+            listId,
             namespaceType,
             signal: abortCtrl.signal,
           });

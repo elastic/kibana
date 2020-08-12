@@ -9,7 +9,12 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../../test_utils';
 
-import { getEndpointListMock, getListMock, getListArrayMock } from './lists.mock';
+import {
+  getEndpointListMock,
+  getListMock,
+  getListArrayMock,
+  getListMockWithId,
+} from './lists.mock';
 import {
   List,
   ListArray,
@@ -39,16 +44,13 @@ describe('Lists', () => {
       expect(message.schema).toEqual(payload);
     });
 
-    test('it should NOT validate a list without an "id"', () => {
-      const payload = getListMock();
-      delete payload.id;
+    test('it should validate a list with an "id"', () => {
+      const payload = getListMockWithId();
       const decoded = list.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "id"',
-      ]);
-      expect(message.schema).toEqual({});
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
     });
 
     test('it should NOT validate a list without "namespace_type"', () => {
@@ -91,7 +93,7 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}>"',
+        'Invalid value "1" supplied to "Array<({| list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |} & Partial<{| id: NonEmptyString |}>)>"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -122,8 +124,8 @@ describe('Lists', () => {
       const message = pipe(decoded, foldLeftRight);
 
       expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "1" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
-        'Invalid value "[1]" supplied to "(Array<{| id: NonEmptyString, list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |}> | undefined)"',
+        'Invalid value "1" supplied to "(Array<({| list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |} & Partial<{| id: NonEmptyString |}>)> | undefined)"',
+        'Invalid value "[1]" supplied to "(Array<({| list_id: NonEmptyString, type: "detection" | "endpoint", namespace_type: "agnostic" | "single" |} & Partial<{| id: NonEmptyString |}>)> | undefined)"',
       ]);
       expect(message.schema).toEqual({});
     });

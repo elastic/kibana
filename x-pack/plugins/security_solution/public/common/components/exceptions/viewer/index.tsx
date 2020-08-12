@@ -268,14 +268,17 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleDeleteException = useCallback(
-    ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
-      setLoadingItemIds([{ id: itemId, namespaceType }]);
+    ({ id, itemId, namespaceType }: ExceptionListItemIdentifiers) => {
+      setLoadingItemIds([{ id, itemId, namespaceType }]);
 
       deleteExceptionItem({
-        id: itemId,
+        id,
+        itemId,
         namespaceType,
         onSuccess: () => {
-          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
+          setLoadingItemIds(
+            loadingItemIds.filter(({ id: loadingItemId }) => loadingItemId !== itemId)
+          );
           handleFetchList();
         },
         onError: () => {
@@ -286,7 +289,9 @@ const ExceptionsViewerComponent = ({
           });
 
           dispatchToasterError();
-          setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
+          setLoadingItemIds(
+            loadingItemIds.filter(({ id: loadingItemId }) => loadingItemId !== itemId)
+          );
         },
       });
     },

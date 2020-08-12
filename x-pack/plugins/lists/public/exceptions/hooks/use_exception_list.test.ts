@@ -39,9 +39,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: [],
           http: mockKibanaHttpService,
-          lists: [
-            { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-          ],
+          lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
           matchFilters: false,
           onError: onErrorMock,
           pagination: {
@@ -78,9 +76,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: [],
           http: mockKibanaHttpService,
-          lists: [
-            { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-          ],
+          lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
           matchFilters: false,
           onError: onErrorMock,
           onSuccess: onSuccessMock,
@@ -133,7 +129,7 @@ describe('useExceptionList', () => {
             filterOptions: [],
             http: mockKibanaHttpService,
             lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
+              { listId: 'list_id', namespaceType: 'single', type: 'detection' },
               {
                 id: 'myListIdEndpoint',
                 listId: 'list_id_endpoint',
@@ -183,7 +179,7 @@ describe('useExceptionList', () => {
             filterOptions: [],
             http: mockKibanaHttpService,
             lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
+              { listId: 'list_id', namespaceType: 'single', type: 'detection' },
               {
                 id: 'myListIdEndpoint',
                 listId: 'list_id_endpoint',
@@ -234,9 +230,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: [],
           http: mockKibanaHttpService,
-          lists: [
-            { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-          ],
+          lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
           matchFilters: false,
           onError: onErrorMock,
           onSuccess: onSuccessMock,
@@ -282,7 +276,7 @@ describe('useExceptionList', () => {
             filterOptions: [{ filter: 'host.name', tags: [] }],
             http: mockKibanaHttpService,
             lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
+              { listId: 'list_id', namespaceType: 'single', type: 'detection' },
               {
                 id: 'myListIdEndpoint',
                 listId: 'list_id_endpoint',
@@ -358,9 +352,7 @@ describe('useExceptionList', () => {
           initialProps: {
             filterOptions: [],
             http: mockKibanaHttpService,
-            lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-            ],
+            lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
             matchFilters: false,
             onError: onErrorMock,
             onSuccess: onSuccessMock,
@@ -416,9 +408,7 @@ describe('useExceptionList', () => {
         useExceptionList({
           filterOptions: [],
           http: mockKibanaHttpService,
-          lists: [
-            { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-          ],
+          lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
           matchFilters: false,
           onError: onErrorMock,
           pagination: {
@@ -458,9 +448,7 @@ describe('useExceptionList', () => {
           useExceptionList({
             filterOptions: [],
             http: mockKibanaHttpService,
-            lists: [
-              { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
-            ],
+            lists: [{ listId: 'list_id', namespaceType: 'single', type: 'detection' }],
             matchFilters: false,
             onError: onErrorMock,
             pagination: {

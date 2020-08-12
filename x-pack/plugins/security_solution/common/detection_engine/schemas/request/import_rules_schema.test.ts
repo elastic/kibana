@@ -1642,7 +1642,6 @@ describe('import rules schema', () => {
         immutable: false,
         exceptions_list: [
           {
-            id: 'some_uuid',
             list_id: 'list_id_single',
             namespace_type: 'single',
             type: 'detection',

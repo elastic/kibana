@@ -32,7 +32,8 @@ export interface DescriptionListItem {
 }
 
 export interface ExceptionListItemIdentifiers {
-  id: string;
+  id: string | undefined;
+  itemId: string | undefined;
   namespaceType: NamespaceType;
 }
 

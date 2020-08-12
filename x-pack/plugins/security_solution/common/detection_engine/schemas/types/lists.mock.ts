@@ -7,7 +7,6 @@ import { List, ListArray } from './lists';
 import { ENDPOINT_LIST_ID } from '../../../shared_imports';
 
 export const getListMock = (): List => ({
-  id: 'some_uuid',
   list_id: 'list_id_single',
   namespace_type: 'single',
   type: 'detection',
@@ -18,6 +17,13 @@ export const getEndpointListMock = (): List => ({
   list_id: ENDPOINT_LIST_ID,
   namespace_type: 'agnostic',
   type: 'endpoint',
+});
+
+export const getListMockWithId = (): List => ({
+  id: 'some_uuid',
+  list_id: 'list_id_single',
+  namespace_type: 'single',
+  type: 'detection',
 });
 
 export const getListArrayMock = (): ListArray => [getListMock(), getEndpointListMock()];
