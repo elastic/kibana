@@ -125,8 +125,8 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 | SAML realm in {es} that provider should use.
 
 | `xpack.security.authc.providers.`
-`saml.<provider-name>.maxRedirectURLSize`
-| The maximum size of the URL that {kib} is allowed to store during the authentication SAML handshake. For more information, refer to <<security-saml-and-long-urls>>.
+`saml.<provider-name>.useRelayStateDeepLink`
+| Determines if provider should treat `RelayState` parameter as a deep link in {kib} during Identity Provider initiated login. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {kib} URL, e.g. for `/app/dashboards#/list` link `RelayState` parameter would look like this `RelayState=%2Fapp%2Fdashboards%23%2Flist` for .
 
 |===
 
@@ -186,8 +186,7 @@ You can configure the following settings in the `kibana.yml` file.
   | Sets the name of the cookie used for the session. The default value is `"sid"`.
 
 | `xpack.security.encryptionKey`
-  | An arbitrary string of 32 characters or more that is used to encrypt credentials
-  in a cookie. It is crucial that this key is not exposed to users of {kib}. By
+  | An arbitrary string of 32 characters or more that is used to encrypt session information. It is crucial that this key is not exposed to users of {kib}. By
   default, a value is automatically generated in memory. If you use that default
   behavior, all sessions are invalidated when {kib} restarts.
   In addition, high-availability deployments of {kib} will behave unexpectedly
@@ -238,7 +237,7 @@ string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
 |===
 
 | `xpack.security.session.cleanupInterval`
-| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default this value is 1 hour. The minimum value is 10 seconds.
+| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
 
 |===
 

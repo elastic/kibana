@@ -181,26 +181,6 @@ Basic authentication is supported _only_ if the `basic` authentication provider 
 
 To support basic authentication for the applications like `curl` or when the `Authorization: Basic base64(username:password)` HTTP header is included in the request (for example, by reverse proxy), add `Basic` scheme to the list of supported schemes for the <<http-authentication,HTTP authentication>>.
 
-[float]
-[[security-saml-and-long-urls]]
-===== SAML and long URLs
-
-At the beginning of the SAML handshake, {kib} stores the initial URL in the session cookie, so it can redirect the user back to that URL after successful SAML authentication.
-If the URL is long, the session cookie might exceed the maximum size supported by the browser--typically 4KB for all cookies per domain. When this happens, the session cookie is truncated,
-or dropped completely, and you might experience sporadic failures during SAML authentication.
-
-To remedy this issue, you can decrease the maximum
-size of the URL that {kib} is allowed to store during the SAML handshake. The default value is 2KB.
-
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.authc.providers:
-  saml.saml1:
-    order: 0
-    realm: saml1
-    maxRedirectURLSize: 1kb
---------------------------------------------------------------------------------
-
 [[oidc]]
 ==== OpenID Connect single sign-on
 
