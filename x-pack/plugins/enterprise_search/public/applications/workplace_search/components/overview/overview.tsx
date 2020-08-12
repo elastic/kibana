@@ -18,7 +18,6 @@ import { OverviewLogic, IOverviewActions, IOverviewValues } from './overview_log
 import { ErrorState } from '../error_state';
 
 import { Loading } from '../shared/loading';
-import { ProductButton } from '../shared/product_button';
 import { ViewContentHeader } from '../shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
@@ -75,11 +74,7 @@ export const Overview: React.FC = () => {
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="overview" />
 
-      <ViewContentHeader
-        title={headerTitle}
-        description={headerDescription}
-        action={<ProductButton />}
-      />
+      <ViewContentHeader title={headerTitle} description={headerDescription} />
       {!hideOnboarding && <OnboardingSteps />}
       <EuiSpacer size="xl" />
       <OrganizationStats />
