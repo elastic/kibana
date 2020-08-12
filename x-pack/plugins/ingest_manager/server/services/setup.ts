@@ -26,116 +26,95 @@ import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
+import { priorSuccessOrTryAgain } from './retry_setup';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
-// the promise which tracks the setup
-interface SetupStatus {
+export interface SetupStatus {
   isIntialized: true | undefined;
 }
-let setupIngestStatus: Promise<SetupStatus> | undefined;
-// default resolve to guard against "undefined is not a function" errors
-let onSetupResolve = (status: SetupStatus) => {};
+
+async function _setupIngestManager(
+  soClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+): Promise<SetupStatus> {
+  const [installedPackages, defaultOutput, config] = await Promise.all([
+    // packages installed by default
+    ensureInstalledDefaultPackages(soClient, callCluster),
+    outputService.ensureDefaultOutput(soClient),
+    agentConfigService.ensureDefaultAgentConfig(soClient),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
+
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
+          protocol: serverInfo.protocol,
+          hostname: serverInfo.hostname,
+          port: serverInfo.port,
+          pathname: basePath.serverBasePath,
+        });
+
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
+        });
+      }
+
+      return Promise.reject(e);
+    }),
+  ]);
+
+  // ensure default packages are added to the default conifg
+  const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
+  if (
+    !configWithPackageConfigs ||
+    (configWithPackageConfigs.package_configs.length &&
+      typeof configWithPackageConfigs.package_configs[0] === 'string')
+  ) {
+    throw new Error('Config not found');
+  }
+  for (const installedPackage of installedPackages) {
+    const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+      (packageName) => installedPackage.name === packageName
+    );
+    if (!packageShouldBeInstalled) {
+      continue;
+    }
+
+    const isInstalled = configWithPackageConfigs.package_configs.some(
+      (d: PackageConfig | string) => {
+        return typeof d !== 'string' && d.package?.name === installedPackage.name;
+      }
+    );
+
+    if (!isInstalled) {
+      await addPackageToConfig(
+        soClient,
+        callCluster,
+        installedPackage,
+        configWithPackageConfigs,
+        defaultOutput
+      );
+    }
+  }
+
+  return { isIntialized: true };
+}
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  // installation in progress
-  if (setupIngestStatus) {
-    await setupIngestStatus;
-  } else {
-    // create the initial promise
-    setupIngestStatus = new Promise((res) => {
-      onSetupResolve = res;
-    });
-  }
-  try {
-    const [installedPackages, defaultOutput, config] = await Promise.all([
-      // packages installed by default
-      ensureInstalledDefaultPackages(soClient, callCluster),
-      outputService.ensureDefaultOutput(soClient),
-      agentConfigService.ensureDefaultAgentConfig(soClient),
-      ensureDefaultIndices(callCluster),
-      settingsService.getSettings(soClient).catch((e: any) => {
-        if (e.isBoom && e.output.statusCode === 404) {
-          const http = appContextService.getHttpSetup();
-          const serverInfo = http.getServerInfo();
-          const basePath = http.basePath;
-
-          const cloud = appContextService.getCloud();
-          const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-          const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-          const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-          const defaultUrl = url.format({
-            protocol: serverInfo.protocol,
-            hostname: serverInfo.hostname,
-            port: serverInfo.port,
-            pathname: basePath.serverBasePath,
-          });
-
-          return settingsService.saveSettings(soClient, {
-            agent_auto_upgrade: true,
-            package_auto_upgrade: true,
-            kibana_url: cloudUrl || flagsUrl || defaultUrl,
-          });
-        }
-
-        return Promise.reject(e);
-      }),
-    ]);
-
-    // ensure default packages are added to the default conifg
-    const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
-    if (!configWithPackageConfigs) {
-      throw new Error('Config not found');
-    }
-    if (
-      configWithPackageConfigs.package_configs.length &&
-      typeof configWithPackageConfigs.package_configs[0] === 'string'
-    ) {
-      throw new Error('Config not found');
-    }
-    for (const installedPackage of installedPackages) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
-        (packageName) => installedPackage.name === packageName
-      );
-      if (!packageShouldBeInstalled) {
-        continue;
-      }
-
-      const isInstalled = configWithPackageConfigs.package_configs.some(
-        (d: PackageConfig | string) => {
-          return typeof d !== 'string' && d.package?.name === installedPackage.name;
-        }
-      );
-
-      if (!isInstalled) {
-        await addPackageToConfig(
-          soClient,
-          callCluster,
-          installedPackage,
-          configWithPackageConfigs,
-          defaultOutput
-        );
-      }
-    }
-
-    // if everything works, mark the tracking promise as resolved
-    onSetupResolve({ isIntialized: true });
-  } catch (error) {
-    // if something fails
-    // * reset the tracking promise to try again next time
-    setupIngestStatus = undefined;
-    // * return the rejection so it can be dealt with now
-    return Promise.reject(error);
-  }
-
-  // be sure to return the promise because it has the resolved status attached to it
-  // otherwise, we effectively return success every time even if there are errors
-  // because `return undefined` -> `Promise.resolve(undefined)` in an `async` function
-  return setupIngestStatus;
+  return priorSuccessOrTryAgain(() => _setupIngestManager(soClient, callCluster));
 }
 
 export async function setupFleet(
