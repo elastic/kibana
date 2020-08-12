@@ -13,7 +13,7 @@ interface Props {
   series: MetricsExplorerSeries;
 }
 
-const ALL_TITLE = i18n.translate('xpack.infra.metricsExploer.everything', {
+const ALL_TITLE = i18n.translate('xpack.infra.metricsExplorer.everything', {
   defaultMessage: 'Everything',
 });
 
