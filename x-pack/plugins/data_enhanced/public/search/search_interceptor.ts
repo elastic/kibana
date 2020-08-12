@@ -77,7 +77,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     const { combinedSignal, cleanup } = this.setupTimers(options);
     const aborted$ = from(toPromise(combinedSignal));
 
-    this.pendingCount$.next(++this.pendingCount);
+    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     return this.runSearch(request, combinedSignal, options?.strategy).pipe(
       expand((response) => {
@@ -112,7 +112,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         },
       }),
       finalize(() => {
-        this.pendingCount$.next(--this.pendingCount);
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
       })
     );

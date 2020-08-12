@@ -44,14 +44,9 @@ export class SearchInterceptor {
   protected abortController = new AbortController();
 
   /**
-   * The number of pending search requests.
-   */
-  protected pendingCount = 0;
-
-  /**
    * Observable that emits when the number of pending requests changes.
    */
-  protected pendingCount$ = new BehaviorSubject(this.pendingCount);
+  protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
@@ -118,7 +113,7 @@ export class SearchInterceptor {
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
+   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
    */
   public search(
     request: IEsSearchRequest,
@@ -131,11 +126,11 @@ export class SearchInterceptor {
       }
 
       const { combinedSignal, cleanup } = this.setupTimers(options);
-      this.pendingCount$.next(++this.pendingCount);
+      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
       return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         finalize(() => {
-          this.pendingCount$.next(--this.pendingCount);
+          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
           cleanup();
         })
       );
