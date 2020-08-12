@@ -15108,7 +15108,7 @@ function getMarkerLines(loc, source, opts) {
     column: 0,
     line: -1
   }, loc.start);
-  const endLoc = Object.assign({}, startLoc, {}, loc.end);
+  const endLoc = Object.assign({}, startLoc, loc.end);
   const {
     linesAbove = 2,
     linesBelow = 3
@@ -15530,7 +15530,7 @@ function isIdentifierName(name) {
     }
   }
 
-  return true;
+  return !isFirst;
 }
 
 /***/ }),
