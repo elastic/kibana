@@ -5,10 +5,11 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
-import { savedObjectsClientMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
+import { savedObjectProviderRegistryMock } from './saved_object_provider_registry.mock';
 
 jest.mock('./event_log_client');
 
@@ -17,28 +18,25 @@ describe('EventLogClientService', () => {
 
   describe('getClient', () => {
     test('creates a client with a scoped SavedObjects client', () => {
-      const savedObjectsService = savedObjectsServiceMock.createStartContract();
+      const savedObjectProviderRegistry = savedObjectProviderRegistryMock.create();
       const request = fakeRequest();
 
       const eventLogStartService = new EventLogClientService({
         esContext,
-        savedObjectsService,
+        savedObjectProviderRegistry,
       });
 
       eventLogStartService.getClient(request);
 
-      expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
-        includedHiddenTypes: ['action', 'alert'],
-      });
-
-      const [{ value: savedObjectsClient }] = savedObjectsService.getScopedClient.mock.results;
-
+      const savedObjectGetter = savedObjectProviderRegistry.getProvidersClient(request);
       expect(jest.requireMock('./event_log_client').EventLogClient).toHaveBeenCalledWith({
         esContext,
         request,
-        savedObjectsClient,
+        savedObjectGetter,
         spacesService: undefined,
       });
+
+      expect(savedObjectProviderRegistry.getProvidersClient).toHaveBeenCalledWith(request);
     });
   });
 });

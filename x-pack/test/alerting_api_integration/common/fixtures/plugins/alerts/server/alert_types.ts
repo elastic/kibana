@@ -296,7 +296,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor({ services, params, state }: AlertExecutorOptions) {
       throw new Error('this alert is intended to fail');
@@ -306,7 +306,7 @@ export function defineAlertTypes(
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor(alertExecutorOptions: AlertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
