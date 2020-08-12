@@ -237,7 +237,7 @@ export class ManifestManager {
       const { items, total } = await this.packageConfigService.list(this.savedObjectsClient, {
         page,
         perPage: 20,
-        kuery: 'ingest-package-configs.package.name:endpoint',
+        kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
       for (const packageConfig of items) {
