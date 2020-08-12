@@ -127,6 +127,10 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
     });
   }
 
+  public getTitle() {
+    return this.getOutput()?.title || this.getOutput().attributes?.title;
+  }
+
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();

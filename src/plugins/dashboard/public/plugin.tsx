@@ -139,7 +139,7 @@ export interface DashboardStart {
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
   getAttributeService: <
-    A,
+    A extends { title: string },
     V extends EmbeddableInput & { attributes: A },
     R extends SavedObjectEmbeddableInput
   >(

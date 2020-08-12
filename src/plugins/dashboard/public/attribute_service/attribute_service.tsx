@@ -45,7 +45,7 @@ import {
  * into an embeddable input shape that contains that saved object's attributes by value.
  */
 export class AttributeService<
-  SavedObjectAttributes,
+  SavedObjectAttributes extends { title: string },
   ValType extends EmbeddableInput & { attributes: SavedObjectAttributes },
   RefType extends SavedObjectEmbeddableInput
 > {
@@ -128,10 +128,9 @@ export class AttributeService<
     return new Promise<RefType>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         try {
+          input.attributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(input.attributes, true)) as RefType;
-          wrappedInput.title = props.newTitle;
           resolve(wrappedInput);
-          throw new Error();
           return { id: wrappedInput.savedObjectId };
         } catch (error) {
           reject();
@@ -144,7 +143,7 @@ export class AttributeService<
           <SavedObjectSaveModal
             onSave={onSave}
             onClose={() => reject()}
-            title={input.title || ''}
+            title={input.attributes.title}
             showCopyOnSave={false}
             objectType={this.type}
             showDescription={false}
