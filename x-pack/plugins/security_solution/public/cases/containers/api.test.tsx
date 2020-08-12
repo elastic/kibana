@@ -159,7 +159,7 @@ describe('Case Configuration API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           reporters,
-          tags,
+          tags: ['"coke"', '"pepsi"'],
           search: 'hello',
         },
         signal: abortCtrl.signal,
