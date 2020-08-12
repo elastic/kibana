@@ -24,6 +24,10 @@ import {
   DatatableVisualizationPluginSetupPlugins,
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
+import {
+  SimpleExampleVisualization,
+  SimpleExampleVisualizationPluginSetupPlugins,
+} from './simple_example_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
@@ -59,6 +63,7 @@ export class LensPlugin {
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+  private simpleExampleVisualization: SimpleExampleVisualization;
 
   constructor() {
     this.datatableVisualization = new DatatableVisualization();
@@ -66,6 +71,7 @@ export class LensPlugin {
     this.indexpatternDatasource = new IndexPatternDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
+    this.simpleExampleVisualization = new SimpleExampleVisualization();
     this.pieVisualization = new PieVisualization();
   }
 
@@ -89,6 +95,7 @@ export class LensPlugin {
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
       MetricVisualizationPluginSetupPlugins &
+      SimpleExampleVisualizationPluginSetupPlugins &
       PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
@@ -102,6 +109,7 @@ export class LensPlugin {
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
+    this.simpleExampleVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
