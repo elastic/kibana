@@ -19,7 +19,6 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
     },
     async (context, request, response) => {
       const functions = expressions.getFunctions();
-      // const functions = api.registries().serverFunctions.toJS();
       const body = JSON.stringify(functions);
       return response.ok({
         body,
