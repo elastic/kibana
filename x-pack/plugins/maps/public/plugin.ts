@@ -44,6 +44,8 @@ import {
   setVisualizations,
   setApplication,
   setShareService,
+  setEmbeddableService,
+  setNavigateToApp,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -155,6 +157,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setCoreI18n(core.i18n);
   setApplication(core.application);
   setShareService(plugins.share);
+  setEmbeddableService(plugins.embeddable);
+  setNavigateToApp(core.application.navigateToApp);
 };
 
 /**

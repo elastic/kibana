@@ -185,3 +185,15 @@ export const getApplication = () => coreApplication;
 let coreShareService;
 export const setShareService = (shareService) => (coreShareService = shareService);
 export const getShareService = () => coreShareService;
+let embeddableService;
+export const setEmbeddableService = (_embeddableService) => {
+  embeddableService = _embeddableService;
+};
+export const getEmbeddableService = () => {
+  return embeddableService;
+};
+
+export let navigateToApp;
+export function setNavigateToApp(_navigateToApp) {
+  navigateToApp = _navigateToApp;
+}
