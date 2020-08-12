@@ -104,15 +104,13 @@ export function DocViewTable({
             // to the index pattern, but that has its own complications which you can read more about in the following
             // issue: https://github.com/elastic/kibana/issues/54957
             const isNestedField =
-              !indexPattern.fields.find((patternField) => patternField.name === field) &&
-              !!indexPattern.fields.find((patternField) => {
+              !indexPattern.fields.getByName(field) &&
+              !!indexPattern.fields.getAll().find((patternField) => {
                 // We only want to match a full path segment
                 const nestedRootRegex = new RegExp(escapeRegExp(field) + '(\\.|$)');
                 return nestedRootRegex.test(patternField.subType?.nested?.path ?? '');
               });
-            const fieldType = isNestedField
-              ? 'nested'
-              : indexPattern.fields.find((patternField) => patternField.name === field)?.type;
+            const fieldType = isNestedField ? 'nested' : indexPattern.fields.getByName(field)?.type;
 
             return (
               <DocViewTableRow
