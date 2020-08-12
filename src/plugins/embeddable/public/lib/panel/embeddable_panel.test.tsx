@@ -40,7 +40,6 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-// eslint-disable-next-line
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';

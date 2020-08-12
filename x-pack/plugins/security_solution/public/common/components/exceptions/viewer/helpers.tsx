@@ -20,18 +20,16 @@ import * as i18n from '../translations';
  */
 export const formatEntry = ({
   isNested,
-  parent,
   item,
 }: {
   isNested: boolean;
-  parent?: string;
   item: BuilderEntry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
   const value = getEntryValue(item);
 
   return {
-    fieldName: isNested ? `${parent}.${item.field}` : item.field ?? '',
+    fieldName: item.field ?? '',
     operator: operator.message,
     value,
     isNested,
@@ -57,7 +55,6 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
         (acc, nestedEntry) => {
           const formattedEntry = formatEntry({
             isNested: true,
-            parent: item.field,
             item: nestedEntry,
           });
           return [...acc, { ...formattedEntry }];

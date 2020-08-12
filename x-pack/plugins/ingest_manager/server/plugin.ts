@@ -83,9 +83,9 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
-  isProductionMode: boolean;
-  kibanaVersion: string;
-  kibanaBranch: string;
+  isProductionMode: PluginInitializerContext['env']['mode']['prod'];
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
@@ -144,9 +144,9 @@ export class IngestManagerPlugin
   private cloud: CloudSetup | undefined;
   private logger: Logger | undefined;
 
-  private isProductionMode: boolean;
-  private kibanaVersion: string;
-  private kibanaBranch: string;
+  private isProductionMode: IngestManagerAppContext['isProductionMode'];
+  private kibanaVersion: IngestManagerAppContext['kibanaVersion'];
+  private kibanaBranch: IngestManagerAppContext['kibanaBranch'];
   private httpSetup: HttpServiceSetup | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
 

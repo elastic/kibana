@@ -10,6 +10,10 @@ import { schema } from '@kbn/config-schema';
 import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from '../../types';
 
 import { ExecutorParamsSchema } from './schema';
+import {
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from './types';
 
 import {
   CreateExternalServiceArgs,
@@ -23,6 +27,7 @@ import {
   TransformFieldsArgs,
   Comment,
   ExecutorSubActionPushParams,
+  PushToServiceResponse,
 } from './types';
 
 import { transformers } from './transformers';
@@ -63,14 +68,17 @@ export const createConnectorExecutor = ({
   api,
   createExternalService,
 }: CreateExternalServiceBasicArgs) => async (
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> => {
+  execOptions: ActionTypeExecutorOptions<
+    ExternalIncidentServiceConfiguration,
+    ExternalIncidentServiceSecretConfiguration,
+    ExecutorParams
+  >
+): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> => {
   const { actionId, config, params, secrets } = execOptions;
-  const { subAction, subActionParams } = params as ExecutorParams;
+  const { subAction, subActionParams } = params;
   let data = {};
 
-  const res: Pick<ActionTypeExecutorResult, 'status'> &
-    Pick<ActionTypeExecutorResult, 'actionId'> = {
+  const res: ActionTypeExecutorResult<void> = {
     status: 'ok',
     actionId,
   };

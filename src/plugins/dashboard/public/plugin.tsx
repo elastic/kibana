@@ -34,7 +34,13 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+  SavedObjectEmbeddableInput,
+  EmbeddableInput,
+} from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -85,6 +91,7 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
+import { AttributeService } from '.';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -93,6 +100,10 @@ declare module '../../share/public' {
 }
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
+
+interface DashboardFeatureFlagConfig {
+  allowByValueEmbeddables: boolean;
+}
 
 interface SetupDependencies {
   data: DataPublicPluginSetup;
@@ -125,7 +136,15 @@ export interface DashboardStart {
     embeddableType: string;
   }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
+  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
+  getAttributeService: <
+    A extends { title: string },
+    V extends EmbeddableInput & { attributes: A },
+    R extends SavedObjectEmbeddableInput
+  >(
+    type: string
+  ) => AttributeService<A, V, R>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -411,9 +430,17 @@ export class DashboardPlugin
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
+      dashboardFeatureFlagConfig: this.initializerContext.config.get<DashboardFeatureFlagConfig>(),
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
+      getAttributeService: (type: string) =>
+        new AttributeService(
+          type,
+          core.savedObjects.client,
+          core.i18n.Context,
+          core.notifications.toasts
+        ),
     };
   }
 

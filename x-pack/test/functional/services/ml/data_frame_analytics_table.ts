@@ -62,8 +62,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return rows;
     }
 
+    public async waitForRefreshButtonLoaded() {
+      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+    }
+
     public async refreshAnalyticsTable() {
-      await testSubjects.click('mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
+      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded();
       await this.waitForAnalyticsToLoad();
     }
 
@@ -79,6 +86,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
 
     async assertJobViewButtonExists() {
       await testSubjects.existOrFail('mlAnalyticsJobViewButton');
+    }
+
+    public async openEditFlyout(analyticsId: string) {
+      await this.openRowActions(analyticsId);
+      await testSubjects.click('mlAnalyticsJobEditButton');
+      await testSubjects.existOrFail('mlAnalyticsEditFlyout', { timeout: 5000 });
     }
 
     async assertAnalyticsSearchInputValue(expectedSearchValue: string) {

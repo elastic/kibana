@@ -44,6 +44,7 @@ const formSerializer: SerializerFunc<MappingsTemplates | undefined> = (formData)
 };
 
 const formDeserializer = (formData: { [key: string]: any }) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_templates } = formData;
 
   return {

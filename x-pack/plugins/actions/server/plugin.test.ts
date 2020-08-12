@@ -125,7 +125,9 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
-        async executor() {},
+        async executor(options) {
+          return { status: 'ok', actionId: options.actionId };
+        },
       };
 
       beforeEach(async () => {

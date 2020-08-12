@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable @typescript-eslint/consistent-type-definitions */
-
 import { Dispatch } from 'redux';
-// @ts-ignore
-import turf from 'turf';
-import uuid from 'uuid/v4';
+import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -46,12 +43,8 @@ import {
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
-import {
-  fitToDataBounds,
-  syncDataForAllJoinLayers,
-  syncDataForAllLayers,
-} from './data_request_actions';
-import { addLayer } from './layer_actions';
+import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
+import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
@@ -59,6 +52,7 @@ import {
   MapExtent,
   MapRefreshConfig,
 } from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../elasticsearch_geo_utils';
 
 export function setMapInitError(errorMessage: string) {
@@ -100,13 +94,21 @@ export function mapReady() {
       type: MAP_READY,
     });
 
-    getWaitingForMapReadyLayerListRaw(getState()).forEach((layerDescriptor) => {
-      dispatch<any>(addLayer(layerDescriptor));
-    });
-
+    const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
     dispatch({
       type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
     });
+
+    if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayerWithoutDataSync(layerDescriptor));
+      });
+      dispatch<any>(autoFitToBounds());
+    } else {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        dispatch<any>(addLayer(layerDescriptor));
+      });
+    }
   };
 }
 
@@ -126,13 +128,13 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
     if (extent) {
       let doesBufferContainExtent = false;
       if (buffer) {
-        const bufferGeometry = turf.bboxPolygon([
+        const bufferGeometry = turfBboxPolygon([
           buffer.minLon,
           buffer.minLat,
           buffer.maxLon,
           buffer.maxLat,
         ]);
-        const extentGeometry = turf.bboxPolygon([
+        const extentGeometry = turfBboxPolygon([
           extent.minLon,
           extent.minLat,
           extent.maxLon,
@@ -198,7 +200,6 @@ function generateQueryTimestamp() {
   return new Date().toISOString();
 }
 
-let lastSetQueryCallId: string = '';
 export function setQuery({
   query,
   timeFilters,
@@ -229,18 +230,7 @@ export function setQuery({
     });
 
     if (getMapSettings(getState()).autoFitToDataBounds) {
-      // Joins are performed on the client.
-      // As a result, bounds for join layers must also be performed on the client.
-      // Therefore join layers need to fetch data prior to auto fitting bounds.
-      const localSetQueryCallId = uuid();
-      lastSetQueryCallId = localSetQueryCallId;
-      await dispatch<any>(syncDataForAllJoinLayers());
-
-      // setQuery can be triggered before async data fetching completes
-      // Only continue execution path if setQuery has not been re-triggered.
-      if (localSetQueryCallId === lastSetQueryCallId) {
-        dispatch<any>(fitToDataBounds());
-      }
+      dispatch<any>(autoFitToBounds());
     } else {
       await dispatch<any>(syncDataForAllLayers());
     }

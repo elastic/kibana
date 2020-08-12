@@ -6,7 +6,8 @@
 
 import React from 'react';
 import uuid from 'uuid/v4';
-import turf from 'turf';
+import turfBbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
@@ -216,7 +217,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       return null;
     }
 
-    return turfBboxToBounds(turf.bbox(turf.multiPoint(corners)));
+    return turfBboxToBounds(turfBbox(multiPoint(corners)));
   }
 
   canFormatFeatureProperties() {

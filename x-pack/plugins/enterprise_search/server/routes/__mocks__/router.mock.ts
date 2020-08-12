@@ -16,12 +16,12 @@ import {
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)
  */
 
-type methodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
-type payloadType = 'params' | 'query' | 'body';
+type MethodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
+type PayloadType = 'params' | 'query' | 'body';
 
 interface IMockRouterProps {
-  method: methodType;
-  payload?: payloadType;
+  method: MethodType;
+  payload?: PayloadType;
 }
 interface IMockRouterRequest {
   body?: object;
@@ -32,8 +32,8 @@ type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
 
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
-  public method: methodType;
-  public payload?: payloadType;
+  public method: MethodType;
+  public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
   constructor({ method, payload }: IMockRouterProps) {

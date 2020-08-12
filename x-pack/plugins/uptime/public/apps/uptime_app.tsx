@@ -10,7 +10,10 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'kibana/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  RedirectAppLinks,
+} from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {
@@ -103,10 +106,12 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeStartupPluginsContextProvider {...startPlugins}>
                       <UptimeAlertsContextProvider>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                          <main>
-                            <UptimeAlertsFlyoutWrapper />
-                            <PageRouter />
-                          </main>
+                          <RedirectAppLinks application={core.application}>
+                            <main>
+                              <UptimeAlertsFlyoutWrapper />
+                              <PageRouter />
+                            </main>
+                          </RedirectAppLinks>
                         </EuiPage>
                       </UptimeAlertsContextProvider>
                     </UptimeStartupPluginsContextProvider>

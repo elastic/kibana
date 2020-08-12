@@ -5,12 +5,16 @@
  */
 
 import React, { FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
@@ -26,9 +30,9 @@ interface IndexOrSearchPageProps extends PageProps {
   mode: MODE;
 }
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
+const getBreadcrumbs = (navigateToPath: NavigateToPath) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
       defaultMessage: 'Create job',
@@ -37,31 +41,31 @@ const breadcrumbs = [
   },
 ];
 
-export const indexOrSearchRoute: MlRoute = {
+export const indexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/jobs/new_job/step/index_or_search',
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="#/jobs/new_job/step/job_type"
+      nextStepPath="/jobs/new_job/step/job_type"
       deps={deps}
       mode={MODE.NEW_JOB}
     />
   ),
-  breadcrumbs,
-};
+  breadcrumbs: getBreadcrumbs(navigateToPath),
+});
 
-export const dataVizIndexOrSearchRoute: MlRoute = {
+export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper
       {...props}
-      nextStepPath="#jobs/new_job/datavisualizer"
+      nextStepPath="/jobs/new_job/datavisualizer"
       deps={deps}
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs,
-};
+  breadcrumbs: getBreadcrumbs(navigateToPath),
+});
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
   const newJobResolvers = {

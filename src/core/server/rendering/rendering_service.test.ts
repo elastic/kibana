@@ -30,17 +30,18 @@ const INJECTED_METADATA = {
   branch: expect.any(String),
   buildNumber: expect.any(Number),
   env: {
-    binDir: expect.any(String),
-    configDir: expect.any(String),
-    homeDir: expect.any(String),
-    logDir: expect.any(String),
+    mode: {
+      name: expect.any(String),
+      dev: expect.any(Boolean),
+      prod: expect.any(Boolean),
+    },
     packageInfo: {
       branch: expect.any(String),
       buildNum: expect.any(Number),
       buildSha: expect.any(String),
+      dist: expect.any(Boolean),
       version: expect.any(String),
     },
-    pluginSearchPaths: expect.any(Array),
   },
   legacyMetadata: {
     branch: expect.any(String),

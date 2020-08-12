@@ -12,12 +12,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./fleet/index'));
 
     // EPM
-    loadTestFile(require.resolve('./epm/list'));
-    loadTestFile(require.resolve('./epm/file'));
-    //loadTestFile(require.resolve('./epm/template'));
-    loadTestFile(require.resolve('./epm/ilm'));
-    loadTestFile(require.resolve('./epm/install_overrides'));
-    loadTestFile(require.resolve('./epm/install_remove_assets'));
+    loadTestFile(require.resolve('./epm/index'));
 
     // Package configs
     loadTestFile(require.resolve('./package_config/create'));

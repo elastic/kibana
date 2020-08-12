@@ -52,8 +52,6 @@ describe('EnhancedSearchInterceptor', () => {
       trackLongQueryPopupShown: jest.fn(),
       trackLongQueryDialogDismissed: jest.fn(),
       trackLongQueryRunBeyondTimeout: jest.fn(),
-      trackError: jest.fn(),
-      trackSuccess: jest.fn(),
     };
 
     searchInterceptor = new EnhancedSearchInterceptor(
@@ -74,8 +72,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
             rawResponse: {
               took: 1,
@@ -101,8 +99,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: true,
+            isPartial: false,
+            isRunning: true,
             id: 1,
             rawResponse: {
               took: 1,
@@ -112,8 +110,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 20,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
             rawResponse: {
               took: 1,
@@ -146,8 +144,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: true,
-            is_running: false,
+            isPartial: true,
+            isRunning: false,
             id: 1,
           },
         },
@@ -170,8 +168,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 500,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
@@ -196,16 +194,16 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: true,
+            isPartial: false,
+            isRunning: true,
             id: 1,
           },
         },
         {
           time: 300,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
@@ -240,8 +238,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 2000,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
@@ -264,16 +262,16 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: true,
+            isPartial: false,
+            isRunning: true,
             id: 1,
           },
         },
         {
           time: 2000,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
@@ -304,8 +302,8 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: true,
+            isPartial: false,
+            isRunning: true,
             id: 1,
           },
         },
@@ -313,8 +311,8 @@ describe('EnhancedSearchInterceptor', () => {
           time: 10,
           value: {
             error: 'oh no',
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
           isError: true,
@@ -348,16 +346,16 @@ describe('EnhancedSearchInterceptor', () => {
         {
           time: 10,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
         {
           time: 20,
           value: {
-            is_partial: false,
-            is_running: false,
+            isPartial: false,
+            isRunning: false,
             id: 1,
           },
         },
@@ -382,8 +380,8 @@ describe('EnhancedSearchInterceptor', () => {
       {
         time: 250,
         value: {
-          is_partial: true,
-          is_running: true,
+          isPartial: true,
+          isRunning: true,
           id: 1,
           rawResponse: {
             took: 1,
@@ -393,8 +391,8 @@ describe('EnhancedSearchInterceptor', () => {
       {
         time: 2000,
         value: {
-          is_partial: false,
-          is_running: false,
+          isPartial: false,
+          isRunning: false,
           id: 1,
           rawResponse: {
             took: 1,
@@ -458,7 +456,6 @@ describe('EnhancedSearchInterceptor', () => {
       expect(next.mock.calls[1][0]).toStrictEqual(timedResponses[1].value);
       expect(error).not.toHaveBeenCalled();
       expect(mockUsageCollector.trackLongQueryRunBeyondTimeout).toBeCalledTimes(1);
-      expect(mockUsageCollector.trackSuccess).toBeCalledTimes(1);
     });
   });
 });

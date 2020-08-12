@@ -24,9 +24,11 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
       throwErrorsForUnmappedFields,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     sourceField,
     metaField,
@@ -51,9 +53,11 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
 const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
+    /* eslint-disable @typescript-eslint/naming-convention */
     numeric_detection,
     date_detection,
     dynamic_date_formats,
+    /* eslint-enable @typescript-eslint/naming-convention */
     _source: { enabled, includes, excludes } = {} as {
       enabled?: boolean;
       includes?: string[];

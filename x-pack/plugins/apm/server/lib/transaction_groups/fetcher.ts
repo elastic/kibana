@@ -7,13 +7,12 @@ import { take, sortBy } from 'lodash';
 import { Unionize } from 'utility-types';
 import moment from 'moment';
 import { joinByKey } from '../../../common/utils/join_by_key';
-import { ESSearchRequest } from '../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -45,7 +44,9 @@ export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
 
-export type TransactionGroupRequestBase = ESSearchRequest & {
+export type TransactionGroupRequestBase = ReturnType<
+  typeof getTransactionGroupsProjection
+> & {
   body: {
     aggs: {
       transaction_groups: Unionize<

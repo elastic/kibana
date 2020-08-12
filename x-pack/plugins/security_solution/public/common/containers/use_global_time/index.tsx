@@ -11,7 +11,7 @@ import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { SetQuery, DeleteQuery } from './types';
 
-export const useGlobalTime = () => {
+export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const dispatch = useDispatch();
   const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -32,9 +32,11 @@ export const useGlobalTime = () => {
       setIsInitializing(false);
     }
     return () => {
-      dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+      if (clearAllQuery) {
+        dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
+      }
     };
-  }, [dispatch, isInitializing]);
+  }, [clearAllQuery, dispatch, isInitializing]);
 
   const memoizedReturn = useMemo(
     () => ({
