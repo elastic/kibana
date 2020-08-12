@@ -20,7 +20,7 @@
 import { get, omit } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IndexPatternSpec } from '../../index_patterns';
 
 export interface DeprecatedMatchPhraseFilter extends Filter {
   query: {
@@ -39,13 +39,13 @@ function isDeprecatedMatchPhraseFilter(filter: any): filter is DeprecatedMatchPh
   return Boolean(fieldName && get(filter, ['query', 'match', fieldName, 'type']) === 'phrase');
 }
 
-export function migrateFilter(filter: Filter, indexPattern?: IIndexPattern) {
+export function migrateFilter(filter: Filter, indexPattern?: IndexPatternSpec) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
     const fieldName = Object.keys(filter.query.match)[0];
     const params: Record<string, any> = get(filter, ['query', 'match', fieldName]);
     let query = params.query;
     if (indexPattern) {
-      const field = indexPattern.fields.find((f) => f.name === fieldName);
+      const field = indexPattern.fields?.find((f) => f.name === fieldName);
 
       if (field) {
         query = getConvertedValueForField(field, params.query);

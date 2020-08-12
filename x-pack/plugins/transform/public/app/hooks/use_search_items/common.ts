@@ -120,7 +120,7 @@ export function createSearchItems(
     const filters = fs.length ? fs : [];
 
     const esQueryConfigs = esQuery.getEsQueryConfig(config);
-    combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    combinedQuery = esQuery.buildEsQuery(indexPattern.toSpec(), [query], filters, esQueryConfigs);
   }
 
   if (!isIndexPattern(indexPattern)) {

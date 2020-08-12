@@ -87,7 +87,7 @@ export const SearchPanel: FC<Props> = ({
       if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
         filterQuery = esKuery.toElasticsearchQuery(
           esKuery.fromKueryExpression(query.query),
-          indexPattern
+          indexPattern.toSpec()
         );
       } else if (query.language === SEARCH_QUERY_LANGUAGE.LUCENE) {
         filterQuery = esQuery.luceneStringToDsl(query.query);

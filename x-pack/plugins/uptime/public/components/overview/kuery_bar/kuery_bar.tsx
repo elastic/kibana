@@ -30,7 +30,7 @@ interface State {
 
 function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
   const ast = esKuery.fromKueryExpression(kuery);
-  return esKuery.toElasticsearchQuery(ast, indexPattern);
+  return esKuery.toElasticsearchQuery(ast, indexPattern.toSpec());
 }
 
 interface Props {

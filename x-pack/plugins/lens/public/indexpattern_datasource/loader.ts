@@ -339,6 +339,7 @@ function fromSavedObject(
       ? (JSON.parse(attributes.typeMeta) as IndexPatternTypeMeta)
       : undefined,
     fieldFormatMap: attributes.fieldFormatMap ? JSON.parse(attributes.fieldFormatMap) : undefined,
+    timeFieldName: attributes.timeFieldName ? attributes.timeFieldName : undefined,
   };
 
   const { typeMeta } = indexPattern;

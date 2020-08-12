@@ -19,20 +19,20 @@
 
 import * as literal from '../../node_types/literal';
 import * as wildcard from '../../node_types/wildcard';
-import { KueryNode, IndexPattern } from '../../../..';
+import { KueryNode, IndexPatternSpec } from '../../../..';
 import { LiteralTypeBuildNode } from '../../node_types/types';
 
-export function getFields(node: KueryNode, indexPattern?: IndexPattern) {
+export function getFields(node: KueryNode, indexPattern?: IndexPatternSpec) {
   if (!indexPattern) return [];
   if (node.type === 'literal') {
     const fieldName = literal.toElasticsearchQuery(node as LiteralTypeBuildNode);
-    const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+    const field = indexPattern.fields?.find((fld) => fld.name === fieldName);
     if (!field) {
       return [];
     }
     return [field];
   } else if (node.type === 'wildcard') {
-    const fields = indexPattern.fields.filter((fld) => wildcard.test(node, fld.name));
+    const fields = indexPattern.fields?.filter((fld) => wildcard.test(node, fld.name));
     return fields;
   }
 }

@@ -20,7 +20,7 @@ import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import {
   QuerySuggestion,
   esKuery,
-  IIndexPattern,
+  IndexPatternSpec,
 } from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
@@ -32,7 +32,7 @@ interface State {
   isLoadingSuggestions: boolean;
 }
 
-function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
+function convertKueryToEsQuery(kuery: string, indexPattern: IndexPatternSpec) {
   const ast = esKuery.fromKueryExpression(kuery);
   return esKuery.toElasticsearchQuery(ast, indexPattern);
 }
@@ -122,7 +122,7 @@ export function KueryBar() {
     }
 
     try {
-      const res = convertKueryToEsQuery(inputValue, indexPattern);
+      const res = convertKueryToEsQuery(inputValue, indexPattern.toSpec());
       if (!res) {
         return;
       }

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FieldSpec, IndexPattern, FieldList } from '..';
+import { FieldSpec, IndexPattern, FieldList } from '../..';
 
 export const fields: FieldSpec[] = [
   {

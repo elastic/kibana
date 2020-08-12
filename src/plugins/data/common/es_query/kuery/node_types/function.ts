@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { functions } from '../functions';
-import { IndexPattern, KueryNode } from '../../..';
+import { IndexPatternSpec, KueryNode } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
 
 export function buildNode(functionName: FunctionName, ...args: any[]) {
@@ -56,7 +56,7 @@ export function buildNodeWithArgumentNodes(
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPattern,
+  indexPattern?: IndexPatternSpec,
   config?: Record<string, any>,
   context?: Record<string, any>
 ) {

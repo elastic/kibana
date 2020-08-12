@@ -75,7 +75,10 @@ export function useMetricsExplorerData(
               indexPattern: source.metricAlias,
               filterQuery:
                 (options.filterQuery &&
-                  convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
+                  convertKueryToElasticSearchQuery(
+                    options.filterQuery,
+                    derivedIndexPattern.toSpec()
+                  )) ||
                 void 0,
               timerange: {
                 ...timerange,

@@ -50,7 +50,7 @@ export function getKqlQueryValues({
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
     influencersFilterQuery = esKuery.toElasticsearchQuery(
       esKuery.fromKueryExpression(inputString),
-      indexPattern
+      indexPattern.toSpec()
     );
   } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
     influencersFilterQuery = esQuery.luceneStringToDsl(inputString);

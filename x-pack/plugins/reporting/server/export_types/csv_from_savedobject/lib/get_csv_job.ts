@@ -6,7 +6,7 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
-import { esQuery, Filter, IndexPattern, Query } from '../../../../../../../src/plugins/data/server';
+import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/server';
 import {
   DocValueFields,
   IndexPatternField,
@@ -120,7 +120,7 @@ export const getGenerateCsvParams = async (
       _source: { includes },
       docvalue_fields: docValueFields,
       query: esQuery.buildEsQuery(
-        (indexPatternSavedObject as unknown) as IndexPattern,
+        indexPatternSavedObject,
         (searchSourceQuery as unknown) as Query,
         (combinedFilter as unknown) as Filter,
         esQueryConfig

@@ -18,9 +18,9 @@
  */
 
 import { getFilterField, cleanFilter, Filter } from '../filters';
-import { IIndexPattern } from '../../index_patterns';
+import { IndexPatternSpec } from '../../index_patterns';
 
-export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern) => {
+export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternSpec) => {
   if (!indexPattern) return filter;
 
   const fieldName = getFilterField(filter);
@@ -28,7 +28,7 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern)
     return filter;
   }
 
-  const field = indexPattern.fields.find(
+  const field = indexPattern.fields?.find(
     (indexPatternField) => indexPatternField.name === fieldName
   );
   if (!field || !field.subType || !field.subType.nested || !field.subType.nested.path) {

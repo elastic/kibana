@@ -9,7 +9,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, keyBy, pick, isEmpty } from 'lodash/fp';
 import { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { DEFAULT_INDEX_KEY, NO_ALERT_INDEX } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -56,7 +56,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]) =>
+  (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -114,7 +114,7 @@ interface UseWithSourceState {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
   errorMessage: string | null;
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
 }
@@ -142,7 +142,6 @@ export const useWithSource = (
     browserFields: EMPTY_BROWSER_FIELDS,
     docValueFields: EMPTY_DOCVALUE_FIELD,
     errorMessage: null,
-    // @ts-expect-error
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),
     loading: true,
@@ -192,7 +191,6 @@ export const useWithSource = (
               defaultIndex.join(),
               get('data.source.status.indexFields', result)
             ),
-            // @ts-expect-error
             indexPattern: getIndexFields(
               defaultIndex.join(),
               get('data.source.status.indexFields', result)

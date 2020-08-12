@@ -20,7 +20,7 @@ import { isUndefined } from 'lodash';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { IndexPattern } from '../../index_patterns';
+import { IndexPatternSpec } from '../../index_patterns';
 import { handleNestedFilter } from './handle_nested_filter';
 
 /**
@@ -55,7 +55,7 @@ const translateToQuery = (filter: Filter) => {
 
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
-  indexPattern: IndexPattern | undefined,
+  indexPattern: IndexPatternSpec | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
 ) => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));

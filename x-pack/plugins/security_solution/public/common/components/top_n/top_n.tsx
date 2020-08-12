@@ -12,7 +12,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
-import { Filter, IndexPattern, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
 import { InputsModelId } from '../../store/inputs/constants';
 import { EventType } from '../../../timelines/store/timeline/model';
 
@@ -48,7 +48,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: EventType;
   field: string;
   filters: Filter[];
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   indexToAdd?: string[] | null;
   options: TopNOption[];
   query: Query;

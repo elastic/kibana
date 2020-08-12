@@ -434,6 +434,7 @@ export {
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
+  IndexPatternSpec,
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';

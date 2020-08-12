@@ -256,7 +256,7 @@ export const Page: FC = () => {
     let qry;
     if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
       const ast = esKuery.fromKueryExpression(qryString);
-      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern.toSpec());
     } else {
       qry = esQuery.luceneStringToDsl(qryString);
       esQuery.decorateQuery(qry, kibanaConfig.get(UI_SETTINGS.QUERY_STRING_OPTIONS));

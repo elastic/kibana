@@ -20,7 +20,7 @@
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
-import { IIndexPattern } from '../../../index_patterns/types';
+import { IndexPatternSpec } from '../../../index_patterns/types';
 
 // @ts-ignore
 import { parse as parseKuery } from './_generated_/kuery';
@@ -87,7 +87,7 @@ export const doesKueryExpressionHaveLuceneSyntaxError = (
  */
 export const toElasticsearchQuery = (
   node: KueryNode,
-  indexPattern?: IIndexPattern,
+  indexPattern?: IndexPatternSpec,
   config?: Record<string, any>,
   context?: Record<string, any>
 ): JsonObject => {

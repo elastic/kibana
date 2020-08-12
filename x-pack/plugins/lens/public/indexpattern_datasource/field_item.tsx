@@ -38,7 +38,6 @@ import {
   ES_FIELD_TYPES,
   Filter,
   esQuery,
-  IndexPattern as DataIndexPattern,
 } from '../../../../../src/plugins/data/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
@@ -134,7 +133,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
-            indexPattern as DataIndexPattern,
+            indexPattern,
             query,
             filters,
             esQuery.getEsQueryConfig(core.uiSettings)

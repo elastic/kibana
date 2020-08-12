@@ -17,18 +17,17 @@
  * under the License.
  */
 
-import { IFieldType } from '../../index_patterns';
+import { IFieldType, IndexPatternSpec } from '../../index_patterns';
 import { Filter } from '../filters';
-import { IndexPattern } from '../../index_patterns';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
  * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
  * change.
  */
-export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPattern | null) {
+export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternSpec | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
-  return indexPattern.fields.getAll().some((field: IFieldType) => field.name === filter.meta.key);
+  return indexPattern.fields?.some((field: IFieldType) => field.name === filter.meta.key);
 }

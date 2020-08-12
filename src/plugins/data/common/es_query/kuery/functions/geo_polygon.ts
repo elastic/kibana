@@ -19,7 +19,7 @@
 
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
+import { IndexPatternSpec, KueryNode, IFieldType, LatLon } from '../../..';
 import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
@@ -36,7 +36,7 @@ export function buildNodeParams(fieldName: string, points: LatLon[]) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPattern,
+  indexPattern?: IndexPatternSpec,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

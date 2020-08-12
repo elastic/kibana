@@ -53,7 +53,7 @@ export const useSearchBar = (
           setSearchQuery(
             esKuery.toElasticsearchQuery(
               esKuery.fromKueryExpression(query.query as string),
-              indexPattern
+              indexPattern.toSpec()
             )
           );
           return;

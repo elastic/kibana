@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import * as literal from '../node_types/literal';
-import { IndexPattern, KueryNode, IFieldType } from '../../..';
+import { IndexPatternSpec, KueryNode, IFieldType } from '../../..';
 
 export function buildNodeParams(fieldName: string) {
   return {
@@ -29,7 +29,7 @@ export function buildNodeParams(fieldName: string) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPattern,
+  indexPattern?: IndexPatternSpec,
   config: Record<string, any> = {},
   context: Record<string, any> = {}
 ) {

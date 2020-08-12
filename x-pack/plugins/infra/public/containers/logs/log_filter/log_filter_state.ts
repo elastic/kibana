@@ -68,7 +68,7 @@ export const useLogFilterState: (props: {
           kind: 'kuery',
           expression,
         },
-        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern.toSpec()),
       });
   }, [indexPattern]);
 

@@ -13,7 +13,12 @@ import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translat
 import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { Filter, esQuery, IndexPattern, Query } from '../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../src/plugins/data/public';
 import { HostsTableType, HostsType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -37,7 +42,7 @@ const DEFAULT_STACK_BY = 'event.module';
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters?: Filter[];
   hideHeaderChildren?: boolean;
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   query?: Query;
 }
 

@@ -61,7 +61,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         case SEARCH_QUERY_LANGUAGE.KUERY:
           const convertedKQuery = esKuery.toElasticsearchQuery(
             esKuery.fromKueryExpression(query.query as string),
-            indexPattern
+            indexPattern.toSpec()
           );
           setSearchQuery(
             includeQueryString

@@ -39,7 +39,7 @@ import {
   esQuery,
   Filter,
   FilterManager,
-  IndexPattern,
+  IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
@@ -104,7 +104,7 @@ export interface Props {
   filters: Filter[];
   graphEventId?: string;
   id: string;
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   indexToAdd: string[];
   isLive: boolean;
   isLoadingSource: boolean;

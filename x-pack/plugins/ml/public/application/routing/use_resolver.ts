@@ -57,7 +57,7 @@ export const useResolver = (
               ? await getIndexPatternAndSavedSearch(savedSearchId)
               : { savedSearch: null, indexPattern: await getIndexPatternById(indexPatternId!) };
 
-          const { combinedQuery } = createSearchItems(config, indexPattern!, savedSearch);
+          const { combinedQuery } = createSearchItems(config, indexPattern!.toSpec(), savedSearch);
 
           setContext({
             combinedQuery,

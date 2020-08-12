@@ -39,7 +39,7 @@ export const useUpdateKueryString = (
     if ((filterQueryString || urlFilters) && indexPattern) {
       const ast = esKuery.fromKueryExpression(combinedFilterString);
 
-      const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+      const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern.toSpec());
 
       esFilters = JSON.stringify(elasticsearchQuery);
     }
