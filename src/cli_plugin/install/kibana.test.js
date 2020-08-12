@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import sinon from 'sinon';
-import Logger from '../lib/logger';
 import { join } from 'path';
-import del from 'del';
 import fs from 'fs';
+
+import sinon from 'sinon';
+import del from 'del';
+
 import { existingInstall, assertVersion } from './kibana';
+import { Logger } from '../lib/logger';
 
 jest.spyOn(fs, 'statSync');
 
@@ -42,7 +44,7 @@ describe('kibana cli', function () {
         tempArchiveFile: tempArchiveFilePath,
         plugin: 'test-plugin',
         version: '1.0.0',
-        plugins: [{ name: 'foo' }],
+        plugins: [{ id: 'foo' }],
         pluginDir,
       };
 
@@ -69,7 +71,10 @@ describe('kibana cli', function () {
             plugin: 'test-plugin',
             version: '5.0.0-SNAPSHOT',
             plugins: [
-              { name: 'foo', path: join(testWorkingPath, 'foo'), kibanaVersion: '5.0.0-SNAPSHOT' },
+              {
+                id: 'foo',
+                kibanaVersion: '5.0.0-SNAPSHOT',
+              },
             ],
           };
 
@@ -77,15 +82,17 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if plugin is missing a kibana version.', function () {
-          expect(() => assertVersion(settings)).toThrow(
-            /plugin package\.json is missing both a version property/i
+          expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+            `"Plugin kibana.json is missing both a version property (required) and a kibanaVersion property (optional)."`
           );
         });
 
         it('should throw an error if plugin kibanaVersion does not match kibana version', function () {
           settings.plugins[0].kibanaVersion = '1.2.3.4';
 
-          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
+          expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+            `"Plugin foo [1.2.3] is incompatible with Kibana [1.0.0]"`
+          );
         });
 
         it('should not throw an error if plugin kibanaVersion matches kibana version', function () {
@@ -103,7 +110,9 @@ describe('kibana cli', function () {
         it('should ignore version info after the dash in checks on invalid version', function () {
           settings.plugins[0].kibanaVersion = '2.0.0-foo-bar-version-1.2.3';
 
-          expect(() => assertVersion(settings)).toThrow(/incompatible with Kibana/i);
+          expect(() => assertVersion(settings)).toThrowErrorMatchingInlineSnapshot(
+            `"Plugin foo [2.0.0] is incompatible with Kibana [1.0.0]"`
+          );
         });
       });
 

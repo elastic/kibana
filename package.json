@@ -272,7 +272,6 @@
     "url-loader": "2.2.0",
     "uuid": "3.3.2",
     "val-loader": "^1.1.1",
-    "validate-npm-package-name": "2.2.2",
     "vega": "^5.13.0",
     "vega-lite": "^4.13.1",
     "vega-schema-url-parser": "^1.1.0",
