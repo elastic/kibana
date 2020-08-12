@@ -39,7 +39,7 @@ const getValue = (valueObject: string | number | MetricValueType) => {
   if (PercentilesKeyedTypeRT.is(valueObject)) {
     if (valueObject.values.length > 1) {
       throw new Error(
-        'Metrics API only supports a single percentile, multiple percentiles should be sent seperatly'
+        'Metrics API only supports a single percentile, multiple percentiles should be sent separately'
       );
     }
     const percentileValue = first(valueObject.values);
