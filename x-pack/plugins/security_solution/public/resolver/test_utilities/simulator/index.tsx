@@ -159,6 +159,18 @@ export class Simulator {
   }
 
   /**
+   * Return an Enzyme ReactWrapper for any child elements of a specific processNodeElement
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   * @param selector The selector for the child element of the process node
+   */
+  public processNodeChildElements(entityID: string, selector: string): ReactWrapper {
+    return this.domNodes(
+      `${processNodeElementSelector({ entityID })} [data-test-subj="${selector}"]`
+    );
+  }
+
+  /**
    * Return the node element with the given `entityID`.
    */
   public selectedProcessNode(entityID: string): ReactWrapper {
@@ -191,24 +203,6 @@ export class Simulator {
   }
 
   /**
-   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
-   *
-   * @param entityID The entity ID of the proocess node to select in
-   */
-  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
-    return this.domNodes(
-      `${processNodeElementSelector({ entityID })} [data-test-subj="resolver:submenu:button"]`
-    );
-  }
-
-  /**
-   * The items in the submenu that is opened by expanding a node in the map.
-   */
-  public processNodeSubmenuItems(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
-  }
-
-  /**
    * Return the selected node query string values.
    */
   public queryStringValues(): { selectedNode: string[] } {
@@ -219,115 +213,17 @@ export class Simulator {
   }
 
   /**
-   * The element that shows when Resolver is waiting for the graph data.
+   * Given a 'data-test-subj' value, it will resolve the react wrapper or undefined if not found
    */
-  public graphLoadingElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:loading"]');
+  public async resolve(selector: string): Promise<ReactWrapper | undefined> {
+    return this.resolveWrapper(() => this.domNodes(`[data-test-subj="${selector}"]`));
   }
 
   /**
-   * The element that shows if Resolver couldn't draw the graph.
+   * Given a 'data-test-subj' selector, it will return the domNode
    */
-  public graphErrorElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:error"]');
-  }
-
-  /**
-   * The element where nodes get drawn.
-   */
-  public graphElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph"]');
-  }
-
-  /**
-   * The titles of the links that select a node in the node list view.
-   */
-  public nodeListNodeLinkText(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:node-link:title"]');
-  }
-
-  /**
-   * The icons in the links that select a node in the node list view.
-   */
-  public nodeListNodeLinkIcons(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:node-link:icon"]');
-  }
-
-  /**
-   * Link rendered in the breadcrumbs of the node detail view. Takes the user to the node list.
-   */
-  public nodeDetailBreadcrumbNodeListLink(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:breadcrumbs:node-list-link"]');
-  }
-
-  /**
-   * The title element for the node detail view.
-   */
-  public nodeDetailViewTitle(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:title"]');
-  }
-
-  /**
-   * Wrapper for the west panning button
-   */
-  public westPanElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:west-button"]');
-  }
-
-  /**
-   * Wrapper for the south panning button
-   */
-  public southPanElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:south-button"]');
-  }
-
-  /**
-   * Wrapper for the east panning button
-   */
-  public eastPanElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:east-button"]');
-  }
-
-  /**
-   * Wrapper for the north panning button
-   */
-  public northPanElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:north-button"]');
-  }
-
-  /**
-   * Wrapper for the center panning button
-   */
-  public centerPanElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:center-button"]');
-  }
-
-  /**
-   * Wrapper for the zoom in button
-   */
-  public zoomInElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-in"]');
-  }
-
-  /**
-   * Wrapper for the zoom out button
-   */
-  public zoomOutElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-out"]');
-  }
-
-  /**
-   * Wrapper for the zoom slider
-   */
-  public zoomSliderElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph-controls:zoom-slider"]');
-  }
-
-  /**
-   * The details of the selected node are shown in a description list. This returns the description elements of the description list.
-   */
-  public nodeDetailViewTitleIcon(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:title-icon"]');
+  public testSubject(selector: string): ReactWrapper {
+    return this.domNodes(`[data-test-subj="${selector}"]`);
   }
 
   /**

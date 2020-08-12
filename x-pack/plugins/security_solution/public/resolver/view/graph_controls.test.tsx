@@ -51,11 +51,11 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   it('should display all cardinal panning buttons and the center button', async () => {
     await expect(
       simulator.map(() => ({
-        westPanButton: simulator.westPanElement().length,
-        southPanButton: simulator.southPanElement().length,
-        eastPanButton: simulator.eastPanElement().length,
-        northPanButton: simulator.northPanElement().length,
-        centerButton: simulator.centerPanElement().length,
+        westPanButton: simulator.testSubject('resolver:graph-controls:west-button').length,
+        southPanButton: simulator.testSubject('resolver:graph-controls:south-button').length,
+        eastPanButton: simulator.testSubject('resolver:graph-controls:east-button').length,
+        northPanButton: simulator.testSubject('resolver:graph-controls:north-button').length,
+        centerButton: simulator.testSubject('resolver:graph-controls:center-button').length,
       }))
     ).toYieldEqualTo({
       westPanButton: 1,
@@ -69,9 +69,9 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   it('should display the zoom buttons and slider', async () => {
     await expect(
       simulator.map(() => ({
-        zoomInButton: simulator.zoomInElement().length,
-        zoomOutButton: simulator.zoomOutElement().length,
-        zoomSlider: simulator.zoomSliderElement().length,
+        zoomInButton: simulator.testSubject('resolver:graph-controls:zoom-in').length,
+        zoomOutButton: simulator.testSubject('resolver:graph-controls:zoom-out').length,
+        zoomSlider: simulator.testSubject('resolver:graph-controls:zoom-slider').length,
       }))
     ).toYieldEqualTo({
       zoomInButton: 1,
@@ -86,7 +86,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the west panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.westPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:west-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -100,7 +100,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the south panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.southPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:south-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -114,7 +114,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the east panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.eastPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:east-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -128,7 +128,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the north panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.northPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:north-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -142,9 +142,9 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the center panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.northPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:north-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
-      (await simulator.resolveWrapper(() => simulator.centerPanElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:center-button'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -159,7 +159,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the zoom in button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.zoomInElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:zoom-in'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -173,7 +173,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the zoom out button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.zoomOutElement()))!.simulate('click');
+      (await simulator.resolve('resolver:graph-controls:zoom-out'))!.simulate('click');
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -189,7 +189,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     beforeEach(async () => {
       await expect(originNodeStyle()).toYieldObjectEqualTo(originalSizeStyle);
 
-      (await simulator.resolveWrapper(() => simulator.zoomSliderElement()))!.simulate('change', {
+      (await simulator.resolve('resolver:graph-controls:zoom-slider'))!.simulate('change', {
         target: { value: 0.8 },
       });
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
@@ -205,7 +205,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the slider is moved downwards', () => {
     beforeEach(async () => {
-      (await simulator.resolveWrapper(() => simulator.zoomSliderElement()))!.simulate('change', {
+      (await simulator.resolve('resolver:graph-controls:zoom-slider'))!.simulate('change', {
         target: { value: 0.2 },
       });
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
