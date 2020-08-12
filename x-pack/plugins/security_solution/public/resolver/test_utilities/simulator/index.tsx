@@ -370,7 +370,7 @@ export class Simulator {
   public async resolveWrapper(
     wrapperFactory: () => ReactWrapper,
     predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
-  ): Promise<ReactWrapper | void> {
+  ): Promise<ReactWrapper | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {
       if (predicate(wrapper)) {
         return wrapper;
