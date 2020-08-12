@@ -95,22 +95,20 @@ export const enhancedEsSearchStrategyProvider = (
   return { search, cancel };
 };
 
-export function updateExpirationProvider(caller: ElasticsearchClient) {
-  return async (searchId: string) => {
-    const path = encodeURI(`/_async_search/${searchId}`);
+export function updateExpiration(caller: ElasticsearchClient, searchId: string) {
+  const path = encodeURI(`/_async_search/${searchId}`);
 
-    // Wait up to 1ms for the response to return
-    const querystring = toSnakeCase({
-      waitForCompletionTimeout: '1ms',
-      keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
-    });
+  // Wait up to 1ms for the response to return
+  const querystring = toSnakeCase({
+    waitForCompletionTimeout: '1ms',
+    keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
+  });
 
-    return caller.transport.request({
-      method: 'GET',
-      path,
-      querystring,
-    });
-  };
+  return caller.transport.request({
+    method: 'GET',
+    path,
+    querystring,
+  });
 }
 
 async function asyncSearch(
@@ -133,7 +131,7 @@ async function asyncSearch(
     : undefined;
 
   if (restore && !storedAsyncId) {
-    throw new Error('Stored not found');
+    throw new Error('Search ID not found');
   }
 
   const asyncId = request.id || storedAsyncId;
@@ -146,7 +144,6 @@ async function asyncSearch(
   // Only report partial results every 64 shards; this should be reduced when we actually display partial results
   const batchedReduceSize = request.id ? undefined : 64;
 
-  // Wait up to 1ms for the response to return for new requests
   // DONT MERGE WITH requestCache: false,
   const query = toSnakeCase({
     ...(asyncId
@@ -157,7 +154,7 @@ async function asyncSearch(
           // TODO: REMOVE
           requestCache: false,
           waitForCompletionTimeout: '100ms',
-          ...(stored ? {} : { keepAlive: '1m' }), // Extend the TTL for this search request by one minute
+          ...(stored ? {} : { keepAlive: '1m' }), // If not stored yet, extend the TTL for this search request by one minute
           ...(batchedReduceSize && { batchedReduceSize }),
           ...queryParams,
         }),
@@ -170,8 +167,8 @@ async function asyncSearch(
     options
   )) as AsyncSearchResponse<any>;
 
-  // Track if ID wasn't recovered from a BG search
-  if (request.sessionId && !stored) {
+  // Track from the server if object was already stored
+  if (request.sessionId && stored) {
     sessionService.trackId(options!.rawRequest!, request.sessionId, request.params?.body, id);
   }
 

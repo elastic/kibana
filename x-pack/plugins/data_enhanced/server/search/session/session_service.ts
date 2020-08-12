@@ -10,8 +10,6 @@ import {
   KibanaRequest,
   Logger,
   SavedObject,
-  SavedObjectsClient,
-  SavedObjectsBulkResponse,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
@@ -22,110 +20,17 @@ import {
   SavedSessionStatus,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from './saved_object';
-import { SessionInfo, SessionKeys } from './types';
+import { SessionKeys } from './types';
 import { SecurityPluginSetup } from '../../../../security/server';
-import { updateExpirationProvider } from '..';
-
-export const INMEM_TRACKING_TIMEOUT_SEC = 60;
-export const INMEM_TRACKING_INTERVAL = 2000;
-export const MAX_UPDATE_RETRIES = 3;
+import { updateExpiration } from '..';
 
 export class SessionService {
-  private readonly idMapping!: Map<string, SessionInfo>;
-  private readonly monitorInterval!: NodeJS.Timeout;
-  private readonly internalSavedObjectsClient!: SavedObjectsClientContract;
-
   constructor(
     private readonly savedObjects: SavedObjectsServiceStart,
     private readonly elasticsearch: ElasticsearchServiceStart,
     private readonly security: SecurityPluginSetup,
     private readonly logger: Logger
-  ) {
-    this.idMapping = new Map<string, SessionInfo>();
-    const internalRepo = savedObjects.createInternalRepository();
-    this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
-    this.monitorInterval = setInterval(this.monitorMappedIds.bind(this), INMEM_TRACKING_INTERVAL);
-  }
-
-  public destroy() {
-    clearInterval(this.monitorInterval);
-  }
-
-  private async monitorMappedId(
-    activeMappingObjects: Array<SavedObject<SessionSavedObjectAttributes>> | undefined,
-    sessionId: string
-  ) {
-    const curTime = moment();
-    const sessionInfo = this.idMapping.get(sessionId);
-    if (!sessionInfo) {
-      this.logger.debug(`${sessionId} Can't find session info.`);
-      return;
-    } else if (sessionInfo.retryCount >= MAX_UPDATE_RETRIES) {
-      this.logger.debug(`${sessionId} Too many retries`);
-      this.idMapping.delete(sessionId);
-      return;
-    }
-    const sessionSavedObject = activeMappingObjects
-      ? await activeMappingObjects.find(
-          (r: SavedObject<SessionSavedObjectAttributes>) =>
-            r.attributes && r.attributes.sessionId && r.attributes.sessionId === sessionId
-        )
-      : undefined;
-
-    if (sessionSavedObject) {
-      this.logger.debug(`${sessionId} Found object. Updating.`);
-      const success = await this.updateBackgroundSession(sessionSavedObject, sessionInfo);
-      // How to track retries here?
-      if (success) this.idMapping.delete(sessionId);
-    } else if (
-      moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() >=
-      INMEM_TRACKING_TIMEOUT_SEC
-    ) {
-      this.logger.debug(`${sessionId} Session timeout`);
-      this.idMapping.delete(sessionId);
-    }
-  }
-
-  private async monitorMappedIds() {
-    if (!this.idMapping.size) return;
-    this.logger.debug(`Fetching ${this.idMapping.size} sessions`);
-    let activeMappingObjects: SavedObjectsBulkResponse<SessionSavedObjectAttributes> | undefined;
-    try {
-      activeMappingObjects = await this.getAllMappedSavedObjects();
-    } catch (e) {
-      this.logger.debug(`Error fetching sessions. ${e}`);
-    }
-
-    const promises = [];
-    for (const sessionId of this.idMapping.keys()) {
-      promises.push(this.monitorMappedId(activeMappingObjects?.saved_objects, sessionId));
-    }
-
-    await Promise.all(promises);
-  }
-
-  /**
-   * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
-   * currently being tracked by the service.
-   *
-   * As most searches do not get send to background, expect the amount of returned objects
-   * to be significantly smaller than the amount of IDs sent.
-   *
-   * @remarks
-   * Uses `internalSavedObjectsClient` as this is called asynchronously, not within the
-   * context of a user's session.
-   */
-  private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.idMapping.keys()).map((sessionId) => {
-      return {
-        id: sessionId,
-        type: BACKGROUND_SESSION_TYPE,
-      };
-    });
-    return await this.internalSavedObjectsClient.bulkGet<SessionSavedObjectAttributes>(
-      activeMappingIds
-    );
-  }
+  ) {}
 
   private async getSavedObject(savedObjectClient: SavedObjectsClientContract, sessionId: string) {
     return await savedObjectClient.get<SessionSavedObjectAttributes>(
@@ -136,7 +41,8 @@ export class SessionService {
 
   private async createSavedObject(
     savedObjectClient: SavedObjectsClientContract,
-    sessionId: string
+    sessionId: string,
+    searchIdMapping: Record<string, string> = {}
   ) {
     return await savedObjectClient.create<SessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
@@ -144,7 +50,7 @@ export class SessionService {
         sessionId,
         creation: moment().toISOString(),
         expiration: moment().add(BACKGROUND_SESSION_STORE_DAYS, 'd').toISOString(),
-        idMapping: {},
+        idMapping: searchIdMapping,
         status: SavedSessionStatus.Running,
       },
       {
@@ -155,18 +61,21 @@ export class SessionService {
   }
 
   private async updateBackgroundSession(
+    request: KibanaRequest,
     sessionSavedObject: SavedObject<SessionSavedObjectAttributes>,
-    sessionInfo: SessionInfo
+    searchIdMapping: Record<string, string>
   ) {
+    const savedObjectsClient = this.savedObjects.getScopedClient(request);
+
     try {
       this.logger.debug(`${sessionSavedObject.id} Updating mapping`);
       const requests = {
         ...sessionSavedObject.attributes.idMapping,
-        ...Object.fromEntries(sessionInfo.requests),
+        ...searchIdMapping,
       };
 
       // Handle the case where multiple servers attempt to update the background session.
-      const res = await this.internalSavedObjectsClient.update(
+      const res = await savedObjectsClient.update(
         BACKGROUND_SESSION_TYPE,
         sessionSavedObject.id,
         {
@@ -176,26 +85,15 @@ export class SessionService {
           version: sessionSavedObject.version,
         }
       );
+
       if (res && !res.error) {
-        sessionInfo.requests.forEach(async (searchId) => {
-          try {
-            await sessionInfo.updateHandler(searchId);
-            this.logger.debug(`Extended expiration for ${searchId}.`);
-          } catch (eUpdate) {
-            this.logger.debug(
-              `${sessionSavedObject.id} Error during expiration update. C'est la vie.`
-            );
-          }
-        });
-        return true;
+        return this.updateExpiration(request, Object.values(searchIdMapping));
       } else {
-        this.logger.debug(`${sessionSavedObject.id} Error during update. Retry in next interval.`);
-        sessionInfo.retryCount++;
+        this.logger.debug(`${sessionSavedObject.id} Error during update.`);
         return false;
       }
     } catch (e) {
-      this.logger.debug(`${sessionSavedObject.id} Failed to update. Retry in next interval.`);
-      sessionInfo.retryCount++;
+      this.logger.debug(`${sessionSavedObject.id} Failed to update.`);
       return false;
     }
   }
@@ -204,33 +102,18 @@ export class SessionService {
     return createHash(`md5`).update(JSON.stringify(requestParams)).digest('hex');
   }
 
-  private getSessionInfo(request: KibanaRequest, sessionId: string) {
-    const user = this.security.authc.getCurrentUser(request);
+  private updateExpiration(request: KibanaRequest, searchIds: string[]) {
     const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
-    let sessionIdsInfo = this.idMapping.get(sessionId);
-    if (!sessionIdsInfo) {
-      sessionIdsInfo = {
-        userId: user!.email,
-        requests: new Map(),
-        insertTime: moment(),
-        retryCount: 0,
-        updateHandler: updateExpirationProvider(esClient),
-      };
-    }
+    return searchIds.every((searchId: string) => {
+      const updateSuccess = updateExpiration(esClient, searchId);
+      if (!updateSuccess) {
+        this.logger.error(`Failed to extend expiration of ${searchId}`);
+      } else {
+        this.logger.debug(`Extended expiration of ${searchId}`);
+      }
 
-    return sessionIdsInfo;
-  }
-
-  private trackReqHash(
-    request: KibanaRequest,
-    sessionId: string,
-    reqHashKey: string,
-    searchId: string
-  ) {
-    this.logger.debug(`trackReqHash ${sessionId} ${reqHashKey} ${searchId}`);
-    const sessionIdsInfo = this.getSessionInfo(request, sessionId);
-    sessionIdsInfo.requests.set(reqHashKey, searchId);
-    this.idMapping.set(sessionId, sessionIdsInfo);
+      return updateSuccess;
+    });
   }
 
   /**
@@ -242,40 +125,43 @@ export class SessionService {
   public async store(
     request: KibanaRequest,
     sessionId: string,
-    searchIds?: Record<string, string>
+    searchIdMapping?: Record<string, string>
   ) {
     this.logger.debug(`${sessionId} Storing`);
     const savedObjectsClient = this.savedObjects.getScopedClient(request);
-
-    if (searchIds) {
-      Object.keys(searchIds).forEach((reqHashKey) => {
-        this.trackReqHash(request, sessionId, reqHashKey, searchIds[reqHashKey]);
-      });
+    const so = await this.createSavedObject(savedObjectsClient, sessionId, searchIdMapping);
+    if (so && searchIdMapping) {
+      this.updateExpiration(request, Object.values(searchIdMapping));
     }
 
-    return await this.createSavedObject(savedObjectsClient, sessionId);
+    return so;
   }
 
   /**
    * Track a single search ID, corresponding with the provided session ID and request parameters.
-   * IDs are tracked in memory until a user chooses to store the BackgroundSession.
    * @param request
    * @param sessionId
    * @param requestParams
    * @param searchId
    */
 
-  public trackId(
+  public async trackId(
     request: KibanaRequest,
     sessionId: string,
     requestParams: SessionKeys,
     searchId: string
   ) {
     this.logger.debug(`${sessionId} trackId ${searchId}`);
-    const user = this.security.authc.getCurrentUser(request);
-    if (!user) return;
-    const reqHashKey = this.getKey(requestParams);
-    this.trackReqHash(request, sessionId, reqHashKey, searchId);
+    const backgroundSession = await this.get(request, sessionId);
+
+    if (backgroundSession) {
+      const reqHashKey = this.getKey(requestParams);
+      return await this.updateBackgroundSession(request, backgroundSession, {
+        [reqHashKey]: searchId,
+      });
+    }
+
+    return false;
   }
 
   /**
