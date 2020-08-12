@@ -64,7 +64,7 @@ export const MonitorPage: React.FC = () => {
             {nameOrId}
             <EnableMonitorAlert
               monitorId={monitorId}
-              monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.url.full}
+              monitorName={selectedMonitor?.monitor?.name || selectedMonitor?.url?.full}
             />
           </>
         }

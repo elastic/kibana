@@ -33,7 +33,6 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
           dateStart,
           dateEnd,
           alertsClient,
-          libs,
         })),
       },
     });

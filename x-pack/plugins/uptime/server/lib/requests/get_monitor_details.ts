@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMElasticsearchQueryFn } from '../adapters';
+import { ESAPICaller, UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
 
@@ -16,8 +16,7 @@ export interface GetMonitorDetailsParams {
 }
 
 const getMonitorAlerts = async (
-  libs: any,
-  callES: any,
+  callES: ESAPICaller,
   dynamicSettings: any,
   alertsClient: any,
   monitorId: string
@@ -65,16 +64,13 @@ const getMonitorAlerts = async (
       },
     };
 
-    const parsedFilters = JSON.parse(
-      await formatFilterString(
-        libs,
-        dynamicSettings,
-        callES,
-        currAlert.params.filters,
-        currAlert.params.search
-      )
+    const parsedFilters = await formatFilterString(
+      dynamicSettings,
+      callES,
+      currAlert.params.filters,
+      currAlert.params.search
     );
-    esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters.bool);
+    esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, parsedFilters?.bool);
 
     const result = await callES('search', esParams);
 
@@ -88,7 +84,7 @@ const getMonitorAlerts = async (
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ libs, callES, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd, alertsClient }) => {
   const queryFilters: any = [
     {
       range: {
@@ -138,7 +134,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
 
   const monitorError: MonitorError | undefined = data?.error;
   const errorTimestamp: string | undefined = data?.['@timestamp'];
-  const monAlerts = await getMonitorAlerts(libs, callES, dynamicSettings, alertsClient, monitorId);
+  const monAlerts = await getMonitorAlerts(callES, dynamicSettings, alertsClient, monitorId);
   return {
     monitorId,
     error: monitorError,

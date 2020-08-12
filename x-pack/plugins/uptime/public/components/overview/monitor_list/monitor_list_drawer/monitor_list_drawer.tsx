@@ -8,19 +8,18 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   EuiLink,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
 import { EnabledAlerts } from './enabled_alerts';
+import { Alert } from '../../../../../../triggers_actions_ui/public';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -67,7 +66,7 @@ export function MonitorListDrawerComponent({
         </EuiFlexItem>
       </EuiFlexGroup>
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
-      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts} />
+      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts as Alert[]} />
       {loading && <EuiLoadingSpinner />}
       {monitorDetails && monitorDetails.error && (
         <MostRecentError

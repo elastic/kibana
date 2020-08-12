@@ -28,7 +28,7 @@ import { BellIcon } from './bell_icon';
 
 interface Props {
   monitorId: string;
-  monitorName: string;
+  monitorName?: string;
 }
 
 export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
