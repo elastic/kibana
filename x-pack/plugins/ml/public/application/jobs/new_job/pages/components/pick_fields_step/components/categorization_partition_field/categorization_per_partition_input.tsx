@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -23,23 +23,30 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   selectedField,
 }) => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const options: EuiComboBoxOptionOption[] = [
-    ...createFieldOptions(fields, jobCreator.additionalFields),
-  ];
+  const options: EuiComboBoxOptionOption[] = useMemo(
+    () => [...createFieldOptions(fields, jobCreator.additionalFields)],
+    [fields, jobCreator]
+  );
 
-  const selection: EuiComboBoxOptionOption[] = [];
-  if (selectedField !== null) {
-    selection.push({ label: selectedField });
-  }
-
-  function onChange(selectedOptions: EuiComboBoxOptionOption[]) {
-    const option = selectedOptions[0];
-    if (typeof option !== 'undefined') {
-      changeHandler(option.label);
-    } else {
-      changeHandler(null);
+  const selection: EuiComboBoxOptionOption[] = useMemo(() => {
+    const selectedOptions: EuiComboBoxOptionOption[] = [];
+    if (selectedField !== null) {
+      selectedOptions.push({ label: selectedField });
     }
-  }
+    return selectedOptions;
+  }, [selectedField]);
+
+  const onChange = useCallback(
+    (selectedOptions: EuiComboBoxOptionOption[]) => {
+      const option = selectedOptions[0];
+      if (typeof option !== 'undefined') {
+        changeHandler(option.label);
+      } else {
+        changeHandler(null);
+      }
+    },
+    [changeHandler]
+  );
 
   return (
     <EuiComboBox

@@ -8,6 +8,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
+import Boom from 'boom';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
@@ -18,7 +19,7 @@ import {
   AnomalyRecordDoc,
 } from '../../../common/types/anomalies';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
-
+import { GetStoppedPartitionResult } from '../../../common/types/results';
 import { MlJobsResponse } from '../job_service/jobs';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
@@ -35,10 +36,6 @@ export interface CriteriaField {
 interface Influencer {
   fieldName: string;
   fieldValue: any;
-}
-
-export interface GetStoppedPartitionResult {
-  jobs: string[] | Record<string, string[]>;
 }
 
 export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
@@ -491,7 +488,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     });
 
     if (!jobConfigResponse || jobConfigResponse.jobs.length < 1) {
-      throw Error(`Unable to find anomaly detector jobs ${jobIds.join(', ')}`);
+      throw Boom.notFound(`Unable to find anomaly detector jobs ${jobIds.join(', ')}`);
     }
 
     const jobIdsWithStopOnWarnSet = jobConfigResponse.jobs

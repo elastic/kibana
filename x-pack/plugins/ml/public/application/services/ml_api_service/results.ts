@@ -5,13 +5,11 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import { GetStoppedPartitionResult } from '../../../../common/types/results';
 import { HttpService } from '../http_service';
-
 import { basePath } from './index';
-
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
-
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
@@ -125,7 +123,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       jobIds,
       fieldToBucket,
     });
-    return httpService.http<any>({
+    return httpService.http<GetStoppedPartitionResult>({
       path: `${basePath()}/results/stopped_partitions`,
       method: 'POST',
       body,

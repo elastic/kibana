@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -112,13 +112,17 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
-  const getJobsWithStoppedPartitions = async (selectedJobIds: string[]) => {
+  const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
       const fetchedStoppedPartitions = await ml.results.getStoppedPartitions(
         selectedJobIds,
         JOB_ID
       );
-      if (fetchedStoppedPartitions.jobs.length > 0) {
+      if (
+        fetchedStoppedPartitions &&
+        Array.isArray(fetchedStoppedPartitions.jobs) &&
+        fetchedStoppedPartitions.jobs.length > 0
+      ) {
         setStoppedPartitions(fetchedStoppedPartitions.jobs);
       } else {
         setStoppedPartitions(undefined);
@@ -127,7 +131,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // eslint-disable-next-line no-console
       console.error(error);
     }
-  };
+  });
   useEffect(() => {
     if (jobIds.length > 0) {
       explorerService.updateJobSelection(jobIds);

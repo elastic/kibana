@@ -27,13 +27,7 @@ export const ExtraSettings: FC = () => {
           <SummaryCountField />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showCategorizationPerPartitionField && (
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem>
-            <CategorizationPerPartitionField />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      {showCategorizationPerPartitionField && <CategorizationPerPartitionField />}
     </Fragment>
   );
 };

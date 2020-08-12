@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -13,18 +13,18 @@ import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../com
 export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
-  const [stopOnWarn, setStopOnWarn] = useState(jobCreator.partitionStopOnWarn);
+  const [stopOnWarn, setStopOnWarn] = useState(jobCreator.perPartitionStopOnWarn);
 
-  const toggleStopOnWarn = () => setStopOnWarn(!stopOnWarn);
+  const toggleStopOnWarn = useCallback(() => setStopOnWarn(!stopOnWarn), [stopOnWarn]);
 
   useEffect(() => {
-    jobCreator.partitionStopOnWarn = stopOnWarn;
+    jobCreator.perPartitionStopOnWarn = stopOnWarn;
     jobCreatorUpdate();
   }, [stopOnWarn]);
 
   return (
     <EuiSwitch
-      name="switch"
+      name="categorizationPerPartitionStopOnWarnSwitch"
       disabled={false}
       checked={stopOnWarn}
       onChange={toggleStopOnWarn}

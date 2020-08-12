@@ -76,16 +76,16 @@ function getPartitionFieldsValues(legacyClient: ILegacyScopedClusterClient, payl
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
 
-function getCategorizerStats(context: RequestHandlerContext, params: any, query: any) {
+function getCategorizerStats(legacyClient: ILegacyScopedClusterClient, params: any, query: any) {
   const { jobId } = params;
   const { partitionByValue } = query;
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+  const rs = resultsServiceProvider(legacyClient);
   return rs.getCategorizerStats(jobId, partitionByValue);
 }
 
-function getStoppedPartitions(context: RequestHandlerContext, payload: any) {
+function getStoppedPartitions(legacyClient: ILegacyScopedClusterClient, payload: any) {
   const { jobIds, fieldToBucket } = payload;
-  const rs = resultsServiceProvider(context.ml!.mlClient);
+  const rs = resultsServiceProvider(legacyClient);
   return rs.getStoppedPartitions(jobIds, fieldToBucket);
 }
 
@@ -290,7 +290,8 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
    * @api {get} /api/ml/results/:jobId/categorizer_stats
    * @apiName GetCategorizerStats
    * @apiDescription Returns the categorizer snapshots for the specified job ID
-   * @apiSchema (params) getCatergorizerStatsSchema
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (query) getCategorizerStatsSchema
    */
   router.get(
     {
@@ -303,9 +304,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getCategorizerStats(context, request.params, request.query);
+        const resp = await getCategorizerStats(legacyClient, request.params, request.query);
         return response.ok({
           body: resp,
         });
@@ -318,10 +319,10 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
   /**
    * @apiGroup ResultsService
    *
-   * @api {get} /api/ml/results/:jobId/categorizer_stats
+   * @api {get} /api/ml/results/stopped_partitions
    * @apiName GetStoppedPartitions
    * @apiDescription Returns list of partitions we stopped categorizing whens status changed to warn
-   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) getStoppedPartitionsSchema
    */
   router.post(
     {
@@ -333,9 +334,9 @@ export function resultsServiceRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const resp = await getStoppedPartitions(context, request.body);
+        const resp = await getStoppedPartitions(legacyClient, request.body);
         return response.ok({
           body: resp,
         });

@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 
 interface Props {
-  isOptional: boolean;
+  children: React.ReactNode;
 }
 export const Description: FC<Props> = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorization.enable.title', {

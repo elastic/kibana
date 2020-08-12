@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -17,13 +17,15 @@ export const CategorizationPerPartitionSwitch: FC = () => {
     jobCreator.perPartitionCategorization
   );
 
-  const toggleEnablePerPartitionCategorization = () =>
-    setEnablePerPartitionCategorization(!enablePerPartitionCategorization);
+  const toggleEnablePerPartitionCategorization = useCallback(
+    () => setEnablePerPartitionCategorization(!enablePerPartitionCategorization),
+    [enablePerPartitionCategorization]
+  );
 
   useEffect(() => {
     // also turn off stop on warn if per_partition_categorization is turned off
     if (enablePerPartitionCategorization === false) {
-      jobCreator.partitionStopOnWarn = false;
+      jobCreator.perPartitionStopOnWarn = false;
     }
 
     jobCreator.perPartitionCategorization = enablePerPartitionCategorization;
@@ -32,7 +34,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
 
   return (
     <EuiSwitch
-      name="switch"
+      name="categorizationPerPartitionSwitch"
       disabled={false}
       checked={enablePerPartitionCategorization}
       onChange={toggleEnablePerPartitionCategorization}

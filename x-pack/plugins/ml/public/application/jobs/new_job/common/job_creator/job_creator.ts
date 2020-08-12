@@ -57,7 +57,7 @@ export class JobCreator {
   private _stopAllRefreshPolls: {
     stop: boolean;
   } = { stop: false };
-  private _partitionField: string | null;
+  private _partitionField: string | null = null;
 
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
@@ -82,7 +82,6 @@ export class JobCreator {
     }
 
     this._datafeed_config.query = query;
-    this._partitionField = null;
   }
 
   public get type(): JOB_TYPE {
@@ -645,11 +644,11 @@ export class JobCreator {
     this._job_config.analysis_config.per_partition_categorization!.enabled = enabled;
   }
 
-  public get partitionStopOnWarn() {
+  public get perPartitionStopOnWarn() {
     return this._job_config.analysis_config.per_partition_categorization?.stop_on_warn === true;
   }
 
-  public set partitionStopOnWarn(enabled: boolean) {
+  public set perPartitionStopOnWarn(enabled: boolean) {
     this._initPerPartitionCategorization();
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }

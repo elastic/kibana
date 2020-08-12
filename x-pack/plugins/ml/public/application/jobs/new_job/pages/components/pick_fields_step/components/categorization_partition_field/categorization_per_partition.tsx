@@ -42,7 +42,8 @@ export const CategorizationPerPartitionField: FC = () => {
     // if per-partition categorization is enabled
     if (
       jobCreator.perPartitionCategorization &&
-      jobCreator.categorizationPerPartitionField === null
+      jobCreator.categorizationPerPartitionField === null &&
+      filteredCategories.length > 0
     ) {
       jobCreator.categorizationPerPartitionField = filteredCategories[0].id;
     }
