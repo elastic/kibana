@@ -21,9 +21,13 @@ interface GenericObject {
   [key: string]: any;
 }
 
-export async function loadNodes() {
-  return await sendGet(`nodes/list`);
-}
+export const useLoadNodes = () => {
+  return useRequest({
+    path: `nodes/list`,
+    method: 'get',
+    initialData: [],
+  });
+};
 
 export async function loadNodeDetails(selectedNodeAttrs: string) {
   return await sendGet(`nodes/${selectedNodeAttrs}/details`);
