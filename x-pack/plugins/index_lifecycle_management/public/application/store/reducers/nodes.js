@@ -5,12 +5,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import {
-  setSelectedNodeAttrs,
-  setSelectedPrimaryShardCount,
-  setSelectedReplicaCount,
-  fetchedNodeDetails,
-} from '../actions/nodes';
+import { setSelectedPrimaryShardCount, setSelectedReplicaCount } from '../actions';
 
 const defaultState = {
   isLoading: false,
@@ -23,22 +18,6 @@ const defaultState = {
 
 export const nodes = handleActions(
   {
-    [fetchedNodeDetails](state, { payload }) {
-      const { selectedNodeAttrs, details } = payload;
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          [selectedNodeAttrs]: details,
-        },
-      };
-    },
-    [setSelectedNodeAttrs](state, { payload: selectedNodeAttrs }) {
-      return {
-        ...state,
-        selectedNodeAttrs,
-      };
-    },
     [setSelectedPrimaryShardCount](state, { payload }) {
       let selectedPrimaryShardCount = parseInt(payload);
       if (isNaN(selectedPrimaryShardCount)) {
