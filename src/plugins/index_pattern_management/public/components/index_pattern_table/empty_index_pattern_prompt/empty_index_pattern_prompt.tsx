@@ -30,7 +30,6 @@ import { IndexPatternManagmentContext } from '../../../types';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternCreationOption } from '../../types';
 import { CreateButton } from '../../create_button';
-// @ts-expect-error
 import { Illustration } from './assets/index_pattern_illustration';
 
 interface Props {
