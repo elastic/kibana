@@ -16,13 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
-export * from './embeddable_factory';
-export * from './embeddable_factory_definition';
-export * from './default_embeddable_factory_provider';
-export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
-export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableRoot } from './embeddable_root';
-export * from './saved_object_embeddable';
-export { EmbeddableRenderer, EmbeddableRendererProps } from './embeddable_renderer';
+
+import os from 'os';
+import execa from 'execa';
+
+export async function getBuildNumber() {
+  if (/^win/.test(os.platform())) {
+    // Windows does not have the wc process and `find /C /V ""` does not consistently work
+    const log = await execa('git', ['log', '--format="%h"']);
+    return log.stdout.split('\n').length;
+  }
+
+  const wc = await execa.command('git log --format="%h" | wc -l', {
+    shell: true,
+  });
+  return parseFloat(wc.stdout.trim());
+}
