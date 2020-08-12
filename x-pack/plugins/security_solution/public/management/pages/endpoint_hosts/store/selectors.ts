@@ -45,6 +45,8 @@ export const selectedPolicyId = (state: Immutable<HostState>) => state.selectedP
 
 export const endpointPackageInfo = (state: Immutable<HostState>) => state.endpointPackageInfo;
 
+export const isAutoRefreshEnabled = (state: Immutable<HostState>) => state.isAutoRefreshEnabled;
+
 export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined

@@ -54,6 +54,8 @@ export interface HostState {
   nonExistingPolicies: Record<string, boolean>;
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   hostsExist: boolean;
+  /** Is auto-refresh enabled */
+  isAutoRefreshEnabled: boolean;
 }
 
 /**

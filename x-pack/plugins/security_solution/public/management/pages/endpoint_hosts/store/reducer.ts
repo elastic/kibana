@@ -30,6 +30,7 @@ export const initialHostListState: Immutable<HostState> = {
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
   hostsExist: true,
+  isAutoRefreshEnabled: true,
 };
 
 /* eslint-disable-next-line complexity */
@@ -130,6 +131,11 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       hostsExist: action.payload,
+    };
+  } else if (action.type === 'serverToggledEndpointListAutoRefresh') {
+    return {
+      ...state,
+      isAutoRefreshEnabled: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {

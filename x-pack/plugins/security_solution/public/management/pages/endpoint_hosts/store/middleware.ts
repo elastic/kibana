@@ -15,6 +15,7 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
+  isAutoRefreshEnabled,
 } from './selectors';
 import { HostState } from '../types';
 import {
@@ -31,7 +32,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
 
     // Host list
     if (
-      action.type === 'userChangedUrl' &&
+      (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnHostPage(state) &&
       hasSelectedHost(state) !== true
     ) {
@@ -63,6 +64,11 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         dispatch({
           type: 'serverReturnedHostList',
           payload: hostResponse,
+        });
+
+        dispatch({
+          type: 'serverToggledEndpointListAutoRefresh',
+          payload: true,
         });
 
         getNonExistingPoliciesForHostsList(
@@ -132,7 +138,24 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
         dispatch({
           type: 'serverCancelledPolicyItemsLoading',
         });
+
+        dispatch({
+          type: 'serverReturnedHostExistValue',
+          payload: true,
+        });
       }
+    }
+
+    if (action.type === 'serverToggledEndpointListAutoRefresh') {
+      pollEndpointList({
+        pollAction: () => {
+          dispatch({
+            type: 'appRequestedEndpointList',
+          });
+        },
+        interval: 10000,
+        stop: () => false,
+      });
     }
 
     // Host Details
@@ -230,6 +253,26 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (cor
       }
     }
   };
+};
+
+const pollEndpointList = async ({
+  pollAction,
+  interval,
+  stop,
+}: {
+  pollAction: () => void;
+  interval: number;
+  stop: () => boolean;
+}) => {
+  const executePoll = async (resolve: () => void, reject: () => void) => {
+    if (stop() === true) {
+      return resolve();
+    } else {
+      setTimeout(pollAction, interval);
+    }
+  };
+
+  return new Promise(executePoll);
 };
 
 const getNonExistingPoliciesForHostsList = async (

@@ -86,6 +86,15 @@ interface ServerReturnedHostExistValue {
   payload: boolean;
 }
 
+interface ServerToggledEndpointListAutoRefresh {
+  type: 'serverToggledEndpointListAutoRefresh';
+  paylod: boolean;
+}
+
+interface AppRequestedEndpointList {
+  type: 'appRequestedEndpointList';
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
@@ -100,4 +109,6 @@ export type HostAction =
   | ServerReturnedHostExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedHostNonExistingPolicies;
+  | ServerReturnedHostNonExistingPolicies
+  | ServerToggledEndpointListAutoRefresh
+  | AppRequestedEndpointList;
