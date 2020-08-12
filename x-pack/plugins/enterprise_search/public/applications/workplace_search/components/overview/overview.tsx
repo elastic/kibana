@@ -5,7 +5,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActions, useValues } from 'kea';
 
@@ -71,22 +71,20 @@ export const Overview: React.FC = () => {
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome isRoot />
       <SendTelemetry action="viewed" metric="overview" />
 
-      <EuiPageBody>
-        <ViewContentHeader
-          title={headerTitle}
-          description={headerDescription}
-          action={<ProductButton />}
-        />
-        {!hideOnboarding && <OnboardingSteps />}
-        <EuiSpacer size="xl" />
-        <OrganizationStats />
-        <EuiSpacer size="xl" />
-        <RecentActivity />
-      </EuiPageBody>
-    </EuiPage>
+      <ViewContentHeader
+        title={headerTitle}
+        description={headerDescription}
+        action={<ProductButton />}
+      />
+      {!hideOnboarding && <OnboardingSteps />}
+      <EuiSpacer size="xl" />
+      <OrganizationStats />
+      <EuiSpacer size="xl" />
+      <RecentActivity />
+    </>
   );
 };
