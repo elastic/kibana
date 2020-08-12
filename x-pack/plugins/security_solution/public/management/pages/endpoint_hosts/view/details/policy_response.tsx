@@ -90,7 +90,7 @@ const ResponseActions = memo(
             <EuiAccordion
               id={action + index}
               key={action + index}
-              data-test-subj="hostDetailsPolicyResponseActionsAccordion"
+              data-test-subj="endpointDetailsPolicyResponseActionsAccordion"
               className="policyResponseActionsAccordion"
               buttonContent={
                 <EuiText
@@ -150,7 +150,7 @@ export const PolicyResponse = memo(
             <PolicyResponseConfigAccordion
               id={generateId(`id_${key}`)}
               key={generateId(`key_${key}`)}
-              data-test-subj="hostDetailsPolicyResponseConfigAccordion"
+              data-test-subj="endpointDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">
                   <p>{formatResponse(key)}</p>
@@ -162,7 +162,7 @@ export const PolicyResponse = memo(
                 attentionCount > 0 && (
                   <EuiNotificationBadge
                     className="policyResponseAttentionBadge"
-                    data-test-subj="hostDetailsPolicyResponseAttentionBadge"
+                    data-test-subj="endpointDetailsPolicyResponseAttentionBadge"
                   >
                     {attentionCount}
                   </EuiNotificationBadge>
