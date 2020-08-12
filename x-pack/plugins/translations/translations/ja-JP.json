@@ -8892,7 +8892,7 @@
     "xpack.infra.metrics.missingTSVBModelError": "{nodeType}では{metricId}のTSVBモデルが存在しません",
     "xpack.infra.metrics.pluginTitle": "メトリック",
     "xpack.infra.metrics.refetchButtonLabel": "新規データを確認",
-    "xpack.infra.metricsExploer.everything": "すべて",
+    "xpack.infra.metricsExplorer.everything": "すべて",
     "xpack.infra.metricsExplorer.actionsLabel.aria": "{grouping} のアクション",
     "xpack.infra.metricsExplorer.actionsLabel.button": "アクション",
     "xpack.infra.metricsExplorer.aggregationLabel": "/",

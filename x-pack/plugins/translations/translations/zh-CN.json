@@ -8894,7 +8894,7 @@
     "xpack.infra.metrics.missingTSVBModelError": "{nodeType} 的 {metricId} TSVB 模型不存在",
     "xpack.infra.metrics.pluginTitle": "指标",
     "xpack.infra.metrics.refetchButtonLabel": "检查新数据",
-    "xpack.infra.metricsExploer.everything": "所有内容",
+    "xpack.infra.metricsExplorer.everything": "所有内容",
     "xpack.infra.metricsExplorer.actionsLabel.aria": "适用于 {grouping} 的操作",
     "xpack.infra.metricsExplorer.actionsLabel.button": "操作",
     "xpack.infra.metricsExplorer.aggregationLabel": "的",
