@@ -43,7 +43,7 @@ import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page
 import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath } from '../../../common/routing';
+import { getEndpointListPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
@@ -71,7 +71,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
-  const hostListRouterPath = getHostListPath({ name: 'hostList' });
+  const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
   // Handle showing update statuses
   useEffect(() => {
