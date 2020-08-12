@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { LegacyAPICaller } from 'src/core/server';
 import { serializeProvider } from '../../../../../../src/plugins/expressions/common';
 import { RouteInitializerDeps } from '../';
@@ -30,23 +29,19 @@ export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
 export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
   const { bfetch, elasticsearch, expressions } = deps;
 
-  /**
-   * Run a single Canvas function.
-   *
-   * @param {*} server - The Kibana server object
-   * @param {*} handlers - The Canvas handlers
-   * @param {*} fnCall - Describes the function being run `{ functionName, args, context }`
-   */
   async function runFunction(
     handlers: { environment: string; elasticsearchClient: LegacyAPICaller },
     fnCall: any
   ) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(expressions.getTypes());
+
     const fnDef = expressions.getFunctions()[functionName];
-    if (!fnDef) throw Boom.notFound(`Function "${functionName}" could not be found.`);
+    if (!fnDef) throw new Error(`Function "${functionName}" could not be found.`);
+
     const deserialized = deserialize(context);
     const result = fnDef.fn(deserialized, args, handlers);
+
     return result;
   }
 
