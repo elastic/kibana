@@ -48,13 +48,13 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           <EuiTab isSelected={mode === 'managed'} onClick={() => setMode('managed')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollFleetTabLabel"
-              defaultMessage="Enroll with Fleet"
+              defaultMessage="Enroll in Fleet"
             />
           </EuiTab>
           <EuiTab isSelected={mode === 'standalone'} onClick={() => setMode('standalone')}>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.enrollStandaloneTabLabel"
-              defaultMessage="Standalone mode"
+              defaultMessage="Run standalone"
             />
           </EuiTab>
         </EuiTabs>

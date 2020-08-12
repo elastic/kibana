@@ -14,14 +14,14 @@ import { AgentConfig } from '../../../../types';
 export const DownloadStep = () => {
   return {
     title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
-      defaultMessage: 'Download the Elastic Agent',
+      defaultMessage: 'Download the Elastic Agent to your host',
     }),
     children: (
       <>
         <EuiText>
           <FormattedMessage
             id="xpack.ingestManager.agentEnrollment.downloadDescription"
-            defaultMessage="Download the Elastic Agent on your host’s machine. You can access the agent binaries and their verification signatures from the Elastic Agent download page."
+            defaultMessage="You can download the agent binaries and their verification signatures from the Elastic Agent download page."
           />
         </EuiText>
         <EuiSpacer size="l" />
@@ -33,7 +33,7 @@ export const DownloadStep = () => {
         >
           <FormattedMessage
             id="xpack.ingestManager.agentEnrollment.downloadLink"
-            defaultMessage="Go to elastic.co/downloads"
+            defaultMessage="Go to download page"
           />
         </EuiButton>
       </>

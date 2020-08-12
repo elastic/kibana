@@ -81,7 +81,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this configuration and put it into a file named {fileName} on the system where the Elastic Agent is installed. Don’t forget to modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the configuration file so that it uses your actual Elasticsearch credentials."
+              defaultMessage="Copy this configuration to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the configuration file to use your Elasticsearch credentials."
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
@@ -129,7 +129,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepRunAgentDescription"
-              defaultMessage="From the agent’s directory, run the following command to start the agent."
+              defaultMessage="From the agent directory, run these commands to enroll and start an Elastic Agent. You can reuse these commands to set up agents on more than one host. Requires administrator privileges."
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{RUN_INSTRUCTIONS}</EuiCodeBlock>
@@ -157,7 +157,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepCheckForDataDescription"
-              defaultMessage="After starting the agent, the agent should begin sending data. You can view this data on Ingest Manager’s datasets page."
+              defaultMessage="The agent should begin sending data. Go to Datasets to view your data."
             />
           </EuiText>
         </>
@@ -170,7 +170,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.standaloneDescription"
-          defaultMessage="Agents running in standalone mode need to be updated manually if you ever wish to make changes to their configuration. Follow the instructions below to download and setup an Elastic Agent in standalone mode."
+          defaultMessage="Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
         />
       </EuiText>
       <EuiSpacer size="l" />

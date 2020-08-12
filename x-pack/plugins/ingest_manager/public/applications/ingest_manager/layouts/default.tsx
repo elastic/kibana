@@ -114,7 +114,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     >
                       <FormattedMessage
                         id="xpack.ingestManager.appNavigation.sendFeedbackButton"
-                        defaultMessage="Send Feedback"
+                        defaultMessage="Send feedback"
                       />
                     </EuiButtonEmpty>
                   </EuiFlexItem>

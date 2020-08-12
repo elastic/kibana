@@ -60,7 +60,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.managedDescription"
-          defaultMessage="Whether you need one agent or thousands, Fleet makes it easy to centrally manage and deploy updates to your agents. Follow the instructions below to download and enroll an Elastic Agent with Fleet."
+          defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy configuration updates and centrally manage the agent."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -72,7 +72,7 @@ export const ManagedInstructions: React.FunctionComponent<Props> = ({ agentConfi
         <>
           <FormattedMessage
             id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
-            defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
+            defaultMessage="Before enrolling agents, set up Fleet. {link}"
             values={{
               link: (
                 <EuiLink href={getHref('fleet')}>
