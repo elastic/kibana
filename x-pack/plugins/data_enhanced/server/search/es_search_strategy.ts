@@ -128,8 +128,8 @@ async function asyncSearch(
   const { id, response, is_partial, is_running } = esResponse.body;
   return {
     id,
-    is_partial,
-    is_running,
+    isPartial: is_partial,
+    isRunning: is_running,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };

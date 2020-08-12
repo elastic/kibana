@@ -31,7 +31,7 @@ export const esSearchStrategyProvider = (
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.info(`search ${JSON.stringify(request.params)}`);
+      logger.info(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 
@@ -56,7 +56,12 @@ export const esSearchStrategyProvider = (
 
         // The above query will either complete or timeout and throw an error.
         // There is no progress indication on this api.
-        return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+        return {
+          isPartial: false,
+          isRunning: false,
+          rawResponse,
+          ...getTotalLoaded(rawResponse._shards),
+        };
       } catch (e) {
         if (usage) usage.trackError();
         throw e;
