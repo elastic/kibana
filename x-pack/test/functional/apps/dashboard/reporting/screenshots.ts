@@ -16,12 +16,13 @@ const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
   const config = getService('config');
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const es = getService('es');
 
   describe('Screenshots', () => {
     before('initialize tests', async () => {
@@ -33,6 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
       await esArchiver.unload('reporting/ecommerce_kibana');
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
     });
 
     describe('Print PDF button', () => {

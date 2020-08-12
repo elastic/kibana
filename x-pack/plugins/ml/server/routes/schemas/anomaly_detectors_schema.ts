@@ -11,7 +11,7 @@ const customRulesSchema = schema.maybe(
     schema.maybe(
       schema.object({
         actions: schema.arrayOf(schema.string()),
-        conditions: schema.arrayOf(schema.any()),
+        conditions: schema.maybe(schema.arrayOf(schema.any())),
         scope: schema.maybe(schema.any()),
       })
     )

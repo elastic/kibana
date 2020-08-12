@@ -403,11 +403,11 @@ export class IndexPattern implements IIndexPattern {
   }
 
   getNonScriptedFields() {
-    return [...this.fields.filter((field) => !field.scripted)];
+    return [...this.fields.getAll().filter((field) => !field.scripted)];
   }
 
   getScriptedFields() {
-    return [...this.fields.filter((field) => field.scripted)];
+    return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
   isTimeBased(): boolean {
