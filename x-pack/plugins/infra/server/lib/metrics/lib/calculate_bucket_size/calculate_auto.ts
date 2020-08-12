@@ -39,22 +39,22 @@ type CheckFunction = (
   target: number
 ) => Duration | undefined;
 
-function find(rules: Rule[], check: CheckFunction, last?: boolean) {
-  function pick(buckets: number, duration: Duration) {
+function findRule(rules: Rule[], check: CheckFunction, last?: boolean) {
+  function pickInterval(buckets: number, duration: Duration) {
     const target = duration.asMilliseconds() / buckets;
-    let lastResp = null;
+    let lastResult = null;
 
     for (const rule of rules) {
-      const resp = check(rule[0] as Duration, rule[1] as Duration, target);
+      const result = check(rule[0] as Duration, rule[1] as Duration, target);
 
-      if (resp == null) {
+      if (result == null) {
         if (!last) continue;
-        if (lastResp) return lastResp;
+        if (lastResult) return lastResult;
         break;
       }
 
-      if (!last) return resp;
-      lastResp = resp;
+      if (!last) return result;
+      lastResult = result;
     }
 
     // fallback to just a number of milliseconds, ensure ms is >= 1
@@ -63,13 +63,13 @@ function find(rules: Rule[], check: CheckFunction, last?: boolean) {
   }
 
   return (buckets: number, duration: Duration) => {
-    const interval = pick(buckets, duration);
+    const interval = pickInterval(buckets, duration);
     if (isDuration(interval)) return interval;
   };
 }
 
 export const calculateAuto = {
-  near: find(
+  near: findRule(
     revRoundingRules,
     function near(bound, interval, target) {
       if (isDuration(bound) && bound.asMilliseconds() > target) return interval;
@@ -78,11 +78,11 @@ export const calculateAuto = {
     true
   ),
 
-  lessThan: find(revRoundingRules, function lessThan(_bound, interval, target) {
+  lessThan: findRule(revRoundingRules, function lessThan(_bound, interval, target) {
     if (interval.asMilliseconds() < target) return interval;
   }),
 
-  atLeast: find(revRoundingRules, function atLeast(_bound, interval, target) {
+  atLeast: findRule(revRoundingRules, function atLeast(_bound, interval, target) {
     if (interval.asMilliseconds() <= target) return interval;
   }),
 };
