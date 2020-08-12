@@ -33,14 +33,15 @@ import { ArtifactConstants } from './common';
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  name: string = ArtifactConstants.GLOBAL_ALLOWLIST_NAME // FIXME:PT make this a required param + refactor
 ): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
   const sha256 = createHash('sha256').update(exceptionsBuffer.toString()).digest('hex');
 
   // Keep compression info empty in case its a duplicate. Lazily compress before committing if needed.
   return {
-    identifier: `${ArtifactConstants.GLOBAL_ALLOWLIST_NAME}-${os}-${schemaVersion}`,
+    identifier: `${name}-${os}-${schemaVersion}`,
     compressionAlgorithm: 'none',
     encryptionAlgorithm: 'none',
     decodedSha256: sha256,
@@ -76,7 +77,8 @@ export function isCompressed(artifact: InternalArtifactSchema) {
 export async function getFullEndpointExceptionList(
   eClient: ExceptionListClient,
   os: string,
-  schemaVersion: string
+  schemaVersion: string,
+  listId: typeof ENDPOINT_LIST_ID | 'endpoint_trusted_apps' = ENDPOINT_LIST_ID // FIXME:PT replace with const
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
   let page = 1;
@@ -84,7 +86,7 @@ export async function getFullEndpointExceptionList(
 
   while (paging) {
     const response = await eClient.findExceptionListItem({
-      listId: ENDPOINT_LIST_ID,
+      listId,
       namespaceType: 'agnostic',
       filter: `exception-list-agnostic.attributes._tags:\"os:${os}\"`,
       perPage: 100,
