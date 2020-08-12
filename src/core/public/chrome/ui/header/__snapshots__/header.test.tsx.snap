@@ -403,6 +403,17 @@ exports[`Header renders 1`] = `
       "thrownError": null,
     }
   }
+  navControlsCenter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1921,6 +1932,55 @@ exports[`Header renders 2`] = `
       "thrownError": null,
     }
   }
+  navControlsCenter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2439,6 +2499,59 @@ exports[`Header renders 2`] = `
           },
           Object {
             "borders": "none",
+            "items": Array [
+              <HeaderNavControls
+                navControls$={
+                  BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  }
+                }
+              />,
+            ],
           },
           Object {
             "borders": "none",
@@ -3441,6 +3554,74 @@ exports[`Header renders 2`] = `
                     </a>
                   </EuiHeaderLogo>
                 </HeaderLogo>
+              </div>
+            </EuiHeaderSectionItem>
+          </div>
+        </EuiHeaderSection>
+        <EuiHeaderSection
+          key="items-1"
+        >
+          <div
+            className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          >
+            <EuiHeaderSectionItem
+              border="none"
+              key="0"
+            >
+              <div
+                className="euiHeaderSectionItem"
+              >
+                <HeaderNavControls
+                  navControls$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": Array [],
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
+                />
               </div>
             </EuiHeaderSectionItem>
           </div>
@@ -7130,6 +7311,55 @@ exports[`Header renders 3`] = `
       "thrownError": null,
     }
   }
+  navControlsCenter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -7648,6 +7878,59 @@ exports[`Header renders 3`] = `
           },
           Object {
             "borders": "none",
+            "items": Array [
+              <HeaderNavControls
+                navControls$={
+                  BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  }
+                }
+              />,
+            ],
           },
           Object {
             "borders": "none",
@@ -8650,6 +8933,74 @@ exports[`Header renders 3`] = `
                     </a>
                   </EuiHeaderLogo>
                 </HeaderLogo>
+              </div>
+            </EuiHeaderSectionItem>
+          </div>
+        </EuiHeaderSection>
+        <EuiHeaderSection
+          key="items-1"
+        >
+          <div
+            className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          >
+            <EuiHeaderSectionItem
+              border="none"
+              key="0"
+            >
+              <div
+                className="euiHeaderSectionItem"
+              >
+                <HeaderNavControls
+                  navControls$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": Array [],
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
+                />
               </div>
             </EuiHeaderSectionItem>
           </div>
@@ -13559,6 +13910,55 @@ exports[`Header renders 4`] = `
       "thrownError": null,
     }
   }
+  navControlsCenter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -14077,6 +14477,59 @@ exports[`Header renders 4`] = `
           },
           Object {
             "borders": "none",
+            "items": Array [
+              <HeaderNavControls
+                navControls$={
+                  BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Array [],
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [
+                      Subscriber {
+                        "_parentOrParents": null,
+                        "_subscriptions": Array [
+                          SubjectSubscription {
+                            "_parentOrParents": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "subject": [Circular],
+                            "subscriber": [Circular],
+                          },
+                        ],
+                        "closed": false,
+                        "destination": SafeSubscriber {
+                          "_complete": undefined,
+                          "_context": [Circular],
+                          "_error": undefined,
+                          "_next": [Function],
+                          "_parentOrParents": null,
+                          "_parentSubscriber": [Circular],
+                          "_subscriptions": null,
+                          "closed": false,
+                          "destination": Object {
+                            "closed": true,
+                            "complete": [Function],
+                            "error": [Function],
+                            "next": [Function],
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": false,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                        "isStopped": false,
+                        "syncErrorThrowable": true,
+                        "syncErrorThrown": false,
+                        "syncErrorValue": null,
+                      },
+                    ],
+                    "thrownError": null,
+                  }
+                }
+              />,
+            ],
           },
           Object {
             "borders": "none",
@@ -15079,6 +15532,74 @@ exports[`Header renders 4`] = `
                     </a>
                   </EuiHeaderLogo>
                 </HeaderLogo>
+              </div>
+            </EuiHeaderSectionItem>
+          </div>
+        </EuiHeaderSection>
+        <EuiHeaderSection
+          key="items-1"
+        >
+          <div
+            className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+          >
+            <EuiHeaderSectionItem
+              border="none"
+              key="0"
+            >
+              <div
+                className="euiHeaderSectionItem"
+              >
+                <HeaderNavControls
+                  navControls$={
+                    BehaviorSubject {
+                      "_isScalar": false,
+                      "_value": Array [],
+                      "closed": false,
+                      "hasError": false,
+                      "isStopped": false,
+                      "observers": Array [
+                        Subscriber {
+                          "_parentOrParents": null,
+                          "_subscriptions": Array [
+                            SubjectSubscription {
+                              "_parentOrParents": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "subject": [Circular],
+                              "subscriber": [Circular],
+                            },
+                          ],
+                          "closed": false,
+                          "destination": SafeSubscriber {
+                            "_complete": undefined,
+                            "_context": [Circular],
+                            "_error": undefined,
+                            "_next": [Function],
+                            "_parentOrParents": null,
+                            "_parentSubscriber": [Circular],
+                            "_subscriptions": null,
+                            "closed": false,
+                            "destination": Object {
+                              "closed": true,
+                              "complete": [Function],
+                              "error": [Function],
+                              "next": [Function],
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": false,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          "isStopped": false,
+                          "syncErrorThrowable": true,
+                          "syncErrorThrown": false,
+                          "syncErrorValue": null,
+                        },
+                      ],
+                      "thrownError": null,
+                    }
+                  }
+                />
               </div>
             </EuiHeaderSectionItem>
           </div>
