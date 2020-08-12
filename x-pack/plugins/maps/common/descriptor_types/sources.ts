@@ -166,7 +166,11 @@ export type LayerDescriptor = {
   __isInErrorState?: boolean;
   __isPreviewLayer?: boolean;
   __errorMessage?: string;
-  __syncContext?: MapFilters;
+  __prevSyncContext?: {
+    datFilters: MapFilters;
+    sourceDescriptor: SourceDescriptor | null;
+    joins: JoinDescriptor[];
+  };
   __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;

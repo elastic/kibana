@@ -156,15 +156,20 @@ export function syncDataForLayer(layer: ILayer) {
     }
 
     const layerDescriptor = layer.getDescriptor();
-    if (_.isEqual(layerDescriptor.__syncContext, dataRequestContext.dataFilters)) {
+    const syncContext: any = {
+      dataFilters: dataRequestContext.dataFilters,
+      sourceDescriptor: layerDescriptor.sourceDescriptor,
+      joins: layerDescriptor.joins,
+    };
+    if (_.isEqual(layerDescriptor.__prevSyncContext, syncContext)) {
       // do not perform sync for identical syncing context
       return;
     }
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layer.getId(),
-      propName: '__syncContext',
-      newValue: dataRequestContext.dataFilters,
+      propName: '__prevSyncContext',
+      newValue: syncContext,
     });
 
     await layer.syncData(dataRequestContext);
