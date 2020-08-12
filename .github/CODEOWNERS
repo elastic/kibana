@@ -68,6 +68,9 @@
 # Beats
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
+# Ingest managaer
+/x-pack/plugins/ingest_manager/**/*.scss @elastic/observability-design
+
 # Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui
