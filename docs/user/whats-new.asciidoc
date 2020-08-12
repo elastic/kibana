@@ -55,9 +55,9 @@ image::images/7.9-whats_new_search.png[Enterprise Search is side navigation]
 
 You can now can create variables to easily reuse the
 strings and patterns in your Canvas elements. This is especially useful if you
-frequently copy from one element to another. For example, when you clone a large workpad and need
-to connect your elements to a new index, you can use variables to update each element
-instead. For instructions, see the
+frequently copy and paste your elements. For example, when you clone a large workpad and need
+to connect your elements to a new index, you can use variables to quickly update the elements,
+instead of changing the index for each individual element. For instructions, refer to the
 {kibana-ref}/canvas.html[Canvas documentation].
 
 [float]
