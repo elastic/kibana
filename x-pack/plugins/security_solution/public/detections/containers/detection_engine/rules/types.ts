@@ -236,10 +236,18 @@ export interface ImportRulesResponseError {
   };
 }
 
+export interface ImportResponseError {
+  id: string;
+  error: {
+    status_code: number;
+    message: string;
+  };
+}
+
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
-  errors: ImportRulesResponseError[];
+  errors: Array<ImportRulesResponseError | ImportResponseError>;
 }
 
 export interface ExportDocumentsProps {
