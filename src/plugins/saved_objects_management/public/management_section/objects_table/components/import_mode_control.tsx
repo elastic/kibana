@@ -18,7 +18,14 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiRadioGroup, EuiText, EuiSwitchEvent, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormFieldset,
+  EuiTitle,
+  EuiCheckableCard,
+  EuiRadioGroup,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface ImportModeControlProps {
@@ -40,11 +47,11 @@ export const ImportModeControl = ({
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
-  const disabledOption = {
+  const createNewCopiesDisabled = {
     id: 'createNewCopiesDisabled',
     title: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledTitle',
-      { defaultMessage: 'Check for conflicts' }
+      { defaultMessage: 'Check for existing objects' }
     ),
     text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
@@ -54,25 +61,45 @@ export const ImportModeControl = ({
       }
     ),
   };
-  const enabledOption = {
+  const createNewCopiesEnabled = {
     id: 'createNewCopiesEnabled',
     title: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledTitle',
-      { defaultMessage: 'Add as copies' }
+      { defaultMessage: 'Create new objects with random IDs' }
     ),
     text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
       { defaultMessage: 'All imported objects will be created with new random IDs.' }
     ),
   };
-  const createLabel = ({ title, text }: { title: string; text: string }) => (
+  const overwriteEnabled = {
+    id: 'overwriteEnabled',
+    label: i18n.translate(
+      'savedObjectsManagement.objectsTable.importModeControl.overwrite.enabledLabel',
+      { defaultMessage: 'Automatically try to overwrite conflicts' }
+    ),
+  };
+  const overwriteDisabled = {
+    id: 'overwriteDisabled',
+    label: i18n.translate(
+      'savedObjectsManagement.objectsTable.importModeControl.overwrite.disabledLabel',
+      { defaultMessage: 'Request action when conflict occurs' }
+    ),
+  };
+  const formTitle = i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.formTitle',
+    { defaultMessage: 'Import options' }
+  );
+
+  const createLabel = ({ title, text }: { title: string; text: string }, subduedText = true) => (
     <Fragment>
       <EuiText>{title}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiText color="subdued">{text}</EuiText>
+      <EuiText color={subduedText ? 'subdued' : undefined} size="s">
+        {text}
+      </EuiText>
     </Fragment>
   );
-
   const onChange = (partial: Partial<ImportMode>) => {
     if (partial.createNewCopies !== undefined) {
       setCreateNewCopies(partial.createNewCopies);
@@ -82,44 +109,47 @@ export const ImportModeControl = ({
     updateSelection({ createNewCopies, overwrite, ...partial });
   };
 
-  const switchLabel = i18n.translate(
-    'savedObjectsManagement.objectsTable.importModeControl.overwriteSwitch',
-    { defaultMessage: 'Automatically try to overwrite conflicts' }
-  );
-  const overwriteSwitch = (
-    <EuiSwitch
-      label={switchLabel}
-      compressed={!isLegacyFile}
-      checked={overwrite}
-      disabled={!isLegacyFile && createNewCopies}
-      onChange={({ target: { checked } }: EuiSwitchEvent) => onChange({ overwrite: checked })}
-      data-test-subj={'importSavedObjectsImportModeOverwriteSwitch'}
+  const overwriteRadio = (
+    <EuiRadioGroup
+      options={[overwriteEnabled, overwriteDisabled]}
+      idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
+      onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
+      disabled={createNewCopies}
+      data-test-subj={'savedObjectsManagement-importModeControl-overwriteRadioGroup'}
     />
   );
 
   if (isLegacyFile) {
-    return overwriteSwitch;
+    return overwriteRadio;
   }
 
   return (
-    <EuiRadioGroup
-      options={[
-        {
-          id: disabledOption.id,
-          label: (
-            <Fragment>
-              {createLabel(disabledOption)}
-              <EuiSpacer size="xs" />
-              {overwriteSwitch}
-              <EuiSpacer size="m" />
-            </Fragment>
-          ),
-        },
-        { id: enabledOption.id, label: createLabel(enabledOption) },
-      ]}
-      idSelected={createNewCopies ? enabledOption.id : disabledOption.id}
-      onChange={(id: string) => onChange({ createNewCopies: id === enabledOption.id })}
-      data-test-subj={'importSavedObjectsImportModeRadio'}
-    />
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiTitle size="xs">
+            <span>{formTitle}</span>
+          </EuiTitle>
+        ),
+      }}
+    >
+      <EuiCheckableCard
+        id={createNewCopiesDisabled.id}
+        label={createLabel(createNewCopiesDisabled)}
+        checked={!createNewCopies}
+        onChange={() => onChange({ createNewCopies: false })}
+      >
+        {overwriteRadio}
+      </EuiCheckableCard>
+
+      <EuiSpacer size="s" />
+
+      <EuiCheckableCard
+        id={createNewCopiesEnabled.id}
+        label={createLabel(createNewCopiesEnabled)}
+        checked={createNewCopies}
+        onChange={() => onChange({ createNewCopies: true })}
+      />
+    </EuiFormFieldset>
   );
 };

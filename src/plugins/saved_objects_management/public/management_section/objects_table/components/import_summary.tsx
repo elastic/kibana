@@ -183,7 +183,12 @@ export const ImportSummary = ({ failedImports, successfulImports }: ImportSummar
 
   return (
     <Fragment>
-      <EuiTitle size="s">
+      <EuiTitle
+        size="s"
+        data-test-subj={
+          importItems.length ? 'importSavedObjectsSuccess' : 'importSavedObjectsSuccessNoneImported'
+        }
+      >
         <h3>
           <FormattedMessage
             id="savedObjectsManagement.importSummary.headerLabel"
