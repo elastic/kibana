@@ -289,6 +289,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         logger: this.logger,
         cache: this.exceptionsCache,
       });
+
+      // initialize the global agnostic Trusted Apps list
+      exceptionListClient.createTrustedAppsList().catch((error) => {
+        this.logger.error('Failed to create Trusted Apps list via list plugin');
+        this.logger.error(error);
+      });
     }
 
     this.endpointAppContextService.start({
