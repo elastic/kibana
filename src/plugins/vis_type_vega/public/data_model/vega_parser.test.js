@@ -29,6 +29,18 @@ jest.mock('../lib/vega', () => ({
   vegaLite: jest.requireActual('vega-lite'),
 }));
 
+describe(`VegaParser.parseAsync`, () => {
+  test(`should throw an error in case of $spec is not defined`, async () => {
+    const vp = new VegaParser('{}');
+
+    await vp.parseAsync();
+
+    expect(
+      vp.error.startsWith('Your specification requires a "$schema" field with a valid URL')
+    ).toBeTruthy();
+  });
+});
+
 describe(`VegaParser._setDefaultValue`, () => {
   function check(spec, expected, ...params) {
     return () => {
@@ -196,22 +208,13 @@ describe('VegaParser._resolveEsQueries', () => {
   );
 });
 
-describe('VegaParser._parseSchema', () => {
-  function check(schema, isVegaLite, warningCount) {
+describe('VegaParser.parseSchema', () => {
+  function check(schema, isVegaLite) {
     return () => {
       const vp = new VegaParser({ $schema: schema });
-      expect(vp._parseSchema()).toBe(isVegaLite);
-      expect(vp.spec).toEqual({ $schema: schema });
-      expect(vp.warnings).toHaveLength(warningCount);
+      expect(vp.parseSchema(vp.spec).isVegaLite).toBe(isVegaLite);
     };
   }
-
-  test('should warn on no vega version specified', () => {
-    const vp = new VegaParser({});
-    expect(vp._parseSchema()).toBe(false);
-    expect(vp.spec).toEqual({ $schema: 'https://vega.github.io/schema/vega/v5.json' });
-    expect(vp.warnings).toHaveLength(1);
-  });
 
   test(
     'should not warn on current vega version',

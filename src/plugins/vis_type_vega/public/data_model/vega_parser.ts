@@ -56,7 +56,6 @@ const locToDirMap: Record<string, ControlsLocation> = {
   top: 'column-reverse',
   bottom: 'column',
 };
-const DEFAULT_SCHEMA: string = 'https://vega.github.io/schema/vega/v5.json';
 
 // If there is no "%type%" parameter, use this parser
 const DEFAULT_PARSER: string = 'elasticsearch';
@@ -118,8 +117,27 @@ export class VegaParser {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
-      this.spec = hjson.parse(this.spec, { legacyRoot: false });
+      const spec = hjson.parse(this.spec, { legacyRoot: false });
+
+      if (!spec.$schema) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaErrorMessage', {
+            defaultMessage: `Your specification requires a {schemaParam} field with a valid URL for
+Vega (see {vegaSchemaUrl}) or 
+Vega-Lite (see {vegaLiteSchemaUrl}).
+The URL is an identifier only. Kibana and your browser will never access this URL.`,
+            values: {
+              schemaParam: '"$schema"',
+              vegaLiteSchemaUrl: 'https://vega.github.io/vega-lite/docs/spec.html#top-level',
+              vegaSchemaUrl:
+                'https://vega.github.io/vega/docs/specification/#top-level-specification-properties',
+            },
+          })
+        );
+      }
+      this.spec = spec;
     }
+
     if (!_.isPlainObject(this.spec)) {
       throw new Error(
         i18n.translate('visTypeVega.vegaParser.invalidVegaSpecErrorMessage', {
@@ -127,7 +145,7 @@ export class VegaParser {
         })
       );
     }
-    this.isVegaLite = this._parseSchema();
+    this.isVegaLite = this.parseSchema(this.spec).isVegaLite;
     this.useHover = !this.isVegaLite;
 
     this._config = this._parseConfig();
@@ -498,23 +516,11 @@ export class VegaParser {
 
   /**
    * Parse Vega schema element
-   * @returns {boolean} is this a VegaLite schema?
+   * @returns {object} isVegaLite, libVersion
    * @private
    */
-  _parseSchema() {
-    if (!this.spec) return false;
-    if (!this.spec.$schema) {
-      this._onWarning(
-        i18n.translate('visTypeVega.vegaParser.inputSpecDoesNotSpecifySchemaWarningMessage', {
-          defaultMessage:
-            'The input spec does not specify a {schemaParam}, defaulting to {defaultSchema}',
-          values: { defaultSchema: `"${DEFAULT_SCHEMA}"`, schemaParam: '"$schema"' },
-        })
-      );
-      this.spec.$schema = DEFAULT_SCHEMA;
-    }
-
-    const schema = schemaParser(this.spec.$schema);
+  private parseSchema(spec: VegaSpec) {
+    const schema = schemaParser(spec.$schema);
     const isVegaLite = schema.library === 'vega-lite';
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
@@ -532,7 +538,7 @@ export class VegaParser {
       );
     }
 
-    return isVegaLite;
+    return { isVegaLite, libVersion };
   }
 
   /**
