@@ -48,9 +48,10 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       // which we don't do here.
       delete data.overlapping;
 
-      if (data.template.mappings === undefined) {
+      if (data.template && data.template.mappings === undefined) {
         // Adding some extra logic to return an empty object for "mappings" as ES does not
         // return one in that case (empty objects _are_ returned for "settings" and "aliases")
+        // Issue: https://github.com/elastic/elasticsearch/issues/60968
         data.template.mappings = {};
       }
 
