@@ -28,10 +28,12 @@ import {
   txtTriggerPickerLabel,
 } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory } from '../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 
-export interface ActionWizardProps {
+export interface ActionWizardProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   /**
    * List of available action factories
    */
@@ -62,12 +64,7 @@ export interface ActionWizardProps {
   /**
    * Context will be passed into ActionFactory's methods
    */
-  context: object;
-
-  /**
-   * Current triggers selection
-   */
-  selectedTriggers?: TriggerId[];
+  context: ActionFactoryContext;
 
   /**
    * Trigger selection has changed
@@ -92,7 +89,6 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   onConfigChange,
   config,
   context,
-  selectedTriggers,
   onSelectedTriggersChange,
   getTriggerInfo,
   supportedTriggers,
@@ -108,7 +104,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   }
 
   // auto pick selected trigger if none is picked
-  if (currentActionFactory && !((selectedTriggers?.length ?? 0) > 0)) {
+  if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
     const triggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
     if (triggers.length > 0) {
       onSelectedTriggersChange([triggers[0]]);
@@ -124,13 +120,12 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         onDeselect={() => {
           onActionFactoryChange(undefined);
         }}
-        context={{ ...context, triggers: selectedTriggers ?? [] }}
+        context={context}
         config={config}
         onConfigChange={(newConfig) => {
           onConfigChange(newConfig);
         }}
         allTriggers={allTriggers}
-        selectedTriggers={selectedTriggers}
         getTriggerInfo={getTriggerInfo}
         onSelectedTriggersChange={onSelectedTriggersChange}
         triggerPickerDocsLink={triggerPickerDocsLink}
@@ -215,15 +210,16 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
   );
 };
 
-interface SelectedActionFactoryProps {
+interface SelectedActionFactoryProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   actionFactory: ActionFactory;
   config: object;
-  context: object;
+  context: ActionFactoryContext;
   onConfigChange: (config: object) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];
-  selectedTriggers?: TriggerId[];
   getTriggerInfo: (triggerId: TriggerId) => Trigger;
   onSelectedTriggersChange: (triggers?: TriggerId[]) => void;
   triggerPickerDocsLink?: string;
@@ -239,7 +235,6 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   config,
   context,
   allTriggers,
-  selectedTriggers,
   getTriggerInfo,
   onSelectedTriggersChange,
   triggerPickerDocsLink,
@@ -276,7 +271,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           <TriggerPicker
             triggers={allTriggers}
             getTriggerInfo={getTriggerInfo}
-            selectedTriggers={selectedTriggers}
+            selectedTriggers={context.triggers}
             onSelectedTriggersChange={onSelectedTriggersChange}
             triggerPickerDocsLink={triggerPickerDocsLink}
           />
@@ -294,9 +289,11 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   );
 };
 
-interface ActionFactorySelectorProps {
+interface ActionFactorySelectorProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   actionFactories: ActionFactory[];
-  context: object;
+  context: ActionFactoryContext;
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 

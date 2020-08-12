@@ -5,7 +5,7 @@
  */
 
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction } from './types';
 import { LicenseType } from '../../../licensing/public';
 import {
   TriggerContextMapping,
@@ -19,9 +19,11 @@ import {
  */
 export interface ActionFactoryDefinition<
   Config extends object = object,
-  FactoryContext extends object = object,
   SupportedTriggers extends TriggerId = TriggerId,
-  ActionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 >
   extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext> {

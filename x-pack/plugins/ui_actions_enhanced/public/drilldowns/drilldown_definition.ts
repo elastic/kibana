@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition } from '../dynamic_actions';
+import { ActionFactoryDefinition, BaseActionFactoryContext } from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
 
@@ -24,8 +24,11 @@ import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_
 
 export interface DrilldownDefinition<
   Config extends object = object,
-  SupportedTriggers extends TriggerId = '',
-  ExecutionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > {
   /**
    * Globally unique identifier for this drilldown.
@@ -49,8 +52,8 @@ export interface DrilldownDefinition<
    */
   createConfig: ActionFactoryDefinition<
     Config,
-    object,
     SupportedTriggers,
+    FactoryContext,
     ExecutionContext
   >['createConfig'];
 
@@ -75,8 +78,8 @@ export interface DrilldownDefinition<
    */
   CollectConfig: ActionFactoryDefinition<
     Config,
-    object,
     SupportedTriggers,
+    FactoryContext,
     ExecutionContext
   >['CollectConfig'];
 
@@ -86,8 +89,8 @@ export interface DrilldownDefinition<
    */
   isConfigValid: ActionFactoryDefinition<
     Config,
-    object,
     SupportedTriggers,
+    FactoryContext,
     ExecutionContext
   >['isConfigValid'];
 

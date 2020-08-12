@@ -20,7 +20,7 @@ const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT =
   'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT';
 
 export class DashboardHelloWorldOnlyRangeSelectDrilldown
-  implements Drilldown<Config, typeof SELECT_RANGE_TRIGGER, RangeSelectContext> {
+  implements Drilldown<Config, typeof SELECT_RANGE_TRIGGER> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN_ONLY_RANGE_SELECT;
 
   public readonly order = 7;

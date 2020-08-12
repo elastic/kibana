@@ -24,7 +24,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
 import { StartDependencies } from '../../../plugin';
-import { Config } from './types';
+import { Config, FactoryContext } from './types';
 
 export interface Params {
   start: StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>;
@@ -32,7 +32,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER, ApplyGlobalFilterActionContext> {
+  implements Drilldown<Config, typeof APPLY_FILTER_TRIGGER, FactoryContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;

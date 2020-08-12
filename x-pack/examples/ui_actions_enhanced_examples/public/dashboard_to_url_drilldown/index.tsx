@@ -31,13 +31,13 @@ export interface Config {
   openInNewTab: boolean;
 }
 
-export type CollectConfigProps = CollectConfigPropsBase<Config>;
+type UrlTrigger = typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER;
+
+export type CollectConfigProps = CollectConfigPropsBase<Config, { triggers: UrlTrigger[] }>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 
-export class DashboardToUrlDrilldown
-  implements
-    Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER, ActionContext> {
+export class DashboardToUrlDrilldown implements Drilldown<Config, UrlTrigger> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 8;
@@ -48,11 +48,15 @@ export class DashboardToUrlDrilldown
 
   public readonly euiIcon = 'link';
 
-  supportedTriggers(): Array<typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+  supportedTriggers(): UrlTrigger[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
+    config,
+    onConfig,
+    context,
+  }) => (
     <>
       <EuiCallOut title="Example warning!" color="warning" iconType="help">
         <p>
@@ -88,6 +92,11 @@ export class DashboardToUrlDrilldown
           onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
         />
       </EuiFormRow>
+      <EuiSpacer size="xl" />
+      <EuiCallOut>
+        {/* just demo how can access selected triggers*/}
+        <p>Will be attached to triggers: {JSON.stringify(context.triggers)}</p>
+      </EuiCallOut>
     </>
   );
 

@@ -239,14 +239,13 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
           changeActionFactory(newActionFactory);
         }}
         currentActionFactory={state.currentActionFactory}
-        context={{}}
+        context={{ triggers: state.selectedTriggers ?? [] }}
         onSelectedTriggersChange={(triggers) => {
           setState({
             ...state,
             selectedTriggers: triggers,
           });
         }}
-        selectedTriggers={state.selectedTriggers}
         getTriggerInfo={mockGetTriggerInfo}
         supportedTriggers={[VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER]}
       />

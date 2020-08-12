@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { FlyoutFrame } from '../flyout_frame';
@@ -16,8 +16,9 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory } from '../../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { ExtraActionFactoryContext } from '../types';
 
 export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   name: string;
@@ -26,7 +27,10 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
   selectedTriggers?: TriggerId[];
 }
 
-export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
+export interface FlyoutDrilldownWizardProps<
+  CurrentActionConfig extends object = object,
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   drilldownActionFactories: ActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
@@ -40,7 +44,7 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  actionFactoryContext?: object;
+  extraActionFactoryContext?: ExtraActionFactoryContext<ActionFactoryContext>;
 
   docsLink?: string;
 
@@ -135,7 +139,7 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
-  actionFactoryContext,
+  extraActionFactoryContext,
   docsLink,
   getTrigger,
   supportedTriggers,
@@ -155,6 +159,14 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
 
     return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
   };
+
+  const actionFactoryContext: BaseActionFactoryContext = useMemo(
+    () => ({
+      ...extraActionFactoryContext,
+      triggers: wizardConfig.selectedTriggers ?? [],
+    }),
+    [extraActionFactoryContext, wizardConfig.selectedTriggers]
+  );
 
   const footer = (
     <EuiButton
@@ -191,9 +203,8 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         currentActionFactory={wizardConfig.actionFactory}
         onActionFactoryChange={setActionFactory}
         actionFactories={drilldownActionFactories}
-        actionFactoryContext={actionFactoryContext!}
+        actionFactoryContext={actionFactoryContext}
         onSelectedTriggersChange={setSelectedTriggers}
-        selectedTriggers={wizardConfig.selectedTriggers}
         supportedTriggers={supportedTriggers}
         getTriggerInfo={getTrigger}
         triggerPickerDocsLink={docsLink}

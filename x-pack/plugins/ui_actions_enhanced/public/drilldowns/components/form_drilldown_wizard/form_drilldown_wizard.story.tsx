@@ -10,7 +10,6 @@ import { FormDrilldownWizard } from './index';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
 const otherProps = {
-  actionFactoryContext: {},
   supportedTriggers: [
     'VALUE_CLICK_TRIGGER',
     'SELECT_RANGE_TRIGGER',
@@ -18,6 +17,7 @@ const otherProps = {
   ] as TriggerId[],
   getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
   onSelectedTriggersChange: () => {},
+  actionFactoryContext: { triggers: [] as TriggerId[] },
 };
 
 const DemoEditName: React.FC = () => {

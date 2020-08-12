@@ -14,7 +14,7 @@ import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/
 afterEach(cleanup);
 
 const otherProps = {
-  actionFactoryContext: {},
+  actionFactoryContext: { triggers: [] as TriggerId[] },
   supportedTriggers: [
     'VALUE_CLICK_TRIGGER',
     'SELECT_RANGE_TRIGGER',

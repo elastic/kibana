@@ -24,8 +24,7 @@ export interface Config {
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 
 export class DashboardHelloWorldDrilldown
-  implements
-    Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER, ActionContext> {
+  implements Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 6;
@@ -41,6 +40,7 @@ export class DashboardHelloWorldDrilldown
   private readonly ReactCollectConfig: React.FC<CollectConfigProps<Config>> = ({
     config,
     onConfig,
+    context,
   }) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText

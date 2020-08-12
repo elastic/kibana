@@ -5,7 +5,11 @@
  */
 
 import { ActionFactoryRegistry } from '../types';
-import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
+import {
+  ActionFactory,
+  ActionFactoryDefinition,
+  BaseActionFactoryContext,
+} from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
 import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
@@ -30,11 +34,13 @@ export class UiActionsServiceEnhancements {
    */
   public readonly registerActionFactory = <
     Config extends object = object,
-    FactoryContext extends object = object,
-    SupportedTriggers extends TriggerId = '',
-    ActionContext extends TriggerContextMapping[SupportedTriggers] = any
+    SupportedTriggers extends TriggerId = TriggerId,
+    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+      triggers: SupportedTriggers[];
+    },
+    ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
   >(
-    definition: ActionFactoryDefinition<Config, FactoryContext, SupportedTriggers, ActionContext>
+    definition: ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ActionContext>
   ) => {
     if (this.actionFactories.has(definition.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
@@ -42,8 +48,8 @@ export class UiActionsServiceEnhancements {
 
     const actionFactory = new ActionFactory<
       Config,
-      FactoryContext,
       SupportedTriggers,
+      FactoryContext,
       ActionContext
     >(definition, this.getLicenseInfo);
 
@@ -72,8 +78,11 @@ export class UiActionsServiceEnhancements {
    */
   public readonly registerDrilldown = <
     Config extends object = object,
-    SupportedTriggers extends TriggerId = '',
-    ExecutionContext extends TriggerContextMapping[SupportedTriggers] = any
+    SupportedTriggers extends TriggerId = TriggerId,
+    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+      triggers: SupportedTriggers[];
+    },
+    ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
   >({
     id: factoryId,
     order,
@@ -86,11 +95,11 @@ export class UiActionsServiceEnhancements {
     getHref,
     minimalLicense,
     supportedTriggers,
-  }: DrilldownDefinition<Config, SupportedTriggers, ExecutionContext>): void => {
+  }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
     const actionFactory: ActionFactoryDefinition<
       Config,
-      object,
       SupportedTriggers,
+      FactoryContext,
       ExecutionContext
     > = {
       id: factoryId,
@@ -111,7 +120,7 @@ export class UiActionsServiceEnhancements {
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
       }),
-    } as ActionFactoryDefinition<Config, object, SupportedTriggers, ExecutionContext>;
+    } as ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>;
 
     this.registerActionFactory(actionFactory);
   };

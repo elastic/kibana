@@ -12,21 +12,23 @@ import {
 } from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import { SerializedAction } from './types';
+import { BaseActionFactoryContext, SerializedAction } from './types';
 import { ILicense } from '../../../licensing/public';
 import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 
 export class ActionFactory<
   Config extends object = object,
-  FactoryContext extends object = object,
   SupportedTriggers extends TriggerId = TriggerId,
-  ActionContext extends TriggerContextMapping[SupportedTriggers] = any // there is no other way, except removing this default
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
 > implements Omit<Presentable<FactoryContext>, 'getHref'>, Configurable<Config, FactoryContext> {
   constructor(
     protected readonly def: ActionFactoryDefinition<
       Config,
-      FactoryContext,
       SupportedTriggers,
+      FactoryContext,
       ActionContext
     >,
     protected readonly getLicence: () => ILicense

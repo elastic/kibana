@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import useMountedState from 'react-use/lib/useMountedState';
 import intersection from 'lodash/intersection';
@@ -25,12 +25,16 @@ import {
 } from './i18n';
 import {
   ActionFactory,
+  BaseActionFactoryContext,
   DynamicActionManager,
   SerializedAction,
   SerializedEvent,
 } from '../../../dynamic_actions';
+import { ExtraActionFactoryContext } from '../types';
 
-interface ConnectedFlyoutManageDrilldownsProps {
+interface ConnectedFlyoutManageDrilldownsProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
@@ -39,6 +43,11 @@ interface ConnectedFlyoutManageDrilldownsProps {
    * List of possible triggers in current context
    */
   supportedTriggers: TriggerId[];
+
+  /**
+   * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
+   */
+  extraContext?: ExtraActionFactoryContext<ActionFactoryContext>;
 }
 
 /**
@@ -71,12 +80,13 @@ export function createFlyoutManageDrilldowns({
   return (props: ConnectedFlyoutManageDrilldownsProps) => {
     const isCreateOnly = props.viewMode === 'create';
 
-    const factoryContext: object = React.useMemo(() => ({}), []);
-
+    const factoryContext: BaseActionFactoryContext = useMemo(
+      () => ({ ...props.extraContext, triggers: props.supportedTriggers }),
+      [props.extraContext, props.supportedTriggers]
+    );
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
       allActionFactories,
-      factoryContext,
-      props.supportedTriggers
+      factoryContext
     );
 
     const [route, setRoute] = useState<Routes>(
@@ -126,11 +136,16 @@ export function createFlyoutManageDrilldowns({
      */
     function mapToDrilldownToDrilldownListItem(drilldown: SerializedEvent): DrilldownListItem {
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
+      const drilldownFactoryContext: BaseActionFactoryContext = {
+        ...props.extraContext,
+        triggers: drilldown.triggers as TriggerId[],
+      };
       return {
         id: drilldown.eventId,
         drilldownName: drilldown.action.name,
-        actionName: actionFactory?.getDisplayName(factoryContext) ?? drilldown.action.factoryId,
-        icon: actionFactory?.getIconType(factoryContext),
+        actionName:
+          actionFactory?.getDisplayName(drilldownFactoryContext) ?? drilldown.action.factoryId,
+        icon: actionFactory?.getIconType(drilldownFactoryContext),
         error: !actionFactory
           ? invalidDrilldownType(drilldown.action.factoryId) // this shouldn't happen for the end user, but useful during development
           : !actionFactory.isCompatibleLicence()
@@ -189,7 +204,7 @@ export function createFlyoutManageDrilldowns({
               setRoute(Routes.Manage);
               setCurrentEditId(null);
             }}
-            actionFactoryContext={factoryContext}
+            extraActionFactoryContext={props.extraContext}
             initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
             supportedTriggers={props.supportedTriggers}
             getTrigger={getTrigger}
@@ -232,11 +247,9 @@ export function createFlyoutManageDrilldowns({
   };
 }
 
-function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
-  actionFactories: ActionFactory[],
-  context: Context,
-  supportedTriggers: TriggerId[]
-) {
+function useCompatibleActionFactoriesForCurrentContext<
+  Context extends BaseActionFactoryContext = BaseActionFactoryContext
+>(actionFactories: ActionFactory[], context: Context) {
   const [compatibleActionFactories, setCompatibleActionFactories] = useState<ActionFactory[]>();
   useEffect(() => {
     let canceled = false;
@@ -248,7 +261,7 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
 
       const compatibleFactories = actionFactories.filter((_, i) => compatibility[i]);
       const triggerSupportedFactories = compatibleFactories.filter((factory) =>
-        factory.supportedTriggers().some((trigger) => supportedTriggers.includes(trigger))
+        factory.supportedTriggers().some((trigger) => context.triggers.includes(trigger))
       );
       setCompatibleActionFactories(triggerSupportedFactories);
     }
@@ -256,7 +269,7 @@ function useCompatibleActionFactoriesForCurrentContext<Context extends object = 
     return () => {
       canceled = true;
     };
-  }, [context, actionFactories, supportedTriggers]);
+  }, [context, actionFactories, context.triggers]);
 
   return compatibleActionFactories;
 }

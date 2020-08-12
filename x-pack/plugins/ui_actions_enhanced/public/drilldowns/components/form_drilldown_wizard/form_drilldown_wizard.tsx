@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { txtDrilldownAction, txtNameOfDrilldown, txtUntitledDrilldown } from './i18n';
-import { ActionFactory } from '../../../dynamic_actions';
+import { ActionFactory, BaseActionFactoryContext } from '../../../dynamic_actions';
 import { ActionWizard } from '../../../components/action_wizard';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
@@ -16,23 +16,20 @@ const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 const noopFn = () => {};
 
-export interface FormDrilldownWizardProps {
+export interface FormDrilldownWizardProps<
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   name?: string;
   onNameChange?: (name: string) => void;
 
   currentActionFactory?: ActionFactory;
   onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
-  actionFactoryContext: object;
+  actionFactoryContext: ActionFactoryContext;
 
   actionConfig?: object;
   onActionConfigChange?: (config: object) => void;
 
   actionFactories?: ActionFactory[];
-
-  /**
-   * Current triggers selection
-   */
-  selectedTriggers?: TriggerId[];
 
   /**
    * Trigger selection has changed
@@ -60,7 +57,6 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
   actionFactories = [],
   actionFactoryContext,
   onSelectedTriggersChange,
-  selectedTriggers,
   getTriggerInfo,
   supportedTriggers,
   triggerPickerDocsLink,
@@ -114,7 +110,6 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         context={actionFactoryContext}
         onSelectedTriggersChange={onSelectedTriggersChange}
         getTriggerInfo={getTriggerInfo}
-        selectedTriggers={selectedTriggers}
         supportedTriggers={supportedTriggers}
         triggerPickerDocsLink={triggerPickerDocsLink}
       />
