@@ -41,23 +41,23 @@ const roundingRules = [
 
 const revRoundingRules = roundingRules.slice(0).reverse();
 
-function find(rules, check, last) {
-  function pick(buckets, duration) {
+function findRule(rules, check, last) {
+  function pickBucket(buckets, duration) {
     const target = duration / buckets;
-    let lastResp = null;
+    let lastResult = null;
 
     for (let i = 0; i < rules.length; i++) {
       const rule = rules[i];
-      const resp = check(rule[0], rule[1], target);
+      const result = check(rule[0], rule[1], target);
 
-      if (resp == null) {
+      if (result == null) {
         if (!last) continue;
-        if (lastResp) return lastResp;
+        if (lastResult) return lastResult;
         break;
       }
 
-      if (!last) return resp;
-      lastResp = resp;
+      if (!last) return result;
+      lastResult = result;
     }
 
     // fallback to just a number of milliseconds, ensure ms is >= 1
@@ -66,13 +66,13 @@ function find(rules, check, last) {
   }
 
   return (buckets, duration) => {
-    const interval = pick(buckets, duration);
+    const interval = pickBucket(buckets, duration);
     if (interval) return moment.duration(interval._data);
   };
 }
 
 export const calculateAuto = {
-  near: find(
+  near: findRule(
     revRoundingRules,
     function near(bound, interval, target) {
       if (bound > target) return interval;
@@ -80,11 +80,11 @@ export const calculateAuto = {
     true
   ),
 
-  lessThan: find(revRoundingRules, function lessThan(_bound, interval, target) {
+  lessThan: findRule(revRoundingRules, function lessThan(_bound, interval, target) {
     if (interval < target) return interval;
   }),
 
-  atLeast: find(revRoundingRules, function atLeast(_bound, interval, target) {
+  atLeast: findRule(revRoundingRules, function atLeast(_bound, interval, target) {
     if (interval <= target) return interval;
   }),
 };
