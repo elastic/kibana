@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import each from 'lodash/each';
+import remove from 'lodash/remove';
+import sortBy from 'lodash/sortBy';
+import get from 'lodash/get';
 
 import { mlLog } from '../../client/log';
 
@@ -91,7 +95,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
           } else {
             // loop over partition values
             for (let j = 0; j < this.splitFieldValues.length; j++) {
-              const queryCopy = _.cloneDeep(this.query);
+              const queryCopy = cloneDeep(this.query);
               // add a term to the query to filter on the partition value
               queryCopy.bool.must.push({
                 term: {
@@ -151,7 +155,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
               }
             };
 
-            _.each(this.checkers, (check) => {
+            each(this.checkers, (check) => {
               check.check
                 .run()
                 .then((interval) => {
@@ -174,7 +178,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
     }
 
     processResults() {
-      const allResults = _.map(this.checkers, 'result');
+      const allResults = this.checkers.map((c) => c.result);
 
       let reducedResults = [];
       const numberOfSplitFields = this.splitFieldValues.length || 1;
@@ -185,8 +189,8 @@ export function estimateBucketSpanFactory(mlClusterClient) {
         const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
-        resultsSubset = _.remove(resultsSubset, (res) => res !== null);
-        resultsSubset = _.sortBy(resultsSubset, (r) => r.ms);
+        resultsSubset = remove(resultsSubset, (res) => res !== null);
+        resultsSubset = sortBy(resultsSubset, (r) => r.ms);
 
         const tempMedian = this.findMedian(resultsSubset);
         if (tempMedian !== null) {
@@ -194,7 +198,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
         }
       }
 
-      reducedResults = _.sortBy(reducedResults, (r) => r.ms);
+      reducedResults = sortBy(reducedResults, (r) => r.ms);
 
       return this.findMedian(reducedResults);
     }
@@ -256,7 +260,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
         },
       })
         .then((resp) => {
-          const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
+          const value = get(resp, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
         .catch((resp) => {
@@ -293,9 +297,10 @@ export function estimateBucketSpanFactory(mlClusterClient) {
             },
           })
             .then((partitionResp) => {
-              if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
+              // eslint-disable-next-line camelcase
+              if (partitionResp.aggregations?.fields_bucket_counts?.buckets !== undefined) {
                 const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
-                fieldValues = _.map(buckets, (b) => b.key);
+                fieldValues = buckets.map((b) => b.key);
               }
               resolve(fieldValues);
             })
