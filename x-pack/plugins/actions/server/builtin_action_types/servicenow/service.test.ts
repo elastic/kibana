@@ -99,6 +99,7 @@ describe('ServiceNow service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
       });
     });
@@ -142,6 +143,7 @@ describe('ServiceNow service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
         method: 'post',
         data: { short_description: 'title', description: 'desc' },
@@ -194,6 +196,7 @@ describe('ServiceNow service', () => {
 
       expect(patchMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
         data: { short_description: 'title', description: 'desc' },
       });

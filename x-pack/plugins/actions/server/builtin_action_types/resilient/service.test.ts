@@ -215,6 +215,7 @@ describe('IBM Resilient service', () => {
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         params: {
           text_content_output_format: 'objects_convert',
@@ -274,6 +275,7 @@ describe('IBM Resilient service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents',
+        logger,
         method: 'post',
         data: {
           name: 'title',
@@ -329,6 +331,7 @@ describe('IBM Resilient service', () => {
       // The second call to the API is the update call.
       expect(requestMock.mock.calls[1][0]).toEqual({
         axios,
+        logger,
         method: 'patch',
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
@@ -410,7 +413,9 @@ describe('IBM Resilient service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'post',
+        proxySettings: undefined,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {

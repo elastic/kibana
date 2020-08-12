@@ -283,6 +283,29 @@ describe('execute()', () => {
             "headers": Object {
               "aheader": "a value",
             },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
             "method": "post",
             "proxySettings": undefined,
             "url": "https://abc.def/my-webhook",
@@ -313,6 +336,29 @@ describe('execute()', () => {
             "data": "some data",
             "headers": Object {
               "aheader": "a value",
+            },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from webhook action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
             },
             "method": "post",
             "proxySettings": undefined,

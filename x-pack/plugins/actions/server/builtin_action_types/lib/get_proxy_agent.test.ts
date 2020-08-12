@@ -17,7 +17,7 @@ describe('getProxyAgent', () => {
       { proxyUrl: 'https://someproxyhost', rejectUnauthorizedCertificates: false },
       logger
     );
-    expect(typeof agent).toBe(HttpsProxyAgent);
+    expect(agent instanceof HttpsProxyAgent).toBeTruthy();
   });
 
   test('return HttpProxyAgent for http proxy url', () => {
@@ -25,6 +25,6 @@ describe('getProxyAgent', () => {
       { proxyUrl: 'http://someproxyhost', rejectUnauthorizedCertificates: false },
       logger
     );
-    expect(typeof agent).toBe(HttpProxyAgent);
+    expect(agent instanceof HttpProxyAgent).toBeTruthy();
   });
 });

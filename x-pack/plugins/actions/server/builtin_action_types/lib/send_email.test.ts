@@ -68,6 +68,10 @@ describe('send_email module', () => {
         host: 'example.com',
         port: 1025,
       },
+      proxySettings: {
+        proxyUrl: 'https://example.com',
+        rejectUnauthorizedCertificates: false,
+      },
     });
     delete sendEmailOptions.transport.service;
     delete sendEmailOptions.transport.user;
@@ -77,8 +81,10 @@ describe('send_email module', () => {
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "headers": undefined,
           "host": "example.com",
           "port": 1025,
+          "proxy": "https://example.com",
           "secure": false,
           "tls": Object {
             "rejectUnauthorized": false,
@@ -124,8 +130,10 @@ describe('send_email module', () => {
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "headers": undefined,
           "host": "example.com",
           "port": 1025,
+          "proxy": undefined,
           "secure": true,
         },
       ]
@@ -161,7 +169,12 @@ describe('send_email module', () => {
   });
 });
 
-function getSendEmailOptions({ content = {}, routing = {}, transport = {} } = {}) {
+function getSendEmailOptions({
+  content = {},
+  routing = {},
+  transport = {},
+  proxySettings = {},
+} = {}) {
   return {
     content: {
       ...content,
@@ -181,5 +194,6 @@ function getSendEmailOptions({ content = {}, routing = {}, transport = {} } = {}
       user: 'elastic',
       password: 'changeme',
     },
+    proxySettings,
   };
 }

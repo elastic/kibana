@@ -110,6 +110,7 @@ describe('Jira service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        logger,
       });
     });
 
@@ -164,6 +165,7 @@ describe('Jira service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        logger,
         method: 'post',
         data: {
           fields: {
@@ -228,6 +230,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'put',
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
         data: { fields: { summary: 'title', description: 'desc' } },
@@ -290,6 +293,7 @@ describe('Jira service', () => {
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
+        logger,
         method: 'post',
         url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
         data: { body: 'comment' },

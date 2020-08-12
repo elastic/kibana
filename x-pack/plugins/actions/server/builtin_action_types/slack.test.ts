@@ -5,6 +5,7 @@
  */
 
 import http from 'http';
+import httpProxy from 'http-proxy';
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
@@ -184,31 +185,21 @@ describe('execute()', () => {
   });
 
   describe('proxy support', function () {
-    const proxyPort = 3434;
+    const proxyPort = 1212;
     const proxyUrl = `http://localhost:${proxyPort}`;
+    // const serverPort = 3434;
+    // const serverUrl = `http://localhost:${serverPort}`;
+    let actionTypeWithProxy: SlackActionType;
 
     let proxyHit = false;
     let proxyConnectHit = false;
 
-    const proxy = http.createServer(function (req, res) {
-      proxyHit = true;
-      // Our test proxy simply returns an empty 200 response, since we only
-      // care about the download promise being resolved.
-      res.writeHead(200);
-      res.end();
+    const proxy = httpProxy.createProxyServer({
+      target: 'http://example.com',
     });
 
-    proxy.on('connect', (req, socket) => {
-      // When the proxy is hit with a HTTPS request instead of a HTTP request,
-      // the above call handler will never be triggered. Instead the client
-      // sends a CONNECT request to the proxy, so that the proxy can setup
-      // a HTTPS connection between the client and the upstream server.
-      // We just intercept this CONNECT call here, write it an empty response
-      // and close the socket, which will fail the actual request, but we know
-      // that it tried to use the proxy.
-      proxyConnectHit = true;
-      socket.write('\r\n\r\n');
-      socket.end();
+    proxy.on('proxyRes', (proxyRes: unknown, req: unknown, res: unknown) => {
+      proxyHit = true;
     });
 
     function expectProxyHit() {
@@ -217,11 +208,16 @@ describe('execute()', () => {
 
     function expectNoProxyHit() {
       expect(proxyHit).toBe(false);
-      expect(proxyConnectHit).toBe(false);
     }
 
-    beforeAll(function (done) {
-      proxy.listen(proxyPort, done);
+    beforeAll(() => {
+      actionTypeWithProxy = getActionType({
+        logger: mockedLogger,
+        configurationUtilities: actionsConfigMock.create(),
+      });
+
+      // slackServer.listen(serverPort);
+      proxy.listen(proxyPort);
     });
 
     beforeEach(function () {
@@ -230,7 +226,7 @@ describe('execute()', () => {
     });
 
     test('should use http_proxy', async () => {
-      await actionType.executor({
+      await actionTypeWithProxy.executor({
         actionId: 'some-id',
         services,
         config: {},
@@ -246,7 +242,7 @@ describe('execute()', () => {
     });
 
     test('should not use http_proxy', async () => {
-      await actionType.executor({
+      await actionTypeWithProxy.executor({
         actionId: 'some-id',
         services,
         config: {},
