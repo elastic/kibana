@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { EditExceptionModal } from './';
@@ -38,14 +38,14 @@ describe('When the edit exception modal is opened', () => {
     useKibanaMock.mockImplementation(() => ({
       ...kibanaMock,
     }));
-    (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
-      { isLoading: false },
-      () => {},
-    ]);
     (useSignalIndex as jest.Mock).mockReturnValue({
       loading: false,
       signalIndexName: 'test-signal',
     });
+    (useAddOrUpdateException as jest.Mock).mockImplementation(() => [
+      { isLoading: false },
+      () => {},
+    ]);
     (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
       {
         isLoading: false,
@@ -55,97 +55,174 @@ describe('When the edit exception modal is opened', () => {
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
   });
 
-  it('renders the loading spinner when some of the hooks are loading', () => {
-    (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
-      {
-        isLoading: true,
-        indexPatterns: stubIndexPattern,
-      },
-    ]);
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <EditExceptionModal
-          ruleIndices={[]}
-          ruleName={ruleName}
-          exceptionListType={'endpoint'}
-          onCancel={() => {}}
-          onConfirm={() => {}}
-          exceptionItem={getExceptionListItemSchemaMock()}
-        />
-      </ThemeProvider>
-    );
-
-    expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+  describe('when the modal is loading', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
+        {
+          isLoading: true,
+          indexPatterns: stubIndexPattern,
+        },
+      ]);
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={[]}
+            ruleName={ruleName}
+            exceptionListType={'endpoint'}
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            exceptionItem={getExceptionListItemSchemaMock()}
+          />
+        </ThemeProvider>
+      );
+    });
+    it('renders the loading spinner', () => {
+      expect(wrapper.find('[data-test-subj="loadingEditExceptionModal"]').exists()).toBeTruthy();
+    });
   });
 
-  it('renders endpoint type properly when all hooks have loaded with exception data', () => {
-    const exceptionItemMock = {
-      ...getExceptionListItemSchemaMock(),
-      entries: [
-        { field: 'response', operator: 'included', type: 'match', value: '3' },
-      ] as EntriesArray,
-    };
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <EditExceptionModal
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
-          exceptionListType={'endpoint'}
-          onCancel={() => {}}
-          onConfirm={() => {}}
-          exceptionItem={exceptionItemMock}
-        />
-      </ThemeProvider>
-    );
-    expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-    ).not.toBeDisabled();
-    expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeTruthy();
-    expect(
-      wrapper
-        .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-        .getDOMNode()
-    ).not.toBeDisabled();
+  describe('when an endpoint exception with exception data is passed', () => {
+    describe('with data that matches index patterns', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(() => {
+        const exceptionItemMock = {
+          ...getExceptionListItemSchemaMock(),
+          entries: [
+            { field: 'response', operator: 'included', type: 'match', value: '3' },
+          ] as EntriesArray,
+        };
+        wrapper = mount(
+          <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+            <EditExceptionModal
+              ruleIndices={['filebeat-*']}
+              ruleName={ruleName}
+              exceptionListType={'endpoint'}
+              onCancel={() => {}}
+              onConfirm={() => {}}
+              exceptionItem={exceptionItemMock}
+            />
+          </ThemeProvider>
+        );
+      });
+      it('renders the exceptions builder', () => {
+        expect(
+          wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+        ).not.toBeDisabled();
+        expect(
+          wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper
+            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+            .getDOMNode()
+        ).not.toBeDisabled();
+      });
+      // it('should have the confirm edit button be enabled', () => {
+      // });
+      // it('should contain the endpoint specific documentation text', () => {
+      // });
+      // it('should have the bulk close checkbox enabled', () => {
+      // });
+    });
+
+    describe('without data that matches index patterns', () => {
+      let wrapper: ReactWrapper;
+      beforeEach(() => {
+        wrapper = mount(
+          <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+            <EditExceptionModal
+              ruleIndices={['filebeat-*']}
+              ruleName={ruleName}
+              exceptionListType={'endpoint'}
+              onCancel={() => {}}
+              onConfirm={() => {}}
+              exceptionItem={getExceptionListItemSchemaMock()}
+            />
+          </ThemeProvider>
+        );
+      });
+      it('renders the exceptions builder', () => {
+        expect(
+          wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+        ).not.toBeDisabled();
+        expect(
+          wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
+        ).toBeTruthy();
+        expect(
+          wrapper
+            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+            .getDOMNode()
+        ).toBeDisabled();
+      });
+      // it('should have the confirm edit button be enabled', () => {
+      // });
+      // it('should contain the endpoint specific documentation text', () => {
+      // });
+      // it('should have the bulk close checkbox disabled', () => {
+      // });
+    });
   });
 
-  it('renders detection type properly when all hooks have loaded with exception data', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <EditExceptionModal
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
-          exceptionListType={'detection'}
-          onCancel={() => {}}
-          onConfirm={() => {}}
-          exceptionItem={getExceptionListItemSchemaMock()}
-        />
-      </ThemeProvider>
-    );
-    expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-    ).not.toBeDisabled();
-    expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
+  describe('when an detection exception with exception data is passed', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            exceptionItem={getExceptionListItemSchemaMock()}
+          />
+        </ThemeProvider>
+      );
+    });
+    it('renders the exceptions builder', () => {
+      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+      ).not.toBeDisabled();
+      expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
+    });
+    // it('should have the confirm edit button be enabled', () => {
+    // });
+    // it('should contain the endpoint specific documentation text', () => {
+    // });
   });
 
-  it('renders properly when all hooks have loaded with no exception data', () => {
-    const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <EditExceptionModal
-          ruleIndices={['filebeat-*']}
-          ruleName={ruleName}
-          exceptionListType={'detection'}
-          onCancel={() => {}}
-          onConfirm={() => {}}
-          exceptionItem={exceptionItemMock}
-        />
-      </ThemeProvider>
-    );
-    expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
-    expect(
-      wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-    ).toBeDisabled();
+  describe('when an exception is passed with no exception data', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            exceptionItem={exceptionItemMock}
+          />
+        </ThemeProvider>
+      );
+    });
+    it('renders the exceptions builder', () => {
+      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+      ).toBeDisabled();
+    });
+    // it('should have the confirm edit button be enabled', () => {
+    // });
   });
 });
