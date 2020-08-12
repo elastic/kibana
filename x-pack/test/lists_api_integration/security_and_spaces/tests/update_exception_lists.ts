@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           status_code: 404,
-          message: 'Exception list id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" does not exist',
+          message: 'exception list id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" does not exist',
         });
       });
 
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           status_code: 404,
-          message: 'Exception list list_id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" does not exist',
+          message: 'exception list list_id: "5096dec6-b6b9-4d8d-8f93-6c2602079d9d" does not exist',
         });
       });
 

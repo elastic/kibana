@@ -8,7 +8,11 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Client } from '@elastic/elasticsearch';
 
-import { ListItemSchema, ExceptionListSchema } from '../../plugins/lists/common/schemas';
+import {
+  ListItemSchema,
+  ExceptionListSchema,
+  ExceptionListItemSchema,
+} from '../../plugins/lists/common/schemas';
 import { ListSchema } from '../../plugins/lists/common';
 import { LIST_INDEX } from '../../plugins/lists/common/constants';
 
@@ -79,6 +83,18 @@ export const removeListServerGeneratedProperties = (
 export const removeListItemServerGeneratedProperties = (
   list: Partial<ListItemSchema>
 ): Partial<ListItemSchema> => {
+  /* eslint-disable-next-line @typescript-eslint/naming-convention */
+  const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
+  return removedProperties;
+};
+
+/**
+ * This will remove server generated properties such as date times, etc...
+ * @param list List to pass in to remove typical server generated properties
+ */
+export const removeExceptionListItemServerGeneratedProperties = (
+  list: Partial<ExceptionListItemSchema>
+): Partial<ExceptionListItemSchema> => {
   /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
