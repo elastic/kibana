@@ -12,7 +12,7 @@ import { RegistryVarsEntry } from '../../../../types';
 import 'brace/mode/yaml';
 import 'brace/theme/textmate';
 
-export const PackageConfigInputVarField: React.FunctionComponent<{
+export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
@@ -78,7 +78,7 @@ export const PackageConfigInputVarField: React.FunctionComponent<{
         !required ? (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
-              id="xpack.ingestManager.createPackageConfig.stepConfigure.inputVarFieldOptionalLabel"
+              id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
               defaultMessage="Optional"
             />
           </EuiText>

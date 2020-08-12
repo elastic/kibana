@@ -13,10 +13,10 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export {
-  CustomConfigurePackageConfigContent,
-  CustomConfigurePackageConfigProps,
-  registerPackageConfigComponent,
+  CustomConfigurePackagePolicyContent,
+  CustomConfigurePackagePolicyProps,
+  registerPackagePolicyComponent,
 } from './applications/ingest_manager/sections/agent_config/create_package_config_page/components/custom_package_config';
 
-export { NewPackageConfig } from './applications/ingest_manager/types';
+export { NewPackagePolicy } from './applications/ingest_manager/types';
 export * from './applications/ingest_manager/types/intra_app_route_state';

@@ -10,7 +10,7 @@ import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
-import { agentConfigService } from '../agent_config';
+import { agentPolicyService } from '../agent_config';
 import { appContextService } from '../app_context';
 
 export async function listEnrollmentApiKeys(
@@ -111,7 +111,7 @@ export async function generateEnrollmentAPIKey(
   if (data.configId) {
     await validateConfigId(soClient, data.configId);
   }
-  const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
+  const configId = data.configId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
   const key = await createAPIKey(soClient, name, {
     // Useless role to avoid to have the privilege of the user that created the key
@@ -150,10 +150,10 @@ export async function generateEnrollmentAPIKey(
 
 async function validateConfigId(soClient: SavedObjectsClientContract, configId: string) {
   try {
-    await agentConfigService.get(soClient, configId);
+    await agentPolicyService.get(soClient, configId);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      throw Boom.badRequest(`Agent config ${configId} does not exist`);
+      throw Boom.badRequest(`Agent policy ${configId} does not exist`);
     }
     throw e;
   }

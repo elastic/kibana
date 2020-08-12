@@ -6,12 +6,12 @@
 import {
   PackageInfo,
   InstallationStatus,
-  NewPackageConfig,
+  NewPackagePolicy,
   RegistryConfigTemplate,
 } from '../../../../types';
-import { validatePackageConfig, validationHasErrors } from './validate_package_config';
+import { validatePackagePolicy, validationHasErrors } from './validate_package_config';
 
-describe('Ingest Manager - validatePackageConfig()', () => {
+describe('Ingest Manager - validatePackagePolicy()', () => {
   const mockPackage = ({
     name: 'mock-package',
     title: 'Mock package',
@@ -92,9 +92,9 @@ describe('Ingest Manager - validatePackageConfig()', () => {
     ],
     config_templates: [
       {
-        name: 'pkgConfig1',
-        title: 'Package config 1',
-        description: 'test package config',
+        name: 'pkgPolicy1',
+        title: 'Package policy 1',
+        description: 'test package policy',
         inputs: [
           {
             type: 'foo',
@@ -141,8 +141,8 @@ describe('Ingest Manager - validatePackageConfig()', () => {
     ],
   } as unknown) as PackageInfo;
 
-  const validPackageConfig: NewPackageConfig = {
-    name: 'pkgConfig1-1',
+  const validPackagePolicy: NewPackagePolicy = {
+    name: 'pkgPolicy1-1',
     namespace: 'default',
     config_id: 'test-config',
     enabled: true,
@@ -226,8 +226,8 @@ describe('Ingest Manager - validatePackageConfig()', () => {
     ],
   };
 
-  const invalidPackageConfig: NewPackageConfig = {
-    ...validPackageConfig,
+  const invalidPackagePolicy: NewPackagePolicy = {
+    ...validPackagePolicy,
     name: '',
     inputs: [
       {
@@ -350,14 +350,14 @@ describe('Ingest Manager - validatePackageConfig()', () => {
     },
   };
 
-  it('returns no errors for valid package config', () => {
-    expect(validatePackageConfig(validPackageConfig, mockPackage)).toEqual(
+  it('returns no errors for valid package policy', () => {
+    expect(validatePackagePolicy(validPackagePolicy, mockPackage)).toEqual(
       noErrorsValidationResults
     );
   });
 
-  it('returns errors for invalid package config', () => {
-    expect(validatePackageConfig(invalidPackageConfig, mockPackage)).toEqual({
+  it('returns errors for invalid package policy', () => {
+    expect(validatePackagePolicy(invalidPackagePolicy, mockPackage)).toEqual({
       name: ['Name is required'],
       description: null,
       namespace: null,
@@ -397,17 +397,17 @@ describe('Ingest Manager - validatePackageConfig()', () => {
   });
 
   it('returns no errors for disabled inputs', () => {
-    const disabledInputs = invalidPackageConfig.inputs.map((input) => ({
+    const disabledInputs = invalidPackagePolicy.inputs.map((input) => ({
       ...input,
       enabled: false,
     }));
     expect(
-      validatePackageConfig({ ...validPackageConfig, inputs: disabledInputs }, mockPackage)
+      validatePackagePolicy({ ...validPackagePolicy, inputs: disabledInputs }, mockPackage)
     ).toEqual(noErrorsValidationResults);
   });
 
-  it('returns only package config and input-level errors for disabled streams', () => {
-    const inputsWithDisabledStreams = invalidPackageConfig.inputs.map((input) =>
+  it('returns only package policy and input-level errors for disabled streams', () => {
+    const inputsWithDisabledStreams = invalidPackagePolicy.inputs.map((input) =>
       input.streams
         ? {
             ...input,
@@ -416,8 +416,8 @@ describe('Ingest Manager - validatePackageConfig()', () => {
         : input
     );
     expect(
-      validatePackageConfig(
-        { ...invalidPackageConfig, inputs: inputsWithDisabledStreams },
+      validatePackagePolicy(
+        { ...invalidPackagePolicy, inputs: inputsWithDisabledStreams },
         mockPackage
       )
     ).toEqual({
@@ -461,9 +461,9 @@ describe('Ingest Manager - validatePackageConfig()', () => {
     });
   });
 
-  it('returns no errors for packages with no package configs', () => {
+  it('returns no errors for packages with no package policies', () => {
     expect(
-      validatePackageConfig(validPackageConfig, {
+      validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
         config_templates: undefined,
       })
@@ -474,7 +474,7 @@ describe('Ingest Manager - validatePackageConfig()', () => {
       inputs: null,
     });
     expect(
-      validatePackageConfig(validPackageConfig, {
+      validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
         config_templates: [],
       })
@@ -488,7 +488,7 @@ describe('Ingest Manager - validatePackageConfig()', () => {
 
   it('returns no errors for packages with no inputs', () => {
     expect(
-      validatePackageConfig(validPackageConfig, {
+      validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
         config_templates: [{} as RegistryConfigTemplate],
       })
@@ -499,7 +499,7 @@ describe('Ingest Manager - validatePackageConfig()', () => {
       inputs: null,
     });
     expect(
-      validatePackageConfig(validPackageConfig, {
+      validatePackagePolicy(validPackagePolicy, {
         ...mockPackage,
         config_templates: [({ inputs: [] } as unknown) as RegistryConfigTemplate],
       })
@@ -553,7 +553,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
     ).toBe(false);
   });
 
-  it('returns true for package config validation results with errors', () => {
+  it('returns true for package policy validation results with errors', () => {
     expect(
       validationHasErrors({
         name: ['name error'],
@@ -595,7 +595,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
     ).toBe(true);
   });
 
-  it('returns false for package config validation results with no errors', () => {
+  it('returns false for package policy validation results with no errors', () => {
     expect(
       validationHasErrors({
         name: null,

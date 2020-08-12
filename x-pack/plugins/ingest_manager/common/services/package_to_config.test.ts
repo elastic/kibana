@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PackageInfo, InstallationStatus } from '../types';
-import { packageToPackageConfig, packageToPackageConfigInputs } from './package_to_config';
+import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_config';
 
 describe('Ingest Manager - packageToConfig', () => {
   const mockPackage: PackageInfo = {
@@ -31,15 +31,15 @@ describe('Ingest Manager - packageToConfig', () => {
     status: InstallationStatus.notInstalled,
   };
 
-  describe('packageToPackageConfigInputs', () => {
+  describe('packageToPackagePolicyInputs', () => {
     it('returns empty array for packages with no config templates', () => {
-      expect(packageToPackageConfigInputs(mockPackage)).toEqual([]);
-      expect(packageToPackageConfigInputs({ ...mockPackage, config_templates: [] })).toEqual([]);
+      expect(packageToPackagePolicyInputs(mockPackage)).toEqual([]);
+      expect(packageToPackagePolicyInputs({ ...mockPackage, config_templates: [] })).toEqual([]);
     });
 
     it('returns empty array for packages with a config template but no inputs', () => {
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           config_templates: [{ inputs: [] }],
         } as unknown) as PackageInfo)
@@ -48,13 +48,13 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with no streams for packages with no streams', () => {
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           config_templates: [{ inputs: [{ type: 'foo' }] }],
         } as unknown) as PackageInfo)
       ).toEqual([{ type: 'foo', enabled: true, streams: [] }]);
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           config_templates: [{ inputs: [{ type: 'foo' }, { type: 'bar' }] }],
         } as unknown) as PackageInfo)
@@ -66,7 +66,7 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams for packages with streams', () => {
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           datasets: [
             { type: 'logs', name: 'foo', streams: [{ input: 'foo' }] },
@@ -100,7 +100,7 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams configurations for packages with stream vars', () => {
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           datasets: [
             {
@@ -171,7 +171,7 @@ describe('Ingest Manager - packageToConfig', () => {
 
     it('returns inputs with streams configurations for packages with stream and input vars', () => {
       expect(
-        packageToPackageConfigInputs(({
+        packageToPackagePolicyInputs(({
           ...mockPackage,
           datasets: [
             {
@@ -315,9 +315,9 @@ describe('Ingest Manager - packageToConfig', () => {
     });
   });
 
-  describe('packageToPackageConfig', () => {
-    it('returns package config with default name', () => {
-      expect(packageToPackageConfig(mockPackage, '1', '2')).toEqual({
+  describe('packageToPackagePolicy', () => {
+    it('returns package policy with default name', () => {
+      expect(packageToPackagePolicy(mockPackage, '1', '2')).toEqual({
         config_id: '1',
         namespace: '',
         enabled: true,
@@ -331,13 +331,13 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns package config with custom name', () => {
-      expect(packageToPackageConfig(mockPackage, '1', '2', 'default', 'pkgConfig-1')).toEqual({
+    it('returns package policy with custom name', () => {
+      expect(packageToPackagePolicy(mockPackage, '1', '2', 'default', 'pkgPolicy-1')).toEqual({
         config_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [],
-        name: 'pkgConfig-1',
+        name: 'pkgPolicy-1',
         output_id: '2',
         package: {
           name: 'mock-package',
@@ -346,21 +346,21 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns package config with namespace and description', () => {
+    it('returns package policy with namespace and description', () => {
       expect(
-        packageToPackageConfig(
+        packageToPackagePolicy(
           mockPackage,
           '1',
           '2',
           'mock-namespace',
-          'pkgConfig-1',
+          'pkgPolicy-1',
           'Test description'
         )
       ).toEqual({
         config_id: '1',
         enabled: true,
         inputs: [],
-        name: 'pkgConfig-1',
+        name: 'pkgPolicy-1',
         namespace: 'mock-namespace',
         description: 'Test description',
         output_id: '2',
@@ -371,20 +371,20 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
-    it('returns package config with inputs', () => {
+    it('returns package policy with inputs', () => {
       const mockPackageWithConfigTemplates = ({
         ...mockPackage,
         config_templates: [{ inputs: [{ type: 'foo' }] }],
       } as unknown) as PackageInfo;
 
       expect(
-        packageToPackageConfig(mockPackageWithConfigTemplates, '1', '2', 'default', 'pkgConfig-1')
+        packageToPackagePolicy(mockPackageWithConfigTemplates, '1', '2', 'default', 'pkgPolicy-1')
       ).toEqual({
         config_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],
-        name: 'pkgConfig-1',
+        name: 'pkgPolicy-1',
         output_id: '2',
         package: {
           name: 'mock-package',

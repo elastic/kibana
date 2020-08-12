@@ -17,18 +17,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import {
-  PackageConfigInput,
-  PackageConfigInputStream,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
 import {
-  PackageConfigInputValidationResults,
+  PackagePolicyInputValidationResults,
   hasInvalidButRequiredVar,
   countValidationErrors,
 } from '../services';
-import { PackageConfigInputConfig } from './package_config_input_config';
-import { PackageConfigInputStreamConfig } from './package_config_input_stream';
+import { PackagePolicyInputConfig } from './package_config_input_config';
+import { PackagePolicyInputStreamConfig } from './package_config_input_stream';
 
 const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   &&& {
@@ -40,18 +40,18 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
-  packageConfigInput: PackageConfigInput
+  packagePolicyInput: PackagePolicyInput
 ): boolean => {
   return (
-    packageConfigInput.enabled &&
-    (hasInvalidButRequiredVar(packageInput.vars, packageConfigInput.vars) ||
+    packagePolicyInput.enabled &&
+    (hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
       Boolean(
         packageInputStreams.find(
           (stream) =>
             stream.enabled &&
             hasInvalidButRequiredVar(
               stream.vars,
-              packageConfigInput.streams.find(
+              packagePolicyInput.streams.find(
                 (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
               )?.vars
             )
@@ -60,25 +60,25 @@ const shouldShowStreamsByDefault = (
   );
 };
 
-export const PackageConfigInputPanel: React.FunctionComponent<{
+export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
-  packageConfigInput: PackageConfigInput;
-  updatePackageConfigInput: (updatedInput: Partial<PackageConfigInput>) => void;
-  inputValidationResults: PackageConfigInputValidationResults;
+  packagePolicyInput: PackagePolicyInput;
+  updatePackagePolicyInput: (updatedInput: Partial<PackagePolicyInput>) => void;
+  inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
     packageInput,
     packageInputStreams,
-    packageConfigInput,
-    updatePackageConfigInput,
+    packagePolicyInput,
+    updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
   }) => {
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
-      shouldShowStreamsByDefault(packageInput, packageInputStreams, packageConfigInput)
+      shouldShowStreamsByDefault(packageInput, packageInputStreams, packagePolicyInput)
     );
 
     // Errors state
@@ -89,12 +89,12 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
       .map((packageInputStream) => {
         return {
           packageInputStream,
-          packageConfigInputStream: packageConfigInput.streams.find(
+          packagePolicyInputStream: packagePolicyInput.streams.find(
             (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
           ),
         };
       })
-      .filter((stream) => Boolean(stream.packageConfigInputStream));
+      .filter((stream) => Boolean(stream.packagePolicyInputStream));
 
     return (
       <>
@@ -111,12 +111,12 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              checked={packageConfigInput.enabled}
+              checked={packagePolicyInput.enabled}
               onChange={(e) => {
                 const enabled = e.target.checked;
-                updatePackageConfigInput({
+                updatePackagePolicyInput({
                   enabled,
-                  streams: packageConfigInput.streams.map((stream) => ({
+                  streams: packagePolicyInput.streams.map((stream) => ({
                     ...stream,
                     enabled,
                   })),
@@ -133,7 +133,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiText color="danger" size="s">
                     <FormattedMessage
-                      id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                      id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
                       defaultMessage="{count, plural, one {# error} other {# errors}}"
                       values={{ count: errorCount }}
                     />
@@ -148,7 +148,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                   aria-label={
                     isShowingStreams
                       ? i18n.translate(
-                          'xpack.ingestManager.createPackageConfig.stepConfigure.hideStreamsAriaLabel',
+                          'xpack.ingestManager.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
                           {
                             defaultMessage: 'Hide {type} inputs',
                             values: {
@@ -157,7 +157,7 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
                           }
                         )
                       : i18n.translate(
-                          'xpack.ingestManager.createPackageConfig.stepConfigure.showStreamsAriaLabel',
+                          'xpack.ingestManager.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
                           {
                             defaultMessage: 'Show {type} inputs',
                             values: {
@@ -175,13 +175,13 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
         {/* Header rule break */}
         {isShowingStreams ? <EuiSpacer size="l" /> : null}
 
-        {/* Input level configuration */}
+        {/* Input level policy */}
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
-            <PackageConfigInputConfig
+            <PackagePolicyInputConfig
               packageInputVars={packageInput.vars}
-              packageConfigInput={packageConfigInput}
-              updatePackageConfigInput={updatePackageConfigInput}
+              packagePolicyInput={packagePolicyInput}
+              updatePackagePolicyInput={updatePackagePolicyInput}
               inputVarsValidationResults={{ vars: inputValidationResults.vars }}
               forceShowErrors={forceShowErrors}
             />
@@ -189,45 +189,45 @@ export const PackageConfigInputPanel: React.FunctionComponent<{
           </Fragment>
         ) : null}
 
-        {/* Per-stream configuration */}
+        {/* Per-stream policy */}
         {isShowingStreams ? (
           <EuiFlexGroup direction="column">
-            {inputStreams.map(({ packageInputStream, packageConfigInputStream }, index) => (
+            {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
-                <PackageConfigInputStreamConfig
+                <PackagePolicyInputStreamConfig
                   packageInputStream={packageInputStream}
-                  packageConfigInputStream={packageConfigInputStream!}
-                  updatePackageConfigInputStream={(
-                    updatedStream: Partial<PackageConfigInputStream>
+                  packagePolicyInputStream={packagePolicyInputStream!}
+                  updatePackagePolicyInputStream={(
+                    updatedStream: Partial<PackagePolicyInputStream>
                   ) => {
-                    const indexOfUpdatedStream = packageConfigInput.streams.findIndex(
+                    const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
                       (stream) =>
                         stream.data_stream.dataset === packageInputStream.data_stream.dataset
                     );
-                    const newStreams = [...packageConfigInput.streams];
+                    const newStreams = [...packagePolicyInput.streams];
                     newStreams[indexOfUpdatedStream] = {
                       ...newStreams[indexOfUpdatedStream],
                       ...updatedStream,
                     };
 
-                    const updatedInput: Partial<PackageConfigInput> = {
+                    const updatedInput: Partial<PackagePolicyInput> = {
                       streams: newStreams,
                     };
 
                     // Update input enabled state if needed
-                    if (!packageConfigInput.enabled && updatedStream.enabled) {
+                    if (!packagePolicyInput.enabled && updatedStream.enabled) {
                       updatedInput.enabled = true;
                     } else if (
-                      packageConfigInput.enabled &&
+                      packagePolicyInput.enabled &&
                       !newStreams.find((stream) => stream.enabled)
                     ) {
                       updatedInput.enabled = false;
                     }
 
-                    updatePackageConfigInput(updatedInput);
+                    updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packageConfigInputStream!.id]
+                    inputValidationResults.streams![packagePolicyInputStream!.id]
                   }
                   forceShowErrors={forceShowErrors}
                 />

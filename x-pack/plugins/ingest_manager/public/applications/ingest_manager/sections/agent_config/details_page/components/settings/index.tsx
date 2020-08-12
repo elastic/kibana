@@ -9,18 +9,18 @@ import styled from 'styled-components';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../../types';
+import { AgentPolicy } from '../../../../../types';
 import {
   useLink,
   useCore,
   useCapabilities,
-  sendUpdateAgentConfig,
+  sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
 } from '../../../../../hooks';
 import {
-  AgentConfigForm,
-  agentConfigFormValidation,
+  AgentPolicyForm,
+  agentPolicyFormValidation,
   ConfirmDeployConfigModal,
 } from '../../../components';
 import { useConfigRefresh } from '../../hooks';
@@ -31,8 +31,8 @@ const FormWrapper = styled.div`
   margin-left: auto;
 `;
 
-export const ConfigSettingsView = memo<{ config: AgentConfig }>(
-  ({ config: originalAgentConfig }) => {
+export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
+  ({ agentPolicy: originalAgentPolicy }) => {
     const {
       notifications,
       chrome: { getIsNavDrawerLocked$ },
@@ -46,14 +46,14 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const hasWriteCapabilites = useCapabilities().write;
     const refreshConfig = useConfigRefresh();
     const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-    const [agentConfig, setAgentConfig] = useState<AgentConfig>({
-      ...originalAgentConfig,
+    const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
+      ...originalAgentPolicy,
     });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-    const validation = agentConfigFormValidation(agentConfig);
+    const validation = agentPolicyFormValidation(agentPolicy);
 
     useEffect(() => {
       const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
@@ -63,20 +63,20 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
       return () => subscription.unsubscribe();
     });
 
-    const updateAgentConfig = (updatedFields: Partial<AgentConfig>) => {
-      setAgentConfig({
-        ...agentConfig,
+    const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
+      setAgentPolicy({
+        ...agentPolicy,
         ...updatedFields,
       });
       setHasChanges(true);
     };
 
-    const submitUpdateAgentConfig = async () => {
+    const submitUpdateAgentPolicy = async () => {
       setIsLoading(true);
       try {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, namespace, monitoring_enabled } = agentConfig;
-        const { data, error } = await sendUpdateAgentConfig(agentConfig.id, {
+        const { name, description, namespace, monitoring_enabled } = agentPolicy;
+        const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
           description,
           namespace,
@@ -84,9 +84,9 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
         });
         if (data?.success) {
           notifications.toasts.addSuccess(
-            i18n.translate('xpack.ingestManager.editAgentConfig.successNotificationTitle', {
+            i18n.translate('xpack.ingestManager.editAgentPolicy.successNotificationTitle', {
               defaultMessage: "Successfully updated '{name}' settings",
-              values: { name: agentConfig.name },
+              values: { name: agentPolicy.name },
             })
           );
           refreshConfig();
@@ -95,15 +95,15 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           notifications.toasts.addDanger(
             error
               ? error.message
-              : i18n.translate('xpack.ingestManager.editAgentConfig.errorNotificationTitle', {
-                  defaultMessage: 'Unable to update agent config',
+              : i18n.translate('xpack.ingestManager.editAgentPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to update agent policy',
                 })
           );
         }
       } catch (e) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.editAgentConfig.errorNotificationTitle', {
-            defaultMessage: 'Unable to update agent config',
+          i18n.translate('xpack.ingestManager.editAgentPolicy.errorNotificationTitle', {
+            defaultMessage: 'Unable to update agent policy',
           })
         );
       }
@@ -114,14 +114,14 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
       // Retrieve agent count if fleet is enabled
       if (isFleetEnabled) {
         setIsLoading(true);
-        const { data } = await sendGetAgentStatus({ configId: agentConfig.id });
+        const { data } = await sendGetAgentStatus({ configId: agentPolicy.id });
         if (data?.results.total) {
           setAgentCount(data.results.total);
         } else {
-          await submitUpdateAgentConfig();
+          await submitUpdateAgentPolicy();
         }
       } else {
-        await submitUpdateAgentConfig();
+        await submitUpdateAgentPolicy();
       }
     };
 
@@ -130,10 +130,10 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
         {agentCount ? (
           <ConfirmDeployConfigModal
             agentCount={agentCount}
-            agentConfig={agentConfig}
+            agentPolicy={agentPolicy}
             onConfirm={() => {
               setAgentCount(0);
-              submitUpdateAgentConfig();
+              submitUpdateAgentPolicy();
             }}
             onCancel={() => {
               setAgentCount(0);
@@ -141,15 +141,15 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
             }}
           />
         ) : null}
-        <AgentConfigForm
-          agentConfig={agentConfig}
-          updateAgentConfig={updateAgentConfig}
+        <AgentPolicyForm
+          agentPolicy={agentPolicy}
+          updateAgentPolicy={updateAgentPolicy}
           withSysMonitoring={withSysMonitoring}
           updateSysMonitoring={(newValue) => setWithSysMonitoring(newValue)}
           validation={validation}
           isEditing={true}
           onDelete={() => {
-            history.push(getPath('configurations_list'));
+            history.push(getPath('policies_list'));
           }}
         />
         {/* TODO #64541 - Remove classes */}
@@ -166,7 +166,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <FormattedMessage
-                  id="xpack.ingestManager.editAgentConfig.unsavedChangesText"
+                  id="xpack.ingestManager.editAgentPolicy.unsavedChangesText"
                   defaultMessage="You have unsaved changes"
                 />
               </EuiFlexItem>
@@ -176,12 +176,12 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
                     <EuiButtonEmpty
                       color="ghost"
                       onClick={() => {
-                        setAgentConfig({ ...originalAgentConfig });
+                        setAgentPolicy({ ...originalAgentPolicy });
                         setHasChanges(false);
                       }}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.editAgentConfig.cancelButtonText"
+                        id="xpack.ingestManager.editAgentPolicy.cancelButtonText"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -199,12 +199,12 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
                     >
                       {isLoading ? (
                         <FormattedMessage
-                          id="xpack.ingestManager.editAgentConfig.savingButtonText"
+                          id="xpack.ingestManager.editAgentPolicy.savingButtonText"
                           defaultMessage="Saving…"
                         />
                       ) : (
                         <FormattedMessage
-                          id="xpack.ingestManager.editAgentConfig.saveButtonText"
+                          id="xpack.ingestManager.editAgentPolicy.saveButtonText"
                           defaultMessage="Save changes"
                         />
                       )}

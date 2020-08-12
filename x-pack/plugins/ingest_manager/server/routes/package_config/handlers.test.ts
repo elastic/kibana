@@ -7,23 +7,23 @@
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import { IRouter, KibanaRequest, Logger, RequestHandler, RouteConfig } from 'kibana/server';
 import { registerRoutes } from './index';
-import { PACKAGE_CONFIG_API_ROUTES } from '../../../common/constants';
+import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { xpackMocks } from '../../../../../mocks';
 import { appContextService } from '../../services';
 import { createAppContextStartContractMock } from '../../mocks';
-import { PackageConfigServiceInterface, ExternalCallback } from '../..';
-import { CreatePackageConfigRequestSchema } from '../../types/rest_spec';
-import { packageConfigService } from '../../services';
+import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
+import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+import { packagePolicyService } from '../../services';
 
-const packageConfigServiceMock = packageConfigService as jest.Mocked<PackageConfigServiceInterface>;
+const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
 jest.mock('../../services/package_config', (): {
-  packageConfigService: jest.Mocked<PackageConfigServiceInterface>;
+  packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
 } => {
   return {
-    packageConfigService: {
+    packagePolicyService: {
       assignPackageStream: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
-      buildPackageConfigFromPackage: jest.fn(),
+      buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
       create: jest.fn((soClient, callCluster, newData) =>
         Promise.resolve({
@@ -52,7 +52,7 @@ jest.mock('../../services/epm/packages', () => {
   };
 });
 
-describe('When calling package config', () => {
+describe('When calling package policy', () => {
   let routerMock: jest.Mocked<IRouter>;
   let routeHandler: RequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, any>;
@@ -77,12 +77,12 @@ describe('When calling package config', () => {
 
   describe('create api handler', () => {
     const getCreateKibanaRequest = (
-      newData?: typeof CreatePackageConfigRequestSchema.body
-    ): KibanaRequest<undefined, undefined, typeof CreatePackageConfigRequestSchema.body> => {
+      newData?: typeof CreatePackagePolicyRequestSchema.body
+    ): KibanaRequest<undefined, undefined, typeof CreatePackagePolicyRequestSchema.body> => {
       return httpServerMock.createKibanaRequest<
         undefined,
         undefined,
-        typeof CreatePackageConfigRequestSchema.body
+        typeof CreatePackagePolicyRequestSchema.body
       >({
         path: routeConfig.path,
         method: 'post',
@@ -102,7 +102,7 @@ describe('When calling package config', () => {
     // Set the routeConfig and routeHandler to the Create API
     beforeAll(() => {
       [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-        path.startsWith(PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN)
+        path.startsWith(PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN)
       )!;
     });
 
@@ -151,8 +151,8 @@ describe('When calling package config', () => {
       });
 
       beforeEach(() => {
-        appContextService.addExternalCallback('packageConfigCreate', callbackOne);
-        appContextService.addExternalCallback('packageConfigCreate', callbackTwo);
+        appContextService.addExternalCallback('packagePolicyCreate', callbackOne);
+        appContextService.addExternalCallback('packagePolicyCreate', callbackTwo);
       });
 
       afterEach(() => (callbackCallingOrder.length = 0));
@@ -164,7 +164,7 @@ describe('When calling package config', () => {
         expect(callbackCallingOrder).toEqual(['one', 'two']);
       });
 
-      it('should feed package config returned by last callback', async () => {
+      it('should feed package policy returned by last callback', async () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
@@ -213,7 +213,7 @@ describe('When calling package config', () => {
         const request = getCreateKibanaRequest();
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(packageConfigServiceMock.create.mock.calls[0][2]).toEqual({
+        expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
           config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
@@ -268,8 +268,8 @@ describe('When calling package config', () => {
         });
 
         beforeEach(() => {
-          appContextService.addExternalCallback('packageConfigCreate', callbackThree);
-          appContextService.addExternalCallback('packageConfigCreate', callbackFour);
+          appContextService.addExternalCallback('packagePolicyCreate', callbackThree);
+          appContextService.addExternalCallback('packagePolicyCreate', callbackFour);
         });
 
         it('should skip over callback exceptions and still execute other callbacks', async () => {
@@ -285,16 +285,16 @@ describe('When calling package config', () => {
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
           expect(errorLogger.mock.calls).toEqual([
-            ['An external registered [packageConfigCreate] callback failed when executed'],
+            ['An external registered [packagePolicyCreate] callback failed when executed'],
             [new Error('callbackThree threw error on purpose')],
           ]);
         });
 
-        it('should create package config with last successful returned package config', async () => {
+        it('should create package policy with last successful returned package policy', async () => {
           const request = getCreateKibanaRequest();
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
-          expect(packageConfigServiceMock.create.mock.calls[0][2]).toEqual({
+          expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
             config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,

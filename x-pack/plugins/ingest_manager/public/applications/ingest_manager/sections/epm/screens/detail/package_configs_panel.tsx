@@ -10,11 +10,11 @@ import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
 
-interface PackageConfigsPanelProps {
+interface PackagePoliciesPanelProps {
   name: string;
   version: string;
 }
-export const PackageConfigsPanel = ({ name, version }: PackageConfigsPanelProps) => {
+export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProps) => {
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);

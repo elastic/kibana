@@ -19,59 +19,59 @@ import {
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
-import { useCore, sendGetOneAgentConfigFull } from '../../../../hooks';
-import { DownloadStep, AgentConfigSelectionStep } from './steps';
-import { configToYaml, agentConfigRouteService } from '../../../../services';
+import { AgentPolicy } from '../../../../types';
+import { useCore, sendGetOneAgentPolicyFull } from '../../../../hooks';
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import { policyToYaml, agentPolicyRouteService } from '../../../../services';
 
 interface Props {
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
 }
 
 const RUN_INSTRUCTIONS = './elastic-agent run';
 
-export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
+export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentPolicies }) => {
   const core = useCore();
   const { notifications } = core;
 
-  const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>();
-  const [fullAgentConfig, setFullAgentConfig] = useState<any | undefined>();
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
+  const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
 
-  const downloadLink = selectedConfigId
+  const downloadLink = selectedPolicyId
     ? core.http.basePath.prepend(
-        `${agentConfigRouteService.getInfoFullDownloadPath(selectedConfigId)}?standalone=true`
+        `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`
       )
     : undefined;
 
   useEffect(() => {
-    async function fetchFullConfig() {
+    async function fetchFullPolicy() {
       try {
-        if (!selectedConfigId) {
+        if (!selectedPolicyId) {
           return;
         }
-        const res = await sendGetOneAgentConfigFull(selectedConfigId, { standalone: true });
+        const res = await sendGetOneAgentPolicyFull(selectedPolicyId, { standalone: true });
         if (res.error) {
           throw res.error;
         }
 
         if (!res.data) {
-          throw new Error('No data while fetching full agent config');
+          throw new Error('No data while fetching full agent policy');
         }
 
-        setFullAgentConfig(res.data.item);
+        setFullAgentPolicy(res.data.item);
       } catch (error) {
         notifications.toasts.addError(error, {
           title: 'Error',
         });
       }
     }
-    fetchFullConfig();
-  }, [selectedConfigId, notifications.toasts]);
+    fetchFullPolicy();
+  }, [selectedPolicyId, notifications.toasts]);
 
-  const yaml = useMemo(() => configToYaml(fullAgentConfig), [fullAgentConfig]);
+  const yaml = useMemo(() => policyToYaml(fullAgentPolicy), [fullAgentPolicy]);
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentConfigSelectionStep({ agentConfigs, setSelectedConfigId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId }),
     {
       title: i18n.translate('xpack.ingestManager.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',
@@ -81,7 +81,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
           <EuiText>
             <FormattedMessage
               id="xpack.ingestManager.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this configuration and put it into a file named {fileName} on the system where the Elastic Agent is installed. Don’t forget to modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the configuration file so that it uses your actual Elasticsearch credentials."
+              defaultMessage="Copy this policy and put it into a file named {fileName} on the system where the Elastic Agent is installed. Don’t forget to modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the policy file so that it uses your actual Elasticsearch credentials."
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
@@ -96,7 +96,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
                   {(copy) => (
                     <EuiButton onClick={copy} iconType="copyClipboard">
                       <FormattedMessage
-                        id="xpack.ingestManager.agentEnrollment.copyConfigurationButton"
+                        id="xpack.ingestManager.agentEnrollment.copyPolicyButton"
                         defaultMessage="Copy to clipboard"
                       />
                     </EuiButton>
@@ -106,8 +106,8 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
               <EuiFlexItem grow={false}>
                 <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.downloadConfigurationButton"
-                    defaultMessage="Download configuration"
+                    id="xpack.ingestManager.agentEnrollment.downloadPolicyButton"
+                    defaultMessage="Download policy"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -170,7 +170,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
       <EuiText>
         <FormattedMessage
           id="xpack.ingestManager.agentEnrollment.standaloneDescription"
-          defaultMessage="Agents running in standalone mode need to be updated manually if you ever wish to make changes to their configuration. Follow the instructions below to download and setup an Elastic Agent in standalone mode."
+          defaultMessage="Agents running in standalone mode need to be updated manually if you ever wish to make changes to their policy. Follow the instructions below to download and setup an Elastic Agent in standalone mode."
         />
       </EuiText>
       <EuiSpacer size="l" />

@@ -9,100 +9,100 @@ import {
   useConditionalRequest,
   SendConditionalRequestConfig,
 } from './use_request';
-import { agentConfigRouteService } from '../../services';
+import { agentPolicyRouteService } from '../../services';
 import {
-  GetAgentConfigsRequest,
-  GetAgentConfigsResponse,
-  GetOneAgentConfigResponse,
-  GetFullAgentConfigResponse,
-  CreateAgentConfigRequest,
-  CreateAgentConfigResponse,
-  UpdateAgentConfigRequest,
-  UpdateAgentConfigResponse,
-  CopyAgentConfigRequest,
-  CopyAgentConfigResponse,
-  DeleteAgentConfigRequest,
-  DeleteAgentConfigResponse,
+  GetAgentPoliciesRequest,
+  GetAgentPoliciesResponse,
+  GetOneAgentPolicyResponse,
+  GetFullAgentPolicyResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+  UpdateAgentPolicyRequest,
+  UpdateAgentPolicyResponse,
+  CopyAgentPolicyRequest,
+  CopyAgentPolicyResponse,
+  DeleteAgentPolicyRequest,
+  DeleteAgentPolicyResponse,
 } from '../../types';
 
-export const useGetAgentConfigs = (query?: GetAgentConfigsRequest['query']) => {
-  return useRequest<GetAgentConfigsResponse>({
-    path: agentConfigRouteService.getListPath(),
+export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
+  return useRequest<GetAgentPoliciesResponse>({
+    path: agentPolicyRouteService.getListPath(),
     method: 'get',
     query,
   });
 };
 
-export const useGetOneAgentConfig = (agentConfigId: string | undefined) => {
-  return useConditionalRequest<GetOneAgentConfigResponse>({
-    path: agentConfigId ? agentConfigRouteService.getInfoPath(agentConfigId) : undefined,
+export const useGetOneAgentPolicy = (agentPolicyId: string | undefined) => {
+  return useConditionalRequest<GetOneAgentPolicyResponse>({
+    path: agentPolicyId ? agentPolicyRouteService.getInfoPath(agentPolicyId) : undefined,
     method: 'get',
-    shouldSendRequest: !!agentConfigId,
+    shouldSendRequest: !!agentPolicyId,
   } as SendConditionalRequestConfig);
 };
 
-export const useGetOneAgentConfigFull = (agentConfigId: string) => {
-  return useRequest<GetFullAgentConfigResponse>({
-    path: agentConfigRouteService.getInfoFullPath(agentConfigId),
+export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
+  return useRequest<GetFullAgentPolicyResponse>({
+    path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
     method: 'get',
   });
 };
 
-export const sendGetOneAgentConfigFull = (
-  agentConfigId: string,
+export const sendGetOneAgentPolicyFull = (
+  agentPolicyId: string,
   query: { standalone?: boolean } = {}
 ) => {
-  return sendRequest<GetFullAgentConfigResponse>({
-    path: agentConfigRouteService.getInfoFullPath(agentConfigId),
+  return sendRequest<GetFullAgentPolicyResponse>({
+    path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
     method: 'get',
     query,
   });
 };
 
-export const sendGetOneAgentConfig = (agentConfigId: string) => {
-  return sendRequest<GetOneAgentConfigResponse>({
-    path: agentConfigRouteService.getInfoPath(agentConfigId),
+export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
+  return sendRequest<GetOneAgentPolicyResponse>({
+    path: agentPolicyRouteService.getInfoPath(agentPolicyId),
     method: 'get',
   });
 };
 
-export const sendCreateAgentConfig = (
-  body: CreateAgentConfigRequest['body'],
+export const sendCreateAgentPolicy = (
+  body: CreateAgentPolicyRequest['body'],
   { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
 ) => {
-  return sendRequest<CreateAgentConfigResponse>({
-    path: agentConfigRouteService.getCreatePath(),
+  return sendRequest<CreateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
     query: withSysMonitoring ? { sys_monitoring: true } : {},
   });
 };
 
-export const sendUpdateAgentConfig = (
-  agentConfigId: string,
-  body: UpdateAgentConfigRequest['body']
+export const sendUpdateAgentPolicy = (
+  agentPolicyId: string,
+  body: UpdateAgentPolicyRequest['body']
 ) => {
-  return sendRequest<UpdateAgentConfigResponse>({
-    path: agentConfigRouteService.getUpdatePath(agentConfigId),
+  return sendRequest<UpdateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
     method: 'put',
     body: JSON.stringify(body),
   });
 };
 
-export const sendCopyAgentConfig = (
-  agentConfigId: string,
-  body: CopyAgentConfigRequest['body']
+export const sendCopyAgentPolicy = (
+  agentPolicyId: string,
+  body: CopyAgentPolicyRequest['body']
 ) => {
-  return sendRequest<CopyAgentConfigResponse>({
-    path: agentConfigRouteService.getCopyPath(agentConfigId),
+  return sendRequest<CopyAgentPolicyResponse>({
+    path: agentPolicyRouteService.getCopyPath(agentPolicyId),
     method: 'post',
     body: JSON.stringify(body),
   });
 };
 
-export const sendDeleteAgentConfig = (body: DeleteAgentConfigRequest['body']) => {
-  return sendRequest<DeleteAgentConfigResponse>({
-    path: agentConfigRouteService.getDeletePath(),
+export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) => {
+  return sendRequest<DeleteAgentPolicyResponse>({
+    path: agentPolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
   });

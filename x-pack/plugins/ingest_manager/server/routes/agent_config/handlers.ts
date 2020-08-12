@@ -6,45 +6,45 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, ResponseHeaders } from 'src/core/server';
 import bluebird from 'bluebird';
-import { configToYaml } from '../../../common/services';
-import { appContextService, agentConfigService, packageConfigService } from '../../services';
+import { policyToYaml } from '../../../common/services';
+import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { listAgents } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import {
-  GetAgentConfigsRequestSchema,
-  GetOneAgentConfigRequestSchema,
-  CreateAgentConfigRequestSchema,
-  UpdateAgentConfigRequestSchema,
-  CopyAgentConfigRequestSchema,
-  DeleteAgentConfigRequestSchema,
-  GetFullAgentConfigRequestSchema,
-  AgentConfig,
+  GetAgentPoliciesRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
+  CopyAgentPolicyRequestSchema,
+  DeleteAgentPolicyRequestSchema,
+  GetFullAgentPolicyRequestSchema,
+  AgentPolicy,
   DefaultPackages,
-  NewPackageConfig,
+  NewPackagePolicy,
 } from '../../types';
 import {
-  GetAgentConfigsResponse,
-  GetAgentConfigsResponseItem,
-  GetOneAgentConfigResponse,
-  CreateAgentConfigResponse,
-  UpdateAgentConfigResponse,
-  CopyAgentConfigResponse,
-  DeleteAgentConfigResponse,
-  GetFullAgentConfigResponse,
+  GetAgentPoliciesResponse,
+  GetAgentPoliciesResponseItem,
+  GetOneAgentPolicyResponse,
+  CreateAgentPolicyResponse,
+  UpdateAgentPolicyResponse,
+  CopyAgentPolicyResponse,
+  DeleteAgentPolicyResponse,
+  GetFullAgentPolicyResponse,
 } from '../../../common';
 
-export const getAgentConfigsHandler: RequestHandler<
+export const getAgentPoliciesHandler: RequestHandler<
   undefined,
-  TypeOf<typeof GetAgentConfigsRequestSchema.query>
+  TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const { full: withPackageConfigs = false, ...restOfQuery } = request.query;
+  const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await agentConfigService.list(soClient, {
-      withPackageConfigs,
+    const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
+      withPackagePolicies,
       ...restOfQuery,
     });
-    const body: GetAgentConfigsResponse = {
+    const body: GetAgentPoliciesResponse = {
       items,
       total,
       page,
@@ -54,13 +54,13 @@ export const getAgentConfigsHandler: RequestHandler<
 
     await bluebird.map(
       items,
-      (agentConfig: GetAgentConfigsResponseItem) =>
+      (agentPolicy: GetAgentPoliciesResponseItem) =>
         listAgents(soClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentConfig.id}`,
-        }).then(({ total: agentTotal }) => (agentConfig.agents = agentTotal)),
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentPolicy.id}`,
+        }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
       { concurrency: 10 }
     );
 
@@ -73,15 +73,15 @@ export const getAgentConfigsHandler: RequestHandler<
   }
 };
 
-export const getOneAgentConfigHandler: RequestHandler<TypeOf<
-  typeof GetOneAgentConfigRequestSchema.params
+export const getOneAgentPolicyHandler: RequestHandler<TypeOf<
+  typeof GetOneAgentPolicyRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const agentConfig = await agentConfigService.get(soClient, request.params.agentConfigId);
-    if (agentConfig) {
-      const body: GetOneAgentConfigResponse = {
-        item: agentConfig,
+    const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+    if (agentPolicy) {
+      const body: GetOneAgentPolicyResponse = {
+        item: agentPolicy,
         success: true,
       };
       return response.ok({
@@ -90,7 +90,7 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Agent config not found' },
+        body: { message: 'Agent policy not found' },
       });
     }
   } catch (e) {
@@ -101,10 +101,10 @@ export const getOneAgentConfigHandler: RequestHandler<TypeOf<
   }
 };
 
-export const createAgentConfigHandler: RequestHandler<
+export const createAgentPolicyHandler: RequestHandler<
   undefined,
-  TypeOf<typeof CreateAgentConfigRequestSchema.query>,
-  TypeOf<typeof CreateAgentConfigRequestSchema.body>
+  TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
+  TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
@@ -112,35 +112,35 @@ export const createAgentConfigHandler: RequestHandler<
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   try {
     // eslint-disable-next-line prefer-const
-    let [agentConfig, newSysPackageConfig] = await Promise.all<
-      AgentConfig,
-      NewPackageConfig | undefined
+    let [agentPolicy, newSysPackagePolicy] = await Promise.all<
+      AgentPolicy,
+      NewPackagePolicy | undefined
     >([
-      agentConfigService.create(soClient, request.body, {
+      agentPolicyService.create(soClient, request.body, {
         user,
       }),
-      // If needed, retrieve System package information and build a new package config for the system package
-      // NOTE: we ignore failures in attempting to create package config, since config might have been created
+      // If needed, retrieve System package information and build a new package policy for the system package
+      // NOTE: we ignore failures in attempting to create package policy, since config might have been created
       // successfully
       withSysMonitoring
-        ? packageConfigService
-            .buildPackageConfigFromPackage(soClient, DefaultPackages.system)
+        ? packagePolicyService
+            .buildPackagePolicyFromPackage(soClient, DefaultPackages.system)
             .catch(() => undefined)
         : undefined,
     ]);
 
-    // Create the system monitoring package config and add it to agent config.
-    if (withSysMonitoring && newSysPackageConfig !== undefined && agentConfig !== undefined) {
-      newSysPackageConfig.config_id = agentConfig.id;
-      newSysPackageConfig.namespace = agentConfig.namespace;
-      await packageConfigService.create(soClient, callCluster, newSysPackageConfig, {
+    // Create the system monitoring package policy and add it to agent policy.
+    if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
+      newSysPackagePolicy.config_id = agentPolicy.id;
+      newSysPackagePolicy.namespace = agentPolicy.namespace;
+      await packagePolicyService.create(soClient, callCluster, newSysPackagePolicy, {
         user,
         bumpConfigRevision: false,
       });
     }
 
-    const body: CreateAgentConfigResponse = {
-      item: agentConfig,
+    const body: CreateAgentPolicyResponse = {
+      item: agentPolicy,
       success: true,
     };
 
@@ -155,23 +155,23 @@ export const createAgentConfigHandler: RequestHandler<
   }
 };
 
-export const updateAgentConfigHandler: RequestHandler<
-  TypeOf<typeof UpdateAgentConfigRequestSchema.params>,
+export const updateAgentPolicyHandler: RequestHandler<
+  TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   unknown,
-  TypeOf<typeof UpdateAgentConfigRequestSchema.body>
+  TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
-    const agentConfig = await agentConfigService.update(
+    const agentPolicy = await agentPolicyService.update(
       soClient,
-      request.params.agentConfigId,
+      request.params.agentPolicyId,
       request.body,
       {
         user: user || undefined,
       }
     );
-    const body: UpdateAgentConfigResponse = { item: agentConfig, success: true };
+    const body: UpdateAgentPolicyResponse = { item: agentPolicy, success: true };
     return response.ok({
       body,
     });
@@ -183,23 +183,23 @@ export const updateAgentConfigHandler: RequestHandler<
   }
 };
 
-export const copyAgentConfigHandler: RequestHandler<
-  TypeOf<typeof CopyAgentConfigRequestSchema.params>,
+export const copyAgentPolicyHandler: RequestHandler<
+  TypeOf<typeof CopyAgentPolicyRequestSchema.params>,
   unknown,
-  TypeOf<typeof CopyAgentConfigRequestSchema.body>
+  TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
-    const agentConfig = await agentConfigService.copy(
+    const agentPolicy = await agentPolicyService.copy(
       soClient,
-      request.params.agentConfigId,
+      request.params.agentPolicyId,
       request.body,
       {
         user: user || undefined,
       }
     );
-    const body: CopyAgentConfigResponse = { item: agentConfig, success: true };
+    const body: CopyAgentPolicyResponse = { item: agentPolicy, success: true };
     return response.ok({
       body,
     });
@@ -211,16 +211,16 @@ export const copyAgentConfigHandler: RequestHandler<
   }
 };
 
-export const deleteAgentConfigsHandler: RequestHandler<
+export const deleteAgentPoliciesHandler: RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof DeleteAgentConfigRequestSchema.body>
+  TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const body: DeleteAgentConfigResponse = await agentConfigService.delete(
+    const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
-      request.body.agentConfigId
+      request.body.agentPolicyId
     );
     return response.ok({
       body,
@@ -233,21 +233,21 @@ export const deleteAgentConfigsHandler: RequestHandler<
   }
 };
 
-export const getFullAgentConfig: RequestHandler<
-  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
-  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+export const getFullAgentPolicy: RequestHandler<
+  TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
+  TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
 
   try {
-    const fullAgentConfig = await agentConfigService.getFullConfig(
+    const fullAgentPolicy = await agentPolicyService.getFullConfig(
       soClient,
-      request.params.agentConfigId,
+      request.params.agentPolicyId,
       { standalone: request.query.standalone === true }
     );
-    if (fullAgentConfig) {
-      const body: GetFullAgentConfigResponse = {
-        item: fullAgentConfig,
+    if (fullAgentPolicy) {
+      const body: GetFullAgentPolicyResponse = {
+        item: fullAgentPolicy,
         success: true,
       };
       return response.ok({
@@ -256,7 +256,7 @@ export const getFullAgentConfig: RequestHandler<
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Agent config not found' },
+        body: { message: 'Agent policy not found' },
       });
     }
   } catch (e) {
@@ -267,21 +267,21 @@ export const getFullAgentConfig: RequestHandler<
   }
 };
 
-export const downloadFullAgentConfig: RequestHandler<
-  TypeOf<typeof GetFullAgentConfigRequestSchema.params>,
-  TypeOf<typeof GetFullAgentConfigRequestSchema.query>
+export const downloadFullAgentPolicy: RequestHandler<
+  TypeOf<typeof GetFullAgentPolicyRequestSchema.params>,
+  TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const {
-    params: { agentConfigId },
+    params: { agentPolicyId },
   } = request;
 
   try {
-    const fullAgentConfig = await agentConfigService.getFullConfig(soClient, agentConfigId, {
+    const fullAgentPolicy = await agentPolicyService.getFullConfig(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
     });
-    if (fullAgentConfig) {
-      const body = configToYaml(fullAgentConfig);
+    if (fullAgentPolicy) {
+      const body = policyToYaml(fullAgentPolicy);
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
         'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -293,7 +293,7 @@ export const downloadFullAgentConfig: RequestHandler<
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Agent config not found' },
+        body: { message: 'Agent policy not found' },
       });
     }
   } catch (e) {

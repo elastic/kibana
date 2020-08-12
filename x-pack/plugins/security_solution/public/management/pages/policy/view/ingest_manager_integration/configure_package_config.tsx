@@ -9,27 +9,27 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import {
-  CustomConfigurePackageConfigContent,
-  CustomConfigurePackageConfigProps,
+  CustomConfigurePackagePolicyContent,
+  CustomConfigurePackagePolicyProps,
 } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 
 /**
- * Exports Endpoint-specific package config instructions
- * for use in the Ingest app create / edit package config
+ * Exports Endpoint-specific package policy instructions
+ * for use in the Ingest app create / edit package policy
  */
-export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigContent>(
+export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyContent>(
   ({
     from,
-    packageConfigId,
-    packageConfig: { config_id: agentConfigId },
-  }: CustomConfigurePackageConfigProps) => {
+    packagePolicyId,
+    packagePolicy: { config_id: agentPolicyId },
+  }: CustomConfigurePackagePolicyProps) => {
     let policyUrl = '';
-    if (from === 'edit' && packageConfigId) {
+    if (from === 'edit' && packagePolicyId) {
       // Cannot use formalUrl here since the code is called in Ingest, which does not use redux
-      policyUrl = getPolicyDetailPath(packageConfigId);
+      policyUrl = getPolicyDetailPath(packagePolicyId);
     }
 
     const policyDetailRouteState = useMemo((): undefined | PolicyDetailsRouteState => {
@@ -39,26 +39,26 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
       const navigateTo: PolicyDetailsRouteState['onSaveNavigateTo'] &
         PolicyDetailsRouteState['onCancelNavigateTo'] = [
         'ingestManager',
-        { path: `#/configs/${agentConfigId}/edit-integration/${packageConfigId}` },
+        { path: `#/policies/${agentPolicyId}/edit-integration/${packagePolicyId}` },
       ];
       return {
         onSaveNavigateTo: navigateTo,
         onCancelNavigateTo: navigateTo,
       };
-    }, [agentConfigId, from, packageConfigId]);
+    }, [agentPolicyId, from, packagePolicyId]);
 
     return (
       <>
         <EuiSpacer size="m" />
         <EuiCallOut
-          data-test-subj={`endpointPackageConfig_${from === 'edit' ? 'edit' : 'create'}`}
+          data-test-subj={`endpointPackagePolicy_${from === 'edit' ? 'edit' : 'create'}`}
           iconType="iInCircle"
         >
           <EuiText size="s">
             <p>
               {from === 'edit' ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfiguration"
+                  id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfiguration"
                   defaultMessage="Click {advancedConfigOptionsLink} to edit advanced configuration options."
                   values={{
                     advancedConfigOptionsLink: (
@@ -69,7 +69,7 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
                         appState={policyDetailRouteState}
                       >
                         <FormattedMessage
-                          id="xpack.securitySolution.endpoint.ingestManager.editPackageConfig.endpointConfigurationLink"
+                          id="xpack.securitySolution.endpoint.ingestManager.editPackagePolicy.endpointConfigurationLink"
                           defaultMessage="here"
                         />
                       </LinkToApp>
@@ -78,8 +78,8 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.endpoint.ingestManager.createPackageConfig.endpointConfiguration"
-                  defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent configuration."
+                  id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
+                  defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent policy."
                 />
               )}
             </p>
@@ -90,4 +90,4 @@ export const ConfigureEndpointPackageConfig = memo<CustomConfigurePackageConfigC
   }
 );
 
-ConfigureEndpointPackageConfig.displayName = 'ConfigureEndpointPackageConfig';
+ConfigureEndpointPackagePolicy.displayName = 'ConfigureEndpointPackagePolicy';

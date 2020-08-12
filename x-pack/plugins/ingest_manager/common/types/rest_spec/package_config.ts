@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, NewPackageConfig, UpdatePackageConfig } from '../models';
+import { PackagePolicy, NewPackagePolicy, UpdatePackagePolicy } from '../models';
 
-export interface GetPackageConfigsRequest {
+export interface GetPackagePoliciesRequest {
   query: {
     page: number;
     perPage: number;
@@ -13,47 +13,47 @@ export interface GetPackageConfigsRequest {
   };
 }
 
-export interface GetPackageConfigsResponse {
-  items: PackageConfig[];
+export interface GetPackagePoliciesResponse {
+  items: PackagePolicy[];
   total: number;
   page: number;
   perPage: number;
   success: boolean;
 }
 
-export interface GetOnePackageConfigRequest {
+export interface GetOnePackagePolicyRequest {
   params: {
-    packageConfigId: string;
+    packagePolicyId: string;
   };
 }
 
-export interface GetOnePackageConfigResponse {
-  item: PackageConfig;
+export interface GetOnePackagePolicyResponse {
+  item: PackagePolicy;
   success: boolean;
 }
 
-export interface CreatePackageConfigRequest {
-  body: NewPackageConfig;
+export interface CreatePackagePolicyRequest {
+  body: NewPackagePolicy;
 }
 
-export interface CreatePackageConfigResponse {
-  item: PackageConfig;
+export interface CreatePackagePolicyResponse {
+  item: PackagePolicy;
   success: boolean;
 }
 
-export type UpdatePackageConfigRequest = GetOnePackageConfigRequest & {
-  body: UpdatePackageConfig;
+export type UpdatePackagePolicyRequest = GetOnePackagePolicyRequest & {
+  body: UpdatePackagePolicy;
 };
 
-export type UpdatePackageConfigResponse = CreatePackageConfigResponse;
+export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
 
-export interface DeletePackageConfigsRequest {
+export interface DeletePackagePoliciesRequest {
   body: {
-    packageConfigIds: string[];
+    packagePolicyIds: string[];
   };
 }
 
-export type DeletePackageConfigsResponse = Array<{
+export type DeletePackagePoliciesResponse = Array<{
   id: string;
   success: boolean;
 }>;

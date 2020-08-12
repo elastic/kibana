@@ -5,11 +5,11 @@
  */
 import React from 'react';
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PackageInfo, RegistryStream, NewPackageConfig, PackageConfigInput } from '../../../types';
+import { PackageInfo, RegistryStream, NewPackagePolicy, PackagePolicyInput } from '../../../types';
 import { Loading } from '../../../components';
-import { PackageConfigValidationResults } from './services';
-import { PackageConfigInputPanel, CustomPackageConfig } from './components';
-import { CreatePackageConfigFrom } from './types';
+import { PackagePolicyValidationResults } from './services';
+import { PackagePolicyInputPanel, CustomPackagePolicy } from './components';
+import { CreatePackagePolicyFrom } from './types';
 
 const findStreamsForInputType = (
   inputType: string,
@@ -34,19 +34,19 @@ const findStreamsForInputType = (
 };
 
 export const StepConfigurePackage: React.FunctionComponent<{
-  from?: CreatePackageConfigFrom;
+  from?: CreatePackagePolicyFrom;
   packageInfo: PackageInfo;
-  packageConfig: NewPackageConfig;
-  packageConfigId?: string;
-  updatePackageConfig: (fields: Partial<NewPackageConfig>) => void;
-  validationResults: PackageConfigValidationResults;
+  packagePolicy: NewPackagePolicy;
+  packagePolicyId?: string;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+  validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
 }> = ({
-  from = 'config',
+  from = 'policy',
   packageInfo,
-  packageConfig,
-  packageConfigId,
-  updatePackageConfig,
+  packagePolicy,
+  packagePolicyId,
+  updatePackagePolicy,
   validationResults,
   submitAttempted,
 }) => {
@@ -61,30 +61,30 @@ export const StepConfigurePackage: React.FunctionComponent<{
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" gutterSize="none">
           {packageInfo.config_templates[0].inputs.map((packageInput) => {
-            const packageConfigInput = packageConfig.inputs.find(
+            const packagePolicyInput = packagePolicy.inputs.find(
               (input) => input.type === packageInput.type
             );
             const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
-            return packageConfigInput ? (
+            return packagePolicyInput ? (
               <EuiFlexItem key={packageInput.type}>
-                <PackageConfigInputPanel
+                <PackagePolicyInputPanel
                   packageInput={packageInput}
                   packageInputStreams={packageInputStreams}
-                  packageConfigInput={packageConfigInput}
-                  updatePackageConfigInput={(updatedInput: Partial<PackageConfigInput>) => {
-                    const indexOfUpdatedInput = packageConfig.inputs.findIndex(
+                  packagePolicyInput={packagePolicyInput}
+                  updatePackagePolicyInput={(updatedInput: Partial<PackagePolicyInput>) => {
+                    const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
                       (input) => input.type === packageInput.type
                     );
-                    const newInputs = [...packageConfig.inputs];
+                    const newInputs = [...packagePolicy.inputs];
                     newInputs[indexOfUpdatedInput] = {
                       ...newInputs[indexOfUpdatedInput],
                       ...updatedInput,
                     };
-                    updatePackageConfig({
+                    updatePackagePolicy({
                       inputs: newInputs,
                     });
                   }}
-                  inputValidationResults={validationResults!.inputs![packageConfigInput.type]}
+                  inputValidationResults={validationResults!.inputs![packagePolicyInput.type]}
                   forceShowErrors={submitAttempted}
                 />
                 <EuiHorizontalRule margin="m" />
@@ -94,11 +94,11 @@ export const StepConfigurePackage: React.FunctionComponent<{
         </EuiFlexGroup>
       </>
     ) : (
-      <CustomPackageConfig
+      <CustomPackagePolicy
         from={from}
         packageName={packageInfo.name}
-        packageConfig={packageConfig}
-        packageConfigId={packageConfigId}
+        packagePolicy={packagePolicy}
+        packagePolicyId={packagePolicyId}
       />
     );
 

@@ -16,41 +16,41 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig, PackageInfo, PackageConfig, NewPackageConfig } from '../../../types';
-import { packageToPackageConfigInputs } from '../../../services';
+import { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
+import { packageToPackagePolicyInputs } from '../../../services';
 import { Loading } from '../../../components';
-import { PackageConfigValidationResults } from './services';
+import { PackagePolicyValidationResults } from './services';
 
-export const StepDefinePackageConfig: React.FunctionComponent<{
-  agentConfig: AgentConfig;
+export const StepDefinePackagePolicy: React.FunctionComponent<{
+  agentPolicy: AgentPolicy;
   packageInfo: PackageInfo;
-  packageConfig: NewPackageConfig;
-  updatePackageConfig: (fields: Partial<NewPackageConfig>) => void;
-  validationResults: PackageConfigValidationResults;
-}> = ({ agentConfig, packageInfo, packageConfig, updatePackageConfig, validationResults }) => {
+  packagePolicy: NewPackagePolicy;
+  updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
+  validationResults: PackagePolicyValidationResults;
+}> = ({ agentPolicy, packageInfo, packagePolicy, updatePackagePolicy, validationResults }) => {
   // Form show/hide states
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-  // Update package config's package and config info
+  // Update package policy's package and agent policy info
   useEffect(() => {
-    const pkg = packageConfig.package;
+    const pkg = packagePolicy.package;
     const currentPkgKey = pkg ? `${pkg.name}-${pkg.version}` : '';
     const pkgKey = `${packageInfo.name}-${packageInfo.version}`;
 
-    // If package has changed, create shell package config with input&stream values based on package info
+    // If package has changed, create shell package policy with input&stream values based on package info
     if (currentPkgKey !== pkgKey) {
-      // Existing package configs on the agent config using the package name, retrieve highest number appended to package config name
+      // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
       const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-      const dsWithMatchingNames = (agentConfig.package_configs as PackageConfig[])
+      const dsWithMatchingNames = (agentPolicy.package_configs as PackagePolicy[])
         .filter((ds) => Boolean(ds.name.match(dsPackageNamePattern)))
         .map((ds) => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
         .sort();
 
-      updatePackageConfig({
+      updatePackagePolicy({
         name:
           // For Endpoint packages, the user must fill in the name, thus we don't attempt to generate
           // a default one here.
-          // FIXME: Improve package configs name uniqueness - https://github.com/elastic/kibana/issues/72948
+          // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
           packageInfo.name !== 'endpoint'
             ? `${packageInfo.name}-${
                 dsWithMatchingNames.length
@@ -63,23 +63,23 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
           title: packageInfo.title,
           version: packageInfo.version,
         },
-        inputs: packageToPackageConfigInputs(packageInfo),
+        inputs: packageToPackagePolicyInputs(packageInfo),
       });
     }
 
-    // If agent config has changed, update package config's config ID and namespace
-    if (packageConfig.config_id !== agentConfig.id) {
-      updatePackageConfig({
-        config_id: agentConfig.id,
-        namespace: agentConfig.namespace,
+    // If agent policy has changed, update package policy's agent policy ID and namespace
+    if (packagePolicy.config_id !== agentPolicy.id) {
+      updatePackagePolicy({
+        config_id: agentPolicy.id,
+        namespace: agentPolicy.namespace,
       });
     }
   }, [
-    packageConfig.package,
-    packageConfig.config_id,
-    agentConfig,
+    packagePolicy.package,
+    packagePolicy.config_id,
+    agentPolicy,
     packageInfo,
-    updatePackageConfig,
+    updatePackagePolicy,
   ]);
 
   return validationResults ? (
@@ -87,14 +87,14 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
       title={
         <h4>
           <FormattedMessage
-            id="xpack.ingestManager.createPackageConfig.stepConfigure.integrationSettingsSectionTitle"
+            id="xpack.ingestManager.createPackagePolicy.stepConfigure.integrationSettingsSectionTitle"
             defaultMessage="Integration settings"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.ingestManager.createPackageConfig.stepConfigure.integrationSettingsSectionDescription"
+          id="xpack.ingestManager.createPackagePolicy.stepConfigure.integrationSettingsSectionDescription"
           defaultMessage="Choose a name and description to help identify how this integration will be used."
         />
       }
@@ -106,19 +106,19 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
           error={validationResults.name}
           label={
             <FormattedMessage
-              id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNameInputLabel"
+              id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
               defaultMessage="Integration name"
             />
           }
         >
           <EuiFieldText
-            value={packageConfig.name}
+            value={packagePolicy.name}
             onChange={(e) =>
-              updatePackageConfig({
+              updatePackagePolicy({
                 name: e.target.value,
               })
             }
-            data-test-subj="packageConfigNameInput"
+            data-test-subj="packagePolicyNameInput"
           />
         </EuiFormRow>
 
@@ -126,14 +126,14 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigDescriptionInputLabel"
+              id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
               defaultMessage="Description"
             />
           }
           labelAppend={
             <EuiText size="xs" color="subdued">
               <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepConfigure.inputVarFieldOptionalLabel"
+                id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
                 defaultMessage="Optional"
               />
             </EuiText>
@@ -142,9 +142,9 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
           error={validationResults.description}
         >
           <EuiFieldText
-            value={packageConfig.description}
+            value={packagePolicy.description}
             onChange={(e) =>
-              updatePackageConfig({
+              updatePackagePolicy({
                 description: e.target.value,
               })
             }
@@ -162,7 +162,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
               flush="left"
             >
               <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepConfigure.advancedOptionsToggleLinkText"
+                id="xpack.ingestManager.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
                 defaultMessage="Advanced options"
               />
             </EuiButtonEmpty>
@@ -171,7 +171,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiText color="danger" size="s">
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                  id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
                   defaultMessage="{count, plural, one {# error} other {# errors}}"
                   values={{ count: 1 }}
                 />
@@ -190,7 +190,7 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
               error={validationResults.namespace}
               label={
                 <FormattedMessage
-                  id="xpack.ingestManager.createPackageConfig.stepConfigure.packageConfigNamespaceInputLabel"
+                  id="xpack.ingestManager.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
                   defaultMessage="Namespace"
                 />
               }
@@ -199,15 +199,15 @@ export const StepDefinePackageConfig: React.FunctionComponent<{
                 noSuggestions
                 singleSelection={true}
                 selectedOptions={
-                  packageConfig.namespace ? [{ label: packageConfig.namespace }] : []
+                  packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
                 }
                 onCreateOption={(newNamespace: string) => {
-                  updatePackageConfig({
+                  updatePackagePolicy({
                     namespace: newNamespace,
                   });
                 }}
                 onChange={(newNamespaces: Array<{ label: string }>) => {
-                  updatePackageConfig({
+                  updatePackagePolicy({
                     namespace: newNamespaces.length ? newNamespaces[0].label : '',
                   });
                 }}

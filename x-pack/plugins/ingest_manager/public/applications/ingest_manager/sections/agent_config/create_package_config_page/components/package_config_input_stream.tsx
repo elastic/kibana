@@ -16,29 +16,29 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { PackageConfigInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
+import { PackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
 import {
   isAdvancedVar,
-  PackageConfigConfigValidationResults,
+  PackagePolicyConfigValidationResults,
   validationHasErrors,
 } from '../services';
-import { PackageConfigInputVarField } from './package_config_input_var_field';
+import { PackagePolicyInputVarField } from './package_config_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
 `;
 
-export const PackageConfigInputStreamConfig: React.FunctionComponent<{
+export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
-  packageConfigInputStream: PackageConfigInputStream;
-  updatePackageConfigInputStream: (updatedStream: Partial<PackageConfigInputStream>) => void;
-  inputStreamValidationResults: PackageConfigConfigValidationResults;
+  packagePolicyInputStream: PackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<PackagePolicyInputStream>) => void;
+  inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
     packageInputStream,
-    packageConfigInputStream,
-    updatePackageConfigInputStream,
+    packagePolicyInputStream,
+    updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
   }) => {
@@ -77,10 +77,10 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
             <EuiFlexItem grow={5}>
               <EuiSwitch
                 label={packageInputStream.title}
-                checked={packageConfigInputStream.enabled}
+                checked={packagePolicyInputStream.enabled}
                 onChange={(e) => {
                   const enabled = e.target.checked;
-                  updatePackageConfigInputStream({
+                  updatePackagePolicyInputStream({
                     enabled,
                   });
                 }}
@@ -100,16 +100,16 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              const value = packageConfigInputStream.vars![varName].value;
+              const value = packagePolicyInputStream.vars![varName].value;
               return (
                 <EuiFlexItem key={varName}>
-                  <PackageConfigInputVarField
+                  <PackagePolicyInputVarField
                     varDef={varDef}
                     value={value}
                     onChange={(newValue: any) => {
-                      updatePackageConfigInputStream({
+                      updatePackagePolicyInputStream({
                         vars: {
-                          ...packageConfigInputStream.vars,
+                          ...packagePolicyInputStream.vars,
                           [varName]: {
                             type: varType,
                             value: newValue,
@@ -135,7 +135,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
                         flush="left"
                       >
                         <FormattedMessage
-                          id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
+                          id="xpack.ingestManager.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
                           defaultMessage="Advanced options"
                         />
                       </EuiButtonEmpty>
@@ -144,7 +144,7 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
                       <EuiFlexItem grow={false}>
                         <EuiText color="danger" size="s">
                           <FormattedMessage
-                            id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                            id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
                             defaultMessage="{count, plural, one {# error} other {# errors}}"
                             values={{ count: advancedVarsWithErrorsCount }}
                           />
@@ -156,16 +156,16 @@ export const PackageConfigInputStreamConfig: React.FunctionComponent<{
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
                       const { name: varName, type: varType } = varDef;
-                      const value = packageConfigInputStream.vars![varName].value;
+                      const value = packagePolicyInputStream.vars![varName].value;
                       return (
                         <EuiFlexItem key={varName}>
-                          <PackageConfigInputVarField
+                          <PackagePolicyInputVarField
                             varDef={varDef}
                             value={value}
                             onChange={(newValue: any) => {
-                              updatePackageConfigInputStream({
+                              updatePackagePolicyInputStream({
                                 vars: {
-                                  ...packageConfigInputStream.vars,
+                                  ...packagePolicyInputStream.vars,
                                   [varName]: {
                                     type: varType,
                                     value: newValue,

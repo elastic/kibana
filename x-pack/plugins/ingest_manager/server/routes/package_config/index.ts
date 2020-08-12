@@ -4,70 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, PACKAGE_CONFIG_API_ROUTES } from '../../constants';
+import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
-  GetPackageConfigsRequestSchema,
-  GetOnePackageConfigRequestSchema,
-  CreatePackageConfigRequestSchema,
-  UpdatePackageConfigRequestSchema,
-  DeletePackageConfigsRequestSchema,
+  GetPackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  CreatePackagePolicyRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
 } from '../../types';
 import {
-  getPackageConfigsHandler,
-  getOnePackageConfigHandler,
-  createPackageConfigHandler,
-  updatePackageConfigHandler,
-  deletePackageConfigHandler,
+  getPackagePoliciesHandler,
+  getOnePackagePolicyHandler,
+  createPackagePolicyHandler,
+  updatePackagePolicyHandler,
+  deletePackagePolicyHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
   // List
   router.get(
     {
-      path: PACKAGE_CONFIG_API_ROUTES.LIST_PATTERN,
-      validate: GetPackageConfigsRequestSchema,
+      path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      validate: GetPackagePoliciesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getPackageConfigsHandler
+    getPackagePoliciesHandler
   );
 
   // Get one
   router.get(
     {
-      path: PACKAGE_CONFIG_API_ROUTES.INFO_PATTERN,
-      validate: GetOnePackageConfigRequestSchema,
+      path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
+      validate: GetOnePackagePolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getOnePackageConfigHandler
+    getOnePackagePolicyHandler
   );
 
   // Create
   router.post(
     {
-      path: PACKAGE_CONFIG_API_ROUTES.CREATE_PATTERN,
-      validate: CreatePackageConfigRequestSchema,
+      path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+      validate: CreatePackagePolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    createPackageConfigHandler
+    createPackagePolicyHandler
   );
 
   // Update
   router.put(
     {
-      path: PACKAGE_CONFIG_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdatePackageConfigRequestSchema,
+      path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
+      validate: UpdatePackagePolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    updatePackageConfigHandler
+    updatePackagePolicyHandler
   );
 
   // Delete
   router.post(
     {
-      path: PACKAGE_CONFIG_API_ROUTES.DELETE_PATTERN,
-      validate: DeletePackageConfigsRequestSchema,
+      path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
+      validate: DeletePackagePoliciesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    deletePackageConfigHandler
+    deletePackagePolicyHandler
   );
 };

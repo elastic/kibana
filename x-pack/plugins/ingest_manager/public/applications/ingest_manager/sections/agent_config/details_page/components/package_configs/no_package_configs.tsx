@@ -8,7 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { useCapabilities, useLink } from '../../../../../hooks';
 
-export const NoPackageConfigs = memo<{ configId: string }>(({ configId }) => {
+export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
 
@@ -18,25 +18,25 @@ export const NoPackageConfigs = memo<{ configId: string }>(({ configId }) => {
       title={
         <h3>
           <FormattedMessage
-            id="xpack.ingestManager.configDetailsPackageConfigs.createFirstTitle"
+            id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstTitle"
             defaultMessage="Add your first integration"
           />
         </h3>
       }
       body={
         <FormattedMessage
-          id="xpack.ingestManager.configDetailsPackageConfigs.createFirstMessage"
-          defaultMessage="This configuration does not have any integrations yet."
+          id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstMessage"
+          defaultMessage="This policy does not have any integrations yet."
         />
       }
       actions={
         <EuiButton
           isDisabled={!hasWriteCapabilities}
           fill
-          href={getHref('add_integration_from_configuration', { configId })}
+          href={getHref('add_integration_from_policy', { policyId })}
         >
           <FormattedMessage
-            id="xpack.ingestManager.configDetailsPackageConfigs.createFirstButtonText"
+            id="xpack.ingestManager.policyDetailsPackagePolicies.createFirstButtonText"
             defaultMessage="Add integration"
           />
         </EuiButton>

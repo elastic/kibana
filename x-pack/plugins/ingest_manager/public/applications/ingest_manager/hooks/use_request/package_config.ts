@@ -4,59 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { sendRequest, useRequest } from './use_request';
-import { packageConfigRouteService } from '../../services';
+import { packagePolicyRouteService } from '../../services';
 import {
-  CreatePackageConfigRequest,
-  CreatePackageConfigResponse,
-  UpdatePackageConfigRequest,
-  UpdatePackageConfigResponse,
+  CreatePackagePolicyRequest,
+  CreatePackagePolicyResponse,
+  UpdatePackagePolicyRequest,
+  UpdatePackagePolicyResponse,
 } from '../../types';
 import {
-  DeletePackageConfigsRequest,
-  DeletePackageConfigsResponse,
-  GetPackageConfigsRequest,
-  GetPackageConfigsResponse,
-  GetOnePackageConfigResponse,
+  DeletePackagePoliciesRequest,
+  DeletePackagePoliciesResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  GetOnePackagePolicyResponse,
 } from '../../../../../common/types/rest_spec';
 
-export const sendCreatePackageConfig = (body: CreatePackageConfigRequest['body']) => {
-  return sendRequest<CreatePackageConfigResponse>({
-    path: packageConfigRouteService.getCreatePath(),
+export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
+  return sendRequest<CreatePackagePolicyResponse>({
+    path: packagePolicyRouteService.getCreatePath(),
     method: 'post',
     body: JSON.stringify(body),
   });
 };
 
-export const sendUpdatePackageConfig = (
-  packageConfigId: string,
-  body: UpdatePackageConfigRequest['body']
+export const sendUpdatePackagePolicy = (
+  packagePolicyId: string,
+  body: UpdatePackagePolicyRequest['body']
 ) => {
-  return sendRequest<UpdatePackageConfigResponse>({
-    path: packageConfigRouteService.getUpdatePath(packageConfigId),
+  return sendRequest<UpdatePackagePolicyResponse>({
+    path: packagePolicyRouteService.getUpdatePath(packagePolicyId),
     method: 'put',
     body: JSON.stringify(body),
   });
 };
 
-export const sendDeletePackageConfig = (body: DeletePackageConfigsRequest['body']) => {
-  return sendRequest<DeletePackageConfigsResponse>({
-    path: packageConfigRouteService.getDeletePath(),
+export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body']) => {
+  return sendRequest<DeletePackagePoliciesResponse>({
+    path: packagePolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
   });
 };
 
-export function useGetPackageConfigs(query: GetPackageConfigsRequest['query']) {
-  return useRequest<GetPackageConfigsResponse>({
+export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query']) {
+  return useRequest<GetPackagePoliciesResponse>({
     method: 'get',
-    path: packageConfigRouteService.getListPath(),
+    path: packagePolicyRouteService.getListPath(),
     query,
   });
 }
 
-export const sendGetOnePackageConfig = (packageConfigId: string) => {
-  return sendRequest<GetOnePackageConfigResponse>({
-    path: packageConfigRouteService.getInfoPath(packageConfigId),
+export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
+  return sendRequest<GetOnePackagePolicyResponse>({
+    path: packagePolicyRouteService.getInfoPath(packagePolicyId),
     method: 'get',
   });
 };

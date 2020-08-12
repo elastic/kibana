@@ -4,105 +4,105 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'src/core/server';
-import { PLUGIN_ID, AGENT_CONFIG_API_ROUTES } from '../../constants';
+import { PLUGIN_ID, AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
-  GetAgentConfigsRequestSchema,
-  GetOneAgentConfigRequestSchema,
-  CreateAgentConfigRequestSchema,
-  UpdateAgentConfigRequestSchema,
-  CopyAgentConfigRequestSchema,
-  DeleteAgentConfigRequestSchema,
-  GetFullAgentConfigRequestSchema,
+  GetAgentPoliciesRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
+  CopyAgentPolicyRequestSchema,
+  DeleteAgentPolicyRequestSchema,
+  GetFullAgentPolicyRequestSchema,
 } from '../../types';
 import {
-  getAgentConfigsHandler,
-  getOneAgentConfigHandler,
-  createAgentConfigHandler,
-  updateAgentConfigHandler,
-  copyAgentConfigHandler,
-  deleteAgentConfigsHandler,
-  getFullAgentConfig,
-  downloadFullAgentConfig,
+  getAgentPoliciesHandler,
+  getOneAgentPolicyHandler,
+  createAgentPolicyHandler,
+  updateAgentPolicyHandler,
+  copyAgentPolicyHandler,
+  deleteAgentPoliciesHandler,
+  getFullAgentPolicy,
+  downloadFullAgentPolicy,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
   // List
   router.get(
     {
-      path: AGENT_CONFIG_API_ROUTES.LIST_PATTERN,
-      validate: GetAgentConfigsRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
+      validate: GetAgentPoliciesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentConfigsHandler
+    getAgentPoliciesHandler
   );
 
   // Get one
   router.get(
     {
-      path: AGENT_CONFIG_API_ROUTES.INFO_PATTERN,
-      validate: GetOneAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.INFO_PATTERN,
+      validate: GetOneAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getOneAgentConfigHandler
+    getOneAgentPolicyHandler
   );
 
   // Create
   router.post(
     {
-      path: AGENT_CONFIG_API_ROUTES.CREATE_PATTERN,
-      validate: CreateAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      validate: CreateAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    createAgentConfigHandler
+    createAgentPolicyHandler
   );
 
   // Update
   router.put(
     {
-      path: AGENT_CONFIG_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdateAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.UPDATE_PATTERN,
+      validate: UpdateAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    updateAgentConfigHandler
+    updateAgentPolicyHandler
   );
 
   // Copy
   router.post(
     {
-      path: AGENT_CONFIG_API_ROUTES.COPY_PATTERN,
-      validate: CopyAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.COPY_PATTERN,
+      validate: CopyAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    copyAgentConfigHandler
+    copyAgentPolicyHandler
   );
 
   // Delete
   router.post(
     {
-      path: AGENT_CONFIG_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.DELETE_PATTERN,
+      validate: DeleteAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    deleteAgentConfigsHandler
+    deleteAgentPoliciesHandler
   );
 
-  // Get one full agent config
+  // Get one full agent policy
   router.get(
     {
-      path: AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN,
-      validate: GetFullAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
+      validate: GetFullAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getFullAgentConfig
+    getFullAgentPolicy
   );
 
-  // Download one full agent config
+  // Download one full agent policy
   router.get(
     {
-      path: AGENT_CONFIG_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
-      validate: GetFullAgentConfigRequestSchema,
+      path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
+      validate: GetFullAgentPolicyRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    downloadFullAgentConfig
+    downloadFullAgentPolicy
   );
 };

@@ -8,63 +8,63 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../types';
-import { sendCopyAgentConfig, useCore } from '../../../hooks';
+import { AgentPolicy } from '../../../types';
+import { sendCopyAgentPolicy, useCore } from '../../../hooks';
 
 interface Props {
-  children: (copyAgentConfig: CopyAgentConfig) => React.ReactElement;
+  children: (copyAgentPolicy: CopyAgentPolicy) => React.ReactElement;
 }
 
-export type CopyAgentConfig = (agentConfig: AgentConfig, onSuccess?: OnSuccessCallback) => void;
+export type CopyAgentPolicy = (agentPolicy: AgentPolicy, onSuccess?: OnSuccessCallback) => void;
 
-type OnSuccessCallback = (newAgentConfig: AgentConfig) => void;
+type OnSuccessCallback = (newAgentPolicy: AgentPolicy) => void;
 
-export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ children }) => {
   const { notifications } = useCore();
-  const [agentConfig, setAgentConfig] = useState<AgentConfig>();
-  const [newAgentConfig, setNewAgentConfig] = useState<Pick<AgentConfig, 'name' | 'description'>>();
+  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
+  const [newAgentPolicy, setNewAgentPolicy] = useState<Pick<AgentPolicy, 'name' | 'description'>>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 
-  const copyAgentConfigPrompt: CopyAgentConfig = (
-    agentConfigToCopy,
+  const copyAgentPolicyPrompt: CopyAgentPolicy = (
+    agentPolicyToCopy,
     onSuccess = () => undefined
   ) => {
-    if (!agentConfigToCopy) {
-      throw new Error('No agent config specified to copy');
+    if (!agentPolicyToCopy) {
+      throw new Error('No agent policy specified to copy');
     }
     setIsModalOpen(true);
-    setAgentConfig(agentConfigToCopy);
-    setNewAgentConfig({
+    setAgentPolicy(agentPolicyToCopy);
+    setNewAgentPolicy({
       name: i18n.translate(
-        'xpack.ingestManager.copyAgentConfig.confirmModal.defaultNewConfigName',
+        'xpack.ingestManager.copyAgentPolicy.confirmModal.defaultNewPolicyName',
         {
           defaultMessage: '{name} (copy)',
-          values: { name: agentConfigToCopy.name },
+          values: { name: agentPolicyToCopy.name },
         }
       ),
-      description: agentConfigToCopy.description,
+      description: agentPolicyToCopy.description,
     });
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
-    setAgentConfig(undefined);
-    setNewAgentConfig(undefined);
+    setAgentPolicy(undefined);
+    setNewAgentPolicy(undefined);
     setIsLoading(false);
     setIsModalOpen(false);
   };
 
-  const copyAgentConfig = async () => {
+  const copyAgentPolicy = async () => {
     setIsLoading(true);
     try {
-      const { data } = await sendCopyAgentConfig(agentConfig!.id, newAgentConfig!);
+      const { data } = await sendCopyAgentPolicy(agentPolicy!.id, newAgentPolicy!);
 
       if (data?.success) {
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.ingestManager.copyAgentConfig.successNotificationTitle', {
-            defaultMessage: 'Agent config copied',
+          i18n.translate('xpack.ingestManager.copyAgentPolicy.successNotificationTitle', {
+            defaultMessage: 'Agent policy copied',
           })
         );
         if (onSuccessCallback.current) {
@@ -74,16 +74,16 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
 
       if (!data?.success) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.copyAgentConfig.failureNotificationTitle', {
-            defaultMessage: "Error copying agent config '{id}'",
-            values: { id: agentConfig!.id },
+          i18n.translate('xpack.ingestManager.copyAgentPolicy.failureNotificationTitle', {
+            defaultMessage: "Error copying agent policy '{id}'",
+            values: { id: agentPolicy!.id },
           })
         );
       }
     } catch (e) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.ingestManager.copyAgentConfig.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error copying agent config',
+        i18n.translate('xpack.ingestManager.copyAgentPolicy.fatalErrorNotificationTitle', {
+          defaultMessage: 'Error copying agent policy',
         })
       );
     }
@@ -91,7 +91,7 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
   };
 
   const renderModal = () => {
-    if (!isModalOpen || !agentConfig || !newAgentConfig) {
+    if (!isModalOpen || !agentPolicy || !newAgentPolicy) {
       return null;
     }
 
@@ -101,55 +101,55 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
           title={
             <span className="eui-textBreakWord">
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentConfig.confirmModal.copyConfigTitle"
-                defaultMessage="Copy '{name}' agent configuration"
+                id="xpack.ingestManager.copyAgentPolicy.confirmModal.copyPolicyTitle"
+                defaultMessage="Copy '{name}' agent policy"
                 values={{
-                  name: agentConfig.name,
+                  name: agentPolicy.name,
                 }}
               />
             </span>
           }
           onCancel={closeModal}
-          onConfirm={copyAgentConfig}
+          onConfirm={copyAgentPolicy}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentConfig.confirmModal.cancelButtonLabel"
+              id="xpack.ingestManager.copyAgentPolicy.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentConfig.confirmModal.confirmButtonLabel"
-              defaultMessage="Copy configuration"
+              id="xpack.ingestManager.copyAgentPolicy.confirmModal.confirmButtonLabel"
+              defaultMessage="Copy policy"
             />
           }
-          confirmButtonDisabled={isLoading || !newAgentConfig.name.trim()}
+          confirmButtonDisabled={isLoading || !newAgentPolicy.name.trim()}
         >
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.copyAgentConfig.confirmModal.copyConfigPrompt"
-              defaultMessage="Choose a name and description for your new agent configuration."
+              id="xpack.ingestManager.copyAgentPolicy.confirmModal.copyPolicyPrompt"
+              defaultMessage="Choose a name and description for your new agent policy."
             />
           </p>
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentConfig.confirmModal.newNameLabel"
-                defaultMessage="New configuration name"
+                id="xpack.ingestManager.copyAgentPolicy.confirmModal.newNameLabel"
+                defaultMessage="New policy name"
               />
             }
             fullWidth
           >
             <EuiFieldText
               fullWidth
-              value={newAgentConfig.name}
-              onChange={(e) => setNewAgentConfig({ ...newAgentConfig, name: e.target.value })}
+              value={newAgentPolicy.name}
+              onChange={(e) => setNewAgentPolicy({ ...newAgentPolicy, name: e.target.value })}
             />
           </EuiFormRow>
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ingestManager.copyAgentConfig.confirmModal.newDescriptionLabel"
+                id="xpack.ingestManager.copyAgentPolicy.confirmModal.newDescriptionLabel"
                 defaultMessage="Description"
               />
             }
@@ -157,9 +157,9 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
           >
             <EuiFieldText
               fullWidth
-              value={newAgentConfig.description}
+              value={newAgentPolicy.description}
               onChange={(e) =>
-                setNewAgentConfig({ ...newAgentConfig, description: e.target.value })
+                setNewAgentPolicy({ ...newAgentPolicy, description: e.target.value })
               }
             />
           </EuiFormRow>
@@ -170,7 +170,7 @@ export const AgentConfigCopyProvider: React.FunctionComponent<Props> = ({ childr
 
   return (
     <Fragment>
-      {children(copyAgentConfigPrompt)}
+      {children(copyAgentPolicyPrompt)}
       {renderModal()}
     </Fragment>
   );

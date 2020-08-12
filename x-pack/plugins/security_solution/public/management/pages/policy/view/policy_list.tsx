@@ -49,7 +49,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackagePolicyRouteState } from '../../../../../../ingest_manager/public';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
 
 interface TableChangeCallbackArguments {
@@ -148,7 +148,7 @@ export const PolicyList = React.memo(() => {
     endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'ingestManager',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
@@ -224,11 +224,11 @@ export const PolicyList = React.memo(() => {
   );
 
   const handleDeleteOnClick = useCallback(
-    ({ policyId, agentConfigId }: { policyId: string; agentConfigId: string }) => {
+    ({ policyId, agentPolicyId }: { policyId: string; agentPolicyId: string }) => {
       dispatch({
         type: 'userOpenedPolicyListDeleteModal',
         payload: {
-          agentConfigId,
+          agentPolicyId,
         },
       });
       setPolicyIdToDelete(policyId);
@@ -338,18 +338,18 @@ export const PolicyList = React.memo(() => {
               return (
                 <TableRowActions
                   items={[
-                    <EuiContextMenuItem icon="link" key="agentConfigLink">
+                    <EuiContextMenuItem icon="link" key="agentPolicyLink">
                       <LinkToApp
-                        data-test-subj="agentConfigLink"
+                        data-test-subj="agentPolicyLink"
                         appId="ingestManager"
-                        appPath={`#/configs/${item.config_id}`}
-                        href={`${services.application.getUrlForApp('ingestManager')}#/configs/${
+                        appPath={`#/policies/${item.config_id}`}
+                        href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
                           item.config_id
                         }`}
                       >
                         <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.agentConfigAction"
-                          defaultMessage="View Agent Configuration"
+                          id="xpack.securitySolution.endpoint.policyList.agentPolicyAction"
+                          defaultMessage="View Agent Policy"
                         />
                       </LinkToApp>
                     </EuiContextMenuItem>,
@@ -358,7 +358,7 @@ export const PolicyList = React.memo(() => {
                       icon="trash"
                       key="policyDeletAction"
                       onClick={() => {
-                        handleDeleteOnClick({ agentConfigId: item.config_id, policyId: item.id });
+                        handleDeleteOnClick({ agentPolicyId: item.config_id, policyId: item.id });
                       }}
                     >
                       <FormattedMessage

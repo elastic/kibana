@@ -3,29 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, FullAgentConfigInput, FullAgentConfigInputStream } from '../types';
+import { PackagePolicy, FullAgentPolicyInput, FullAgentPolicyInputStream } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
-export const storedPackageConfigsToAgentInputs = (
-  packageConfigs: PackageConfig[]
-): FullAgentConfigInput[] => {
-  const fullInputs: FullAgentConfigInput[] = [];
+export const storedPackagePoliciesToAgentInputs = (
+  packagePolicies: PackagePolicy[]
+): FullAgentPolicyInput[] => {
+  const fullInputs: FullAgentPolicyInput[] = [];
 
-  packageConfigs.forEach((packageConfig) => {
-    if (!packageConfig.enabled || !packageConfig.inputs || !packageConfig.inputs.length) {
+  packagePolicies.forEach((packagePolicy) => {
+    if (!packagePolicy.enabled || !packagePolicy.inputs || !packagePolicy.inputs.length) {
       return;
     }
-    packageConfig.inputs.forEach((input) => {
+    packagePolicy.inputs.forEach((input) => {
       if (!input.enabled) {
         return;
       }
 
-      const fullInput: FullAgentConfigInput = {
-        id: packageConfig.id || packageConfig.name,
-        name: packageConfig.name,
+      const fullInput: FullAgentPolicyInput = {
+        id: packagePolicy.id || packagePolicy.name,
+        name: packagePolicy.name,
         type: input.type,
         data_stream: {
-          namespace: packageConfig.namespace || 'default',
+          namespace: packagePolicy.namespace || 'default',
         },
         use_output: DEFAULT_OUTPUT.name,
         ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
@@ -35,7 +35,7 @@ export const storedPackageConfigsToAgentInputs = (
         streams: input.streams
           .filter((stream) => stream.enabled)
           .map((stream) => {
-            const fullStream: FullAgentConfigInputStream = {
+            const fullStream: FullAgentPolicyInputStream = {
               id: stream.id,
               data_stream: stream.data_stream,
               ...stream.compiled_stream,
@@ -48,11 +48,11 @@ export const storedPackageConfigsToAgentInputs = (
           }),
       };
 
-      if (packageConfig.package) {
+      if (packagePolicy.package) {
         fullInput.meta = {
           package: {
-            name: packageConfig.package.name,
-            version: packageConfig.package.version,
+            name: packagePolicy.package.name,
+            version: packagePolicy.package.version,
           },
         };
       }

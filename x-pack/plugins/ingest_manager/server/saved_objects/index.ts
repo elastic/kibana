@@ -8,8 +8,8 @@ import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -113,8 +113,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       },
     },
   },
-  [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {
-    name: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+    name: AGENT_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {
@@ -176,8 +176,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
       },
     },
   },
-  [PACKAGE_CONFIG_SAVED_OBJECT_TYPE]: {
-    name: PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
+  [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+    name: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
     management: {

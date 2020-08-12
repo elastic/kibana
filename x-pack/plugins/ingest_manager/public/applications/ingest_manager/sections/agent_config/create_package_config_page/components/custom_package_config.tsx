@@ -6,39 +6,39 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import { NewPackageConfig } from '../../../../types';
-import { CreatePackageConfigFrom } from '../types';
+import { NewPackagePolicy } from '../../../../types';
+import { CreatePackagePolicyFrom } from '../types';
 
-export interface CustomConfigurePackageConfigProps {
+export interface CustomConfigurePackagePolicyProps {
   packageName: string;
-  from: CreatePackageConfigFrom;
-  packageConfig: NewPackageConfig;
-  packageConfigId?: string;
+  from: CreatePackagePolicyFrom;
+  packagePolicy: NewPackagePolicy;
+  packagePolicyId?: string;
 }
 
 /**
  * Custom content type that external plugins can provide to Ingest's
- * package config UI.
+ * package policy UI.
  */
-export type CustomConfigurePackageConfigContent = React.FC<CustomConfigurePackageConfigProps>;
+export type CustomConfigurePackagePolicyContent = React.FC<CustomConfigurePackagePolicyProps>;
 
 type AllowedPackageKey = 'endpoint';
-const PackageConfigMapping: {
-  [key: string]: CustomConfigurePackageConfigContent;
+const PackagePolicyMapping: {
+  [key: string]: CustomConfigurePackagePolicyContent;
 } = {};
 
 /**
  * Plugins can call this function from the start lifecycle to
- * register a custom component in the Ingest package config.
+ * register a custom component in the Ingest package policy.
  */
-export function registerPackageConfigComponent(
+export function registerPackagePolicyComponent(
   key: AllowedPackageKey,
-  value: CustomConfigurePackageConfigContent
+  value: CustomConfigurePackagePolicyContent
 ) {
-  PackageConfigMapping[key] = value;
+  PackagePolicyMapping[key] = value;
 }
 
-const EmptyPackageConfig: CustomConfigurePackageConfigContent = () => (
+const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
   <EuiEmptyPrompt
     iconType="checkInCircleFilled"
     iconColor="secondary"
@@ -46,7 +46,7 @@ const EmptyPackageConfig: CustomConfigurePackageConfigContent = () => (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.createPackageConfig.stepConfigure.noConfigOptionsMessage"
+            id="xpack.ingestManager.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
             defaultMessage="Nothing to configure"
           />
         </p>
@@ -55,7 +55,7 @@ const EmptyPackageConfig: CustomConfigurePackageConfigContent = () => (
   />
 );
 
-export const CustomPackageConfig = (props: CustomConfigurePackageConfigProps) => {
-  const CustomPackageConfigContent = PackageConfigMapping[props.packageName] || EmptyPackageConfig;
-  return <CustomPackageConfigContent {...props} />;
+export const CustomPackagePolicy = (props: CustomConfigurePackagePolicyProps) => {
+  const CustomPackagePolicyContent = PackagePolicyMapping[props.packageName] || EmptyPackagePolicy;
+  return <CustomPackagePolicyContent {...props} />;
 };

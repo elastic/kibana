@@ -7,10 +7,10 @@ import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 import { getFlattenedObject } from '../../../../services';
 import {
-  NewPackageConfig,
-  PackageConfigInput,
-  PackageConfigInputStream,
-  PackageConfigConfigRecordEntry,
+  NewPackagePolicy,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  PackagePolicyConfigRecordEntry,
   PackageInfo,
   RegistryInput,
   RegistryStream,
@@ -21,47 +21,47 @@ type Errors = string[] | null;
 
 type ValidationEntry = Record<string, Errors>;
 
-export interface PackageConfigConfigValidationResults {
+export interface PackagePolicyConfigValidationResults {
   vars?: ValidationEntry;
 }
 
-export type PackageConfigInputValidationResults = PackageConfigConfigValidationResults & {
-  streams?: Record<PackageConfigInputStream['id'], PackageConfigConfigValidationResults>;
+export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationResults & {
+  streams?: Record<PackagePolicyInputStream['id'], PackagePolicyConfigValidationResults>;
 };
 
-export interface PackageConfigValidationResults {
+export interface PackagePolicyValidationResults {
   name: Errors;
   description: Errors;
   namespace: Errors;
-  inputs: Record<PackageConfigInput['type'], PackageConfigInputValidationResults> | null;
+  inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 }
 
 /*
- * Returns validation information for a given package config and package info
- * Note: this method assumes that `packageConfig` is correctly structured for the given package
+ * Returns validation information for a given package policy and package info
+ * Note: this method assumes that `packagePolicy` is correctly structured for the given package
  */
-export const validatePackageConfig = (
-  packageConfig: NewPackageConfig,
+export const validatePackagePolicy = (
+  packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
-): PackageConfigValidationResults => {
-  const validationResults: PackageConfigValidationResults = {
+): PackagePolicyValidationResults => {
+  const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
     namespace: null,
     inputs: {},
   };
 
-  if (!packageConfig.name.trim()) {
+  if (!packagePolicy.name.trim()) {
     validationResults.name = [
-      i18n.translate('xpack.ingestManager.packageConfigValidation.nameRequiredErrorMessage', {
+      i18n.translate('xpack.ingestManager.packagePolicyValidation.nameRequiredErrorMessage', {
         defaultMessage: 'Name is required',
       }),
     ];
   }
 
-  if (!packageConfig.namespace.trim()) {
+  if (!packagePolicy.namespace.trim()) {
     validationResults.namespace = [
-      i18n.translate('xpack.ingestManager.packageConfigValidation.namespaceRequiredErrorMessage', {
+      i18n.translate('xpack.ingestManager.packagePolicyValidation.namespaceRequiredErrorMessage', {
         defaultMessage: 'Namespace is required',
       }),
     ];
@@ -93,13 +93,13 @@ export const validatePackageConfig = (
     return datasets;
   }, {} as Record<string, RegistryStream[]>);
 
-  // Validate each package config input with either its own config fields or streams
-  packageConfig.inputs.forEach((input) => {
+  // Validate each package policy input with either its own config fields or streams
+  packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
 
-    const inputValidationResults: PackageConfigInputValidationResults = {
+    const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       streams: {},
     };
@@ -117,7 +117,7 @@ export const validatePackageConfig = (
     if (inputConfigs.length) {
       inputValidationResults.vars = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
-          ? validatePackageConfigConfig(configEntry, inputVarsByName[name])
+          ? validatePackagePolicyConfig(configEntry, inputVarsByName[name])
           : null;
         return results;
       }, {} as ValidationEntry);
@@ -128,7 +128,7 @@ export const validatePackageConfig = (
     // Validate each input stream with config fields
     if (input.streams.length) {
       input.streams.forEach((stream) => {
-        const streamValidationResults: PackageConfigConfigValidationResults = {};
+        const streamValidationResults: PackagePolicyConfigValidationResults = {};
 
         // Validate stream-level config fields
         if (stream.vars) {
@@ -146,7 +146,7 @@ export const validatePackageConfig = (
             (results, [name, configEntry]) => {
               results[name] =
                 input.enabled && stream.enabled
-                  ? validatePackageConfigConfig(configEntry, streamVarsByName[name])
+                  ? validatePackagePolicyConfig(configEntry, streamVarsByName[name])
                   : null;
               return results;
             },
@@ -171,8 +171,8 @@ export const validatePackageConfig = (
   return validationResults;
 };
 
-export const validatePackageConfigConfig = (
-  configEntry: PackageConfigConfigRecordEntry,
+export const validatePackagePolicyConfig = (
+  configEntry: PackagePolicyConfigRecordEntry,
   varDef: RegistryVarsEntry
 ): string[] | null => {
   const errors = [];
@@ -186,7 +186,7 @@ export const validatePackageConfigConfig = (
   if (varDef.required) {
     if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packageConfigValidation.requiredErrorMessage', {
+        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -202,7 +202,7 @@ export const validatePackageConfigConfig = (
     } catch (e) {
       errors.push(
         i18n.translate(
-          'xpack.ingestManager.packageConfigValidation.invalidYamlFormatErrorMessage',
+          'xpack.ingestManager.packagePolicyValidation.invalidYamlFormatErrorMessage',
           {
             defaultMessage: 'Invalid YAML format',
           }
@@ -214,7 +214,7 @@ export const validatePackageConfigConfig = (
   if (varDef.multi) {
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packageConfigValidation.invalidArrayErrorMessage', {
+        i18n.translate('xpack.ingestManager.packagePolicyValidation.invalidArrayErrorMessage', {
           defaultMessage: 'Invalid format',
         })
       );
@@ -224,7 +224,7 @@ export const validatePackageConfigConfig = (
       (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
     ) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packageConfigValidation.requiredErrorMessage', {
+        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -239,9 +239,9 @@ export const validatePackageConfigConfig = (
 
 export const countValidationErrors = (
   validationResults:
-    | PackageConfigValidationResults
-    | PackageConfigInputValidationResults
-    | PackageConfigConfigValidationResults
+    | PackagePolicyValidationResults
+    | PackagePolicyInputValidationResults
+    | PackagePolicyConfigValidationResults
 ): number => {
   const flattenedValidation = getFlattenedObject(validationResults);
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
@@ -250,9 +250,9 @@ export const countValidationErrors = (
 
 export const validationHasErrors = (
   validationResults:
-    | PackageConfigValidationResults
-    | PackageConfigInputValidationResults
-    | PackageConfigConfigValidationResults
+    | PackagePolicyValidationResults
+    | PackagePolicyInputValidationResults
+    | PackagePolicyConfigValidationResults
 ): boolean => {
   return countValidationErrors(validationResults) > 0;
 };

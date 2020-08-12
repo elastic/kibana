@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NewPackageConfig, PackageConfig } from './types/models/package_config';
+import { NewPackagePolicy, PackagePolicy } from './types/models/package_config';
 
-export const createNewPackageConfigMock = (): NewPackageConfig => {
+export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
     name: 'endpoint-1',
     description: '',
@@ -23,10 +23,10 @@ export const createNewPackageConfigMock = (): NewPackageConfig => {
   };
 };
 
-export const createPackageConfigMock = (): PackageConfig => {
-  const newPackageConfig = createNewPackageConfigMock();
+export const createPackagePolicyMock = (): PackagePolicy => {
+  const newPackagePolicy = createNewPackagePolicyMock();
   return {
-    ...newPackageConfig,
+    ...newPackagePolicy,
     id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
     version: 'abcd',
     revision: 1,

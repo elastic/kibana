@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AgentConfig, PackageInfo, PackageConfig, GetPackagesResponse } from '../../../types';
+import { AgentPolicy, PackageInfo, PackagePolicy, GetPackagesResponse } from '../../../types';
 import {
-  useGetOneAgentConfig,
+  useGetOneAgentPolicy,
   useGetPackages,
   useGetLimitedPackages,
   sendGetPackageInfoByKey,
@@ -18,14 +18,14 @@ import {
 import { PackageIcon } from '../../../components/package_icon';
 
 export const StepSelectPackage: React.FunctionComponent<{
-  agentConfigId: string;
-  updateAgentConfig: (config: AgentConfig | undefined) => void;
+  agentPolicyId: string;
+  updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   packageInfo?: PackageInfo;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   setIsLoadingSecondStep: (isLoading: boolean) => void;
 }> = ({
-  agentConfigId,
-  updateAgentConfig,
+  agentPolicyId,
+  updateAgentPolicy,
   packageInfo,
   updatePackageInfo,
   setIsLoadingSecondStep,
@@ -36,15 +36,15 @@ export const StepSelectPackage: React.FunctionComponent<{
   );
   const [selectedPkgError, setSelectedPkgError] = useState<Error>();
 
-  // Fetch agent config info
+  // Fetch agent policy info
   const {
-    data: agentConfigData,
-    error: agentConfigError,
-    isLoading: isAgentConfigsLoading,
-  } = useGetOneAgentConfig(agentConfigId);
+    data: agentPolicyData,
+    error: agentPolicyError,
+    isLoading: isAgentPoliciesLoading,
+  } = useGetOneAgentPolicy(agentPolicyId);
 
   // Fetch packages info
-  // Filter out limited packages already part of selected agent config
+  // Filter out limited packages already part of selected agent policy
   const [packages, setPackages] = useState<GetPackagesResponse['response']>([]);
   const {
     data: packagesData,
@@ -56,22 +56,22 @@ export const StepSelectPackage: React.FunctionComponent<{
     isLoading: isLimitedPackagesLoading,
   } = useGetLimitedPackages();
   useEffect(() => {
-    if (packagesData?.response && limitedPackagesData?.response && agentConfigData?.item) {
+    if (packagesData?.response && limitedPackagesData?.response && agentPolicyData?.item) {
       const allPackages = packagesData.response;
       const limitedPackages = limitedPackagesData.response;
-      const usedLimitedPackages = (agentConfigData.item.package_configs as PackageConfig[])
-        .map((packageConfig) => packageConfig.package?.name || '')
+      const usedLimitedPackages = (agentPolicyData.item.package_configs as PackagePolicy[])
+        .map((packagePolicy) => packagePolicy.package?.name || '')
         .filter((pkgName) => limitedPackages.includes(pkgName));
       setPackages(allPackages.filter((pkg) => !usedLimitedPackages.includes(pkg.name)));
     }
-  }, [packagesData, limitedPackagesData, agentConfigData]);
+  }, [packagesData, limitedPackagesData, agentPolicyData]);
 
-  // Update parent agent config state
+  // Update parent agent policy state
   useEffect(() => {
-    if (agentConfigData && agentConfigData.item) {
-      updateAgentConfig(agentConfigData.item);
+    if (agentPolicyData && agentPolicyData.item) {
+      updateAgentPolicy(agentPolicyData.item);
     }
-  }, [agentConfigData, updateAgentConfig]);
+  }, [agentPolicyData, updateAgentPolicy]);
 
   // Update parent selected package state
   useEffect(() => {
@@ -97,17 +97,17 @@ export const StepSelectPackage: React.FunctionComponent<{
     }
   }, [selectedPkgKey, packageInfo, updatePackageInfo, setIsLoadingSecondStep]);
 
-  // Display agent config error if there is one
-  if (agentConfigError) {
+  // Display agent policy error if there is one
+  if (agentPolicyError) {
     return (
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingConfigTitle"
-            defaultMessage="Error loading agent configuration information"
+            id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingPolicyTitle"
+            defaultMessage="Error loading agent policy information"
           />
         }
-        error={agentConfigError}
+        error={agentPolicyError}
       />
     );
   }
@@ -118,7 +118,7 @@ export const StepSelectPackage: React.FunctionComponent<{
       <Error
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingPackagesTitle"
+            id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingPackagesTitle"
             defaultMessage="Error loading integrations"
           />
         }
@@ -134,7 +134,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           searchable
           allowExclusions={false}
           singleSelection={true}
-          isLoading={isPackagesLoading || isLimitedPackagesLoading || isAgentConfigsLoading}
+          isLoading={isPackagesLoading || isLimitedPackagesLoading || isAgentPoliciesLoading}
           options={packages.map(({ title, name, version, icons }) => {
             const pkgkey = `${name}-${version}`;
             return {
@@ -157,7 +157,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           }}
           searchProps={{
             placeholder: i18n.translate(
-              'xpack.ingestManager.createPackageConfig.stepSelectPackage.filterPackagesInputPlaceholder',
+              'xpack.ingestManager.createPackagePolicy.stepSelectPackage.filterPackagesInputPlaceholder',
               {
                 defaultMessage: 'Search for integrations',
               }
@@ -190,7 +190,7 @@ export const StepSelectPackage: React.FunctionComponent<{
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.createPackageConfig.stepSelectPackage.errorLoadingSelectedPackageTitle"
+                id="xpack.ingestManager.createPackagePolicy.stepSelectPackage.errorLoadingSelectedPackageTitle"
                 defaultMessage="Error loading selected integration"
               />
             }

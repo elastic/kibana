@@ -66,7 +66,7 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   CONFIG: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.configLabel"
+        id="xpack.ingestManager.agentEventSubtype.policyLabel"
         defaultMessage="Config"
       />
     </EuiBadge>

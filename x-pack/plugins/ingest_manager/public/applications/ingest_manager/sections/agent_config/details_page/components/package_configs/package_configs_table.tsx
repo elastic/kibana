@@ -15,13 +15,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig, PackageConfig } from '../../../../../types';
+import { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
-import { PackageConfigDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
+import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
 import { useConfigRefresh } from '../../hooks';
 
-interface InMemoryPackageConfig extends PackageConfig {
+interface InMemoryPackagePolicy extends PackagePolicy {
   inputTypes: string[];
   packageName?: string;
   packageTitle?: string;
@@ -29,11 +29,11 @@ interface InMemoryPackageConfig extends PackageConfig {
 }
 
 interface Props {
-  packageConfigs: PackageConfig[];
-  config: AgentConfig;
+  packagePolicies: PackagePolicy[];
+  agentPolicy: AgentPolicy;
   // Pass through props to InMemoryTable
-  loading?: EuiInMemoryTableProps<InMemoryPackageConfig>['loading'];
-  message?: EuiInMemoryTableProps<InMemoryPackageConfig>['message'];
+  loading?: EuiInMemoryTableProps<InMemoryPackagePolicy>['loading'];
+  message?: EuiInMemoryTableProps<InMemoryPackagePolicy>['message'];
 }
 
 interface FilterOption {
@@ -44,29 +44,29 @@ interface FilterOption {
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
-export const PackageConfigsTable: React.FunctionComponent<Props> = ({
-  packageConfigs: originalPackageConfigs,
-  config,
+export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
+  packagePolicies: originalPackagePolicies,
+  agentPolicy,
   ...rest
 }) => {
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
   const refreshConfig = useConfigRefresh();
 
-  // With the package configs provided on input, generate the list of package configs
+  // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
   // the list of options that will be used in the filters dropdowns
-  const [packageConfigs, namespaces, inputTypes] = useMemo((): [
-    InMemoryPackageConfig[],
+  const [packagePolicies, namespaces, inputTypes] = useMemo((): [
+    InMemoryPackagePolicy[],
     FilterOption[],
     FilterOption[]
   ] => {
     const namespacesValues: string[] = [];
     const inputTypesValues: string[] = [];
-    const mappedPackageConfigs = originalPackageConfigs.map<InMemoryPackageConfig>(
-      (packageConfig) => {
-        if (packageConfig.namespace && !namespacesValues.includes(packageConfig.namespace)) {
-          namespacesValues.push(packageConfig.namespace);
+    const mappedPackagePolicies = originalPackagePolicies.map<InMemoryPackagePolicy>(
+      (packagePolicy) => {
+        if (packagePolicy.namespace && !namespacesValues.includes(packagePolicy.namespace)) {
+          namespacesValues.push(packagePolicy.namespace);
         }
 
         const dsInputTypes: string[] = [];
@@ -74,11 +74,11 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
         dsInputTypes.sort(stringSortAscending);
 
         return {
-          ...packageConfig,
+          ...packagePolicy,
           inputTypes: dsInputTypes,
-          packageName: packageConfig.package?.name ?? '',
-          packageTitle: packageConfig.package?.title ?? '',
-          packageVersion: packageConfig.package?.version ?? '',
+          packageName: packagePolicy.package?.name ?? '',
+          packageTitle: packagePolicy.package?.title ?? '',
+          packageVersion: packagePolicy.package?.version ?? '',
         };
       }
     );
@@ -87,19 +87,19 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
     inputTypesValues.sort(stringSortAscending);
 
     return [
-      mappedPackageConfigs,
+      mappedPackagePolicies,
       namespacesValues.map(toFilterOption),
       inputTypesValues.map(toFilterOption),
     ];
-  }, [originalPackageConfigs]);
+  }, [originalPackagePolicies]);
 
   const columns = useMemo(
-    (): EuiInMemoryTableProps<InMemoryPackageConfig>['columns'] => [
+    (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
       {
         field: 'name',
         sortable: true,
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.nameColumnTitle',
+          'xpack.ingestManager.policyDetails.packagePoliciesTable.nameColumnTitle',
           {
             defaultMessage: 'Name',
           }
@@ -113,7 +113,7 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
       {
         field: 'description',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.descriptionColumnTitle',
+          'xpack.ingestManager.policyDetails.packagePoliciesTable.descriptionColumnTitle',
           {
             defaultMessage: 'Description',
           }
@@ -128,19 +128,19 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
         field: 'packageTitle',
         sortable: true,
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.packageNameColumnTitle',
+          'xpack.ingestManager.policyDetails.packagePoliciesTable.packageNameColumnTitle',
           {
             defaultMessage: 'Integration',
           }
         ),
-        render(packageTitle: string, packageConfig: InMemoryPackageConfig) {
+        render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {packageConfig.package && (
+              {packagePolicy.package && (
                 <EuiFlexItem grow={false}>
                   <PackageIcon
-                    packageName={packageConfig.package.name}
-                    version={packageConfig.package.version}
+                    packageName={packagePolicy.package.name}
+                    version={packagePolicy.package.version}
                     size="m"
                     tryApi={true}
                   />
@@ -154,36 +154,36 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
       {
         field: 'namespace',
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.namespaceColumnTitle',
+          'xpack.ingestManager.policyDetails.packagePoliciesTable.namespaceColumnTitle',
           {
             defaultMessage: 'Namespace',
           }
         ),
-        render: (namespace: InMemoryPackageConfig['namespace']) => {
+        render: (namespace: InMemoryPackagePolicy['namespace']) => {
           return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
         },
       },
       {
         name: i18n.translate(
-          'xpack.ingestManager.configDetails.packageConfigsTable.actionsColumnTitle',
+          'xpack.ingestManager.policyDetails.packagePoliciesTable.actionsColumnTitle',
           {
             defaultMessage: 'Actions',
           }
         ),
         actions: [
           {
-            render: (packageConfig: InMemoryPackageConfig) => (
+            render: (packagePolicy: InMemoryPackagePolicy) => (
               <ContextMenuActions
                 items={[
-                  // FIXME: implement View package config action
+                  // FIXME: implement View package policy action
                   // <EuiContextMenuItem
                   //   disabled
                   //   icon="inspect"
                   //   onClick={() => {}}
-                  //   key="packageConfigView"
+                  //   key="packagePolicyView"
                   // >
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.configDetails.packageConfigsTable.viewActionTitle"
+                  //     id="xpack.ingestManager.policyDetails.packagePoliciesTable.viewActionTitle"
                   //     defaultMessage="View integration"
                   //   />
                   // </EuiContextMenuItem>,
@@ -191,41 +191,41 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
                     disabled={!hasWriteCapabilities}
                     icon="pencil"
                     href={getHref('edit_integration', {
-                      configId: config.id,
-                      packageConfigId: packageConfig.id,
+                      policyId: agentPolicy.id,
+                      packagePolicyId: packagePolicy.id,
                     })}
-                    key="packageConfigEdit"
+                    key="packagePolicyEdit"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.configDetails.packageConfigsTable.editActionTitle"
+                      id="xpack.ingestManager.policyDetails.packagePoliciesTable.editActionTitle"
                       defaultMessage="Edit integration"
                     />
                   </EuiContextMenuItem>,
-                  // FIXME: implement Copy package config action
-                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packageConfigCopy">
+                  // FIXME: implement Copy package policy action
+                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="packagePolicyCopy">
                   //   <FormattedMessage
-                  //     id="xpack.ingestManager.configDetails.packageConfigsTable.copyActionTitle"
+                  //     id="xpack.ingestManager.policyDetails.packagePoliciesTable.copyActionTitle"
                   //     defaultMessage="Copy integration"
                   //   />
                   // </EuiContextMenuItem>,
-                  <PackageConfigDeleteProvider agentConfig={config} key="packageConfigDelete">
-                    {(deletePackageConfigsPrompt) => {
+                  <PackagePolicyDeleteProvider agentPolicy={agentPolicy} key="packagePolicyDelete">
+                    {(deletePackagePoliciesPrompt) => {
                       return (
                         <DangerEuiContextMenuItem
                           disabled={!hasWriteCapabilities}
                           icon="trash"
                           onClick={() => {
-                            deletePackageConfigsPrompt([packageConfig.id], refreshConfig);
+                            deletePackagePoliciesPrompt([packagePolicy.id], refreshConfig);
                           }}
                         >
                           <FormattedMessage
-                            id="xpack.ingestManager.configDetails.packageConfigsTable.deleteActionTitle"
+                            id="xpack.ingestManager.policyDetails.packagePoliciesTable.deleteActionTitle"
                             defaultMessage="Delete integration"
                           />
                         </DangerEuiContextMenuItem>
                       );
                     }}
-                  </PackageConfigDeleteProvider>,
+                  </PackagePolicyDeleteProvider>,
                 ]}
               />
             ),
@@ -233,13 +233,13 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [config, getHref, hasWriteCapabilities, refreshConfig]
+    [agentPolicy, getHref, hasWriteCapabilities, refreshConfig]
   );
 
   return (
-    <EuiInMemoryTable<InMemoryPackageConfig>
+    <EuiInMemoryTable<InMemoryPackagePolicy>
       itemId="id"
-      items={packageConfigs}
+      items={packagePolicies}
       columns={columns}
       sorting={{
         sort: {
@@ -251,13 +251,13 @@ export const PackageConfigsTable: React.FunctionComponent<Props> = ({
       search={{
         toolsRight: [
           <EuiButton
-            key="addPackageConfigButton"
+            key="addPackagePolicyButton"
             isDisabled={!hasWriteCapabilities}
             iconType="plusInCircle"
-            href={getHref('add_integration_from_configuration', { configId: config.id })}
+            href={getHref('add_integration_from_policy', { policyId: agentPolicy.id })}
           >
             <FormattedMessage
-              id="xpack.ingestManager.configDetails.addPackageConfigButtonText"
+              id="xpack.ingestManager.policyDetails.addPackagePolicyButtonText"
               defaultMessage="Add integration"
             />
           </EuiButton>,

@@ -9,87 +9,87 @@ import { EuiConfirmModal, EuiOverlayMask, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { sendDeleteAgentConfig, useCore, useConfig, sendRequest } from '../../../hooks';
+import { sendDeleteAgentPolicy, useCore, useConfig, sendRequest } from '../../../hooks';
 
 interface Props {
-  children: (deleteAgentConfig: DeleteAgentConfig) => React.ReactElement;
+  children: (deleteAgentPolicy: DeleteAgentPolicy) => React.ReactElement;
 }
 
-export type DeleteAgentConfig = (agentConfig: string, onSuccess?: OnSuccessCallback) => void;
+export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallback) => void;
 
-type OnSuccessCallback = (agentConfigDeleted: string) => void;
+type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 
-export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
   const { notifications } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
-  const [agentConfig, setAgentConfig] = useState<string>();
+  const [agentPolicy, setAgentPolicy] = useState<string>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
 
-  const deleteAgentConfigPrompt: DeleteAgentConfig = (
-    agentConfigToDelete,
+  const deleteAgentPolicyPrompt: DeleteAgentPolicy = (
+    agentPolicyToDelete,
     onSuccess = () => undefined
   ) => {
-    if (!agentConfigToDelete) {
-      throw new Error('No agent config specified for deletion');
+    if (!agentPolicyToDelete) {
+      throw new Error('No agent policy specified for deletion');
     }
     setIsModalOpen(true);
-    setAgentConfig(agentConfigToDelete);
-    fetchAgentsCount(agentConfigToDelete);
+    setAgentPolicy(agentPolicyToDelete);
+    fetchAgentsCount(agentPolicyToDelete);
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
-    setAgentConfig(undefined);
+    setAgentPolicy(undefined);
     setIsLoading(false);
     setIsLoadingAgentsCount(false);
     setIsModalOpen(false);
   };
 
-  const deleteAgentConfig = async () => {
+  const deleteAgentPolicy = async () => {
     setIsLoading(true);
 
     try {
-      const { data } = await sendDeleteAgentConfig({
-        agentConfigId: agentConfig!,
+      const { data } = await sendDeleteAgentPolicy({
+        agentPolicyId: agentPolicy!,
       });
 
       if (data?.success) {
         notifications.toasts.addSuccess(
-          i18n.translate('xpack.ingestManager.deleteAgentConfig.successSingleNotificationTitle', {
-            defaultMessage: "Deleted agent config '{id}'",
-            values: { id: agentConfig },
+          i18n.translate('xpack.ingestManager.deleteAgentPolicy.successSingleNotificationTitle', {
+            defaultMessage: "Deleted agent policy '{id}'",
+            values: { id: agentPolicy },
           })
         );
         if (onSuccessCallback.current) {
-          onSuccessCallback.current(agentConfig!);
+          onSuccessCallback.current(agentPolicy!);
         }
       }
 
       if (!data?.success) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.deleteAgentConfig.failureSingleNotificationTitle', {
-            defaultMessage: "Error deleting agent config '{id}'",
-            values: { id: agentConfig },
+          i18n.translate('xpack.ingestManager.deleteAgentPolicy.failureSingleNotificationTitle', {
+            defaultMessage: "Error deleting agent policy '{id}'",
+            values: { id: agentPolicy },
           })
         );
       }
     } catch (e) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.ingestManager.deleteAgentConfig.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error deleting agent config',
+        i18n.translate('xpack.ingestManager.deleteAgentPolicy.fatalErrorNotificationTitle', {
+          defaultMessage: 'Error deleting agent policy',
         })
       );
     }
     closeModal();
   };
 
-  const fetchAgentsCount = async (agentConfigToCheck: string) => {
+  const fetchAgentsCount = async (agentPolicyToCheck: string) => {
     if (!isFleetEnabled || isLoadingAgentsCount) {
       return;
     }
@@ -98,7 +98,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfigToCheck}`,
+        kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentPolicyToCheck}`,
       },
     });
     setAgentsCount(data?.total || 0);
@@ -115,28 +115,28 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="xpack.ingestManager.deleteAgentConfig.confirmModal.deleteConfigTitle"
-              defaultMessage="Delete this agent configuration?"
+              id="xpack.ingestManager.deleteAgentPolicy.confirmModal.deletePolicyTitle"
+              defaultMessage="Delete this agent policy?"
             />
           }
           onCancel={closeModal}
-          onConfirm={deleteAgentConfig}
+          onConfirm={deleteAgentPolicy}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.deleteAgentConfig.confirmModal.cancelButtonLabel"
+              id="xpack.ingestManager.deleteAgentPolicy.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isLoading || isLoadingAgentsCount ? (
               <FormattedMessage
-                id="xpack.ingestManager.deleteAgentConfig.confirmModal.loadingButtonLabel"
+                id="xpack.ingestManager.deleteAgentPolicy.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.deleteAgentConfig.confirmModal.confirmButtonLabel"
-                defaultMessage="Delete configuration"
+                id="xpack.ingestManager.deleteAgentPolicy.confirmModal.confirmButtonLabel"
+                defaultMessage="Delete policy"
               />
             )
           }
@@ -145,22 +145,22 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         >
           {isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.ingestManager.deleteAgentConfig.confirmModal.loadingAgentsCountMessage"
+              id="xpack.ingestManager.deleteAgentPolicy.confirmModal.loadingAgentsCountMessage"
               defaultMessage="Checking amount of affected agents…"
             />
           ) : agentsCount ? (
             <EuiCallOut
               color="danger"
               title={i18n.translate(
-                'xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsTitle',
+                'xpack.ingestManager.deleteAgentPolicy.confirmModal.affectedAgentsTitle',
                 {
-                  defaultMessage: 'Configuration in use',
+                  defaultMessage: 'Policy in use',
                 }
               )}
             >
               <FormattedMessage
-                id="xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsMessage"
-                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent configuration. Unassign these agents before deleting this configuration."
+                id="xpack.ingestManager.deleteAgentPolicy.confirmModal.affectedAgentsMessage"
+                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent policy. Unassign these agents before deleting this policy."
                 values={{
                   agentsCount,
                 }}
@@ -168,7 +168,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
             </EuiCallOut>
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.deleteAgentConfig.confirmModal.irreversibleMessage"
+              id="xpack.ingestManager.deleteAgentPolicy.confirmModal.irreversibleMessage"
               defaultMessage="This action cannot be undone."
             />
           )}
@@ -179,7 +179,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
 
   return (
     <Fragment>
-      {children(deleteAgentConfigPrompt)}
+      {children(deleteAgentPolicyPrompt)}
       {renderModal()}
     </Fragment>
   );

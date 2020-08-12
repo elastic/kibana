@@ -21,12 +21,12 @@ import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
-import { AgentConfig } from '../../../types';
-import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AgentPolicy } from '../../../types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
   useCapabilities,
-  useGetAgentConfigs,
+  useGetAgentPolicies,
   usePagination,
   useSorting,
   useLink,
@@ -35,10 +35,10 @@ import {
   useBreadcrumbs,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
-import { LinkedAgentCount, AgentConfigActionMenu } from '../components';
-import { CreateAgentConfigFlyout } from './components';
+import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+import { CreateAgentPolicyFlyout } from './components';
 
-const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
+const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
     leftColumn={
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -46,8 +46,8 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.pageTitle"
-                defaultMessage="Agent Configurations"
+                id="xpack.ingestManager.agentPolicyList.pageTitle"
+                defaultMessage="Agent policies"
               />
             </h1>
           </EuiText>
@@ -56,8 +56,8 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.agentConfigList.pageSubtitle"
-                defaultMessage="Use agent configurations to manage your agents and the data they collect."
+                id="xpack.ingestManager.agentPolicyList.pageSubtitle"
+                defaultMessage="Use agent policies to manage your agents and the data they collect."
               />
             </p>
           </EuiText>
@@ -69,8 +69,8 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
   </WithHeaderLayout>
 );
 
-export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('configurations_list');
+export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('policies_list');
   const { getHref, getPath } = useLink();
   // Config information
   const hasWriteCapabilites = useCapabilities().write;
@@ -86,30 +86,30 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       : urlParams.kuery ?? ''
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const { sorting, setSorting } = useSorting<AgentConfig>({
+  const { sorting, setSorting } = useSorting<AgentPolicy>({
     field: 'updated_at',
     direction: 'desc',
   });
   const history = useHistory();
-  const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
-  const setIsCreateAgentConfigFlyoutOpen = useCallback(
+  const isCreateAgentPolicyFlyoutOpen = 'create' in urlParams;
+  const setIsCreateAgentPolicyFlyoutOpen = useCallback(
     (isOpen: boolean) => {
-      if (isOpen !== isCreateAgentConfigFlyoutOpen) {
+      if (isOpen !== isCreateAgentPolicyFlyoutOpen) {
         if (isOpen) {
           history.push(
-            `${getPath('configurations_list')}?${toUrlParams({ ...urlParams, create: null })}`
+            `${getPath('policies_list')}?${toUrlParams({ ...urlParams, create: null })}`
           );
         } else {
           const { create, ...params } = urlParams;
-          history.push(`${getPath('configurations_list')}?${toUrlParams(params)}`);
+          history.push(`${getPath('policies_list')}?${toUrlParams(params)}`);
         }
       }
     },
-    [getPath, history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
+    [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
-  // Fetch agent configs
-  const { isLoading, data: agentConfigData, sendRequest } = useGetAgentConfigs({
+  // Fetch agent policies
+  const { isLoading, data: agentPolicyData, sendRequest } = useGetAgentPolicies({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,
@@ -117,35 +117,35 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     kuery: search,
   });
 
-  // Some configs retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<
-      EuiTableFieldDataColumnType<AgentConfig> | EuiTableActionsColumnType<AgentConfig>
+      EuiTableFieldDataColumnType<AgentPolicy> | EuiTableActionsColumnType<AgentPolicy>
     > = [
       {
         field: 'name',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.agentConfigList.nameColumnTitle', {
+        name: i18n.translate('xpack.ingestManager.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
         width: '20%',
-        render: (name: string, agentConfig: AgentConfig) => (
+        render: (name: string, agentPolicy: AgentPolicy) => (
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiLink
                 className="eui-textTruncate"
-                href={getHref('configuration_details', { configId: agentConfig.id })}
-                title={name || agentConfig.id}
+                href={getHref('policy_details', { policyId: agentPolicy.id })}
+                title={name || agentPolicy.id}
               >
-                {name || agentConfig.id}
+                {name || agentPolicy.id}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentConfigList.revisionNumber"
+                  id="xpack.ingestManager.agentPolicyList.revisionNumber"
                   defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: agentConfig.revision }}
+                  values={{ revNumber: agentPolicy.revision }}
                 />
               </EuiText>
             </EuiFlexItem>
@@ -154,7 +154,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.descriptionColumnTitle', {
+        name: i18n.translate('xpack.ingestManager.agentPolicyList.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
         width: '35%',
@@ -167,40 +167,46 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'updated_at',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
+        name: i18n.translate('xpack.ingestManager.agentPolicyList.updatedOnColumnTitle', {
           defaultMessage: 'Last updated on',
         }),
-        render: (date: AgentConfig['updated_at']) => (
+        render: (date: AgentPolicy['updated_at']) => (
           <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
         ),
       },
       {
         field: 'agents',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.agentsColumnTitle', {
+        name: i18n.translate('xpack.ingestManager.agentPolicyList.agentsColumnTitle', {
           defaultMessage: 'Agents',
         }),
         dataType: 'number',
-        render: (agents: number, config: AgentConfig) => (
-          <LinkedAgentCount count={agents} agentConfigId={config.id} />
+        render: (agents: number, agentPolicy: AgentPolicy) => (
+          <LinkedAgentCount count={agents} agentPolicyId={agentPolicy.id} />
         ),
       },
       {
         field: 'package_configs',
-        name: i18n.translate('xpack.ingestManager.agentConfigList.packageConfigsCountColumnTitle', {
-          defaultMessage: 'Integrations',
-        }),
+        name: i18n.translate(
+          'xpack.ingestManager.agentPolicyList.packagePoliciesCountColumnTitle',
+          {
+            defaultMessage: 'Integrations',
+          }
+        ),
         dataType: 'number',
-        render: (packageConfigs: AgentConfig['package_configs']) =>
-          packageConfigs ? packageConfigs.length : 0,
+        render: (packagePolicies: AgentPolicy['package_configs']) =>
+          packagePolicies ? packagePolicies.length : 0,
       },
       {
-        name: i18n.translate('xpack.ingestManager.agentConfigList.actionsColumnTitle', {
+        name: i18n.translate('xpack.ingestManager.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            render: (config: AgentConfig) => (
-              <AgentConfigActionMenu config={config} onCopySuccess={() => sendRequest()} />
+            render: (agentPolicy: AgentPolicy) => (
+              <AgentPolicyActionMenu
+                agentPolicy={agentPolicy}
+                onCopySuccess={() => sendRequest()}
+              />
             ),
           },
         ],
@@ -215,21 +221,21 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     return cols;
   }, [getHref, isFleetEnabled, sendRequest]);
 
-  const createAgentConfigButton = useMemo(
+  const createAgentPolicyButton = useMemo(
     () => (
       <EuiButton
         fill
         iconType="plusInCircle"
         isDisabled={!hasWriteCapabilites}
-        onClick={() => setIsCreateAgentConfigFlyoutOpen(true)}
+        onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
       >
         <FormattedMessage
-          id="xpack.ingestManager.agentConfigList.addButton"
-          defaultMessage="Create agent configuration"
+          id="xpack.ingestManager.agentPolicyList.addButton"
+          defaultMessage="Create agent policy"
         />
       </EuiButton>
     ),
-    [hasWriteCapabilites, setIsCreateAgentConfigFlyoutOpen]
+    [hasWriteCapabilites, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(
@@ -238,18 +244,18 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.noAgentConfigsPrompt"
-              defaultMessage="No agent configurations"
+              id="xpack.ingestManager.agentPolicyList.noAgentPoliciesPrompt"
+              defaultMessage="No agent policies"
             />
           </h2>
         }
-        actions={createAgentConfigButton}
+        actions={createAgentPolicyButton}
       />
     ),
-    [createAgentConfigButton]
+    [createAgentPolicyButton]
   );
 
-  const onTableChange = (criteria: CriteriaWithPagination<AgentConfig>) => {
+  const onTableChange = (criteria: CriteriaWithPagination<AgentPolicy>) => {
     const newPagination = {
       ...pagination,
       currentPage: criteria.page.index + 1,
@@ -260,11 +266,11 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
   };
 
   return (
-    <AgentConfigListPageLayout>
-      {isCreateAgentConfigFlyoutOpen ? (
-        <CreateAgentConfigFlyout
+    <AgentPolicyListPageLayout>
+      {isCreateAgentPolicyFlyoutOpen ? (
+        <CreateAgentPolicyFlyout
           onClose={() => {
-            setIsCreateAgentConfigFlyoutOpen(false);
+            setIsCreateAgentPolicyFlyoutOpen(false);
             sendRequest();
           }}
         />
@@ -280,41 +286,41 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            fieldPrefix={AGENT_CONFIG_SAVED_OBJECT_TYPE}
+            fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
             <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.reloadAgentConfigsButtonText"
+              id="xpack.ingestManager.agentPolicyList.reloadAgentPoliciesButtonText"
               defaultMessage="Reload"
             />
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createAgentConfigButton}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{createAgentPolicyButton}</EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <EuiBasicTable<AgentConfig>
+      <EuiBasicTable<AgentPolicy>
         loading={isLoading}
         hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.loadingAgentConfigsMessage"
-              defaultMessage="Loading agent configurations…"
+              id="xpack.ingestManager.agentPolicyList.loadingAgentPoliciesMessage"
+              defaultMessage="Loading agent policies…"
             />
-          ) : !search.trim() && (agentConfigData?.total ?? 0) === 0 ? (
+          ) : !search.trim() && (agentPolicyData?.total ?? 0) === 0 ? (
             emptyPrompt
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.noFilteredAgentConfigsPrompt"
-              defaultMessage="No agent configurations found. {clearFiltersLink}"
+              id="xpack.ingestManager.agentPolicyList.noFilteredAgentPoliciesPrompt"
+              defaultMessage="No agent policies found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
                   <EuiLink onClick={() => setSearch('')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.agentConfigList.clearFiltersLinkText"
+                      id="xpack.ingestManager.agentPolicyList.clearFiltersLinkText"
                       defaultMessage="Clear filters"
                     />
                   </EuiLink>
@@ -323,19 +329,19 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
             />
           )
         }
-        items={agentConfigData ? agentConfigData.items : []}
+        items={agentPolicyData ? agentPolicyData.items : []}
         itemId="id"
         columns={columns}
         isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: agentConfigData ? agentConfigData.total : 0,
+          totalItemCount: agentPolicyData ? agentPolicyData.total : 0,
           pageSizeOptions,
         }}
         sorting={{ sort: sorting }}
         onChange={onTableChange}
       />
-    </AgentConfigListPageLayout>
+    </AgentPolicyListPageLayout>
   );
 };

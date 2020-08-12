@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function IngestManagerCreatePackageConfig({
+export function IngestManagerCreatePackagePolicy({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
@@ -19,28 +19,28 @@ export function IngestManagerCreatePackageConfig({
      * Validates that the page shown is the Package Config Create Page
      */
     async ensureOnCreatePageOrFail() {
-      await testSubjects.existOrFail('createPackageConfig_header');
+      await testSubjects.existOrFail('createPackagePolicy_header');
     },
 
     /**
      * Finds and returns the Cancel button on the sticky bottom bar
      */
     async findCancelButton() {
-      return await testSubjects.find('createPackageConfigCancelButton');
+      return await testSubjects.find('createPackagePolicyCancelButton');
     },
 
     /**
      * Finds and returns the Cancel back link at the top of the create page
      */
     async findBackLink() {
-      return await testSubjects.find('createPackageConfig_cancelBackLink');
+      return await testSubjects.find('createPackagePolicy_cancelBackLink');
     },
 
     /**
      * Finds and returns the save button on the sticky bottom bar
      */
     async findDSaveButton() {
-      return await testSubjects.find('createPackageConfigSaveButton');
+      return await testSubjects.find('createPackagePolicySaveButton');
     },
 
     /**
@@ -49,7 +49,7 @@ export function IngestManagerCreatePackageConfig({
      * Visual name of the configuration. if one is not provided, the first agent
      * configuration on the list will be chosen
      */
-    async selectAgentConfig(name?: string) {
+    async selectAgentPolicy(name?: string) {
       // if we have a name, then find the button with that `title` set.
       if (name) {
         await (
@@ -65,7 +65,7 @@ export function IngestManagerCreatePackageConfig({
     /**
      * Returns the package config name currently populated on the input field
      */
-    async getPackageConfigName() {
+    async getPackagePolicyName() {
       return testSubjects.getAttribute('packageConfigNameInput', 'value');
     },
 
@@ -73,7 +73,7 @@ export function IngestManagerCreatePackageConfig({
      * Set the name of the package config on the input field
      * @param name
      */
-    async setPackageConfigName(name: string) {
+    async setPackagePolicyName(name: string) {
       // Because of the bottom sticky bar, we need to scroll section 2 into view
       // so that `setValue()` enters the data on the input field.
       await testSubjects.scrollIntoView('dataCollectionSetupStep');
@@ -91,13 +91,13 @@ export function IngestManagerCreatePackageConfig({
      * Validates that the page shown is the Package Config Edit Page
      */
     async ensureOnEditPageOrFail() {
-      await testSubjects.existOrFail('editPackageConfig_header');
+      await testSubjects.existOrFail('editPackagePolicy_header');
     },
 
     /**
      * Navigates to the Ingest Agent configuration Edit Package Config page
      */
-    async navigateToAgentConfigEditPackageConfig(agentConfigId: string, packageConfigId: string) {
+    async navigateToAgentPolicyEditPackagePolicy(agentConfigId: string, packageConfigId: string) {
       await pageObjects.common.navigateToApp('ingestManager', {
         hash: `/configs/${agentConfigId}/edit-integration/${packageConfigId}`,
       });

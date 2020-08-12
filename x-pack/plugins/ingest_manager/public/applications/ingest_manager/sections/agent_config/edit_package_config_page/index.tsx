@@ -15,34 +15,34 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentConfig, PackageInfo, UpdatePackageConfig } from '../../../types';
+import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
   useCore,
   useConfig,
-  sendUpdatePackageConfig,
+  sendUpdatePackagePolicy,
   sendGetAgentStatus,
-  sendGetOneAgentConfig,
-  sendGetOnePackageConfig,
+  sendGetOneAgentPolicy,
+  sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { ConfirmDeployConfigModal } from '../components';
-import { CreatePackageConfigPageLayout } from '../create_package_config_page/components';
+import { CreatePackagePolicyPageLayout } from '../create_package_config_page/components';
 import {
-  PackageConfigValidationResults,
-  validatePackageConfig,
+  PackagePolicyValidationResults,
+  validatePackagePolicy,
   validationHasErrors,
 } from '../create_package_config_page/services';
 import {
-  PackageConfigFormState,
-  CreatePackageConfigFrom,
+  PackagePolicyFormState,
+  CreatePackagePolicyFrom,
 } from '../create_package_config_page/types';
 import { StepConfigurePackage } from '../create_package_config_page/step_configure_package';
-import { StepDefinePackageConfig } from '../create_package_config_page/step_define_package_config';
+import { StepDefinePackagePolicy } from '../create_package_config_page/step_define_package_config';
 
-export const EditPackageConfigPage: React.FunctionComponent = () => {
+export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
@@ -52,7 +52,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
   const {
-    params: { configId, packageConfigId },
+    params: { policyId, packagePolicyId },
   } = useRouteMatch();
   const history = useHistory();
   const { getHref, getPath } = useLink();
@@ -66,12 +66,12 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     return () => subscription.unsubscribe();
   });
 
-  // Agent config, package info, and package config states
+  // Agent policy, package info, and package policy states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const [loadingError, setLoadingError] = useState<Error>();
-  const [agentConfig, setAgentConfig] = useState<AgentConfig>();
+  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
   const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [packageConfig, setPackageConfig] = useState<UpdatePackageConfig>({
+  const [packagePolicy, setPackagePolicy] = useState<UpdatePackagePolicy>({
     name: '',
     description: '',
     namespace: '',
@@ -82,20 +82,20 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     version: '',
   });
 
-  // Retrieve agent config, package, and package config info
+  // Retrieve agent policy, package, and package policy info
   useEffect(() => {
     const getData = async () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const [{ data: agentConfigData }, { data: packageConfigData }] = await Promise.all([
-          sendGetOneAgentConfig(configId),
-          sendGetOnePackageConfig(packageConfigId),
+        const [{ data: agentPolicyData }, { data: packagePolicyData }] = await Promise.all([
+          sendGetOneAgentPolicy(policyId),
+          sendGetOnePackagePolicy(packagePolicyId),
         ]);
-        if (agentConfigData?.item) {
-          setAgentConfig(agentConfigData.item);
+        if (agentPolicyData?.item) {
+          setAgentPolicy(agentPolicyData.item);
         }
-        if (packageConfigData?.item) {
+        if (packagePolicyData?.item) {
           const {
             id,
             revision,
@@ -106,11 +106,11 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
             updated_by,
             updated_at,
             /* eslint-enable @typescript-eslint/naming-convention */
-            ...restOfPackageConfig
-          } = packageConfigData.item;
+            ...restOfPackagePolicy
+          } = packagePolicyData.item;
           // Remove `compiled_stream` from all stream info, we assign this after saving
-          const newPackageConfig = {
-            ...restOfPackageConfig,
+          const newPackagePolicy = {
+            ...restOfPackagePolicy,
             inputs: inputs.map((input) => {
               const { streams, ...restOfInput } = input;
               return {
@@ -123,14 +123,14 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
               };
             }),
           };
-          setPackageConfig(newPackageConfig);
-          if (packageConfigData.item.package) {
+          setPackagePolicy(newPackagePolicy);
+          if (packagePolicyData.item.package) {
             const { data: packageData } = await sendGetPackageInfoByKey(
-              `${packageConfigData.item.package.name}-${packageConfigData.item.package.version}`
+              `${packagePolicyData.item.package.name}-${packagePolicyData.item.package.version}`
             );
             if (packageData?.response) {
               setPackageInfo(packageData.response);
-              setValidationResults(validatePackageConfig(newPackageConfig, packageData.response));
+              setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
               setFormState('VALID');
             }
           }
@@ -141,13 +141,13 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
       setIsLoadingData(false);
     };
     getData();
-  }, [configId, packageConfigId]);
+  }, [policyId, packagePolicyId]);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      const { data } = await sendGetAgentStatus({ configId });
+      const { data } = await sendGetAgentStatus({ configId: policyId });
       if (data?.results.total) {
         setAgentCount(data.results.total);
       }
@@ -156,42 +156,42 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     if (isFleetEnabled) {
       getAgentCount();
     }
-  }, [configId, isFleetEnabled]);
+  }, [policyId, isFleetEnabled]);
 
-  // Package config validation state
-  const [validationResults, setValidationResults] = useState<PackageConfigValidationResults>();
+  // Package policy validation state
+  const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  // Update package config validation
-  const updatePackageConfigValidation = useCallback(
-    (newPackageConfig?: UpdatePackageConfig) => {
+  // Update package policy validation
+  const updatePackagePolicyValidation = useCallback(
+    (newPackagePolicy?: UpdatePackagePolicy) => {
       if (packageInfo) {
-        const newValidationResult = validatePackageConfig(
-          newPackageConfig || packageConfig,
+        const newValidationResult = validatePackagePolicy(
+          newPackagePolicy || packagePolicy,
           packageInfo
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
-        console.debug('Package config validation results', newValidationResult);
+        console.debug('Package policy validation results', newValidationResult);
 
         return newValidationResult;
       }
     },
-    [packageConfig, packageInfo]
+    [packagePolicy, packageInfo]
   );
 
-  // Update package config method
-  const updatePackageConfig = useCallback(
-    (updatedFields: Partial<UpdatePackageConfig>) => {
-      const newPackageConfig = {
-        ...packageConfig,
+  // Update package policy method
+  const updatePackagePolicy = useCallback(
+    (updatedFields: Partial<UpdatePackagePolicy>) => {
+      const newPackagePolicy = {
+        ...packagePolicy,
         ...updatedFields,
       };
-      setPackageConfig(newPackageConfig);
+      setPackagePolicy(newPackagePolicy);
 
       // eslint-disable-next-line no-console
-      console.debug('Package config updated', newPackageConfig);
-      const newValidationResults = updatePackageConfigValidation(newPackageConfig);
+      console.debug('Package policy updated', newPackagePolicy);
+      const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
@@ -199,17 +199,17 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
         setFormState('VALID');
       }
     },
-    [packageConfig, updatePackageConfigValidation]
+    [packagePolicy, updatePackagePolicyValidation]
   );
 
   // Cancel url
-  const cancelUrl = getHref('configuration_details', { configId });
+  const cancelUrl = getHref('policy_details', { policyId });
 
-  // Save package config
-  const [formState, setFormState] = useState<PackageConfigFormState>('INVALID');
-  const savePackageConfig = async () => {
+  // Save package policy
+  const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
+  const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const result = await sendUpdatePackageConfig(packageConfigId, packageConfig);
+    const result = await sendUpdatePackagePolicy(packagePolicyId, packagePolicy);
     setFormState('SUBMITTED');
     return result;
   };
@@ -223,22 +223,22 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
       setFormState('CONFIRM');
       return;
     }
-    const { error } = await savePackageConfig();
+    const { error } = await savePackagePolicy();
     if (!error) {
-      history.push(getPath('configuration_details', { configId }));
+      history.push(getPath('policy_details', { policyId }));
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.ingestManager.editPackageConfig.updatedNotificationTitle', {
-          defaultMessage: `Successfully updated '{packageConfigName}'`,
+        title: i18n.translate('xpack.ingestManager.editPackagePolicy.updatedNotificationTitle', {
+          defaultMessage: `Successfully updated '{packagePolicyName}'`,
           values: {
-            packageConfigName: packageConfig.name,
+            packagePolicyName: packagePolicy.name,
           },
         }),
         text:
-          agentCount && agentConfig
-            ? i18n.translate('xpack.ingestManager.editPackageConfig.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentConfigName}' configuration`,
+          agentCount && agentPolicy
+            ? i18n.translate('xpack.ingestManager.editPackagePolicy.updatedNotificationMessage', {
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
                 values: {
-                  agentConfigName: agentConfig.name,
+                  agentPolicyName: agentPolicy.name,
                 },
               })
             : undefined,
@@ -246,25 +246,25 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
     } else {
       if (error.statusCode === 409) {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.ingestManager.editPackageConfig.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packageConfigName}'`,
+          title: i18n.translate('xpack.ingestManager.editPackagePolicy.failedNotificationTitle', {
+            defaultMessage: `Error updating '{packagePolicyName}'`,
             values: {
-              packageConfigName: packageConfig.name,
+              packagePolicyName: packagePolicy.name,
             },
           }),
           toastMessage: i18n.translate(
-            'xpack.ingestManager.editPackageConfig.failedConflictNotificationMessage',
+            'xpack.ingestManager.editPackagePolicy.failedConflictNotificationMessage',
             {
-              defaultMessage: `Data is out of date. Refresh the page to get the latest configuration.`,
+              defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
             }
           ),
         });
       } else {
         notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.ingestManager.editPackageConfig.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packageConfigName}'`,
+          title: i18n.translate('xpack.ingestManager.editPackagePolicy.failedNotificationTitle', {
+            defaultMessage: `Error updating '{packagePolicyName}'`,
             values: {
-              packageConfigName: packageConfig.name,
+              packagePolicyName: packagePolicy.name,
             },
           }),
         });
@@ -274,72 +274,72 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
   };
 
   const layoutProps = {
-    from: 'edit' as CreatePackageConfigFrom,
+    from: 'edit' as CreatePackagePolicyFrom,
     cancelUrl,
-    agentConfig,
+    agentPolicy,
     packageInfo,
   };
 
   const configurePackage = useMemo(
     () =>
-      agentConfig && packageInfo ? (
+      agentPolicy && packageInfo ? (
         <>
-          <StepDefinePackageConfig
-            agentConfig={agentConfig}
+          <StepDefinePackagePolicy
+            agentPolicy={agentPolicy}
             packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            updatePackageConfig={updatePackageConfig}
+            packagePolicy={packagePolicy}
+            updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
 
           <StepConfigurePackage
             from={'edit'}
             packageInfo={packageInfo}
-            packageConfig={packageConfig}
-            packageConfigId={packageConfigId}
-            updatePackageConfig={updatePackageConfig}
+            packagePolicy={packagePolicy}
+            packagePolicyId={packagePolicyId}
+            updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
           />
         </>
       ) : null,
     [
-      agentConfig,
+      agentPolicy,
       formState,
-      packageConfig,
-      packageConfigId,
+      packagePolicy,
+      packagePolicyId,
       packageInfo,
-      updatePackageConfig,
+      updatePackagePolicy,
       validationResults,
     ]
   );
 
   return (
-    <CreatePackageConfigPageLayout {...layoutProps} data-test-subj="editPackageConfig">
+    <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       {isLoadingData ? (
         <Loading />
-      ) : loadingError || !agentConfig || !packageInfo ? (
+      ) : loadingError || !agentPolicy || !packageInfo ? (
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.editPackageConfig.errorLoadingDataTitle"
+              id="xpack.ingestManager.editPackagePolicy.errorLoadingDataTitle"
               defaultMessage="Error loading data"
             />
           }
           error={
             loadingError ||
-            i18n.translate('xpack.ingestManager.editPackageConfig.errorLoadingDataMessage', {
+            i18n.translate('xpack.ingestManager.editPackagePolicy.errorLoadingDataMessage', {
               defaultMessage: 'There was an error loading this intergration information',
             })
           }
         />
       ) : (
         <>
-          <Breadcrumb configName={agentConfig.name} configId={configId} />
+          <Breadcrumb configName={agentPolicy.name} policyId={policyId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployConfigModal
               agentCount={agentCount}
-              agentConfig={agentConfig}
+              agentPolicy={agentPolicy}
               onConfirm={onSubmit}
               onCancel={() => setFormState('VALID')}
             />
@@ -358,10 +358,10 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
-                {agentConfig && packageInfo && formState === 'INVALID' ? (
+                {agentPolicy && packageInfo && formState === 'INVALID' ? (
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackageConfig.errorOnSaveText"
-                    defaultMessage="Your integration configuration has errors. Please fix them before saving."
+                    id="xpack.ingestManager.createPackagePolicy.errorOnSaveText"
+                    defaultMessage="Your integration policy has errors. Please fix them before saving."
                   />
                 ) : null}
               </EuiFlexItem>
@@ -370,7 +370,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty color="ghost" href={cancelUrl}>
                       <FormattedMessage
-                        id="xpack.ingestManager.editPackageConfig.cancelButton"
+                        id="xpack.ingestManager.editPackagePolicy.cancelButton"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -385,7 +385,7 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
                       fill
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.editPackageConfig.saveButton"
+                        id="xpack.ingestManager.editPackagePolicy.saveButton"
                         defaultMessage="Save integration"
                       />
                     </EuiButton>
@@ -396,14 +396,14 @@ export const EditPackageConfigPage: React.FunctionComponent = () => {
           </EuiBottomBar>
         </>
       )}
-    </CreatePackageConfigPageLayout>
+    </CreatePackagePolicyPageLayout>
   );
 };
 
-const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string }> = ({
+const Breadcrumb: React.FunctionComponent<{ configName: string; policyId: string }> = ({
   configName,
-  configId,
+  policyId,
 }) => {
-  useBreadcrumbs('edit_integration', { configName, configId });
+  useBreadcrumbs('edit_integration', { configName, policyId });
   return null;
 };

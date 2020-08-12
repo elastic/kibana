@@ -18,7 +18,7 @@ classDiagram
     last_checkin
     local_metadata
     user_provided_metadata
-    actions // Encrypted  contains new agent config
+    actions // Encrypted  contains new agent policy
     default_api_key // Encrypted
 
 	}

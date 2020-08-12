@@ -5,7 +5,7 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { agentConfigService } from './agent_config';
+import { agentPolicyService } from './agent_config';
 import { Output } from '../types';
 
 function getSavedObjectMock(configAttributes: any) {
@@ -41,13 +41,13 @@ jest.mock('./output', () => {
   };
 });
 
-describe('agent config', () => {
+describe('agent policy', () => {
   describe('getFullConfig', () => {
     it('should return a config without monitoring if not monitoring is not enabled', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
       });
-      const config = await agentConfigService.getFullConfig(soClient, 'config');
+      const config = await agentPolicyService.getFullConfig(soClient, 'config');
 
       expect(config).toMatchObject({
         id: 'config',
@@ -76,7 +76,7 @@ describe('agent config', () => {
         revision: 1,
         monitoring_enabled: ['logs'],
       });
-      const config = await agentConfigService.getFullConfig(soClient, 'config');
+      const config = await agentPolicyService.getFullConfig(soClient, 'config');
 
       expect(config).toMatchObject({
         id: 'config',
@@ -106,7 +106,7 @@ describe('agent config', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const config = await agentConfigService.getFullConfig(soClient, 'config');
+      const config = await agentPolicyService.getFullConfig(soClient, 'config');
 
       expect(config).toMatchObject({
         id: 'config',

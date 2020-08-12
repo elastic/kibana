@@ -11,11 +11,11 @@ import { UseRequestConfig } from '../../../../hooks/use_request/use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
-export function useGetAgentStatus(configId?: string, options?: RequestOptions) {
+export function useGetAgentStatus(policyId?: string, options?: RequestOptions) {
   const agentStatusRequest = useRequest<GetAgentStatusResponse>({
     path: agentRouteService.getStatusPath(),
     query: {
-      configId,
+      policyId,
     },
     method: 'get',
     ...options,

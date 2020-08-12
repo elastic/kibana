@@ -13,7 +13,7 @@ const ConfigRecordSchema = schema.recordOf(
   })
 );
 
-const PackageConfigBaseSchema = {
+const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.string({ minLength: 1 }),
@@ -62,17 +62,17 @@ const PackageConfigBaseSchema = {
   ),
 };
 
-export const NewPackageConfigSchema = schema.object({
-  ...PackageConfigBaseSchema,
+export const NewPackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
 });
 
-export const UpdatePackageConfigSchema = schema.object({
-  ...PackageConfigBaseSchema,
+export const UpdatePackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
   version: schema.maybe(schema.string()),
 });
 
-export const PackageConfigSchema = schema.object({
-  ...PackageConfigBaseSchema,
+export const PackagePolicySchema = schema.object({
+  ...PackagePolicyBaseSchema,
   id: schema.string(),
   version: schema.maybe(schema.string()),
 });

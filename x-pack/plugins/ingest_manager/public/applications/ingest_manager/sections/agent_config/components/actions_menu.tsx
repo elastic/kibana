@@ -6,22 +6,22 @@
 import React, { memo, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import { AgentConfig } from '../../../types';
+import { AgentPolicy } from '../../../types';
 import { useCapabilities } from '../../../hooks';
 import { ContextMenuActions } from '../../../components';
 import { AgentEnrollmentFlyout } from '../../fleet/components';
-import { ConfigYamlFlyout } from './config_yaml_flyout';
-import { AgentConfigCopyProvider } from './config_copy_provider';
+import { AgentPolicyYamlFlyout } from './config_yaml_flyout';
+import { AgentPolicyCopyProvider } from './config_copy_provider';
 
-export const AgentConfigActionMenu = memo<{
-  config: AgentConfig;
-  onCopySuccess?: (newAgentConfig: AgentConfig) => void;
+export const AgentPolicyActionMenu = memo<{
+  agentPolicy: AgentPolicy;
+  onCopySuccess?: (newAgentPolicy: AgentPolicy) => void;
   fullButton?: boolean;
   enrollmentFlyoutOpenByDefault?: boolean;
   onCancelEnrollment?: () => void;
 }>(
   ({
-    config,
+    agentPolicy,
     onCopySuccess,
     fullButton = false,
     enrollmentFlyoutOpenByDefault = false,
@@ -42,21 +42,21 @@ export const AgentConfigActionMenu = memo<{
     }, [onCancelEnrollment, setIsEnrollmentFlyoutOpen]);
 
     return (
-      <AgentConfigCopyProvider>
-        {(copyAgentConfigPrompt) => {
+      <AgentPolicyCopyProvider>
+        {(copyAgentPolicyPrompt) => {
           return (
             <>
               {isYamlFlyoutOpen ? (
                 <EuiPortal>
-                  <ConfigYamlFlyout
-                    configId={config.id}
+                  <AgentPolicyYamlFlyout
+                    policyId={agentPolicy.id}
                     onClose={() => setIsYamlFlyoutOpen(false)}
                   />
                 </EuiPortal>
               ) : null}
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
-                  <AgentEnrollmentFlyout agentConfigs={[config]} onClose={onClose} />
+                  <AgentEnrollmentFlyout agentPolicies={[agentPolicy]} onClose={onClose} />
                 </EuiPortal>
               )}
               <ContextMenuActions
@@ -69,7 +69,7 @@ export const AgentConfigActionMenu = memo<{
                         },
                         children: (
                           <FormattedMessage
-                            id="xpack.ingestManager.agentConfigActionMenu.buttonText"
+                            id="xpack.ingestManager.agentPolicyActionMenu.buttonText"
                             defaultMessage="Actions"
                           />
                         ),
@@ -84,31 +84,31 @@ export const AgentConfigActionMenu = memo<{
                     key="enrollAgents"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentConfigActionMenu.enrollAgentActionText"
+                      id="xpack.ingestManager.agentPolicyActionMenu.enrollAgentActionText"
                       defaultMessage="Add agent"
                     />
                   </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     icon="inspect"
                     onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
-                    key="viewConfig"
+                    key="viewPolicy"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentConfigActionMenu.viewConfigText"
-                      defaultMessage="View config"
+                      id="xpack.ingestManager.agentPolicyActionMenu.viewPolicyText"
+                      defaultMessage="View policy"
                     />
                   </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     disabled={!hasWriteCapabilities}
                     icon="copy"
                     onClick={() => {
-                      copyAgentConfigPrompt(config, onCopySuccess);
+                      copyAgentPolicyPrompt(agentPolicy, onCopySuccess);
                     }}
-                    key="copyConfig"
+                    key="copyPolicy"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentConfigActionMenu.copyConfigActionText"
-                      defaultMessage="Copy config"
+                      id="xpack.ingestManager.agentPolicyActionMenu.copyPolicyActionText"
+                      defaultMessage="Copy policy"
                     />
                   </EuiContextMenuItem>,
                 ]}
@@ -116,7 +116,7 @@ export const AgentConfigActionMenu = memo<{
             </>
           );
         }}
-      </AgentConfigCopyProvider>
+      </AgentPolicyCopyProvider>
     );
   }
 );

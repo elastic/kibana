@@ -5,9 +5,9 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackageConfigMock } from '../../common/mocks';
-import { packageConfigService } from './package_config';
-import { PackageInfo, PackageConfigSOAttributes } from '../types';
+import { createPackagePolicyMock } from '../../common/mocks';
+import { packagePolicyService } from './package_config';
+import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
@@ -40,10 +40,10 @@ jest.mock('./epm/registry', () => {
   };
 });
 
-describe('Package config service', () => {
+describe('Package policy service', () => {
   describe('assignPackageStream', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packageConfigService.assignPackageStream(
+      const inputs = await packagePolicyService.assignPackageStream(
         ({
           datasets: [
             {
@@ -104,7 +104,7 @@ describe('Package config service', () => {
     });
 
     it('should work with config variables at the input level', async () => {
-      const inputs = await packageConfigService.assignPackageStream(
+      const inputs = await packagePolicyService.assignPackageStream(
         ({
           datasets: [
             {
@@ -173,21 +173,21 @@ describe('Package config service', () => {
         type: 'abcd',
         references: [],
         version: 'test',
-        attributes: createPackageConfigMock(),
+        attributes: createPackagePolicyMock(),
       });
       savedObjectsClient.update.mockImplementation(
         async (
           type: string,
           id: string
-        ): Promise<SavedObjectsUpdateResponse<PackageConfigSOAttributes>> => {
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
           throw savedObjectsClient.errors.createConflictError('abc', '123');
         }
       );
       await expect(
-        packageConfigService.update(
+        packagePolicyService.update(
           savedObjectsClient,
           'the-package-config-id',
-          createPackageConfigMock()
+          createPackagePolicyMock()
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });

@@ -6,92 +6,92 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
-  DeletePackageConfigsResponse,
-  PackageConfigInput,
-  PackageConfigInputStream,
+  DeletePackagePoliciesResponse,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
-  packageToPackageConfig,
+  packageToPackagePolicy,
   isPackageLimited,
-  doesAgentConfigAlreadyIncludePackage,
+  doesAgentPolicyAlreadyIncludePackage,
 } from '../../common';
-import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  NewPackageConfig,
-  UpdatePackageConfig,
-  PackageConfig,
-  PackageConfigSOAttributes,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicy,
+  PackagePolicySOAttributes,
   RegistryPackage,
   CallESAsCurrentUser,
 } from '../types';
-import { agentConfigService } from './agent_config';
+import { agentPolicyService } from './agent_config';
 import { outputService } from './output';
 import * as Registry from './epm/registry';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { createStream } from './epm/agent/agent';
 
-const SAVED_OBJECT_TYPE = PACKAGE_CONFIG_SAVED_OBJECT_TYPE;
+const SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 
 function getDataset(st: string) {
   return st.split('.')[1];
 }
 
-class PackageConfigService {
+class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
     callCluster: CallESAsCurrentUser,
-    packageConfig: NewPackageConfig,
+    packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpConfigRevision?: boolean }
-  ): Promise<PackageConfig> {
-    // Check that its agent config does not have a package config with the same name
-    const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
-    if (!parentAgentConfig) {
-      throw new Error('Agent config not found');
+  ): Promise<PackagePolicy> {
+    // Check that its agent policy does not have a package policy with the same name
+    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id);
+    if (!parentAgentPolicy) {
+      throw new Error('Agent policy not found');
     } else {
       if (
-        (parentAgentConfig.package_configs as PackageConfig[]).find(
-          (siblingPackageConfig) => siblingPackageConfig.name === packageConfig.name
+        (parentAgentPolicy.package_configs as PackagePolicy[]).find(
+          (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
         )
       ) {
-        throw new Error('There is already a package with the same name on this agent config');
+        throw new Error('There is already a package with the same name on this agent policy');
       }
     }
 
     // Make sure the associated package is installed
-    if (packageConfig.package?.name) {
+    if (packagePolicy.package?.name) {
       const [, pkgInfo] = await Promise.all([
         ensureInstalledPackage({
           savedObjectsClient: soClient,
-          pkgName: packageConfig.package.name,
+          pkgName: packagePolicy.package.name,
           callCluster,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,
-          pkgName: packageConfig.package.name,
-          pkgVersion: packageConfig.package.version,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
         }),
       ]);
 
-      // Check if it is a limited package, and if so, check that the corresponding agent config does not
-      // already contain a package config for this package
+      // Check if it is a limited package, and if so, check that the corresponding agent policy does not
+      // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        const agentConfig = await agentConfigService.get(soClient, packageConfig.config_id, true);
-        if (agentConfig && doesAgentConfigAlreadyIncludePackage(agentConfig, pkgInfo.name)) {
+        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id, true);
+        if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new Error(
-            `Unable to create package config. Package '${pkgInfo.name}' already exists on this agent config.`
+            `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
       }
 
-      packageConfig.inputs = await this.assignPackageStream(pkgInfo, packageConfig.inputs);
+      packagePolicy.inputs = await this.assignPackageStream(pkgInfo, packagePolicy.inputs);
     }
 
     const isoDate = new Date().toISOString();
-    const newSo = await soClient.create<PackageConfigSOAttributes>(
+    const newSo = await soClient.create<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
-        ...packageConfig,
+        ...packagePolicy,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
@@ -101,8 +101,8 @@ class PackageConfigService {
       options
     );
 
-    // Assign it to the given agent config
-    await agentConfigService.assignPackageConfigs(soClient, packageConfig.config_id, [newSo.id], {
+    // Assign it to the given agent policy
+    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.config_id, [newSo.id], {
       user: options?.user,
       bumpRevision: options?.bumpConfigRevision ?? true,
     });
@@ -116,17 +116,17 @@ class PackageConfigService {
 
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
-    packageConfigs: NewPackageConfig[],
+    packagePolicies: NewPackagePolicy[],
     configId: string,
     options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
-  ): Promise<PackageConfig[]> {
+  ): Promise<PackagePolicy[]> {
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { saved_objects } = await soClient.bulkCreate<PackageConfigSOAttributes>(
-      packageConfigs.map((packageConfig) => ({
+    const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
+      packagePolicies.map((packagePolicy) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
-          ...packageConfig,
+          ...packagePolicy,
           config_id: configId,
           revision: 1,
           created_at: isoDate,
@@ -140,8 +140,8 @@ class PackageConfigService {
     // Filter out invalid SOs
     const newSos = saved_objects.filter((so) => !so.error && so.attributes);
 
-    // Assign it to the given agent config
-    await agentConfigService.assignPackageConfigs(
+    // Assign it to the given agent policy
+    await agentPolicyService.assignPackagePolicies(
       soClient,
       configId,
       newSos.map((newSo) => newSo.id),
@@ -161,38 +161,38 @@ class PackageConfigService {
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<PackageConfig | null> {
-    const packageConfigSO = await soClient.get<PackageConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
-    if (!packageConfigSO) {
+  ): Promise<PackagePolicy | null> {
+    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(SAVED_OBJECT_TYPE, id);
+    if (!packagePolicySO) {
       return null;
     }
 
-    if (packageConfigSO.error) {
-      throw new Error(packageConfigSO.error.message);
+    if (packagePolicySO.error) {
+      throw new Error(packagePolicySO.error.message);
     }
 
     return {
-      id: packageConfigSO.id,
-      version: packageConfigSO.version,
-      ...packageConfigSO.attributes,
+      id: packagePolicySO.id,
+      version: packagePolicySO.version,
+      ...packagePolicySO.attributes,
     };
   }
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[]
-  ): Promise<PackageConfig[] | null> {
-    const packageConfigSO = await soClient.bulkGet<PackageConfigSOAttributes>(
+  ): Promise<PackagePolicy[] | null> {
+    const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
       }))
     );
-    if (!packageConfigSO) {
+    if (!packagePolicySO) {
       return null;
     }
 
-    return packageConfigSO.saved_objects.map((so) => ({
+    return packagePolicySO.saved_objects.map((so) => ({
       id: so.id,
       version: so.version,
       ...so.attributes,
@@ -202,10 +202,10 @@ class PackageConfigService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: PackageConfig[]; total: number; page: number; perPage: number }> {
+  ): Promise<{ items: PackagePolicy[]; total: number; page: number; perPage: number }> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
-    const packageConfigs = await soClient.find<PackageConfigSOAttributes>({
+    const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -221,12 +221,12 @@ class PackageConfigService {
     });
 
     return {
-      items: packageConfigs.saved_objects.map((packageConfigSO) => ({
-        id: packageConfigSO.id,
-        version: packageConfigSO.version,
-        ...packageConfigSO.attributes,
+      items: packagePolicies.saved_objects.map((packagePolicySO) => ({
+        id: packagePolicySO.id,
+        version: packagePolicySO.version,
+        ...packagePolicySO.attributes,
       })),
-      total: packageConfigs.total,
+      total: packagePolicies.total,
       page,
       perPage,
     };
@@ -235,37 +235,37 @@ class PackageConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    packageConfig: UpdatePackageConfig,
+    packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser }
-  ): Promise<PackageConfig> {
-    const oldPackageConfig = await this.get(soClient, id);
-    const { version, ...restOfPackageConfig } = packageConfig;
+  ): Promise<PackagePolicy> {
+    const oldPackagePolicy = await this.get(soClient, id);
+    const { version, ...restOfPackagePolicy } = packagePolicy;
 
-    if (!oldPackageConfig) {
-      throw new Error('Package config not found');
+    if (!oldPackagePolicy) {
+      throw new Error('Package policy not found');
     }
 
-    // Check that its agent config does not have a package config with the same name
-    const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
-    if (!parentAgentConfig) {
-      throw new Error('Agent config not found');
+    // Check that its agent policy does not have a package policy with the same name
+    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id);
+    if (!parentAgentPolicy) {
+      throw new Error('Agent policy not found');
     } else {
       if (
-        (parentAgentConfig.package_configs as PackageConfig[]).find(
-          (siblingPackageConfig) =>
-            siblingPackageConfig.id !== id && siblingPackageConfig.name === packageConfig.name
+        (parentAgentPolicy.package_configs as PackagePolicy[]).find(
+          (siblingPackagePolicy) =>
+            siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
         )
       ) {
-        throw new Error('There is already a package with the same name on this agent config');
+        throw new Error('There is already a package with the same name on this agent policy');
       }
     }
 
-    await soClient.update<PackageConfigSOAttributes>(
+    await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
       {
-        ...restOfPackageConfig,
-        revision: oldPackageConfig.revision + 1,
+        ...restOfPackagePolicy,
+        revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
       },
@@ -274,32 +274,32 @@ class PackageConfigService {
       }
     );
 
-    // Bump revision of associated agent config
-    await agentConfigService.bumpRevision(soClient, packageConfig.config_id, {
+    // Bump revision of associated agent policy
+    await agentPolicyService.bumpRevision(soClient, packagePolicy.config_id, {
       user: options?.user,
     });
 
-    return (await this.get(soClient, id)) as PackageConfig;
+    return (await this.get(soClient, id)) as PackagePolicy;
   }
 
   public async delete(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentConfigs?: boolean }
-  ): Promise<DeletePackageConfigsResponse> {
-    const result: DeletePackageConfigsResponse = [];
+    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean }
+  ): Promise<DeletePackagePoliciesResponse> {
+    const result: DeletePackagePoliciesResponse = [];
 
     for (const id of ids) {
       try {
-        const oldPackageConfig = await this.get(soClient, id);
-        if (!oldPackageConfig) {
-          throw new Error('Package config not found');
+        const oldPackagePolicy = await this.get(soClient, id);
+        if (!oldPackagePolicy) {
+          throw new Error('Package policy not found');
         }
-        if (!options?.skipUnassignFromAgentConfigs) {
-          await agentConfigService.unassignPackageConfigs(
+        if (!options?.skipUnassignFromAgentPolicies) {
+          await agentPolicyService.unassignPackagePolicies(
             soClient,
-            oldPackageConfig.config_id,
-            [oldPackageConfig.id],
+            oldPackagePolicy.config_id,
+            [oldPackagePolicy.id],
             {
               user: options?.user,
             }
@@ -321,10 +321,10 @@ class PackageConfigService {
     return result;
   }
 
-  public async buildPackageConfigFromPackage(
+  public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
     pkgName: string
-  ): Promise<NewPackageConfig | undefined> {
+  ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
       const [pkgInfo, defaultOutputId] = await Promise.all([
@@ -339,15 +339,15 @@ class PackageConfigService {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToPackageConfig(pkgInfo, '', defaultOutputId);
+        return packageToPackagePolicy(pkgInfo, '', defaultOutputId);
       }
     }
   }
 
   public async assignPackageStream(
     pkgInfo: PackageInfo,
-    inputs: PackageConfigInput[]
-  ): Promise<PackageConfigInput[]> {
+    inputs: PackagePolicyInput[]
+  ): Promise<PackagePolicyInput[]> {
     const registryPkgInfo = await Registry.fetchInfo(pkgInfo.name, pkgInfo.version);
     const inputsPromises = inputs.map((input) =>
       _assignPackageStreamToInput(registryPkgInfo, pkgInfo, input)
@@ -360,7 +360,7 @@ class PackageConfigService {
 async function _assignPackageStreamToInput(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
-  input: PackageConfigInput
+  input: PackagePolicyInput
 ) {
   const streamsPromises = input.streams.map((stream) =>
     _assignPackageStreamToStream(registryPkgInfo, pkgInfo, input, stream)
@@ -373,8 +373,8 @@ async function _assignPackageStreamToInput(
 async function _assignPackageStreamToStream(
   registryPkgInfo: RegistryPackage,
   pkgInfo: PackageInfo,
-  input: PackageConfigInput,
-  stream: PackageConfigInputStream
+  input: PackagePolicyInput,
+  stream: PackagePolicyInputStream
 ) {
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
@@ -426,5 +426,5 @@ async function _assignPackageStreamToStream(
   return { ...stream };
 }
 
-export type PackageConfigServiceInterface = PackageConfigService;
-export const packageConfigService = new PackageConfigService();
+export type PackagePolicyServiceInterface = PackagePolicyService;
+export const packagePolicyService = new PackagePolicyService();

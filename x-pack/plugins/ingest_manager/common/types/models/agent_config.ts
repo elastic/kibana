@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, PackageConfigPackage } from './package_config';
+import { PackagePolicy, PackagePolicyPackage } from './package_config';
 import { Output } from './output';
 
-export enum AgentConfigStatus {
+export enum AgentPolicyStatus {
   Active = 'active',
   Inactive = 'inactive',
 }
 
-export interface NewAgentConfig {
+export interface NewAgentPolicy {
   name: string;
   namespace: string;
   description?: string;
@@ -19,18 +19,18 @@ export interface NewAgentConfig {
   monitoring_enabled?: Array<'logs' | 'metrics'>;
 }
 
-export interface AgentConfig extends NewAgentConfig {
+export interface AgentPolicy extends NewAgentPolicy {
   id: string;
-  status: AgentConfigStatus;
-  package_configs: string[] | PackageConfig[];
+  status: AgentPolicyStatus;
+  package_configs: string[] | PackagePolicy[];
   updated_at: string;
   updated_by: string;
   revision: number;
 }
 
-export type AgentConfigSOAttributes = Omit<AgentConfig, 'id'>;
+export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
 
-export interface FullAgentConfigInputStream {
+export interface FullAgentPolicyInputStream {
   id: string;
   data_stream: {
     dataset: string;
@@ -39,28 +39,28 @@ export interface FullAgentConfigInputStream {
   [key: string]: any;
 }
 
-export interface FullAgentConfigInput {
+export interface FullAgentPolicyInput {
   id: string;
   name: string;
   type: string;
   data_stream: { namespace: string };
   use_output: string;
   meta?: {
-    package?: Pick<PackageConfigPackage, 'name' | 'version'>;
+    package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
     [key: string]: unknown;
   };
-  streams: FullAgentConfigInputStream[];
+  streams: FullAgentPolicyInputStream[];
   [key: string]: any;
 }
 
-export interface FullAgentConfig {
+export interface FullAgentPolicy {
   id: string;
   outputs: {
     [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
       [key: string]: any;
     };
   };
-  inputs: FullAgentConfigInput[];
+  inputs: FullAgentPolicyInput[];
   revision?: number;
   agent?: {
     monitoring: {

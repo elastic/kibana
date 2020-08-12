@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'endpoint',
     'policy',
     'endpointPageUtils',
-    'ingestManagerCreatePackageConfig',
+    'ingestManagerCreatePackagePolicy',
   ]);
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
 
-        const agentFullConfig = await policyTestResources.getFullAgentConfig(
+        const agentFullConfig = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentConfig.id
         );
 
@@ -202,7 +202,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         // Create a policy and navigate to Ingest app
         policyInfo = await policyTestResources.createPolicy();
-        await pageObjects.ingestManagerCreatePackageConfig.navigateToAgentConfigEditPackageConfig(
+        await pageObjects.ingestManagerCreatePackagePolicy.navigateToAgentPolicyEditPackagePolicy(
           policyInfo.agentConfig.id,
           policyInfo.packageConfig.id
         );
@@ -227,12 +227,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
+        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
       it('should navigate back to Ingest Configuration Edit package page on click of cancel button', async () => {
         await (await testSubjects.find('editLinkToPolicyDetails')).click();
         await (await pageObjects.policy.findCancelButton()).click();
-        await pageObjects.ingestManagerCreatePackageConfig.ensureOnEditPageOrFail();
+        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
     });
   });

@@ -42,8 +42,8 @@ import { PolicyEmptyState, HostsEmptyState } from '../../../components/managemen
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import {
-  CreatePackageConfigRouteState,
-  AgentConfigDetailsDeployAgentAction,
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
@@ -121,7 +121,7 @@ export const EndpointList = () => {
     [history, queryParams]
   );
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'ingestManager',
     {
       path: `#/integrations${
@@ -142,9 +142,9 @@ export const EndpointList = () => {
   );
 
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<
-    AgentConfigDetailsDeployAgentAction
+    AgentPolicyDetailsDeployAgentAction
   >('ingestManager', {
-    path: `#/configs/${selectedPolicyId}?openEnrollmentFlyout=true`,
+    path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
     state: {
       onDoneNavigateTo: [
         'securitySolution:administration',

@@ -3,81 +3,81 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AgentConfig, NewAgentConfig, FullAgentConfig } from '../models';
+import { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
 import { ListWithKuery } from './common';
 
-export interface GetAgentConfigsRequest {
+export interface GetAgentPoliciesRequest {
   query: ListWithKuery & {
     full?: boolean;
   };
 }
 
-export type GetAgentConfigsResponseItem = AgentConfig & { agents?: number };
+export type GetAgentPoliciesResponseItem = AgentPolicy & { agents?: number };
 
-export interface GetAgentConfigsResponse {
-  items: GetAgentConfigsResponseItem[];
+export interface GetAgentPoliciesResponse {
+  items: GetAgentPoliciesResponseItem[];
   total: number;
   page: number;
   perPage: number;
   success: boolean;
 }
 
-export interface GetOneAgentConfigRequest {
+export interface GetOneAgentPolicyRequest {
   params: {
-    agentConfigId: string;
+    agentPolicyId: string;
   };
 }
 
-export interface GetOneAgentConfigResponse {
-  item: AgentConfig;
+export interface GetOneAgentPolicyResponse {
+  item: AgentPolicy;
   success: boolean;
 }
 
-export interface CreateAgentConfigRequest {
-  body: NewAgentConfig;
+export interface CreateAgentPolicyRequest {
+  body: NewAgentPolicy;
 }
 
-export interface CreateAgentConfigResponse {
-  item: AgentConfig;
+export interface CreateAgentPolicyResponse {
+  item: AgentPolicy;
   success: boolean;
 }
 
-export type UpdateAgentConfigRequest = GetOneAgentConfigRequest & {
-  body: NewAgentConfig;
+export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
+  body: NewAgentPolicy;
 };
 
-export interface UpdateAgentConfigResponse {
-  item: AgentConfig;
+export interface UpdateAgentPolicyResponse {
+  item: AgentPolicy;
   success: boolean;
 }
 
-export interface CopyAgentConfigRequest {
-  body: Pick<AgentConfig, 'name' | 'description'>;
+export interface CopyAgentPolicyRequest {
+  body: Pick<AgentPolicy, 'name' | 'description'>;
 }
 
-export interface CopyAgentConfigResponse {
-  item: AgentConfig;
+export interface CopyAgentPolicyResponse {
+  item: AgentPolicy;
   success: boolean;
 }
 
-export interface DeleteAgentConfigRequest {
+export interface DeleteAgentPolicyRequest {
   body: {
-    agentConfigId: string;
+    agentPolicyId: string;
   };
 }
 
-export interface DeleteAgentConfigResponse {
+export interface DeleteAgentPolicyResponse {
   id: string;
   success: boolean;
 }
 
-export interface GetFullAgentConfigRequest {
+export interface GetFullAgentPolicyRequest {
   params: {
-    agentConfigId: string;
+    agentPolicyId: string;
   };
 }
 
-export interface GetFullAgentConfigResponse {
-  item: FullAgentConfig;
+export interface GetFullAgentPolicyResponse {
+  item: FullAgentPolicy;
   success: boolean;
 }

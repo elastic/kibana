@@ -110,8 +110,8 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      * custom configuaration component
      * @param onEditPage
      */
-    async findPackageConfigEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
+    async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**

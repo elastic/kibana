@@ -7,8 +7,8 @@
 import { SavedObjectsClient } from 'kibana/server';
 import _ from 'lodash';
 import { getPackageSavedObjects } from '../services/epm/packages/get';
-import { agentConfigService } from '../services';
-import { NewPackageConfig } from '../types';
+import { agentPolicyService } from '../services';
+import { NewPackagePolicy } from '../types';
 
 export interface PackageUsage {
   name: string;
@@ -21,19 +21,19 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
     return [];
   }
   const packagesSavedObjects = await getPackageSavedObjects(soClient);
-  const agentConfigs = await agentConfigService.list(soClient, {
+  const agentPolicies = await agentPolicyService.list(soClient, {
     perPage: 1000, // avoiding pagination
-    withPackageConfigs: true,
+    withPackagePolicies: true,
   });
 
-  // Once we provide detailed telemetry on agent configs, this logic should probably be moved
-  // to the (then to be created) agent config collector, so we only query and loop over these
+  // Once we provide detailed telemetry on agent policies, this logic should probably be moved
+  // to the (then to be created) agent policy collector, so we only query and loop over these
   // objects once.
 
-  const packagesInConfigs = agentConfigs.items.map((agentConfig) => {
-    const packageConfigs: NewPackageConfig[] = agentConfig.package_configs as NewPackageConfig[];
-    return packageConfigs
-      .map((packageConfig) => packageConfig.package?.name)
+  const packagesInConfigs = agentPolicies.items.map((agentPolicy) => {
+    const packagePolicies: NewPackagePolicy[] = agentPolicy.package_configs as NewPackagePolicy[];
+    return packagePolicies
+      .map((packagePolicy) => packagePolicy.package?.name)
       .filter((packageName): packageName is string => packageName !== undefined);
   });
 

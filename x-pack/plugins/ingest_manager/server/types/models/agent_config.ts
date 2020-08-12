@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { PackageConfigSchema } from './package_config';
-import { AgentConfigStatus } from '../../../common';
+import { PackagePolicySchema } from './package_config';
+import { AgentPolicyStatus } from '../../../common';
 
-const AgentConfigBaseSchema = {
+const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),
   namespace: schema.string({ minLength: 1 }),
   description: schema.maybe(schema.string()),
@@ -16,20 +16,20 @@ const AgentConfigBaseSchema = {
   ),
 };
 
-export const NewAgentConfigSchema = schema.object({
-  ...AgentConfigBaseSchema,
+export const NewAgentPolicySchema = schema.object({
+  ...AgentPolicyBaseSchema,
 });
 
-export const AgentConfigSchema = schema.object({
-  ...AgentConfigBaseSchema,
+export const AgentPolicySchema = schema.object({
+  ...AgentPolicyBaseSchema,
   id: schema.string(),
   status: schema.oneOf([
-    schema.literal(AgentConfigStatus.Active),
-    schema.literal(AgentConfigStatus.Inactive),
+    schema.literal(AgentPolicyStatus.Active),
+    schema.literal(AgentPolicyStatus.Inactive),
   ]),
   package_configs: schema.oneOf([
     schema.arrayOf(schema.string()),
-    schema.arrayOf(PackageConfigSchema),
+    schema.arrayOf(PackagePolicySchema),
   ]),
   updated_at: schema.string(),
   updated_by: schema.string(),

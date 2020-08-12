@@ -19,9 +19,9 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { useGetOneAgentConfigFull, useGetOneAgentConfig, useCore } from '../../../hooks';
+import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useCore } from '../../../hooks';
 import { Loading } from '../../../components';
-import { configToYaml, agentConfigRouteService } from '../../../services';
+import { policyToYaml, agentPolicyRouteService } from '../../../services';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -29,40 +29,40 @@ const FlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
-  ({ configId, onClose }) => {
+export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => void }>(
+  ({ policyId, onClose }) => {
     const core = useCore();
-    const { isLoading: isLoadingYaml, data: yamlData } = useGetOneAgentConfigFull(configId);
-    const { data: configData } = useGetOneAgentConfig(configId);
+    const { isLoading: isLoadingYaml, data: yamlData } = useGetOneAgentPolicyFull(policyId);
+    const { data: configData } = useGetOneAgentPolicy(policyId);
 
     const body =
       isLoadingYaml && !yamlData ? (
         <Loading />
       ) : (
         <EuiCodeBlock language="yaml" isCopyable fontSize="m">
-          {configToYaml(yamlData!.item)}
+          {policyToYaml(yamlData!.item)}
         </EuiCodeBlock>
       );
 
     const downloadLink = core.http.basePath.prepend(
-      agentConfigRouteService.getInfoFullDownloadPath(configId)
+      agentPolicyRouteService.getInfoFullDownloadPath(policyId)
     );
 
     return (
       <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
-        <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerConfigYamlFlyoutTitle">
+        <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
           <EuiTitle size="m">
-            <h2 id="IngestManagerConfigYamlFlyoutTitle">
+            <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
               {configData?.item ? (
                 <FormattedMessage
-                  id="xpack.ingestManager.configDetails.yamlflyoutTitleWithName"
-                  defaultMessage="'{name}' agent configuration"
+                  id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithName"
+                  defaultMessage="'{name}' agent policy"
                   values={{ name: configData.item.name }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.ingestManager.configDetails.yamlflyoutTitleWithoutName"
-                  defaultMessage="Agent configuration"
+                  id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithoutName"
+                  defaultMessage="Agent policy"
                 />
               )}
             </h2>
@@ -74,7 +74,7 @@ export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose} flush="left">
                 <FormattedMessage
-                  id="xpack.ingestManager.configDetails.yamlFlyoutCloseButtonLabel"
+                  id="xpack.ingestManager.policyDetails.yamlFlyoutCloseButtonLabel"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
@@ -86,8 +86,8 @@ export const ConfigYamlFlyout = memo<{ configId: string; onClose: () => void }>(
                 isDisabled={Boolean(isLoadingYaml && !yamlData)}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.configDetails.yamlDownloadButtonLabel"
-                  defaultMessage="Download configuration"
+                  id="xpack.ingestManager.policyDetails.yamlDownloadButtonLabel"
+                  defaultMessage="Download policy"
                 />
               </EuiButton>
             </EuiFlexItem>

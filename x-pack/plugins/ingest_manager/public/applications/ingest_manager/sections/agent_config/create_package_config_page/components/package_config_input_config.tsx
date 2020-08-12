@@ -14,29 +14,29 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { PackageConfigInput, RegistryVarsEntry } from '../../../../types';
+import { PackagePolicyInput, RegistryVarsEntry } from '../../../../types';
 import {
   isAdvancedVar,
-  PackageConfigConfigValidationResults,
+  PackagePolicyConfigValidationResults,
   validationHasErrors,
 } from '../services';
-import { PackageConfigInputVarField } from './package_config_input_var_field';
+import { PackagePolicyInputVarField } from './package_config_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
 `;
 
-export const PackageConfigInputConfig: React.FunctionComponent<{
+export const PackagePolicyInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
-  packageConfigInput: PackageConfigInput;
-  updatePackageConfigInput: (updatedInput: Partial<PackageConfigInput>) => void;
-  inputVarsValidationResults: PackageConfigConfigValidationResults;
+  packagePolicyInput: PackagePolicyInput;
+  updatePackagePolicyInput: (updatedInput: Partial<PackagePolicyInput>) => void;
+  inputVarsValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
   ({
     packageInputVars,
-    packageConfigInput,
-    updatePackageConfigInput,
+    packagePolicyInput,
+    updatePackagePolicyInput,
     inputVarsValidationResults,
     forceShowErrors,
   }) => {
@@ -76,7 +76,7 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
               <EuiText>
                 <h4>
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsTitle"
+                    id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputSettingsTitle"
                     defaultMessage="Settings"
                   />
                 </h4>
@@ -85,7 +85,7 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
               <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackageConfig.stepConfigure.inputSettingsDescription"
+                    id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputSettingsDescription"
                     defaultMessage="The following settings are applicable to all inputs below."
                   />
                 </p>
@@ -97,16 +97,16 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              const value = packageConfigInput.vars![varName].value;
+              const value = packagePolicyInput.vars![varName].value;
               return (
                 <EuiFlexItem key={varName}>
-                  <PackageConfigInputVarField
+                  <PackagePolicyInputVarField
                     varDef={varDef}
                     value={value}
                     onChange={(newValue: any) => {
-                      updatePackageConfigInput({
+                      updatePackagePolicyInput({
                         vars: {
-                          ...packageConfigInput.vars,
+                          ...packagePolicyInput.vars,
                           [varName]: {
                             type: varType,
                             value: newValue,
@@ -133,7 +133,7 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
                         flush="left"
                       >
                         <FormattedMessage
-                          id="xpack.ingestManager.createPackageConfig.stepConfigure.toggleAdvancedOptionsButtonText"
+                          id="xpack.ingestManager.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
                           defaultMessage="Advanced options"
                         />
                       </EuiButtonEmpty>
@@ -142,7 +142,7 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
                       <EuiFlexItem grow={false}>
                         <EuiText color="danger" size="s">
                           <FormattedMessage
-                            id="xpack.ingestManager.createPackageConfig.stepConfigure.errorCountText"
+                            id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
                             defaultMessage="{count, plural, one {# error} other {# errors}}"
                             values={{ count: advancedVarsWithErrorsCount }}
                           />
@@ -154,16 +154,16 @@ export const PackageConfigInputConfig: React.FunctionComponent<{
                 {isShowingAdvanced
                   ? advancedVars.map((varDef) => {
                       const { name: varName, type: varType } = varDef;
-                      const value = packageConfigInput.vars![varName].value;
+                      const value = packagePolicyInput.vars![varName].value;
                       return (
                         <EuiFlexItem key={varName}>
-                          <PackageConfigInputVarField
+                          <PackagePolicyInputVarField
                             varDef={varDef}
                             value={value}
                             onChange={(newValue: any) => {
-                              updatePackageConfigInput({
+                              updatePackagePolicyInput({
                                 vars: {
-                                  ...packageConfigInput.vars,
+                                  ...packagePolicyInput.vars,
                                   [varName]: {
                                     type: varType,
                                     value: newValue,

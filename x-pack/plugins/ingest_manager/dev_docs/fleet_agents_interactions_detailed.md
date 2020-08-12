@@ -29,8 +29,8 @@ When an agent checkin fleet:
 - verify the access token is a valid ES API key
 - retrieve the agent (SO associated to this api key id)
 - Insert events SO
-- If the Agent configuration has been updated since last checkin
-  - generate the agent config
+- If the Agent policy has been updated since last checkin
+  - generate the agent policy
   - Create the missing API key for agent -> ES communication
 - Save the new agent (with last checkin date) in a SavedObject with keys encrypted inside the agent
 
@@ -44,6 +44,6 @@ An agent can acknowledge one or multiple actions by calling `POST /api/ingest_ma
 
 ## Other interactions
 
-### Agent Configuration update
+### Agent policy update
 
 When a configuration is updated, every SO agent running this configuration is updated with a timestamp of the latest config.

@@ -4,50 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewAgentConfigSchema } from '../models';
+import { NewAgentPolicySchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
-export const GetAgentConfigsRequestSchema = {
+export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
     full: schema.maybe(schema.boolean()),
   }),
 };
 
-export const GetOneAgentConfigRequestSchema = {
+export const GetOneAgentPolicyRequestSchema = {
   params: schema.object({
-    agentConfigId: schema.string(),
+    agentPolicyId: schema.string(),
   }),
 };
 
-export const CreateAgentConfigRequestSchema = {
-  body: NewAgentConfigSchema,
+export const CreateAgentPolicyRequestSchema = {
+  body: NewAgentPolicySchema,
   query: schema.object({
     sys_monitoring: schema.maybe(schema.boolean()),
   }),
 };
 
-export const UpdateAgentConfigRequestSchema = {
-  ...GetOneAgentConfigRequestSchema,
-  body: NewAgentConfigSchema,
+export const UpdateAgentPolicyRequestSchema = {
+  ...GetOneAgentPolicyRequestSchema,
+  body: NewAgentPolicySchema,
 };
 
-export const CopyAgentConfigRequestSchema = {
-  ...GetOneAgentConfigRequestSchema,
+export const CopyAgentPolicyRequestSchema = {
+  ...GetOneAgentPolicyRequestSchema,
   body: schema.object({
     name: schema.string({ minLength: 1 }),
     description: schema.maybe(schema.string()),
   }),
 };
 
-export const DeleteAgentConfigRequestSchema = {
+export const DeleteAgentPolicyRequestSchema = {
   body: schema.object({
-    agentConfigId: schema.string(),
+    agentPolicyId: schema.string(),
   }),
 };
 
-export const GetFullAgentConfigRequestSchema = {
+export const GetFullAgentPolicyRequestSchema = {
   params: schema.object({
-    agentConfigId: schema.string(),
+    agentPolicyId: schema.string(),
   }),
   query: schema.object({
     download: schema.maybe(schema.boolean()),

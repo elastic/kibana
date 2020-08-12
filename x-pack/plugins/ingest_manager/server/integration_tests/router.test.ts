@@ -42,11 +42,11 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('does not have agent config api', async () => {
+    it('does not have agent policy api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(404);
     });
 
-    it('does not have package configs api', async () => {
+    it('does not have package policies api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(404);
     });
 
@@ -75,11 +75,11 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
+    it('has agent policy api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
     });
 
-    it('has package configs api', async () => {
+    it('has package policies api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
     });
 
@@ -114,11 +114,11 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
+    it('has agent policy api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
     });
 
-    it('has package configs api', async () => {
+    it('has package policies api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
     });
 
@@ -148,11 +148,11 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
+    it('has agent policy api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
     });
 
-    it('has package configs api', async () => {
+    it('has package policies api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
     });
 
@@ -183,11 +183,11 @@ describe('ingestManager', () => {
 
     afterAll(async () => await root.shutdown());
 
-    it('has agent config api', async () => {
+    it('has agent policy api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/agent_configs').expect(200);
     });
 
-    it('has package configs api', async () => {
+    it('has package policies api', async () => {
       await kbnTestServer.request.get(root, '/api/ingest_manager/package_configs').expect(200);
     });
 

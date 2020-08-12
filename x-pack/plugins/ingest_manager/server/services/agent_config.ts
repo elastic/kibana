@@ -7,81 +7,81 @@ import { uniq } from 'lodash';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
 import {
-  DEFAULT_AGENT_CONFIG,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  DEFAULT_AGENT_POLICY,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
 import {
-  PackageConfig,
-  NewAgentConfig,
-  AgentConfig,
-  AgentConfigSOAttributes,
-  FullAgentConfig,
-  AgentConfigStatus,
+  PackagePolicy,
+  NewAgentPolicy,
+  AgentPolicy,
+  AgentPolicySOAttributes,
+  FullAgentPolicy,
+  AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
-import { DeleteAgentConfigResponse, storedPackageConfigsToAgentInputs } from '../../common';
+import { DeleteAgentPolicyResponse, storedPackagePoliciesToAgentInputs } from '../../common';
 import { listAgents } from './agents';
-import { packageConfigService } from './package_config';
+import { packagePolicyService } from './package_config';
 import { outputService } from './output';
-import { agentConfigUpdateEventHandler } from './agent_config_update';
+import { agentPolicyUpdateEventHandler } from './agent_config_update';
 
-const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
+const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
-class AgentConfigService {
-  private triggerAgentConfigUpdatedEvent = async (
+class AgentPolicyService {
+  private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
     action: string,
-    agentConfigId: string
+    agentPolicyId: string
   ) => {
-    return agentConfigUpdateEventHandler(soClient, action, agentConfigId);
+    return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
   };
 
   private async _update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: Partial<AgentConfigSOAttributes>,
+    agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
-  ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id, false);
+  ): Promise<AgentPolicy> {
+    const oldAgentPolicy = await this.get(soClient, id, false);
 
-    if (!oldAgentConfig) {
-      throw new Error('Agent config not found');
+    if (!oldAgentPolicy) {
+      throw new Error('Agent policy not found');
     }
 
     if (
-      oldAgentConfig.status === AgentConfigStatus.Inactive &&
-      agentConfig.status !== AgentConfigStatus.Active
+      oldAgentPolicy.status === AgentPolicyStatus.Inactive &&
+      agentPolicy.status !== AgentPolicyStatus.Active
     ) {
       throw new Error(
-        `Agent config ${id} cannot be updated because it is ${oldAgentConfig.status}`
+        `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
       );
     }
 
-    await soClient.update<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
-      ...agentConfig,
-      ...(options.bumpRevision ? { revision: oldAgentConfig.revision + 1 } : {}),
+    await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
+      ...agentPolicy,
+      ...(options.bumpRevision ? { revision: oldAgentPolicy.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
-    return (await this.get(soClient, id)) as AgentConfig;
+    return (await this.get(soClient, id)) as AgentPolicy;
   }
 
-  public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find<AgentConfigSOAttributes>({
-      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  public async ensureDefaultAgentPolicy(soClient: SavedObjectsClientContract) {
+    const configs = await soClient.find<AgentPolicySOAttributes>({
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
 
     if (configs.total === 0) {
-      const newDefaultAgentConfig: NewAgentConfig = {
-        ...DEFAULT_AGENT_CONFIG,
+      const newDefaultAgentPolicy: NewAgentPolicy = {
+        ...DEFAULT_AGENT_POLICY,
       };
 
-      return this.create(soClient, newDefaultAgentConfig);
+      return this.create(soClient, newDefaultAgentPolicy);
     }
 
     return {
@@ -92,22 +92,22 @@ class AgentConfigService {
 
   public async create(
     soClient: SavedObjectsClientContract,
-    agentConfig: NewAgentConfig,
+    agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
-  ): Promise<AgentConfig> {
-    const newSo = await soClient.create<AgentConfigSOAttributes>(
+  ): Promise<AgentPolicy> {
+    const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
-        ...agentConfig,
+        ...agentPolicy,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
-      } as AgentConfig,
+      } as AgentPolicy,
       options
     );
 
-    if (!agentConfig.is_default) {
-      await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
+    if (!agentPolicy.is_default) {
+      await this.triggerAgentPolicyUpdatedEvent(soClient, 'created', newSo.id);
     }
 
     return { id: newSo.id, ...newSo.attributes };
@@ -116,46 +116,46 @@ class AgentConfigService {
   public async get(
     soClient: SavedObjectsClientContract,
     id: string,
-    withPackageConfigs: boolean = true
-  ): Promise<AgentConfig | null> {
-    const agentConfigSO = await soClient.get<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id);
-    if (!agentConfigSO) {
+    withPackagePolicies: boolean = true
+  ): Promise<AgentPolicy | null> {
+    const agentPolicySO = await soClient.get<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id);
+    if (!agentPolicySO) {
       return null;
     }
 
-    if (agentConfigSO.error) {
-      throw new Error(agentConfigSO.error.message);
+    if (agentPolicySO.error) {
+      throw new Error(agentPolicySO.error.message);
     }
 
-    const agentConfig = { id: agentConfigSO.id, ...agentConfigSO.attributes };
+    const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
 
-    if (withPackageConfigs) {
-      agentConfig.package_configs =
-        (await packageConfigService.getByIDs(
+    if (withPackagePolicies) {
+      agentPolicy.package_configs =
+        (await packagePolicyService.getByIDs(
           soClient,
-          (agentConfigSO.attributes.package_configs as string[]) || []
+          (agentPolicySO.attributes.package_configs as string[]) || []
         )) || [];
     }
 
-    return agentConfig;
+    return agentPolicy;
   }
 
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & {
-      withPackageConfigs?: boolean;
+      withPackagePolicies?: boolean;
     }
-  ): Promise<{ items: AgentConfig[]; total: number; page: number; perPage: number }> {
+  ): Promise<{ items: AgentPolicy[]; total: number; page: number; perPage: number }> {
     const {
       page = 1,
       perPage = 20,
       sortField = 'updated_at',
       sortOrder = 'desc',
       kuery,
-      withPackageConfigs = false,
+      withPackagePolicies = false,
     } = options;
 
-    const agentConfigsSO = await soClient.find<AgentConfigSOAttributes>({
+    const agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -170,29 +170,29 @@ class AgentConfigService {
         : undefined,
     });
 
-    const agentConfigs = await Promise.all(
-      agentConfigsSO.saved_objects.map(async (agentConfigSO) => {
-        const agentConfig = {
-          id: agentConfigSO.id,
-          ...agentConfigSO.attributes,
+    const agentPolicies = await Promise.all(
+      agentPoliciesSO.saved_objects.map(async (agentPolicySO) => {
+        const agentPolicy = {
+          id: agentPolicySO.id,
+          ...agentPolicySO.attributes,
         };
-        if (withPackageConfigs) {
-          const agentConfigWithPackageConfigs = await this.get(
+        if (withPackagePolicies) {
+          const agentPolicyWithPackagePolicies = await this.get(
             soClient,
-            agentConfigSO.id,
-            withPackageConfigs
+            agentPolicySO.id,
+            withPackagePolicies
           );
-          if (agentConfigWithPackageConfigs) {
-            agentConfig.package_configs = agentConfigWithPackageConfigs.package_configs;
+          if (agentPolicyWithPackagePolicies) {
+            agentPolicy.package_configs = agentPolicyWithPackagePolicies.package_configs;
           }
         }
-        return agentConfig;
+        return agentPolicy;
       })
     );
 
     return {
-      items: agentConfigs,
-      total: agentConfigsSO.total,
+      items: agentPolicies,
+      total: agentPoliciesSO.total,
       page,
       perPage,
     };
@@ -201,76 +201,76 @@ class AgentConfigService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    agentConfig: Partial<AgentConfig>,
+    agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
-  ): Promise<AgentConfig> {
-    return this._update(soClient, id, agentConfig, options?.user);
+  ): Promise<AgentPolicy> {
+    return this._update(soClient, id, agentPolicy, options?.user);
   }
 
   public async copy(
     soClient: SavedObjectsClientContract,
     id: string,
-    newAgentConfigProps: Pick<AgentConfig, 'name' | 'description'>,
+    newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
     options?: { user?: AuthenticatedUser }
-  ): Promise<AgentConfig> {
+  ): Promise<AgentPolicy> {
     // Copy base config
-    const baseAgentConfig = await this.get(soClient, id, true);
-    if (!baseAgentConfig) {
-      throw new Error('Agent config not found');
+    const baseAgentPolicy = await this.get(soClient, id, true);
+    if (!baseAgentPolicy) {
+      throw new Error('Agent policy not found');
     }
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { namespace, monitoring_enabled } = baseAgentConfig;
-    const newAgentConfig = await this.create(
+    const { namespace, monitoring_enabled } = baseAgentPolicy;
+    const newAgentPolicy = await this.create(
       soClient,
       {
         namespace,
         monitoring_enabled,
-        ...newAgentConfigProps,
+        ...newAgentPolicyProps,
       },
       options
     );
 
-    // Copy all package configs
-    if (baseAgentConfig.package_configs.length) {
-      const newPackageConfigs = (baseAgentConfig.package_configs as PackageConfig[]).map(
-        (packageConfig: PackageConfig) => {
-          const { id: packageConfigId, version, ...newPackageConfig } = packageConfig;
-          return newPackageConfig;
+    // Copy all package policies
+    if (baseAgentPolicy.package_configs.length) {
+      const newPackagePolicies = (baseAgentPolicy.package_configs as PackagePolicy[]).map(
+        (packagePolicy: PackagePolicy) => {
+          const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+          return newPackagePolicy;
         }
       );
-      await packageConfigService.bulkCreate(soClient, newPackageConfigs, newAgentConfig.id, {
+      await packagePolicyService.bulkCreate(soClient, newPackagePolicies, newAgentPolicy.id, {
         ...options,
         bumpConfigRevision: false,
       });
     }
 
     // Get updated config
-    const updatedAgentConfig = await this.get(soClient, newAgentConfig.id, true);
-    if (!updatedAgentConfig) {
-      throw new Error('Copied agent config not found');
+    const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
+    if (!updatedAgentPolicy) {
+      throw new Error('Copied agent policy not found');
     }
 
-    return updatedAgentConfig;
+    return updatedAgentPolicy;
   }
 
   public async bumpRevision(
     soClient: SavedObjectsClientContract,
     id: string,
     options?: { user?: AuthenticatedUser }
-  ): Promise<AgentConfig> {
+  ): Promise<AgentPolicy> {
     return this._update(soClient, id, {}, options?.user);
   }
 
-  public async assignPackageConfigs(
+  public async assignPackagePolicies(
     soClient: SavedObjectsClientContract,
     id: string,
-    packageConfigIds: string[],
+    packagePolicyIds: string[],
     options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
-  ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id, false);
+  ): Promise<AgentPolicy> {
+    const oldAgentPolicy = await this.get(soClient, id, false);
 
-    if (!oldAgentConfig) {
-      throw new Error('Agent config not found');
+    if (!oldAgentPolicy) {
+      throw new Error('Agent policy not found');
     }
 
     return await this._update(
@@ -278,7 +278,7 @@ class AgentConfigService {
       id,
       {
         package_configs: uniq(
-          [...((oldAgentConfig.package_configs || []) as string[])].concat(packageConfigIds)
+          [...((oldAgentPolicy.package_configs || []) as string[])].concat(packagePolicyIds)
         ),
       },
       options?.user,
@@ -286,16 +286,16 @@ class AgentConfigService {
     );
   }
 
-  public async unassignPackageConfigs(
+  public async unassignPackagePolicies(
     soClient: SavedObjectsClientContract,
     id: string,
-    packageConfigIds: string[],
+    packagePolicyIds: string[],
     options?: { user?: AuthenticatedUser }
-  ): Promise<AgentConfig> {
-    const oldAgentConfig = await this.get(soClient, id, false);
+  ): Promise<AgentPolicy> {
+    const oldAgentPolicy = await this.get(soClient, id, false);
 
-    if (!oldAgentConfig) {
-      throw new Error('Agent config not found');
+    if (!oldAgentPolicy) {
+      throw new Error('Agent policy not found');
     }
 
     return await this._update(
@@ -303,8 +303,8 @@ class AgentConfigService {
       id,
       {
         package_configs: uniq(
-          [...((oldAgentConfig.package_configs || []) as string[])].filter(
-            (pkgConfigId) => !packageConfigIds.includes(pkgConfigId)
+          [...((oldAgentPolicy.package_configs || []) as string[])].filter(
+            (pkgConfigId) => !packagePolicyIds.includes(pkgConfigId)
           )
         ),
       },
@@ -312,15 +312,15 @@ class AgentConfigService {
     );
   }
 
-  public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
+  public async getDefaultAgentPolicyId(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find({
-      type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
 
     if (configs.saved_objects.length === 0) {
-      throw new Error('No default agent config');
+      throw new Error('No default agent policy');
     }
 
     return configs.saved_objects[0].id;
@@ -329,15 +329,15 @@ class AgentConfigService {
   public async delete(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<DeleteAgentConfigResponse> {
+  ): Promise<DeleteAgentPolicyResponse> {
     const config = await this.get(soClient, id, false);
     if (!config) {
-      throw new Error('Agent configuration not found');
+      throw new Error('Agent policy not found');
     }
 
-    const { id: defaultConfigId } = await this.ensureDefaultAgentConfig(soClient);
+    const { id: defaultConfigId } = await this.ensureDefaultAgentPolicy(soClient);
     if (id === defaultConfigId) {
-      throw new Error('The default agent configuration cannot be deleted');
+      throw new Error('The default agent policy cannot be deleted');
     }
 
     const { total } = await listAgents(soClient, {
@@ -348,16 +348,16 @@ class AgentConfigService {
     });
 
     if (total > 0) {
-      throw new Error('Cannot delete agent config that is assigned to agent(s)');
+      throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
     if (config.package_configs && config.package_configs.length) {
-      await packageConfigService.delete(soClient, config.package_configs as string[], {
-        skipUnassignFromAgentConfigs: true,
+      await packagePolicyService.delete(soClient, config.package_configs as string[], {
+        skipUnassignFromAgentPolicies: true,
       });
     }
     await soClient.delete(SAVED_OBJECT_TYPE, id);
-    await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
+    await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
     return {
       id,
       success: true,
@@ -368,7 +368,7 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     options?: { standalone: boolean }
-  ): Promise<FullAgentConfig | null> {
+  ): Promise<FullAgentPolicy | null> {
     let config;
 
     try {
@@ -389,7 +389,7 @@ class AgentConfigService {
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
 
-    const agentConfig: FullAgentConfig = {
+    const agentPolicy: FullAgentPolicy = {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
@@ -412,10 +412,10 @@ class AgentConfigService {
 
             return outputs;
           },
-          {} as FullAgentConfig['outputs']
+          {} as FullAgentPolicy['outputs']
         ),
       },
-      inputs: storedPackageConfigsToAgentInputs(config.package_configs as PackageConfig[]),
+      inputs: storedPackagePoliciesToAgentInputs(config.package_configs as PackagePolicy[]),
       revision: config.revision,
       ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
         ? {
@@ -435,8 +435,8 @@ class AgentConfigService {
           }),
     };
 
-    return agentConfig;
+    return agentPolicy;
   }
 }
 
-export const agentConfigService = new AgentConfigService();
+export const agentPolicyService = new AgentPolicyService();

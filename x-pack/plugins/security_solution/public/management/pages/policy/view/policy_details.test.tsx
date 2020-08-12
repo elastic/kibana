@@ -27,7 +27,7 @@ describe('Policy Details', () => {
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let http: typeof coreStart.http;
   let render: (ui: Parameters<typeof mount>[0]) => ReturnType<typeof mount>;
-  let policyPackageConfig: ReturnType<typeof generator.generatePolicyPackageConfig>;
+  let policyPackagePolicy: ReturnType<typeof generator.generatePolicyPackagePolicy>;
   let policyView: ReturnType<typeof render>;
 
   beforeEach(() => {
@@ -77,8 +77,8 @@ describe('Policy Details', () => {
     let asyncActions: Promise<unknown> = Promise.resolve();
 
     beforeEach(() => {
-      policyPackageConfig = generator.generatePolicyPackageConfig();
-      policyPackageConfig.id = '1';
+      policyPackagePolicy = generator.generatePolicyPackagePolicy();
+      policyPackagePolicy.id = '1';
 
       const policyListApiHandlers = policyListApiPathHandlers();
 
@@ -89,12 +89,12 @@ describe('Policy Details', () => {
           if (path === '/api/ingest_manager/package_configs/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
-              item: policyPackageConfig,
+              item: policyPackagePolicy,
               success: true,
             });
           }
 
-          // GET Agent status for agent config
+          // GET Agent status for agent policy
           if (path === '/api/ingest_manager/fleet/agent-status') {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
@@ -134,7 +134,7 @@ describe('Policy Details', () => {
 
       const pageTitle = pageHeaderLeft.find('[data-test-subj="pageViewHeaderLeftTitle"]');
       expect(pageTitle).toHaveLength(1);
-      expect(pageTitle.text()).toEqual(policyPackageConfig.name);
+      expect(pageTitle.text()).toEqual(policyPackagePolicy.name);
     });
     it('should navigate to list if back to link is clicked', async () => {
       policyView.update();
@@ -210,7 +210,7 @@ describe('Policy Details', () => {
           if (typeof path === 'string') {
             if (path === '/api/ingest_manager/package_configs/1') {
               return Promise.resolve({
-                item: policyPackageConfig,
+                item: policyPackagePolicy,
                 success: true,
               });
             }
@@ -234,7 +234,7 @@ describe('Policy Details', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent configuration.'
+          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {
@@ -265,7 +265,7 @@ describe('Policy Details', () => {
         });
       });
       it('should show an error notification toast if update fails', async () => {
-        policyPackageConfig.id = 'invalid';
+        policyPackagePolicy.id = 'invalid';
         modalConfirmButton.simulate('click');
 
         await asyncActions;

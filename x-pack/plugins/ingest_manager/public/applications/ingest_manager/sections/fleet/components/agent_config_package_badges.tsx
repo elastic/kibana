@@ -6,36 +6,36 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { PackageConfig } from '../../../types';
-import { useGetOneAgentConfig } from '../../../hooks';
+import { PackagePolicy } from '../../../types';
+import { useGetOneAgentPolicy } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 interface Props {
-  agentConfigId: string;
+  agentPolicyId: string;
 }
 
-export const AgentConfigPackageBadges: React.FunctionComponent<Props> = ({ agentConfigId }) => {
-  const agentConfigRequest = useGetOneAgentConfig(agentConfigId);
-  const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
+export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({ agentPolicyId }) => {
+  const agentPolicyRequest = useGetOneAgentPolicy(agentPolicyId);
+  const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
 
-  if (!agentConfig) {
+  if (!agentPolicy) {
     return null;
   }
   return (
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.agentReassignConfig.configDescription"
-          defaultMessage="The selected agent configuration will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
+          id="xpack.ingestManager.agentReassignPolicy.policyDescription"
+          defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
           values={{
-            count: agentConfig.package_configs.length,
-            countValue: <b>{agentConfig.package_configs.length}</b>,
+            count: agentPolicy.package_configs.length,
+            countValue: <b>{agentPolicy.package_configs.length}</b>,
           }}
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {(agentConfig.package_configs as PackageConfig[]).map((packageConfig, idx) => {
-        if (!packageConfig.package) {
+      {(agentPolicy.package_configs as PackagePolicy[]).map((packagePolicy, idx) => {
+        if (!packagePolicy.package) {
           return null;
         }
         return (
@@ -43,13 +43,13 @@ export const AgentConfigPackageBadges: React.FunctionComponent<Props> = ({ agent
             <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
                 <PackageIcon
-                  packageName={packageConfig.package.name}
-                  version={packageConfig.package.version}
+                  packageName={packagePolicy.package.name}
+                  version={packagePolicy.package.version}
                   size="s"
                   tryApi={true}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{packageConfig.package.title}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{packagePolicy.package.title}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiBadge>
         );

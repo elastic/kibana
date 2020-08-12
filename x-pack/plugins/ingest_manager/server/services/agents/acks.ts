@@ -18,7 +18,7 @@ import {
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
-  FullAgentConfig,
+  FullAgentPolicy,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -73,7 +73,7 @@ export async function acknowledgeAgentActions(
   const config = getLatestConfigIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(config ? [buildUpdateAgentConfig(agent.id, config)] : []),
+    ...(config ? [buildUpdateAgentPolicy(agent.id, config)] : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
@@ -81,7 +81,7 @@ export async function acknowledgeAgentActions(
 }
 
 function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce<null | FullAgentConfig>((acc, action) => {
+  return actions.reduce<null | FullAgentPolicy>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
     }
@@ -97,7 +97,7 @@ function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
   }, null);
 }
 
-function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
+function buildUpdateAgentPolicy(agentId: string, config: FullAgentPolicy) {
   const packages = config.inputs.reduce<string[]>((acc, input) => {
     const packageName = input.meta?.package?.name;
     if (packageName && acc.indexOf(packageName) < 0) {

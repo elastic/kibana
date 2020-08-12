@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfig, PackageConfigInput } from '../types';
-import { storedPackageConfigsToAgentInputs } from './package_configs_to_agent_inputs';
+import { PackagePolicy, PackagePolicyInput } from '../types';
+import { storedPackagePoliciesToAgentInputs } from './package_configs_to_agent_inputs';
 
-describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
-  const mockPackageConfig: PackageConfig = {
+describe('Ingest Manager - storedPackagePoliciesToAgentInputs', () => {
+  const mockPackagePolicy: PackagePolicy = {
     id: 'some-uuid',
-    name: 'mock-package-config',
+    name: 'mock-package-policy',
     description: '',
     created_at: '',
     created_by: '',
@@ -23,7 +23,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     revision: 1,
   };
 
-  const mockInput: PackageConfigInput = {
+  const mockInput: PackagePolicyInput = {
     type: 'test-logs',
     enabled: true,
     vars: {
@@ -74,13 +74,13 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     ],
   };
 
-  it('returns no inputs for package config with no inputs, or only disabled inputs', () => {
-    expect(storedPackageConfigsToAgentInputs([mockPackageConfig])).toEqual([]);
+  it('returns no inputs for package policy with no inputs, or only disabled inputs', () => {
+    expect(storedPackagePoliciesToAgentInputs([mockPackagePolicy])).toEqual([]);
 
     expect(
-      storedPackageConfigsToAgentInputs([
+      storedPackagePoliciesToAgentInputs([
         {
-          ...mockPackageConfig,
+          ...mockPackagePolicy,
           package: {
             name: 'mock-package',
             title: 'Mock package',
@@ -91,9 +91,9 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     ).toEqual([]);
 
     expect(
-      storedPackageConfigsToAgentInputs([
+      storedPackagePoliciesToAgentInputs([
         {
-          ...mockPackageConfig,
+          ...mockPackagePolicy,
           inputs: [{ ...mockInput, enabled: false }],
         },
       ])
@@ -102,9 +102,9 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
 
   it('returns agent inputs', () => {
     expect(
-      storedPackageConfigsToAgentInputs([
+      storedPackagePoliciesToAgentInputs([
         {
-          ...mockPackageConfig,
+          ...mockPackagePolicy,
           package: {
             name: 'mock-package',
             title: 'Mock package',
@@ -116,7 +116,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     ).toEqual([
       {
         id: 'some-uuid',
-        name: 'mock-package-config',
+        name: 'mock-package-policy',
         type: 'test-logs',
         data_stream: { namespace: 'default' },
         use_output: 'default',
@@ -144,9 +144,9 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
 
   it('returns agent inputs without disabled streams', () => {
     expect(
-      storedPackageConfigsToAgentInputs([
+      storedPackagePoliciesToAgentInputs([
         {
-          ...mockPackageConfig,
+          ...mockPackagePolicy,
           inputs: [
             {
               ...mockInput,
@@ -158,7 +158,7 @@ describe('Ingest Manager - storedPackageConfigsToAgentInputs', () => {
     ).toEqual([
       {
         id: 'some-uuid',
-        name: 'mock-package-config',
+        name: 'mock-package-policy',
         type: 'test-logs',
         data_stream: { namespace: 'default' },
         use_output: 'default',

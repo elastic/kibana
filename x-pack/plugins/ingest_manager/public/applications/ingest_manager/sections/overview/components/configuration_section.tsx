@@ -15,15 +15,15 @@ import {
 } from '@elastic/eui';
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
-import { useLink, useGetPackageConfigs } from '../../../hooks';
-import { AgentConfig } from '../../../types';
+import { useLink, useGetPackagePolicies } from '../../../hooks';
+import { AgentPolicy } from '../../../types';
 import { Loading } from '../../fleet/components';
 
-export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[] }> = ({
-  agentConfigs,
+export const OverviewConfigurationSection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
+  agentPolicies,
 }) => {
   const { getHref } = useLink();
-  const packageConfigsRequest = useGetPackageConfigs({
+  const packagePoliciesRequest = useGetPackagePolicies({
     page: 1,
     perPage: 10000,
   });
@@ -31,39 +31,39 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelTitle', {
-          defaultMessage: 'Agent configurations',
+        title={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelTitle', {
+          defaultMessage: 'Agent policies',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelTooltip', {
-          defaultMessage: 'Use agent configurations to control the data that your agents collect.',
+        tooltip={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelTooltip', {
+          defaultMessage: 'Use agent policies to control the data that your agents collect.',
         })}
-        linkTo={getHref('configurations_list')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageConfigurationsPanelAction', {
-          defaultMessage: 'View configurations',
+        linkTo={getHref('policies_list')}
+        linkToText={i18n.translate('xpack.ingestManager.overviewPagePoliciesPanelAction', {
+          defaultMessage: 'View policies',
         })}
       >
         <OverviewStats>
-          {packageConfigsRequest.isLoading ? (
+          {packagePoliciesRequest.isLoading ? (
             <Loading />
           ) : (
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewConfigTotalTitle"
+                  id="xpack.ingestManager.overviewPolicyTotalTitle"
                   defaultMessage="Total available"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <EuiI18nNumber value={agentConfigs.length} />
+                <EuiI18nNumber value={agentPolicies.length} />
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewPackageConfigTitle"
-                  defaultMessage="Configured integrations"
+                  id="xpack.ingestManager.overviewPackagePolicyTitle"
+                  defaultMessage="Used integrations"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <EuiI18nNumber value={packageConfigsRequest.data?.total ?? 0} />
+                <EuiI18nNumber value={packagePoliciesRequest.data?.total ?? 0} />
               </EuiDescriptionListDescription>
             </>
           )}

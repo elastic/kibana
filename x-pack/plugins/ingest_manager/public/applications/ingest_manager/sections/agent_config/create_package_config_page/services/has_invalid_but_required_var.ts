@@ -3,23 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageConfigConfigRecord, RegistryVarsEntry } from '../../../../types';
-import { validatePackageConfigConfig } from './';
+import { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
+import { validatePackagePolicyConfig } from './';
 
 export const hasInvalidButRequiredVar = (
   registryVars?: RegistryVarsEntry[],
-  packageConfigVars?: PackageConfigConfigRecord
+  packagePolicyVars?: PackagePolicyConfigRecord
 ): boolean => {
   return (
-    (registryVars && !packageConfigVars) ||
+    (registryVars && !packagePolicyVars) ||
     Boolean(
       registryVars &&
         registryVars.find(
           (registryVar) =>
             registryVar.required &&
-            (!packageConfigVars ||
-              !packageConfigVars[registryVar.name] ||
-              validatePackageConfigConfig(packageConfigVars[registryVar.name], registryVar)?.length)
+            (!packagePolicyVars ||
+              !packagePolicyVars[registryVar.name] ||
+              validatePackagePolicyConfig(packagePolicyVars[registryVar.name], registryVar)?.length)
         )
     )
   );

@@ -51,7 +51,7 @@ describe.skip('when on the policies page', () => {
         middlewareSpy
           .waitForAction('serverReturnedPolicyListData')
           .then((action) => (firstPolicyID = action.payload.policyItems[0].id)),
-        // middlewareSpy.waitForAction('serverReturnedAgentConfigListData'),
+        // middlewareSpy.waitForAction('serverReturnedAgentPolicyListData'),
       ]);
       return renderResult;
     };

@@ -4,30 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { NewPackageConfigSchema, UpdatePackageConfigSchema } from '../models';
+import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../models';
 import { ListWithKuerySchema } from './index';
 
-export const GetPackageConfigsRequestSchema = {
+export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
 };
 
-export const GetOnePackageConfigRequestSchema = {
+export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packageConfigId: schema.string(),
+    packagePolicyId: schema.string(),
   }),
 };
 
-export const CreatePackageConfigRequestSchema = {
-  body: NewPackageConfigSchema,
+export const CreatePackagePolicyRequestSchema = {
+  body: NewPackagePolicySchema,
 };
 
-export const UpdatePackageConfigRequestSchema = {
-  ...GetOnePackageConfigRequestSchema,
-  body: UpdatePackageConfigSchema,
+export const UpdatePackagePolicyRequestSchema = {
+  ...GetOnePackagePolicyRequestSchema,
+  body: UpdatePackagePolicySchema,
 };
 
-export const DeletePackageConfigsRequestSchema = {
+export const DeletePackagePoliciesRequestSchema = {
   body: schema.object({
-    packageConfigIds: schema.arrayOf(schema.string()),
+    packagePolicyIds: schema.arrayOf(schema.string()),
   }),
 };

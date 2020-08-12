@@ -22,8 +22,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { sendPutAgentReassign, useCore, useGetAgentConfigs } from '../../../../hooks';
-import { AgentConfigPackageBadges } from '../agent_config_package_badges';
+import { sendPutAgentReassign, useCore, useGetAgentPolicies } from '../../../../hooks';
+import { AgentPolicyPackageBadges } from '../agent_config_package_badges';
 
 interface Props {
   onClose: () => void;
@@ -32,35 +32,35 @@ interface Props {
 
 export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onClose, agent }) => {
   const { notifications } = useCore();
-  const [selectedAgentConfigId, setSelectedAgentConfigId] = useState<string | undefined>(
+  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
     agent.config_id
   );
 
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit() {
     try {
       setIsSubmitting(true);
-      if (!selectedAgentConfigId) {
-        throw new Error('No selected config id');
+      if (!selectedAgentPolicyId) {
+        throw new Error('No selected agent policy id');
       }
       const res = await sendPutAgentReassign(agent.id, {
-        config_id: selectedAgentConfigId,
+        config_id: selectedAgentPolicyId,
       });
       if (res.error) {
         throw res.error;
       }
       setIsSubmitting(false);
       const successMessage = i18n.translate(
-        'xpack.ingestManager.agentReassignConfig.successSingleNotificationTitle',
+        'xpack.ingestManager.agentReassignPolicy.successSingleNotificationTitle',
         {
-          defaultMessage: 'Agent configuration reassigned',
+          defaultMessage: 'Agent policy reassigned',
         }
       );
       notifications.toasts.addSuccess(successMessage);
@@ -68,7 +68,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
     } catch (error) {
       setIsSubmitting(false);
       notifications.toasts.addError(error, {
-        title: 'Unable to reassign agent configuration',
+        title: 'Unable to reassign agent policy',
       });
     }
   }
@@ -79,16 +79,16 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
         <EuiTitle size="m">
           <h2 id="FleetAgentReassigmentFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.agentReassignConfig.flyoutTitle"
-              defaultMessage="Assign new agent configuration"
+              id="xpack.ingestManager.agentReassignPolicy.flyoutTitle"
+              defaultMessage="Assign new agent policy"
             />
           </h2>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ingestManager.agentReassignConfig.flyoutDescription"
-            defaultMessage="Choose a new agent configuration to assign the selected agent to."
+            id="xpack.ingestManager.agentReassignPolicy.flyoutDescription"
+            defaultMessage="Choose a new agent policy to assign the selected agent to."
           />
         </EuiText>
       </EuiFlyoutHeader>
@@ -97,26 +97,26 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.ingestManager.agentReassignConfig.selectConfigLabel', {
-                defaultMessage: 'Agent configuration',
+              label={i18n.translate('xpack.ingestManager.agentReassignPolicy.selectPolicyLabel', {
+                defaultMessage: 'Agent policy',
               })}
             >
               <EuiSelect
                 fullWidth
-                options={agentConfigs.map((config) => ({
-                  value: config.id,
-                  text: config.name,
+                options={agentPolicies.map((agentPolicy) => ({
+                  value: agentPolicy.id,
+                  text: agentPolicy.name,
                 }))}
-                value={selectedAgentConfigId}
-                onChange={(e) => setSelectedAgentConfigId(e.target.value)}
+                value={selectedAgentPolicyId}
+                onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
               />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
 
-        {selectedAgentConfigId && (
-          <AgentConfigPackageBadges agentConfigId={selectedAgentConfigId} />
+        {selectedAgentPolicyId && (
+          <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -124,21 +124,21 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignConfig.cancelButtonLabel"
+                id="xpack.ingestManager.agentReassignPolicy.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={selectedAgentConfigId === agent.config_id}
+              disabled={selectedAgentPolicyId === agent.config_id}
               fill
               onClick={onSubmit}
               isLoading={isSubmitting}
             >
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignConfig.continueButtonLabel"
-                defaultMessage="Assign configuration"
+                id="xpack.ingestManager.agentReassignPolicy.continueButtonLabel"
+                defaultMessage="Assign policy"
               />
             </EuiButton>
           </EuiFlexItem>

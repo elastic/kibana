@@ -8,16 +8,16 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import Boom from 'boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
-import { agentConfigService } from '../agent_config';
+import { agentPolicyService } from '../agent_config';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
   newConfigId: string
 ) {
-  const config = await agentConfigService.get(soClient, newConfigId);
+  const config = await agentPolicyService.get(soClient, newConfigId);
   if (!config) {
-    throw Boom.notFound(`Agent Configuration not found: ${newConfigId}`);
+    throw Boom.notFound(`Agent policy not found: ${newConfigId}`);
   }
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {

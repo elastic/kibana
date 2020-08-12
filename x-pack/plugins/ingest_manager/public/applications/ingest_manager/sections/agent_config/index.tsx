@@ -7,28 +7,28 @@ import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
 import { useBreadcrumbs } from '../../hooks';
-import { AgentConfigListPage } from './list_page';
-import { AgentConfigDetailsPage } from './details_page';
-import { CreatePackageConfigPage } from './create_package_config_page';
-import { EditPackageConfigPage } from './edit_package_config_page';
+import { AgentPolicyListPage } from './list_page';
+import { AgentPolicyDetailsPage } from './details_page';
+import { CreatePackagePolicyPage } from './create_package_config_page';
+import { EditPackagePolicyPage } from './edit_package_config_page';
 
-export const AgentConfigApp: React.FunctionComponent = () => {
-  useBreadcrumbs('configurations');
+export const AgentPolicyApp: React.FunctionComponent = () => {
+  useBreadcrumbs('policies');
 
   return (
     <Router>
       <Switch>
         <Route path={PAGE_ROUTING_PATHS.edit_integration}>
-          <EditPackageConfigPage />
+          <EditPackagePolicyPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.add_integration_from_configuration}>
-          <CreatePackageConfigPage />
+        <Route path={PAGE_ROUTING_PATHS.add_integration_from_policy}>
+          <CreatePackagePolicyPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.configuration_details}>
-          <AgentConfigDetailsPage />
+        <Route path={PAGE_ROUTING_PATHS.policy_details}>
+          <AgentPolicyDetailsPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.configurations_list}>
-          <AgentConfigListPage />
+        <Route path={PAGE_ROUTING_PATHS.policies_list}>
+          <AgentPolicyListPage />
         </Route>
       </Switch>
     </Router>

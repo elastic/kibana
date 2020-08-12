@@ -8,20 +8,20 @@ import React from 'react';
 import { EuiCallOut, EuiOverlayMask, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AgentConfig } from '../../../types';
+import { AgentPolicy } from '../../../types';
 
 export const ConfirmDeployConfigModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
-  agentConfig: AgentConfig;
-}> = ({ onConfirm, onCancel, agentCount, agentConfig }) => {
+  agentPolicy: AgentPolicy;
+}> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.ingestManager.agentConfig.confirmModalTitle"
+            id="xpack.ingestManager.agentPolicy.confirmModalTitle"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -29,13 +29,13 @@ export const ConfirmDeployConfigModal: React.FunctionComponent<{
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.agentConfig.confirmModalCancelButtonLabel"
+            id="xpack.ingestManager.agentPolicy.confirmModalCancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.agentConfig.confirmModalConfirmButtonLabel"
+            id="xpack.ingestManager.agentPolicy.confirmModalConfirmButtonLabel"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -43,7 +43,7 @@ export const ConfirmDeployConfigModal: React.FunctionComponent<{
       >
         <EuiCallOut
           iconType="iInCircle"
-          title={i18n.translate('xpack.ingestManager.agentConfig.confirmModalCalloutTitle', {
+          title={i18n.translate('xpack.ingestManager.agentPolicy.confirmModalCalloutTitle', {
             defaultMessage:
               'This action will update {agentCount, plural, one {# agent} other {# agents}}',
             values: {
@@ -53,19 +53,19 @@ export const ConfirmDeployConfigModal: React.FunctionComponent<{
         >
           <div className="eui-textBreakWord">
             <FormattedMessage
-              id="xpack.ingestManager.agentConfig.confirmModalCalloutDescription"
-              defaultMessage="Fleet has detected that the selected agent configuration, {configName}, is already in use by
+              id="xpack.ingestManager.agentPolicy.confirmModalCalloutDescription"
+              defaultMessage="Fleet has detected that the selected agent policy, {configName}, is already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this configuration."
+            that use this policy."
               values={{
-                configName: <b>{agentConfig.name}</b>,
+                configName: <b>{agentPolicy.name}</b>,
               }}
             />
           </div>
         </EuiCallOut>
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.ingestManager.agentConfig.confirmModalDescription"
+          id="xpack.ingestManager.agentPolicy.confirmModalDescription"
           defaultMessage="This action can not be undone. Are you sure you wish to continue?"
         />
       </EuiConfirmModal>

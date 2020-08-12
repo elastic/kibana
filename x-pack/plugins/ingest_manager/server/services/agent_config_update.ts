@@ -9,7 +9,7 @@ import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './a
 import { unenrollForConfigId } from './agents';
 import { outputService } from './output';
 
-export async function agentConfigUpdateEventHandler(
+export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
   action: string,
   configId: string

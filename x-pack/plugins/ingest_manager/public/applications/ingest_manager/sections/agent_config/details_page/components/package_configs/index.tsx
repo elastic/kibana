@@ -5,19 +5,19 @@
  */
 
 import React, { memo } from 'react';
-import { AgentConfig, PackageConfig } from '../../../../../types';
-import { NoPackageConfigs } from './no_package_configs';
-import { PackageConfigsTable } from './package_configs_table';
+import { AgentPolicy, PackagePolicy } from '../../../../../types';
+import { NoPackagePolicies } from './no_package_configs';
+import { PackagePoliciesTable } from './package_configs_table';
 
-export const ConfigPackageConfigsView = memo<{ config: AgentConfig }>(({ config }) => {
-  if (config.package_configs.length === 0) {
-    return <NoPackageConfigs configId={config.id} />;
+export const ConfigPackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
+  if (agentPolicy.package_configs.length === 0) {
+    return <NoPackagePolicies policyId={agentPolicy.id} />;
   }
 
   return (
-    <PackageConfigsTable
-      config={config}
-      packageConfigs={(config.package_configs || []) as PackageConfig[]}
+    <PackagePoliciesTable
+      agentPolicy={agentPolicy}
+      packagePolicies={(agentPolicy.package_configs || []) as PackagePolicy[]}
     />
   );
 });

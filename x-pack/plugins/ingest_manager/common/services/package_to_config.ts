@@ -8,12 +8,12 @@ import {
   RegistryConfigTemplate,
   RegistryVarsEntry,
   RegistryStream,
-  PackageConfig,
-  PackageConfigConfigRecord,
-  PackageConfigConfigRecordEntry,
-  PackageConfigInput,
-  PackageConfigInputStream,
-  NewPackageConfig,
+  PackagePolicy,
+  PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  NewPackagePolicy,
 } from '../types';
 
 const getStreamsForInputType = (
@@ -40,27 +40,27 @@ const getStreamsForInputType = (
 };
 
 /*
- * This service creates a package config inputs definition from defaults provided in package info
+ * This service creates a package policy inputs definition from defaults provided in package info
  */
-export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageConfig['inputs'] => {
-  const inputs: PackageConfig['inputs'] = [];
+export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): PackagePolicy['inputs'] => {
+  const inputs: PackagePolicy['inputs'] = [];
 
-  // Assume package will only ever ship one package config template for now
-  const packageConfigTemplate: RegistryConfigTemplate | null =
+  // Assume package will only ever ship one package policy template for now
+  const packagePolicyTemplate: RegistryConfigTemplate | null =
     packageInfo.config_templates && packageInfo.config_templates[0]
       ? packageInfo.config_templates[0]
       : null;
 
-  // Create package config input property
-  if (packageConfigTemplate?.inputs?.length) {
-    // Map each package package config input to agent config package config input
-    packageConfigTemplate.inputs.forEach((packageInput) => {
+  // Create package policy input property
+  if (packagePolicyTemplate?.inputs?.length) {
+    // Map each package package policy input to agent policy package policy input
+    packagePolicyTemplate.inputs.forEach((packageInput) => {
       // Reduces registry var def into config object entry
       const varsReducer = (
-        configObject: PackageConfigConfigRecord,
+        configObject: PackagePolicyConfigRecord,
         registryVar: RegistryVarsEntry
-      ): PackageConfigConfigRecord => {
-        const configEntry: PackageConfigConfigRecordEntry = {
+      ): PackagePolicyConfigRecord => {
+        const configEntry: PackagePolicyConfigRecordEntry = {
           value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
         };
         if (registryVar.type) {
@@ -70,12 +70,12 @@ export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageC
         return configObject;
       };
 
-      // Map each package input stream into package config input stream
-      const streams: PackageConfigInputStream[] = getStreamsForInputType(
+      // Map each package input stream into package policy input stream
+      const streams: PackagePolicyInputStream[] = getStreamsForInputType(
         packageInput.type,
         packageInfo
       ).map((packageStream) => {
-        const stream: PackageConfigInputStream = {
+        const stream: PackagePolicyInputStream = {
           id: `${packageInput.type}-${packageStream.data_stream.dataset}`,
           enabled: packageStream.enabled === false ? false : true,
           data_stream: packageStream.data_stream,
@@ -86,7 +86,7 @@ export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageC
         return stream;
       });
 
-      const input: PackageConfigInput = {
+      const input: PackagePolicyInput = {
         type: packageInput.type,
         enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
         streams,
@@ -104,23 +104,23 @@ export const packageToPackageConfigInputs = (packageInfo: PackageInfo): PackageC
 };
 
 /**
- * Builds a `NewPackageConfig` structure based on a package
+ * Builds a `NewPackagePolicy` structure based on a package
  *
  * @param packageInfo
- * @param configId
+ * @param agentPolicyId
  * @param outputId
- * @param packageConfigName
+ * @param packagePolicyName
  */
-export const packageToPackageConfig = (
+export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
-  configId: string,
+  agentPolicyId: string,
   outputId: string,
   namespace: string = '',
-  packageConfigName?: string,
+  packagePolicyName?: string,
   description?: string
-): NewPackageConfig => {
+): NewPackagePolicy => {
   return {
-    name: packageConfigName || `${packageInfo.name}-1`,
+    name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
     description,
     package: {
@@ -129,8 +129,8 @@ export const packageToPackageConfig = (
       version: packageInfo.version,
     },
     enabled: true,
-    config_id: configId,
+    config_id: agentPolicyId,
     output_id: outputId,
-    inputs: packageToPackageConfigInputs(packageInfo),
+    inputs: packageToPackagePolicyInputs(packageInfo),
   };
 };

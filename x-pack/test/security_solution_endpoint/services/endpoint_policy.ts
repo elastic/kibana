@@ -5,15 +5,15 @@
  */
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
-  CreateAgentConfigRequest,
-  CreateAgentConfigResponse,
-  CreatePackageConfigRequest,
-  CreatePackageConfigResponse,
-  PACKAGE_CONFIG_SAVED_OBJECT_TYPE,
-  DeleteAgentConfigRequest,
-  DeletePackageConfigsRequest,
-  GetPackageConfigsResponse,
-  GetFullAgentConfigResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
+  CreatePackagePolicyRequest,
+  CreatePackagePolicyResponse,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  DeleteAgentPolicyRequest,
+  DeletePackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  GetFullAgentPolicyResponse,
   GetPackagesResponse,
 } from '../../../plugins/ingest_manager/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
@@ -33,11 +33,11 @@ const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
  */
 export interface PolicyTestResourceInfo {
   /** The Ingest agent configuration created */
-  agentConfig: Immutable<CreateAgentConfigResponse['item']>;
+  agentConfig: Immutable<CreateAgentPolicyResponse['item']>;
   /** The Ingest Package Config created and added to agent configuration.
    * This is where Endpoint Policy is stored.
    */
-  packageConfig: Immutable<CreatePackageConfigResponse['item']>;
+  packageConfig: Immutable<CreatePackagePolicyResponse['item']>;
   /**
    * Information about the endpoint package
    */
@@ -110,19 +110,19 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
      * Retrieves the full Agent configuration, which mirrors what the Elastic Agent would get
      * once they checkin.
      */
-    async getFullAgentConfig(agentConfigId: string): Promise<GetFullAgentConfigResponse['item']> {
-      let fullAgentConfig: GetFullAgentConfigResponse['item'];
+    async getFullAgentPolicy(agentConfigId: string): Promise<GetFullAgentPolicyResponse['item']> {
+      let fullAgentPolicy: GetFullAgentPolicyResponse['item'];
       try {
-        const apiResponse: { body: GetFullAgentConfigResponse } = await supertest
+        const apiResponse: { body: GetFullAgentPolicyResponse } = await supertest
           .get(`${INGEST_API_AGENT_CONFIGS}/${agentConfigId}/full`)
           .expect(200);
 
-        fullAgentConfig = apiResponse.body.item;
+        fullAgentPolicy = apiResponse.body.item;
       } catch (error) {
         return logSupertestApiErrorAndThrow('Unable to get full Agent Configuration', error);
       }
 
-      return fullAgentConfig!;
+      return fullAgentPolicy!;
     },
 
     /**
@@ -131,14 +131,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
      */
     async createPolicy(): Promise<PolicyTestResourceInfo> {
       // create agent config
-      let agentConfig: CreateAgentConfigResponse['item'];
+      let agentConfig: CreateAgentPolicyResponse['item'];
       try {
-        const newAgentconfigData: CreateAgentConfigRequest['body'] = {
+        const newAgentconfigData: CreateAgentPolicyRequest['body'] = {
           name: 'East Coast',
           description: 'East Coast call center',
           namespace: 'default',
         };
-        const { body: createResponse }: { body: CreateAgentConfigResponse } = await supertest
+        const { body: createResponse }: { body: CreateAgentPolicyResponse } = await supertest
           .post(INGEST_API_AGENT_CONFIGS)
           .set('kbn-xsrf', 'xxx')
           .send(newAgentconfigData)
@@ -152,9 +152,9 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       const endpointPackageInfo = await retrieveEndpointPackageInfo();
 
       // create Package Config and associated it to agent config
-      let packageConfig: CreatePackageConfigResponse['item'];
+      let packageConfig: CreatePackagePolicyResponse['item'];
       try {
-        const newPackageConfigData: CreatePackageConfigRequest['body'] = {
+        const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
           name: 'Protect East Coast',
           description: 'Protect the worlds data - but in the East Coast',
           config_id: agentConfig!.id,
@@ -181,10 +181,10 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
         };
         const {
           body: createResponse,
-        }: { body: CreatePackageConfigResponse } = await supertest
+        }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_CONFIGS)
           .set('kbn-xsrf', 'xxx')
-          .send(newPackageConfigData)
+          .send(newPackagePolicyData)
           .expect(200);
         packageConfig = createResponse.item;
       } catch (error) {
@@ -198,13 +198,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
         async cleanup() {
           // Delete Package Config
           try {
-            const deletePackageConfigData: DeletePackageConfigsRequest['body'] = {
+            const deletePackagePolicyData: DeletePackagePoliciesRequest['body'] = {
               packageConfigIds: [packageConfig.id],
             };
             await supertest
               .post(INGEST_API_PACKAGE_CONFIGS_DELETE)
               .set('kbn-xsrf', 'xxx')
-              .send(deletePackageConfigData)
+              .send(deletePackagePolicyData)
               .expect(200);
           } catch (error) {
             logSupertestApiErrorAndThrow('Unable to delete Package Config via Ingest!', error);
@@ -212,13 +212,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
 
           // Delete Agent config
           try {
-            const deleteAgentConfigData: DeleteAgentConfigRequest['body'] = {
+            const deleteAgentPolicyData: DeleteAgentPolicyRequest['body'] = {
               agentConfigId: agentConfig.id,
             };
             await supertest
               .post(INGEST_API_AGENT_CONFIGS_DELETE)
               .set('kbn-xsrf', 'xxx')
-              .send(deleteAgentConfigData)
+              .send(deleteAgentPolicyData)
               .expect(200);
           } catch (error) {
             logSupertestApiErrorAndThrow('Unable to delete Agent Config via Ingest!', error);
@@ -232,14 +232,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
      * @param name
      */
     async deletePolicyByName(name: string) {
-      let packageConfigList: GetPackageConfigsResponse['items'];
+      let packageConfigList: GetPackagePoliciesResponse['items'];
       try {
         const {
           body: packageConfigsResponse,
-        }: { body: GetPackageConfigsResponse } = await supertest
+        }: { body: GetPackagePoliciesResponse } = await supertest
           .get(INGEST_API_PACKAGE_CONFIGS)
           .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.name: ${name}` })
+          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
           .send()
           .expect(200);
         packageConfigList = packageConfigsResponse.items;
@@ -259,13 +259,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       }
 
       try {
-        const deletePackageConfigData: DeletePackageConfigsRequest['body'] = {
+        const deletePackagePolicyData: DeletePackagePoliciesRequest['body'] = {
           packageConfigIds: [packageConfigList[0].id],
         };
         await supertest
           .post(INGEST_API_PACKAGE_CONFIGS_DELETE)
           .set('kbn-xsrf', 'xxx')
-          .send(deletePackageConfigData)
+          .send(deletePackagePolicyData)
           .expect(200);
       } catch (error) {
         logSupertestApiErrorAndThrow('Unable to delete Package Config via Ingest!', error);

@@ -13,7 +13,7 @@ sequenceDiagram
   end
 
   alt If configuration updated since last checkin
-    Fleet API->>SavedObjects: getAgentConfiguration(configId)
+    Fleet API->>SavedObjects: getAgentPolicy(configId)
 
     opt If there is not API Key for default output
       Fleet API->>Elasticsearch: createAgentESApiKey()
@@ -34,4 +34,4 @@ sequenceDiagram
   end
 
 
-  Fleet API->>Agent: actions|agent config
+  Fleet API->>Agent: actions|agent policy

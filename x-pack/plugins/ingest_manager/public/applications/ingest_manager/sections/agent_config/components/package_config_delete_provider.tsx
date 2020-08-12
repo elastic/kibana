@@ -8,31 +8,31 @@ import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useCore, sendRequest, sendDeletePackageConfig, useConfig } from '../../../hooks';
+import { useCore, sendRequest, sendDeletePackagePolicy, useConfig } from '../../../hooks';
 import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AgentConfig } from '../../../types';
+import { AgentPolicy } from '../../../types';
 
 interface Props {
-  agentConfig: AgentConfig;
-  children: (deletePackageConfigsPrompt: DeletePackageConfigsPrompt) => React.ReactElement;
+  agentPolicy: AgentPolicy;
+  children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
-export type DeletePackageConfigsPrompt = (
-  packageConfigsToDelete: string[],
+export type DeletePackagePoliciesPrompt = (
+  packagePoliciesToDelete: string[],
   onSuccess?: OnSuccessCallback
 ) => void;
 
-type OnSuccessCallback = (packageConfigsDeleted: string[]) => void;
+type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
-export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
-  agentConfig,
+export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
+  agentPolicy,
   children,
 }) => {
   const { notifications } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
-  const [packageConfigs, setPackageConfigs] = useState<string[]>([]);
+  const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
   const [agentsCount, setAgentsCount] = useState<number>(0);
@@ -51,22 +51,22 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
         query: {
           page: 1,
           perPage: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfig.id}`,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentPolicy.id}`,
         },
       });
       setAgentsCount(data?.total || 0);
       setIsLoadingAgentsCount(false);
     },
-    [agentConfig.id, isFleetEnabled, isLoadingAgentsCount]
+    [agentPolicy.id, isFleetEnabled, isLoadingAgentsCount]
   );
 
-  const deletePackageConfigsPrompt = useMemo(
-    (): DeletePackageConfigsPrompt => (packageConfigsToDelete, onSuccess = () => undefined) => {
-      if (!Array.isArray(packageConfigsToDelete) || packageConfigsToDelete.length === 0) {
-        throw new Error('No package configs specified for deletion');
+  const deletePackagePoliciesPrompt = useMemo(
+    (): DeletePackagePoliciesPrompt => (packagePoliciesToDelete, onSuccess = () => undefined) => {
+      if (!Array.isArray(packagePoliciesToDelete) || packagePoliciesToDelete.length === 0) {
+        throw new Error('No package policies specified for deletion');
       }
       setIsModalOpen(true);
-      setPackageConfigs(packageConfigsToDelete);
+      setPackagePolicies(packagePoliciesToDelete);
       fetchAgentsCount();
       onSuccessCallback.current = onSuccess;
     },
@@ -75,7 +75,7 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
 
   const closeModal = useMemo(
     () => () => {
-      setPackageConfigs([]);
+      setPackagePolicies([]);
       setIsLoading(false);
       setIsLoadingAgentsCount(false);
       setIsModalOpen(false);
@@ -83,12 +83,12 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
     []
   );
 
-  const deletePackageConfigs = useMemo(
+  const deletePackagePolicies = useMemo(
     () => async () => {
       setIsLoading(true);
 
       try {
-        const { data } = await sendDeletePackageConfig({ packageConfigIds: packageConfigs });
+        const { data } = await sendDeletePackagePolicy({ packagePolicyIds: packagePolicies });
         const successfulResults = data?.filter((result) => result.success) || [];
         const failedResults = data?.filter((result) => !result.success) || [];
 
@@ -96,14 +96,14 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
           const hasMultipleSuccesses = successfulResults.length > 1;
           const successMessage = hasMultipleSuccesses
             ? i18n.translate(
-                'xpack.ingestManager.deletePackageConfig.successMultipleNotificationTitle',
+                'xpack.ingestManager.deletePackagePolicy.successMultipleNotificationTitle',
                 {
                   defaultMessage: 'Deleted {count} integrations',
                   values: { count: successfulResults.length },
                 }
               )
             : i18n.translate(
-                'xpack.ingestManager.deletePackageConfig.successSingleNotificationTitle',
+                'xpack.ingestManager.deletePackagePolicy.successSingleNotificationTitle',
                 {
                   defaultMessage: "Deleted integration '{id}'",
                   values: { id: successfulResults[0].id },
@@ -116,14 +116,14 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
           const hasMultipleFailures = failedResults.length > 1;
           const failureMessage = hasMultipleFailures
             ? i18n.translate(
-                'xpack.ingestManager.deletePackageConfig.failureMultipleNotificationTitle',
+                'xpack.ingestManager.deletePackagePolicy.failureMultipleNotificationTitle',
                 {
                   defaultMessage: 'Error deleting {count} integrations',
                   values: { count: failedResults.length },
                 }
               )
             : i18n.translate(
-                'xpack.ingestManager.deletePackageConfig.failureSingleNotificationTitle',
+                'xpack.ingestManager.deletePackagePolicy.failureSingleNotificationTitle',
                 {
                   defaultMessage: "Error deleting integration '{id}'",
                   values: { id: failedResults[0].id },
@@ -137,14 +137,14 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
         }
       } catch (e) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.deletePackageConfig.fatalErrorNotificationTitle', {
+          i18n.translate('xpack.ingestManager.deletePackagePolicy.fatalErrorNotificationTitle', {
             defaultMessage: 'Error deleting integration',
           })
         );
       }
       closeModal();
     },
-    [closeModal, packageConfigs, notifications.toasts]
+    [closeModal, packagePolicies, notifications.toasts]
   );
 
   const renderModal = () => {
@@ -157,31 +157,31 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
         <EuiConfirmModal
           title={
             <FormattedMessage
-              id="xpack.ingestManager.deletePackageConfig.confirmModal.deleteMultipleTitle"
+              id="xpack.ingestManager.deletePackagePolicy.confirmModal.deleteMultipleTitle"
               defaultMessage="Delete {count, plural, one {integration} other {# integrations}}?"
-              values={{ count: packageConfigs.length }}
+              values={{ count: packagePolicies.length }}
             />
           }
           onCancel={closeModal}
-          onConfirm={deletePackageConfigs}
+          onConfirm={deletePackagePolicies}
           cancelButtonText={
             <FormattedMessage
-              id="xpack.ingestManager.deletePackageConfig.confirmModal.cancelButtonLabel"
+              id="xpack.ingestManager.deletePackagePolicy.confirmModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           }
           confirmButtonText={
             isLoading || isLoadingAgentsCount ? (
               <FormattedMessage
-                id="xpack.ingestManager.deletePackageConfig.confirmModal.loadingButtonLabel"
+                id="xpack.ingestManager.deletePackagePolicy.confirmModal.loadingButtonLabel"
                 defaultMessage="Loading…"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.deletePackageConfig.confirmModal.confirmButtonLabel"
-                defaultMessage="Delete {agentConfigsCount, plural, one {integration} other {integrations}}"
+                id="xpack.ingestManager.deletePackagePolicy.confirmModal.confirmButtonLabel"
+                defaultMessage="Delete {agentPoliciesCount, plural, one {integration} other {integrations}}"
                 values={{
-                  agentConfigsCount: packageConfigs.length,
+                  agentPoliciesCount: packagePolicies.length,
                 }}
               />
             )
@@ -191,7 +191,7 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
         >
           {isLoadingAgentsCount ? (
             <FormattedMessage
-              id="xpack.ingestManager.deletePackageConfig.confirmModal.loadingAgentsCountMessage"
+              id="xpack.ingestManager.deletePackagePolicy.confirmModal.loadingAgentsCountMessage"
               defaultMessage="Checking affected agents…"
             />
           ) : agentsCount ? (
@@ -200,17 +200,17 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
                 color="danger"
                 title={
                   <FormattedMessage
-                    id="xpack.ingestManager.deletePackageConfig.confirmModal.affectedAgentsTitle"
+                    id="xpack.ingestManager.deletePackagePolicy.confirmModal.affectedAgentsTitle"
                     defaultMessage="This action will affect {agentsCount} {agentsCount, plural, one {agent} other {agents}}."
                     values={{ agentsCount }}
                   />
                 }
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.deletePackageConfig.confirmModal.affectedAgentsMessage"
-                  defaultMessage="Fleet has detected that {agentConfigName} is already in use by some of your agents."
+                  id="xpack.ingestManager.deletePackagePolicy.confirmModal.affectedAgentsMessage"
+                  defaultMessage="Fleet has detected that {agentPolicyName} is already in use by some of your agents."
                   values={{
-                    agentConfigName: <strong>{agentConfig.name}</strong>,
+                    agentPolicyName: <strong>{agentPolicy.name}</strong>,
                   }}
                 />
               </EuiCallOut>
@@ -219,7 +219,7 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
           ) : null}
           {!isLoadingAgentsCount && (
             <FormattedMessage
-              id="xpack.ingestManager.deletePackageConfig.confirmModal.generalMessage"
+              id="xpack.ingestManager.deletePackagePolicy.confirmModal.generalMessage"
               defaultMessage="This action can not be undone. Are you sure you wish to continue?"
             />
           )}
@@ -230,7 +230,7 @@ export const PackageConfigDeleteProvider: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      {children(deletePackageConfigsPrompt)}
+      {children(deletePackagePoliciesPrompt)}
       {renderModal()}
     </Fragment>
   );

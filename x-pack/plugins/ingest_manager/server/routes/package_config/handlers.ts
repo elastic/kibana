@@ -6,25 +6,25 @@
 import { TypeOf } from '@kbn/config-schema';
 import Boom from 'boom';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { appContextService, packageConfigService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
 import {
-  GetPackageConfigsRequestSchema,
-  GetOnePackageConfigRequestSchema,
-  CreatePackageConfigRequestSchema,
-  UpdatePackageConfigRequestSchema,
-  DeletePackageConfigsRequestSchema,
-  NewPackageConfig,
+  GetPackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  CreatePackagePolicyRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
+  NewPackagePolicy,
 } from '../../types';
-import { CreatePackageConfigResponse, DeletePackageConfigsResponse } from '../../../common';
+import { CreatePackagePolicyResponse, DeletePackagePoliciesResponse } from '../../../common';
 
-export const getPackageConfigsHandler: RequestHandler<
+export const getPackagePoliciesHandler: RequestHandler<
   undefined,
-  TypeOf<typeof GetPackageConfigsRequestSchema.query>
+  TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const { items, total, page, perPage } = await packageConfigService.list(
+    const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
       request.query
     );
@@ -45,20 +45,20 @@ export const getPackageConfigsHandler: RequestHandler<
   }
 };
 
-export const getOnePackageConfigHandler: RequestHandler<TypeOf<
-  typeof GetOnePackageConfigRequestSchema.params
+export const getOnePackagePolicyHandler: RequestHandler<TypeOf<
+  typeof GetOnePackagePolicyRequestSchema.params
 >> = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const { packageConfigId } = request.params;
+  const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
-    response.notFound({ body: { message: `Package config ${packageConfigId} not found` } });
+    response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
 
   try {
-    const packageConfig = await packageConfigService.get(soClient, packageConfigId);
-    if (packageConfig) {
+    const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+    if (packagePolicy) {
       return response.ok({
         body: {
-          item: packageConfig,
+          item: packagePolicy,
           success: true,
         },
       });
@@ -77,10 +77,10 @@ export const getOnePackageConfigHandler: RequestHandler<TypeOf<
   }
 };
 
-export const createPackageConfigHandler: RequestHandler<
+export const createPackagePolicyHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof CreatePackageConfigRequestSchema.body>
+  TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
@@ -88,21 +88,21 @@ export const createPackageConfigHandler: RequestHandler<
   const logger = appContextService.getLogger();
   let newData = { ...request.body };
   try {
-    // If we have external callbacks, then process those now before creating the actual package config
-    const externalCallbacks = appContextService.getExternalCallbacks('packageConfigCreate');
+    // If we have external callbacks, then process those now before creating the actual package policy
+    const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyCreate');
     if (externalCallbacks && externalCallbacks.size > 0) {
-      let updatedNewData: NewPackageConfig = newData;
+      let updatedNewData: NewPackagePolicy = newData;
 
       for (const callback of externalCallbacks) {
         try {
           // ensure that the returned value by the callback passes schema validation
-          updatedNewData = CreatePackageConfigRequestSchema.body.validate(
+          updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
             await callback(updatedNewData)
           );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks
           logger.error(
-            'An external registered [packageConfigCreate] callback failed when executed'
+            'An external registered [packagePolicyCreate] callback failed when executed'
           );
           logger.error(error);
         }
@@ -111,11 +111,11 @@ export const createPackageConfigHandler: RequestHandler<
       newData = updatedNewData;
     }
 
-    // Create package config
-    const packageConfig = await packageConfigService.create(soClient, callCluster, newData, {
+    // Create package policy
+    const packagePolicy = await packagePolicyService.create(soClient, callCluster, newData, {
       user,
     });
-    const body: CreatePackageConfigResponse = { item: packageConfig, success: true };
+    const body: CreatePackagePolicyResponse = { item: packagePolicy, success: true };
     return response.ok({
       body,
     });
@@ -128,42 +128,42 @@ export const createPackageConfigHandler: RequestHandler<
   }
 };
 
-export const updatePackageConfigHandler: RequestHandler<
-  TypeOf<typeof UpdatePackageConfigRequestSchema.params>,
+export const updatePackagePolicyHandler: RequestHandler<
+  TypeOf<typeof UpdatePackagePolicyRequestSchema.params>,
   unknown,
-  TypeOf<typeof UpdatePackageConfigRequestSchema.body>
+  TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const packageConfig = await packageConfigService.get(soClient, request.params.packageConfigId);
+    const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
-    if (!packageConfig) {
-      throw Boom.notFound('Package config not found');
+    if (!packagePolicy) {
+      throw Boom.notFound('Package policy not found');
     }
 
     const newData = { ...request.body };
-    const pkg = newData.package || packageConfig.package;
-    const inputs = newData.inputs || packageConfig.inputs;
+    const pkg = newData.package || packagePolicy.package;
+    const inputs = newData.inputs || packagePolicy.inputs;
     if (pkg && (newData.inputs || newData.package)) {
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: pkg.name,
         pkgVersion: pkg.version,
       });
-      newData.inputs = (await packageConfigService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
-        typeof CreatePackageConfigRequestSchema.body
+      newData.inputs = (await packagePolicyService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
+        typeof CreatePackagePolicyRequestSchema.body
       >['inputs'];
     }
 
-    const updatedPackageConfig = await packageConfigService.update(
+    const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
-      request.params.packageConfigId,
+      request.params.packagePolicyId,
       newData,
       { user }
     );
     return response.ok({
-      body: { item: updatedPackageConfig, success: true },
+      body: { item: updatedPackagePolicy, success: true },
     });
   } catch (e) {
     return response.customError({
@@ -173,17 +173,17 @@ export const updatePackageConfigHandler: RequestHandler<
   }
 };
 
-export const deletePackageConfigHandler: RequestHandler<
+export const deletePackagePolicyHandler: RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof DeletePackageConfigsRequestSchema.body>
+  TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
-    const body: DeletePackageConfigsResponse = await packageConfigService.delete(
+    const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
-      request.body.packageConfigIds,
+      request.body.packagePolicyIds,
       { user }
     );
     return response.ok({

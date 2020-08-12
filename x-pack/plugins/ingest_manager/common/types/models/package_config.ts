@@ -4,64 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface PackageConfigPackage {
+export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
 }
 
-export interface PackageConfigConfigRecordEntry {
+export interface PackagePolicyConfigRecordEntry {
   type?: string;
   value?: any;
 }
 
-export type PackageConfigConfigRecord = Record<string, PackageConfigConfigRecordEntry>;
+export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
-export interface NewPackageConfigInputStream {
+export interface NewPackagePolicyInputStream {
   id: string;
   enabled: boolean;
   data_stream: {
     dataset: string;
     type: string;
   };
-  vars?: PackageConfigConfigRecord;
-  config?: PackageConfigConfigRecord;
+  vars?: PackagePolicyConfigRecord;
+  config?: PackagePolicyConfigRecord;
 }
 
-export interface PackageConfigInputStream extends NewPackageConfigInputStream {
+export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
   compiled_stream?: any;
 }
 
-export interface NewPackageConfigInput {
+export interface NewPackagePolicyInput {
   type: string;
   enabled: boolean;
-  vars?: PackageConfigConfigRecord;
-  config?: PackageConfigConfigRecord;
-  streams: NewPackageConfigInputStream[];
+  vars?: PackagePolicyConfigRecord;
+  config?: PackagePolicyConfigRecord;
+  streams: NewPackagePolicyInputStream[];
 }
 
-export interface PackageConfigInput extends Omit<NewPackageConfigInput, 'streams'> {
-  streams: PackageConfigInputStream[];
+export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
+  streams: PackagePolicyInputStream[];
 }
 
-export interface NewPackageConfig {
+export interface NewPackagePolicy {
   name: string;
   description?: string;
   namespace: string;
   enabled: boolean;
   config_id: string;
   output_id: string;
-  package?: PackageConfigPackage;
-  inputs: NewPackageConfigInput[];
+  package?: PackagePolicyPackage;
+  inputs: NewPackagePolicyInput[];
 }
 
-export interface UpdatePackageConfig extends NewPackageConfig {
+export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
-export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
+export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
-  inputs: PackageConfigInput[];
+  inputs: PackagePolicyInput[];
   version?: string;
   revision: number;
   updated_at: string;
@@ -70,4 +70,4 @@ export interface PackageConfig extends Omit<NewPackageConfig, 'inputs'> {
   created_by: string;
 }
 
-export type PackageConfigSOAttributes = Omit<PackageConfig, 'id' | 'version'>;
+export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;

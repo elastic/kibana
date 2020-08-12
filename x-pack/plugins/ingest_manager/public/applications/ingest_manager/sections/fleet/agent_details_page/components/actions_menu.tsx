@@ -58,7 +58,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           >
             <FormattedMessage
               id="xpack.ingestManager.agentList.reassignActionText"
-              defaultMessage="Assign new agent config"
+              defaultMessage="Assign new agent policy"
             />
           </EuiContextMenuItem>,
           <AgentUnenrollProvider key="unenrollAgent" forceUnenroll={isUnenrolling}>

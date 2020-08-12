@@ -57,7 +57,7 @@ export const mockPolicyResultList: (options?: {
 
   const policies = [];
   for (let index = 0; index < actualCountToReturn; index++) {
-    policies.push(generator.generatePolicyPackageConfig());
+    policies.push(generator.generatePolicyPackagePolicy());
   }
   const mock: GetPolicyListResponse = {
     items: policies,

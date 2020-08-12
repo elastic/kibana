@@ -8,21 +8,21 @@ import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
-import { agentConfigService } from './agent_config';
+import { agentPolicyService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
 import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
-  packageToPackageConfig,
-  PackageConfig,
-  AgentConfig,
+  packageToPackagePolicy,
+  PackagePolicy,
+  AgentPolicy,
   Installation,
   Output,
-  DEFAULT_AGENT_CONFIGS_PACKAGES,
+  DEFAULT_AGENT_POLICIES_PACKAGES,
   decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
-import { packageConfigService } from './package_config';
+import { packagePolicyService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
@@ -55,7 +55,7 @@ export async function setupIngestManager(
       // packages installed by default
       ensureInstalledDefaultPackages(soClient, callCluster),
       outputService.ensureDefaultOutput(soClient),
-      agentConfigService.ensureDefaultAgentConfig(soClient),
+      agentPolicyService.ensureDefaultAgentPolicy(soClient),
       ensureDefaultIndices(callCluster),
       settingsService.getSettings(soClient).catch((e: any) => {
         if (e.isBoom && e.output.statusCode === 404) {
@@ -86,26 +86,26 @@ export async function setupIngestManager(
     ]);
 
     // ensure default packages are added to the default conifg
-    const configWithPackageConfigs = await agentConfigService.get(soClient, config.id, true);
-    if (!configWithPackageConfigs) {
+    const configWithPackagePolicies = await agentPolicyService.get(soClient, config.id, true);
+    if (!configWithPackagePolicies) {
       throw new Error('Config not found');
     }
     if (
-      configWithPackageConfigs.package_configs.length &&
-      typeof configWithPackageConfigs.package_configs[0] === 'string'
+      configWithPackagePolicies.package_configs.length &&
+      typeof configWithPackagePolicies.package_configs[0] === 'string'
     ) {
       throw new Error('Config not found');
     }
     for (const installedPackage of installedPackages) {
-      const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
+      const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
         (packageName) => installedPackage.name === packageName
       );
       if (!packageShouldBeInstalled) {
         continue;
       }
 
-      const isInstalled = configWithPackageConfigs.package_configs.some(
-        (d: PackageConfig | string) => {
+      const isInstalled = configWithPackagePolicies.package_configs.some(
+        (d: PackagePolicy | string) => {
           return typeof d !== 'string' && d.package?.name === installedPackage.name;
         }
       );
@@ -115,7 +115,7 @@ export async function setupIngestManager(
           soClient,
           callCluster,
           installedPackage,
-          configWithPackageConfigs,
+          configWithPackagePolicies,
           defaultOutput
         );
       }
@@ -185,15 +185,15 @@ export async function setupFleet(
     fleet_enroll_password: password,
   });
 
-  const { items: agentConfigs } = await agentConfigService.list(soClient, {
+  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: 10000,
   });
 
   await Promise.all(
-    agentConfigs.map((agentConfig) => {
+    agentPolicies.map((agentPolicy) => {
       return generateEnrollmentAPIKey(soClient, {
         name: `Default`,
-        configId: agentConfig.id,
+        configId: agentPolicy.id,
       });
     })
   );
@@ -207,7 +207,7 @@ async function addPackageToConfig(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
-  config: AgentConfig,
+  config: AgentPolicy,
   defaultOutput: Output
 ) {
   const packageInfo = await getPackageInfo({
@@ -216,14 +216,14 @@ async function addPackageToConfig(
     pkgVersion: packageToInstall.version,
   });
 
-  const newPackageConfig = packageToPackageConfig(
+  const newPackagePolicy = packageToPackagePolicy(
     packageInfo,
     config.id,
     defaultOutput.id,
     config.namespace
   );
 
-  await packageConfigService.create(soClient, callCluster, newPackageConfig, {
+  await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
     bumpConfigRevision: false,
   });
 }
