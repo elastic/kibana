@@ -8,7 +8,6 @@ import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 // @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-expect-error .png file
 import { elasticLogo } from '../../lib/elastic_logo';
 
 export enum ImageMode {
@@ -22,7 +21,7 @@ interface Arguments {
   mode: ImageMode | null;
 }
 
-interface Return {
+export interface Return {
   type: 'image';
   mode: string;
   dataurl: string;

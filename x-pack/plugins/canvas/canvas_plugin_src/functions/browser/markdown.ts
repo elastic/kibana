@@ -22,7 +22,7 @@ interface Arguments {
   openLinksInNewTab: boolean;
 }
 
-interface Return {
+export interface Return {
   content: string;
   font: Style;
   openLinksInNewTab: boolean;
