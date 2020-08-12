@@ -43,12 +43,6 @@ interface ReportingDocument {
  * The document created by Reporting to store as task parameters for Task
  * Manager to reference the report in .reporting
  */
-export interface ReportTaskJSON {
-  id: string;
-  index: string;
-  jobtype: string;
-}
-
 const puid = new Puid();
 
 export class Report implements Partial<ReportingDocument> {
@@ -145,22 +139,6 @@ export class Report implements Partial<ReportingDocument> {
   }
 
   /*
-   * Task parameters for finding the report in the store, finding its export
-   * type and getting its run function later
-   */
-  toReportTaskJSON(): ReportTaskJSON {
-    if (!this._id || !this._index) {
-      throw new Error(`Report object is not synced with ES!`);
-    }
-
-    return {
-      id: this._id,
-      index: this._index,
-      jobtype: this.jobtype,
-    };
-  }
-
-  /*
    * Data structure for API responses
    */
   toApiJSON() {
@@ -181,17 +159,5 @@ export class Report implements Partial<ReportingDocument> {
       started_at: this.started_at,
       completed_at: this.completed_at,
     };
-  }
-
-  getUser(): string | null {
-    return this.created_by || null;
-  }
-
-  getPayload() {
-    return this.payload;
-  }
-
-  getEncryptedHeaders() {
-    return this.payload.headers;
   }
 }

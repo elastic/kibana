@@ -14,7 +14,7 @@ describe('Class Report', () => {
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt', layout: {} as any },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
       timeout: 30000,
       priority: 1,
     });
@@ -30,23 +30,19 @@ describe('Class Report', () => {
         jobtype: 'test-report',
         max_attempts: 50,
         meta: undefined,
-        payload: { headers: 'payload_test_field', objectType: 'testOt', layout: {} },
+        payload: { headers: 'payload_test_field', objectType: 'testOt' },
         priority: 1,
         started_at: undefined,
         status: 'pending',
         timeout: 30000,
       },
     });
-    expect(report.toReportTaskJSON()).toMatchObject({
-      index: '.reporting-test-index-12345',
-      jobtype: 'test-report',
-    });
     expect(report.toApiJSON()).toMatchObject({
       browser_type: 'browser_type_test_string',
       created_by: 'created_by_test_string',
       jobtype: 'test-report',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt', layout: {} },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
       priority: 1,
       timeout: 30000,
     });
@@ -61,7 +57,7 @@ describe('Class Report', () => {
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
       max_attempts: 50,
-      payload: { headers: 'payload_test_field', objectType: 'testOt', layout: {} as any },
+      payload: { headers: 'payload_test_field', objectType: 'testOt' },
       timeout: 30000,
       priority: 1,
     });
@@ -99,13 +95,6 @@ describe('Class Report', () => {
         },
       }
     `);
-    expect(report.toReportTaskJSON()).toMatchInlineSnapshot(`
-      Object {
-        "id": "12342p9o387549o2345",
-        "index": ".reporting-test-update",
-        "jobtype": "test-report",
-      }
-    `);
     expect(report.toApiJSON()).toMatchInlineSnapshot(`
       Object {
         "attempts": 0,
@@ -129,12 +118,5 @@ describe('Class Report', () => {
         "timeout": 30000,
       }
     `);
-  });
-
-  it('throws error if converted to task JSON before being synced with ES storage', () => {
-    const report = new Report({});
-    expect(() => report.toReportTaskJSON()).toThrowErrorMatchingInlineSnapshot(
-      `"Report object is not synced with ES!"`
-    );
   });
 });
