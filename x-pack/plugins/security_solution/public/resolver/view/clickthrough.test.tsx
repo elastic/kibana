@@ -152,5 +152,38 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         relatedEventButtons: 1,
       });
     });
+    describe('when the related events button is clicked', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should open the submenu and display exactly one option with the correct count', async () => {
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().map((node) => node.text()))
+        ).toYieldEqualTo(['2 registry']);
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().length)
+        ).toYieldEqualTo(1);
+      });
+    });
+    describe('and when the related events button is clicked again', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should close the submenu', async () => {
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().length)
+        ).toYieldEqualTo(0);
+      });
+    });
   });
 });
