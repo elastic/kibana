@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchBarFilter } from '../objects/filter';
-
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
 
