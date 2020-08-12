@@ -983,6 +983,9 @@ describe('update()', () => {
           "name": "my name",
           "secrets": Object {},
         },
+        Object {
+          "references": Array [],
+        },
       ]
     `);
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -1095,6 +1098,9 @@ describe('update()', () => {
           },
           "name": "my name",
           "secrets": Object {},
+        },
+        Object {
+          "references": Array [],
         },
       ]
     `);
