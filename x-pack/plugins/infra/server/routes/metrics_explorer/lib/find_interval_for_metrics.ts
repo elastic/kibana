@@ -45,7 +45,7 @@ export const findIntervalForMetrics = async (
       timestampField: options.timerange.field,
       timerange: options.timerange,
     },
-    modules.filter((m) => m) as string[]
+    modules.filter(Boolean) as string[]
   );
   cache.set(cacheKey, interval);
   return interval;
