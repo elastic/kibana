@@ -4,17 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-.engineOverview {
-  padding: $euiSize;
-
-  @include euiBreakpoint('m', 'l', 'xl') {
-    padding: $euiSizeXL;
-  }
-}
-
-.engineIcon {
-  display: inline-block;
-  width: $euiSize;
-  height: $euiSize;
-  margin-right: $euiSizeXS;
-}
+export { Layout } from './layout';
+export { SideNav, SideNavLink } from './side_nav';
