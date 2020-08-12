@@ -94,24 +94,48 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
+    const filter = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
+
+    const MAX_INTERVAL = 120000;
+
+    async function runPolling(interval: number): Promise<TimelionSuccessResponse> {
+      async function checkCondition(resolve: Function, reject: Function) {
+        const resp = await http.post('/api/timelion/run', {
+          body: JSON.stringify({
+            sheet: [expression],
+            extended: {
+              es: {
+                filter,
+              },
+            },
+            time: {
+              from: timeRangeBounds.min,
+              to: timeRangeBounds.max,
+              interval: visParams.interval,
+              timezone,
+            },
+          }),
+        });
+
+        if (interval > MAX_INTERVAL) {
+          reject('Reach max interval');
+        }
+
+        if (resp.sheet.some((sheet: any) => sheet.is_running || sheet.is_partial)) {
+          setTimeout(() => {
+            interval = interval * Math.log10(interval / 10);
+            checkCondition(resolve, reject);
+          }, interval);
+        } else {
+          resolve(resp);
+        }
+      }
+
+      return new Promise(checkCondition);
+    }
 
     try {
-      return await http.post('/api/timelion/run', {
-        body: JSON.stringify({
-          sheet: [expression],
-          extended: {
-            es: {
-              filter: esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs),
-            },
-          },
-          time: {
-            from: timeRangeBounds.min,
-            to: timeRangeBounds.max,
-            interval: visParams.interval,
-            timezone,
-          },
-        }),
-      });
+      return await runPolling(500);
     } catch (e) {
       if (e && e.body) {
         const err = new Error(
