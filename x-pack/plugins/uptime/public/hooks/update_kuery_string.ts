@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esKuery, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { esKuery, IIndexPattern, IndexPatternSpec } from '../../../../../src/plugins/data/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string): string => {
@@ -39,7 +39,10 @@ export const useUpdateKueryString = (
     if ((filterQueryString || urlFilters) && indexPattern) {
       const ast = esKuery.fromKueryExpression(combinedFilterString);
 
-      const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern.toSpec());
+      const elasticsearchQuery = esKuery.toElasticsearchQuery(
+        ast,
+        indexPattern as IndexPatternSpec
+      );
 
       esFilters = JSON.stringify(elasticsearchQuery);
     }

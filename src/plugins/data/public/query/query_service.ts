@@ -93,7 +93,7 @@ export class QueryService {
         const timeFilter = this.timefilter.timefilter.createFilter(indexPattern);
 
         return buildEsQuery(
-          indexPattern,
+          indexPattern.toSpec(),
           this.queryStringManager.getQuery(),
           [...this.filterManager.getFilters(), ...(timeFilter ? [timeFilter] : [])],
           getEsQueryConfig(getUiSettings())
