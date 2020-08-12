@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 
 import {
   EuiBasicTable,
   EuiText,
-  EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,8 +22,8 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiButton,
-  EuiBetaBadge,
   EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -41,7 +40,6 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
@@ -51,6 +49,10 @@ import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
+import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { HeaderPage } from '../../../../common/components/header_page';
+import { SiemNavigation } from '../../../../common/components/navigation';
+import { managementTabs } from '../../../components/management_tabs';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -405,42 +407,27 @@ export const PolicyList = React.memo(() => {
           }}
         />
       )}
-      <ManagementPageView
-        viewType="list"
-        data-test-subj="policyListPage"
-        headerLeft={
-          <>
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1 data-test-subj="pageViewHeaderLeftTitle">
-                    <FormattedMessage
-                      id="xpack.securitySolution.policyList.pageTitle"
-                      defaultMessage="Policies"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
-                    defaultMessage: 'Beta',
-                  })}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.policyList.pageSubTitle"
-                  defaultMessage="View and configure protections"
-                />
-              </p>
-            </EuiText>
-          </>
-        }
-        headerRight={
+      <WrapperPage noTimeline data-test-subj="policyListPage">
+        <HeaderPage
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.policyList.pageTitle"
+              defaultMessage="Policies"
+            />
+          }
+          subtitle={
+            <FormattedMessage
+              id="xpack.securitySolution.policyList.pageSubTitle"
+              defaultMessage="View and configure protections"
+            />
+          }
+          badgeOptions={{
+            beta: true,
+            text: i18n.translate('xpack.securitySolution.endpoint.policyList.beta', {
+              defaultMessage: 'Beta',
+            }),
+          }}
+        >
           <EuiButton
             iconType="plusInCircle"
             onClick={handleCreatePolicyClick}
@@ -451,23 +438,29 @@ export const PolicyList = React.memo(() => {
               defaultMessage="Create new policy"
             />
           </EuiButton>
-        }
-      >
-        {policyItems && policyItems.length > 0 && (
-          <>
-            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
-                defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
-                values={{ totalItemCount }}
-              />
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-          </>
-        )}
-        {bodyContent}
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </ManagementPageView>
+        </HeaderPage>
+
+        <SiemNavigation navTabs={managementTabs} />
+
+        <EuiSpacer />
+
+        <EuiPanel>
+          {policyItems && policyItems.length > 0 && (
+            <>
+              <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
+                  defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
+                  values={{ totalItemCount }}
+                />
+              </EuiText>
+              <EuiHorizontalRule margin="xs" />
+            </>
+          )}
+          {bodyContent}
+          <SpyRoute pageName={SecurityPageName.administration} />
+        </EuiPanel>
+      </WrapperPage>
     </>
   );
 });

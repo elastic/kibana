@@ -10,15 +10,12 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
-  EuiTitle,
   EuiSpacer,
   EuiLink,
   EuiHealth,
   EuiToolTip,
   EuiSelectableProps,
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPanel,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +34,6 @@ import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoi
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
@@ -48,6 +44,10 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { HeaderPage } from '../../../../common/components/header_page';
+import { SiemNavigation } from '../../../../common/components/navigation';
+import { managementTabs } from '../../../components/management_tabs';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
 
@@ -375,57 +375,49 @@ export const EndpointList = () => {
   ]);
 
   return (
-    <ManagementPageView
-      viewType="list"
-      data-test-subj="endpointPage"
-      headerLeft={
-        <>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="l">
-                <h1 data-test-subj="pageViewHeaderLeftTitle">
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.list.pageTitle"
-                    defaultMessage="Endpoints"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.list.beta', {
-                  defaultMessage: 'Beta',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
+    <WrapperPage noTimeline data-test-subj="endpointPage">
+      <HeaderPage
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.list.pageTitle"
+            defaultMessage="Endpoints"
+          />
+        }
+        subtitle={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.list.pageSubTitle"
+            defaultMessage="Hosts running Elastic Endpoint Security"
+          />
+        }
+        badgeOptions={{
+          beta: true,
+          text: i18n.translate('xpack.securitySolution.endpoint.list.beta', {
+            defaultMessage: 'Beta',
+          }),
+        }}
+      />
+
+      <SiemNavigation navTabs={managementTabs} />
+
+      <EuiSpacer />
+
+      <EuiPanel>
+        {hasSelectedEndpoint && <EndpointDetailsFlyout />}
+        {listData && listData.length > 0 && (
+          <>
+            <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.pageSubTitle"
-                defaultMessage="Hosts running Elastic Endpoint Security"
+                id="xpack.securitySolution.endpoint.list.totalCount"
+                defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+                values={{ totalItemCount }}
               />
-            </p>
-          </EuiText>
-        </>
-      }
-    >
-      {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {listData && listData.length > 0 && (
-        <>
-          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.list.totalCount"
-              defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
-              values={{ totalItemCount }}
-            />
-          </EuiText>
-          <EuiHorizontalRule margin="xs" />
-        </>
-      )}
-      {renderTableOrEmptyState}
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </ManagementPageView>
+            </EuiText>
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
+        {renderTableOrEmptyState}
+        <SpyRoute pageName={SecurityPageName.administration} />
+      </EuiPanel>
+    </WrapperPage>
   );
 };

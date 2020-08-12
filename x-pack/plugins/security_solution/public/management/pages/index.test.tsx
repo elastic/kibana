@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { ManagementContainer } from './index';
+import '../../common/mock/match_media.ts';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
