@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
 import { Operation, DataType, FramePublicAPI, TableSuggestionColumn } from '../types';
@@ -321,6 +322,29 @@ describe('Datatable Visualization', () => {
             columns: ['b', 'c'],
           },
         ],
+      });
+    });
+  });
+
+  describe('#toExpression', () => {
+    it('reorders the rendered colums based on the order from the datasource', () => {
+      const datasource = createMockDatasource('test');
+      const layer = { layerId: 'a', columns: ['b', 'c'] };
+      const frame = mockFrame();
+      frame.datasourceLayers = { a: datasource.publicAPIMock };
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'c' }, { columnId: 'b' }]);
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        label: 'label',
+      });
+
+      const expression = datatableVisualization.toExpression({ layers: [layer] }, frame);
+      const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
+
+      expect(tableArgs).toHaveLength(1);
+      expect(tableArgs[0].arguments).toEqual({
+        columnIds: ['c', 'b'],
       });
     });
   });

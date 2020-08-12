@@ -188,7 +188,10 @@ export const datatableVisualization: Visualization<
   toExpression(state, frame) {
     const layer = state.layers[0];
     const datasource = frame.datasourceLayers[layer.layerId];
-    const operations = layer.columns
+    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    // When we add a column it could be empty, and therefore have no order
+    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+    const operations = sortedColumns
       .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
