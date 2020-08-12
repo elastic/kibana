@@ -22,11 +22,7 @@ import { serialize } from '../../serialize';
 
 import { Tabs, Tab, OutputTab, DocumentsTab } from './flyout_tabs';
 
-export interface Props {
-  children: (openFlyout: () => void) => React.ReactNode;
-}
-
-export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const FlyoutProvider: React.FunctionComponent<Props> = () => {
   const {
     state: { processors },
     api,
@@ -37,8 +33,6 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
   const { testConfig } = useTestConfigContext();
   const { documents: cachedDocuments, verbose: cachedVerbose } = testConfig;
-
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const initialSelectedTab = cachedDocuments ? 'output' : 'documents';
   const [selectedTab, setSelectedTab] = useState<Tab>(initialSelectedTab);
@@ -83,19 +77,19 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
   );
 
   useEffect(() => {
-    if (isFlyoutVisible === false && cachedDocuments) {
+    if (cachedDocuments) {
       setShouldExecuteImmediately(true);
     }
-  }, [isFlyoutVisible, cachedDocuments]);
+  }, [cachedDocuments]);
 
   useEffect(() => {
     // If the user has already tested the pipeline once,
     // use the cached test config and automatically execute the pipeline
-    if (isFlyoutVisible && shouldExecuteImmediately && cachedDocuments) {
+    if (shouldExecuteImmediately && cachedDocuments) {
       setShouldExecuteImmediately(false);
       handleExecute(cachedDocuments!, cachedVerbose);
     }
-  }, [handleExecute, cachedDocuments, cachedVerbose, isFlyoutVisible, shouldExecuteImmediately]);
+  }, [handleExecute, cachedDocuments, cachedVerbose, shouldExecuteImmediately]);
 
   let tabContent;
 
@@ -114,58 +108,48 @@ export const FlyoutProvider: React.FunctionComponent<Props> = ({ children }) => 
 
   return (
     <>
-      {children(() => setIsFlyoutVisible(true))}
-
-      {isFlyoutVisible && (
-        <EuiFlyout
-          maxWidth={550}
-          onClose={() => setIsFlyoutVisible(false)}
-          data-test-subj="testPipelineFlyout"
-        >
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2 data-test-subj="title">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.testPipelineFlyout.title"
-                  defaultMessage="Test pipeline"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-
-          <EuiFlyoutBody>
-            <Tabs
-              onTabChange={setSelectedTab}
-              selectedTab={selectedTab}
-              getIsDisabled={(tabId) => !executeOutput && tabId === 'output'}
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2 data-test-subj="title">
+            <FormattedMessage
+              id="xpack.ingestPipelines.testPipelineFlyout.title"
+              defaultMessage="Test pipeline"
             />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
 
-            <EuiSpacer />
+      <EuiFlyoutBody>
+        <Tabs
+          onTabChange={setSelectedTab}
+          selectedTab={selectedTab}
+          getIsDisabled={(tabId) => !executeOutput && tabId === 'output'}
+        />
 
-            {/* Execute error */}
-            {executeError ? (
-              <>
-                <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"
-                      defaultMessage="Unable to execute pipeline"
-                    />
-                  }
-                  color="danger"
-                  iconType="alert"
-                >
-                  <p>{executeError.message}</p>
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
+        <EuiSpacer />
 
-            {/* Documents or output tab content */}
-            {tabContent}
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
+        {/* Execute error */}
+        {executeError ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.testPipelineFlyout.executePipelineError"
+                  defaultMessage="Unable to execute pipeline"
+                />
+              }
+              color="danger"
+              iconType="alert"
+            >
+              <p>{executeError.message}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+
+        {/* Documents or output tab content */}
+        {tabContent}
+      </EuiFlyoutBody>
     </>
   );
 };
