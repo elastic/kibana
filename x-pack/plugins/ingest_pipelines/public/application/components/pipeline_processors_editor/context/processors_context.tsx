@@ -42,7 +42,7 @@ import { OnActionHandler } from '../components/processors_tree';
 import {
   ProcessorRemoveModal,
   PipelineProcessorsItemTooltip,
-  ProcessorSettingsForm,
+  ManageProcessorForm,
   OnSubmitHandler,
 } from '../components';
 
@@ -148,7 +148,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             },
           });
           break;
-        case 'editingProcessor':
+        case 'managingProcessor':
           processorsDispatch({
             type: 'updateProcessor',
             payload: {
@@ -229,10 +229,10 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         />
       )}
 
-      {mode.id === 'editingProcessor' || mode.id === 'creatingProcessor' ? (
-        <ProcessorSettingsForm
+      {mode.id === 'managingProcessor' || mode.id === 'creatingProcessor' ? (
+        <ManageProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
-          processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
+          processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
