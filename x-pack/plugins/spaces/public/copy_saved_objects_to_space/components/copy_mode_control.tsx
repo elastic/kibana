@@ -5,7 +5,14 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { EuiRadioGroup, EuiText, EuiSwitchEvent, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormFieldset,
+  EuiTitle,
+  EuiCheckableCard,
+  EuiRadioGroup,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface CopyModeControlProps {
@@ -22,11 +29,11 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
 
-  const disabledOption = {
+  const createNewCopiesDisabled = {
     id: 'createNewCopiesDisabled',
     title: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledTitle',
-      { defaultMessage: 'Check for conflicts' }
+      { defaultMessage: 'Check for existing objects' }
     ),
     text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
@@ -36,25 +43,59 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
       }
     ),
   };
-  const enabledOption = {
+  const createNewCopiesEnabled = {
     id: 'createNewCopiesEnabled',
     title: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledTitle',
-      { defaultMessage: 'Add as copies' }
+      { defaultMessage: 'Create new objects with random IDs' }
     ),
     text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
       { defaultMessage: 'All copied objects will be created with new random IDs.' }
     ),
   };
-  const createLabel = ({ title, text }: { title: string; text: string }) => (
+  const overwriteEnabled = {
+    id: 'overwriteEnabled',
+    label: i18n.translate(
+      'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.enabledLabel',
+      { defaultMessage: 'Automatically try to overwrite conflicts' }
+    ),
+  };
+  const overwriteDisabled = {
+    id: 'overwriteDisabled',
+    label: i18n.translate(
+      'xpack.spaces.management.copyToSpace.copyModeControl.overwrite.disabledLabel',
+      { defaultMessage: 'Request action when conflict occurs' }
+    ),
+  };
+  const includeRelated = {
+    id: 'includeRelated',
+    title: i18n.translate(
+      'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.title',
+      { defaultMessage: 'Include related saved objects' }
+    ),
+    text: i18n.translate(
+      'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
+      {
+        defaultMessage:
+          'This will copy any other objects this has references to -- for example, a dashboard may have references to multiple visualizations.',
+      }
+    ),
+  };
+  const formTitle = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.formTitle',
+    { defaultMessage: 'Copy options' }
+  );
+
+  const createLabel = ({ title, text }: { title: string; text: string }, subduedText = true) => (
     <Fragment>
       <EuiText>{title}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiText color="subdued">{text}</EuiText>
+      <EuiText color={subduedText ? 'subdued' : undefined} size="s">
+        {text}
+      </EuiText>
     </Fragment>
   );
-
   const onChange = (partial: Partial<CopyMode>) => {
     if (partial.createNewCopies !== undefined) {
       setCreateNewCopies(partial.createNewCopies);
@@ -64,39 +105,50 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
     updateSelection({ createNewCopies, overwrite, ...partial });
   };
 
-  const switchLabel = i18n.translate(
-    'xpack.spaces.management.copyToSpace.copyModeControl.overwriteSwitch',
-    { defaultMessage: 'Automatically try to overwrite conflicts' }
-  );
-
   return (
-    <EuiRadioGroup
-      options={[
-        {
-          id: disabledOption.id,
-          label: (
-            <Fragment>
-              {createLabel(disabledOption)}
-              <EuiSpacer size="xs" />
-              <EuiSwitch
-                label={switchLabel}
-                compressed={true}
-                checked={overwrite}
-                disabled={createNewCopies}
-                onChange={({ target: { checked } }: EuiSwitchEvent) =>
-                  onChange({ overwrite: checked })
-                }
-                data-test-subj={'cts-copy-mode-overwrite-switch'}
-              />
-              <EuiSpacer size="m" />
-            </Fragment>
-          ),
-        },
-        { id: enabledOption.id, label: createLabel(enabledOption) },
-      ]}
-      idSelected={createNewCopies ? enabledOption.id : disabledOption.id}
-      onChange={(id: string) => onChange({ createNewCopies: id === enabledOption.id })}
-      data-test-subj={'cts-copy-mode-radio'}
-    />
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiTitle size="xs">
+            <span>{formTitle}</span>
+          </EuiTitle>
+        ),
+      }}
+    >
+      <EuiCheckableCard
+        id={createNewCopiesDisabled.id}
+        label={createLabel(createNewCopiesDisabled)}
+        checked={!createNewCopies}
+        onChange={() => onChange({ createNewCopies: false })}
+      >
+        <EuiRadioGroup
+          options={[overwriteEnabled, overwriteDisabled]}
+          idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
+          onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
+          disabled={createNewCopies}
+          data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
+        />
+      </EuiCheckableCard>
+
+      <EuiSpacer size="s" />
+
+      <EuiCheckableCard
+        id={createNewCopiesEnabled.id}
+        label={createLabel(createNewCopiesEnabled)}
+        checked={createNewCopies}
+        onChange={() => onChange({ createNewCopies: true })}
+      />
+
+      <EuiSpacer size="s" />
+
+      <EuiCheckableCard
+        id={includeRelated.id}
+        label={createLabel(includeRelated, false)}
+        checkableType="checkbox"
+        checked={true}
+        onChange={() => {}} // noop
+        disabled
+      />
+    </EuiFormFieldset>
   );
 };

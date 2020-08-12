@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CopyOptions } from '../types';
 import { Space } from '../../../common/model/space';
@@ -34,25 +34,11 @@ export const CopyToSpaceForm = (props: Props) => {
 
       <EuiSpacer />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.spaces.management.copyToSpace.includeRelatedFormLabel"
-            defaultMessage="Include related saved objects"
-          />
-        }
-        checked={true}
-        disabled={true}
-        onChange={() => {}} // noop
-      />
-
-      <EuiSpacer />
-
       <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.spaces.management.copyToSpace.selectSpacesLabel"
-            defaultMessage="Select space(s)"
+            defaultMessage="Select space(s):"
           />
         }
         fullWidth

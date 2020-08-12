@@ -17957,7 +17957,6 @@
     "xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount": "错误",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount": "待处理",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.successCount": "已复制",
-    "xpack.spaces.management.copyToSpaceFlyoutHeader": "将已保存对象复制到工作区",
     "xpack.spaces.management.createSpaceBreadcrumb": "创建",
     "xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel": "颜色",
     "xpack.spaces.management.customizeSpaceAvatar.imageUrl": "定制图像",

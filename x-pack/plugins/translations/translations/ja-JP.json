@@ -17950,7 +17950,6 @@
     "xpack.spaces.management.copyToSpaceFlyoutFooter.errorCount": "エラー",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.pendingCount": "保留中",
     "xpack.spaces.management.copyToSpaceFlyoutFooter.successCount": "コピー完了",
-    "xpack.spaces.management.copyToSpaceFlyoutHeader": "保存されたオブジェクトのスペースへのコピー",
     "xpack.spaces.management.createSpaceBreadcrumb": "作成",
     "xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel": "色",
     "xpack.spaces.management.customizeSpaceAvatar.imageUrl": "カスタム画像",

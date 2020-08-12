@@ -37,12 +37,12 @@ const renderCopyOptions = ({ createNewCopies, overwrite, includeRelated }: CopyO
   const createNewCopiesLabel = createNewCopies ? (
     <FormattedMessage
       id="xpack.spaces.management.copyToSpace.createNewCopiesLabel"
-      defaultMessage="Add as copies"
+      defaultMessage="Create new objects with random IDs"
     />
   ) : (
     <FormattedMessage
       id="xpack.spaces.management.copyToSpace.dontCreateNewCopiesLabel"
-      defaultMessage="Check for conflicts"
+      defaultMessage="Check for existing objects"
     />
   );
   const overwriteLabel = overwrite ? (

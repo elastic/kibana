@@ -245,7 +245,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
               <h2>
                 <FormattedMessage
                   id="xpack.spaces.management.copyToSpaceFlyoutHeader"
-                  defaultMessage="Copy saved object to space"
+                  defaultMessage="Copy to space"
                 />
               </h2>
             </EuiTitle>
