@@ -19,9 +19,11 @@ import {
 } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 interface SetupDependencies {
   data: DataPluginSetup;
+  features: FeaturesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -34,6 +36,32 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
 
   public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
+
+    deps.features.registerFeature({
+      id: 'backgroundSearch',
+      name: 'Background Search',
+	  app: [],
+      privileges: {
+        all: {
+          app: [],
+          api: [],
+          ui: ['runBeyondTimeout'],
+          savedObject: {
+            all: ['background-session'],
+            read: [],
+          },
+        },
+        read: {
+          app: [],
+          api: [],
+          ui: [],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
+      },
+    });
 
     deps.data.search.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
