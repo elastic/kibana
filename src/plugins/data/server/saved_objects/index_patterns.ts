@@ -45,6 +45,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {
       title: { type: 'text' },
+      type: { type: 'keyword' },
     },
   },
   migrations: indexPatternSavedObjectTypeMigrations as any,
