@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, keyBy, pick } from 'lodash/fp';
+import { isEmpty, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { isUndefined } from 'lodash';
