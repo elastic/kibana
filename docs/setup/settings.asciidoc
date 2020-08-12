@@ -304,7 +304,7 @@ list of timezones, refer to https://en.wikipedia.org/wiki/List_of_tz_database_ti
 
 | [[logging-verbose]] `logging.verbose:` {ece-icon}
  | Set to `true` to log all events, including system usage information and all
-requests. *Default: `false`*
+requests. Requires `logging.silent` and `logging.quiet` set to `false`. *Default: `false`*
 
 | `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
