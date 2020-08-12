@@ -9,7 +9,6 @@ import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@elastic/elasticsearch';
-import { AsyncSearchGet } from '@elastic/elasticsearch/api/requestParams';
 import {
   SharedGlobalConfig,
   RequestHandlerContext,
@@ -108,20 +107,16 @@ async function asyncSearch(
 
   let esResponse;
   if (request.id) {
-    esResponse = await caller.asyncSearch.get(
-      toSnakeCase({
-        id: request.id,
-        ...asyncOptions,
-      }) as AsyncSearchGet
-    );
+    esResponse = await caller.asyncSearch.get({
+      id: request.id,
+      ...asyncOptions,
+    });
   } else {
-    esResponse = await caller.asyncSearch.submit(
-      toSnakeCase({
-        ...asyncOptions,
-        ...(batchedReduceSize && { batchedReduceSize }),
-        ...queryParams,
-      })
-    );
+    esResponse = await caller.asyncSearch.submit({
+      ...asyncOptions,
+      ...(batchedReduceSize && { batchedReduceSize }),
+      ...queryParams,
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
