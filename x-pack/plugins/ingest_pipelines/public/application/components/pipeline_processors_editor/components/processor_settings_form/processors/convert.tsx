@@ -76,6 +76,13 @@ export const Convert: FunctionComponent = () => {
                 ),
               },
               {
+                value: 'long',
+                text: i18n.translate(
+                  'xpack.ingestPipelines.pipelineEditor.convertForm.longOption',
+                  { defaultMessage: 'Long' }
+                ),
+              },
+              {
                 value: 'float',
                 text: i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.convertForm.floatOption',
