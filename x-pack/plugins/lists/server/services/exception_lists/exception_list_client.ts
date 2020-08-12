@@ -50,6 +50,8 @@ import { createEndpointList } from './create_endpoint_list';
 export class ExceptionListClient {
   private readonly user: string;
 
+  private trustedAppsListCreated: boolean = false;
+
   private readonly savedObjectsClient: SavedObjectsClientContract;
 
   constructor({ user, savedObjectsClient }: ConstructorOptions) {
@@ -87,6 +89,24 @@ export class ExceptionListClient {
       savedObjectsClient,
       user,
       version: 1,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
+    if (this.trustedAppsListCreated) {
+      return null;
+    }
+    const { savedObjectsClient, user } = this;
+    return createEndpointList({
+      savedObjectsClient,
+      user,
+      version: 1,
+    }).then((response) => {
+      this.trustedAppsListCreated = true;
+      return response;
     });
   };
 
