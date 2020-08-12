@@ -137,11 +137,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'client_side_monitoring',
+      id: 'clientSideMonitoring',
       title: 'Client Side Monitoring',
       order: 8500,
       euiIconType: 'apmApp',
-      appRoute: '/app/client-side-monitoring',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
 
