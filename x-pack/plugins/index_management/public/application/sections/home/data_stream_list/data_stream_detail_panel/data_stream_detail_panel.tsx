@@ -105,7 +105,14 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       />
     );
   } else if (dataStream) {
-    const { health, indices, timeStampField, generation } = dataStream;
+    const {
+      health,
+      indices,
+      timeStampField,
+      generation,
+      indexTemplateName,
+      ilmPolicyName,
+    } = dataStream;
     const details = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
@@ -142,6 +149,29 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Cumulative count of backing indices created for the data stream',
         }),
         content: generation,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle', {
+          defaultMessage: 'Index template',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateToolTip', {
+          defaultMessage:
+            'The index template that configured this data stream and configures its backing indices',
+        }),
+        content: indexTemplateName,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
+          defaultMessage: 'Index lifecycle policy',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
+          defaultMessage: `The index lifecycle policy that manages this data stream's data`,
+        }),
+        content:
+          ilmPolicyName ??
+          i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
+            defaultMessage: `-`,
+          }),
       },
     ];
 
