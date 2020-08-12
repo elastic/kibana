@@ -51,6 +51,9 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  /**
+   * @internal
+   */
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 

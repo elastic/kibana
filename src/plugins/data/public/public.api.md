@@ -224,7 +224,7 @@ export type CustomFilter = Filter & {
 export interface DataPublicPluginSetup {
     // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
     //
-    // (undocumented)
+    // @internal (undocumented)
     __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
@@ -1718,15 +1718,18 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
+    // @internal
     protected abortController: AbortController;
-    // (undocumented)
+    // @internal (undocumented)
     protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
-    getPendingCount$: () => Observable<number>;
-    // (undocumented)
+    getPendingCount$(): Observable<number>;
+    // @internal (undocumented)
     protected hideToast: () => void;
+    // @internal
     protected longRunningToast?: Toast;
+    // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
@@ -1738,8 +1741,9 @@ export class SearchInterceptor {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
-    // (undocumented)
+    // @internal (undocumented)
     protected showToast: () => void;
+    // @internal
     protected timeoutSubscriptions: Subscription;
 }
 
@@ -1985,9 +1989,9 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:393:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:396:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:45:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:59:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:60:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:68:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:62:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:71:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

@@ -40,24 +40,31 @@ export interface SearchInterceptorDeps {
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
+   *  @internal
    */
   protected abortController = new AbortController();
 
   /**
    * Observable that emits when the number of pending requests changes.
+   * @internal
    */
   protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
+   * @internal
    */
   protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
    * The current long-running toast (if there is one).
+   * @internal
    */
   protected longRunningToast?: Toast;
 
+  /**
+   * @internal
+   */
   protected application!: CoreStart['application'];
 
   /**
@@ -88,9 +95,9 @@ export class SearchInterceptor {
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
    */
-  public getPendingCount$ = () => {
+  public getPendingCount$() {
     return this.pendingCount$.asObservable();
-  };
+  }
 
   protected runSearch(
     request: IEsSearchRequest,
@@ -174,6 +181,9 @@ export class SearchInterceptor {
     };
   }
 
+  /**
+   *  @internal
+   */
   protected showToast = () => {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
@@ -189,6 +199,9 @@ export class SearchInterceptor {
     );
   };
 
+  /**
+   *  @internal
+   */
   protected hideToast = () => {
     if (this.longRunningToast) {
       this.deps.toasts.remove(this.longRunningToast);

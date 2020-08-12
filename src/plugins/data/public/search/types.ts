@@ -64,6 +64,9 @@ export interface SearchEnhancements {
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
   usageCollector?: SearchUsageCollector;
+  /**
+   * @internal
+   */
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
@@ -74,6 +77,10 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
+  /**
+   * @deprecated
+   * @internal
+   */
   __LEGACY: ISearchStartLegacy;
 }
 
