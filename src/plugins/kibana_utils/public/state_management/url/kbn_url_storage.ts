@@ -84,7 +84,7 @@ export function getStateFromKbnUrl<State>(
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery: boolean } = {
+  { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
     useHash: false,
     storeInHashQuery: true,
   },
