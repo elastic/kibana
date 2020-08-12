@@ -18,7 +18,7 @@ import {
   Dissect,
   DotExpander,
   Drop,
-} from '../processor_settings_form/processors';
+} from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
 // import { Gsub } from './processors/gsub';
