@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-duplicate-imports */
+
+/* eslint-disable react/display-name */
+
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import {
   EuiI18nNumber,
   EuiSelectable,
@@ -15,6 +19,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { EuiSelectableOption } from '@elastic/eui';
 import { Matrix3 } from '../types';
 
 /**
@@ -59,21 +64,21 @@ const OptionList = React.memo(
     subMenuOptions: ResolverSubmenuOptionList;
     isLoading: boolean;
   }) => {
-    const [options, setOptions] = useState(() =>
+    const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
       typeof subMenuOptions !== 'object'
         ? []
-        : subMenuOptions.map((opt: ResolverSubmenuOption): {
-            label: string;
-            prepend?: ReactNode;
-          } => {
-            return opt.prefix
+        : subMenuOptions.map((option: ResolverSubmenuOption) => {
+            const dataTestSubj = 'resolver:map:node-submenu-item';
+            return option.prefix
               ? {
-                  label: opt.optionTitle,
-                  prepend: <span>{opt.prefix} </span>,
+                  label: option.optionTitle,
+                  prepend: <span>{option.prefix} </span>,
+                  'data-test-subj': dataTestSubj,
                 }
               : {
-                  label: opt.optionTitle,
+                  label: option.optionTitle,
                   prepend: <span />,
+                  'data-test-subj': dataTestSubj,
                 };
           })
     );
@@ -88,11 +93,10 @@ const OptionList = React.memo(
       }, {});
     }, [subMenuOptions]);
 
-    type ChangeOptions = Array<{ label: string; prepend?: ReactNode; checked?: string }>;
     const selectableProps = useMemo(() => {
       return {
         listProps: { showIcons: true, bordered: true },
-        onChange: (newOptions: ChangeOptions) => {
+        onChange: (newOptions: EuiSelectableOption[]) => {
           const selectedOption = newOptions.find((opt) => opt.checked === 'on');
           if (selectedOption) {
             const { label } = selectedOption;
@@ -118,8 +122,6 @@ const OptionList = React.memo(
     );
   }
 );
-
-OptionList.displayName = 'OptionList';
 
 /**
  * A Submenu to be displayed in one of two forms:
@@ -233,6 +235,7 @@ const NodeSubMenuComponents = React.memo(
         iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
         iconSide="right"
         tabIndex={-1}
+        data-test-subj="resolver:submenu:button"
       >
         {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>
@@ -257,8 +260,6 @@ const NodeSubMenuComponents = React.memo(
     );
   }
 );
-
-NodeSubMenuComponents.displayName = 'NodeSubMenu';
 
 export const NodeSubMenu = styled(NodeSubMenuComponents)`
   margin: 2px 0 0 0;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
 
@@ -144,7 +144,7 @@ describe('ML - validateTimeRange', () => {
   });
 
   it('invalid time field', () => {
-    const mockSearchResponseInvalid = _.cloneDeep(mockSearchResponse);
+    const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
     return validateTimeRange(

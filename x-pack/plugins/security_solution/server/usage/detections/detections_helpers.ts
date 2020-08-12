@@ -15,6 +15,7 @@ import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
 import { DetectionRulesUsage, MlJobsUsage } from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
+import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
 interface DetectionsMetric {
   isElastic: boolean;
@@ -182,11 +183,9 @@ export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJ
         .modulesProvider(internalMlClient, fakeRequest, fakeSOClient)
         .listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await ml
-        .jobServiceProvider(internalMlClient, fakeRequest)
-        .jobsSummary(['siem', 'security']);
+      const jobs = await ml.jobServiceProvider(internalMlClient, fakeRequest).jobsSummary();
 
-      jobsUsage = jobs.reduce((usage, job) => {
+      jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
         const isEnabled = isJobStarted(job.jobState, job.datafeedState);
 

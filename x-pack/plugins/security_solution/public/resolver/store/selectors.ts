@@ -9,8 +9,8 @@ import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState, IsometricTaxiLayout } from '../types';
-import { uniquePidForProcess } from '../models/process_event';
 import { ResolverEvent, ResolverNodeStats } from '../../../common/endpoint/types';
+import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -271,9 +271,14 @@ export const ariaFlowtoNodeID: (
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
 
       // get a `Set` containing their node IDs
-      const nodesVisibleAtTime: Set<string> = new Set(
-        [...processNodePositions.keys()].map(uniquePidForProcess)
-      );
+      const nodesVisibleAtTime: Set<string> = new Set();
+      // NB: in practice, any event that has been graphed is guaranteed to have an entity_id
+      for (const visibleEvent of processNodePositions.keys()) {
+        const nodeID = entityIDSafeVersion(visibleEvent);
+        if (nodeID !== undefined) {
+          nodesVisibleAtTime.add(nodeID);
+        }
+      }
 
       // return the ID of `nodeID`'s following sibling, if it is visible
       return (nodeID: string): string | null => {

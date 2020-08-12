@@ -11,12 +11,14 @@ import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 
 const mockIndices = {
+  /* eslint-disable @typescript-eslint/naming-convention */
   'apm_oss.sourcemapIndices': 'myIndex',
   'apm_oss.errorIndices': 'myIndex',
   'apm_oss.onboardingIndices': 'myIndex',
   'apm_oss.spanIndices': 'myIndex',
   'apm_oss.transactionIndices': 'myIndex',
   'apm_oss.metricsIndices': 'myIndex',
+  /* eslint-enable @typescript-eslint/naming-convention */
   apmAgentConfigurationIndex: 'myIndex',
   apmCustomLinkIndex: 'myIndex',
 };
