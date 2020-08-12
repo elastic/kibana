@@ -424,7 +424,7 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction(core);
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
     }

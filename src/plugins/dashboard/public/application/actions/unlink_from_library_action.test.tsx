@@ -18,7 +18,7 @@
  */
 import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+import { getSampleDashboardInput } from '../test_helpers';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
