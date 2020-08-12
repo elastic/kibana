@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { VegaParser } from './vega_parser';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
@@ -59,26 +60,29 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, true, {
       config: {
         axis: {
-          domainColor: '#eef0f3',
-          gridColor: '#eef0f3',
-          tickColor: '#eef0f3',
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
         mark: { color: '#54B399' },
         style: {
           'group-title': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-label': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-title': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkShade,
           },
         },
         title: {
-          color: '#343741',
+          color: euiThemeVars.euiColorDarkestShade,
         },
       },
     })
@@ -89,9 +93,9 @@ describe(`VegaParser._setDefaultColors`, () => {
     check({}, false, {
       config: {
         axis: {
-          domainColor: '#eef0f3',
-          gridColor: '#eef0f3',
-          tickColor: '#eef0f3',
+          domainColor: euiThemeVars.euiColorChartLines,
+          gridColor: euiThemeVars.euiColorChartLines,
+          tickColor: euiThemeVars.euiColorChartLines,
         },
         background: 'transparent',
         range: { category: { scheme: 'elastic' } },
@@ -106,17 +110,20 @@ describe(`VegaParser._setDefaultColors`, () => {
         trail: { fill: '#54B399' },
         style: {
           'group-title': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-label': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-title': {
-            fill: '#69707d',
+            fill: euiThemeVars.euiColorDarkShade,
+          },
+          'group-subtitle': {
+            fill: euiThemeVars.euiColorDarkShade,
           },
         },
         title: {
-          color: '#343741',
+          color: euiThemeVars.euiColorDarkestShade,
         },
       },
     })

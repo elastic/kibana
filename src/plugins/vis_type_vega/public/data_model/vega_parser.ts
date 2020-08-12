@@ -660,6 +660,13 @@ export class VegaParser {
     this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
     this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-title', 'fill');
     this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'group-title', 'fill');
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkShade,
+      'config',
+      'style',
+      'group-subtitle',
+      'fill'
+    );
     this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'tickColor');
     this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'domainColor');
     this._setDefaultValue(euiThemeVars.euiColorChartLines, 'config', 'axis', 'gridColor');
