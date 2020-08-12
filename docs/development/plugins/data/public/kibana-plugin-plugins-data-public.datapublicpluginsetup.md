@@ -14,8 +14,8 @@ export interface DataPublicPluginSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [\_\_enhance](./kibana-plugin-plugins-data-public.datapublicpluginsetup.__enhance.md) | <code>(enhancements: DataPublicPluginEnhancements) =&gt; void</code> |  |
 |  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginsetup.autocomplete.md) | <code>AutocompleteSetup</code> |  |
-|  [enhance](./kibana-plugin-plugins-data-public.datapublicpluginsetup.enhance.md) | <code>(enhancements: DataPublicPluginEnhancements) =&gt; void</code> |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginsetup.fieldformats.md) | <code>FieldFormatsSetup</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.datapublicpluginsetup.query.md) | <code>QuerySetup</code> |  |
 |  [search](./kibana-plugin-plugins-data-public.datapublicpluginsetup.search.md) | <code>ISearchSetup</code> |  |

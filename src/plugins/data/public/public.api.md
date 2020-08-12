@@ -222,14 +222,14 @@ export type CustomFilter = Filter & {
 //
 // @public (undocumented)
 export interface DataPublicPluginSetup {
+    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     autocomplete: AutocompleteSetup;
-    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "FieldFormatsSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1728,7 +1728,6 @@ export class SearchInterceptor {
     protected hideToast: () => void;
     protected longRunningToast?: Toast;
     protected pendingCount$: BehaviorSubject<number>;
-    protected pendingCount: number;
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
     // (undocumented)

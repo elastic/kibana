@@ -26,7 +26,6 @@ export declare class SearchInterceptor
 |  [getPendingCount$](./kibana-plugin-plugins-data-public.searchinterceptor.getpendingcount_.md) |  | <code>() =&gt; Observable&lt;number&gt;</code> | Returns an <code>Observable</code> over the current number of pending searches. This could mean that one of the search requests is still in flight, or that it has only received partial responses. |
 |  [hideToast](./kibana-plugin-plugins-data-public.searchinterceptor.hidetoast.md) |  | <code>() =&gt; void</code> |  |
 |  [longRunningToast](./kibana-plugin-plugins-data-public.searchinterceptor.longrunningtoast.md) |  | <code>Toast</code> | The current long-running toast (if there is one). |
-|  [pendingCount](./kibana-plugin-plugins-data-public.searchinterceptor.pendingcount.md) |  | <code>number</code> | The number of pending search requests. |
 |  [pendingCount$](./kibana-plugin-plugins-data-public.searchinterceptor.pendingcount_.md) |  | <code>BehaviorSubject&lt;number&gt;</code> | Observable that emits when the number of pending requests changes. |
 |  [requestTimeout](./kibana-plugin-plugins-data-public.searchinterceptor.requesttimeout.md) |  | <code>number &#124; undefined</code> |  |
 |  [showToast](./kibana-plugin-plugins-data-public.searchinterceptor.showtoast.md) |  | <code>() =&gt; void</code> |  |
@@ -37,6 +36,6 @@ export declare class SearchInterceptor
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [runSearch(request, signal, strategy)](./kibana-plugin-plugins-data-public.searchinterceptor.runsearch.md) |  |  |
-|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates the <code>pendingCount</code> when the request is started/finalized. |
+|  [search(request, options)](./kibana-plugin-plugins-data-public.searchinterceptor.search.md) |  | Searches using the given <code>search</code> method. Overrides the <code>AbortSignal</code> with one that will abort either when <code>cancelPending</code> is called, when the request times out, or when the original <code>AbortSignal</code> is aborted. Updates <code>pendingCount$</code> when the request is started/finalized. |
 |  [setupTimers(options)](./kibana-plugin-plugins-data-public.searchinterceptor.setuptimers.md) |  |  |
 
