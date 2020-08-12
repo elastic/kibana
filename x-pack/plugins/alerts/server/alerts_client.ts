@@ -199,9 +199,10 @@ export class AlertsClient {
     this.validateActions(alertType, data.actions);
 
     const { references, actions } = await this.denormalizeActions(data.actions);
+    const encryptedAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
     const rawAlert: RawAlert = {
       ...data,
-      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
+      ...encryptedAttributes,
       actions,
       createdBy: username,
       updatedBy: username,
@@ -234,8 +235,8 @@ export class AlertsClient {
         'alert',
         createdAlert.id,
         {
-          ...rawAlert,
           ...createdAlert.attributes,
+          ...encryptedAttributes,
           scheduledTaskId: scheduledTask.id,
         },
         {

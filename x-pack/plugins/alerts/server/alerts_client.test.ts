@@ -244,27 +244,33 @@ describe('create()', () => {
 
   test('creates an alert', async () => {
     const data = getMockData();
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        createdAt: '2019-02-12T21:01:22.479Z',
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
+      attributes: createdAttributes,
       references: [
         {
           name: 'action_0',
@@ -290,7 +296,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
-        actions: [],
+        ...createdAttributes,
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -316,8 +322,14 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "consumer": "bar",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "createdBy": "elastic",
+        "enabled": true,
         "id": "1",
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
         "params": Object {
           "bar": true,
         },
@@ -325,7 +337,12 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
         "updatedAt": 2019-02-12T21:01:22.479Z,
+        "updatedBy": "elastic",
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -414,7 +431,15 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
+        "createdBy": "elastic",
+        "enabled": true,
+        "muteAll": false,
+        "mutedInstanceIds": Array [],
+        "name": "abc",
         "params": Object {
           "bar": true,
         },
@@ -422,6 +447,11 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "throttle": null,
+        "updatedBy": "elastic",
       }
     `);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
@@ -433,7 +463,6 @@ describe('create()', () => {
             "type": "action",
           },
         ],
-        "version": undefined,
       }
     `);
   });
@@ -1589,7 +1618,7 @@ describe('disable()', () => {
 describe('muteAll()', () => {
   test('mutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1635,7 +1664,7 @@ describe('muteAll()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1690,7 +1719,7 @@ describe('muteAll()', () => {
 describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1736,7 +1765,7 @@ describe('unmuteAll()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1791,7 +1820,7 @@ describe('unmuteAll()', () => {
 describe('muteInstance()', () => {
   test('mutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1825,7 +1854,7 @@ describe('muteInstance()', () => {
 
   test('skips muting when alert instance already muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1845,7 +1874,7 @@ describe('muteInstance()', () => {
 
   test('skips muting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1866,7 +1895,7 @@ describe('muteInstance()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {
@@ -1929,7 +1958,7 @@ describe('muteInstance()', () => {
 describe('unmuteInstance()', () => {
   test('unmutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1966,7 +1995,7 @@ describe('unmuteInstance()', () => {
 
   test('skips unmuting when alert instance not muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1986,7 +2015,7 @@ describe('unmuteInstance()', () => {
 
   test('skips unmuting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2007,7 +2036,7 @@ describe('unmuteInstance()', () => {
 
   describe('authorization', () => {
     beforeEach(() => {
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
         attributes: {

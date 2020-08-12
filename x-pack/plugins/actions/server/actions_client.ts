@@ -13,6 +13,7 @@ import {
 } from 'src/core/server';
 
 import { i18n } from '@kbn/i18n';
+import { omitBy, isUndefined } from 'lodash';
 import { ActionTypeRegistry } from './action_type_registry';
 import { validateConfig, validateSecrets, ActionExecutorContract } from './lib';
 import {
@@ -150,8 +151,10 @@ export class ActionsClient {
         'update'
       );
     }
-    const existingObject = await this.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-    const { actionTypeId } = existingObject.attributes;
+    const { attributes, references, version } = await this.unsecuredSavedObjectsClient.get<
+      RawAction
+    >('action', id);
+    const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
     const validatedActionTypeConfig = validateConfig(actionType, config);
@@ -163,16 +166,19 @@ export class ActionsClient {
       'action',
       id,
       {
-        ...existingObject.attributes,
+        ...attributes,
         actionTypeId,
         name,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
-      {
-        references: existingObject.references,
-        version: existingObject.version,
-      }
+      omitBy(
+        {
+          references,
+          version,
+        },
+        isUndefined
+      )
     );
 
     return {
