@@ -27,6 +27,7 @@ import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
 
 jest.mock('../../lib/fs');
+jest.mock('../../lib/get_build_number');
 
 const Fs = jest.requireMock('../../lib/fs');
 
