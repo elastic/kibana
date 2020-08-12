@@ -177,17 +177,13 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       onChange={async (selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
         const { url } = selected.find(({ checked }) => checked === 'on')!;
 
-        if (url.startsWith('https://')) {
-          // if absolute path
-          window.location.assign(url);
-        } else {
-          // else is relative path
+        if (url.startsWith('https://')) window.location.assign(url);
+        else {
           await navigateToUrl(url);
-          // a simplified "get first tabbale element" with likely subjects
           (document.activeElement as HTMLElement).blur();
           setTerm('');
           setSearchFocus(false);
-          searchRef.value = '';
+          if (searchRef) searchRef.value = '';
         }
       }}
     >
@@ -200,7 +196,6 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
             panelPaddingSize={'none'}
             hasArrow={false}
             panelRef={setPanelRef}
-            className="foo"
           >
             <div style={{ width: '600px' }}>{list}</div>
             <EuiPopoverFooter>
