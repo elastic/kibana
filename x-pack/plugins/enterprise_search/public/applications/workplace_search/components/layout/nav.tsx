@@ -26,7 +26,6 @@ export const WorkplaceSearchNav: React.FC = () => {
   const legacyUrl = (path: string) => `${enterpriseSearchUrl}/ws#${path}`;
 
   // TODO: icons
-  // TODO: do we need links to personal dashboard? eweb link? (prob ask bearwood)
   return (
     <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
       <SideNavLink to="/" isRoot>
