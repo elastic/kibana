@@ -46,20 +46,12 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const typeConfig: FieldConfig = {
+const typeConfig: FieldConfig<any, string> = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Processor',
   }),
-  deserializer: (value: string | undefined) => {
-    if (value) {
-      return [value];
-    }
-    return [];
-  },
-  serializer: (value: string[]) => {
-    return value[0];
-  },
+  deserializer: String,
   validations: [
     {
       validator: emptyField(
@@ -73,11 +65,11 @@ const typeConfig: FieldConfig = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   return (
-    <UseField<string[]> config={typeConfig} defaultValue={initialType} path="type">
+    <UseField<string> config={typeConfig} defaultValue={initialType} path="type">
       {(typeField) => {
         let selectedOptions: ProcessorTypeAndLabel[];
         if (typeField.value?.length) {
-          const [type] = typeField.value;
+          const type = typeField.value;
           const descriptor = getProcessorDescriptor(type);
           selectedOptions = descriptor
             ? [{ label: descriptor.label, value: type }]
@@ -103,9 +95,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
             return false;
           }
 
-          const newValue = [...(typeField.value as string[]), value];
-
-          typeField.setValue(newValue);
+          typeField.setValue(value);
         };
 
         return (
@@ -131,8 +121,9 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
               options={processorTypesAndLabels}
               selectedOptions={selectedOptions}
               onCreateOption={onCreateComboOption}
-              onChange={(options: EuiComboBoxOptionOption[]) => {
-                typeField.setValue(options.map(({ value }) => value));
+              onChange={(options: Array<EuiComboBoxOptionOption<string>>) => {
+                const [selection] = options;
+                typeField.setValue(selection?.value! ?? '');
               }}
               noSuggestions={false}
               singleSelection={{

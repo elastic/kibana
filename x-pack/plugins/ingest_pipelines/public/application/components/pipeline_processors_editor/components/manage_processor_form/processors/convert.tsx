@@ -48,9 +48,12 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldLabel', {
       defaultMessage: 'Target field (optional)',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldLabel', {
-      defaultMessage: 'The field to assign the converted value to.',
-    }),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
+      {
+        defaultMessage: 'The field to assign the converted value to.',
+      }
+    ),
   },
 };
 
@@ -59,7 +62,7 @@ export const Convert: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.convertForm.targetFieldHelpText',
+          'xpack.ingestPipelines.pipelineEditor.convertForm.fieldNameHelpText',
           { defaultMessage: 'The field whose value is to be converted.' }
         )}
       />

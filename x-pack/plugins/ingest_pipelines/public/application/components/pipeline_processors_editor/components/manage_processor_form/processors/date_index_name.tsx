@@ -117,7 +117,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.timezoneHelpText"
         defaultMessage="The timezone to use when parsing the date and when date math index supports resolves expressions into concrete index names. Default value is {timezone}."
         values={{ timezone: <EuiCode inline>{'UTC'}</EuiCode> }}
       />
@@ -134,7 +134,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText"
         defaultMessage="The locale to use when parsing the date from the document being preprocessed, relevant when parsing month names or week days. Default value is {locale}"
         values={{ locale: <EuiCode inline>{'ENGLISH'}</EuiCode> }}
       />

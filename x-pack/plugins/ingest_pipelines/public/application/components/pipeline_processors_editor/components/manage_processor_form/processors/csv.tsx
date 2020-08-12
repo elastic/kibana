@@ -139,10 +139,9 @@ export const CSV: FunctionComponent = () => {
   return (
     <>
       <FieldNameField
-        helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.convertForm.fieldNameHelpText',
-          { defaultMessage: 'The field to extract data from.' }
-        )}
+        helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.fieldNameHelpText', {
+          defaultMessage: 'The field to extract data from.',
+        })}
       />
 
       <UseField
