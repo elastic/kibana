@@ -27,7 +27,7 @@ const roundingRules = [
   [Infinity, d(1, 'year')],
 ];
 
-const revRoundingRules = roundingRules.slice(0).reverse();
+const revRoundingRules = [...roundingRules].reverse();
 
 type NumberOrDuration = number | Duration;
 
