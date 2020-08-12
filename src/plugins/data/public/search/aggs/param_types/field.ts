@@ -23,7 +23,7 @@ import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/comm
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { isNestedField, KBN_FIELD_TYPES } from '../../../../common';
-import { Field as IndexPatternField } from '../../../index_patterns';
+import { IndexPatternField } from '../../../index_patterns';
 
 const filterByType = propFilter('type');
 

@@ -16,7 +16,6 @@ export async function installILMPolicy(paths: string[], callCluster: CallESAsCur
       const { file } = Registry.pathParts(path);
       const name = file.substr(0, file.lastIndexOf('.'));
       try {
-        if (await policyExists(name, callCluster)) return;
         await callCluster('transport.request', {
           method: 'PUT',
           path: '/_ilm/policy/' + name,

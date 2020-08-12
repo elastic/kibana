@@ -11,12 +11,12 @@ import {
   EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import { FlexPage } from './page';
 
 interface LoadingPageProps {
-  message?: string | JSX.Element;
+  message?: ReactNode;
 }
 
 export const LoadingPage = ({ message }: LoadingPageProps) => (

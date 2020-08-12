@@ -29,6 +29,7 @@ import { VerifyExistingNodeBuilds } from './verify_existing_node_builds_task';
 jest.mock('./node_shasums');
 jest.mock('./node_download_info');
 jest.mock('../../lib/fs');
+jest.mock('../../lib/get_build_number');
 
 const { getNodeShasums } = jest.requireMock('./node_shasums');
 const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
