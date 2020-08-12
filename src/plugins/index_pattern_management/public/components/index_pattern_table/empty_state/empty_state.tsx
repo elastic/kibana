@@ -118,7 +118,7 @@ export const EmptyState = ({
         className="inpEmptyState"
         grow={false}
         horizontalPosition="center"
-        data-test-subj="emptyState"
+        data-test-subj="indexPatternEmptyState"
       >
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
