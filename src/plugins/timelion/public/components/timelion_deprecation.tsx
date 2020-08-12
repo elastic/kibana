@@ -29,7 +29,7 @@ export const TimelionDeprecation = ({ links }: DocLinksStart) => {
         title={
           <FormattedMessage
             id="timelion.deprecation.message"
-            defaultMessage="Timelion app is deprecated and will be removed on 8.0+. To check the actions you can take in order to move your existing worksheets to a dashboard click {timeLionDeprecationLink}."
+            defaultMessage="Deprecated since 7.0, Timelion app will be removed in 8.0. To move your existing worksheets to a dashboard click {timeLionDeprecationLink}."
             values={{
               timeLionDeprecationLink: (
                 <EuiLink href={timelionDeprecationLink} target="_blank" external>
@@ -40,7 +40,7 @@ export const TimelionDeprecation = ({ links }: DocLinksStart) => {
           />
         }
         color="warning"
-        iconType="bolt"
+        iconType="alert"
         size="s"
       />
       <EuiSpacer size="s" />
