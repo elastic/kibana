@@ -29,32 +29,39 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
         <h2>
           <FormattedMessage
             defaultMessage="You have data in Elasticsearch."
-            id="kbn.management.emptyIndexPatternPrompt.youHaveData"
+            id="indexPatternManagement.emptyIndexPatternPrompt.youHaveData"
             values={Object {}}
           />
           <br />
           <FormattedMessage
             defaultMessage="Now, create an index pattern."
-            id="kbn.management.emptyIndexPatternPrompt.nowCreate"
+            id="indexPatternManagement.emptyIndexPatternPrompt.nowCreate"
             values={Object {}}
           />
         </h2>
         <p>
           <FormattedMessage
             defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
-            id="kbn.management.emptyIndexPatternPrompt.indexPatternExplanation"
+            id="indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation"
             values={Object {}}
           />
         </p>
-        <InjectUICapabilities(CreateButtonComponent)
-          options={Array []}
+        <CreateButton
+          options={
+            Array [
+              Object {
+                "onClick": [Function],
+                "text": "default",
+              },
+            ]
+          }
         >
           <FormattedMessage
             defaultMessage="Create index pattern"
-            id="kbn.management.indexPatternTable.createBtn"
+            id="indexPatternManagement.indexPatternTable.createBtn"
             values={Object {}}
           />
-        </InjectUICapabilities(CreateButtonComponent)>
+        </CreateButton>
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -66,27 +73,23 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
     type="responsiveColumn"
   >
     <EuiDescriptionListTitle
-      style={
-        Object {
-          "width": "auto",
-        }
-      }
+      className="inpEmptyIndexPatternPrompt__title"
     >
       <FormattedMessage
         defaultMessage="Want to learn more?"
-        id="kbn.management.emptyIndexPatternPrompt.learnMore"
+        id="indexPatternManagement.emptyIndexPatternPrompt.learnMore"
         values={Object {}}
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
       <EuiLink
         external={true}
-        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html"
+        href="testUrl"
         target="_blank"
       >
         <FormattedMessage
           defaultMessage="Read documentation"
-          id="kbn.management.emptyIndexPatternPrompt.documentation"
+          id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
           values={Object {}}
         />
       </EuiLink>

@@ -24,7 +24,12 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 describe('EmptyIndexPatternPrompt', () => {
   it('should render normally', () => {
     const component = shallowWithI18nProvider(
-      <EmptyIndexPatternPrompt canSave creationOptions={[{ text: 'default', onClick: () => {} }]} />
+      <EmptyIndexPatternPrompt
+        canSave
+        creationOptions={[{ text: 'default', onClick: () => {} }]}
+        docLinksIndexPatternIntro={'testUrl'}
+        setBreadcrumbs={() => {}}
+      />
     );
 
     expect(component).toMatchSnapshot();

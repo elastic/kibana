@@ -204,7 +204,14 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         />
       );
     } else {
-      return <EmptyIndexPatternPrompt canSave={canSave} creationOptions={creationOptions} />;
+      return (
+        <EmptyIndexPatternPrompt
+          canSave={canSave}
+          creationOptions={creationOptions}
+          docLinksIndexPatternIntro={docLinks.links.indexPatterns.introduction}
+          setBreadcrumbs={setBreadcrumbs}
+        />
+      );
     }
   }
 

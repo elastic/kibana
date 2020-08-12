@@ -26,19 +26,24 @@ import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { getListBreadcrumbs } from '../../breadcrumbs';
-import { IndexPatternManagmentContext } from '../../../types';
-import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternCreationOption } from '../../types';
 import { CreateButton } from '../../create_button';
 import { Illustration } from './assets/index_pattern_illustration';
+import { ManagementAppMountParams } from '../../../../../management/public';
 
 interface Props {
   canSave: boolean;
   creationOptions: IndexPatternCreationOption[];
+  docLinksIndexPatternIntro: string;
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
-export const EmptyIndexPatternPrompt = ({ canSave, creationOptions }: Props) => {
-  const { setBreadcrumbs, docLinks } = useKibana<IndexPatternManagmentContext>().services;
+export const EmptyIndexPatternPrompt = ({
+  canSave,
+  creationOptions,
+  docLinksIndexPatternIntro,
+  setBreadcrumbs,
+}: Props) => {
   setBreadcrumbs(getListBreadcrumbs());
 
   return (
@@ -93,7 +98,7 @@ export const EmptyIndexPatternPrompt = ({ canSave, creationOptions }: Props) => 
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          <EuiLink href={docLinks.links.indexPatterns.introduction} target="_blank" external>
+          <EuiLink href={docLinksIndexPatternIntro} target="_blank" external>
             <FormattedMessage
               id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"
