@@ -28,5 +28,4 @@ export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams
 
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
-export const GLOBAL_SEARCH_BAR_FILTER_ITEM = ({ key, value }: SearchBarFilter) =>
-  `[data-test-subj="filter filter-enabled filter-key-${key} filter-value-${value} filter-unpinned"]`;
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '.globalFilterItem';
