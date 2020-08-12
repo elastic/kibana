@@ -21,9 +21,9 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { LegacyApiCaller } from './legacy/es_client';
-import { SearchInterceptor } from './search_interceptor';
+import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
-import { ISessionService, SessionService } from './session_service';
+import { ISessionService } from './session_service';
 import { SearchUsageCollector } from './collectors';
 import {
   IKibanaSearchRequest,
@@ -56,8 +56,8 @@ export interface ISearchStartLegacy {
 }
 
 export interface SearchEnhancements {
-  searchInterceptor: SearchInterceptor;
-  sessionService: SessionService;
+  searchInterceptor: ISearchInterceptor;
+  sessionService: ISessionService;
 }
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension

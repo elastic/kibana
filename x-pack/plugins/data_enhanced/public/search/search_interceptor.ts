@@ -11,7 +11,7 @@ import { SearchInterceptor, UI_SETTINGS } from '../../../../../src/plugins/data/
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
 import { EnhancedSearchInterceptorDeps } from './types';
-import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
+import { IAsyncSearchRequest } from '../../common';
 
 interface SessionInfo {
   requests: Record<string, string>;
@@ -111,9 +111,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           // Send future requests using just the ID from the response
           mergeMap(() => {
             const stored = this.deps.session.isRestoredSession();
-            return this.runSearch({ id, stored }, combinedSignal, options?.strategy) as Observable<
-              IAsyncSearchResponse
-            >;
+            return this.runSearch({ id, stored }, combinedSignal, options?.strategy);
           })
         );
       }),

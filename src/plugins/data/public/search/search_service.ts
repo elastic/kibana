@@ -28,7 +28,7 @@ import { calculateBounds, TimeRange } from '../../common/query';
 
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor } from './search_interceptor';
+import { SearchInterceptor, ISearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -55,7 +55,7 @@ interface SearchServiceStartDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
-  private searchInterceptor!: SearchInterceptor;
+  private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   /**

@@ -144,7 +144,6 @@ export class SearchInterceptor {
     const combinedSignal = getCombinedSignal(signals);
     const cleanup = () => {
       this.timeoutSubscriptions.remove(subscription);
-      // notificationSubscription.unsubscribe();
     };
 
     combinedSignal.addEventListener('abort', cleanup);
@@ -155,3 +154,5 @@ export class SearchInterceptor {
     };
   }
 }
+
+export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;
