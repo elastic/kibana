@@ -131,7 +131,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       // eslint-disable-next-line no-console
       console.error(error);
     }
-  });
+  }, []);
+
   useEffect(() => {
     if (jobIds.length > 0) {
       explorerService.updateJobSelection(jobIds);

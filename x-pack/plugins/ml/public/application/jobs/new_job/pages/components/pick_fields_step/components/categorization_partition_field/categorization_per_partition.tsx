@@ -8,11 +8,7 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import {
-  AdvancedJobCreator,
-  CategorizationJobCreator,
-  isCategorizationJobCreator,
-} from '../../../../../common/job_creator';
+import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Description } from './description';
 
@@ -52,16 +48,13 @@ export const CategorizationPerPartitionField: FC = () => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
   }, [jobCreatorUpdated]);
 
-  const isCategorizationJob = isCategorizationJobCreator(jobCreator);
   return (
-    <Description isOptional={isCategorizationJob === false}>
+    <Description>
       <EuiFormRow
         label={
           <FormattedMessage
-            id={
-              'xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel'
-            }
-            defaultMessage={'Enable per-partition categorization'}
+            id="xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel"
+            defaultMessage="Enable per-partition categorization"
           />
         }
       >
@@ -73,8 +66,8 @@ export const CategorizationPerPartitionField: FC = () => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id={'xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel'}
-                defaultMessage={'Stop on warn'}
+                id="xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel"
+                defaultMessage="Stop on warn"
               />
             }
           >
@@ -83,8 +76,8 @@ export const CategorizationPerPartitionField: FC = () => {
           <EuiFormRow
             label={
               <FormattedMessage
-                id={'xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel'}
-                defaultMessage={'Partition field'}
+                id="xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel"
+                defaultMessage="Partition field"
               />
             }
           >

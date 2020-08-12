@@ -41,8 +41,8 @@ export const CategorizationPerPartitionSwitch: FC = () => {
       data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
       label={
         <FormattedMessage
-          id={'xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel'}
-          defaultMessage={'Enable per-partition categorization'}
+          id="xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel"
+          defaultMessage="Enable per-partition categorization"
         />
       }
     />

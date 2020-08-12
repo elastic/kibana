@@ -658,13 +658,17 @@ export class JobCreator {
     const firstCategorizationDetector = this._detectors.find(
       (d) => d.by_field_name === 'mlcategory'
     );
-    if (firstCategorizationDetector && 'partition_field_name' in firstCategorizationDetector) {
+    if (
+      firstCategorizationDetector &&
+      'partition_field_name' in firstCategorizationDetector &&
+      firstCategorizationDetector.partition_field_name !== undefined
+    ) {
       return firstCategorizationDetector.partition_field_name;
     }
     return null;
   }
 
-  public set categorizationPerPartitionField(fieldName: string | number | null) {
+  public set categorizationPerPartitionField(fieldName: string | null) {
     if (fieldName === null) {
       this._detectors.forEach((detector) => {
         delete detector.partition_field_name;

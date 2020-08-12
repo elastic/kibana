@@ -31,8 +31,8 @@ export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
       data-test-subj="mlJobWizardSwitchCategorizationPerPartitionStopOnWarn"
       label={
         <FormattedMessage
-          id={'xpack.ml.newJob.wizard.perPartitionCategorizationtopOnWarnSwitchLabel'}
-          defaultMessage={'Stop on warn'}
+          id="xpack.ml.newJob.wizard.perPartitionCategorizationtopOnWarnSwitchLabel"
+          defaultMessage="Stop on warn"
         />
       }
     />
