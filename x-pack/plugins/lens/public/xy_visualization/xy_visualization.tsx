@@ -174,7 +174,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: true,
+          required: false,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -199,6 +199,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
           suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
+          required: layer.seriesType.includes('percentage'),
         },
       ],
     };

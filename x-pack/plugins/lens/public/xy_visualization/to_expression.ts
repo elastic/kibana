@@ -102,8 +102,10 @@ export const buildExpression = (
   frame?: FramePublicAPI,
   { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
 ): Ast | null => {
-  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.xAccessor && layer.accessors.length)
+  const validLayers = state.layers.filter(
+    (layer): layer is ValidLayer =>
+      !(layer.seriesType.includes('percentage') && !layer.splitAccessor) &&
+      Boolean(layer.accessors.length)
   );
   if (!validLayers.length) {
     return null;
@@ -174,7 +176,7 @@ export const buildExpression = (
 
                     hide: [Boolean(layer.hide)],
 
-                    xAccessor: [layer.xAccessor],
+                    xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
                     yScaleType: [
                       getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
                     ],

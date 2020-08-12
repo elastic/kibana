@@ -205,11 +205,10 @@ export function XYChart({
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
     return !(
-      !xAccessor ||
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||
-      data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined')
+      (xAccessor && data.tables[layerId].rows.every((row) => typeof row[xAccessor] === 'undefined'))
     );
   });
 
@@ -379,7 +378,7 @@ export function XYChart({
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
-        hide={filteredLayers[0].hide}
+        hide={!filteredLayers[0].xAccessor || filteredLayers[0].hide}
         tickFormat={(d) => xAxisFormatter.convert(d)}
       />
 
@@ -427,8 +426,7 @@ export function XYChart({
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
             (row) =>
-              xAccessor &&
-              typeof row[xAccessor] !== 'undefined' &&
+              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
               !(
                 splitAccessor &&
                 typeof row[splitAccessor] === 'undefined' &&
@@ -436,11 +434,17 @@ export function XYChart({
               )
           );
 
+          if (!xAccessor) {
+            rows.forEach((row) => {
+              row.unifiedX = '(empty)';
+            });
+          }
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: `${splitAccessor}-${accessor}`,
-            xAccessor,
+            xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
             data: rows,
             xScaleType,

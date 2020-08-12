@@ -156,7 +156,7 @@ function getSuggestionsForLayer({
 }: {
   layerId: string;
   changeType: TableChangeType;
-  xValue: TableSuggestionColumn;
+  xValue?: TableSuggestionColumn;
   yValues: TableSuggestionColumn[];
   splitBy?: TableSuggestionColumn;
   currentState?: State;
@@ -164,7 +164,7 @@ function getSuggestionsForLayer({
   keptLayerIds: string[];
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
-  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue, changeType);
+  const seriesType: SeriesType = getSeriesType(currentState, layerId, xValue);
 
   const options = {
     currentState,
@@ -182,11 +182,23 @@ function getSuggestionsForLayer({
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type
     return visualizationTypes
-      .map((visType) => ({
-        ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
-        title: visType.label,
-        hide: visType.id !== 'bar_stacked',
-      }))
+      .map((visType) => {
+        const localOptions = { ...options };
+        if (
+          visType.id.includes('percentage') &&
+          localOptions.xValue &&
+          localOptions.xValue.operation.scale === 'ordinal' &&
+          !localOptions.splitBy
+        ) {
+          localOptions.splitBy = localOptions.xValue;
+          delete localOptions.xValue;
+        }
+        return {
+          ...buildSuggestion({ ...localOptions, seriesType: visType.id as SeriesType }),
+          title: visType.label,
+          hide: visType.id !== 'bar_stacked',
+        };
+      })
       .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
   }
 
@@ -199,13 +211,14 @@ function getSuggestionsForLayer({
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
-  if (seriesType !== 'line' && xValue.operation.scale === 'ordinal') {
+  if (seriesType !== 'line' && (!xValue || xValue.operation.scale === 'ordinal')) {
     // flip between horizontal/vertical for ordinal scales
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
         title: i18n.translate('xpack.lens.xySuggestions.flipTitle', { defaultMessage: 'Flip' }),
         seriesType:
+          // TODO add percentage variants in here
           seriesType === 'bar_horizontal'
             ? 'bar'
             : seriesType === 'bar_horizontal_stacked'
@@ -253,10 +266,21 @@ function getSuggestionsForLayer({
     seriesType.includes('stacked') &&
     !seriesType.includes('percentage')
   ) {
-    // flip between stacked/unstacked
+    const percentageOptions = { ...options };
+    if (
+      percentageOptions.xValue &&
+      percentageOptions.xValue.operation.scale === 'ordinal' &&
+      !percentageOptions.splitBy
+    ) {
+      percentageOptions.splitBy = percentageOptions.xValue;
+      delete percentageOptions.xValue;
+    }
+    // percentage suggestion
     sameStateSuggestions.push(
       buildSuggestion({
         ...options,
+        // hide the suggestion if split by is missing
+        hide: !percentageOptions.splitBy,
         seriesType: asPercentageSeriesType(seriesType),
         title: i18n.translate('xpack.lens.xySuggestions.asPercentageTitle', {
           defaultMessage: 'Percentage',
@@ -331,8 +355,7 @@ function altSeriesType(oldSeriesType: SeriesType) {
 function getSeriesType(
   currentState: XYState | undefined,
   layerId: string,
-  xValue: TableSuggestionColumn,
-  changeType: TableChangeType
+  xValue?: TableSuggestionColumn
 ): SeriesType {
   const defaultType = 'bar_stacked';
 
@@ -344,7 +367,7 @@ function getSeriesType(
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
-  if (xValue.operation.scale && xValue.operation.scale === 'ordinal') {
+  if (xValue && xValue.operation.scale && xValue.operation.scale === 'ordinal') {
     return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
   }
 
@@ -353,7 +376,7 @@ function getSeriesType(
 
 function getSuggestionTitle(
   yValues: TableSuggestionColumn[],
-  xValue: TableSuggestionColumn,
+  xValue: TableSuggestionColumn | undefined,
   tableLabel: string | undefined
 ) {
   const yTitle = yValues
@@ -365,10 +388,10 @@ function getSuggestionTitle(
           'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
       })
     );
-  const xTitle = xValue.operation.label;
+  const xTitle = xValue?.operation.label || '(empty)';
   const title =
     tableLabel ||
-    (xValue.operation.dataType === 'date'
+    (xValue?.operation.dataType === 'date'
       ? i18n.translate('xpack.lens.xySuggestions.dateSuggestion', {
           defaultMessage: '{yTitle} over {xTitle}',
           description:
@@ -394,16 +417,18 @@ function buildSuggestion({
   changeType,
   xValue,
   keptLayerIds,
+  hide,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
   title: string;
   yValues: TableSuggestionColumn[];
-  xValue: TableSuggestionColumn;
+  xValue?: TableSuggestionColumn;
   splitBy: TableSuggestionColumn | undefined;
   layerId: string;
   changeType: TableChangeType;
   keptLayerIds: string[];
+  hide?: boolean;
 }) {
   const existingLayer: LayerConfig | {} = getExistingLayer(currentState, layerId) || {};
   const accessors = yValues.map((col) => col.columnId);
@@ -411,7 +436,7 @@ function buildSuggestion({
     ...existingLayer,
     layerId,
     seriesType,
-    xAccessor: xValue.columnId,
+    xAccessor: xValue?.columnId,
     splitAccessor: splitBy?.columnId,
     accessors,
     yConfig:
@@ -445,10 +470,11 @@ function buildSuggestion({
     title,
     score: getScore(yValues, splitBy, changeType),
     hide:
+      hide ??
       // Only advertise very clear changes when XY chart is not active
-      (!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
-      // Don't advertise removing dimensions
-      (currentState && changeType === 'reduced'),
+      ((!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
+        // Don't advertise removing dimensions
+        (currentState && changeType === 'reduced')),
     state,
     previewIcon: getIconForSeries(seriesType),
   };
