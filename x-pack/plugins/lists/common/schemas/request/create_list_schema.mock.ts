@@ -18,3 +18,22 @@ export const getCreateListSchemaMock = (): CreateListSchema => ({
   type: TYPE,
   version: VERSION,
 });
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ */
+export const getCreateMinimalListSchemaMock = (): CreateListSchema => ({
+  description: DESCRIPTION,
+  id: LIST_ID,
+  name: NAME,
+  type: TYPE,
+});
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ */
+export const getCreateMinimalListSchemaMockWithoutId = (): CreateListSchema => ({
+  description: DESCRIPTION,
+  name: NAME,
+  type: TYPE,
+});
