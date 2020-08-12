@@ -6873,7 +6873,6 @@
     "xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.description": "検索できるように、同僚をこの組織に招待します。",
     "xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.title": "ユーザーと招待",
     "xpack.enterpriseSearch.workplaceSearch.overviewUsersCard.title": "検索できるように、同僚を招待しました。",
-    "xpack.enterpriseSearch.workplaceSearch.productCta": "Workplace Searchの起動",
     "xpack.enterpriseSearch.workplaceSearch.productName": "Workplace Search",
     "xpack.enterpriseSearch.workplaceSearch.recentActivity.title": "最近のアクティビティ",
     "xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel": "ソースを表示",

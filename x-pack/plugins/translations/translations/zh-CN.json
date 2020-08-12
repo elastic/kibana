@@ -6874,7 +6874,6 @@
     "xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.description": "邀请同事加入此组织以便一同搜索。",
     "xpack.enterpriseSearch.workplaceSearch.overviewOnboardingUsersCard.title": "用户和邀请",
     "xpack.enterpriseSearch.workplaceSearch.overviewUsersCard.title": "很好，您已邀请同事一同搜索。",
-    "xpack.enterpriseSearch.workplaceSearch.productCta": "启动 Workplace Search",
     "xpack.enterpriseSearch.workplaceSearch.productName": "Workplace Search",
     "xpack.enterpriseSearch.workplaceSearch.recentActivity.title": "最近活动",
     "xpack.enterpriseSearch.workplaceSearch.recentActivitySourceLink.linkLabel": "查看源",
