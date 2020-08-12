@@ -177,14 +177,6 @@ describe('Session Timeout', () => {
       expect(sessionTimeout['sessionInfo']).toBeUndefined();
       expect(method).not.toHaveBeenCalled();
     });
-
-    test(`handles empty response`, async () => {
-      http.fetch.mockResolvedValue('');
-      await sessionTimeout.start();
-
-      expect(http.fetch).toHaveBeenCalledTimes(1);
-      expect(sessionExpired.logout).toHaveBeenCalled();
-    });
   });
 
   describe('warning toast', () => {

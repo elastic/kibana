@@ -238,7 +238,7 @@ string of `<count>[ms|s|m|h|d|w|M|Y]` (e.g. '70ms', '5s', '3d', '1Y').
 |===
 
 | `xpack.security.session.cleanupInterval`
-| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default this value is 1 hour. The minimum value is 1 minute.
+| Sets the interval at which {kib} tries to remove expired and invalid sessions from the session index. By default this value is 1 hour. The minimum value is 10 seconds.
 
 |===
 

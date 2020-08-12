@@ -12,12 +12,7 @@ import { RouteDefinitionParams } from '..';
  */
 export function defineSessionInfoRoutes({ router, logger, session }: RouteDefinitionParams) {
   router.get(
-    {
-      path: '/internal/security/session',
-      validate: false,
-      // We have both authenticated and non-authenticated sessions.
-      options: { authRequired: 'optional' },
-    },
+    { path: '/internal/security/session', validate: false },
     async (_context, request, response) => {
       try {
         const sessionValue = await session.get(request);

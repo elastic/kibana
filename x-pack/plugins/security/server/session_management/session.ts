@@ -75,6 +75,15 @@ export interface SessionValueContentToEncrypt {
   state: unknown;
 }
 
+/**
+ * The SIDs and AAD must be unpredictable to prevent guessing attacks, where an attacker is able to
+ * guess or predict the ID of a valid session through statistical analysis techniques. That's why we
+ * generate SIDs and AAD using a secure PRNG and current OWASP guidance suggests a minimum of 16
+ * bytes (128 bits), but to be on the safe side we decided to use 32 bytes (256 bits).
+ */
+const SID_BYTE_LENGTH = 32;
+const AAD_BYTE_LENGTH = 32;
+
 export class Session {
   /**
    * Session idle timeout in ms. If `null`, a session will stay active until its max lifespan is reached.
@@ -177,8 +186,8 @@ export class Session {
     >
   ) {
     const [sid, aad] = await Promise.all([
-      this.randomBytes(32).then((sidBuffer) => sidBuffer.toString('base64')),
-      this.randomBytes(32).then((aadBuffer) => aadBuffer.toString('base64')),
+      this.randomBytes(SID_BYTE_LENGTH).then((sidBuffer) => sidBuffer.toString('base64')),
+      this.randomBytes(AAD_BYTE_LENGTH).then((aadBuffer) => aadBuffer.toString('base64')),
     ]);
 
     const sessionLogger = this.getLoggerForSID(sid);

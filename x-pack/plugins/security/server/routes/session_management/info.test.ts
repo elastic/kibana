@@ -42,7 +42,7 @@ describe('Info session routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: 'optional' });
+      expect(routeConfig.options).toBeUndefined();
       expect(routeConfig.validate).toBe(false);
     });
 
