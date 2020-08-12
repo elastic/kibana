@@ -5,7 +5,7 @@
  */
 
 import React, { useContext } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../shared/telemetry';
@@ -32,43 +32,40 @@ export const EmptyState: React.FC = () => {
   };
 
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome isRoot />
-
-      <EuiPageBody>
-        <EngineOverviewHeader />
-        <EuiPageContent className="emptyState">
-          <EuiEmptyPrompt
-            className="emptyState__prompt"
-            iconType="eyeClosed"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.emptyState.title"
-                  defaultMessage="Create your first engine"
-                />
-              </h2>
-            }
-            titleSize="l"
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.emptyState.description1"
-                  defaultMessage="An App Search engine stores the documents for your search experience."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton iconType="popout" fill {...buttonProps}>
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
-                  defaultMessage="Create an engine"
-                />
-              </EuiButton>
-            }
-          />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+      <EngineOverviewHeader />
+      <EuiPageContent className="emptyState">
+        <EuiEmptyPrompt
+          className="emptyState__prompt"
+          iconType="eyeClosed"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.emptyState.title"
+                defaultMessage="Create your first engine"
+              />
+            </h2>
+          }
+          titleSize="l"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.emptyState.description1"
+                defaultMessage="An App Search engine stores the documents for your search experience."
+              />
+            </p>
+          }
+          actions={
+            <EuiButton iconType="popout" fill {...buttonProps}>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
+                defaultMessage="Create an engine"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
+    </>
   );
 };
