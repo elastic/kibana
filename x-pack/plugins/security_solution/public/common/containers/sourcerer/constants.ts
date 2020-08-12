@@ -23,7 +23,6 @@ export const sourceGroups = {
     'endgame-*',
     'filebeat-*',
     'logs-*',
-    // 'packetbeat-*',
     'winlogbeat-*',
     'blobbeat-*',
   ],

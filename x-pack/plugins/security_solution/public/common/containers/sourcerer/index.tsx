@@ -361,8 +361,9 @@ export const useSourceManager = (): UseSourceManager => {
   );
   const getManageSourceGroupById = useCallback(
     (id: SourceGroupsType) => {
-      if (state.sourceGroups[id] != null) {
-        return state.sourceGroups[id] as ManageSource;
+      const sourceById = state.sourceGroups[id];
+      if (sourceById != null) {
+        return sourceById;
       }
       return getSourceDefaults(id, getDefaultIndex());
     },
