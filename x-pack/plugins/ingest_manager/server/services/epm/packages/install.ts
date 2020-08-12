@@ -103,7 +103,7 @@ export async function installPackage({
   force?: boolean;
 }): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
-  const [pkgName, pkgVersion] = pkgkey.split('-');
+  const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);

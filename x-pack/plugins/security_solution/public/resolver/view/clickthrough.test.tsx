@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oneAncestorTwoChildren } from '../data_access_layer/mocks/one_ancestor_two_children';
+import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
+import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -16,10 +17,10 @@ let entityIDs: { origin: string; firstChild: string; secondChild: string };
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', () => {
+describe('Resolver, when analyzing a tree that has no ancestors and 2 children', () => {
   beforeEach(async () => {
     // create a mock data access layer
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = oneAncestorTwoChildren();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = noAncestorsTwoChildren();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
@@ -40,7 +41,7 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
          *
          * For example, there might be no loading element at one point, and 1 graph element at one point, but never a single time when there is both 1 graph element and 0 loading elements.
          */
-        simulator.mapStateTransitions(() => ({
+        simulator.map(() => ({
           graphElements: simulator.graphElement().length,
           graphLoadingElements: simulator.graphLoadingElement().length,
           graphErrorElements: simulator.graphErrorElement().length,
@@ -55,22 +56,24 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
 
     // Combining assertions here for performance. Unfortunately, Enzyme + jsdom + React is slow.
     it(`should have 3 nodes, with the entityID's 'origin', 'firstChild', and 'secondChild'. 'origin' should be selected.`, async () => {
-      expect(simulator.processNodeElementLooksSelected(entityIDs.origin)).toBe(true);
-
-      expect(simulator.processNodeElementLooksUnselected(entityIDs.firstChild)).toBe(true);
-      expect(simulator.processNodeElementLooksUnselected(entityIDs.secondChild)).toBe(true);
-
-      expect(simulator.processNodeElements().length).toBe(3);
+      await expect(
+        simulator.map(() => ({
+          selectedOriginCount: simulator.selectedProcessNode(entityIDs.origin).length,
+          unselectedFirstChildCount: simulator.unselectedProcessNode(entityIDs.firstChild).length,
+          unselectedSecondChildCount: simulator.unselectedProcessNode(entityIDs.secondChild).length,
+          processNodeCount: simulator.processNodeElements().length,
+        }))
+      ).toYieldEqualTo({
+        selectedOriginCount: 1,
+        unselectedFirstChildCount: 1,
+        unselectedSecondChildCount: 1,
+        processNodeCount: 3,
+      });
     });
 
-    it(`should have the default "process list" panel present`, async () => {
-      expect(simulator.panelElement().length).toBe(1);
-      expect(simulator.panelContentElement().length).toBe(1);
-      const testSubjectName = simulator
-        .panelContentElement()
-        .getDOMNode()
-        .getAttribute('data-test-subj');
-      expect(testSubjectName).toMatch(/process-list/g);
+    it(`should show links to the 3 nodes (with icons) in the node list.`, async () => {
+      await expect(simulator.map(() => simulator.nodeListNodeLinkText().length)).toYieldEqualTo(3);
+      await expect(simulator.map(() => simulator.nodeListNodeLinkIcons().length)).toYieldEqualTo(3);
     });
 
     describe("when the second child node's first button has been clicked", () => {
@@ -82,42 +85,37 @@ describe('Resolver, when analyzing a tree that has 1 ancestor and 2 children', (
           .first()
           .simulate('click');
       });
-      it('should render the second child node as selected, and the first child not as not selected, and the query string should indicate that the second child is selected', async () => {
+      it('should render the second child node as selected, and the origin as not selected, and the query string should indicate that the second child is selected', async () => {
         await expect(
-          simulator.mapStateTransitions(function value() {
-            return {
-              // the query string has a key showing that the second child is selected
-              queryStringSelectedNode: simulator.queryStringValues().selectedNode,
-              // the second child is rendered in the DOM, and shows up as selected
-              secondChildLooksSelected: simulator.processNodeElementLooksSelected(
-                entityIDs.secondChild
-              ),
-              // the origin is in the DOM, but shows up as unselected
-              originLooksUnselected: simulator.processNodeElementLooksUnselected(entityIDs.origin),
-            };
-          })
+          simulator.map(() => ({
+            // the query string has a key showing that the second child is selected
+            queryStringSelectedNode: simulator.queryStringValues().selectedNode,
+            // the second child is rendered in the DOM, and shows up as selected
+            selectedSecondChildNodeCount: simulator.selectedProcessNode(entityIDs.secondChild)
+              .length,
+            // the origin is in the DOM, but shows up as unselected
+            unselectedOriginNodeCount: simulator.unselectedProcessNode(entityIDs.origin).length,
+          }))
         ).toYieldEqualTo({
           // Just the second child should be marked as selected in the query string
           queryStringSelectedNode: [entityIDs.secondChild],
           // The second child is rendered and has `[aria-selected]`
-          secondChildLooksSelected: true,
+          selectedSecondChildNodeCount: 1,
           // The origin child is rendered and doesn't have `[aria-selected]`
-          originLooksUnselected: true,
+          unselectedOriginNodeCount: 1,
         });
       });
     });
   });
 });
 
-describe('Resolver, when analyzing a tree that has some related events', () => {
+describe('Resolver, when analyzing a tree that has two related events for the origin', () => {
   beforeEach(async () => {
     // create a mock data access layer with related events
-    const { metadata: dataAccessLayerMetadata, dataAccessLayer } = oneAncestorTwoChildren({
-      withRelatedEvents: [
-        ['registry', 'access'],
-        ['registry', 'access'],
-      ],
-    });
+    const {
+      metadata: dataAccessLayerMetadata,
+      dataAccessLayer,
+    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
@@ -132,7 +130,7 @@ describe('Resolver, when analyzing a tree that has some related events', () => {
   describe('when it has loaded', () => {
     beforeEach(async () => {
       await expect(
-        simulator.mapStateTransitions(() => ({
+        simulator.map(() => ({
           graphElements: simulator.graphElement().length,
           graphLoadingElements: simulator.graphLoadingElement().length,
           graphErrorElements: simulator.graphErrorElement().length,
@@ -148,11 +146,26 @@ describe('Resolver, when analyzing a tree that has some related events', () => {
 
     it('should render a related events button', async () => {
       await expect(
-        simulator.mapStateTransitions(() => ({
+        simulator.map(() => ({
           relatedEventButtons: simulator.processNodeRelatedEventButton(entityIDs.origin).length,
         }))
       ).toYieldEqualTo({
         relatedEventButtons: 1,
+      });
+    });
+    describe('when the related events button is clicked', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should open the submenu', async () => {
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().map((node) => node.text()))
+        ).toYieldEqualTo(['2 registry']);
       });
     });
   });
