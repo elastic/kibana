@@ -83,7 +83,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
         title={
           <FormattedMessage
             id="xpack.idxMgmt.simulateTemplate.noFilterSelected"
-            defaultMessage="You need to include at least one of the above filters."
+            defaultMessage="Select at least one option to preview."
           />
         }
         iconType="pin"
