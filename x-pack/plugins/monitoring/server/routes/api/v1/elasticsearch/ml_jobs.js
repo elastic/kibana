@@ -35,11 +35,7 @@ export function mlJobRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(
-        config,
-        `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
-        ccs
-      );
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);

@@ -51,6 +51,7 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
     filterPath: [
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_name',
       'hits.hits._source.version',
       'hits.hits._source.license.status', // license data only includes necessary fields to drive UI
@@ -59,7 +60,9 @@ function fetchClusterStats(req, esIndexPattern, clusterUuid) {
       'hits.hits._source.license.expiry_date',
       'hits.hits._source.license.expiry_date_in_millis',
       'hits.hits._source.cluster_stats',
+      'hits.hits._source.elasticsearch.cluster',
       'hits.hits._source.cluster_state',
+      'hits.hits._source.elasticsearch.cluster.state',
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
     ],
     body: {
@@ -96,6 +99,8 @@ export function handleClusterStats(response) {
         if (ccs) {
           cluster.ccs = ccs;
         }
+
+        cluster.cluster_uuid = cluster.cluster_uuid || get(cluster, 'elasticsearch.cluster.id');
       }
 
       return cluster;

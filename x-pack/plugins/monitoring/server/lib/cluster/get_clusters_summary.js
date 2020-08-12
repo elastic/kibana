@@ -9,7 +9,7 @@ import { calculateOverallStatus } from '../calculate_overall_status';
 import { LOGGING_TAG } from '../../../common/constants';
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
-export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
+export function getClustersSummary(req, clusters, kibanaUuid, isCcrEnabled) {
   return clusters.map((cluster) => {
     const {
       isSupported,
@@ -33,13 +33,14 @@ export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
     // check for any missing licenses
     if (!license) {
       const clusterId = cluster.name || clusterName || clusterUuid;
-      server.log(
-        ['error', LOGGING_TAG],
-        "Could not find license information for cluster = '" +
-          clusterId +
-          "'. " +
-          "Please check the cluster's master node server logs for errors or warnings."
-      );
+      req
+        .getLogger(LOGGING_TAG)
+        .error(
+          "Could not find license information for cluster = '" +
+            clusterId +
+            "'. " +
+            "Please check the cluster's master node server logs for errors or warnings."
+        );
       throw new MonitoringLicenseError(clusterId);
     }
 

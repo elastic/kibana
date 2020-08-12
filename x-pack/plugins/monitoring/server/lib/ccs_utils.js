@@ -5,6 +5,21 @@
  */
 import { isFunction, get } from 'lodash';
 
+export function appendMetricbeatIndex(config, indexPattern) {
+  // Leverage this function to also append the dynamic metricbeat index too
+  let mbIndex = null;
+  // TODO: NP
+  // This function is called with both NP config and LP config
+  if (isFunction(config.get)) {
+    mbIndex = config.get('monitoring.ui.metricbeat.index');
+  } else {
+    mbIndex = get(config, 'monitoring.ui.metricbeat.index');
+  }
+
+  const newIndexPattern = `${indexPattern},${mbIndex}`;
+  return newIndexPattern;
+}
+
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
  *
@@ -27,7 +42,7 @@ export function prefixIndexPattern(config, indexPattern, ccs) {
   }
 
   if (!ccsEnabled || !ccs) {
-    return indexPattern;
+    return appendMetricbeatIndex(config, indexPattern);
   }
 
   const patterns = indexPattern.split(',');
@@ -35,10 +50,10 @@ export function prefixIndexPattern(config, indexPattern, ccs) {
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {
-    return `${prefixedPattern},${indexPattern}`;
+    return appendMetricbeatIndex(config, `${prefixedPattern},${indexPattern}`);
   }
 
-  return prefixedPattern;
+  return appendMetricbeatIndex(config, prefixedPattern);
 }
 
 /**

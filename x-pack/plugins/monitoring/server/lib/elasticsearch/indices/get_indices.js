@@ -16,7 +16,7 @@ export function handleResponse(resp, min, max, shardStats) {
   // map the hits
   const hits = get(resp, 'hits.hits', []);
   return hits.map((hit) => {
-    const stats = get(hit, '_source.index_stats', get(hit, '_source.elasticsearch.index'));
+    const stats = get(hit, '_source.elasticsearch.index', get(hit, '_source.index_stats'));
     const earliestStats = get(
       hit,
       'inner_hits.earliest.hits.hits[0]._source.index_stats',
@@ -24,11 +24,11 @@ export function handleResponse(resp, min, max, shardStats) {
     );
 
     const rateOptions = {
-      hitTimestamp: get(hit, '_source.timestamp', get(hit, '_source.@timestamp')),
+      hitTimestamp: get(hit, '_source.@timestamp', get(hit, '_source.timestamp')),
       earliestHitTimestamp: get(
         hit,
-        'inner_hits.earliest.hits.hits[0]._source.timestamp',
-        get(hit, 'inner_hits.earliest.hits.hits[0]._source.@timestamp')
+        'inner_hits.earliest.hits.hits[0]._source.@timestamp',
+        get(hit, 'inner_hits.earliest.hits.hits[0]._source.timestamp')
       ),
       timeWindowMin: min,
       timeWindowMax: max,
@@ -165,7 +165,7 @@ export function getIndices(req, esIndexPattern, showSystemIndices = false, shard
     size: config.get('monitoring.ui.max_bucket_size'),
   });
 
-  // console.log(JSON.stringify(params, null, 2));
+  console.log(JSON.stringify(params, null, 2));
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) =>

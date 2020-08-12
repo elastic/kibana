@@ -15,7 +15,7 @@ export function handleResponse(response, start, end) {
   const hits = get(response, 'hits.hits', []);
   const initial = { ids: new Set(), beats: [] };
   const { beats } = hits.reduce((accum, hit) => {
-    const stats = get(hit, '_source.beats_stats');
+    const stats = get(hit, '_source.beats.stats', get(hit, '_source.beats_stats'));
     const uuid = get(stats, 'beat.uuid');
 
     // skip this duplicated beat, newer one was already added
@@ -25,7 +25,11 @@ export function handleResponse(response, start, end) {
 
     // add another beat summary
     accum.ids.add(uuid);
-    const earliestStats = get(hit, 'inner_hits.earliest.hits.hits[0]._source.beats_stats');
+    const earliestStats = get(
+      hit,
+      'inner_hits.earliest.hits.hits[0]._source.beats.stats',
+      get(hit, 'inner_hits.earliest.hits.hits[0]._source.beats_stats')
+    );
 
     //  add the beat
     const rateOptions = {
@@ -87,29 +91,48 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
     ignoreUnavailable: true,
     filterPath: [
       // only filter path can filter for inner_hits
+      'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.beats_stats.beat.uuid',
+      'hits.hits._source.beats.stats.beat.uuid',
       'hits.hits._source.beats_stats.beat.name',
+      'hits.hits._source.beats.stats.beat.name',
       'hits.hits._source.beats_stats.beat.host',
+      'hits.hits._source.beats.stats.beat.host',
       'hits.hits._source.beats_stats.beat.type',
+      'hits.hits._source.beats.stats.beat.type',
       'hits.hits._source.beats_stats.beat.version',
+      'hits.hits._source.beats.stats.beat.version',
       'hits.hits._source.beats_stats.metrics.libbeat.output.type',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.type',
       'hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.read.errors',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.write.errors',
       'hits.hits._source.beats_stats.metrics.beat.memstats.memory_alloc',
+      'hits.hits._source.beats.stats.metrics.beat.memstats.memory_alloc',
 
       // latest hits for calculating metrics
       'hits.hits._source.beats_stats.timestamp',
+      'hits.hits._source.beats.stats.timestamp',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
+      'hits.hits._source.beats.stats.metrics.libbeat.output.write.bytes',
       'hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.total',
 
       // earliest hits for calculating metrics
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.timestamp',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats.stats.timestamp',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats.stats.metrics.libbeat.output.write.bytes',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.pipeline.events.total',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats.stats.metrics.libbeat.pipeline.events.total',
 
       // earliest hits for calculating diffs
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats.stats.metrics.libbeat.output.read.errors',
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
+      'hits.hits.inner_hits.earliest.hits.hits._source.beats.stats.metrics.libbeat.output.write.errors',
     ],
     body: {
       query: createBeatsQuery({

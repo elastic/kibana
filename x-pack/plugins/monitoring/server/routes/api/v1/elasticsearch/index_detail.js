@@ -46,11 +46,7 @@ export function esIndexRoute(server) {
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const esIndexPattern = prefixIndexPattern(
-          config,
-          `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
-          ccs
-        );
+        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const filebeatIndexPattern = prefixIndexPattern(
           config,
           config.get('monitoring.ui.logs.index'),

@@ -233,5 +233,5 @@ export async function getClustersFromRequest(
 
   const kibanaUuid = config.get('server.uuid');
 
-  return getClustersSummary(req.server, clusters, kibanaUuid, isCcrEnabled);
+  return getClustersSummary(req, clusters, kibanaUuid, isCcrEnabled);
 }

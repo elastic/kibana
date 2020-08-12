@@ -47,11 +47,7 @@ export function esNodesRoute(server) {
       const config = server.config();
       const { ccs, pagination, sort, queryText } = req.payload;
       const clusterUuid = req.params.clusterUuid;
-      const esIndexPattern = prefixIndexPattern(
-        config,
-        `${INDEX_PATTERN_ELASTICSEARCH},${config.get('monitoring.ui.metricbeat.index')}`,
-        ccs
-      );
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
