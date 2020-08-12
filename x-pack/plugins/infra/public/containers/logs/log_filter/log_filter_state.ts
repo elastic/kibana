@@ -6,7 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import createContainer from 'constate';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern, IndexPatternSpec } from 'src/plugins/data/public';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
@@ -68,7 +68,10 @@ export const useLogFilterState: (props: {
           kind: 'kuery',
           expression,
         },
-        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern.toSpec()),
+        serializedQuery: convertKueryToElasticSearchQuery(
+          expression,
+          indexPattern as IndexPatternSpec
+        ),
       });
   }, [indexPattern]);
 
