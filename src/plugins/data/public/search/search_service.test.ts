@@ -41,7 +41,7 @@ describe('Search service', () => {
         expressions: expressionsPluginMock.createSetupContract(),
       } as any);
       expect(setup).toHaveProperty('aggs');
-      expect(setup).toHaveProperty('enhance');
+      expect(setup).toHaveProperty('__enhance');
     });
   });
 
