@@ -93,14 +93,16 @@ export const EditIndexPattern = withRouter(
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
-      indexPattern.fields.filter((field) => field.type === 'conflict')
+      indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
-      setConflictedFields(indexPattern.fields.filter((field) => field.type === 'conflict'));
+      setConflictedFields(
+        indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
+      );
     }, [indexPattern]);
 
     useEffect(() => {
