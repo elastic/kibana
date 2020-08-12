@@ -44,12 +44,6 @@ let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 let coreStart: CoreStart;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
-  coreStart.savedObjects.client = {
-    ...coreStart.savedObjects.client,
-    get: jest.fn().mockImplementation(() => ({ attributes: { title: 'Holy moly' } })),
-    find: jest.fn().mockImplementation(() => ({ total: 15 })),
-    create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
-  };
 
   const containerOptions = {
     ExitFullScreenButton: () => null,
@@ -88,19 +82,19 @@ beforeEach(async () => {
 });
 
 test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Unlink is not compatible when embeddable input is by value', async () => {
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Unlink is not compatible when view mode is set to view', async () => {
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
@@ -121,7 +115,7 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
     mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
     mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
   });
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
 
@@ -129,7 +123,7 @@ test('Unlink replaces embeddableId but retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
 
@@ -155,7 +149,7 @@ test('Unlink unwraps all attributes from savedObject', async () => {
   });
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction(coreStart);
+  const action = new UnlinkFromLibraryAction();
   await action.execute({ embeddable });
   const newPanelId = Object.keys(container.getInput().panels).find(
     (key) => !originalPanelKeySet.has(key)

@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart, SimpleSavedObject } from 'src/core/public';
 import _ from 'lodash';
 import uuid from 'uuid';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
@@ -26,7 +25,6 @@ import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
 import {
   PanelNotFoundError,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
   isReferenceOrValueEmbeddable,
 } from '../../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
@@ -42,14 +40,14 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor(private core: CoreStart) {}
+  constructor() {}
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
     return i18n.translate('dashboard.panel.unlinkFromLibrary', {
-      defaultMessage: 'Unlink from visualize library',
+      defaultMessage: 'Unlink from library item',
     });
   }
 
