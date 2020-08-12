@@ -6814,8 +6814,6 @@
     "xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText": "より小さいまたは等しい",
     "xpack.data.kueryAutocomplete.orOperatorDescription": "{oneOrMoreArguments} が true であることを条件とする",
     "xpack.data.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText": "1つ以上の引数",
-    "xpack.data.query.queryBar.cancelLongQuery": "キャンセル",
-    "xpack.data.query.queryBar.runBeyond": "タイムアウトを越えて実行",
     "xpack.discover.FlyoutCreateDrilldownAction.displayName": "基本データを調査",
     "xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns": "パネルには{count}個のドリルダウンがあります",
     "xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown": "パネルには1個のドリルダウンがあります",

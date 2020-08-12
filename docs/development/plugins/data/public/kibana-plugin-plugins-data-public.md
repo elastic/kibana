@@ -19,6 +19,7 @@
 |  [Plugin](./kibana-plugin-plugins-data-public.plugin.md) |  |
 |  [RequestTimeoutError](./kibana-plugin-plugins-data-public.requesttimeouterror.md) | Class used to signify that a request timed out. Useful for applications to conditionally handle this type of error differently than other errors. |
 |  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
+|  [SessionService](./kibana-plugin-plugins-data-public.sessionservice.md) |  |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 
 ## Enumerations
@@ -143,6 +144,7 @@
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | \* |
+|  [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |  |
 |  [MappingObject](./kibana-plugin-plugins-data-public.mappingobject.md) |  |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |

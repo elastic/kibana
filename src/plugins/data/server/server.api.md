@@ -131,6 +131,7 @@ import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { ShallowPromise } from '@kbn/utility-types';
 import { ShardsResponse } from 'elasticsearch';
+import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
 import { SnapshotDeleteParams } from 'elasticsearch';
@@ -345,11 +346,10 @@ export interface Filter {
     query?: any;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "getDefaultSearchParams" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function getDefaultSearchParams(config: SharedGlobalConfig): {
+export function getDefaultSearchParams(config: SharedGlobalConfig_2): {
     timeout: string;
     ignoreUnavailable: boolean;
     restTotalHitsAsInt: boolean;
@@ -380,6 +380,10 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
     //
     // (undocumented)
     params?: ISearchRequestParams;
+    // (undocumented)
+    sessionId?: string;
+    // (undocumented)
+    stored?: boolean;
 }
 
 // Warning: (ae-forgotten-export) The symbol "IKibanaSearchResponse" needs to be exported by the entry point index.d.ts
@@ -552,7 +556,15 @@ export class IndexPatternsFetcher {
 //
 // @public (undocumented)
 export interface ISearchOptions {
+    // Warning: (ae-forgotten-export) The symbol "KibanaRequest" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    rawRequest?: KibanaRequest;
+    // (undocumented)
+    restore?: boolean;
     signal?: AbortSignal;
+    // (undocumented)
+    stored?: boolean;
     // (undocumented)
     strategy?: string;
 }
