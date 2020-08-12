@@ -80,6 +80,8 @@ Dashboard::
 * Lens editor auto refresh {kibana-pull}65868[#65868]
 Discover::
 * Multi-line kql bar {kibana-pull}70140[#70140]
+Enterprise Search::
+* Workplace Search in Kibana MVP {kibana-pull}70979[#70979]
 Ingest Management::
 * Adds support for datastream to each template {kibana-pull}66367[#66367]
 * Improves server-side error handling {kibana-pull}67278[#67278]
@@ -187,7 +189,6 @@ Platform::
 * Switches to core application service {kibana-pull}63443[#63443]
 * Adds docLinks to CoreSetup {kibana-pull}66631[#66631]
 * New Enterprise Search Kibana plugin {kibana-pull}66922[#66922]
-* Workplace Search in Kibana MVP {kibana-pull}70979[#70979]
 Querying & Filtering::
 * Resolves range date filter bugs and improve usability {kibana-pull}71298[#71298]
 Security::
