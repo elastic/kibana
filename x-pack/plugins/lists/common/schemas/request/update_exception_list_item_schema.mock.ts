@@ -34,3 +34,16 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
   tags: TAGS,
   type: ITEM_TYPE,
 });
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ * after doing a get of the structure.
+ */
+export const getUpdateMinimalExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
+  description: DESCRIPTION,
+  entries: ENTRIES,
+  id: ID,
+  item_id: LIST_ITEM_ID,
+  name: NAME,
+  type: ITEM_TYPE,
+});
