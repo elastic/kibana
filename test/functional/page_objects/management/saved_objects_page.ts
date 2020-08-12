@@ -34,6 +34,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await searchBox.clearValue();
       await searchBox.type(objectName);
       await searchBox.pressKeys(browser.keys.ENTER);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async importFile(path: string, overwriteAll = true) {
@@ -107,23 +108,45 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         const objectType = await row.findByTestSubject('objectType');
         const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
         // not all rows have inspect button - Advanced Settings objects don't
-        let inspectElement;
-        const innerHtml = await row.getAttribute('innerHTML');
-        if (innerHtml.includes('Inspect')) {
-          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
-        } else {
-          inspectElement = null;
+        // Advanced Settings has 2 actions,
+        //   data-test-subj="savedObjectsTableAction-relationships"
+        //   data-test-subj="savedObjectsTableAction-copy_saved_objects_to_space"
+        // Some other objects have the ...
+        //   data-test-subj="euiCollapsedItemActionsButton"
+        // Maybe some objects still have the inspect element visible?
+        // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
+        let menuElement = null;
+        let inspectElement = null;
+        let relationshipsElement = null;
+        let copySaveObjectsElement = null;
+        const actions = await row.findByClassName('euiTableRowCell--hasActions');
+        // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
+        const actionsHTML = await actions.getAttribute('innerHTML');
+        if (actionsHTML.includes('euiCollapsedItemActionsButton')) {
+          menuElement = await row.findByTestSubject('euiCollapsedItemActionsButton');
         }
-        const relationshipsElement = await row.findByTestSubject(
-          'savedObjectsTableAction-relationships'
-        );
+        if (actionsHTML.includes('savedObjectsTableAction-inspect')) {
+          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
+        }
+        if (actionsHTML.includes('savedObjectsTableAction-relationships')) {
+          relationshipsElement = await row.findByTestSubject(
+            'savedObjectsTableAction-relationships'
+          );
+        }
+        if (actionsHTML.includes('savedObjectsTableAction - copy_saved_objects_to_space')) {
+          copySaveObjectsElement = await row.findByTestSubject(
+            'savedObjectsTableAction - copy_saved_objects_to_space'
+          );
+        }
         return {
           checkbox,
           objectType: await objectType.getAttribute('aria-label'),
           titleElement,
           title: await titleElement.getVisibleText(),
+          menuElement,
           inspectElement,
           relationshipsElement,
+          copySaveObjectsElement,
         };
       });
     }
