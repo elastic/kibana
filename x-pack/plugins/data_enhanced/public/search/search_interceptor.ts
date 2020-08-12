@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, throwError, EMPTY, timer, from } from 'rxjs';
+import { throwError, EMPTY, timer, from } from 'rxjs';
 import { mergeMap, expand, takeUntil, finalize, tap } from 'rxjs/operators';
 import { getLongQueryNotification } from './long_query_notification';
 import {
@@ -14,7 +14,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
 import { IAsyncSearchOptions } from '.';
-import { IAsyncSearchRequest, IAsyncSearchResponse } from '../../common';
+import { IAsyncSearchRequest } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
@@ -51,7 +51,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     if (this.longRunningToast) return;
     this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           cancel: this.cancelPending,
           runBeyondTimeout: this.runBeyondTimeout,
@@ -67,7 +67,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   public search(
     request: IAsyncSearchRequest,
     { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-  ): Observable<IAsyncSearchResponse> {
+  ) {
     let { id } = request;
 
     request.params = {
@@ -80,15 +80,15 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
     this.pendingCount$.next(++this.pendingCount);
 
-    return (this.runSearch(request, combinedSignal) as Observable<IAsyncSearchResponse>).pipe(
-      expand((response: IAsyncSearchResponse) => {
+    return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      expand((response) => {
         // If the response indicates of an error, stop polling and complete the observable
-        if (!response || (!response.is_running && response.is_partial)) {
+        if (!response || (!response.isRunning && response.isPartial)) {
           return throwError(new AbortError());
         }
 
         // If the response indicates it is complete, stop polling and complete the observable
-        if (!response.is_running) {
+        if (!response.isRunning) {
           return EMPTY;
         }
 
@@ -97,7 +97,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            return this.runSearch({ id }, combinedSignal) as Observable<IAsyncSearchResponse>;
+            return this.runSearch({ id }, combinedSignal, options?.strategy);
           })
         );
       }),
