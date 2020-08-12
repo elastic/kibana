@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
+import { useMlKibana } from '../../contexts/kibana';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -39,6 +41,8 @@ export interface InferenceConfigResponse {
     version: string;
   }>;
 }
+
+export type ModelConfigResponse = InferenceConfigResponse['trained_model_configs'][number];
 
 export interface InferenceStatsResponse {
   count: number;
@@ -95,13 +99,13 @@ export function inferenceApiProvider(httpService: HttpService) {
      * @param params - Optional query params
      */
     getInferenceModel(modelId?: string | string[], params?: InferenceQueryParams) {
-      let model = modelId ?? '_all';
+      let model = modelId ?? '';
       if (Array.isArray(modelId)) {
         model = modelId.join(',');
       }
 
       return httpService.http<InferenceConfigResponse>({
-        path: `${apiBasePath}/inference/${model}`,
+        path: `${apiBasePath}/inference${model && `/${model}`}`,
         method: 'GET',
       });
     },
@@ -125,4 +129,18 @@ export function inferenceApiProvider(httpService: HttpService) {
       });
     },
   };
+}
+
+type InferenceApiService = ReturnType<typeof inferenceApiProvider>;
+
+/**
+ * Hooks for accessing {@link InferenceApiService} in React components.
+ */
+export function useInferenceApiService(): InferenceApiService {
+  const {
+    services: {
+      mlServices: { httpService },
+    },
+  } = useMlKibana();
+  return useMemo(() => inferenceApiProvider(httpService), [httpService]);
 }

@@ -271,6 +271,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   return (
     <>
       {modals}
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {analyticsStats && (
