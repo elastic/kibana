@@ -259,7 +259,6 @@
     "type-detect": "^4.0.8",
     "ui-select": "0.19.8",
     "uuid": "3.3.2",
-    "validate-npm-package-name": "2.2.2",
     "vega": "^5.13.0",
     "vega-lite": "^4.13.1",
     "vega-schema-url-parser": "^1.1.0",
