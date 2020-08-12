@@ -63,6 +63,7 @@ export class VegaBaseView {
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
+    this._vis = opts.vis;
     this._timefilter = opts.timefilter;
     this._findIndex = opts.findIndex;
     this._view = null;
@@ -263,7 +264,8 @@ export class VegaBaseView {
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
-    this._filterManager.addFilters(filter);
+
+    this._vis.API.events.applyFilter({ filters: [filter] });
   }
 
   /**
@@ -298,7 +300,22 @@ export class VegaBaseView {
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
-    this._timefilter.setTime(VegaBaseView._parseTimeRange(start, end));
+    const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
+
+    this._vis.API.events.applyFilter({
+      timeFieldName: '*',
+      filters: [
+        {
+          range: {
+            '*': {
+              mode,
+              gte: from,
+              lte: to,
+            },
+          },
+        },
+      ],
+    });
   }
 
   /**

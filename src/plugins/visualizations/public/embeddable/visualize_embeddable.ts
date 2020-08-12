@@ -309,6 +309,16 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           return;
         }
 
+        if (event.name === 'applyFilter') {
+          const context = {
+            embeddable: this,
+            timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+            ...event.data,
+          };
+
+          getUiActions().getTrigger(VIS_EVENT_TO_TRIGGER.applyFilter).exec(context);
+        }
+
         if (!this.input.disableTriggers) {
           const triggerId =
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;

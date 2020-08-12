@@ -18,28 +18,37 @@
  */
 
 import { createBrushHandler } from './create_brush_handler';
-import moment from 'moment';
+import { ExprVis } from '../../../../visualizations/public';
 
 describe('brushHandler', () => {
-  let mockTimefilter;
-  let onBrush;
+  let onBrush: ReturnType<typeof createBrushHandler>;
+  let vis: ExprVis;
 
   beforeEach(() => {
-    mockTimefilter = {
-      time: {},
-      setTime: function (time) {
-        this.time = time;
+    vis = ({
+      API: {
+        events: {
+          applyFilter: jest.fn(),
+        },
       },
-    };
-    onBrush = createBrushHandler(mockTimefilter);
+    } as unknown) as ExprVis;
+
+    onBrush = createBrushHandler(vis);
   });
 
-  it('returns brushHandler() that updates timefilter', () => {
-    const from = '2017-01-01T00:00:00Z';
-    const to = '2017-01-01T00:10:00Z';
-    onBrush(from, to);
-    expect(mockTimefilter.time.from).toEqual(moment(from).toISOString());
-    expect(mockTimefilter.time.to).toEqual(moment(to).toISOString());
-    expect(mockTimefilter.time.mode).toEqual('absolute');
+  test('returns brushHandler() should updates timefilter through vis.API.events.brush', () => {
+    const gte = '2017-01-01T00:00:00Z';
+    const lte = '2017-01-01T00:10:00Z';
+
+    onBrush(gte, lte);
+
+    expect(vis.API.events.applyFilter).toHaveBeenCalledWith({
+      timeFieldName: '*',
+      filters: [
+        {
+          range: { '*': { gte: '2017-01-01T00:00:00Z', lte: '2017-01-01T00:10:00Z' } },
+        },
+      ],
+    });
   });
 });

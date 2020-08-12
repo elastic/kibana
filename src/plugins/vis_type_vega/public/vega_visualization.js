@@ -106,6 +106,7 @@ export const createVegaVisualization = ({ serviceSettings }) =>
         const { timefilter } = this.dataPlugin.query.timefilter;
         const vegaViewParams = {
           parentEl: this._el,
+          vis: this._vis,
           vegaParser,
           serviceSettings,
           filterManager,
