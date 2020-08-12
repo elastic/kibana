@@ -416,5 +416,5 @@ See
 // tag::workpad-def[]
 A workspace where you build presentations of your live data in <<glossary-canvas,Canvas>>.
 See
-{kibana-ref}/create-canvas-workpad.html[Create a workpad].
+{kibana-ref}/canvas.html[Create a workpad].
 // end::workpad-def[]
