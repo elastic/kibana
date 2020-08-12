@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
 import chartTableSVG from '../assets/chart_datatable.svg';
@@ -185,7 +186,7 @@ export const datatableVisualization: Visualization<
     };
   },
 
-  toExpression(state, frame) {
+  toExpression(state, frame): Ast {
     const layer = state.layers[0];
     const datasource = frame.datasourceLayers[layer.layerId];
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);

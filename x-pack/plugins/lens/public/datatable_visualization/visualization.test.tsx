@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource } from '../editor_frame_service/mocks';
 import { DatatableVisualizationState, datatableVisualization } from './visualization';
@@ -339,7 +340,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const expression = datatableVisualization.toExpression({ layers: [layer] }, frame);
+      const expression = datatableVisualization.toExpression({ layers: [layer] }, frame) as Ast;
       const tableArgs = buildExpression(expression).findFunction('lens_datatable_columns');
 
       expect(tableArgs).toHaveLength(1);
