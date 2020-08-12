@@ -13,6 +13,7 @@ import { ScopedHistory } from 'kibana/public';
 import { DataStream } from '../../../../../../common/types';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { encodePathForReactRouter } from '../../../../services/routing';
+import { DataHealth } from '../../../../components';
 import { Section } from '../../../home';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 
@@ -51,6 +52,17 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             {name}
           </EuiLink>
         );
+      },
+    },
+    {
+      field: 'health',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.nameColumnTitle', {
+        defaultMessage: 'Health',
+      }),
+      truncateText: true,
+      sortable: true,
+      render: (health: DataStream['health']) => {
+        return <DataHealth health={health} />;
       },
     },
     {

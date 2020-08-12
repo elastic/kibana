@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,9 +24,50 @@ import {
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../shared_imports';
-import { SectionLoading, SectionError, Error } from '../../../../components';
+import { SectionLoading, SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
+
+interface DetailsListProps {
+  details: Array<{
+    name: string;
+    toolTip: string;
+    content: any;
+  }>;
+}
+
+const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
+  const groups: any[] = [];
+  let items: any[];
+
+  details.forEach((detail, index) => {
+    const { name, toolTip, content } = detail;
+
+    if (index % 2 === 0) {
+      items = [];
+
+      groups.push(<EuiFlexGroup key={groups.length}>{items}</EuiFlexGroup>);
+    }
+
+    items.push(
+      <EuiFlexItem key={name}>
+        <EuiDescriptionListTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              {toolTip && <EuiIconTip content={toolTip} position="top" />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiDescriptionListTitle>
+
+        <EuiDescriptionListDescription>{content}</EuiDescriptionListDescription>
+      </EuiFlexItem>
+    );
+  });
+
+  return <EuiDescriptionList textStyle="reverse">{groups}</EuiDescriptionList>;
+};
 
 interface Props {
   dataStreamName: string;
@@ -48,116 +89,63 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   if (isLoading) {
     content = (
       <SectionLoading>
-        <FormattedMessage
-          id="xpack.idxMgmt.dataStreamDetailPanel.loadingDataStreamDescription"
-          defaultMessage="Loading data stream"
-        />
+        {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.loadingDataStreamDescription', {
+          defaultMessage: 'Loading data stream',
+        })}
       </SectionLoading>
     );
   } else if (error) {
     content = (
       <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamDetailPanel.loadingDataStreamErrorMessage"
-            defaultMessage="Error loading data stream"
-          />
-        }
+        title={i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.loadingDataStreamErrorMessage', {
+          defaultMessage: 'Error loading data stream',
+        })}
         error={error as Error}
         data-test-subj="sectionError"
       />
     );
   } else if (dataStream) {
-    const { indices, timeStampField, generation } = dataStream;
+    const { health, indices, timeStampField, generation } = dataStream;
+    const details = [
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
+          defaultMessage: 'Health',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthToolTip', {
+          defaultMessage: `The health of the data stream's current backing indices`,
+        }),
+        content: <DataHealth health={health} />,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesTitle', {
+          defaultMessage: 'Indices',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip', {
+          defaultMessage: `The data stream's current backing indices`,
+        }),
+        content: <EuiLink {...backingIndicesLink}>{indices.length}</EuiLink>,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle', {
+          defaultMessage: 'Timestamp field',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip', {
+          defaultMessage: 'Timestamp field shared by all documents in the data stream',
+        }),
+        content: timeStampField.name,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationTitle', {
+          defaultMessage: 'Generation',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationToolTip', {
+          defaultMessage: 'Cumulative count of backing indices created for the data stream',
+        }),
+        content: generation,
+      },
+    ];
 
-    content = (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.indicesTitle"
-                    defaultMessage="Indices"
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip"
-                        defaultMessage="The data stream's current backing indices"
-                      />
-                    }
-                    position="top"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription>
-              <EuiLink {...backingIndicesLink}>{indices.length}</EuiLink>
-            </EuiDescriptionListDescription>
-
-            <EuiDescriptionListTitle>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle"
-                    defaultMessage="Timestamp field"
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip"
-                        defaultMessage="Timestamp field shared by all documents in the data stream"
-                      />
-                    }
-                    position="top"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription>{timeStampField.name}</EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiDescriptionList textStyle="reverse">
-            <EuiDescriptionListTitle>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.generationTitle"
-                    defaultMessage="Generation"
-                  />
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.idxMgmt.dataStreamDetailPanel.generationToolTip"
-                        defaultMessage="Cumulative count of backing indices created for the data stream"
-                      />
-                    }
-                    position="top"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription>{generation}</EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    content = <DetailsList details={details} />;
   }
 
   return (
@@ -201,10 +189,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                 onClick={() => onClose()}
                 data-test-subj="closeDetailsButton"
               >
-                <FormattedMessage
-                  id="xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel"
-                  defaultMessage="Close"
-                />
+                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel', {
+                  defaultMessage: 'Close',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
 
@@ -216,10 +203,9 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   onClick={() => setIsDeleting(true)}
                   data-test-subj="deleteDataStreamButton"
                 >
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel"
-                    defaultMessage="Delete data stream"
-                  />
+                  {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel', {
+                    defaultMessage: 'Delete data stream',
+                  })}
                 </EuiButton>
               </EuiFlexItem>
             ) : null}

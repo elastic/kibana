@@ -174,4 +174,6 @@ export const createDataStreamPayload = (name: string): DataStream => ({
     },
   ],
   generation: 1,
+  health: 'green',
+  indexTemplateName: 'indexTemplate',
 });

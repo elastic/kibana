@@ -127,8 +127,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', '1', 'Delete'],
-        ['', 'dataStream2', '1', 'Delete'],
+        ['', 'dataStream1', 'green', '1', 'Delete'],
+        ['', 'dataStream2', 'green', '1', 'Delete'],
       ]);
     });
 

@@ -10,11 +10,16 @@ interface TimestampFieldFromEs {
 
 type TimestampField = TimestampFieldFromEs;
 
+export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
+
 export interface DataStreamFromEs {
   name: string;
   timestamp_field: TimestampFieldFromEs;
   indices: DataStreamIndexFromEs[];
   generation: number;
+  status: HealthFromEs;
+  template: string;
+  ilm_policy?: string;
 }
 
 export interface DataStreamIndexFromEs {
@@ -22,11 +27,16 @@ export interface DataStreamIndexFromEs {
   index_uuid: string;
 }
 
+export type Health = 'green' | 'yellow' | 'red';
+
 export interface DataStream {
   name: string;
   timeStampField: TimestampField;
   indices: DataStreamIndex[];
   generation: number;
+  health: Health;
+  indexTemplateName: string;
+  ilmPolicyName?: string;
 }
 
 export interface DataStreamIndex {
