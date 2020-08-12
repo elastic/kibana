@@ -55,10 +55,10 @@ describe('utils/kbn_field_types', () => {
       expect(kbnFieldType).toHaveProperty('name', ES_FIELD_TYPES.STRING);
     });
 
-    test('returns undefined for invalid name', () => {
+    test('returns unknown for invalid name', () => {
       const kbnFieldType = getKbnFieldType('wrongType');
 
-      expect(kbnFieldType).toBeUndefined();
+      expect(kbnFieldType).toHaveProperty('name', KBN_FIELD_TYPES.UNKNOWN);
     });
   });
 

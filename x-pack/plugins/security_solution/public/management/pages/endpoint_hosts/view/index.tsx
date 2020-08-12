@@ -25,9 +25,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { HostDetailsFlyout } from './details';
+import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
-import { useHostSelector } from './hooks';
+import { useEndpointSelector } from './hooks';
 import {
   HOST_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
@@ -46,12 +46,12 @@ import {
   AgentConfigDetailsDeployAgentAction,
 } from '../../../../../../ingest_manager/public';
 import { SecurityPageName } from '../../../../app/types';
-import { getHostListPath, getHostDetailsPath } from '../../../common/routing';
+import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
-import { HostAction } from '../store/action';
-import { HostPolicyLink } from './components/host_policy_link';
+import { EndpointAction } from '../store/action';
+import { EndpointPolicyLink } from './components/endpoint_policy_link';
 
-const HostListNavLink = memo<{
+const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
@@ -71,10 +71,10 @@ const HostListNavLink = memo<{
     </EuiLink>
   );
 });
-HostListNavLink.displayName = 'HostListNavLink';
+EndpointListNavLink.displayName = 'EndpointListNavLink';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-export const HostList = () => {
+export const EndpointList = () => {
   const history = useHistory();
   const {
     listData,
@@ -84,16 +84,16 @@ export const HostList = () => {
     listLoading: loading,
     listError,
     uiQueryParams: queryParams,
-    hasSelectedHost,
+    hasSelectedEndpoint,
     policyItems,
     selectedPolicyId,
     policyItemsLoading,
     endpointPackageVersion,
-    hostsExist,
-  } = useHostSelector(selector);
+    endpointsExist,
+  } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
-  const dispatch = useDispatch<(a: HostAction) => void>();
+  const dispatch = useDispatch<(a: EndpointAction) => void>();
 
   const paginationSetup = useMemo(() => {
     return {
@@ -108,10 +108,10 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
-      // FIXME: PT: if host details is open, table is not displaying correct number of rows
+      // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
       history.push(
-        getHostListPath({
-          name: 'hostList',
+        getEndpointListPath({
+          name: 'endpointList',
           ...queryParams,
           page_index: JSON.stringify(index),
           page_size: JSON.stringify(size),
@@ -130,12 +130,12 @@ export const HostList = () => {
       state: {
         onCancelNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
-        onCancelUrl: formatUrl(getHostListPath({ name: 'hostList' })),
+        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
         onSaveNavigateTo: [
           'securitySolution:administration',
-          { path: getHostListPath({ name: 'hostList' }) },
+          { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
     }
@@ -148,7 +148,7 @@ export const HostList = () => {
     state: {
       onDoneNavigateTo: [
         'securitySolution:administration',
-        { path: getHostListPath({ name: 'hostList' }) },
+        { path: getEndpointListPath({ name: 'endpointList' }) },
       ],
     },
   });
@@ -183,28 +183,28 @@ export const HostList = () => {
   );
 
   const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
-    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpointList.lastActive', {
+    const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
       defaultMessage: 'Last Active',
     });
 
     return [
       {
         field: 'metadata.host',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostname', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
         render: ({ hostname, id }: HostInfo['metadata']['host']) => {
-          const toRoutePath = getHostDetailsPath(
+          const toRoutePath = getEndpointDetailsPath(
             {
               ...queryParams,
-              name: 'hostDetails',
-              selected_host: id,
+              name: 'endpointDetails',
+              selected_endpoint: id,
             },
             search
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <HostListNavLink
+            <EndpointListNavLink
               name={hostname}
               href={toRouteUrl}
               route={toRoutePath}
@@ -215,8 +215,8 @@ export const HostList = () => {
       },
       {
         field: 'host_status',
-        name: i18n.translate('xpack.securitySolution.endpointList.hostStatus', {
-          defaultMessage: 'Host Status',
+        name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
+          defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
@@ -227,7 +227,7 @@ export const HostList = () => {
               className="eui-textTruncate"
             >
               <FormattedMessage
-                id="xpack.securitySolution.endpointList.hostStatusValue"
+                id="xpack.securitySolution.endpoint.list.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
                 values={{ hostStatus }}
               />
@@ -237,33 +237,33 @@ export const HostList = () => {
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policy', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policy', {
           defaultMessage: 'Integration',
         }),
         truncateText: true,
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <HostPolicyLink
+            <EndpointPolicyLink
               policyId={policy.id}
               className="eui-textTruncate"
               data-test-subj="policyNameCellLink"
             >
               {policy.name}
-            </HostPolicyLink>
+            </EndpointPolicyLink>
           );
         },
       },
       {
         field: 'metadata.Endpoint.policy.applied',
-        name: i18n.translate('xpack.securitySolution.endpointList.policyStatus', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.policyStatus', {
           defaultMessage: 'Configuration Status',
         }),
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied'], item: HostInfo) => {
-          const toRoutePath = getHostDetailsPath({
-            name: 'hostPolicyResponse',
+          const toRoutePath = getEndpointDetailsPath({
+            name: 'endpointPolicyResponse',
             ...queryParams,
-            selected_host: item.metadata.host.id,
+            selected_endpoint: item.metadata.host.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
@@ -272,7 +272,7 @@ export const HostList = () => {
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
-              <HostListNavLink
+              <EndpointListNavLink
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
@@ -284,14 +284,14 @@ export const HostList = () => {
       },
       {
         field: 'metadata.host.os.name',
-        name: i18n.translate('xpack.securitySolution.endpointList.os', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
         truncateText: true,
       },
       {
         field: 'metadata.host.ip',
-        name: i18n.translate('xpack.securitySolution.endpointList.ip', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
         // eslint-disable-next-line react/display-name
@@ -309,7 +309,7 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.securitySolution.endpointList.endpointVersion', {
+        name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
       },
@@ -330,10 +330,10 @@ export const HostList = () => {
   }, [formatUrl, queryParams, search]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (hostsExist) {
+    if (endpointsExist) {
       return (
         <EuiBasicTable
-          data-test-subj="hostListTable"
+          data-test-subj="endpointListTable"
           items={[...listData]}
           columns={columns}
           error={listError?.message}
@@ -359,7 +359,7 @@ export const HostList = () => {
     }
   }, [
     loading,
-    hostsExist,
+    endpointsExist,
     policyItemsLoading,
     policyItems,
     listData,
@@ -377,7 +377,7 @@ export const HostList = () => {
   return (
     <ManagementPageView
       viewType="list"
-      data-test-subj="hostPage"
+      data-test-subj="endpointPage"
       headerLeft={
         <>
           <EuiFlexGroup alignItems="center" responsive={false}>
@@ -385,15 +385,15 @@ export const HostList = () => {
               <EuiTitle size="l">
                 <h1 data-test-subj="pageViewHeaderLeftTitle">
                   <FormattedMessage
-                    id="xpack.securitySolution.hostList.pageTitle"
-                    defaultMessage="Hosts"
+                    id="xpack.securitySolution.endpoint.list.pageTitle"
+                    defaultMessage="Endpoints"
                   />
                 </h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
-                label={i18n.translate('xpack.securitySolution.endpoint.hostList.beta', {
+                label={i18n.translate('xpack.securitySolution.endpoint.list.beta', {
                   defaultMessage: 'Beta',
                 })}
               />
@@ -403,7 +403,7 @@ export const HostList = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.hostList.pageSubTitle"
+                id="xpack.securitySolution.endpoint.list.pageSubTitle"
                 defaultMessage="Hosts running Elastic Endpoint Security"
               />
             </p>
@@ -411,12 +411,12 @@ export const HostList = () => {
         </>
       }
     >
-      {hasSelectedHost && <HostDetailsFlyout />}
+      {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       {listData && listData.length > 0 && (
         <>
-          <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
+          <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             <FormattedMessage
-              id="xpack.securitySolution.endpointList.totalCount"
+              id="xpack.securitySolution.endpoint.list.totalCount"
               defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
               values={{ totalItemCount }}
             />

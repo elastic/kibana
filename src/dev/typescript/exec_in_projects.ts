@@ -43,7 +43,7 @@ export function execInProjects(
           // execute in the current working directory so that relative paths in errors
           // are relative from the right location
           cwd: process.cwd(),
-          env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
+          env: chalk.level > 0 ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
           preferLocal: true,
         }).catch((error) => {
