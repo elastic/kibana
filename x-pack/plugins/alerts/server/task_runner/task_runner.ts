@@ -355,8 +355,13 @@ interface GenerateNewAndResolvedInstanceEventsParams {
 }
 
 function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInstanceEventsParams) {
-  const { eventLogger, alertId, namespace } = params;
-  const { currentAlertInstanceIds, originalAlertInstanceIds } = params;
+  const {
+    eventLogger,
+    alertId,
+    namespace,
+    currentAlertInstanceIds,
+    originalAlertInstanceIds,
+  } = params;
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);

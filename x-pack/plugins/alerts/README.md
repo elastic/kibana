@@ -514,7 +514,7 @@ Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose state you're trying to get.|string|
+|id|The id of the alert whose status you're trying to get.|string|
 
 Query:
 

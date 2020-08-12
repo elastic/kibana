@@ -285,9 +285,7 @@ export class AlertsClient {
   }
 
   public async getAlertStatus({ id, dateStart }: GetAlertStatusParams): Promise<AlertStatus> {
-    const eventLogClient = await this.getEventLogClient();
-
-    this.logger.debug('getAlertStatus(): getting the alert');
+    this.logger.debug(`getAlertStatus(): getting alert ${id}`);
     const alert = await this.get({ id });
     await this.authorization.ensureAuthorized(
       alert.alertTypeId,
@@ -301,7 +299,9 @@ export class AlertsClient {
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 
-    this.logger.debug('getAlertStatus(): search the event log');
+    const eventLogClient = await this.getEventLogClient();
+
+    this.logger.debug(`getAlertStatus(): search the event log for alert ${id}`);
     let events: IEvent[];
     try {
       const queryResults = await eventLogClient.findEventsBySavedObject('alert', id, {
@@ -313,7 +313,9 @@ export class AlertsClient {
       });
       events = queryResults.data;
     } catch (err) {
-      this.logger.debug(`alertsClient.getAlertStatus(): error searching event log: ${err.message}`);
+      this.logger.debug(
+        `alertsClient.getAlertStatus(): error searching event log for alert ${id}: ${err.message}`
+      );
       events = [];
     }
 
@@ -323,31 +325,6 @@ export class AlertsClient {
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
     });
-
-    function parseDate(
-      dateString: string | undefined,
-      propertyName: string,
-      defaultValue: Date
-    ): Date {
-      if (dateString === undefined) {
-        return defaultValue;
-      }
-
-      const parsedDate = parseIsoOrRelativeDate(dateString);
-      if (parsedDate === undefined) {
-        throw Boom.badRequest(
-          i18n.translate('xpack.alerts.alertsClient.getAlertStatus.invalidDate', {
-            defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
-            values: {
-              field: propertyName,
-              dateValue: dateString,
-            },
-          })
-        );
-      }
-
-      return parsedDate;
-    }
   }
 
   public async find({
@@ -965,4 +942,25 @@ export class AlertsClient {
   private generateAPIKeyName(alertTypeId: string, alertName: string) {
     return truncate(`Alerting: ${alertTypeId}/${alertName}`, { length: 256 });
   }
+}
+
+function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerts.alertsClient.getAlertStatus.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
 }
