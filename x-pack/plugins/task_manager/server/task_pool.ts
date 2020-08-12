@@ -31,7 +31,7 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private maxWorkers: number;
+  public readonly maxWorkers: number;
   private running = new Set<TaskRunner>();
   private logger: Logger;
 
@@ -53,6 +53,13 @@ export class TaskPool {
    */
   public get occupiedWorkers() {
     return this.running.size;
+  }
+
+  /**
+   * Gets how many workers are currently in use.
+   */
+  public getOccupiedWorkersByType(type: string) {
+    return [...this.running].reduce((count, runningTask) => runningTask.definition.type === type ? ++count : count, 0);
   }
 
   /**

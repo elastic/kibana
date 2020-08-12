@@ -65,6 +65,8 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 };
 
 describe('TaskStore', () => {
+  const taskTypes = new Set(['foo', 'bar']);
+  
   describe('schedule', () => {
     async function testSchedule(task: unknown) {
       const callCluster = jest.fn();
@@ -292,6 +294,7 @@ describe('TaskStore', () => {
       const { docs } = await store.claimAvailableTasks({
         claimOwnershipUntil: new Date(),
         size: 10,
+        taskTypes,
       });
       sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWithMatch(callCluster, 'updateByQuery', {
@@ -327,7 +330,7 @@ describe('TaskStore', () => {
             },
           },
         },
-        claimingOpts: { claimOwnershipUntil: new Date(), size: 10 },
+        claimingOpts: { claimOwnershipUntil: new Date(), size: 10, taskTypes },
       });
       expect(query).toMatchObject({
         bool: {
@@ -423,6 +426,22 @@ describe('TaskStore', () => {
                       ],
                     },
                   },
+                  {
+                    bool:  {
+                      should:  [
+                        { 
+                          term:  {
+                            "task.taskType": "foo",
+                          },
+                        },
+                        {
+                          term:  {
+                            "task.taskType": "bar",
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -464,6 +483,7 @@ describe('TaskStore', () => {
             '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
             'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
           ],
+          taskTypes,
         },
       });
 
@@ -569,6 +589,22 @@ describe('TaskStore', () => {
                       ],
                     },
                   },
+                  {
+                    bool:  {
+                      should:  [
+                        { 
+                          term:  {
+                            "task.taskType": "foo",
+                          },
+                        },
+                        {
+                          term:  {
+                            "task.taskType": "bar",
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
               },
             },
@@ -614,6 +650,7 @@ if (doc['task.runAt'].size()!=0) {
         claimingOpts: {
           claimOwnershipUntil,
           size: 10,
+          taskTypes,
         },
       });
       expect(script).toMatchObject({
@@ -689,6 +726,7 @@ if (doc['task.runAt'].size()!=0) {
         claimingOpts: {
           claimOwnershipUntil,
           size: 10,
+          taskTypes,
         },
         hits: tasks,
       });
@@ -1108,6 +1146,7 @@ if (doc['task.runAt'].size()!=0) {
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
+        taskTypes,
       });
     });
 
@@ -1170,6 +1209,7 @@ if (doc['task.runAt'].size()!=0) {
         claimTasksById: ['claimed-by-id'],
         claimOwnershipUntil: new Date(),
         size: 10,
+        taskTypes,
       });
     });
 
@@ -1234,6 +1274,7 @@ if (doc['task.runAt'].size()!=0) {
         claimTasksById: ['already-running'],
         claimOwnershipUntil: new Date(),
         size: 10,
+        taskTypes,
       });
     });
 
@@ -1276,6 +1317,7 @@ if (doc['task.runAt'].size()!=0) {
         claimTasksById: ['unknown-task'],
         claimOwnershipUntil: new Date(),
         size: 10,
+        taskTypes,
       });
     });
   });

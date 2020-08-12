@@ -61,6 +61,7 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { BufferedTaskStore } from './buffered_task_store';
 
 const VERSION_CONFLICT_STATUS = 409;
+const DEFAULT_POLLER = '*';
 
 export interface TaskManagerOpts {
   logger: Logger;
@@ -92,6 +93,7 @@ export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRun
  */
 export class TaskManager {
   private definitions: TaskDictionary<TaskDefinition> = {};
+  private config: TaskManagerConfig;
 
   private store: TaskStore;
   private bufferedStore: BufferedTaskStore;
@@ -103,9 +105,9 @@ export class TaskManager {
   // all on-demand requests we wish to pipe into the poller
   private claimRequests$ = new Subject<Option<string>>();
   // the task poller that polls for work on fixed intervals and on demand
-  private poller$: Observable<Result<FillPoolResult, PollingError<string>>>;
+  private pollers$: Map<string, Observable<Result<FillPoolResult, PollingError<string>>>>;
   // our subscription to the poller
-  private pollingSubscription: Subscription = Subscription.EMPTY;
+  private pollingSubscription: Map<string, Subscription>;
 
   private startQueue: Array<() => void> = [];
   private middleware = {
@@ -121,6 +123,7 @@ export class TaskManager {
    */
   constructor(opts: TaskManagerOpts) {
     this.logger = opts.logger;
+    this.config = opts.config;
 
     const { taskManagerId } = opts;
     if (!taskManagerId) {
@@ -153,13 +156,15 @@ export class TaskManager {
       maxWorkers: opts.config.max_workers,
     });
 
-    this.poller$ = createTaskPoller<string, FillPoolResult>({
+    this.pollers$ = new Map();
+    this.pollingSubscription = new Map();
+    this.pollers$.set(DEFAULT_POLLER, createTaskPoller<string, FillPoolResult>({
       pollInterval: opts.config.poll_interval,
       bufferCapacity: opts.config.request_capacity,
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
-      work: this.pollForWork,
-    });
+      work: this.pollForWork(),
+    }));
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {
@@ -183,19 +188,39 @@ export class TaskManager {
   };
 
   public get isStarted() {
-    return !this.pollingSubscription.closed;
+    return this.pollingSubscription.has(DEFAULT_POLLER) && !this.pollingSubscription.get(DEFAULT_POLLER)?.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+  private pollForWork = (taskType?: TaskDefinition) => async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
     return fillPool(
       // claim available tasks
-      () =>
-        claimAvailableTasks(
+      () =>{
+        console.log(`POLLING FOR WORK${taskType? ' FOR ' + taskType.type : ''}`)
+        console.log(`availableWorkers:${Math.max(
+          0,
+          taskType?.hasOwnProperty('maxConcurrency')
+            ? taskType.maxConcurrency! - this.pool.getOccupiedWorkersByType(taskType.type)
+            : this.pool.availableWorkers
+        )}`)
+        return claimAvailableTasks(
           tasksToClaim.splice(0, this.pool.availableWorkers),
           this.store.claimAvailableTasks,
-          this.pool.availableWorkers,
+          Math.max(
+            0,
+            taskType?.hasOwnProperty('maxConcurrency')
+              ? taskType.maxConcurrency! - this.pool.getOccupiedWorkersByType(taskType.type)
+              : this.pool.availableWorkers
+          ),
+          taskType
+            ? new Set([taskType.type])
+            : new Set(
+                Object
+                  .entries(this.definitions)
+                  .filter(([,definition]) => !definition.hasOwnProperty('maxConcurrency'))
+                  .map(([task]) => task)
+            ),
           this.logger
-        ),
+        )},
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
@@ -212,17 +237,19 @@ export class TaskManager {
       this.startQueue.forEach((fn) => fn());
       this.startQueue = [];
 
-      this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: PollingError<string>) => {
-          if (error.type === PollingErrorType.RequestCapacityReached) {
-            pipe(
-              error.data,
-              mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
-            );
-          }
-          this.logger.error(error.message);
-        })
-      );
+      this.pollers$.forEach((poller$, type) => {
+        this.pollingSubscription.set(type, poller$.subscribe(
+          mapErr((error: PollingError<string>) => {
+            if (error.type === PollingErrorType.RequestCapacityReached) {
+              pipe(
+                error.data,
+                mapOptional((id) => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+              );
+            }
+            this.logger.error(error.message);
+          })
+        ));
+      });
     }
   }
 
@@ -239,7 +266,7 @@ export class TaskManager {
    */
   public stop() {
     if (this.isStarted) {
-      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription.forEach(subscription => subscription.unsubscribe());
       this.pool.cancelRunningTasks();
     }
   }
@@ -262,6 +289,20 @@ export class TaskManager {
     } catch (e) {
       this.logger.error('Could not sanitize task definitions');
     }
+
+    Object.values(taskDefinitions)
+      .filter(taskDefinition => taskDefinition.hasOwnProperty('maxConcurrency') && taskDefinition.maxConcurrency! > 0)
+      .forEach(taskDefinition => {
+        console.log(`CREATING POLLER FOR ${taskDefinition.type}`)
+        this.pollers$.set(taskDefinition.type, createTaskPoller<string, FillPoolResult>({
+          pollInterval: this.config.poll_interval,
+          bufferCapacity: this.config.request_capacity,
+          getCapacity: () => this.pool.availableWorkers,
+          pollRequests$: this.claimRequests$,
+          work: this.pollForWork(taskDefinition),
+        }));
+      })
+
   }
 
   /**
@@ -382,6 +423,7 @@ export async function claimAvailableTasks(
   claimTasksById: string[],
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
+  taskTypes: Set<string>,
   logger: Logger
 ) {
   if (availableWorkers > 0) {
@@ -392,6 +434,7 @@ export async function claimAvailableTasks(
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
+        taskTypes,
       });
 
       if (claimedTasks === 0) {

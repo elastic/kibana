@@ -10,8 +10,10 @@ import {
   TermFilter,
   RangeFilter,
   mustBeAllOf,
+  shouldBeOneOf,
   MustCondition,
   BoolClauseWithAnyCondition,
+  ShouldCondition,
 } from './query_clauses';
 
 export const TaskWithSchedule: ExistsFilter = {
@@ -35,6 +37,15 @@ export function taskWithLessThanMaxAttempts(
       ],
     },
   };
+}
+
+
+export function tasksOfType(
+  ...types: string[]
+): ShouldCondition<TermFilter> {
+  return shouldBeOneOf(
+    ...types.map(type => ({ term: { 'task.taskType': type } }))
+  );
 }
 
 export function tasksClaimedByOwner(taskManagerId: string) {

@@ -128,6 +128,8 @@ export interface TaskDefinition {
    */
   maxAttempts?: number;
 
+  maxConcurrency?: number;
+
   /**
    * Function that customizes how the task should behave when the task fails. This
    * function can return `true`, `false` or a Date. True will tell task manager
@@ -150,6 +152,7 @@ export const validateTaskDefinition = Joi.object({
   description: Joi.string().optional(),
   timeout: Joi.string().default('5m'),
   maxAttempts: Joi.number().min(1).optional(),
+  maxConcurrency: Joi.number().min(0).optional(),
   createTaskRunner: Joi.func().required(),
   getRetry: Joi.func().optional(),
 }).default();

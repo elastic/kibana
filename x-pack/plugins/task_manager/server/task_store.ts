@@ -59,6 +59,7 @@ import {
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
+  tasksOfType,
 } from './queries/mark_available_tasks_as_claimed';
 
 export interface StoreOpts {
@@ -91,6 +92,7 @@ export interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
   claimTasksById?: string[];
   size: number;
+  taskTypes: Set<string>;
 }
 
 export interface FetchResult {
@@ -207,6 +209,7 @@ export class TaskStore {
     claimOwnershipUntil,
     claimTasksById = [],
     size,
+    taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
     const claimTasksByIdWithRawIds = claimTasksById.map((id) =>
       this.serializer.generateRawId(undefined, 'task', id)
@@ -215,7 +218,8 @@ export class TaskStore {
     const numberOfTasksClaimed = await this.markAvailableTasksAsClaimed(
       claimOwnershipUntil,
       claimTasksByIdWithRawIds,
-      size
+      size,
+      taskTypes
     );
     const docs =
       numberOfTasksClaimed > 0
@@ -265,7 +269,8 @@ export class TaskStore {
   private async markAvailableTasksAsClaimed(
     claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
-    size: OwnershipClaimingOpts['size']
+    size: OwnershipClaimingOpts['size'],
+    taskTypes: Set<string>,
   ): Promise<number> {
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
@@ -274,7 +279,9 @@ export class TaskStore {
       // Either task has a schedule or the attempts < the maximum configured
       shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
         TaskWithSchedule,
-        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
+        ...Object.entries(this.definitions)
+          .filter(([type])=> taskTypes.has(type))
+          .map(([type, { maxAttempts }]) =>
           taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
         )
       )
@@ -289,7 +296,12 @@ export class TaskStore {
               ? asPinnedQuery(claimTasksById, queryForScheduledTasks)
               : queryForScheduledTasks
           ),
-          filterDownBy(InactiveTasks)
+          filterDownBy(
+            InactiveTasks,
+            tasksOfType(
+              ...taskTypes
+            )
+          )
         ),
         update: updateFields({
           ownerId: this.taskManagerId,

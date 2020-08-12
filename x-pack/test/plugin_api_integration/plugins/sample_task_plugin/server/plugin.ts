@@ -105,6 +105,14 @@ export class SampleTaskManagerFixturePlugin
         // fail after the first failed run
         maxAttempts: 1,
       },
+      limitedConcurrencyTask: {
+        type: 'limitedConcurrencyTask',
+        title: 'Limited Concurrency Task',
+        description: 'A task with Limited Concurrency',
+        maxConcurrency: 1,
+        timeout: '1m',
+        createTaskRunner: createLimitedConcurrencyTaskRunner(taskTestingEvents)
+      },
     });
 
     taskManager.addMiddleware({
@@ -162,3 +170,50 @@ const once = function (emitter: EventEmitter, event: string): Promise<Record<str
     emitter.once(event, (data) => resolve(data || {}));
   });
 };
+
+class Mutex {
+  private isLocked: boolean;
+  
+  constructor(){
+    this.isLocked = false;
+  }
+
+  lock(){
+    if(this.isLocked){
+      throw new Error(`Can't access this code concurrently`);
+    }
+    this.isLocked = true;
+  }
+
+  unlock(){
+    this.isLocked = false;
+  }
+}
+
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function createLimitedConcurrencyTaskRunner(taskTestingEvents: EventEmitter) {
+  const mutex = new Mutex();
+  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+    async run() {
+      const { params, state, id } = taskInstance;
+      console.log(`Limited Concurrency Task: ${id}`)
+      const prevState = state || { count: 0 };
+      const count = (prevState.count || 0) + 1;
+
+      console.log(`LOCK: ${id}`)
+      mutex.lock();
+
+      // Stall task  run until a certain event is triggered
+      if (params.waitForEvent) {
+        await once(taskTestingEvents, params.waitForEvent);
+      }
+
+      console.log(`UNLOCK: ${id}`)
+      mutex.unlock();
+      return {
+        state: { count },
+      };
+    },
+  })
+}

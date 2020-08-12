@@ -29,7 +29,7 @@ export default function ({ getService }) {
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   // FLAKY: https://github.com/elastic/kibana/issues/71390
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(
       async () => await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200)
     );
@@ -607,6 +607,44 @@ export default function ({ getService }) {
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
+    });
+
+    it('should not run tasks in parallel beyond their configured concurrency', async () => {
+      const nonConcurrentTask = await scheduleTask({
+        taskType: 'limitedConcurrencyTask',
+        schedule: { interval: `${parseInt(DEFAULT_POLL_INTERVAL/1000)}s` },
+        params: {},
+      });
+
+      console.log(`nonConcurrentTask ${nonConcurrentTask.id}`)
+
+      const longRunningnonConcurrentTask = await scheduleTask({
+        taskType: 'limitedConcurrencyTask',
+        params: {
+          waitForEvent: 'releaseConcurrentTask',
+        },
+      });
+
+      console.log(`longRunningnonConcurrentTask ${longRunningnonConcurrentTask.id}`)
+
+      await retry.try(async () => {
+        const task = await currentTask(longRunningnonConcurrentTask.id);
+        expect(task.status).to.eql('running');
+      });
+
+      const task = await currentTask(nonConcurrentTask.id);
+
+      await delay(DEFAULT_POLL_INTERVAL * 2);
+
+      const taskAfterDelay = await currentTask(nonConcurrentTask.id);
+      expect(task.state.count).to.eql(taskAfterDelay.state.count);
+      
+      await releaseTasksWaitingForEventToComplete('releaseConcurrentTask');
+
+      await delay(DEFAULT_POLL_INTERVAL * 2);
+
+      const taskAfterReleasedConcurrency = await currentTask(nonConcurrentTask.id);
+      expect(taskAfterReleasedConcurrency.state.count).to.be.greaterThan(taskAfterDelay.state.count);
     });
   });
 }
