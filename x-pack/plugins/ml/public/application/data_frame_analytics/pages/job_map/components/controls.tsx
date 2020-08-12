@@ -154,6 +154,7 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
 
   useEffect(() => {
     setEvalData([]);
+    // TODO: only fetch eval data if it's an analytics job
     if (selectedNode !== undefined) {
       fetchEvalData();
     }
