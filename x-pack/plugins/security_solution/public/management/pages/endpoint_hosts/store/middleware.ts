@@ -15,7 +15,6 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
-  isAutoRefreshEnabled,
 } from './selectors';
 import { EndpointState } from '../types';
 import {

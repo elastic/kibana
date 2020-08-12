@@ -88,7 +88,7 @@ interface ServerReturnedEndpointExistValue {
 
 interface ServerToggledEndpointListAutoRefresh {
   type: 'serverToggledEndpointListAutoRefresh';
-  paylod: boolean;
+  payload: boolean;
 }
 
 interface AppRequestedEndpointList {
@@ -109,7 +109,6 @@ export type EndpointAction =
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedHostNonExistingPolicies
   | ServerToggledEndpointListAutoRefresh
   | AppRequestedEndpointList
   | ServerReturnedEndpointNonExistingPolicies;
