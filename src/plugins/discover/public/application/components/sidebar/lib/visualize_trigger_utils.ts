@@ -56,7 +56,7 @@ export function triggerVisualizeActions(
     fieldName: field.name,
     contextualFields: trigger === VISUALIZE_GEO_FIELD_TRIGGER ? contextualFields : [],
   };
-  getUiActions().executeTriggerActions(trigger, triggerOptions);
+  getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
 
 export async function isFieldVisualizable(

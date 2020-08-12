@@ -69,6 +69,7 @@ export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>(
     const urlState: VisualizeUrlGeneratorState = {
       filters: getQueryService().filterManager.getFilters(),
       query: getQueryService().queryString.getQuery(),
+      timeRange: getQueryService().timefilter.timefilter.getTime(),
       indexPatternId: context.indexPatternId,
       type: 'histogram',
       vis: {
