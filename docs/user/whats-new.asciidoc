@@ -62,15 +62,15 @@ instead of changing the index for each individual element. For instructions, ref
 
 [float]
 [[lens-7-9]]
-=== Multiple Y axes in Lens
+=== Multiple Y-axes in Lens
 
-In Lens, you can now compare two metrics on the Y axes at the same time.
-This enables you compare and contrast data with vastly different ranges.
+Compare two metrics on the y-axes at the same time.
+This enables you compare and contrast data of vastly different types and ranges.
 For example, you might track the total page views for your web site,
-which could tally in the millions. At the same time, you're also interested
-in the percentage of web site bounce rates,
-typically between 1 and 100. You can stack both metrics on top of one
-another to quickly spot outliers.
+which tallies in the millions. At the same time, you're also interested
+in the percentage of the web site bounce rates,
+typically between 1 and 100. You can now stack both metrics on top of one
+another to quickly spot the outliers.
 
 Also in 7.9, Lens debuts color pick, sort, and a fitting function.
 
