@@ -225,7 +225,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
                     id="xpack.infra.metrics.alertFlyout.alertPreviewTotalNotifications"
                     defaultMessage="Based on the {notifyEvery} setting, this alert would have sent {notifications}."
                     values={{
-                      notifyEvery: <strong>Notify every</strong>,
+                      notifyEvery: <strong>notify every</strong>,
                       notifications: (
                         <strong>
                           {i18n.translate(
