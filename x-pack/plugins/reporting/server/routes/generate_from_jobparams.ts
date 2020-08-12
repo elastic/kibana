@@ -67,7 +67,7 @@ export function registerGenerateFromJobParams(
       }
 
       const { exportType } = req.params as { exportType: string };
-      let jobParams: CreateJobBaseParams | null;
+      let jobParams;
 
       try {
         jobParams = rison.decode(jobParamsRison) as CreateJobBaseParams | null;

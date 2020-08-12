@@ -36,7 +36,7 @@ export type ReportingRequestQuery = ListQuery | GenerateQuery;
 
 export interface ReportingRequestPre {
   management: {
-    jobTypes: any;
+    jobTypes: string[];
   };
   user: string;
 }
