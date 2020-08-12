@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
     await transform.api.createTransform(config);
   }
 
-  describe('delete_transforms', function () {
+  describe('/api/transform/delete_transforms', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
