@@ -32,7 +32,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
     // Endpoint list
     if (
-      (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList')  &&
+      (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(state) &&
       hasSelectedEndpoint(state) !== true
     ) {
