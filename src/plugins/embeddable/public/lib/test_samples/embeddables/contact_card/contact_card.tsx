@@ -25,6 +25,7 @@ import * as Rx from 'rxjs';
 import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
 import { EmbeddableContext } from '../../../triggers';
+import { ContactCardByRefOrValEmbeddable } from '../ref_or_val_contact_card/contact_card_ref_or_val_embeddable';
 
 declare module '../../../../../../ui_actions/public' {
   export interface TriggerContextMapping {
@@ -33,7 +34,7 @@ declare module '../../../../../../ui_actions/public' {
 }
 
 interface Props {
-  embeddable: ContactCardEmbeddable;
+  embeddable: ContactCardEmbeddable | ContactCardByRefOrValEmbeddable;
   execTrigger: UiActionsStart['executeTriggerActions'];
 }
 

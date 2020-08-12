@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, IContainer } from '../../embeddable_plugin';
+import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -29,9 +29,8 @@ import {
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { UnlinkFromLibraryAction } from '.';
-
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { ViewMode } from '../../../../embeddable/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -41,7 +40,7 @@ setup.registerEmbeddableFactory(
 const start = doStart();
 
 let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable;
+let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
 let coreStart: CoreStart;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
@@ -52,7 +51,7 @@ beforeEach(async () => {
     create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
   };
 
-  const options = {
+  const containerOptions = {
     ExitFullScreenButton: () => null,
     SavedObjectFinder: () => null,
     application: {} as any,
@@ -63,56 +62,67 @@ beforeEach(async () => {
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
   };
-  const input = getSampleDashboardInput({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Kibanana', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
-    },
-  });
-  container = new DashboardContainer(input, options);
+
+  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibana',
+    firstName: 'Kibanana',
   });
-
-  contactCardEmbeddable.updateInput({ savedObjectId: 'coolestSavedObjectId' });
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {
     throw new Error('Failed to create embeddable');
   } else {
-    embeddable = contactCardEmbeddable;
+    embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
+      ContactCardEmbeddable,
+      ContactCardEmbeddableInput
+    >(contactCardEmbeddable, {
+      mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
+      mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+    });
+    embeddable.updateInput({ viewMode: ViewMode.EDIT });
   }
 });
 
-test('Unlink is not compatible when embeddable does not have a savedObjectId', async () => {
+test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
   const action = new UnlinkFromLibraryAction(coreStart);
-  embeddable.updateInput({ savedObjectId: undefined });
+  embeddable.updateInput(await embeddable.getInputAsRefType());
+  expect(await action.isCompatible({ embeddable })).toBe(true);
+});
+
+test('Unlink is not compatible when embeddable input is by value', async () => {
+  const action = new UnlinkFromLibraryAction(coreStart);
+  embeddable.updateInput(await embeddable.getInputAsValueType());
+  expect(await action.isCompatible({ embeddable })).toBe(false);
+});
+
+test('Unlink is not compatible when view mode is set to view', async () => {
+  const action = new UnlinkFromLibraryAction(coreStart);
+  embeddable.updateInput(await embeddable.getInputAsRefType());
+  embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Unlink is not compatible when embeddable is not in a dashboard container', async () => {
-  const orphanContactCard = await container.addNewEmbeddable<
+  let orphanContactCard = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
     firstName: 'Orphan',
   });
-  orphanContactCard.updateInput({ savedObjectId: 'coolestSavedObjectId' });
+  orphanContactCard = embeddablePluginMock.mockRefOrValEmbeddable<
+    ContactCardEmbeddable,
+    ContactCardEmbeddableInput
+  >(orphanContactCard, {
+    mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
+    mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
+  });
   const action = new UnlinkFromLibraryAction(coreStart);
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
-});
-
-test('Unlink is compatible when embeddable on dashboard has a savedObjectId', async () => {
-  const action = new UnlinkFromLibraryAction(coreStart);
-  embeddable.updateInput({ savedObjectId: undefined });
-  expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Unlink replaces embeddableId but retains panel count', async () => {
@@ -139,9 +149,10 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     attribute4: { nestedattribute: 'hello from the nest' },
   };
 
-  coreStart.savedObjects.client.get = jest.fn().mockImplementation(() => ({
-    attributes: complicatedAttributes,
-  }));
+  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<ContactCardEmbeddable>(embeddable, {
+    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: embeddable.id },
+    mockedByValueInput: { attributes: complicatedAttributes, id: embeddable.id },
+  });
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
   const action = new UnlinkFromLibraryAction(coreStart);

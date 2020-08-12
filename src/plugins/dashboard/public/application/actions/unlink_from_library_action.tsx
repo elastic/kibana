@@ -27,6 +27,7 @@ import {
   PanelNotFoundError,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
+  isReferenceOrValueEmbeddable,
 } from '../../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
@@ -65,25 +66,18 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        (embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId &&
-        embeddable.type === 'lens'
+        isReferenceOrValueEmbeddable(embeddable) &&
+        embeddable.inputIsRefType(embeddable.getInput())
     );
   }
 
   public async execute({ embeddable }: UnlinkFromLibraryActionContext) {
-    if (
-      !embeddable.getRoot() ||
-      !embeddable.getRoot().isContainer ||
-      !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId
-    ) {
+    if (!isReferenceOrValueEmbeddable(embeddable)) {
       throw new IncompatibleActionError();
     }
 
-    const currentInput = embeddable.getInput() as SavedObjectEmbeddableInput;
-    const savedObject: SimpleSavedObject = await this.core.savedObjects.client.get(
-      embeddable.type,
-      currentInput.savedObjectId
-    );
+    const newInput = await embeddable.getInputAsValueType();
+    embeddable.updateInput(newInput);
 
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
@@ -93,12 +87,7 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: {
-        ...panelToReplace.explicitInput,
-        savedObjectId: undefined,
-        id: uuid.v4(),
-        attributes: savedObject.attributes,
-      },
+      explicitInput: { ...newInput, id: uuid.v4() },
     };
     dashboard.replacePanel(panelToReplace, newPanel);
   }
