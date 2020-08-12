@@ -199,3 +199,5 @@ export class SearchInterceptor {
     }
   };
 }
+
+export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

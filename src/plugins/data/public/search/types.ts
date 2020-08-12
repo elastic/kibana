@@ -55,7 +55,7 @@ export interface ISearchStartLegacy {
 }
 
 export interface SearchEnhancements {
-  searchInterceptor: SearchInterceptor;
+  searchInterceptor: ISearchInterceptor;
 }
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
