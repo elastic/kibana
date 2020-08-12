@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-removeScriptedField(field: IFieldType): Promise<void | Error>;
+removeScriptedField(fieldName: string): Promise<void | Error>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  field | <code>IFieldType</code> |  |
+|  fieldName | <code>string</code> |  |
 
 <b>Returns:</b>
 

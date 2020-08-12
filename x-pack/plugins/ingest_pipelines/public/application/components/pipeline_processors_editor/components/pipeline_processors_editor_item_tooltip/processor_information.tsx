@@ -7,17 +7,19 @@
 import React, { FunctionComponent, memo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
+import { getProcessorDescriptor } from '../shared';
 
 interface Props {
   processor: ProcessorInternal;
 }
 
 export const ProcessorInformation: FunctionComponent<Props> = memo(({ processor }) => {
+  const label = getProcessorDescriptor(processor.type)?.label ?? processor.type;
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
-          <b>{processor.type}</b>
+          <b>{label}</b>
         </EuiFlexItem>
         {processor.options.description ? (
           <EuiFlexItem grow={false}>
