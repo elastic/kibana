@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CURRENT_MAJOR_VERSION } from '../shared/version';
+import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
