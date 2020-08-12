@@ -191,8 +191,13 @@ export class Simulator {
     return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
   }
 
+  public get historyLocationSearch() {
+    return this.history.location.search;
+  }
+
   /**
    * Return the selected node query string values.
+   * @deprecated
    */
   public queryStringValues(): { selectedNode: string[] } {
     const urlSearchParams = new URLSearchParams(this.history.location.search);
