@@ -50,6 +50,9 @@ export const VisualizeByValueEditor = () => {
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
+    if (!valueInputValue) {
+      history.back();
+    }
   }, [services]);
 
   const isChromeVisible = useChromeVisibility(services.chrome);
@@ -58,7 +61,8 @@ export const VisualizeByValueEditor = () => {
     services,
     eventEmitter,
     isChromeVisible,
-    valueInput
+    valueInput,
+    originatingApp
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
     services,

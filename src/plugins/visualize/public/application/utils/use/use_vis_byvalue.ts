@@ -22,14 +22,15 @@ import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
-import { getEditBreadcrumbs } from '../breadcrumbs';
+import { getBreadcrumbsPrefixedWithApp, getEditBreadcrumbs } from '../breadcrumbs';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
-  valueInput?: VisualizeInput
+  valueInput?: VisualizeInput,
+  originatingApp?: string
 ) => {
   const [state, setState] = useState<{
     byValueVisInstance?: ByValueVisInstance;
@@ -53,7 +54,9 @@ export const useVisByValue = (
         embeddableHandler
       );
 
-      if (chrome) {
+      if (chrome && originatingApp) {
+        chrome.setBreadcrumbs(getBreadcrumbsPrefixedWithApp(originatingApp));
+      } else if (chrome) {
         chrome.setBreadcrumbs(getEditBreadcrumbs());
       }
 
@@ -72,6 +75,7 @@ export const useVisByValue = (
     state.byValueVisInstance,
     state.visEditorController,
     valueInput,
+    originatingApp,
   ]);
 
   useEffect(() => {

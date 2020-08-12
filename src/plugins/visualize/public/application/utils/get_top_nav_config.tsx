@@ -178,7 +178,7 @@ export const getTopNavConfig = (
   };
 
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && (savedVis?.id || embeddableId)
+    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
       ? [
           {
             id: 'saveAndReturn',
