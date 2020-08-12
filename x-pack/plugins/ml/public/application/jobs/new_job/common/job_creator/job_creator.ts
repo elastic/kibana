@@ -57,7 +57,6 @@ export class JobCreator {
   private _stopAllRefreshPolls: {
     stop: boolean;
   } = { stop: false };
-  private _partitionField: string | null = null;
 
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
@@ -653,19 +652,25 @@ export class JobCreator {
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
 
-  public get categorizationPerPartitionField() {
-    return this._partitionField;
+  public get categorizationPerPartitionField(): string | null {
+    // looping through to find current partition_field name to prevent stale/syncing issue
+    // possible because partition_field_name has to have same value in every detector that uses the keyword mlcategory
+    const firstCategorizationDetector = this._detectors.find(
+      (d) => d.by_field_name === 'mlcategory'
+    );
+    if (firstCategorizationDetector && 'partition_field_name' in firstCategorizationDetector) {
+      return firstCategorizationDetector.partition_field_name;
+    }
+    return null;
   }
 
-  public set categorizationPerPartitionField(fieldName: string | null) {
+  public set categorizationPerPartitionField(fieldName: string | number | null) {
     if (fieldName === null) {
       this._detectors.forEach((detector) => {
         delete detector.partition_field_name;
       });
-      this._partitionField = null;
     } else {
-      if (this._partitionField !== fieldName) {
-        this._partitionField = fieldName;
+      if (this.categorizationPerPartitionField !== fieldName) {
         this._detectors.forEach((detector) => {
           detector.partition_field_name = fieldName;
         });
