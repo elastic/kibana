@@ -6,7 +6,7 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   AdvancedJobCreator,
@@ -15,6 +15,7 @@ import {
 } from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Description } from './description';
+
 import { CategorizationPerPartitionSwitch } from './categorization_per_partition_switch';
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 import { CategorizationPerPartitionStopOnWarnSwitch } from './categorization_stop_on_warn_switch';
@@ -55,12 +56,14 @@ export const CategorizationPerPartitionField: FC = () => {
   return (
     <Description isOptional={isCategorizationJob === false}>
       <EuiFormRow
-        label={i18n.translate(
-          'xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel',
-          {
-            defaultMessage: 'Enable per-partition categorization',
-          }
-        )}
+        label={
+          <FormattedMessage
+            id={
+              'xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel'
+            }
+            defaultMessage={'Enable per-partition categorization'}
+          />
+        }
       >
         <CategorizationPerPartitionSwitch />
       </EuiFormRow>
@@ -68,22 +71,22 @@ export const CategorizationPerPartitionField: FC = () => {
       {enablePerPartitionCategorization && (
         <>
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel',
-              {
-                defaultMessage: 'Stop on warn',
-              }
-            )}
+            label={
+              <FormattedMessage
+                id={'xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel'}
+                defaultMessage={'Stop on warn'}
+              />
+            }
           >
             <CategorizationPerPartitionStopOnWarnSwitch />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel',
-              {
-                defaultMessage: 'Partition field',
-              }
-            )}
+            label={
+              <FormattedMessage
+                id={'xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel'}
+                defaultMessage={'Partition field'}
+              />
+            }
           >
             <CategorizationPerPartitionFieldSelect
               fields={filteredCategories}

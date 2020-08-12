@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useContext, useEffect, useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -39,9 +39,12 @@ export const CategorizationPerPartitionSwitch: FC = () => {
       checked={enablePerPartitionCategorization}
       onChange={toggleEnablePerPartitionCategorization}
       data-test-subj="mlJobWizardSwitchCategorizationPerPartition"
-      label={i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel', {
-        defaultMessage: 'Enable per-partition categorization',
-      })}
+      label={
+        <FormattedMessage
+          id={'xpack.ml.newJob.wizard.perPartitionCategorizationSwitchLabel'}
+          defaultMessage={'Enable per-partition categorization'}
+        />
+      }
     />
   );
 };

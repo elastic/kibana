@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useCallback, useContext, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -29,12 +29,12 @@ export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
       checked={stopOnWarn}
       onChange={toggleStopOnWarn}
       data-test-subj="mlJobWizardSwitchCategorizationPerPartitionStopOnWarn"
-      label={i18n.translate(
-        'xpack.ml.newJob.wizard.perPartitionCategorizationtopOnWarnSwitchLabel',
-        {
-          defaultMessage: 'Stop on warn',
-        }
-      )}
+      label={
+        <FormattedMessage
+          id={'xpack.ml.newJob.wizard.perPartitionCategorizationtopOnWarnSwitchLabel'}
+          defaultMessage={'Stop on warn'}
+        />
+      }
     />
   );
 };
