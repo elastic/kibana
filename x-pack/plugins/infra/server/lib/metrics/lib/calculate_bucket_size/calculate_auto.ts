@@ -44,8 +44,7 @@ function find(rules: Rule[], check: CheckFunction, last?: boolean) {
     const target = duration.asMilliseconds() / buckets;
     let lastResp = null;
 
-    for (let i = 0; i < rules.length; i++) {
-      const rule = rules[i];
+    for (const rule of rules) {
       const resp = check(rule[0] as Duration, rule[1] as Duration, target);
 
       if (resp == null) {
