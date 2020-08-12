@@ -31,20 +31,23 @@ const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
 
 // the promise which tracks the setup
-let setupIngestStatus: Promise<void> | undefined;
-// default resolve & reject to guard against "undefined is not a function" errors
-let onSetupResolve = () => {};
+interface SetupStatus {
+  isIntialized: true | undefined;
+}
+let setupIngestStatus: Promise<SetupStatus> | undefined;
+// default resolve to guard against "undefined is not a function" errors
+let onSetupResolve = (status: SetupStatus) => {};
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
-) {
+): Promise<SetupStatus> {
   // installation in progress
   if (setupIngestStatus) {
     await setupIngestStatus;
   } else {
     // create the initial promise
-    setupIngestStatus = new Promise((res, rej) => {
+    setupIngestStatus = new Promise((res) => {
       onSetupResolve = res;
     });
   }
@@ -120,7 +123,7 @@ export async function setupIngestManager(
     }
 
     // if everything works, mark the tracking promise as resolved
-    onSetupResolve();
+    onSetupResolve({ isIntialized: true });
   } catch (error) {
     // if something fails
     // * reset the tracking promise to try again next time

@@ -5,19 +5,19 @@
  */
 
 import { xpackMocks } from '../../../../../x-pack/mocks';
-import { RegistryError } from '../errors';
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
 
-const mockedMethodThrowsCustom = () =>
+const mockedMethodThrowsError = () =>
   jest.fn().mockImplementation(() => {
     throw new Error('SO method mocked to throw');
   });
 
-const mockedMethodThrowsRegistry = () =>
+class CustomTestError extends Error {}
+const mockedMethodThrowsCustom = () =>
   jest.fn().mockImplementation(() => {
-    throw new RegistryError('Registry method mocked to throw');
+    throw new CustomTestError('method mocked to throw');
   });
 
 describe('setupIngestManager', () => {
@@ -35,7 +35,19 @@ describe('setupIngestManager', () => {
   });
 
   describe('should reject with any error thrown underneath', () => {
-    it('with plain Error', async () => {
+    it('SO client throws plain Error', async () => {
+      const soClient = context.core.savedObjects.client;
+      soClient.create = mockedMethodThrowsError();
+      soClient.find = mockedMethodThrowsError();
+      soClient.get = mockedMethodThrowsError();
+      soClient.update = mockedMethodThrowsError();
+
+      const setupPromise = setupIngestManager(soClient, jest.fn());
+      await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
+      await expect(setupPromise).rejects.toThrow(Error);
+    });
+
+    it('SO client throws other error', async () => {
       const soClient = context.core.savedObjects.client;
       soClient.create = mockedMethodThrowsCustom();
       soClient.find = mockedMethodThrowsCustom();
@@ -43,25 +55,8 @@ describe('setupIngestManager', () => {
       soClient.update = mockedMethodThrowsCustom();
 
       const setupPromise = setupIngestManager(soClient, jest.fn());
-      await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
-      await expect(setupPromise).rejects.toThrow(Error);
-    });
-
-    it('with RegistryError', async () => {
-      const soClient = context.core.savedObjects.client;
-      soClient.create = mockedMethodThrowsRegistry();
-      soClient.find = mockedMethodThrowsRegistry();
-      soClient.get = mockedMethodThrowsRegistry();
-      soClient.update = mockedMethodThrowsRegistry();
-
-      const setupPromise = setupIngestManager(soClient, jest.fn());
-      await expect(setupPromise).rejects.toThrow('Registry method mocked to throw');
-      await expect(setupPromise).rejects.toThrow(RegistryError);
+      await expect(setupPromise).rejects.toThrow('method mocked to throw');
+      await expect(setupPromise).rejects.toThrow(CustomTestError);
     });
   });
-
-  // describe('caching setup result', () => {
-  //   it('should not cache failures', async () => {});
-  //   it('should cache successes', async () => {});
-  // });
 });
