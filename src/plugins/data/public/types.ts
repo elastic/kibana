@@ -51,7 +51,7 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
-  enhance: (enhancements: DataPublicPluginEnhancements) => void;
+  __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
 export interface DataPublicPluginStart {

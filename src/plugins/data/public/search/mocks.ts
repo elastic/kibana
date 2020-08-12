@@ -26,7 +26,7 @@ export * from './search_source/mocks';
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
-    enhance: jest.fn(),
+    __enhance: jest.fn(),
   };
 }
 

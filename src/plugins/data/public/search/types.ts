@@ -64,7 +64,7 @@ export interface SearchEnhancements {
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
   usageCollector?: SearchUsageCollector;
-  enhance: (enhancements: SearchEnhancements) => void;
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
 export interface ISearchStart {

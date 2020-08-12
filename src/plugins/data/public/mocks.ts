@@ -44,7 +44,7 @@ const createSetupContract = (): Setup => {
     search: searchServiceMock.createSetupContract(),
     fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
-    enhance: jest.fn(),
+    __enhance: jest.fn(),
   };
 };
 

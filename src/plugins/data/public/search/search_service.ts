@@ -110,7 +110,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       usageCollector: this.usageCollector!,
-      enhance: (enhancements: SearchEnhancements) => {
+      __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
       aggs: {

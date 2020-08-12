@@ -43,7 +43,7 @@ export class DataEnhancedPlugin
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
-    data.enhance({
+    data.__enhance({
       search: {
         searchInterceptor: enhancedSearchInterceptor,
       },
