@@ -26,6 +26,7 @@ import {
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
+  // eslint-disable-next-line complexity
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
