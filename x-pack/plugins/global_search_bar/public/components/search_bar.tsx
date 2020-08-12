@@ -185,7 +185,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           await navigateToUrl(url);
           // a simplified "get first tabbale element" with likely subjects
           (document.activeElement as HTMLElement).blur();
+          setTerm('');
           setSearchFocus(false);
+          searchRef.value = '';
         }
       }}
     >
