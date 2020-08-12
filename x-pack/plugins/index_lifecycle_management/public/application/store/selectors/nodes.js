@@ -10,17 +10,3 @@ export const getSelectedPrimaryShardCount = (state) => state.nodes.selectedPrima
 
 export const getSelectedReplicaCount = (state) =>
   state.nodes.selectedReplicaCount !== undefined ? state.nodes.selectedReplicaCount : 1;
-
-export const getSelectedNodeAttrs = (state) => state.nodes.selectedNodeAttrs;
-
-export const getNodesFromSelectedNodeAttrs = (state) => {
-  const nodes = getNodes(state)[getSelectedNodeAttrs(state)];
-  if (nodes) {
-    return nodes.length;
-  }
-  return null;
-};
-
-export const getNodeDetails = (state, selectedNodeAttrs) => {
-  return state.nodes.details[selectedNodeAttrs];
-};

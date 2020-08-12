@@ -55,6 +55,25 @@ export function timestampSafeVersion(event: SafeResolverEvent): string | undefin
     : firstNonNullValue(event?.['@timestamp']);
 }
 
+/**
+ * The `@timestamp` for the event, as a `Date` object.
+ * If `@timestamp` couldn't be parsed as a `Date`, returns `undefined`.
+ */
+export function timestampAsDateSafeVersion(event: SafeResolverEvent): Date | undefined {
+  const value = timestampSafeVersion(event);
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const date = new Date(value);
+  // Check if the date is valid
+  if (isFinite(date.getTime())) {
+    return date;
+  } else {
+    return undefined;
+  }
+}
+
 export function eventTimestamp(event: ResolverEvent): string | undefined | number {
   if (isLegacyEvent(event)) {
     return event.endgame.timestamp_utc;
@@ -84,6 +103,20 @@ export function eventId(event: ResolverEvent): number | undefined | string {
     return event.endgame.serial_event_id;
   }
   return event.event.id;
+}
+
+export function eventSequence(event: ResolverEvent): number | undefined {
+  if (isLegacyEvent(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
+}
+
+export function eventSequenceSafeVersion(event: SafeResolverEvent): number | undefined {
+  if (isLegacyEventSafeVersion(event)) {
+    return firstNonNullValue(event.endgame.serial_event_id);
+  }
+  return firstNonNullValue(event.event?.sequence);
 }
 
 export function eventIDSafeVersion(event: SafeResolverEvent): number | undefined | string {

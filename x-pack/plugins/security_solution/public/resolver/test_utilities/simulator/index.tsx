@@ -10,7 +10,6 @@ import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
@@ -48,6 +47,7 @@ export class Simulator {
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    history,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -61,6 +61,7 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID?: string;
+    history?: HistoryPackageHistoryInterface<never>;
   }) {
     this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
@@ -79,8 +80,9 @@ export class Simulator {
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
-    // Create a fake 'history' instance that Resolver will use to read and write query string values
-    this.history = createMemoryHistory();
+    // If needed, create a fake 'history' instance.
+    // Resolver will use to read and write query string values.
+    this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
@@ -95,9 +97,6 @@ export class Simulator {
         databaseDocumentID={databaseDocumentID}
       />
     );
-
-    // Update the enzyme wrapper after each state transition
-    connectEnzymeWrapperAndStore(this.store, this.wrapper);
   }
 
   /**
@@ -113,6 +112,16 @@ export class Simulator {
   }
 
   /**
+   * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
+   * This forces any `AutoSizer` instances to have a large size.
+   */
+  private forceAutoSizerOpen() {
+    this.wrapper
+      .find('AutoSizer')
+      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+  }
+
+  /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
@@ -124,6 +133,7 @@ export class Simulator {
       yield mapper();
       await new Promise((resolve) => {
         setTimeout(() => {
+          this.forceAutoSizerOpen();
           this.wrapper.update();
           resolve();
         }, 0);
@@ -175,6 +185,13 @@ export class Simulator {
   }
 
   /**
+   * The items in the submenu that is opened by expanding a node in the map.
+   */
+  public processNodeSubmenuItems(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
+  }
+
+  /**
    * Return the selected node query string values.
    */
   public queryStringValues(): { selectedNode: string[] } {
@@ -206,38 +223,38 @@ export class Simulator {
   }
 
   /**
-   * An element with a list of all nodes.
+   * The titles of the links that select a node in the node list view.
    */
-  public nodeListElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list"]');
+  public nodeListNodeLinkText(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link:title"]');
   }
 
   /**
-   * Return the items in the node list (the default panel view.)
+   * The icons in the links that select a node in the node list view.
    */
-  public nodeListItems(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:item"]');
+  public nodeListNodeLinkIcons(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link:icon"]');
   }
 
   /**
-   * The element containing the details for the selected node.
+   * Link rendered in the breadcrumbs of the node detail view. Takes the user to the node list.
    */
-  public nodeDetailElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail"]');
+  public nodeDetailBreadcrumbNodeListLink(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:breadcrumbs:node-list-link"]');
   }
 
   /**
-   * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+   * The title element for the node detail view.
    */
-  private nodeDetailEntryTitle(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
+  public nodeDetailViewTitle(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:title"]');
   }
 
   /**
-   * The details of the selected node are shown in a description list. This returns the description elements of the description list.
+   * The icon element for the node detail title.
    */
-  private nodeDetailEntryDescription(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
+  public nodeDetailViewTitleIcon(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-detail:title-icon"]');
   }
 
   /**
@@ -253,8 +270,14 @@ export class Simulator {
    * The titles and descriptions (as text) from the node detail panel.
    */
   public nodeDetailDescriptionListEntries(): Array<[string, string]> {
-    const titles = this.nodeDetailEntryTitle();
-    const descriptions = this.nodeDetailEntryDescription();
+    /**
+     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     */
+    const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
+    /**
+     * The details of the selected node are shown in a description list. This returns the description elements of the description list.
+     */
+    const descriptions = this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
     const entries: Array<[string, string]> = [];
     for (let index = 0; index < Math.min(titles.length, descriptions.length); index++) {
       const title = titles.at(index).text();

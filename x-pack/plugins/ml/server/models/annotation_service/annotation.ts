@@ -5,7 +5,8 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
+import each from 'lodash/each';
+import get from 'lodash/get';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
@@ -190,7 +191,7 @@ export function annotationProvider({ callAsInternalUser }: ILegacyScopedClusterC
 
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
-      _.each(jobIds, (jobId, i: number) => {
+      each(jobIds, (jobId, i: number) => {
         jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
       });
       boolCriteria.push({
@@ -293,7 +294,7 @@ export function annotationProvider({ callAsInternalUser }: ILegacyScopedClusterC
         throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
 
-      const docs: Annotations = _.get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
+      const docs: Annotations = get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
         // get the original source document and the document id, we need it
         // to identify the annotation when editing/deleting it.
         // if original `event` is undefined then substitute with 'user` by default
@@ -305,7 +306,7 @@ export function annotationProvider({ callAsInternalUser }: ILegacyScopedClusterC
         } as Annotation;
       });
 
-      const aggregations = _.get(resp, ['aggregations'], {}) as EsAggregationResult;
+      const aggregations = get(resp, ['aggregations'], {}) as EsAggregationResult;
       if (fields) {
         obj.aggregations = aggregations;
       }
