@@ -19,7 +19,7 @@ Then navigate to https://localhost:5601/app/ingestManager#/ and grab the token f
 
 ## Load testing with 'loadtest'
 
-[Loadtest](https://github.com/roncohen/loadtest) is a crude tool that helps you simulate a number of agents from a single Go program. For more advanced and bigger scale tests, see https://github.com/elastic/horde.
+[Loadtest](https://github.com/roncohen/fleet-loadtest) is a crude tool that helps you simulate a number of agents from a single Go program. For more advanced and bigger scale tests, see https://github.com/elastic/horde.
 
 Do a checkout of https://github.com/roncohen/fleet-loadtest then start it like so:
 
