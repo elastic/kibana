@@ -20,6 +20,7 @@ import {
 import { enhancedEsSearchStrategyProvider } from './search';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { ApiResponse } from '@elastic/elasticsearch';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -40,7 +41,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     deps.features.registerFeature({
       id: 'backgroundSearch',
       name: 'Background Search',
-	  app: [],
+      app: [],
       privileges: {
         all: {
           app: [],
