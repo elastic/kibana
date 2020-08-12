@@ -10,6 +10,7 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
 import { HandlerErrorFunction, HandlerFunction } from './types';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
+import { CreateJobBaseParams } from '../types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -66,10 +67,10 @@ export function registerGenerateFromJobParams(
       }
 
       const { exportType } = req.params as { exportType: string };
-      let jobParams;
+      let jobParams: CreateJobBaseParams | null;
 
       try {
-        jobParams = rison.decode(jobParamsRison) as object | null;
+        jobParams = rison.decode(jobParamsRison) as CreateJobBaseParams | null;
         if (!jobParams) {
           return res.customError({
             statusCode: 400,

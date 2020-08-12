@@ -159,13 +159,15 @@ export class Worker extends events.EventEmitter {
     };
 
     return this.queue.store
-      .updateReport({
-        index: job._index,
-        id: job._id,
-        if_seq_no: job._seq_no,
-        if_primary_term: job._primary_term,
-        body: { doc },
-      })
+      .setReportClaimed(
+        {
+          _index: job._index,
+          _id: job._id,
+          _seq_no: job._seq_no,
+          _primary_term: job._primary_term,
+        },
+        doc
+      )
       .then((response) => {
         this.info(`Job marked as claimed: ${getUpdatedDocPath(response)}`);
         const updatedJob = {
@@ -198,13 +200,15 @@ export class Worker extends events.EventEmitter {
     });
 
     return this.queue.store
-      .updateReport({
-        index: job._index,
-        id: job._id,
-        if_seq_no: job._seq_no,
-        if_primary_term: job._primary_term,
-        body: { doc },
-      })
+      .setReportFailed(
+        {
+          _index: job._index,
+          _id: job._id,
+          _seq_no: job._seq_no,
+          _primary_term: job._primary_term,
+        },
+        doc
+      )
       .then((response) => {
         this.info(`Job marked as failed: ${getUpdatedDocPath(response)}`);
       })
@@ -295,13 +299,15 @@ export class Worker extends events.EventEmitter {
         };
 
         return this.queue.store
-          .updateReport({
-            index: job._index,
-            id: job._id,
-            if_seq_no: job._seq_no,
-            if_primary_term: job._primary_term,
-            body: { doc },
-          })
+          .setReportCompleted(
+            {
+              _index: job._index,
+              _id: job._id,
+              _seq_no: job._seq_no,
+              _primary_term: job._primary_term,
+            },
+            doc
+          )
           .then((response) => {
             const eventOutput = {
               job: formatJobObject(job),

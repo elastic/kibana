@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ScheduledTaskParams } from '../../../server/types';
+import { CreateJobBaseParams, ScheduledTaskParams } from '../../../server/types';
 import { LayoutInstance, LayoutParams } from '../../lib/layouts';
 
 // Job params: structure of incoming user request data, after being parsed from RISON
