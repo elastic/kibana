@@ -40,11 +40,6 @@ export const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial
     []
   );
 
-export const getAllFieldsByName = (
-  browserFields: BrowserFields
-): { [fieldName: string]: Partial<BrowserField> } =>
-  keyBy('name', getAllBrowserFields(browserFields));
-
 export const getIndexFields = memoizeOne(
   (title: string, fields: IndexField[]): IIndexPattern =>
     fields && fields.length > 0

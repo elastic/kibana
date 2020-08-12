@@ -70,7 +70,7 @@ export const MaybeSourcerer = React.memo(() => {
         label: title,
         key: `${title}-${id}`,
         value: title,
-        checked: selectedOptions && selectedOptions.includes(title) ? 'on' : undefined,
+        checked: selectedOptions.includes(title) ? 'on' : undefined,
       })),
     [availableIndexPatterns, selectedOptions]
   );
@@ -108,7 +108,10 @@ export const MaybeSourcerer = React.memo(() => {
     },
     [onChangeIndexPattern]
   );
-
+  const allOptions = useMemo(() => [...options, ...unSelectableOptions], [
+    options,
+    unSelectableOptions,
+  ]);
   return (
     <EuiPopover
       button={trigger}
@@ -129,7 +132,7 @@ export const MaybeSourcerer = React.memo(() => {
           data-test-subj="indexPattern-switcher"
           searchable
           isLoading={loading}
-          options={[...options, ...unSelectableOptions]}
+          options={allOptions}
           onChange={onChange}
           renderOption={renderOption}
           searchProps={{
