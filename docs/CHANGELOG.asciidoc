@@ -72,9 +72,12 @@ APM::
 * Anomaly detection setup link with alert if job doesn't exist {kibana-pull}71229[#71229]
 * Respects default time range defined in Kibana Advanced Settings {kibana-pull}71464[#71464]
 * Uses HDR for percentiles {kibana-pull}64758[#64758]
+Canvas::
+* Adds simple variables to workpads {kibana-pull}66139[#66139]
 Dashboard::
-* Adds Lens drilldowns {kibana-pull}65675[#65675]
-* Improves duplicate panel positioning {kibana-pull}67461[#67461]
+* Enables drilldowns for Lens visualizations {kibana-pull}65675[#65675]
+* Improves positioning of cloned panels {kibana-pull}67461[#67461]
+* Lens editor auto refresh {kibana-pull}65868[#65868]
 Discover::
 * Multi-line kql bar {kibana-pull}70140[#70140]
 Ingest Management::
@@ -83,8 +86,6 @@ Ingest Management::
 * Adds ability to copy an agent config {kibana-pull}68737[#68737]
 * Adds enroll agent action to config action menu {kibana-pull}68840[#68840]
 * Adds ability to sort to agent configs and package configs {kibana-pull}70676[#70676]
-Kibana UI::
-* Adds link for Cloud deployment settings {kibana-pull}66486[#66486]
 Lens and visualizations::
 * Warns if leaving with unsaved visualization {kibana-pull}67689[#67689]
 * Uses accordion menus in field list for available and empty fields {kibana-pull}68871[#68871]
@@ -184,8 +185,6 @@ Operations::
 * Creates Linux aarch64 package {kibana-pull}69165[#69165]
 Platform::
 * Switches to core application service {kibana-pull}63443[#63443]
-* Lens editor auto refresh {kibana-pull}65868[#65868]
-* Adds simple variables to workpads {kibana-pull}66139[#66139]
 * Adds docLinks to CoreSetup {kibana-pull}66631[#66631]
 * New Enterprise Search Kibana plugin {kibana-pull}66922[#66922]
 * Workplace Search in Kibana MVP {kibana-pull}70979[#70979]
