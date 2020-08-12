@@ -35,7 +35,6 @@ To get a closer look at a portion of your workpad, use the zoom options.
 [role="screenshot"]
 image::images/canvas-zoom-controls.png[Zoom controls]
 
-
 [float]
 [[configure-auto-refresh-interval]]
 === Change the auto-refresh interval

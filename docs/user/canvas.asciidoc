@@ -26,7 +26,7 @@ For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_
 [[create-workpads]]
 == Create workpads
 
-A _workpad_ provides you with a workspace where you can build presentations of your live data.
+A _workpad_ provides you with a space where you can build presentations of your live data.
 
 [float]
 [[start-with-a-blank-workpad]]
@@ -89,7 +89,7 @@ Each of the sample data sets comes with a Canvas workpad that you can use for yo
 [[add-canvas-elements]]
 == Add elements
 
-Create a story about your data by adding elements to your workpad that include images, text, charts, and more. You can create your own elements and connect them to your data sources, add saved objects, and add your own images.
+Create a story about your data by adding elements to your workpad that include images, text, charts, and more.
 
 [float]
 [[create-elements]]
@@ -105,7 +105,7 @@ image::images/canvas-element-select.gif[Canvas elements]
 
 When you're ready to connect the element to your data, select *Data*, then select one of the following data sources:
 
-* *{es} SQL* &mdash; Access your data in {es} using SQL syntax. For information about SQL syntax, refer to {ref}/sql-spec.html[SQL language].
+* *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
 
 * *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
 

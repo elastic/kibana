@@ -21,7 +21,7 @@ Want to export multiple workpads? Go to the *Canvas* home page, select the workp
 [[create-workpad-pdf]]
 === Create a PDF
 
-If you have a license that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
+If you have a subscription that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
 
 Click *Share > PDF reports > Generate PDF*.
 
@@ -34,7 +34,7 @@ For more information, refer to <<reporting-getting-started, Reporting from Kiban
 [[create-workpad-URL]]
 === Create a POST URL
 
-If you have a license that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
+If you have a subscription that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using <<watcher-ui,Watcher>> or a script.
 
 Click *Share > PDF reports > Copy POST URL*.
 
