@@ -82,7 +82,7 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             basePath,
             serverBasePath,
             env,
-            legacyMode: appId !== 'core',
+            legacyMode: false,
             anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
