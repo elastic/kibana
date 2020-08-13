@@ -182,6 +182,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   )}
                   checked={isIncludeStatsChecked}
                   onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                  data-test-subj="includeStatsSwitch"
                 />
               </EuiFlexItem>
 
