@@ -18,7 +18,6 @@
  */
 
 /* eslint max-len: 0 */
-/* eslint-disable */
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from 'kibana/server';
 

@@ -109,6 +109,24 @@ export const sampleDocNoSortId = (
   sort: [],
 });
 
+export const sampleDocSeverity = (
+  severity?: Array<string | number | null> | string | number | null
+): SignalSourceHit => ({
+  _index: 'myFakeSignalIndex',
+  _type: 'doc',
+  _score: 100,
+  _version: 1,
+  _id: sampleIdGuid,
+  _source: {
+    someKey: 'someValue',
+    '@timestamp': '2020-04-20T21:27:45+0000',
+    event: {
+      severity: severity ?? 100,
+    },
+  },
+  sort: [],
+});
+
 export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   took: 10,
   timed_out: false,

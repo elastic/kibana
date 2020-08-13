@@ -25,11 +25,10 @@ import { getTimelineTabsUrl } from '../../../common/components/link_to';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
 import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
+import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-
 import { StatefulOpenTimeline } from '.';
-
 import { TimelineTabsStyle } from './types';
 import {
   useTimelineTypes,
@@ -75,9 +74,17 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
+jest.mock('./use_timeline_status', () => {
+  return {
+    useTimelineStatus: jest.fn(),
+  };
+});
+
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
   let mockHistory: History[];
+  const mockInstallPrepackagedTimelines = jest.fn();
+
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({
       tabName: TimelineType.default,
@@ -95,6 +102,13 @@ describe('StatefulOpenTimeline', () => {
       totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
       refetch: jest.fn(),
     });
+    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+      timelineStatus: null,
+      templateTimelineType: null,
+      templateTimelineFilter: <div />,
+      installPrepackagedTimelines: mockInstallPrepackagedTimelines,
+    });
+    mockInstallPrepackagedTimelines.mockClear();
   });
 
   afterEach(() => {

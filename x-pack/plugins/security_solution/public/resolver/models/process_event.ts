@@ -5,7 +5,7 @@
  */
 
 import * as event from '../../../common/endpoint/models/event';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { ResolverProcessType } from '../types';
 
 /**
@@ -32,8 +32,8 @@ export function isTerminatedProcess(passedEvent: ResolverEvent) {
  * ms since Unix epoc, based on timestamp.
  * may return NaN if the timestamp wasn't present or was invalid.
  */
-export function datetime(passedEvent: ResolverEvent): number | null {
-  const timestamp = event.eventTimestamp(passedEvent);
+export function datetime(passedEvent: SafeResolverEvent): number | null {
+  const timestamp = event.timestampSafeVersion(passedEvent);
 
   const time = timestamp === undefined ? 0 : new Date(timestamp).getTime();
 
@@ -178,13 +178,15 @@ export function argsForProcess(passedEvent: ResolverEvent): string | undefined {
 /**
  * used to sort events
  */
-export function orderByTime(first: ResolverEvent, second: ResolverEvent): number {
+export function orderByTime(first: SafeResolverEvent, second: SafeResolverEvent): number {
   const firstDatetime: number | null = datetime(first);
   const secondDatetime: number | null = datetime(second);
 
   if (firstDatetime === secondDatetime) {
     // break ties using an arbitrary (stable) comparison of `eventId` (which should be unique)
-    return String(event.eventId(first)).localeCompare(String(event.eventId(second)));
+    return String(event.eventIDSafeVersion(first)).localeCompare(
+      String(event.eventIDSafeVersion(second))
+    );
   } else if (firstDatetime === null || secondDatetime === null) {
     // sort `null`'s as higher than numbers
     return (firstDatetime === null ? 1 : 0) - (secondDatetime === null ? 1 : 0);

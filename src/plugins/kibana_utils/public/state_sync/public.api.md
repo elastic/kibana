@@ -8,9 +8,11 @@ import { History } from 'history';
 import { Observable } from 'rxjs';
 
 // @public
-export const createKbnUrlStateStorage: ({ useHash, history }?: {
+export const createKbnUrlStateStorage: ({ useHash, history, onGetError, onSetError, }?: {
     useHash: boolean;
     history?: History<any> | undefined;
+    onGetError?: ((error: Error) => void) | undefined;
+    onSetError?: ((error: Error) => void) | undefined;
 }) => IKbnUrlStateStorage;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "Storage"
@@ -74,7 +76,7 @@ export interface IStateSyncConfig<State extends BaseState, StateStorage extends 
 }
 
 // @public (undocumented)
-export interface ISyncStateRef<stateStorage extends IStateStorage = IStateStorage> {
+export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorage> {
     start: StartSyncStateFnType;
     stop: StopSyncStateFnType;
 }

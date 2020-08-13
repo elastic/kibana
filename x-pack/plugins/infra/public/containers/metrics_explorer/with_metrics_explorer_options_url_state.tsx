@@ -5,19 +5,17 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { values } from 'lodash';
 import React, { useContext, useMemo } from 'react';
-import * as t from 'io-ts';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { MetricsExplorerColor } from '../../../common/color_palette';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsContainer,
   MetricsExplorerTimeOptions,
-  MetricsExplorerYAxisMode,
-  MetricsExplorerChartType,
   MetricsExplorerChartOptions,
+  metricExplorerOptionsRT,
+  metricsExplorerChartOptionsRT,
+  metricsExplorerTimeOptionsRT,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
@@ -74,36 +72,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
 };
 
 function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOptions {
-  const MetricRequired = t.type({
-    aggregation: t.string,
-  });
-
-  const MetricOptional = t.partial({
-    field: t.string,
-    rate: t.boolean,
-    color: t.keyof(
-      Object.fromEntries(values(MetricsExplorerColor).map((c) => [c, null])) as Record<string, null>
-    ),
-    label: t.string,
-  });
-
-  const Metric = t.intersection([MetricRequired, MetricOptional]);
-
-  const OptionsRequired = t.type({
-    aggregation: t.string,
-    metrics: t.array(Metric),
-  });
-
-  const OptionsOptional = t.partial({
-    limit: t.number,
-    groupBy: t.string,
-    filterQuery: t.string,
-    source: t.string,
-  });
-
-  const Options = t.intersection([OptionsRequired, OptionsOptional]);
-
-  const result = Options.decode(subject);
+  const result = metricExplorerOptionsRT.decode(subject);
 
   try {
     ThrowReporter.report(result);
@@ -114,22 +83,7 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
 }
 
 function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerChartOptions {
-  const ChartOptions = t.type({
-    yAxisMode: t.keyof(
-      Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
-        string,
-        null
-      >
-    ),
-    type: t.keyof(
-      Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
-        string,
-        null
-      >
-    ),
-    stack: t.boolean,
-  });
-  const result = ChartOptions.decode(subject);
+  const result = metricsExplorerChartOptionsRT.decode(subject);
 
   try {
     ThrowReporter.report(result);
@@ -140,12 +94,7 @@ function isMetricExplorerChartOptions(subject: any): subject is MetricsExplorerC
 }
 
 function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTimeOptions {
-  const TimeRange = t.type({
-    from: t.string,
-    to: t.string,
-    interval: t.string,
-  });
-  const result = TimeRange.decode(subject);
+  const result = metricsExplorerTimeOptionsRT.decode(subject);
   try {
     ThrowReporter.report(result);
     return true;
@@ -154,7 +103,7 @@ function isMetricExplorerTimeOption(subject: any): subject is MetricsExplorerTim
   }
 }
 
-const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
+export const mapToUrlState = (value: any): MetricsExplorerUrlState | undefined => {
   const finalState = {};
   if (value) {
     if (value.options && isMetricExplorerOptions(value.options)) {

@@ -73,6 +73,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
   #kibana-body {
     height: 100%;
+    overflow-y: hidden;
 
     > .content {
       height: 100%;
