@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import fs from 'fs';
+
+import sinon from 'sinon';
 
 import { renamePlugin } from './rename';
 

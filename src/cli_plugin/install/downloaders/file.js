@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import Progress from '../progress';
 import { createWriteStream, createReadStream, statSync } from 'fs';
+
+import { Progress } from '../progress';
 
 function openSourceFile({ sourcePath }) {
   try {
@@ -58,7 +59,7 @@ async function copyFile({ readStream, writeStream, progress }) {
 /*
 // Responsible for managing local file transfers
 */
-export default async function copyLocalFile(logger, sourcePath, targetPath) {
+export async function downloadLocalFile(logger, sourcePath, targetPath) {
   try {
     const { readStream, fileInfo } = openSourceFile({ sourcePath });
     const writeStream = createWriteStream(targetPath);
