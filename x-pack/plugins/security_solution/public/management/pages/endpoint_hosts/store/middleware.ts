@@ -24,6 +24,7 @@ import {
   sendGetAgentConfigList,
 } from '../../policy/store/policy_list/services/ingest';
 import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { startPoll, POLL_INTERVAL } from '../../../common/polling';
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
   // eslint-disable-next-line complexity
@@ -150,13 +151,13 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     if (action.type === 'serverToggledEndpointListAutoRefresh' && isAutoRefreshEnabled(state)) {
-      pollEndpointList({
+      startPoll({
         pollAction: () => {
           dispatch({
             type: 'appRequestedEndpointList',
           });
         },
-        interval: 10000,
+        interval: POLL_INTERVAL,
         shouldStop: () => {
           return !isOnEndpointPage(getState());
         },
@@ -268,35 +269,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
     }
   };
-};
-
-const pollEndpointList = ({
-  pollAction,
-  interval,
-  shouldStop,
-  stopAction,
-}: {
-  pollAction: () => void;
-  interval: number;
-  shouldStop: () => boolean;
-  stopAction: () => void;
-}) => {
-  function sleep() {
-    return new Promise((resolve) => setTimeout(resolve, interval));
-  }
-  const executePoll = async () => {
-    while (true) {
-      await sleep();
-      if (shouldStop()) {
-        stopAction();
-        break;
-      } else {
-        pollAction();
-      }
-    }
-  };
-
-  executePoll();
 };
 
 const getNonExistingPoliciesForEndpointsList = async (

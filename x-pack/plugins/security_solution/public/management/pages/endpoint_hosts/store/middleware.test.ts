@@ -28,6 +28,14 @@ jest.mock('../../policy/store/policy_list/services/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
 }));
 
+jest.mock('../../../common/polling', () => {
+  const { startPoll } = jest.requireActual('../../../common/polling');
+  return {
+    startPoll,
+    POLL_INTERVAL: 10,
+  };
+});
+
 describe('endpoint list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
@@ -77,7 +85,7 @@ describe('endpoint list middleware', () => {
     expect(listData(getState())).toEqual(apiResponse.hosts);
   });
 
-  it('handles `appRequestedEndpointList`', async () => {
+  it('handles `appRequestedEndpointList` and poll', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -96,6 +104,16 @@ describe('endpoint list middleware', () => {
     dispatch({
       type: 'appRequestedEndpointList',
     });
+    await waitForAction('serverReturnedEndpointList');
+    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
+      body: JSON.stringify({
+        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
+      }),
+    });
+    expect(listData(getState())).toEqual(apiResponse.hosts);
+
+    // Wait for the poll
+    await waitForAction('appRequestedEndpointList');
     await waitForAction('serverReturnedEndpointList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
