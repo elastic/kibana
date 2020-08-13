@@ -33,3 +33,12 @@ export interface FetchHandlers {
   config: IUiSettingsClient;
   esShardTimeout: number;
 }
+
+export interface SearchError {
+  name: string;
+  status: string;
+  title: string;
+  message: string;
+  path: string;
+  type: string;
+}

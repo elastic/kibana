@@ -16,7 +16,8 @@
     "share",
     "embeddable",
     "uiActions",
-    "kibanaLegacy"
+    "kibanaLegacy",
+    "indexPatternManagement"
   ],
   "optionalPlugins": [
     "security",

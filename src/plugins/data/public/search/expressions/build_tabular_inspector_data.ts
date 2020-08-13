@@ -19,8 +19,8 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { FormattedData } from '../../../../../plugins/inspector/public';
+import { TabbedTable } from '../../../common';
 import { FormatFactory } from '../../../common/field_formats/utils';
-import { TabbedTable } from '../tabify';
 import { createFilter } from './create_filter';
 
 /**
