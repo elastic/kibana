@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
@@ -47,16 +47,16 @@ interface Results {
   };
 }
 
-export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const { callAsInternalUser } = mlClusterClient;
+export function jobsProvider(client: IScopedClusterClient) {
+  const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClusterClient);
-  const { getAuditMessagesSummary } = jobAuditMessagesProvider(mlClusterClient);
-  const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClusterClient);
-  const calMngr = new CalendarManager(mlClusterClient);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(client);
+  const { getAuditMessagesSummary } = jobAuditMessagesProvider(client);
+  const { getLatestBucketTimestampByJob } = resultsServiceProvider(client);
+  const calMngr = new CalendarManager(client);
 
   async function forceDeleteJob(jobId: string) {
-    return callAsInternalUser('ml.deleteJob', { jobId, force: true });
+    return asInternalUser.ml.deleteJob({ job_id: jobId, force: true });
   }
 
   async function deleteJobs(jobIds: string[]) {
@@ -100,7 +100,7 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     const results: Results = {};
     for (const jobId of jobIds) {
       try {
-        await callAsInternalUser('ml.closeJob', { jobId });
+        await asInternalUser.ml.closeJob({ job_id: jobId });
         results[jobId] = { closed: true };
       } catch (error) {
         if (isRequestTimeout(error)) {
@@ -116,7 +116,7 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
           // if the job has failed we want to attempt a force close.
           // however, if we received a 409 due to the datafeed being started we should not attempt a force close.
           try {
-            await callAsInternalUser('ml.closeJob', { jobId, force: true });
+            await asInternalUser.ml.closeJob({ job_id: jobId, force: true });
             results[jobId] = { closed: true };
           } catch (error2) {
             if (isRequestTimeout(error)) {
@@ -139,12 +139,12 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const dfResult = await callAsInternalUser('ml.stopDatafeed', { datafeedId, force: true });
-    if (!dfResult || dfResult.stopped !== true) {
+    const { body } = await asInternalUser.ml.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    if (body.stopped !== true) {
       return { success: false };
     }
 
-    await callAsInternalUser('ml.closeJob', { jobId, force: true });
+    await asInternalUser.ml.closeJob({ job_id: jobId, force: true });
 
     return { success: true };
   }
@@ -256,6 +256,7 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     const calendarsByJobId: { [jobId: string]: string[] } = {};
     const globalCalendars: string[] = [];
 
+    const jobIdsString = jobIds.join();
     const requests: [
       Promise<MlJobsResponse>,
       Promise<MlJobsStatsResponse>,
@@ -264,14 +265,14 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
       Promise<Calendar[]>,
       Promise<{ [id: string]: number | undefined }>
     ] = [
-      jobIds.length > 0
-        ? (callAsInternalUser('ml.jobs', { jobId: jobIds }) as Promise<MlJobsResponse>) // move length check in  side call
-        : (callAsInternalUser('ml.jobs') as Promise<MlJobsResponse>),
-      jobIds.length > 0
-        ? (callAsInternalUser('ml.jobStats', { jobId: jobIds }) as Promise<MlJobsStatsResponse>)
-        : (callAsInternalUser('ml.jobStats') as Promise<MlJobsStatsResponse>),
-      callAsInternalUser('ml.datafeeds') as Promise<MlDatafeedsResponse>,
-      callAsInternalUser('ml.datafeedStats') as Promise<MlDatafeedsStatsResponse>,
+      (asInternalUser.ml.getJobs(
+        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
+      ) as unknown) as Promise<MlJobsResponse>,
+      (asInternalUser.ml.getJobStats(
+        jobIds.length > 0 ? { job_id: jobIdsString } : undefined
+      ) as unknown) as Promise<MlJobsStatsResponse>,
+      (asInternalUser.ml.getDatafeeds() as unknown) as Promise<MlDatafeedsResponse>,
+      (asInternalUser.ml.getDatafeedStats() as unknown) as Promise<MlDatafeedsStatsResponse>,
       calMngr.getAllCalendars(),
       getLatestBucketTimestampByJob(),
     ];
@@ -400,9 +401,9 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     const detailed = true;
     const jobIds = [];
     try {
-      const tasksList = await callAsInternalUser('tasks.list', { actions, detailed });
-      Object.keys(tasksList.nodes).forEach((nodeId) => {
-        const tasks = tasksList.nodes[nodeId].tasks;
+      const { body } = await asInternalUser.tasks.list({ actions, detailed });
+      Object.keys(body.nodes).forEach((nodeId) => {
+        const tasks = body.nodes[nodeId].tasks;
         Object.keys(tasks).forEach((taskId) => {
           jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
         });
@@ -410,7 +411,9 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs
-      const { jobs } = (await callAsInternalUser('ml.jobs')) as MlJobsResponse;
+      const {
+        body: { jobs },
+      } = await asInternalUser.ml.getJobs<MlJobsResponse>();
       jobIds.push(...jobs.filter((j) => j.deleting === true).map((j) => j.job_id));
     }
     return { jobIds };
@@ -421,13 +424,13 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
   // e.g. *_low_request_rate_ecs
   async function jobsExist(jobIds: string[] = []) {
     // Get the list of job IDs.
-    const jobsInfo = (await callAsInternalUser('ml.jobs', {
-      jobId: jobIds,
-    })) as MlJobsResponse;
+    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
+      job_id: jobIds.join(),
+    });
 
     const results: { [id: string]: boolean } = {};
-    if (jobsInfo.count > 0) {
-      const allJobIds = jobsInfo.jobs.map((job) => job.job_id);
+    if (body.count > 0) {
+      const allJobIds = body.jobs.map((job) => job.job_id);
 
       // Check if each of the supplied IDs match existing jobs.
       jobIds.forEach((jobId) => {
@@ -446,9 +449,9 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
   }
 
   async function getAllJobAndGroupIds() {
-    const { getAllGroups } = groupsProvider(mlClusterClient);
-    const jobs = (await callAsInternalUser('ml.jobs')) as MlJobsResponse;
-    const jobIds = jobs.jobs.map((job) => job.job_id);
+    const { getAllGroups } = groupsProvider(client);
+    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>();
+    const jobIds = body.jobs.map((job) => job.job_id);
     const groups = await getAllGroups();
     const groupIds = groups.map((group) => group.id);
 
@@ -460,13 +463,13 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
 
   async function getLookBackProgress(jobId: string, start: number, end: number) {
     const datafeedId = `datafeed-${jobId}`;
-    const [jobStats, isRunning] = await Promise.all([
-      callAsInternalUser('ml.jobStats', { jobId: [jobId] }) as Promise<MlJobsStatsResponse>,
+    const [{ body }, isRunning] = await Promise.all([
+      asInternalUser.ml.getJobStats<MlJobsStatsResponse>({ job_id: jobId }),
       isDatafeedRunning(datafeedId),
     ]);
 
-    if (jobStats.jobs.length) {
-      const statsForJob = jobStats.jobs[0];
+    if (body.jobs.length) {
+      const statsForJob = body.jobs[0];
       const time = statsForJob.data_counts.latest_record_timestamp;
       const progress = (time - start) / (end - start);
       const isJobClosed = statsForJob.state === JOB_STATE.CLOSED;
@@ -480,11 +483,11 @@ export function jobsProvider(mlClusterClient: ILegacyScopedClusterClient) {
   }
 
   async function isDatafeedRunning(datafeedId: string) {
-    const stats = (await callAsInternalUser('ml.datafeedStats', {
-      datafeedId: [datafeedId],
-    })) as MlDatafeedsStatsResponse;
-    if (stats.datafeeds.length) {
-      const state = stats.datafeeds[0].state;
+    const { body } = await asInternalUser.ml.getDatafeedStats<MlDatafeedsStatsResponse>({
+      datafeed_id: datafeedId,
+    });
+    if (body.datafeeds.length) {
+      const state = body.datafeeds[0].state;
       return (
         state === DATAFEED_STATE.STARTED ||
         state === DATAFEED_STATE.STARTING ||

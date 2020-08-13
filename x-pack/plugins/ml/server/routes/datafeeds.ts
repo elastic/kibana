@@ -33,12 +33,12 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, response }) => {
       try {
-        const resp = await legacyClient.callAsInternalUser('ml.datafeeds');
+        const { body } = await client.asInternalUser.ml.getDatafeeds();
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -65,13 +65,13 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await legacyClient.callAsInternalUser('ml.datafeeds', { datafeedId });
+        const { body } = await client.asInternalUser.ml.getDatafeeds({ datafeed_id: datafeedId });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -94,12 +94,12 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await legacyClient.callAsInternalUser('ml.datafeedStats');
+        const { body } = await client.asInternalUser.ml.getDatafeedStats();
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -126,15 +126,15 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canGetDatafeeds'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await legacyClient.callAsInternalUser('ml.datafeedStats', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.getDatafeedStats({
+          datafeed_id: datafeedId,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -163,17 +163,19 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canCreateDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await legacyClient.callAsInternalUser('ml.addDatafeed', {
-          datafeedId,
-          body: request.body,
-          ...getAuthorizationHeader(request),
-        });
+        const { body } = await client.asInternalUser.ml.putDatafeed(
+          {
+            datafeed_id: datafeedId,
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -202,17 +204,19 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canUpdateDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await legacyClient.callAsInternalUser('ml.updateDatafeed', {
-          datafeedId,
-          body: request.body,
-          ...getAuthorizationHeader(request),
-        });
+        const { body } = await client.asInternalUser.ml.updateDatafeed(
+          {
+            datafeed_id: datafeedId,
+            body: request.body,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -241,20 +245,20 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canDeleteDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const options: { datafeedId: string; force?: boolean } = {
-          datafeedId: request.params.jobId,
+        const options: { datafeed_id: string; force?: boolean } = {
+          datafeed_id: request.params.jobId,
         };
         const force = request.query.force;
         if (force !== undefined) {
           options.force = force;
         }
 
-        const resp = await legacyClient.callAsInternalUser('ml.deleteDatafeed', options);
+        const { body } = await client.asInternalUser.ml.deleteDatafeed(options);
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -283,19 +287,19 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
         const { start, end } = request.body;
 
-        const resp = await legacyClient.callAsInternalUser('ml.startDatafeed', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.startDatafeed({
+          datafeed_id: datafeedId,
           start,
           end,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -322,16 +326,16 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canStartStopDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
 
-        const resp = await legacyClient.callAsInternalUser('ml.stopDatafeed', {
-          datafeedId,
+        const { body } = await client.asInternalUser.ml.stopDatafeed({
+          datafeed_id: datafeedId,
         });
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -358,16 +362,18 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canPreviewDatafeed'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const datafeedId = request.params.datafeedId;
-        const resp = await legacyClient.callAsInternalUser('ml.datafeedPreview', {
-          datafeedId,
-          ...getAuthorizationHeader(request),
-        });
+        const { body } = await client.asInternalUser.ml.previewDatafeed(
+          {
+            datafeed_id: datafeedId,
+          },
+          getAuthorizationHeader(request)
+        );
 
         return response.ok({
-          body: resp,
+          body,
         });
       } catch (e) {
         return response.customError(wrapError(e));

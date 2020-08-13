@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
@@ -26,8 +26,8 @@ interface Results {
   };
 }
 
-export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
-  async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
+export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
+  async function forceStartDatafeeds(datafeedIds: string[], start?: string, end?: string) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
       acc[cur] = false;
@@ -84,10 +84,11 @@ export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterCl
   async function openJob(jobId: string) {
     let opened = false;
     try {
-      const resp = await callAsInternalUser('ml.openJob', { jobId });
-      opened = resp.opened;
+      const { body } = await asInternalUser.ml.openJob({ job_id: jobId });
+      opened = body.opened;
     } catch (error) {
       if (error.statusCode === 409) {
+        // TEST THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         opened = true;
       } else {
         throw error;
@@ -96,8 +97,8 @@ export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterCl
     return opened;
   }
 
-  async function startDatafeed(datafeedId: string, start?: number, end?: number) {
-    return callAsInternalUser('ml.startDatafeed', { datafeedId, start, end });
+  async function startDatafeed(datafeedId: string, start?: string, end?: string) {
+    return asInternalUser.ml.startDatafeed({ datafeed_id: datafeedId, start, end });
   }
 
   async function stopDatafeeds(datafeedIds: string[]) {
@@ -105,7 +106,12 @@ export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterCl
 
     for (const datafeedId of datafeedIds) {
       try {
-        results[datafeedId] = await callAsInternalUser('ml.stopDatafeed', { datafeedId });
+        const { body } = await asInternalUser.ml.stopDatafeed<{
+          started: boolean;
+        }>({
+          datafeed_id: datafeedId,
+        });
+        results[datafeedId] = body;
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
@@ -117,11 +123,17 @@ export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterCl
   }
 
   async function forceDeleteDatafeed(datafeedId: string) {
-    return callAsInternalUser('ml.deleteDatafeed', { datafeedId, force: true });
+    const { body } = await asInternalUser.ml.deleteDatafeed({
+      datafeed_id: datafeedId,
+      force: true,
+    });
+    return body;
   }
 
   async function getDatafeedIdsByJobId() {
-    const { datafeeds } = (await callAsInternalUser('ml.datafeeds')) as MlDatafeedsResponse;
+    const {
+      body: { datafeeds },
+    } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
     return datafeeds.reduce((acc, cur) => {
       acc[cur.job_id] = cur.datafeed_id;
       return acc;
@@ -129,7 +141,9 @@ export function datafeedsProvider({ callAsInternalUser }: ILegacyScopedClusterCl
   }
 
   async function getJobIdsByDatafeedId() {
-    const { datafeeds } = (await callAsInternalUser('ml.datafeeds')) as MlDatafeedsResponse;
+    const {
+      body: { datafeeds },
+    } = await asInternalUser.ml.getDatafeeds<MlDatafeedsResponse>();
     return datafeeds.reduce((acc, cur) => {
       acc[cur.datafeed_id] = cur.job_id;
       return acc;

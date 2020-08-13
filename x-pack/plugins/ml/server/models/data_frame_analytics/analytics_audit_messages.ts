@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { JobMessage } from '../../../common/types/audit_message';
 
@@ -23,7 +23,7 @@ interface BoolQuery {
   bool: { [key: string]: any };
 }
 
-export function analyticsAuditMessagesProvider({ callAsInternalUser }: ILegacyScopedClusterClient) {
+export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedClusterClient) {
   // search for audit messages,
   // analyticsId is optional. without it, all analytics will be listed.
   async function getAnalyticsAuditMessages(analyticsId: string) {
@@ -69,7 +69,7 @@ export function analyticsAuditMessagesProvider({ callAsInternalUser }: ILegacySc
     }
 
     try {
-      const resp = await callAsInternalUser('search', {
+      const { body } = await asInternalUser.search({
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         rest_total_hits_as_int: true,
@@ -81,8 +81,8 @@ export function analyticsAuditMessagesProvider({ callAsInternalUser }: ILegacySc
       });
 
       let messages = [];
-      if (resp.hits.total !== 0) {
-        messages = resp.hits.hits.map((hit: Message) => hit._source);
+      if (body.hits.total !== 0) {
+        messages = body.hits.hits.map((hit: Message) => hit._source);
         messages.reverse();
       }
       return messages;
