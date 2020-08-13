@@ -181,17 +181,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (count: number, status: Status) => {
+    (updated: number, total: number, conflicts: number, status: Status) => {
       let title: string;
       switch (status) {
         case 'closed':
-          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(count);
+          title = i18n.CLOSED_ALERT_SUCCESS_TOAST(updated, total);
           break;
         case 'open':
-          title = i18n.OPENED_ALERT_SUCCESS_TOAST(count);
+          title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated, total);
           break;
         case 'in-progress':
-          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(count);
+          title = i18n.IN_PROGRESS_ALERT_SUCCESS_TOAST(updated, total);
+      }
+      if (conflicts > 0) {
+        // TODO: add 'try again' button
       }
       displaySuccessToast(title, dispatchToaster);
     },

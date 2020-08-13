@@ -129,27 +129,27 @@ export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   }
 );
 
-export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+export const CLOSED_ALERT_SUCCESS_TOAST = (totalClosed: number, totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.closedAlertSuccessToastMessage', {
-    values: { totalAlerts },
+    values: { totalClosed, totalAlerts },
     defaultMessage:
-      'Successfully closed {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+      'Successfully closed {totalClosed}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const OPENED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+export const OPENED_ALERT_SUCCESS_TOAST = (totalOpened: number, totalAlerts: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage', {
-    values: { totalAlerts },
+    values: { totalOpened, totalAlerts },
     defaultMessage:
-      'Successfully opened {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+      'Successfully opened {totalOpened}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
   });
 
-export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
+export const IN_PROGRESS_ALERT_SUCCESS_TOAST = (totalInProgress: number, totalAlerts: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.alerts.inProgressAlertSuccessToastMessage',
     {
-      values: { totalAlerts },
+      values: { totalInProgress, totalAlerts },
       defaultMessage:
-        'Successfully marked {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
+        'Successfully marked {totalInProgress}/{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}} as in progress.',
     }
   );
 

@@ -28,7 +28,7 @@ export const setSignalsStatusRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const { signal_ids: signalIds, query, status } = request.body;
+      const { conflicts, signal_ids: signalIds, query, status } = request.body;
       const clusterClient = context.core.elasticsearch.legacy.client;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
@@ -52,9 +52,14 @@ export const setSignalsStatusRoute = (router: IRouter) => {
           },
         };
       }
+      let onConflict = 'abort';
+      if (conflicts != null) {
+        onConflict = conflicts;
+      }
       try {
         const result = await clusterClient.callAsCurrentUser('updateByQuery', {
           index: siemClient.getSignalsIndex(),
+          conflicts: onConflict,
           refresh: 'wait_for',
           body: {
             script: {

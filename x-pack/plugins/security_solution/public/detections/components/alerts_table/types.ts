@@ -45,7 +45,12 @@ export interface UpdateAlertStatusActionProps {
   selectedStatus: Status;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
-  onAlertStatusUpdateSuccess: (count: number, status: Status) => void;
+  onAlertStatusUpdateSuccess: (
+    count: number,
+    total: number,
+    conflicts: number,
+    status: Status
+  ) => void;
   onAlertStatusUpdateFailure: (status: Status, error: Error) => void;
 }
 
