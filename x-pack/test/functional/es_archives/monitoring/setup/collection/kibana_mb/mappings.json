@@ -7,6 +7,14 @@
     "mappings": {
       "dynamic": "false",
       "properties": {
+        "beats_state": {
+          "properties": {
+            "timestamp": {
+              "format": "date_time",
+              "type": "date"
+            }
+          }
+        },
         "beats_stats": {
           "properties": {
             "beat": {
@@ -340,6 +348,13 @@
             },
             "time_since_last_read_millis": {
               "type": "long"
+            }
+          }
+        },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
             }
           }
         },
@@ -911,6 +926,9 @@
                 },
                 "uuid": {
                   "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
                 }
               }
             },
@@ -974,6 +992,13 @@
             },
             "timestamp": {
               "type": "date"
+            },
+            "usage": {
+              "properties": {
+                "index": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -1022,6 +1047,9 @@
                 },
                 "uuid": {
                   "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
                 }
               }
             },
@@ -1085,6 +1113,13 @@
             },
             "timestamp": {
               "type": "date"
+            },
+            "usage": {
+              "properties": {
+                "index": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },

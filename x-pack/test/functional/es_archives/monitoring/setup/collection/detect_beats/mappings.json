@@ -39,6 +39,13 @@
             }
           }
         },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
+            }
+          }
+        },
         "cluster_uuid": {
           "type": "keyword"
         },
@@ -624,6 +631,13 @@
             }
           }
         },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
+            }
+          }
+        },
         "cluster_uuid": {
           "type": "keyword"
         },
@@ -1192,6 +1206,9 @@
                 },
                 "uuid": {
                   "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
                 }
               }
             },
@@ -1255,6 +1272,13 @@
             },
             "timestamp": {
               "type": "date"
+            },
+            "usage": {
+              "properties": {
+                "index": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },

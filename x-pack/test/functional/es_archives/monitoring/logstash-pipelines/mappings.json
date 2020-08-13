@@ -266,6 +266,13 @@
             }
           }
         },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
+            }
+          }
+        },
         "cluster_uuid": {
           "type": "keyword"
         },

@@ -20,6 +20,9 @@
                 },
                 "uuid": {
                   "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
                 }
               }
             },
@@ -83,6 +86,13 @@
             },
             "timestamp": {
               "type": "date"
+            },
+            "usage": {
+              "properties": {
+                "index": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
@@ -430,6 +440,13 @@
             },
             "time_since_last_read_millis": {
               "type": "long"
+            }
+          }
+        },
+        "cluster_state": {
+          "properties": {
+            "nodes_hash": {
+              "type": "integer"
             }
           }
         },
