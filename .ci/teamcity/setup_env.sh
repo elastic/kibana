@@ -27,18 +27,10 @@ else
   echo "Chrome not detected, installing default chromedriver binary for the package version"
 fi
 
-"$(dirname "${0}")/setup_node.sh"
-
-echo "$PATH"
-echo "Node Version: $NODE_VERSION"
 # TODO vault keys
-
-node --version
 
 # TODO
 if [[ -d "/home/agent/.kibana/node_modules" ]]; then
   echo 'Using node_modules cache'
   mv /home/agent/.kibana/node_modules .
 fi
-
-"$(dirname "${0}")/bootstrap.sh" # TODO this should be elsewhere (probably a separate step)

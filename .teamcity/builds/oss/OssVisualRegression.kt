@@ -20,6 +20,20 @@ class OssVisualRegression(val build: BuildType) : BuildType({
 
     script {
       scriptContent = """
+                #!/bin/bash
+                ./.ci/teamcity/setup_node.sh
+          """.trimIndent()
+    }
+
+    script {
+      scriptContent = """
+                #!/bin/bash
+                ./.ci/teamcity/bootstrap.sh
+          """.trimIndent()
+    }
+
+    script {
+      scriptContent = """
               #!/bin/bash
               ./.ci/teamcity/oss/visual_regression.sh
           """.trimIndent()
