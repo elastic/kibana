@@ -214,7 +214,12 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     // Step 2: Copy has not been initiated yet; User must fill out form to continue.
     if (!copyInProgress) {
       return (
-        <CopyToSpaceForm spaces={spaces} copyOptions={copyOptions} onUpdate={setCopyOptions} />
+        <CopyToSpaceForm
+          savedObject={savedObject}
+          spaces={spaces}
+          copyOptions={copyOptions}
+          onUpdate={setCopyOptions}
+        />
       );
     }
 
