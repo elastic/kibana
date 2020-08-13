@@ -30,7 +30,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
         await putTransform(getService, transformId);
         await pageObjects.endpoint.navigateToEndpointList();
-
       });
       after(async () => {
         await deleteTransform(getService, transformId);
@@ -200,12 +199,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await deleteTransform(getService, transformId);
         // clear out the data and reload the page
         await deleteMetadataStream(getService);
-<<<<<<< HEAD
         await deleteMetadataCurrentStream(getService);
-        await pageObjects.endpoint.navigateToHostList();
-=======
         await pageObjects.endpoint.navigateToEndpointList();
->>>>>>> master
       });
       it('displays empty Policy Table page.', async () => {
         await testSubjects.existOrFail('emptyPolicyTable');
