@@ -29,7 +29,7 @@ import {
   createParserErrorMessage,
   normalizePath,
   extractMessageValueFromNode,
-} from './utils';
+} from '.';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
   (callee) => `
