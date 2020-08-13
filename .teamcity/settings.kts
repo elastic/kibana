@@ -5,9 +5,9 @@ import templates.DefaultTemplate
 version = "2020.1"
 
 project {
-  params {
-    param("teamcity.ui.settings.readOnly", "true")
-  }
+  // params {
+  //   param("teamcity.ui.settings.readOnly", "true")
+  // }
 
   vcsRoot(DefaultRoot)
   template(DefaultTemplate)
