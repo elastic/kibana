@@ -25,55 +25,52 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 object DefaultTemplate : Template({
-    name = "Default Template"
+  name = "Default Template"
 
-    vcs {
-        root(DefaultRoot)
+  vcs {
+    root(DefaultRoot)
 
-        checkoutDir = "kibana"
-    }
+    checkoutDir = "kibana"
+  }
 
-    params {
-      param("env.CI", "true")
-      param("env.TEST_BROWSER_HEADLESS", "1")
+  params {
+    param("env.CI", "true")
 //
 //        // For now these are just to ensure compatibility with existing Jenkins-based configuration
 //        param("env.JENKINS_URL", "%teamcity.serverUrl%")
 //        param("env.BUILD_URL", "%teamcity.serverUrl%/build/%teamcity.build.id%")
 //        param("env.JOB_NAME", "%system.teamcity.buildType.id%")
 
-      param("env.BUILD_ID", "%build.number%")
-      param("env.GIT_BRANCH", "%vcsroot.branch%")
-      param("env.branch_specifier", "%vcsroot.branch%")
+    param("env.BUILD_ID", "%build.number%")
+    param("env.GIT_BRANCH", "%vcsroot.branch%")
+    param("env.branch_specifier", "%vcsroot.branch%")
+  }
+
+  steps {
+    script {
+      name = "Setup Environment"
+      scriptContent = """
+                #!/bin/bash
+                ./.ci/teamcity/setup_env.sh
+          """.trimIndent()
     }
 
-//    steps {
-//        script {
-//            name = "Setup Build Environment (Unix)"
-//
-//            conditions {
-//                doesNotContain("teamcity.agent.jvm.os.name", "Windows")
-//            }
-//
-//            scriptContent = """
-//                #!/usr/bin/env bash
-//            """.trimIndent()
-//        }
-//
-//        placeholder { }
-//
-//        script {
-//            name = "Notify H.O.M.E.R. Webhook"
-//
-//            conditions {
-//                doesNotContain("teamcity.agent.jvm.os.name", "Windows")
-//                doesNotEqual("system.build.is.personal", "true")
-//            }
-//
-//            scriptContent = """
-//                #!/usr/bin/env bash
-//                curl -sS -X POST -H "Content-Type: text/plain" --data "%teamcity.serverUrl%/app/rest/builds/%teamcity.build.id%" https://homer.app.elstc.co/webhook/teamcity/build-finished || true
-//            """.trimIndent()
-//        }
-//    }
+    script {
+      name = "Setup Node and Yarn"
+      scriptContent = """
+                #!/bin/bash
+                ./.ci/teamcity/setup_node.sh
+          """.trimIndent()
+    }
+
+    script {
+      name = "Bootstrap"
+      scriptContent = """
+                #!/bin/bash
+                ./.ci/teamcity/bootstrap.sh
+          """.trimIndent()
+    }
+
+    placeholder {}
+  }
 })

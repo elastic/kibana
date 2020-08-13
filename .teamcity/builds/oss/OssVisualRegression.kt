@@ -1,4 +1,5 @@
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
+import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.placeholder
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.script
 
 class OssVisualRegression(val build: BuildType) : BuildType({
@@ -7,34 +8,11 @@ class OssVisualRegression(val build: BuildType) : BuildType({
   paused = true
 
   params {
+    param("env.KBN_NP_PLUGINS_BUILT", "true")
     password("env.PERCY_TOKEN", "credentialsJSON:1ef0e984-a184-4f1c-a9be-282182cb262d", display = ParameterDisplay.HIDDEN)
   }
 
   steps {
-    script {
-      name = "Setup Environment"
-      scriptContent = """
-                #!/bin/bash
-                ./.ci/teamcity/setup_env.sh
-          """.trimIndent()
-    }
-
-    script {
-      name = "Setup Node and Yarn"
-      scriptContent = """
-                #!/bin/bash
-                ./.ci/teamcity/setup_node.sh
-          """.trimIndent()
-    }
-
-    script {
-      name = "Bootstrap"
-      scriptContent = """
-                #!/bin/bash
-                ./.ci/teamcity/bootstrap.sh
-          """.trimIndent()
-    }
-
     script {
       name = "OSS Visual Regression"
       scriptContent = """
