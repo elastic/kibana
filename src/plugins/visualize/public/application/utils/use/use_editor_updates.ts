@@ -89,8 +89,9 @@ export const useEditorUpdates = (
         } else if (!linked && savedVis && savedVis.savedSearchId) {
           delete savedVis.savedSearchId;
           delete vis.data.savedSearchId;
-        } else {
-          // TODO: something to do for when it's not a saved vis?
+        } else if (!linked && !savedVis) {
+          // delete link when it's not a saved vis
+          delete vis.data.savedSearchId;
         }
       };
 
