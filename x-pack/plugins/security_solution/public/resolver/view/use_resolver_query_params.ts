@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useQueryStringKeys } from './use_query_string_keys';
-import * as selectors from '../store/selectors';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
 export function useResolverQueryParams() {
@@ -48,33 +47,6 @@ export function useResolverQueryParams() {
       crumbId: urlSearchParams.get(idKey) ?? '',
     };
   }, [urlSearch, idKey, eventKey]);
-
-  useEffect(() => {
-    /**
-     * Keep track of the old query string keys so we can remove them.
-     */
-    const oldIdKey = idKey;
-    const oldEventKey = eventKey;
-    /**
-     * When `idKey` or `eventKey` changes (such as when the `resolverComponentInstanceID` has changed) or when the component unmounts, remove any state from the query string.
-     */
-    return () => {
-      /**
-       * This effect must not be invalidated when `search` changes.
-       * Use the current location.search via the `history` object.
-       * `history` doesn't change so this is effectively like accessing `search` via a ref.
-       */
-      const urlSearchParams = new URLSearchParams(history.location.search);
-
-      /**
-       * Remove old keys from the url
-       */
-      urlSearchParams.delete(oldIdKey);
-      urlSearchParams.delete(oldEventKey);
-      const relativeURL = { search: urlSearchParams.toString() };
-      history.replace(relativeURL);
-    };
-  }, [idKey, eventKey, history]);
 
   return {
     pushToQueryParams,
