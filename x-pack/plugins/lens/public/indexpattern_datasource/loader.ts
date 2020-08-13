@@ -18,6 +18,7 @@ import {
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
+import { documentField } from './document_field';
 import {
   IndexPatternsContract,
   indexPatterns as indexPatternsUtils,
@@ -48,10 +49,12 @@ export async function loadIndexPatterns({
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
-      const newFields = [...(indexPattern.fields as IndexPatternField[])].filter(
-        (field) =>
-          !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
-      );
+      const newFields = [...(indexPattern.fields as IndexPatternField[])]
+        .filter(
+          (field) =>
+            !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
+        )
+        .concat(documentField as IndexPatternField[]);
 
       const { typeMeta, id } = indexPattern;
       if (typeMeta?.aggs) {

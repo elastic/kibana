@@ -166,7 +166,10 @@ function mockIndexPatternsService() {
         type: undefined,
         title: pattern.title,
         timeFieldName: pattern.timeFieldName,
-        fields: pattern.fields,
+        fields: {
+          ...pattern.fields,
+          documentField,
+        },
       };
     }),
   } as unknown) as Pick<IndexPatternsContract, 'get'>;
