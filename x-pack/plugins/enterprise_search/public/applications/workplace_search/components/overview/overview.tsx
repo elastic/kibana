@@ -56,7 +56,7 @@ export const Overview: React.FC = () => {
     hasOrgSources,
     isOldAccount,
     organization: { name: orgName, defaultOrgName },
-  } = useValues(OverviewLogic) as IOverviewValues;
+  } = useValues(OverviewLogic);
 
   useEffect(() => {
     initializeOverview({ http });

@@ -43,14 +43,14 @@ export interface IOverviewValues extends IOverviewServerData {
   flashMessages: IFlashMessagesProps;
 }
 
-export const OverviewLogic = kea({
-  actions: (): IOverviewActions => ({
+export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+  actions: {
     setServerData: (serverData) => serverData,
     setFlashMessages: (flashMessages) => ({ flashMessages }),
     setHasErrorConnecting: (hasErrorConnecting) => ({ hasErrorConnecting }),
     initializeOverview: ({ http }) => ({ http }),
-  }),
-  reducers: (): TKeaReducers<IOverviewValues, IOverviewActions> => ({
+  },
+  reducers: {
     organization: [
       {} as IOrganization,
       {
@@ -154,8 +154,8 @@ export const OverviewLogic = kea({
         setHasErrorConnecting: (_, { hasErrorConnecting }) => hasErrorConnecting,
       },
     ],
-  }),
-  listeners: ({ actions }): Partial<IOverviewActions> => ({
+  },
+  listeners: ({ actions }) => ({
     initializeOverview: async ({ http }: { http: HttpSetup }) => {
       try {
         const response = await http.get('/api/workplace_search/overview');
@@ -165,4 +165,4 @@ export const OverviewLogic = kea({
       }
     },
   }),
-}) as MakeLogicType<IOverviewValues, IOverviewActions>;
+});
