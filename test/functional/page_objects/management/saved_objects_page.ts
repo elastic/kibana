@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { keyBy } from 'lodash';
 import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -35,6 +36,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await searchBox.type(objectName);
       await searchBox.pressKeys(browser.keys.ENTER);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitTableIsLoaded();
     }
 
     async importFile(path: string, overwriteAll = true) {
@@ -100,6 +102,56 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       });
     }
 
+    async clickRelationshipsByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      if (table[title].menuElement) {
+        log.debug(`we found a context menu element for (${title}) so click it`);
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        await (await menuPanel.findByTestSubject('savedObjectsTableAction-relationships')).click();
+      } else {
+        log.debug(
+          `we didn't find a menu element so should be a relastionships element for (${title}) to click`
+        );
+        // or the action elements are on the row without the menu
+        await table[title].relationshipsElement?.click();
+      }
+    }
+
+    async clickCopyToSpaceByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      if (table[title].menuElement) {
+        log.debug(`we found a context menu element for (${title}) so click it`);
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        await (
+          await menuPanel.findByTestSubject('savedObjectsTableAction-copy_saved_objects_to_space')
+        ).click();
+      } else {
+        log.debug(
+          `we didn't find a menu element so should be a relastionships element for (${title}) to click`
+        );
+        // or the action elements are on the row without the menu
+        await table[title].copySaveObjectsElement?.click();
+      }
+    }
+
+    async clickCheckboxByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      await table[title].checkbox.click();
+    }
+
+    async getObjectTypeByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      return table[title].objectType;
+    }
+
     async getElementsInTable() {
       const rows = await testSubjects.findAll('~savedObjectsTableRow');
       return mapAsync(rows, async (row) => {
@@ -133,9 +185,9 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
             'savedObjectsTableAction-relationships'
           );
         }
-        if (actionsHTML.includes('savedObjectsTableAction - copy_saved_objects_to_space')) {
+        if (actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space')) {
           copySaveObjectsElement = await row.findByTestSubject(
-            'savedObjectsTableAction - copy_saved_objects_to_space'
+            'savedObjectsTableAction-copy_saved_objects_to_space'
           );
         }
         return {

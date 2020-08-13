@@ -31,6 +31,7 @@ export default function spaceSelectorFunctonalTests({
         disabledFeatures: [],
       });
 
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });

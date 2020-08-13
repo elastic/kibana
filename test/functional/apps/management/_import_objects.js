@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const find = getService('find');
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
@@ -49,25 +48,13 @@ export default function ({ getService, getPageObjects }) {
         );
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
-        await PageObjects.common.sleep(5000);
 
-        // get all the elements in the table, and index them by the 'title' visible text field
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
         log.debug("check that 'Log Agents' is in table as a visualization");
-        expect(elements['Log Agents'].objectType).to.eql('visualization');
+        expect(await PageObjects.savedObjects.getObjectTypeByTitle('Log Agents')).to.eql(
+          'visualization'
+        );
 
-        // there's either a menu of actions
-        if (elements['logstash-*'].menuElement) {
-          await elements['logstash-*'].menuElement?.click();
-          // Wait for context menu to render
-          const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
-          await (
-            await menuPanel.findByTestSubject('savedObjectsTableAction-relationships')
-          ).click();
-        } else {
-          // or the action elements are on the row without the menu
-          await elements['logstash-*'].relationshipsElement.click();
-        }
+        await PageObjects.savedObjects.clickRelationshipsByTitle('logstash-*');
 
         const flyout = keyBy(await PageObjects.savedObjects.getRelationshipFlyout(), 'title');
         log.debug(
@@ -164,8 +151,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         await PageObjects.savedObjects.importFile(
@@ -196,8 +182,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Then, import the objects
@@ -233,7 +218,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.checkImportSucceeded();
         await PageObjects.savedObjects.clickImportDone();
         const objects = await PageObjects.savedObjects.getRowTitles();
-        console.log(objects);
         const isSavedObjectImported = objects.includes('Log Agents');
         expect(isSavedObjectImported).to.be(true);
       });
@@ -336,8 +320,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.savedObjects.clickImportDone();
 
         // Second, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Last, import a saved object connected to the saved search
@@ -368,8 +351,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should import saved objects with index patterns when index patterns does not exists', async () => {
         // First, we need to delete the index pattern
-        const elements = keyBy(await PageObjects.savedObjects.getElementsInTable(), 'title');
-        await elements['logstash-*'].checkbox.click();
+        await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
         // Then, import the objects

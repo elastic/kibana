@@ -25,21 +25,7 @@ export function CopySavedObjectsToSpacePageProvider({
       // Hopefully the one we want is on the first page of results.
       await savedObjects.searchForObject(objectName);
       await common.sleep(1000);
-
-      // this gets all the elements in the saved object table and keys them by title
-      const elements = keyBy(await savedObjects.getElementsInTable(), 'title');
-      // If there are more than 2 "actions" on the saved object we get the ... menu
-      // if there is the ... action menu we need to click it and click the copy saved object element
-      if (elements[objectName].menuElement) {
-        await elements[objectName].menuElement?.click();
-        // Wait for context menu to render
-        await find.existsByCssSelector('.euiContextMenuPanel');
-        await testSubjects.click('savedObjectsTableAction-copy_saved_objects_to_space');
-      } else {
-        // or there might be the copy saved object element without the menu
-        await elements[objectName].copySaveObjectsElement?.click();
-      }
-
+      await savedObjects.clickCopyToSpaceByTitle(objectName);
       await testSubjects.existOrFail('copy-to-space-flyout');
     },
 
