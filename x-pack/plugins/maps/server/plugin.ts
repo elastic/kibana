@@ -28,6 +28,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
 import { alertType as peopleInSpaceAlert } from './alert_types/astros';
+import { alertType as geoThresholdAlert } from './alert_types/geo_threshold';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
 
 interface SetupDeps {
@@ -201,6 +202,7 @@ export class MapsPlugin implements Plugin {
     core.savedObjects.registerType(mapSavedObjects);
     registerMapsUsageCollector(usageCollection, currentConfig);
     alerts.registerType(peopleInSpaceAlert);
+    alerts.registerType(geoThresholdAlert);
 
     return {
       config: config$,

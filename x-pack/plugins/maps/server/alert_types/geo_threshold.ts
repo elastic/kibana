@@ -4,28 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../../alerts/server';
+import { LegacyApiCaller } from 'kibana/server';
 import { APP_ID } from '../../common/constants';
 
-const actionGroupId = i18n.translate(
-  'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
-  {
-    defaultMessage: 'Geo threshold met',
-  }
-);
-
-const actionGroupName = i18n.translate(
-  'xpack.alertingBuiltins.indexThreshold.actionGroupThresholdMetTitle',
-  {
-    defaultMessage: 'Geo threshold met',
-  }
-);
-
-function getShapesFilter(type: string, shapesArr: unknown[]) {
+function getShapesFilter(type: string, shapesArr: unknown[], isContained: boolean) {
+  const boolCheck = isContained ? 'should' : 'must_not';
   const shapesFilter = {
     bool: {
-      should: [],
+      [boolCheck]: [],
       minimum_should_match: 1,
     },
   };
@@ -33,60 +19,17 @@ function getShapesFilter(type: string, shapesArr: unknown[]) {
     case 'indexedShapes':
       shapesArr.forEach((shape: unknown) => {
         const { index, id, path } = shape;
-        shapesFilter.bool.should.push({
+        shapesFilter.bool[boolCheck].push({
           bool: {
             should: [
               {
                 geo_shape: {
-                  location: {
+                  [path]: {
                     indexed_shape: {
                       index,
                       id,
                       path,
                     },
-                  },
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        });
-      });
-      break;
-    case 'poly':
-      shapesArr.forEach((coords: unknown) => {
-        shapesFilter.bool.should.push({
-          bool: {
-            should: [
-              {
-                geo_shape: {
-                  ignore_unmapped: true,
-                  DestLocation: {
-                    relation: 'INTERSECTS',
-                    shape: {
-                      coordinates: coords,
-                      type: 'Polygon',
-                    },
-                  },
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        });
-      });
-      break;
-    case 'bbox':
-      shapesArr.forEach((coords: unknown) => {
-        const { topLeft, bottomRight } = coords;
-        shapesFilter.bool.should.push({
-          bool: {
-            should: [
-              {
-                geo_bounding_box: {
-                  'pin.location': {
-                    top_left: topLeft,
-                    bottom_right: bottomRight,
                   },
                 },
               },
@@ -102,11 +45,168 @@ function getShapesFilter(type: string, shapesArr: unknown[]) {
   return shapesFilter;
 }
 
+function executeEsQueryFactory(
+  {
+    entity,
+    index,
+    dateField,
+    shapesArr,
+    type,
+  }: {
+    entity: string;
+    index: string;
+    dateField: string;
+    shapesArr: unknown[];
+    type: string;
+  },
+  { callCluster, log }: { callCluster: LegacyApiCaller; log: unknown }
+) {
+  return async (
+    gteDateTime: string,
+    ltDateTime: string,
+    isContained: boolean,
+    topHitsQty: number = 1
+  ) => {
+    const esQuery: unknown = {
+      index,
+      body: {
+        size: 0,
+        aggs: {
+          totalEntities: {
+            cardinality: {
+              precision_threshold: 1,
+              field: entity,
+            },
+          },
+          entitySplit: {
+            terms: {
+              size: 65535,
+              shard_size: 65535,
+              field: entity,
+            },
+            aggs: {
+              entityHits: {
+                top_hits: {
+                  size: topHitsQty,
+                  docvalue_fields: [entity, dateField],
+                  _source: false,
+                },
+              },
+            },
+          },
+        },
+        stored_fields: ['*'],
+        docvalue_fields: [
+          {
+            field: dateField,
+            format: 'date_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              getShapesFilter(type, shapesArr, isContained),
+              {
+                range: {
+                  [dateField]: {
+                    gte: gteDateTime,
+                    lt: ltDateTime,
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        },
+      },
+      ignoreUnavailable: true,
+      allowNoIndices: true,
+      ignore: [404],
+    };
+
+    console.log('*********************************');
+    console.log(JSON.stringify(esQuery.body));
+    console.log('*********************************');
+
+    let esResult;
+    try {
+      esResult = await callCluster('search', esQuery);
+    } catch (err) {
+      // log.warn(['warn', 'maps']`${err.message}`);
+    }
+    return esResult;
+  };
+}
+
+function getTopHitsEntities(esQueryResults, dateField) {
+  console.log('ES QUERY RESULTS');
+  console.log(esQueryResults);
+  if (!esQueryResults.aggregations) {
+    return [];
+  }
+
+  const {
+    aggregations: {
+      entitySplit: { buckets: aggResults = [] },
+    },
+  } = esQueryResults;
+
+  return aggResults.map((aggResult) => {
+    const {
+      key: entityName,
+      entityHits: {
+        hits: { hits: topAggHits },
+      },
+    } = aggResult;
+
+    const {
+      fields: { [dateField]: dates },
+    } = topAggHits[0];
+    return {
+      name: entityName,
+      dates,
+    };
+  });
+}
+
+function getAlertableEntities(lastAlertEntities, currAlertEntities) {
+  console.log('Last and current');
+  console.log(lastAlertEntities, currAlertEntities);
+  console.log('**********************');
+  const lastAlertNames = lastAlertEntities.map(({ name }) => name);
+  const alertableEntities = [];
+  currAlertEntities.forEach(({ name, dates }) => {
+    if (!lastAlertNames.includes(name)) {
+      return;
+    }
+    if (dates.length > 1) {
+      // Check that the prior hit isn't more recent than the one on the other side of the
+      // shape(s). If it is, there was just a movement within the same space
+      const lastEntity = lastAlertEntities.find(
+        ({ name: lastEntityName }) => lastEntityName === name
+      );
+      const lastEntityTime = newDate(lastEntity.dates[0]).getTime();
+      const currEntitySecondTime = new Date(dates[1]).getTime();
+      if (currEntitySecondTime > lastEntityTime) {
+        return;
+      }
+    }
+    alertableEntities.push(name);
+  });
+  console.log('Alertable entities');
+  console.log(alertableEntities);
+  return alertableEntities;
+}
+
 export const alertType: {
   defaultActionGroupId: string;
   actionVariables: any[];
   actionGroups: Array<{ name: string; id: string }>;
   executor({
+    startedAt,
+    previousStartedAt,
     services: { callCluster, log },
     params,
   }: {
@@ -119,70 +219,49 @@ export const alertType: {
 } = {
   id: 'maps.geo-threshold',
   name: 'Check if one or more documents has entered or left a defined geo area',
-  actionGroups: [{ id: actionGroupId, name: actionGroupName }],
+  actionGroups: [{ id: 'default', name: 'default' }],
   defaultActionGroupId: 'default',
   actionVariables: [],
-  async executor({ services: { callCluster, log }, params }) {
-    const { entity, index, dateField, shapesArr, type } = params;
+  async executor({
+    previousStartedAt: currIntervalStartTime,
+    startedAt: currIntervalEndTime,
+    services,
+    params,
+    state: { prevIntervalStartTime },
+  }) {
+    const { dateField, entity } = params;
+    const executeEsQuery = executeEsQueryFactory(params, services);
+    const trackingEvent = params.trackingEvent;
+    const isContained = trackingEvent === 'entered';
+    // Get top hits either inside or outside (dependent on value of `isContained`) of the shape(s)
+    // for previous interval
+    const lastAlertCycleResults = await executeEsQuery(
+      null,
+      currIntervalStartTime,
+      !isContained,
+      1
+    );
+    // Get top hits opposite of previous shape(s) query for current interval
+    const currentAlertCycleResults = await executeEsQuery(
+      currIntervalStartTime,
+      currIntervalEndTime,
+      isContained,
+      2
+    );
 
-    const esQuery: any = {
-      index,
-      body: {
-        size: 0,
-        query: {
-          size: 0,
-          aggs: {
-            totalEntities: {
-              cardinality: {
-                precision_threshold: 1,
-                field: entity,
-              },
-            },
-            entitySplit: {
-              terms: {
-                size: 65535,
-                shard_size: 65535,
-                field: entity,
-              },
-              aggs: {
-                entityHits: {
-                  top_hits: {
-                    size: 1,
-                    _source: false,
-                  },
-                },
-              },
-            },
-          },
-          stored_fields: ['*'],
-          docvalue_fields: [
-            {
-              field: dateField,
-              format: 'date_time',
-            },
-          ],
-          query: {
-            bool: {
-              filter: [getShapesFilter(type, shapesArr)],
-              should: [],
-              must_not: [],
-            },
-          },
-        },
-      },
-      ignoreUnavailable: true,
-      allowNoIndices: true,
-      ignore: [404],
-    };
-    let esResult = [];
-    try {
-      esResult = await callCluster('search', esQuery);
-    } catch (err) {
-      log.warn(['warn', 'maps']`${err.message}`);
-    }
+    const lastAlertEntities = getTopHitsEntities(lastAlertCycleResults, dateField);
+    const currAlertEntities = getTopHitsEntities(currentAlertCycleResults, dateField);
+
+    // Determine if any of the entities that were previously top hits inside or outside have
+    // any top hits in the opposite space indicating a crossing event
+    const alertableEntities = getAlertableEntities(lastAlertEntities, currAlertEntities);
+
+    alertableEntities.forEach((entityName) =>
+      services.alertInstanceFactory(entityName).scheduleActions('default')
+    );
 
     return {
-      esResult,
+      prevIntervalStartTime: currIntervalStartTime,
     };
   },
   producer: APP_ID,
