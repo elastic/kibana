@@ -104,7 +104,7 @@ This section summarizes the changes in each release.
 [float]
 [[security-update-6.8.11]]
 === Security updates
-* In {kib} 6.8.11 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed by a {kib} user, 
+* In {kib} 6.8.10 and earlier, there is a denial of service (DoS) flaw in Timelion. Attackers can construct a URL that when viewed by a {kib} user, 
 the {kib} process consumes large amounts of CPU and becomes unresponsive,
 https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-7016[CVE-2020-7016].
 +
