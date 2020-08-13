@@ -204,7 +204,6 @@
     "leaflet-responsive-popup": "0.6.4",
     "leaflet-vega": "^0.8.6",
     "leaflet.heat": "0.2.0",
-    "less": "npm:@elastic/less@2.7.3-kibana",
     "lodash": "^4.17.15",
     "lru-cache": "4.1.5",
     "markdown-it": "^10.0.0",
