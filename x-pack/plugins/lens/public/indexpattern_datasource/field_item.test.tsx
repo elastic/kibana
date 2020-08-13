@@ -145,6 +145,7 @@ describe('IndexPattern Field Item', () => {
           timeFieldName: 'timestamp',
           field: {
             name: 'bytes',
+            displayName: 'bytes',
             type: 'number',
             aggregatable: true,
             searchable: true,
@@ -231,6 +232,7 @@ describe('IndexPattern Field Item', () => {
           timeFieldName: 'timestamp',
           field: {
             name: 'bytes',
+            displayName: 'bytes',
             type: 'number',
             aggregatable: true,
             searchable: true,

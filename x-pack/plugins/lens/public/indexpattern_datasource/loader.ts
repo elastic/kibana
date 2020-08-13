@@ -18,12 +18,11 @@ import {
 import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
-import { documentField } from './document_field';
 import {
   IndexPatternsContract,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
-
+import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
@@ -47,6 +46,7 @@ export async function loadIndexPatterns({
   }
 
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
+
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
       const newFields = [...(indexPattern.fields as IndexPatternField[])]
@@ -56,7 +56,7 @@ export async function loadIndexPatterns({
         )
         .concat(documentField);
 
-      const { typeMeta, id } = indexPattern;
+      const { typeMeta } = indexPattern;
       if (typeMeta?.aggs) {
         const aggs = Object.keys(typeMeta.aggs);
         newFields.forEach((field, index) => {
@@ -75,11 +75,11 @@ export async function loadIndexPatterns({
       }
 
       return {
-        ...acc,
-        [id as string]: {
+        [id!]: {
           ...indexPattern,
           fields: newFields,
         },
+        ...acc,
       };
     },
     { ...cache }

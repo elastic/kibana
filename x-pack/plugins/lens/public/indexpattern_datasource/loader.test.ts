@@ -174,10 +174,7 @@ function mockIndexPatternsService() {
         type: undefined,
         title: pattern.title,
         timeFieldName: pattern.timeFieldName,
-        fields: {
-          ...pattern.fields,
-          documentField,
-        },
+        fields: pattern.fields.filter((f) => f.type !== 'document'),
       };
     }),
   } as unknown) as Pick<IndexPatternsContract, 'get'>;
@@ -453,7 +450,10 @@ describe('loader', () => {
       expect(setState.mock.calls[0][0](state)).toMatchObject({
         currentIndexPatternId: 'a',
         indexPatterns: {
-          a: sampleIndexPatterns.a,
+          a: {
+            ...sampleIndexPatterns.a,
+            fields: [...sampleIndexPatterns.a.fields],
+          },
         },
       });
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {
