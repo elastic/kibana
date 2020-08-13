@@ -18,13 +18,24 @@ import {
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
 import {
   ModelConfigResponse,
+  ModelStats,
   useInferenceApiService,
 } from '../../../../../services/ml_api_service/inference';
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { DeleteModelsModal } from './delete_models_modal';
+
+type Stats = Omit<ModelStats, 'model_id'>;
+
+export type ModelItem = ModelConfigResponse & {
+  stats?: Stats;
+};
+
+export type ModelWithStats = Omit<ModelItem, 'stats'> & { stats: Stats };
 
 export const ModelsList: FC = () => {
   const inferenceApiService = useInferenceApiService();
@@ -38,8 +49,10 @@ export const ModelsList: FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [modelsStats, setModelsStats] = useState<ModelsBarStats | undefined>();
-  const [items, setItems] = useState<ModelConfigResponse[]>([]);
-  const [selectedModels, setSelectedModels] = useState<ModelConfigResponse[]>([]);
+  const [items, setItems] = useState<ModelItem[]>([]);
+  const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
+
+  const [modelsToDelete, setModelsToDelete] = useState<ModelWithStats[]>([]);
 
   async function fetchData() {
     setIsLoading(true);
@@ -67,7 +80,69 @@ export const ModelsList: FC = () => {
     fetchData();
   }, []);
 
-  const columns: Array<EuiBasicTableColumn<ModelConfigResponse>> = [
+  async function prepareModelsForDeletion(models: ModelItem[]) {
+    // Fetch model stats to check associated pipelines
+    try {
+      const {
+        trained_model_stats: modelsStatsResponse,
+      } = await inferenceApiService.getInferenceModelStats(
+        models.filter((model) => model.stats === undefined).map((model) => model.model_id)
+      );
+      for (const { model_id: id, ...stats } of modelsStatsResponse) {
+        const model = models.find((m) => m.model_id === id);
+        model!.stats = stats;
+      }
+      setModelsToDelete(models as ModelWithStats[]);
+      setItems([...items]);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  }
+
+  async function deleteModels() {
+    try {
+      await Promise.all(
+        modelsToDelete.map((model) => inferenceApiService.deleteInferenceModel(model.model_id))
+      );
+      setItems(
+        items.filter(
+          (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
+        )
+      );
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
+  }
+
+  const actions: Array<Action<ModelItem>> = [
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+        defaultMessage: 'View training data',
+      }),
+      description: 'Clone this person',
+      icon: 'list',
+      type: 'icon',
+      href: 'temp',
+      isPrimary: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+        defaultMessage: 'Delete model',
+      }),
+      description: 'Delete this person',
+      icon: 'trash',
+      type: 'icon',
+      color: 'danger',
+      isPrimary: false,
+      onClick: async (model) => {
+        await prepareModelsForDeletion([model]);
+      },
+    },
+  ];
+
+  const columns: Array<EuiBasicTableColumn<ModelItem>> = [
     {
       field: ModelsTableToConfigMapping.id,
       name: i18n.translate('xpack.ml.inference.modelsList.modelIdHeader', {
@@ -92,6 +167,12 @@ export const ModelsList: FC = () => {
       dataType: 'date',
       render: (date: string) => formatDate(date, TIME_FORMAT),
       sortable: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.inference.modelsList.actionsHeader', {
+        defaultMessage: 'Actions',
+      }),
+      actions,
     },
   ];
 
@@ -123,7 +204,7 @@ export const ModelsList: FC = () => {
     },
   };
 
-  const onTableChange: EuiInMemoryTable<ModelConfigResponse>['onTableChange'] = ({
+  const onTableChange: EuiInMemoryTable<ModelItem>['onTableChange'] = ({
     page = { index: 0, size: 10 },
     sort = { field: ModelsTableToConfigMapping.id, direction: 'asc' },
   }) => {
@@ -136,7 +217,7 @@ export const ModelsList: FC = () => {
     setSortDirection(direction);
   };
 
-  const selection: EuiTableSelectionType<ModelConfigResponse> = {
+  const selection: EuiTableSelectionType<ModelItem> = {
     onSelectionChange: (selectedItems) => {
       setSelectedModels(selectedItems);
     },
@@ -156,7 +237,7 @@ export const ModelsList: FC = () => {
         <EuiInMemoryTable
           allowNeutralSort={false}
           columns={columns}
-          hasActions={false}
+          hasActions={true}
           isExpandable={true}
           isSelectable={false}
           items={items}
@@ -172,6 +253,17 @@ export const ModelsList: FC = () => {
           })}
         />
       </div>
+      {modelsToDelete.length > 0 && (
+        <DeleteModelsModal
+          onClose={async (deletionApproved) => {
+            if (deletionApproved) {
+              await deleteModels();
+            }
+            setModelsToDelete([]);
+          }}
+          models={modelsToDelete}
+        />
+      )}
     </>
   );
 };

@@ -6,19 +6,22 @@
 
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
+import { modelIdSchema, optionalModelIdSchema } from './schemas/inference_schema';
 
 export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {get} /api/ml/inference/{modelId} Get info of a trained inference model
-   * @apiName GetInference
+   * @api {get} /api/ml/inference/:modelId Get info of a trained inference model
+   * @apiName GetInferenceModel
    * @apiDescription Retrieves configuration information for a trained inference model.
    */
   router.get(
     {
       path: '/api/ml/inference/{modelId?}',
-      validate: false,
+      validate: {
+        params: optionalModelIdSchema,
+      },
       options: {
         tags: ['access:ml:canAccessML'],
       },
@@ -41,14 +44,16 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
-   * @api {get} /api/ml/inference/{modelId} Get stats of a trained inference model
-   * @apiName GetInferenceStats
+   * @api {get} /api/ml/inference/:modelId/_stats Get stats of a trained inference model
+   * @apiName GetInferenceModelStats
    * @apiDescription Retrieves usage information for trained inference models.
    */
   router.get(
     {
       path: '/api/ml/inference/{modelId}/_stats',
-      validate: false,
+      validate: {
+        params: modelIdSchema,
+      },
       options: {
         tags: ['access:ml:canAccessML'],
       },
@@ -58,6 +63,38 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         const { modelId } = request.params;
         const { body } = await client.asInternalUser.ml.getTrainedModelsStats({
           ...(modelId ? { model_id: modelId } : {}),
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup Inference
+   *
+   * @api {delete} /api/ml/inference/:modelId Get stats of a trained inference model
+   * @apiName DeleteInferenceModel
+   * @apiDescription Deletes an existing trained inference model that is currently not referenced by an ingest pipeline.
+   */
+  router.delete(
+    {
+      path: '/api/ml/inference/{modelId}',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const { body } = await client.asInternalUser.ml.deleteTrainedModel({
+          model_id: modelId,
         });
         return response.ok({
           body,

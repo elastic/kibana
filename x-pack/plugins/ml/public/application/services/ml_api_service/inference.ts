@@ -49,39 +49,17 @@ export interface InferenceStatsResponse {
   trained_model_stats: Array<{
     model_id: string;
     pipeline_count: number;
-    ingest?: {
-      total: {
-        count: number;
-        time_in_millis: number;
-        current: number;
-        failed: number;
-      };
-      pipelines?: Record<
-        string,
-        {
-          count: number;
-          time_in_millis: number;
-          current: number;
-          failed: number;
-          processors: Array<
-            Record<
-              string,
-              {
-                type: string;
-                stats: {
-                  count: number;
-                  time_in_millis: number;
-                  current: number;
-                  failed: number;
-                };
-              }
-            >
-          >;
-        }
-      >;
+    inference_stats: {
+      failure_count: number;
+      inference_count: number;
+      cache_miss_count: number;
+      missing_all_fields_count: number;
+      timestamp: number;
     };
   }>;
 }
+
+export type ModelStats = InferenceStatsResponse['trained_model_stats'][number];
 
 /**
  * Service with APIs calls to perform inference operations.
@@ -126,6 +104,18 @@ export function inferenceApiProvider(httpService: HttpService) {
       return httpService.http<InferenceStatsResponse>({
         path: `${apiBasePath}/inference/${model}/_stats`,
         method: 'GET',
+      });
+    },
+
+    /**
+     * Deletes an existing trained inference model.
+     *
+     * @param modelId - Model ID
+     */
+    deleteInferenceModel(modelId: string) {
+      return httpService.http<any>({
+        path: `${apiBasePath}/inference/${modelId}`,
+        method: 'DELETE',
       });
     },
   };
