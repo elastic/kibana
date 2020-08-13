@@ -5,8 +5,8 @@
  */
 
 import { useCallback, useMemo, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useQueryStringKeys } from './use_query_string_keys';
 import * as selectors from '../store/selectors';
 import { CrumbInfo } from './panels/panel_content_utilities';
 
@@ -17,9 +17,7 @@ export function useResolverQueryParams() {
    */
   const history = useHistory();
   const urlSearch = useLocation().search;
-  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
-  const idKey: string = `resolver-${resolverComponentInstanceID}-id`;
-  const eventKey: string = `resolver-${resolverComponentInstanceID}-event`;
+  const { idKey, eventKey } = useQueryStringKeys();
   const pushToQueryParams = useCallback(
     (queryStringState: CrumbInfo) => {
       const urlSearchParams = new URLSearchParams(urlSearch);

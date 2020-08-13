@@ -10,6 +10,7 @@ import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
@@ -33,6 +34,8 @@ export const ResolverWithoutProviders = React.memo(
     { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
     refToForward
   ) {
+    //
+    useResolverQueryParamCleaner();
     /**
      * This is responsible for dispatching actions that include any external data.
      * `databaseDocumentID`
