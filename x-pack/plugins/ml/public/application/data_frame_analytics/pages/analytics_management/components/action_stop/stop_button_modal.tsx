@@ -22,8 +22,7 @@ export const StopButtonModal: FC<ForceStopAction> = ({
         <EuiOverlayMask>
           <EuiConfirmModal
             title={i18n.translate('xpack.ml.dataframe.analyticsList.forceStopModalTitle', {
-              defaultMessage: 'Force stop {analyticsId}',
-              values: { analyticsId: item.config.id },
+              defaultMessage: 'Force this job to stop?',
             })}
             onCancel={closeModal}
             onConfirm={forceStopAndCloseModal}
@@ -36,7 +35,7 @@ export const StopButtonModal: FC<ForceStopAction> = ({
             confirmButtonText={i18n.translate(
               'xpack.ml.dataframe.analyticsList.forceStopModalStartButton',
               {
-                defaultMessage: 'Stop',
+                defaultMessage: 'Force stop',
               }
             )}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
@@ -45,7 +44,7 @@ export const StopButtonModal: FC<ForceStopAction> = ({
             <p>
               <FormattedMessage
                 id="xpack.ml.dataframe.analyticsList.forceStopModalBody"
-                defaultMessage="The analytics job is in the failed state, do you want to force stop {analyticsId}?"
+                defaultMessage="{analyticsId} is in a failed state. You must stop the job and fix the failure."
                 values={{ analyticsId: item.config.id }}
               />
             </p>
