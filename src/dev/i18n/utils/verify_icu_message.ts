@@ -19,8 +19,8 @@
 
 // @ts-ignore
 import parser from 'intl-messageformat-parser';
-import { createParserErrorMessage, traverseNodes } from './utils';
 // @ts-ignore
+import { createParserErrorMessage, traverseNodes } from './utils';
 import { SelectFormatNode } from './intl_types';
 
 export function checkEnglishOnly(message: string) {
