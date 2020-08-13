@@ -5,15 +5,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { scheduleTaskFnFactory } from '../export_types/csv_from_savedobject/create_job';
 import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
+import { JobParamsPostPayloadPanelCsv } from '../export_types/csv_from_savedobject/types';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../types';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
 import { HandlerErrorFunction } from './types';
+
+export type CsvFromSavedObjectRequest = KibanaRequest<
+  { savedObjectType: string; savedObjectId: string },
+  unknown,
+  JobParamsPostPayloadPanelCsv
+>;
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -56,7 +64,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         }),
       },
     },
-    userHandler(async (user, context, req, res) => {
+    userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(req, { isImmediate: true });
       const scheduleTaskFn = scheduleTaskFnFactory(reporting, logger);

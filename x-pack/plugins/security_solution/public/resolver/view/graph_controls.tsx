@@ -125,12 +125,13 @@ const GraphControlsComponent = React.memo(
         className={className}
         graphControlsBackground={colorMap.graphControlsBackground}
         graphControlsIconColor={colorMap.graphControls}
+        data-test-subj="resolver:graph-controls"
       >
         <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
           <div className="panning-controls-top">
             <button
               className="north-button"
-              data-test-subj="north-button"
+              data-test-subj="resolver:graph-controls:north-button"
               title="North"
               onClick={handleNorth}
             >
@@ -140,7 +141,7 @@ const GraphControlsComponent = React.memo(
           <div className="panning-controls-middle">
             <button
               className="west-button"
-              data-test-subj="west-button"
+              data-test-subj="resolver:graph-controls:west-button"
               title="West"
               onClick={handleWest}
             >
@@ -148,7 +149,7 @@ const GraphControlsComponent = React.memo(
             </button>
             <button
               className="center-button"
-              data-test-subj="center-button"
+              data-test-subj="resolver:graph-controls:center-button"
               title="Center"
               onClick={handleCenterClick}
             >
@@ -156,7 +157,7 @@ const GraphControlsComponent = React.memo(
             </button>
             <button
               className="east-button"
-              data-test-subj="east-button"
+              data-test-subj="resolver:graph-controls:east-button"
               title="East"
               onClick={handleEast}
             >
@@ -166,7 +167,7 @@ const GraphControlsComponent = React.memo(
           <div className="panning-controls-bottom">
             <button
               className="south-button"
-              data-test-subj="south-button"
+              data-test-subj="resolver:graph-controls:south-button"
               title="South"
               onClick={handleSouth}
             >
@@ -175,19 +176,27 @@ const GraphControlsComponent = React.memo(
           </div>
         </EuiPanel>
         <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
-          <button title="Zoom In" data-test-subj="zoom-in" onClick={handleZoomInClick}>
+          <button
+            title="Zoom In"
+            data-test-subj="resolver:graph-controls:zoom-in"
+            onClick={handleZoomInClick}
+          >
             <EuiIcon type="plusInCircle" />
           </button>
           <EuiRange
             className="zoom-slider"
-            data-test-subj="zoom-slider"
+            data-test-subj="resolver:graph-controls:zoom-slider"
             min={0}
             max={1}
             step={0.01}
             value={scalingFactor}
             onChange={handleZoomAmountChange}
           />
-          <button title="Zoom Out" data-test-subj="zoom-out" onClick={handleZoomOutClick}>
+          <button
+            title="Zoom Out"
+            data-test-subj="resolver:graph-controls:zoom-out"
+            onClick={handleZoomOutClick}
+          >
             <EuiIcon type="minusInCircle" />
           </button>
         </EuiPanel>

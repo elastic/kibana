@@ -8,15 +8,19 @@
 
 |  Class | Description |
 |  --- | --- |
+|  [AggParamType](./kibana-plugin-plugins-data-server.aggparamtype.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
+|  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
 ## Enumerations
 
 |  Enumeration | Description |
 |  --- | --- |
+|  [BUCKET\_TYPES](./kibana-plugin-plugins-data-server.bucket_types.md) |  |
 |  [ES\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.es_field_types.md) | \* |
 |  [KBN\_FIELD\_TYPES](./kibana-plugin-plugins-data-server.kbn_field_types.md) | \* |
+|  [METRIC\_TYPES](./kibana-plugin-plugins-data-server.metric_types.md) |  |
 
 ## Functions
 
@@ -33,6 +37,7 @@
 
 |  Interface | Description |
 |  --- | --- |
+|  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
@@ -46,17 +51,22 @@
 |  [ISearchStart](./kibana-plugin-plugins-data-server.isearchstart.md) |  |
 |  [ISearchStrategy](./kibana-plugin-plugins-data-server.isearchstrategy.md) | Search strategy interface contains a search method that takes in a request and returns a promise that resolves to a response. |
 |  [KueryNode](./kibana-plugin-plugins-data-server.kuerynode.md) |  |
+|  [OptionedValueProp](./kibana-plugin-plugins-data-server.optionedvalueprop.md) |  |
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
+|  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
+|  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
 ## Variables
 
 |  Variable | Description |
 |  --- | --- |
+|  [AggGroupLabels](./kibana-plugin-plugins-data-server.agggrouplabels.md) |  |
+|  [AggGroupNames](./kibana-plugin-plugins-data-server.agggroupnames.md) |  |
 |  [castEsToKbnFieldTypeName](./kibana-plugin-plugins-data-server.castestokbnfieldtypename.md) | Get the KbnFieldType name for an esType string |
 |  [config](./kibana-plugin-plugins-data-server.config.md) |  |
 |  [esFilters](./kibana-plugin-plugins-data-server.esfilters.md) |  |
@@ -71,8 +81,16 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AggConfigOptions](./kibana-plugin-plugins-data-server.aggconfigoptions.md) |  |
+|  [AggGroupName](./kibana-plugin-plugins-data-server.agggroupname.md) |  |
+|  [AggParam](./kibana-plugin-plugins-data-server.aggparam.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
+|  [IAggConfig](./kibana-plugin-plugins-data-server.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
+|  [IAggType](./kibana-plugin-plugins-data-server.iaggtype.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
+|  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
+|  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
+|  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |
 

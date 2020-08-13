@@ -51,6 +51,8 @@ export class MapsAppView extends React.Component {
       initialized: false,
       savedQuery: '',
       initialLayerListConfig: null,
+      // tracking originatingApp in state so the connection can be broken by users
+      originatingApp: props.originatingApp,
     };
   }
 
@@ -303,11 +305,15 @@ export class MapsAppView extends React.Component {
       savedMap: this.props.savedMap,
       isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
       isSaveDisabled: this.props.isSaveDisabled,
-      closeFlyout: this.props.closeFlyout,
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
       setBreadcrumbs: this._setBreadcrumbs,
+      stateTransfer: this.props.stateTransfer,
+      originatingApp: this.state.originatingApp,
+      cutOriginatingAppConnection: () => {
+        this.setState({ originatingApp: undefined });
+      },
     });
 
     const { TopNavMenu } = getNavigation().ui;

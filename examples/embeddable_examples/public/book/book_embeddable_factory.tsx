@@ -23,9 +23,7 @@ import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import {
   EmbeddableFactoryDefinition,
-  EmbeddableStart,
   IContainer,
-  AttributeService,
   EmbeddableFactory,
 } from '../../../../src/plugins/embeddable/public';
 import {
@@ -38,9 +36,10 @@ import {
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
 import { OverlayStart } from '../../../../src/core/public';
+import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
 
 interface StartServices {
-  getAttributeService: EmbeddableStart['getAttributeService'];
+  getAttributeService: DashboardStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
 }
 
@@ -85,6 +84,16 @@ export class BookEmbeddableFactoryDefinition
     });
   }
 
+  // This is currently required due to the distinction in container.ts and the
+  // default error implementation in default_embeddable_factory_provider.ts
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: BookEmbeddableInput,
+    parent?: IContainer
+  ) {
+    return this.create(input, parent);
+  }
+
   public getDisplayName() {
     return i18n.translate('embeddableExamples.book.displayName', {
       defaultMessage: 'Book',
@@ -122,6 +131,6 @@ export class BookEmbeddableFactoryDefinition
         BookByReferenceInput
       >(this.type);
     }
-    return this.attributeService;
+    return this.attributeService!;
   }
 }
