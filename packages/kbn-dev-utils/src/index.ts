@@ -44,3 +44,4 @@ export * from './simple_kibana_platform_plugin_discovery';
 export * from './streams';
 export * from './babel';
 export * from './parse_kibana_platform_plugin';
+export { rules } from './code_ownership/ownership_config';
