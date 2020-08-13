@@ -13,6 +13,8 @@ import {
   EuiTabbedContent,
   EuiTitle,
   EuiNotificationBadge,
+  EuiFlexGrid,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { ModelWithStats } from './models_list';
 
@@ -21,8 +23,30 @@ interface ExpandedRowProps {
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { model_id, create_time, created_by, inference_config, stats, ...details } = item;
+  const {
+    inference_config: inferenceConfig,
+    stats,
+    metadata,
+    tags,
+    version,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    estimated_operations,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    estimated_heap_memory_usage_bytes,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    default_field_map,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    license_level,
+  } = item;
+
+  const details = {
+    tags,
+    version,
+    estimated_operations,
+    estimated_heap_memory_usage_bytes,
+    default_field_map,
+    license_level,
+  };
 
   const tabs = [
     {
@@ -68,19 +92,81 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       content: (
         <>
           <EuiSpacer size={'m'} />
+          <EuiFlexGrid columns={2}>
+            <EuiFlexItem>
+              <EuiPanel>
+                <EuiTitle size={'xs'}>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
+                      defaultMessage="Inference configuration"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size={'m'} />
+                <EuiDescriptionList
+                  type="column"
+                  listItems={Object.entries(inferenceConfig[Object.keys(inferenceConfig)[0]]).map(
+                    ([title, value]) => ({
+                      title,
+                      description:
+                        typeof value === 'object' ? JSON.stringify(value) : (value as any),
+                    })
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            {metadata?.analytics_config && (
+              <EuiFlexItem>
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.inference.modelsList.expandedRow.analyticsConfigTitle"
+                        defaultMessage="Analytics configuration"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    type="column"
+                    listItems={Object.entries(metadata?.analytics_config).map(([title, value]) => ({
+                      title,
+                      description:
+                        typeof value === 'object' ? JSON.stringify(value) : (value as any),
+                    }))}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGrid>
+        </>
+      ),
+    },
+    {
+      id: 'stats',
+      name: (
+        <FormattedMessage
+          id="xpack.ml.inference.modelsList.expandedRow.statsTabLabel"
+          defaultMessage="Stats"
+        />
+      ),
+      content: (
+        <>
+          <EuiSpacer size={'m'} />
           <EuiPanel>
             <EuiTitle size={'xs'}>
               <h5>
                 <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
-                  defaultMessage="Inference configuration"
+                  id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
+                  defaultMessage="Inference Stats"
                 />
               </h5>
             </EuiTitle>
             <EuiSpacer size={'m'} />
             <EuiDescriptionList
               type="column"
-              listItems={Object.entries(inference_config).map(([title, value]) => ({
+              listItems={Object.entries(stats.inference_stats).map(([title, value]) => ({
                 title,
                 description: typeof value === 'object' ? JSON.stringify(value) : value,
               }))}
