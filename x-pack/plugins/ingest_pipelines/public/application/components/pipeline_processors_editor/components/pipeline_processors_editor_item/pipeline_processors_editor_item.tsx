@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -67,12 +68,13 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
 
     const { testPipelineData } = useTestPipelineContext();
     const {
-      resultsByProcessor,
       config: { selectedDocumentIndex },
+      testOutputByProcessor,
+      isExecuting,
     } = testPipelineData;
 
     const processorOutput =
-      resultsByProcessor && resultsByProcessor[selectedDocumentIndex][processor.id];
+      testOutputByProcessor && testOutputByProcessor[selectedDocumentIndex][processor.id];
     const processorStatus = processorOutput?.status ?? 'inactive';
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
@@ -144,7 +146,11 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{renderMoveButton()}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PipelineProcessorsItemStatus processorStatus={processorStatus} />
+                {isExecuting ? (
+                  <EuiLoadingSpinner size="s" />
+                ) : (
+                  <PipelineProcessorsItemStatus processorStatus={processorStatus} />
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText

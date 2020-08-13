@@ -21,17 +21,22 @@ import {
 import { usePipelineProcessorsContext, useTestPipelineContext } from '../../../context';
 import { Document } from '../../../types';
 
-import { documentsSchema } from './schema';
-import { HandleExecuteArgs } from '../flyout_provider';
+import { documentsSchema } from './documents_schema';
+import { HandleExecuteArgs } from '../test_pipeline_flyout';
 
 const UseField = getUseField({ component: Field });
 
 interface Props {
   handleExecute: (data: HandleExecuteArgs) => void;
+  setPerProcessorOutput: (documents: Document[]) => void;
   isExecuting: boolean;
 }
 
-export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
+export const DocumentsTab: React.FunctionComponent<Props> = ({
+  handleExecute,
+  isExecuting,
+  setPerProcessorOutput,
+}) => {
   const { links } = usePipelineProcessorsContext();
 
   const { testPipelineData } = useTestPipelineContext();
@@ -49,7 +54,10 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({ handleExecute, is
 
     const { documents } = data as { documents: Document[] };
 
-    handleExecute({ documents: documents!, fetchPerProcessorResults: true });
+    await handleExecute({ documents: documents! });
+
+    // This is necessary to update the status and output of each processor
+    setPerProcessorOutput(documents!);
   };
 
   const { form } = useForm({

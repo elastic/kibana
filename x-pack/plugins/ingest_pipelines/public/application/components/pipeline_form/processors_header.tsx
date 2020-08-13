@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,8 +17,11 @@ import {
 import {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
-  OutputButton,
+  TestOutputButton,
   DocumentsDropdown,
+  AddDocumentsButton,
+  TestPipelineFlyout,
+  TestPipelineFlyoutTab,
 } from '../pipeline_processors_editor';
 
 export interface Props {
@@ -29,51 +32,90 @@ export const ProcessorsHeader: FunctionComponent<Props> = ({ onLoadJson }) => {
   const { links } = usePipelineProcessorsContext();
   const { testPipelineData } = useTestPipelineContext();
 
-  const { results } = testPipelineData;
+  const {
+    testOutput,
+    config: { documents },
+  } = testPipelineData;
+
+  const [openTestPipelineFlyout, setOpenTestPipelineFlyout] = useState(false);
+  const [activeFlyoutTab, setActiveFlyoutTab] = useState<TestPipelineFlyoutTab>('documents');
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      justifyContent="spaceBetween"
-      responsive={false}
-    >
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
-              defaultMessage: 'Processors',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.processorsTreeDescription"
-            defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
-            values={{
-              learnMoreLink: (
-                <EuiLink href={links.esDocsBasePath + '/ingest-processors.html'} target="_blank">
-                  {i18n.translate(
-                    'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
-                    {
-                      defaultMessage: 'Learn more.',
-                    }
-                  )}
-                </EuiLink>
-              ),
+    <>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('xpack.ingestPipelines.pipelineEditor.processorsTreeTitle', {
+                    defaultMessage: 'Processors',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LoadFromJsonButton onDone={onLoadJson} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.ingestPipelines.pipelineEditor.processorsTreeDescription"
+              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={links.esDocsBasePath + '/ingest-processors.html'}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.processorsDocumentationLink',
+                      {
+                        defaultMessage: 'Learn more.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {documents ? (
+            <DocumentsDropdown />
+          ) : (
+            <AddDocumentsButton
+              openFlyout={() => {
+                setOpenTestPipelineFlyout(true);
+                setActiveFlyoutTab('documents');
+              }}
+            />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TestOutputButton
+            isDisabled={Boolean(testOutput) === false}
+            openFlyout={() => {
+              setOpenTestPipelineFlyout(true);
+              setActiveFlyoutTab('output');
             }}
           />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <LoadFromJsonButton onDone={onLoadJson} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DocumentsDropdown />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <OutputButton isDisabled={Boolean(results) === false} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {openTestPipelineFlyout && (
+        <TestPipelineFlyout
+          activeTab={activeFlyoutTab}
+          onClose={() => setOpenTestPipelineFlyout(false)}
+        />
+      )}
+    </>
   );
 };

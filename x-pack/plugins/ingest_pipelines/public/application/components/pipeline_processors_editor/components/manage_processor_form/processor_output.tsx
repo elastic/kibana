@@ -13,29 +13,16 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPagination,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useTestPipelineContext } from '../../context';
-import { ProcessorInternal } from '../../types';
+import { DocumentsDropdown } from '../test_pipeline';
 
 export interface Props {
-  processor: ProcessorInternal;
+  processorOutput: any;
 }
 
-export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
-  const { id: processorId } = processor;
-
-  const {
-    resultsByProcessor,
-    config: { documents, selectedDocumentIndex },
-  } = testPipelineData;
-
-  const processorOutput =
-    resultsByProcessor && resultsByProcessor[selectedDocumentIndex][processorId];
-
+export const ProcessorOutput: React.FunctionComponent<Props> = ({ processorOutput }) => {
   const {
     prevProcessorResult,
     doc: currentResult,
@@ -57,7 +44,8 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
       {currentResult && (
         <>
           <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
             <EuiFlexItem>
               <p>
                 <FormattedMessage
@@ -67,24 +55,12 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
               </p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {documents && documents.length > 1 && (
-                <EuiPagination
-                  pageCount={documents.length}
-                  activePage={selectedDocumentIndex}
-                  onPageClick={(activePage) => {
-                    setCurrentTestPipelineData({
-                      type: 'updateActiveDocument',
-                      payload: {
-                        config: {
-                          selectedDocumentIndex: activePage,
-                        },
-                      },
-                    });
-                  }}
-                />
-              )}
+              <DocumentsDropdown />
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
+
           <EuiCodeBlock paddingSize="s" language="json" isCopyable>
             {JSON.stringify(currentResult, null, 2)}
           </EuiCodeBlock>
@@ -94,7 +70,8 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
       {error && (
         <>
           <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="baseline">
             <EuiFlexItem>
               <p>
                 <FormattedMessage
@@ -104,25 +81,12 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
               </p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* TODO fix: duplicate code */}
-              {documents && documents.length > 1 && (
-                <EuiPagination
-                  pageCount={documents.length}
-                  activePage={selectedDocumentIndex}
-                  onPageClick={(activePage) => {
-                    setCurrentTestPipelineData({
-                      type: 'updateActiveDocument',
-                      payload: {
-                        config: {
-                          selectedDocumentIndex: activePage,
-                        },
-                      },
-                    });
-                  }}
-                />
-              )}
+              <DocumentsDropdown />
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
+
           <EuiCodeBlock paddingSize="s" language="json" isCopyable>
             {JSON.stringify(error, null, 2)}
           </EuiCodeBlock>
@@ -132,6 +96,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
       {prevProcessorResult?.doc && (
         <>
           <EuiSpacer />
+
           <EuiAccordion
             id="prev_accordion"
             buttonContent={
@@ -147,6 +112,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
           >
             <>
               <EuiSpacer />
+
               <EuiCodeBlock paddingSize="s" language="json" isCopyable>
                 {JSON.stringify(prevProcessorResult.doc, null, 2)}
               </EuiCodeBlock>
@@ -158,6 +124,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
       {ignoredError && (
         <>
           <EuiSpacer />
+
           <EuiAccordion
             id="ignored_error_accordion"
             buttonContent={
@@ -173,6 +140,7 @@ export const ProcessorOutput: React.FunctionComponent<Props> = ({ processor }) =
           >
             <>
               <EuiSpacer />
+
               <EuiCodeBlock paddingSize="s" language="json" isCopyable>
                 {JSON.stringify(ignoredError, null, 2)}
               </EuiCodeBlock>

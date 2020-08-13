@@ -5,10 +5,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButtonEmpty, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { useTestPipelineContext } from '../../context';
-import { FlyoutProvider } from './flyout_provider';
+import { Document } from '../../types';
 
 const i18nTexts = {
   ariaLabel: i18n.translate(
@@ -28,6 +28,12 @@ const i18nTexts = {
   }),
 };
 
+const getDocumentOptions = (documents: Document[]) =>
+  documents.map((doc, index) => ({
+    value: index,
+    text: doc._id,
+  }));
+
 export const DocumentsDropdown: FunctionComponent = () => {
   const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
 
@@ -36,52 +42,30 @@ export const DocumentsDropdown: FunctionComponent = () => {
   } = testPipelineData;
 
   return (
-    <FlyoutProvider>
-      {(openFlyout) => {
-        if (documents) {
-          const documentOptions = documents!.map((doc, index) => ({
-            value: index,
-            text: doc._id,
-          }));
-
-          return (
-            <EuiFlexGroup alignItems="baseline" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <span>{i18nTexts.dropdownLabel}</span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={documentOptions}
-                  value={selectedDocumentIndex}
-                  onChange={(e) => {
-                    setCurrentTestPipelineData({
-                      type: 'updateActiveDocument',
-                      payload: {
-                        config: {
-                          selectedDocumentIndex: Number(e.target.value),
-                        },
-                      },
-                    });
-                  }}
-                  aria-label={i18nTexts.ariaLabel}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        }
-        return (
-          <EuiButtonEmpty
-            size="s"
-            onClick={openFlyout}
-            data-test-subj="addDocumentsButton"
-            iconType="plusInCircleFilled"
-          >
-            {i18nTexts.buttonLabel}
-          </EuiButtonEmpty>
-        );
-      }}
-    </FlyoutProvider>
+    <EuiFlexGroup alignItems="baseline" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <span>{i18nTexts.dropdownLabel}</span>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSelect
+          compressed
+          options={getDocumentOptions(documents!)}
+          value={selectedDocumentIndex}
+          onChange={(e) => {
+            setCurrentTestPipelineData({
+              type: 'updateActiveDocument',
+              payload: {
+                config: {
+                  selectedDocumentIndex: Number(e.target.value),
+                },
+              },
+            });
+          }}
+          aria-label={i18nTexts.ariaLabel}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

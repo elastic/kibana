@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { useTestPipelineContext } from '../../../context';
-import { HandleExecuteArgs } from '../flyout_provider';
+import { HandleExecuteArgs } from '../test_pipeline_flyout';
 
 interface Props {
   handleExecute: (data: HandleExecuteArgs) => void;
@@ -28,7 +28,7 @@ interface Props {
 export const OutputTab: React.FunctionComponent<Props> = ({ handleExecute, isExecuting }) => {
   const { testPipelineData } = useTestPipelineContext();
   const {
-    results,
+    testOutput,
     config: { verbose: cachedVerbose, documents: cachedDocuments },
   } = testPipelineData;
 
@@ -44,10 +44,10 @@ export const OutputTab: React.FunctionComponent<Props> = ({ handleExecute, isExe
 
   if (isExecuting) {
     content = <EuiLoadingSpinner size="m" />;
-  } else if (results) {
+  } else if (testOutput) {
     content = (
       <EuiCodeBlock language="json" isCopyable>
-        {JSON.stringify(results, null, 2)}
+        {JSON.stringify(testOutput, null, 2)}
       </EuiCodeBlock>
     );
   }

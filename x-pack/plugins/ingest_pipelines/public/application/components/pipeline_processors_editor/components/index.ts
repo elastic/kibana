@@ -20,6 +20,12 @@ export { ProcessorRemoveModal } from './processor_remove_modal';
 
 export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
 
-export { AddDocumentsButton, OutputButton, DocumentsDropdown } from './test_pipeline';
+export {
+  AddDocumentsButton,
+  TestOutputButton,
+  DocumentsDropdown,
+  TestPipelineFlyout,
+  TestPipelineFlyoutTab,
+} from './test_pipeline';
 
 export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';

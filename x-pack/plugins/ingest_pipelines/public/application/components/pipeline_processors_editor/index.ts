@@ -18,6 +18,8 @@ export {
   LoadFromJsonButton,
   OnDoneLoadJsonHandler,
   AddDocumentsButton,
-  OutputButton,
+  TestOutputButton,
   DocumentsDropdown,
+  TestPipelineFlyout,
+  TestPipelineFlyoutTab,
 } from './components';

@@ -7,29 +7,25 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { FlyoutProvider } from './flyout_provider';
-
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.testPipeline.buttonLabel', {
     defaultMessage: 'Add documents',
   }),
 };
 
-export const AddDocumentsButton: FunctionComponent = () => {
+interface Props {
+  openFlyout: () => void;
+}
+
+export const AddDocumentsButton: FunctionComponent<Props> = ({ openFlyout }) => {
   return (
-    <FlyoutProvider>
-      {(openFlyout) => {
-        return (
-          <EuiButtonEmpty
-            size="s"
-            onClick={openFlyout}
-            data-test-subj="addDocumentsButton"
-            iconType="plusInCircleFilled"
-          >
-            {i18nTexts.buttonLabel}
-          </EuiButtonEmpty>
-        );
-      }}
-    </FlyoutProvider>
+    <EuiButtonEmpty
+      size="s"
+      onClick={openFlyout}
+      data-test-subj="addDocumentsButton"
+      iconType="plusInCircleFilled"
+    >
+      {i18nTexts.buttonLabel}
+    </EuiButtonEmpty>
   );
 };

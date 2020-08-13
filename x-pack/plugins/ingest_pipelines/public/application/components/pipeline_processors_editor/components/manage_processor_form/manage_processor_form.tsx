@@ -114,9 +114,14 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
   ({ processor, form, isOnFailure, onClose, onOpen, esDocsBasePath }) => {
     const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
     const {
-      resultsByProcessor,
-      config: { documents },
+      testOutputByProcessor,
+      config: { documents, selectedDocumentIndex },
     } = testPipelineData;
+
+    const processorOutput =
+      processor &&
+      testOutputByProcessor &&
+      testOutputByProcessor[selectedDocumentIndex][processor.id];
 
     const {
       state: { processors },
@@ -130,16 +135,28 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
 
       const serializedProcessorsWithTag = serialize(processors.state, true);
 
-      const { data: verboseResults } = await api.simulatePipeline({
+      const { data: verboseResults, error } = await api.simulatePipeline({
         documents,
         verbose: true,
         pipeline: { ...serializedProcessorsWithTag },
       });
 
+      if (error) {
+        setCurrentTestPipelineData({
+          type: 'updateIsExecuting',
+          payload: {
+            isExecuting: false,
+          },
+        });
+
+        return;
+      }
+
       setCurrentTestPipelineData({
-        type: 'updateResultsByProcessor',
+        type: 'updateOutputByProcessor',
         payload: {
-          resultsByProcessor: deserializeVerboseTestOutput(verboseResults),
+          testOutputByProcessor: deserializeVerboseTestOutput(verboseResults),
+          isExecuting: false,
         },
       });
     };
@@ -156,7 +173,7 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
     let flyoutContent: React.ReactNode;
 
     if (activeTab === 'output' && processor) {
-      flyoutContent = <ProcessorOutput processor={processor} />;
+      flyoutContent = <ProcessorOutput processorOutput={processorOutput} />;
     } else {
       flyoutContent = <ProcessorSettingsFields processor={processor} />;
     }
@@ -204,7 +221,10 @@ export const ManageProcessorForm: FunctionComponent<Props> = memo(
                       isSelected={tab.id === activeTab}
                       key={tab.id}
                       data-test-subj={`${tab.id}Tab`}
-                      disabled={tab.id === 'output' && Boolean(resultsByProcessor) === false}
+                      disabled={
+                        (tab.id === 'output' && Boolean(testOutputByProcessor) === false) ||
+                        Boolean(processorOutput) === false
+                      }
                     >
                       {tab.name}
                     </EuiTab>

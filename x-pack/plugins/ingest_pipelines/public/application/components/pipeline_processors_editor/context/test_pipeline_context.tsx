@@ -6,7 +6,7 @@
 
 import React, { useCallback, useContext, useReducer, Reducer } from 'react';
 import { DeserializedProcessorResult } from '../deserialize';
-import { ProcessorResults, Document } from '../types';
+import { Document } from '../types';
 
 export interface TestPipelineData {
   config: {
@@ -14,42 +14,40 @@ export interface TestPipelineData {
     verbose?: boolean;
     selectedDocumentIndex: number;
   };
-  results?: {
+  testOutput?: {
     [key: string]: any;
   };
-  resultsByProcessor?: DeserializedProcessorResult[];
+  testOutputByProcessor?: DeserializedProcessorResult[];
+  isExecuting?: boolean;
 }
 
 type Action =
   | {
-      type: 'updateResultsByProcessor';
+      type: 'updateOutputByProcessor';
       payload: {
-        config?: {
-          documents?: Document[];
-          verbose?: boolean;
-        };
-        results?: {
-          [key: string]: any;
-        };
-        resultsByProcessor?: DeserializedProcessorResult[];
+        testOutputByProcessor?: DeserializedProcessorResult[];
+        isExecuting: boolean;
       };
     }
   | {
-      type: 'updateResults';
+      type: 'updateOutput';
       payload: {
-        config?: {
-          documents?: Document[];
+        config: {
+          documents: Document[];
           verbose?: boolean;
         };
-        results?: {
+        testOutput: {
           [key: string]: any;
         };
-        resultsByProcessor?: Array<DeserializedProcessorResult | ProcessorResults>;
       };
     }
   | {
       type: 'updateActiveDocument';
       payload: Pick<TestPipelineData, 'config'>;
+    }
+  | {
+      type: 'updateIsExecuting';
+      payload: Pick<TestPipelineData, 'isExecuting'>;
     };
 
 interface TestPipelineContext {
@@ -62,6 +60,7 @@ const DEFAULT_TEST_PIPELINE_CONTEXT = {
     config: {
       selectedDocumentIndex: 0,
     },
+    isExecuting: false,
   },
   setCurrentTestPipelineData: () => {},
 };
@@ -79,24 +78,22 @@ export const useTestPipelineContext = () => {
 };
 
 export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
-  if (action.type === 'updateResultsByProcessor') {
+  if (action.type === 'updateOutputByProcessor') {
     return {
-      ...action.payload,
-      config: {
-        ...action.payload.config,
-        selectedDocumentIndex: state.config.selectedDocumentIndex,
-      },
+      ...state,
+      testOutputByProcessor: action.payload.testOutputByProcessor,
+      isExecuting: false,
     };
   }
 
-  if (action.type === 'updateResults') {
+  if (action.type === 'updateOutput') {
     return {
       ...action.payload,
       config: {
         ...action.payload.config,
         selectedDocumentIndex: state.config.selectedDocumentIndex,
       },
-      resultsByProcessor: state.resultsByProcessor,
+      testOutputByProcessor: state.testOutputByProcessor,
     };
   }
 
@@ -107,6 +104,13 @@ export const reducer: Reducer<TestPipelineData, Action> = (state, action) => {
         ...state.config,
         selectedDocumentIndex: action.payload.config.selectedDocumentIndex,
       },
+    };
+  }
+
+  if (action.type === 'updateIsExecuting') {
+    return {
+      ...state,
+      isExecuting: action.payload.isExecuting,
     };
   }
 
