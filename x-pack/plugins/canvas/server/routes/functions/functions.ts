@@ -9,6 +9,12 @@ import { serializeProvider } from '../../../../../../src/plugins/expressions/com
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 
+interface FunctionCall {
+  functionName: string;
+  args: Record<string, any>;
+  context: Record<string, any>;
+}
+
 export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
   const { router, expressions } = deps;
   router.get(
@@ -31,7 +37,7 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
 
   async function runFunction(
     handlers: { environment: string; elasticsearchClient: LegacyAPICaller },
-    fnCall: any
+    fnCall: FunctionCall
   ) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(expressions.getTypes());
@@ -51,7 +57,7 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
    */
   bfetch.addBatchProcessingRoute(API_ROUTE_FUNCTIONS, (request) => {
     return {
-      onBatchItem: async (fnCall: any) => {
+      onBatchItem: async (fnCall: FunctionCall) => {
         const handlers = {
           environment: 'server',
           elasticsearchClient: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
