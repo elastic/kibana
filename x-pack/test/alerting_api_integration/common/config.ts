@@ -5,6 +5,7 @@
  */
 
 import path from 'path';
+import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -15,6 +16,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  enableActionsProxy: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -56,6 +58,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
+    const actionsProxyUrl = options.enableActionsProxy
+      ? `http://localhost:${await getPort()}`
+      : undefined;
+
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers,
@@ -85,6 +91,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.actions.proxyUrl=${actionsProxyUrl}`,
+          '--xpack.actions.rejectUnauthorizedCertificates=false',
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
