@@ -91,17 +91,22 @@ backed by a single index pattern.
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
 
 [float]
-[[maps-7-9]]
+[[maps-7-9-geo-shape]]
 === geo_shape fields at scale in Maps
 
-Maps introduces {kibana-ref}/maps-grid-aggregation.html[geo_shape fields with {es} aggregations].
+Maps now allows you to create {kibana-ref}/maps-grid-aggregation.html[geo_shape fields with {es} aggregations].
 This means that you can plot your geo_shape fields at scale
 just like your geo_point fields.
 You can create a layer that clusters your lines and polygons until
 you zoom into an area with less than 10,000 discrete documents. Then,
 you’ll see individual lines and polygons.
 
-{kibana-ref}//tile-layer.html[Vector tile layers] are also enhanced&mdash;add layers to your map for data services that implement the
+[float]
+[[maps-7-9-vector-tile]]
+=== Vector tile layers available in Maps
+
+Maps also introduces a new {kibana-ref}//tile-layer.html[vector tile layer]&mdash;you can add
+layers to your map for data services that implement the
 Mapbox vector tile specification.
 
 [role="screenshot"]
