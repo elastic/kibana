@@ -13,24 +13,24 @@ import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PolicyContainer } from './policy';
 import {
-  MANAGEMENT_ROUTING_HOSTS_PATH,
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_ROOT_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
-import { HostsContainer } from './endpoint_hosts';
-import { getHostListPath } from '../common/routing';
+import { EndpointsContainer } from './endpoint_hosts';
+import { getEndpointListPath } from '../common/routing';
 import { APP_ID, SecurityPageName } from '../../../common/constants';
 import { GetUrlForApp } from '../../common/components/navigation/types';
 import { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { ADMINISTRATION } from '../../app/home/translations';
 import { AdministrationSubTab } from '../types';
-import { HOSTS_TAB, POLICIES_TAB } from '../common/translations';
+import { ENDPOINTS_TAB, POLICIES_TAB } from '../common/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
 const TabNameMappedToI18nKey: Record<string, string> = {
-  [AdministrationSubTab.hosts]: HOSTS_TAB,
+  [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
   [AdministrationSubTab.policies]: POLICIES_TAB,
 };
 
@@ -102,13 +102,13 @@ export const ManagementContainer = memo(() => {
 
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_HOSTS_PATH} component={HostsContainer} />
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
       <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
       <Route
         path={MANAGEMENT_ROUTING_ROOT_PATH}
         exact
         render={() => {
-          history.replace(getHostListPath({ name: 'hostList' }));
+          history.replace(getEndpointListPath({ name: 'endpointList' }));
           return null;
         }}
       />
