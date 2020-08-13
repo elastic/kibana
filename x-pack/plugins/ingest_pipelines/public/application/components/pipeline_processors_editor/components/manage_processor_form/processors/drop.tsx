@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { XJsonEditor } from './xjson_editor';
-export { TextEditor } from './text_editor';
+import { FunctionComponent } from 'react';
+
+/**
+ * This fields component has no unique fields
+ */
+export const Drop: FunctionComponent = () => {
+  return null;
+};
