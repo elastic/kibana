@@ -29,6 +29,8 @@ fi
 
 "$(dirname "${0}")/setup_node.sh"
 
+echo "$PATH"
+echo "Node Version: $NODE_VERSION"
 # TODO vault keys
 
 node --version

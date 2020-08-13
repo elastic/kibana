@@ -19,6 +19,7 @@ if [[ ! -d "$NODE_DIR" ]]; then
   curl --silent -L "$nodeUrl" | tar -xz -C "$NODE_DIR" --strip-components=1
 else
   echo "node.js v$NODE_VERSION already installed to $NODE_DIR, re-using"
+  ls -alh "$NODE_BIN_DIR"
 fi
 
 tc_set_env PATH "$NODE_BIN_DIR:$PATH"
