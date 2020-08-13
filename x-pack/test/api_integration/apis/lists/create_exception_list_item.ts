@@ -43,10 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.message).to.eql([
         'Invalid value "list" supplied to "type"',
         'Invalid value "undefined" supplied to "value"',
-        'Invalid value "list" supplied to "type"',
-        'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "entries"',
-        'Invalid value "list" supplied to "type"',
       ]);
     });
 
