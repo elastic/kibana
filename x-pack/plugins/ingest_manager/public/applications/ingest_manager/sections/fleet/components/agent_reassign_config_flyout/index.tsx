@@ -30,7 +30,10 @@ interface Props {
   agent: Agent;
 }
 
-export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onClose, agent }) => {
+export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
+  onClose,
+  agent,
+}) => {
   const { notifications } = useCore();
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
     agent.config_id

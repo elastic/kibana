@@ -23,7 +23,7 @@ import {
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
-import { useConfigRefresh } from '../../hooks';
+import { useAgentPolicyRefresh } from '../../hooks';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -31,7 +31,7 @@ const FormWrapper = styled.div`
   margin-left: auto;
 `;
 
-export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
+export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
     const {
       notifications,
@@ -44,7 +44,7 @@ export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const history = useHistory();
     const { getPath } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
-    const refreshConfig = useConfigRefresh();
+    const refreshAgentPolicy = useAgentPolicyRefresh();
     const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -89,7 +89,7 @@ export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
               values: { name: agentPolicy.name },
             })
           );
-          refreshConfig();
+          refreshAgentPolicy();
           setHasChanges(false);
         } else {
           notifications.toasts.addDanger(

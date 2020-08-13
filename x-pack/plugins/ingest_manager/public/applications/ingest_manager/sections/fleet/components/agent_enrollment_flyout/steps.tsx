@@ -59,7 +59,7 @@ export const AgentPolicySelectionStep = ({
         agentPolicies={agentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
         onKeyChange={setSelectedAPIKeyId}
-        onConfigChange={setSelectedPolicyId}
+        onAgentPolicyChange={setSelectedPolicyId}
       />
     ),
   };

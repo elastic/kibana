@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { PackagePoliciesTable } from './package_configs/package_configs_table';
-export { ConfigPackagePoliciesView } from './package_configs';
-export { ConfigSettingsView } from './settings';
+export { PackagePoliciesView } from './package_configs';
+export { SettingsView } from './settings';

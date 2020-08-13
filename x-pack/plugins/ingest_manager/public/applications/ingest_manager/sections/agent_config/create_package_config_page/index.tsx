@@ -42,8 +42,8 @@ import {
   validationHasErrors,
 } from './services';
 import { StepSelectPackage } from './step_select_package';
-import { StepSelectConfig } from './step_select_config';
-import { StepConfigurePackage } from './step_configure_package';
+import { StepSelectAgentPolicy } from './step_select_config';
+import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_config';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
@@ -285,9 +285,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     packageInfo,
   };
 
-  const stepSelectConfig = useMemo(
+  const stepSelectAgentPolicy = useMemo(
     () => (
-      <StepSelectConfig
+      <StepSelectAgentPolicy
         pkgkey={pkgkey}
         updatePackageInfo={updatePackageInfo}
         agentPolicy={agentPolicy}
@@ -311,7 +311,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [policyId, updateAgentPolicy, packageInfo, updatePackageInfo]
   );
 
-  const stepConfigurePackage = useMemo(
+  const stepConfigurePackagePolicy = useMemo(
     () =>
       isLoadingSecondStep ? (
         <Loading />
@@ -324,7 +324,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
           />
-          <StepConfigurePackage
+          <StepConfigurePackagePolicy
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
@@ -355,7 +355,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
               defaultMessage: 'Select an agent policy',
             }
           ),
-          children: stepSelectConfig,
+          children: stepSelectAgentPolicy,
         }
       : {
           title: i18n.translate('xpack.ingestManager.createPackagePolicy.stepSelectPackageTitle', {
@@ -372,7 +372,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       ),
       status: !packageInfo || !agentPolicy || isLoadingSecondStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
-      children: stepConfigurePackage,
+      children: stepConfigurePackagePolicy,
     },
   ];
 

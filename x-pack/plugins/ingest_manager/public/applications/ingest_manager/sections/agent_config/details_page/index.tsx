@@ -25,9 +25,9 @@ import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { useGetOneAgentPolicy, useLink, useBreadcrumbs, useCore } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
-import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
+import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
-import { ConfigPackagePoliciesView, ConfigSettingsView } from './components';
+import { PackagePoliciesView, SettingsView } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 
 const Divider = styled.div`
@@ -271,7 +271,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   }, [agentPolicy, policyId, error, isLoading, redirectToAgentPolicyList]);
 
   return (
-    <ConfigRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>
+    <AgentPolicyRefreshContext.Provider value={{ refresh: refreshAgentPolicy }}>
       <AgentStatusRefreshContext.Provider value={{ refresh: refreshAgentStatus }}>
         <WithHeaderLayout
           leftColumn={headerLeftContent}
@@ -281,7 +281,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
           {content}
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
-    </ConfigRefreshContext.Provider>
+    </AgentPolicyRefreshContext.Provider>
   );
 };
 
@@ -294,13 +294,13 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
       <Route
         path={PAGE_ROUTING_PATHS.policy_details_settings}
         render={() => {
-          return <ConfigSettingsView agentPolicy={agentPolicy} />;
+          return <SettingsView agentPolicy={agentPolicy} />;
         }}
       />
       <Route
         path={PAGE_ROUTING_PATHS.policy_details}
         render={() => {
-          return <ConfigPackagePoliciesView agentPolicy={agentPolicy} />;
+          return <PackagePoliciesView agentPolicy={agentPolicy} />;
         }}
       />
     </Switch>

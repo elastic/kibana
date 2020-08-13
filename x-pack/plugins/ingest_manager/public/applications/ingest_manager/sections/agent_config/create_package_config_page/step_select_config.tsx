@@ -49,7 +49,7 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-export const StepSelectConfig: React.FunctionComponent<{
+export const StepSelectAgentPolicy: React.FunctionComponent<{
   pkgkey: string;
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   agentPolicy: AgentPolicy | undefined;
@@ -62,7 +62,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
     agentPolicy ? agentPolicy.id : undefined
   );
-  const [selectedConfigError, setSelectedConfigError] = useState<Error>();
+  const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   // Create new agent policy flyout state
   const hasWriteCapabilites = useCapabilities().write;
@@ -114,14 +114,14 @@ export const StepSelectConfig: React.FunctionComponent<{
         setIsLoadingSecondStep(true);
         const { data, error } = await sendGetOneAgentPolicy(selectedPolicyId);
         if (error) {
-          setSelectedConfigError(error);
+          setSelectedAgentPolicyError(error);
           updateAgentPolicy(undefined);
         } else if (data && data.item) {
-          setSelectedConfigError(undefined);
+          setSelectedAgentPolicyError(undefined);
           updateAgentPolicy(data.item);
         }
       } else {
-        setSelectedConfigError(undefined);
+        setSelectedAgentPolicyError(undefined);
         updateAgentPolicy(undefined);
       }
       setIsLoadingSecondStep(false);
@@ -146,7 +146,7 @@ export const StepSelectConfig: React.FunctionComponent<{
       })
     : [];
 
-  const selectedConfigOption = agentPolicyOptions.find(
+  const selectedAgentPolicyOption = agentPolicyOptions.find(
     (option) => option.value === selectedPolicyId
   );
 
@@ -289,7 +289,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                   </EuiFlexGroup>
                 );
               }}
-              selectedOptions={selectedConfigOption ? [selectedConfigOption] : []}
+              selectedOptions={selectedAgentPolicyOption ? [selectedAgentPolicyOption] : []}
               onChange={(options) => {
                 const selectedOption = options[0] || undefined;
                 if (selectedOption) {
@@ -304,7 +304,7 @@ export const StepSelectConfig: React.FunctionComponent<{
           </AgentPolicyWrapper>
         </EuiFlexItem>
         {/* Display selected agent policy error if there is one */}
-        {selectedConfigError ? (
+        {selectedAgentPolicyError ? (
           <EuiFlexItem>
             <Error
               title={
@@ -313,7 +313,7 @@ export const StepSelectConfig: React.FunctionComponent<{
                   defaultMessage="Error loading selected agent policy"
                 />
               }
-              error={selectedConfigError}
+              error={selectedAgentPolicyError}
             />
           </EuiFlexItem>
         ) : null}

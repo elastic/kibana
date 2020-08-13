@@ -19,7 +19,7 @@ import { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
-import { useConfigRefresh } from '../../hooks';
+import { useAgentPolicyRefresh } from '../../hooks';
 
 interface InMemoryPackagePolicy extends PackagePolicy {
   inputTypes: string[];
@@ -51,7 +51,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
 }) => {
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
-  const refreshConfig = useConfigRefresh();
+  const refreshAgentPolicy = useAgentPolicyRefresh();
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -215,7 +215,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                           disabled={!hasWriteCapabilities}
                           icon="trash"
                           onClick={() => {
-                            deletePackagePoliciesPrompt([packagePolicy.id], refreshConfig);
+                            deletePackagePoliciesPrompt([packagePolicy.id], refreshAgentPolicy);
                           }}
                         >
                           <FormattedMessage
@@ -233,7 +233,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy, getHref, hasWriteCapabilities, refreshConfig]
+    [agentPolicy, getHref, hasWriteCapabilities, refreshAgentPolicy]
   );
 
   return (

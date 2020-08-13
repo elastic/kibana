@@ -9,7 +9,7 @@ import { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { NoPackagePolicies } from './no_package_configs';
 import { PackagePoliciesTable } from './package_configs_table';
 
-export const ConfigPackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
+export const PackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
   if (agentPolicy.package_configs.length === 0) {
     return <NoPackagePolicies policyId={agentPolicy.id} />;
   }

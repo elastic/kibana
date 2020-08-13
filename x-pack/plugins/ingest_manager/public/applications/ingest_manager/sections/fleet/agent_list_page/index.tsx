@@ -37,7 +37,7 @@ import {
 import { SearchBar, ContextMenuActions } from '../../../components';
 import { AgentStatusKueryHelper } from '../../../services';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
-import { AgentReassignConfigFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
+import { AgentReassignAgentPolicyFlyout, AgentHealth, AgentUnenrollProvider } from '../components';
 
 const REFRESH_INTERVAL_MS = 5000;
 
@@ -390,7 +390,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       ) : null}
       {agentToReassign && (
         <EuiPortal>
-          <AgentReassignConfigFlyout
+          <AgentReassignAgentPolicyFlyout
             agent={agentToReassign}
             onClose={() => {
               setAgentToReassignId(undefined);

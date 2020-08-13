@@ -33,7 +33,7 @@ const findStreamsForInputType = (
   return streams;
 };
 
-export const StepConfigurePackage: React.FunctionComponent<{
+export const StepConfigurePackagePolicy: React.FunctionComponent<{
   from?: CreatePackagePolicyFrom;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;

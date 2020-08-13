@@ -5,8 +5,8 @@
  */
 import React from 'react';
 
-export const ConfigRefreshContext = React.createContext({ refresh: () => {} });
+export const AgentPolicyRefreshContext = React.createContext({ refresh: () => {} });
 
-export function useConfigRefresh() {
-  return React.useContext(ConfigRefreshContext).refresh;
+export function useAgentPolicyRefresh() {
+  return React.useContext(AgentPolicyRefreshContext).refresh;
 }

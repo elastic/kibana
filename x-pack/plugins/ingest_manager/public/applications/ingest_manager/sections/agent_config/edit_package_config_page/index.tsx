@@ -39,7 +39,7 @@ import {
   PackagePolicyFormState,
   CreatePackagePolicyFrom,
 } from '../create_package_config_page/types';
-import { StepConfigurePackage } from '../create_package_config_page/step_configure_package';
+import { StepConfigurePackagePolicy } from '../create_package_config_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_config_page/step_define_package_config';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
@@ -292,7 +292,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
           />
 
-          <StepConfigurePackage
+          <StepConfigurePackagePolicy
             from={'edit'}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
@@ -335,7 +335,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
         />
       ) : (
         <>
-          <Breadcrumb configName={agentPolicy.name} policyId={policyId} />
+          <Breadcrumb policyName={agentPolicy.name} policyId={policyId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployAgentPolicyModal
               agentCount={agentCount}
@@ -400,10 +400,10 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
   );
 };
 
-const Breadcrumb: React.FunctionComponent<{ configName: string; policyId: string }> = ({
-  configName,
+const Breadcrumb: React.FunctionComponent<{ policyName: string; policyId: string }> = ({
+  policyName,
   policyId,
 }) => {
-  useBreadcrumbs('edit_integration', { configName, policyId });
+  useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };

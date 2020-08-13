@@ -72,7 +72,6 @@ const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getHref, getPath } = useLink();
-  // Config information
   const hasWriteCapabilites = useCapabilities().write;
   const {
     fleet: { enabled: isFleetEnabled },

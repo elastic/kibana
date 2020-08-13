@@ -14,7 +14,7 @@ import { AgentPolicyPackageBadges } from '../agent_config_package_badges';
 
 type Props = {
   agentPolicies?: AgentPolicy[];
-  onConfigChange?: (key: string) => void;
+  onAgentPolicyChange?: (key: string) => void;
 } & (
   | {
       withKeySelection: true;
@@ -27,7 +27,7 @@ type Props = {
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   const { notifications } = useCore();
-  const { withKeySelection, agentPolicies, onConfigChange } = props;
+  const { withKeySelection, agentPolicies, onAgentPolicyChange } = props;
   const onKeyChange = props.withKeySelection && props.onKeyChange;
 
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState(false);
@@ -41,11 +41,11 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
-      if (onConfigChange && selectedState.agentPolicyId) {
-        onConfigChange(selectedState.agentPolicyId);
+      if (onAgentPolicyChange && selectedState.agentPolicyId) {
+        onAgentPolicyChange(selectedState.agentPolicyId);
       }
     },
-    [selectedState.agentPolicyId, onConfigChange]
+    [selectedState.agentPolicyId, onAgentPolicyChange]
   );
 
   useEffect(
