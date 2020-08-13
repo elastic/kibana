@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_GROUP_IDS } from '../constants';
+import { MlCapabilitiesResponse } from '../../../ml/common/types/capabilities';
 
-export const isSecurityJob = (job: { groups: string[] }): boolean =>
-  job.groups.some((group) => ML_GROUP_IDS.includes(group));
+export const hasMlLicense = (capabilities: MlCapabilitiesResponse): boolean =>
+  capabilities.isPlatinumOrTrialLicense;
