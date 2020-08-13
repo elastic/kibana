@@ -45,13 +45,13 @@ export function registerGenerateFromJobParams(
       },
     },
     userHandler(async (user, context, req, res) => {
-      let jobParamsRison: string | null;
+      let jobParamsRison: null | string = null;
 
       if (req.body) {
-        const { jobParams: jobParamsPayload } = req.body as { jobParams: string };
-        jobParamsRison = jobParamsPayload;
-      } else {
-        const { jobParams: queryJobParams } = req.query as { jobParams: string };
+        const { jobParams: jobParamsPayload } = req.body;
+        jobParamsRison = jobParamsPayload ? jobParamsPayload : null;
+      } else if (req.query?.jobParams) {
+        const { jobParams: queryJobParams } = req.query;
         if (queryJobParams) {
           jobParamsRison = queryJobParams;
         } else {
@@ -66,7 +66,7 @@ export function registerGenerateFromJobParams(
         });
       }
 
-      const { exportType } = req.params as { exportType: string };
+      const { exportType } = req.params;
       let jobParams;
 
       try {
