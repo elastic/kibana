@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { isOSS } from './is_oss';
+import { isOss } from './is_oss';
 
 describe('is_oss', () => {
   describe('x-pack installed', () => {
     it('should return false', () => {
-      expect(isOSS()).toEqual(false);
+      expect(isOss()).toEqual(false);
     });
   });
 });

@@ -86,19 +86,6 @@ describe('non_empty_nested_entries_array', () => {
       'Invalid value "undefined" supplied to "operator"',
       'Invalid value "nested" supplied to "type"',
       'Invalid value "undefined" supplied to "value"',
-      'Invalid value "undefined" supplied to "operator"',
-      'Invalid value "nested" supplied to "type"',
-      'Invalid value "undefined" supplied to "value"',
-      'Invalid value "undefined" supplied to "operator"',
-      'Invalid value "nested" supplied to "type"',
-      'Invalid value "undefined" supplied to "operator"',
-      'Invalid value "nested" supplied to "type"',
-      'Invalid value "undefined" supplied to "value"',
-      'Invalid value "undefined" supplied to "operator"',
-      'Invalid value "nested" supplied to "type"',
-      'Invalid value "undefined" supplied to "value"',
-      'Invalid value "undefined" supplied to "operator"',
-      'Invalid value "nested" supplied to "type"',
     ]);
     expect(message.schema).toEqual({});
   });
@@ -122,8 +109,6 @@ describe('non_empty_nested_entries_array', () => {
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
       'Invalid value "1" supplied to "NonEmptyNestedEntriesArray"',
     ]);
     expect(message.schema).toEqual({});
