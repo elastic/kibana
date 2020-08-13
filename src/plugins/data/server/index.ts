@@ -161,7 +161,12 @@ import {
   toAbsoluteDates,
 } from '../common';
 
-export { EsaggsExpressionFunctionDefinition, ParsedInterval } from '../common';
+export {
+  EsaggsExpressionFunctionDefinition,
+  ParsedInterval,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '../common';
 
 export {
   ISearchStrategy,

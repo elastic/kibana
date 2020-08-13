@@ -186,6 +186,44 @@ describe('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledWith({ query: 'response:200', language: 'kuery' });
   });
 
+  it('Should fire onBlur callback on input blur', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onBlur: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith();
+  });
+
+  it('Should fire onChangeQueryInputFocus callback on input blur', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChangeQueryInputFocus: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(false);
+  });
+
   it('Should use PersistedLog for recent search suggestions', async () => {
     const component = mount(
       wrapQueryStringInputInContext({
