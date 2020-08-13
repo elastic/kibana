@@ -284,7 +284,7 @@ export class TaskManager {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: object
+    options?: Record<string, unknown>
   ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
@@ -319,7 +319,7 @@ export class TaskManager {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: object
+    options?: Record<string, unknown>
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);
