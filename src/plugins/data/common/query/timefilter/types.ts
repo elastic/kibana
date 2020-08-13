@@ -20,6 +20,7 @@
 import { Moment } from 'moment';
 
 export interface RefreshInterval {
+  display?: string;
   pause: boolean;
   value: number;
 }

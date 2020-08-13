@@ -75,7 +75,6 @@ const MlRoutes: FC<{
   pageDeps: PageDependencies;
 }> = ({ pageDeps }) => {
   const navigateToPath = useNavigateToPath();
-
   return (
     <>
       {Object.entries(routes).map(([name, routeFactory]) => {

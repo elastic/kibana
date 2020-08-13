@@ -7,9 +7,9 @@
 import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { getResultsUrl } from '../../../analytics_management/components/analytics_list/common';
+import { useMlUrlGenerator } from '../../../../../contexts/kibana';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 
 interface Props {
   jobId: string;
@@ -17,10 +17,15 @@ interface Props {
 }
 
 export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
+  const urlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
   const redirectToAnalyticsManagementPage = async () => {
-    const path = getResultsUrl(jobId, analysisType);
+    const path = await urlGenerator.createUrl({
+      page: 'data_frame_analytics/exploration',
+      jobId,
+      analysisType,
+    });
     await navigateToPath(path);
   };
 

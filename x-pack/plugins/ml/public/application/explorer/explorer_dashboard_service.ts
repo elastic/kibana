@@ -65,6 +65,7 @@ export interface ExplorerAppState {
     filteredFields?: string[];
     queryString?: string;
   };
+  query?: any;
 }
 
 const explorerAppState$: Observable<ExplorerAppState> = explorerState$.pipe(
