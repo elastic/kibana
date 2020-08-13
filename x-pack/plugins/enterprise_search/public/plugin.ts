@@ -68,6 +68,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
+        await this.setPublicUrl(config, coreStart.http);
+
         const { renderApp } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');
 
