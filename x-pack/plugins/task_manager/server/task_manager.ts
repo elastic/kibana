@@ -146,6 +146,7 @@ export class TaskManager {
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: opts.config.max_workers,
+      logger: this.logger,
     });
 
     this.pool = new TaskPool({
