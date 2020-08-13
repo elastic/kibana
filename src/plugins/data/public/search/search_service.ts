@@ -28,7 +28,7 @@ import { calculateBounds, TimeRange } from '../../common/query';
 
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor, ISearchInterceptor } from './search_interceptor';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -115,7 +115,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     return {
       usageCollector: this.usageCollector!,
-      enhance: (enhancements: SearchEnhancements) => {
+      __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
         this.sessionService = enhancements.sessionService;
       },

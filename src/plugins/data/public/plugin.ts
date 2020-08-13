@@ -169,8 +169,8 @@ export class DataPublicPlugin
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
-      enhance: (enhancements: DataPublicPluginEnhancements) => {
-        searchService.enhance(enhancements.search);
+      __enhance: (enhancements: DataPublicPluginEnhancements) => {
+        searchService.__enhance(enhancements.search);
       },
     };
   }

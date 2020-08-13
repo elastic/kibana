@@ -397,7 +397,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               }
               isClearable={false}
               isInvalid={dependentVariable === ''}
-              data-test-subj="mlAnalyticsCreateJobWizardDependentVariableSelect"
+              data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+                loadingDepVarOptions ? ' loading' : ' loaded'
+              }`}
             />
           </EuiFormRow>
         </Fragment>

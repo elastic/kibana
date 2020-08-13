@@ -39,19 +39,25 @@ export interface SearchInterceptorDeps {
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
+   *  @internal
    */
   protected abortController = new AbortController();
 
   /**
    * Observable that emits when the number of pending requests changes.
+   * @internal
    */
-  protected pendingCount$ = new BehaviorSubject<number>(0);
+  protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
+   * @internal
    */
   protected timeoutSubscriptions: Subscription = new Subscription();
 
+  /**
+   * @internal
+   */
   protected application!: CoreStart['application'];
 
   /**

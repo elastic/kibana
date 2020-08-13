@@ -20,12 +20,8 @@ export declare class SearchInterceptor
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [abortController](./kibana-plugin-plugins-data-public.searchinterceptor.abortcontroller.md) |  | <code>AbortController</code> | <code>abortController</code> used to signal all searches to abort. |
-|  [application](./kibana-plugin-plugins-data-public.searchinterceptor.application.md) |  | <code>CoreStart['application']</code> |  |
 |  [deps](./kibana-plugin-plugins-data-public.searchinterceptor.deps.md) |  | <code>SearchInterceptorDeps</code> |  |
-|  [pendingCount$](./kibana-plugin-plugins-data-public.searchinterceptor.pendingcount_.md) |  | <code>BehaviorSubject&lt;number&gt;</code> | Observable that emits when the number of pending requests changes. |
 |  [requestTimeout](./kibana-plugin-plugins-data-public.searchinterceptor.requesttimeout.md) |  | <code>number &#124; undefined</code> |  |
-|  [timeoutSubscriptions](./kibana-plugin-plugins-data-public.searchinterceptor.timeoutsubscriptions.md) |  | <code>Subscription</code> | The subscriptions from scheduling the automatic timeout for each request. |
 
 ## Methods
 
