@@ -6,9 +6,8 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useEffectOnce } from 'react-use';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import * as selectors from '../store/selectors';
@@ -70,11 +69,6 @@ export const ResolverWithoutProviders = React.memo(
     const hasError = useSelector(selectors.hasError);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
-    const { cleanUpQueryParams } = useResolverQueryParams();
-
-    useEffectOnce(() => {
-      return () => cleanUpQueryParams();
-    });
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>

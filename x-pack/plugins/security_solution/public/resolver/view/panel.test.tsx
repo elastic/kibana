@@ -152,9 +152,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children, an
       ]);
     });
     it("should have the first node's ID in the query string", async () => {
-      await expect(simulator().map(() => simulator().queryStringValues())).toYieldEqualTo({
-        selectedNode: [entityIDs.origin],
-      });
+      await expect(simulator().map(() => simulator().historyLocationSearch)).toYieldEqualTo(
+        urlSearch(resolverComponentInstanceID, {
+          selectedEntityID: entityIDs.origin,
+        })
+      );
     });
     describe('and when the node list link has been clicked', () => {
       beforeEach(async () => {

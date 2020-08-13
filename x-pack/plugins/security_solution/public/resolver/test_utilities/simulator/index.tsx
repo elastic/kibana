@@ -22,10 +22,6 @@ import { ResolverAction } from '../../store/actions';
  */
 export class Simulator {
   /**
-   * A string that uniquely identifies this Resolver instance among others mounted in the DOM.
-   */
-  private readonly resolverComponentInstanceID: string;
-  /**
    * The redux store, creating in the constructor using the `dataAccessLayer`.
    * This code subscribes to state transitions.
    */
@@ -63,7 +59,6 @@ export class Simulator {
     databaseDocumentID?: string;
     history?: HistoryPackageHistoryInterface<never>;
   }) {
-    this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
@@ -90,13 +85,34 @@ export class Simulator {
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
-        resolverComponentInstanceID={this.resolverComponentInstanceID}
+        resolverComponentInstanceID={resolverComponentInstanceID}
         history={this.history}
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
       />
     );
+  }
+
+  /**
+   * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
+   */
+  public unmount(): void {
+    this.wrapper.unmount();
+  }
+
+  /**
+   * Get the component instance ID from the component.
+   */
+  public get resolverComponentInstanceID(): string {
+    return this.wrapper.prop('resolverComponentInstanceID');
+  }
+
+  /**
+   * Change the component instance ID (updates the React component props.)
+   */
+  public set resolverComponentInstanceID(value: string) {
+    this.wrapper.setProps({ resolverComponentInstanceID: value });
   }
 
   /**
@@ -191,19 +207,12 @@ export class Simulator {
     return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
   }
 
-  public get historyLocationSearch() {
-    return this.history.location.search;
-  }
-
   /**
-   * Return the selected node query string values.
-   * @deprecated
+   * The 'search' part of the URL.
    */
-  public queryStringValues(): { selectedNode: string[] } {
-    const urlSearchParams = new URLSearchParams(this.history.location.search);
-    return {
-      selectedNode: urlSearchParams.getAll(`resolver-${this.resolverComponentInstanceID}-id`),
-    };
+  public get historyLocationSearch(): string {
+    // Wrap the `search` value from the MemoryHistory using `URLSearchParams` in order to standardize it.
+    return new URLSearchParams(this.history.location.search).toString();
   }
 
   /**

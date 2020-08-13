@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { useSelector } from 'react-redux';
@@ -20,24 +20,24 @@ export function useResolverQueryParams() {
   const history = useHistory();
   const urlSearch = useLocation().search;
   const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
-  const uniqueCrumbIdKey: string = `resolver-${resolverComponentInstanceID}-id`;
-  const uniqueCrumbEventKey: string = `resolver-${resolverComponentInstanceID}-event`;
+  const idKey: string = `resolver-${resolverComponentInstanceID}-id`;
+  const eventKey: string = `resolver-${resolverComponentInstanceID}-event`;
   const pushToQueryParams = useCallback(
     (newCrumbs: CrumbInfo) => {
       // Construct a new set of parameters from the current set (minus empty parameters)
       // by assigning the new set of parameters provided in `newCrumbs`
       const crumbsToPass = {
         ...querystring.parse(urlSearch.slice(1)),
-        [uniqueCrumbIdKey]: newCrumbs.crumbId,
-        [uniqueCrumbEventKey]: newCrumbs.crumbEvent,
+        [idKey]: newCrumbs.crumbId,
+        [eventKey]: newCrumbs.crumbEvent,
       };
 
       // If either was passed in as empty, remove it from the record
       if (newCrumbs.crumbId === '') {
-        delete crumbsToPass[uniqueCrumbIdKey];
+        delete crumbsToPass[idKey];
       }
       if (newCrumbs.crumbEvent === '') {
-        delete crumbsToPass[uniqueCrumbEventKey];
+        delete crumbsToPass[eventKey];
       }
 
       const relativeURL = { search: querystring.stringify(crumbsToPass) };
@@ -45,12 +45,12 @@ export function useResolverQueryParams() {
       // trail of these, thus `.replace` instead of `.push`
       return history.replace(relativeURL);
     },
-    [history, urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]
+    [history, urlSearch, idKey, eventKey]
   );
   const queryParams: CrumbInfo = useMemo(() => {
     const parsed = querystring.parse(urlSearch.slice(1));
-    const crumbEvent = parsed[uniqueCrumbEventKey];
-    const crumbId = parsed[uniqueCrumbIdKey];
+    const crumbEvent = parsed[eventKey];
+    const crumbId = parsed[idKey];
     function valueForParam(param: string | string[]): string {
       if (Array.isArray(param)) {
         return param[0] || '';
@@ -61,21 +61,24 @@ export function useResolverQueryParams() {
       crumbEvent: valueForParam(crumbEvent),
       crumbId: valueForParam(crumbId),
     };
-  }, [urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]);
+  }, [urlSearch, idKey, eventKey]);
 
-  const cleanUpQueryParams = () => {
-    const crumbsToPass = {
-      ...querystring.parse(urlSearch.slice(1)),
+  useEffect(() => {
+    const oldIdKey = idKey;
+    const oldEventKey = eventKey;
+    return () => {
+      const crumbsToPass = {
+        ...querystring.parse(history.location.search.slice(1)),
+      };
+      delete crumbsToPass[oldIdKey];
+      delete crumbsToPass[oldEventKey];
+      const relativeURL = { search: querystring.stringify(crumbsToPass) };
+      history.replace(relativeURL);
     };
-    delete crumbsToPass[uniqueCrumbIdKey];
-    delete crumbsToPass[uniqueCrumbEventKey];
-    const relativeURL = { search: querystring.stringify(crumbsToPass) };
-    history.replace(relativeURL);
-  };
+  }, [idKey, eventKey, history]);
 
   return {
     pushToQueryParams,
     queryParams,
-    cleanUpQueryParams,
   };
 }

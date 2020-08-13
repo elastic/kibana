@@ -15,7 +15,7 @@ let databaseDocumentID: string;
 let entityIDs: { origin: string; firstChild: string; secondChild: string };
 
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
-const resolverComponentInstanceID = 'resolverComponentInstanceID';
+const resolverComponentInstanceID = 'oldID';
 
 describe('Resolver, when analyzing a tree that has no ancestors and 2 children', () => {
   beforeEach(async () => {
@@ -45,10 +45,45 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
     const expectedSearch = urlSearch(resolverComponentInstanceID, {
       selectedEntityID: 'secondChild',
     });
-    it(`should have a url search of ${expectedSearch}`, () => {
-      expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo(
+    it(`should have a url search of ${expectedSearch}`, async () => {
+      await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo(
         urlSearch(resolverComponentInstanceID, { selectedEntityID: 'secondChild' })
       );
+    });
+    describe('when the resolver component gets unmounted', () => {
+      beforeEach(() => {
+        simulator.unmount();
+      });
+      it('should have a history location search of `""`', async () => {
+        await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo('');
+      });
+    });
+    describe('when the resolver component has its component instance ID changed', () => {
+      const newInstanceID = 'newID';
+      beforeEach(() => {
+        simulator.resolverComponentInstanceID = newInstanceID;
+      });
+      it('should have a history location search of `""`', async () => {
+        await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo('');
+      });
+      describe("when the user clicks the second child node's button again", () => {
+        beforeEach(async () => {
+          const node = await simulator.resolveWrapper(() =>
+            simulator.processNodeElements({ entityID: entityIDs.secondChild }).find('button')
+          );
+          if (node) {
+            // Click the first button under the second child element.
+            node.first().simulate('click');
+          }
+        });
+        it(`should have a url search of ${urlSearch(newInstanceID, {
+          selectedEntityID: 'secondChild',
+        })}`, async () => {
+          await expect(simulator.map(() => simulator.historyLocationSearch)).toYieldEqualTo(
+            urlSearch(newInstanceID, { selectedEntityID: 'secondChild' })
+          );
+        });
+      });
     });
   });
 });
