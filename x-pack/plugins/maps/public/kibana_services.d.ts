@@ -13,7 +13,7 @@ import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
-export function getFileUploadComponent(): any;
+export function getFileUploadComponent(): Promise<any>;
 export function getIndexPatternSelectComponent(): any;
 export function getHttp(): any;
 export function getTimeFilter(): any;

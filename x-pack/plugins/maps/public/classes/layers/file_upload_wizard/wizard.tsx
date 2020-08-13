@@ -39,10 +39,12 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
   state = {
     indexingStage: null,
+    fileUploadComponent: null,
   };
 
   componentDidMount() {
     this._isMounted = true;
+    this._loadFileUploadComponent();
   }
 
   componentWillUnmount() {
@@ -56,6 +58,13 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
       this.props.startStepLoading();
+    }
+  }
+
+  async _loadFileUploadComponent() {
+    const fileUploadComponent = await getFileUploadComponent();
+    if (this._isMounted) {
+      this.setState({ fileUploadComponent });
     }
   }
 
@@ -145,7 +154,11 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   };
 
   render() {
-    const FileUpload = getFileUploadComponent();
+    if (!this.state.fileUploadComponent) {
+      return null;
+    }
+
+    const FileUpload = this.state.fileUploadComponent;
     return (
       <EuiPanel>
         <FileUpload
