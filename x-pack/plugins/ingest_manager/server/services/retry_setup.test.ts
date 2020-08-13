@@ -6,53 +6,43 @@
 
 import { firstSuccessOrTryAgain } from './retry_setup';
 
-let counter = 0;
-async function succeeds() {
-  return `counter is ${counter}`;
+async function succeeds(value: string | number) {
+  return `value is ${value}`;
 }
-async function throws() {
-  throw new Error(`counter is ${counter}`);
+async function throws(value: string | number) {
+  throw new Error(`error is ${value}`);
 }
 
 describe('firstSuccessOrTryAgain', () => {
   it('reject/throws is called again & its value returned', async () => {
-    counter = 6;
-    const firstCall = firstSuccessOrTryAgain(throws);
-    await expect(firstCall).rejects.toThrow(`counter is 6`);
+    const firstCall = firstSuccessOrTryAgain(() => throws(6));
+    await expect(firstCall).rejects.toThrow(`error is 6`);
 
-    counter = 61;
-    const secondCall = firstSuccessOrTryAgain(throws);
-    await expect(secondCall).rejects.toThrow(`counter is 61`);
+    const secondCall = firstSuccessOrTryAgain(() => throws(61));
+    await expect(secondCall).rejects.toThrow(`error is 61`);
 
-    counter = 66;
-    const thirdCall = firstSuccessOrTryAgain(throws);
-    await expect(thirdCall).rejects.toThrow(`counter is 66`);
+    const thirdCall = firstSuccessOrTryAgain(() => throws(66));
+    await expect(thirdCall).rejects.toThrow(`error is 66`);
   });
 
   it('the first success value is cached', async () => {
-    counter = 12;
-    const successValue = `counter is 12`;
-    const firstCall = firstSuccessOrTryAgain(succeeds);
+    const successValue = `value is 12`;
+    const firstCall = firstSuccessOrTryAgain(() => succeeds(12));
     await expect(firstCall).resolves.toBe(successValue);
 
-    counter = 2;
-    const secondCall = firstSuccessOrTryAgain(succeeds);
+    const secondCall = firstSuccessOrTryAgain(() => succeeds(2));
     await expect(secondCall).resolves.toBe(successValue);
 
-    counter = 3;
-    const thirdCall = firstSuccessOrTryAgain(succeeds);
+    const thirdCall = firstSuccessOrTryAgain(() => succeeds(3));
     await expect(thirdCall).resolves.toBe(successValue);
 
-    counter = 6;
-    const fourthCall = firstSuccessOrTryAgain(throws);
+    const fourthCall = firstSuccessOrTryAgain(() => throws(6));
     await expect(fourthCall).resolves.toBe(successValue);
 
-    counter = 61;
-    const fifthCall = firstSuccessOrTryAgain(throws);
+    const fifthCall = firstSuccessOrTryAgain(() => throws(61));
     await expect(fifthCall).resolves.toBe(successValue);
 
-    counter = 66;
-    const sixthCall = firstSuccessOrTryAgain(throws);
+    const sixthCall = firstSuccessOrTryAgain(() => throws(66));
     await expect(sixthCall).resolves.toBe(successValue);
   });
 });
