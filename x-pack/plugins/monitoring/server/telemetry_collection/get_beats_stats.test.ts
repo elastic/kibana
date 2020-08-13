@@ -22,6 +22,7 @@ describe('Get Beats Stats', () => {
     const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
     const start = 100;
     const end = 200;
+    const mbIndex = 'metricbeat-*';
     let callCluster = sinon.stub();
 
     beforeEach(() => {
@@ -31,7 +32,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 0, to: 10000` in the query', async () => {
-      await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, {} as any, mbIndex);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
@@ -41,7 +42,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 10000, from: 10000` in the query', async () => {
-      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 1 } as any, mbIndex);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 
@@ -51,7 +52,7 @@ describe('Get Beats Stats', () => {
     });
 
     it('should set `from: 20000, from: 10000` in the query', async () => {
-      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any);
+      await fetchBeatsStats(callCluster, clusterUuids, start, end, { page: 2 } as any, mbIndex);
       const { args } = callCluster.firstCall;
       const [api, { body }] = args;
 

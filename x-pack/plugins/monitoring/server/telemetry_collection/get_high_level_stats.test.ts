@@ -228,13 +228,14 @@ describe('get_high_level_stats', () => {
   };
   const clusterUuids = Object.keys(expectedClusters);
   const maxBucketSize = 10;
+  const mbIndex = 'metricbeat-*';
 
   describe('getHighLevelStats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
       expect(
-        await getHighLevelStats(callWith, clusterUuids, start, end, product, maxBucketSize)
+        await getHighLevelStats(callWith, clusterUuids, start, end, product, maxBucketSize, mbIndex)
       ).toStrictEqual(expectedClusters);
     });
   });
@@ -244,7 +245,15 @@ describe('get_high_level_stats', () => {
       callWith.returns(Promise.resolve(response));
 
       expect(
-        await fetchHighLevelStats(callWith, clusterUuids, start, end, product, maxBucketSize)
+        await fetchHighLevelStats(
+          callWith,
+          clusterUuids,
+          start,
+          end,
+          product,
+          maxBucketSize,
+          mbIndex
+        )
       ).toStrictEqual(response);
     });
   });
