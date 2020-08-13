@@ -20,7 +20,7 @@
 /**
  * Generates file transfer progress messages
  */
-export default class Progress {
+export class Progress {
   constructor(logger) {
     const self = this;
 
