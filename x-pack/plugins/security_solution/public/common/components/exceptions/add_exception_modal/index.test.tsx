@@ -19,19 +19,26 @@ import { useFetchOrCreateRuleExceptionList } from '../use_fetch_or_create_rule_e
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { createUseKibanaMock } from '../../../mock/kibana_react';
 import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
+import { ExceptionBuilderComponent } from '../builder';
+import * as helpers from '../helpers';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
+jest.mock('../builder');
 
 const useKibanaMock = useKibana as jest.Mock;
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
+  let defaultEndpointItems: jest.SpyInstance<ReturnType<
+    typeof helpers.defaultEndpointExceptionItems
+  >>;
 
   beforeEach(() => {
+    defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     const kibanaMock = createUseKibanaMock()();
     useKibanaMock.mockImplementation(() => ({
       ...kibanaMock,
@@ -55,6 +62,12 @@ describe('When the add exception modal is opened', () => {
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
+    // Unsafe casting for mocking of internal component
+    ((ExceptionBuilderComponent as unknown) as jest.Mock).mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -104,11 +117,6 @@ describe('When the add exception modal is opened', () => {
     it('should render the exception builder', () => {
       expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
     });
-    it('has the add exception button disabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).toBeDisabled();
-    });
     it('should not render the close on add exception checkbox', () => {
       expect(
         wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
@@ -118,7 +126,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    beforeAll(() => {
+    beforeEach(() => {
       const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
         ecsData: { _id: 'test-id' },
         nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
@@ -140,22 +148,47 @@ describe('When the add exception modal is opened', () => {
     it('should render the exception builder', () => {
       expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
     });
-    it('has the add exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
+    it('should prepopulate endpoint items', () => {
+      expect(defaultEndpointItems).toHaveBeenCalled();
     });
     it('should render the close on add exception checkbox', () => {
       expect(
         wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
       ).toBeTruthy();
     });
-    it('has the bulk close on add exception disabled', () => {
+  });
+
+  describe('when there is alert data passed to a detection list exception', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      const alertDataMock: { ecsData: Ecs; nonEcsData: TimelineNonEcsData[] } = {
+        ecsData: { _id: 'test-id' },
+        nonEcsData: [{ field: 'file.path', value: ['test/path'] }],
+      };
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <AddExceptionModal
+            ruleId={'123'}
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            alertData={alertDataMock}
+          />
+        </ThemeProvider>
+      );
+    });
+    it('should render the exception builder', () => {
+      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+    });
+    it('should not prepopulate endpoint items', () => {
+      expect(defaultEndpointItems).not.toHaveBeenCalled();
+    });
+    it('should render the close on add exception checkbox', () => {
       expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).toBeDisabled();
+        wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
+      ).toBeTruthy();
     });
   });
 
@@ -199,22 +232,13 @@ describe('When the add exception modal is opened', () => {
     it('should render the exception builder', () => {
       expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
     });
-    it('has the add exception button enabled', () => {
-      expect(
-        wrapper.find('button[data-test-subj="add-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
+    it('should prepopulate endpoint items', () => {
+      expect(defaultEndpointItems).toHaveBeenCalled();
     });
     it('should render the close on add exception checkbox', () => {
       expect(
         wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
       ).toBeTruthy();
-    });
-    it('has the bulk close on add exception enabled', () => {
-      expect(
-        wrapper
-          .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
-          .getDOMNode()
-      ).not.toBeDisabled();
     });
   });
 });

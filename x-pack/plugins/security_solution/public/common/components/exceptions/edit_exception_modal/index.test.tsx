@@ -21,12 +21,14 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { createUseKibanaMock } from '../../../mock/kibana_react';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
+import { ExceptionBuilderComponent } from '../builder';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../use_add_exception');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../builder');
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -53,6 +55,8 @@ describe('When the edit exception modal is opened', () => {
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
+    // Unsafe casting for mocking of internal component
+    ((ExceptionBuilderComponent as unknown) as jest.Mock).mockReturnValue(null);
   });
 
   describe('when the modal is loading', () => {
@@ -109,24 +113,12 @@ describe('When the edit exception modal is opened', () => {
         expect(
           wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-        ).not.toBeDisabled();
+      });
+      it('should contain the endpoint specific documentation text', () => {
         expect(
           wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper
-            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-            .getDOMNode()
-        ).not.toBeDisabled();
       });
-      // it('should have the confirm edit button be enabled', () => {
-      // });
-      // it('should contain the endpoint specific documentation text', () => {
-      // });
-      // it('should have the bulk close checkbox enabled', () => {
-      // });
     });
 
     describe('without data that matches index patterns', () => {
@@ -149,24 +141,12 @@ describe('When the edit exception modal is opened', () => {
         expect(
           wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-        ).not.toBeDisabled();
+      });
+      it('should contain the endpoint specific documentation text', () => {
         expect(
           wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper
-            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
-            .getDOMNode()
-        ).toBeDisabled();
       });
-      // it('should have the confirm edit button be enabled', () => {
-      // });
-      // it('should contain the endpoint specific documentation text', () => {
-      // });
-      // it('should have the bulk close checkbox disabled', () => {
-      // });
     });
   });
 
@@ -188,41 +168,9 @@ describe('When the edit exception modal is opened', () => {
     });
     it('renders the exceptions builder', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
-      expect(
-        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-      ).not.toBeDisabled();
+    });
+    it('should not contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
     });
-    // it('should have the confirm edit button be enabled', () => {
-    // });
-    // it('should contain the endpoint specific documentation text', () => {
-    // });
-  });
-
-  describe('when an exception is passed with no exception data', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
-      wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <EditExceptionModal
-            ruleIndices={['filebeat-*']}
-            ruleName={ruleName}
-            exceptionListType={'detection'}
-            onCancel={() => {}}
-            onConfirm={() => {}}
-            exceptionItem={exceptionItemMock}
-          />
-        </ThemeProvider>
-      );
-    });
-    it('renders the exceptions builder', () => {
-      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
-      expect(
-        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
-      ).toBeDisabled();
-    });
-    // it('should have the confirm edit button be enabled', () => {
-    // });
   });
 });
