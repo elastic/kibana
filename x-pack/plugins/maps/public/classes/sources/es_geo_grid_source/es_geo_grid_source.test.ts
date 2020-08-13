@@ -50,7 +50,7 @@ describe('ESGeoGridSource', () => {
     },
     {}
   );
-  geogridSource._runEsQuery = (args: any) => {
+  geogridSource._runEsQuery = async (args: unknown) => {
     return {
       took: 71,
       timed_out: false,
