@@ -40,7 +40,7 @@ export function IngestManagerPanel() {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink href="https://ela.st/ingest-manager-announcement">
+          <EuiLink href="/app/ingestManager#/">
             {i18n.translate('xpack.observability.ingestManafer.button', {
               defaultMessage: 'Try Ingest Manager Beta',
             })}
