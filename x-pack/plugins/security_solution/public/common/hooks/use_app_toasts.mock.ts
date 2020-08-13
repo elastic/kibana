@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useContext } from 'react';
+const createAppToastsMock = () => ({
+  addError: jest.fn(),
+  addSuccess: jest.fn(),
+});
 
-import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
-
-export const useMlCapabilities = () => useContext(MlCapabilitiesContext);
+export const useAppToastsMock = {
+  create: createAppToastsMock,
+};
