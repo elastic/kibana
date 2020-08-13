@@ -108,7 +108,7 @@ export class UiActionsExecutionService {
   private async executeMultipleActions(tasks: ExecuteActionTask[]) {
     const panel = await buildContextMenuForActions({
       actions: tasks.map(({ action, context }) => [action, context]),
-      title: tasks[0].trigger.title, // title of context menu is title of trigger which originated the chain
+      title: '', // intentionally don't have any title
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());
         session.close();
