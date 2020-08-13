@@ -18,22 +18,16 @@
  */
 
 import { createBrushHandler } from './create_brush_handler';
-import { ExprVis } from '../../../../visualizations/public';
+import { ExprVisAPIEvents } from '../../../../visualizations/public';
 
 describe('brushHandler', () => {
   let onBrush: ReturnType<typeof createBrushHandler>;
-  let vis: ExprVis;
+  let applyFilter: ExprVisAPIEvents['applyFilter'];
 
   beforeEach(() => {
-    vis = ({
-      API: {
-        events: {
-          applyFilter: jest.fn(),
-        },
-      },
-    } as unknown) as ExprVis;
+    applyFilter = jest.fn();
 
-    onBrush = createBrushHandler(vis);
+    onBrush = createBrushHandler(applyFilter);
   });
 
   test('returns brushHandler() should updates timefilter through vis.API.events.brush', () => {
@@ -42,7 +36,7 @@ describe('brushHandler', () => {
 
     onBrush(gte, lte);
 
-    expect(vis.API.events.applyFilter).toHaveBeenCalledWith({
+    expect(applyFilter).toHaveBeenCalledWith({
       timeFieldName: '*',
       filters: [
         {

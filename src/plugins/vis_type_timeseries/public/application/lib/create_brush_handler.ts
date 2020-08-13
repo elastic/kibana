@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { ExprVis } from '../../../../visualizations/public';
+import { ExprVisAPIEvents } from '../../../../visualizations/public';
 
-export const createBrushHandler = (vis: ExprVis) => (gte: string, lte: string) => {
-  return vis.API.events.applyFilter({
+export const createBrushHandler = (applyFilter: ExprVisAPIEvents['applyFilter']) => (
+  gte: string,
+  lte: string
+) => {
+  return applyFilter({
     timeFieldName: '*',
     filters: [
       {

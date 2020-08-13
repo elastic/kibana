@@ -50,7 +50,7 @@ export class VisEditor extends Component {
       visFields: props.visFields,
       extractedIndexPatterns: [''],
     };
-    this.onBrush = createBrushHandler(this.props.vis);
+    this.onBrush = createBrushHandler(props.vis.API.events.applyFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
 
