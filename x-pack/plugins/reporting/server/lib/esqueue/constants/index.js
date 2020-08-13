@@ -5,8 +5,8 @@
  */
 
 import { statuses } from '../../statuses';
-import { events } from './events';
 import { defaultSettings } from './default_settings';
+import { events } from './events';
 
 export const constants = {
   ...events,
