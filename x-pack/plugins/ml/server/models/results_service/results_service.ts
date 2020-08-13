@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import sortBy from 'lodash/sortBy';
+import slice from 'lodash/slice';
+import get from 'lodash/get';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
@@ -175,7 +177,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       });
 
       // Sort anomalies in ascending time order.
-      records = _.sortBy(records, 'timestamp');
+      records = sortBy(records, 'timestamp');
       tableData.interval = aggregationInterval;
       if (aggregationInterval === 'auto') {
         // Determine the actual interval to use if aggregating.
@@ -197,7 +199,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
 
         const categoryIdsByJobId: { [key: string]: any } = {};
         categoryAnomalies.forEach((anomaly) => {
-          if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
+          if (categoryIdsByJobId[anomaly.jobId] === undefined) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
           if (categoryIdsByJobId[anomaly.jobId].indexOf(anomaly.entityValue) === -1) {
@@ -289,7 +291,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     };
 
     const resp = await callAsInternalUser('search', query);
-    const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
+    const maxScore = get(resp, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
   }
@@ -353,7 +355,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       },
     });
 
-    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = _.get(
+    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
       resp,
       ['aggregations', 'byJobId', 'buckets'],
       []
@@ -387,7 +389,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     if (resp.hits.total !== 0) {
       resp.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
-          examplesByCategoryId[hit._source.category_id] = _.slice(
+          examplesByCategoryId[hit._source.category_id] = slice(
             hit._source.examples,
             0,
             Math.min(hit._source.examples.length, maxExamples)

@@ -41,6 +41,7 @@ describe('Search service', () => {
         expressions: expressionsPluginMock.createSetupContract(),
       } as any);
       expect(setup).toHaveProperty('aggs');
+      expect(setup).toHaveProperty('__enhance');
     });
   });
 
@@ -49,7 +50,6 @@ describe('Search service', () => {
       const start = searchService.start(mockCoreStart, {
         indexPatterns: {},
       } as any);
-      expect(start).toHaveProperty('setInterceptor');
       expect(start).toHaveProperty('search');
     });
   });
