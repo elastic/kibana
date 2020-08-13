@@ -24,9 +24,9 @@ export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
     );
 
     return {
-      ...jobParams,
       headers: serializedEncryptedHeaders,
       indexPatternSavedObject,
+      ...jobParams,
     };
   };
 };
