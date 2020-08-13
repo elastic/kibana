@@ -43,6 +43,7 @@ export const createSourceStatusResolvers = (libs: {
     async indexFields(_, args, { req }) {
       const indexes = filterIndexes(args.defaultIndex);
       if (indexes.length !== 0) {
+        console.log('indexes', indexes);
         return libs.fields.getFields(req, indexes);
       } else {
         return [];

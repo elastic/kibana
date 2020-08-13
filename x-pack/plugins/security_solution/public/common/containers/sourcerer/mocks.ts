@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SOURCE_GROUPS } from './constants';
+import { SecurityPageName } from './constants';
 import { getSourceDefaults } from './index';
 
 export const mockPatterns = [
@@ -17,7 +17,7 @@ export const mockPatterns = [
 ];
 
 export const mockSourceGroups = {
-  [SOURCE_GROUPS.default]: [
+  [SecurityPageName.default]: [
     'apm-*-transaction*',
     'auditbeat-*',
     'blobbeat-*',
@@ -26,7 +26,7 @@ export const mockSourceGroups = {
     'logs-*',
     'winlogbeat-*',
   ],
-  [SOURCE_GROUPS.host]: [
+  [SecurityPageName.host]: [
     'apm-*-transaction*',
     'endgame-*',
     'logs-*',
@@ -36,10 +36,10 @@ export const mockSourceGroups = {
 };
 
 export const mockSourceSelections = {
-  [SOURCE_GROUPS.default]: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  [SOURCE_GROUPS.host]: ['endgame-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+  [SecurityPageName.default]: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
+  [SecurityPageName.host]: ['endgame-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
 };
-export const mockSource = (testId: SOURCE_GROUPS.default | SOURCE_GROUPS.host) => ({
+export const mockSource = (testId: SecurityPageName.default | SecurityPageName.host) => ({
   data: {
     source: {
       id: 'default',
@@ -69,7 +69,7 @@ export const mockSource = (testId: SOURCE_GROUPS.default | SOURCE_GROUPS.host) =
   stale: false,
 });
 
-export const mockSourceGroup = (testId: SOURCE_GROUPS.default | SOURCE_GROUPS.host) => {
+export const mockSourceGroup = (testId: SecurityPageName.default | SecurityPageName.host) => {
   const indexes = mockSourceSelections[testId];
   return {
     ...getSourceDefaults(testId, mockPatterns),

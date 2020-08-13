@@ -17,7 +17,7 @@ import { sourceQuery } from '../source/index.gql_query';
 import { useApolloClient } from '../../utils/apollo_context';
 import {
   sourceGroups,
-  SOURCE_GROUPS,
+  SecurityPageName,
   SourceGroupsType,
   SOURCERER_FEATURE_FLAG_ON,
 } from './constants';
@@ -31,6 +31,7 @@ import {
   getIndexFields,
   indicesExistOrDataTemporarilyUnavailable,
 } from './format';
+import { fetchIndexFields } from './async';
 
 // TYPES
 interface ManageSource {
@@ -111,7 +112,7 @@ export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) 
 });
 
 const initManageSource: ManageSourcerer = {
-  activeSourceGroupId: SOURCE_GROUPS.default,
+  activeSourceGroupId: SecurityPageName.default,
   availableIndexPatterns: [],
   availableSourceGroupIds: [],
   isIndexPatternsLoading: true,
@@ -178,7 +179,7 @@ const reducerManageSource = (state: ManageSourcerer, action: ActionManageSource)
 export const useSourceManager = (): UseSourceManager => {
   const {
     services: {
-      data: { indexPatterns },
+      data: { indexPatterns: indexPatternsService },
     },
   } = useKibana();
   const apolloClient = useApolloClient();
@@ -218,10 +219,19 @@ export const useSourceManager = (): UseSourceManager => {
 
     async function fetchTitles() {
       try {
-        const result = await indexPatterns.getTitles();
+        const result = await indexPatternsService.getTitles();
+
+        const makeIt = await indexPatternsService.make('winlogbeat-*');
+        const saveIt = await indexPatternsService.save('winlogbeat-*');
+        console.log('makeIt and saveIt', {
+          makeIt,
+          saveIt,
+        });
+        debugger;
         setAvailableIndexPatterns(result);
         setIsIndexPatternsLoading(false);
       } catch (error) {
+        console.log('ERRRRRR', error);
         setIsIndexPatternsLoading(false);
       }
     }
@@ -231,7 +241,7 @@ export const useSourceManager = (): UseSourceManager => {
     return () => {
       return abortCtrl.abort();
     };
-  }, [indexPatterns, setAvailableIndexPatterns, setIsIndexPatternsLoading]);
+  }, [indexPatternsService, setAvailableIndexPatterns, setIsIndexPatternsLoading]);
 
   // Security Solution Source Groups
   const setActiveSourceGroupId = useCallback(
@@ -289,26 +299,29 @@ export const useSourceManager = (): UseSourceManager => {
               },
             },
           });
+          const ip = await fetchIndexFields({ indexPatternsService, selectedPatterns });
+          // const ipf = await indexPatternsService.getFields();
+          console.log('results', { result, ip });
+          ////////////////////////////////////////
+          // LETS BUILD HERE
+          ////////////////////////////////////////
+
+          ////////////////////////////////////////
+          // STOP  HERE
+          ////////////////////////////////////////
+
+          debugger;
           if (isSubscribed) {
             dispatch({
               type: 'SET_SOURCE',
               id,
               defaultIndex: selectedPatterns,
               payload: {
-                browserFields: getBrowserFields(
-                  selectedPatterns.join(),
-                  get('data.source.status.indexFields', result)
-                ),
-                docValueFields: getDocValueFields(
-                  selectedPatterns.join(),
-                  get('data.source.status.indexFields', result)
-                ),
+                browserFields: getBrowserFields(selectedPatterns.join(), ip),
+                docValueFields: getDocValueFields(selectedPatterns.join(), ip),
                 errorMessage: null,
                 id,
-                indexPattern: getIndexFields(
-                  selectedPatterns.join(),
-                  get('data.source.status.indexFields', result)
-                ),
+                indexPattern: getIndexFields(selectedPatterns.join(), ip),
                 indexPatterns: selectedPatterns,
                 indicesExist: indicesExistOrDataTemporarilyUnavailable(
                   get('data.source.status.indicesExist', result)
@@ -343,6 +356,7 @@ export const useSourceManager = (): UseSourceManager => {
     [
       apolloClient,
       getDefaultIndex,
+      indexPatternsService,
       setIsSourceLoading,
       state.availableIndexPatterns,
       state.sourceGroups,

@@ -4,53 +4,64 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, get } from 'lodash/fp';
-
-import { IndexField } from '../../graphql/types';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+/* eslint-disable no-restricted-imports */
+import { get, isEmpty } from 'lodash/fp';
 import {
   baseCategoryFields,
   getDocumentation,
   getIndexAlias,
   hasDocumentation,
   IndexAlias,
-} from '../../utils/beat_schema';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
-import { FieldsAdapter, IndexFieldDescriptor } from './types';
+} from '../../../../server/utils/beat_schema';
+import { IndexFieldDescriptor } from '../../../../server/lib/index_fields/types';
+import { IndexField } from '../../../../server/graphql/types';
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
-export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
-
-  public async getIndexFields(request: FrameworkRequest, indices: string[]): Promise<IndexField[]> {
-    const indexPatternsService = this.framework.getIndexPatternsService(request);
-    const indexesAliasIndices = indices.reduce<Record<string, string[]>>((accumulator, indice) => {
-      const key = getIndexAlias(indices, indice);
+interface GetIndexFields {
+  indexPatternsService: IndexPatternsContract;
+  selectedPatterns: string[];
+}
+export const fetchIndexFields = async ({
+  indexPatternsService,
+  selectedPatterns,
+}: GetIndexFields) => {
+  const indexesAliasIndices = selectedPatterns.reduce<Record<string, string[]>>(
+    (accumulator, indexTitle) => {
+      const key = getIndexAlias(selectedPatterns, indexTitle);
 
       if (get(key, accumulator)) {
-        accumulator[key] = [...accumulator[key], indice];
+        accumulator[key] = [...accumulator[key], indexTitle];
       } else {
-        accumulator[key] = [indice];
+        accumulator[key] = [indexTitle];
       }
       return accumulator;
-    }, {});
-    console.log('indexesAliasIndices', indexesAliasIndices);
-    const responsesIndexFields: IndexFieldDescriptor[][] = await Promise.all(
-      Object.values(indexesAliasIndices).map((indicesByGroup) => {
-        console.log('indicesByGroup', indicesByGroup);
-        return indexPatternsService.getFieldsForWildcard({
-          pattern: indicesByGroup,
-        });
+    },
+    {}
+  );
+
+  const fieldsPromiseArray = Object.values(indexesAliasIndices).map((indicesByGroup) =>
+    indicesByGroup.map((eachIndex) =>
+      indexPatternsService.getFieldsForWildcard({
+        pattern: eachIndex,
       })
-    );
-    console.log('responsesIndexFields', {
-      r1: responsesIndexFields[0].length,
-    });
-    console.log('!!!!!!!', responsesIndexFields[0][0]);
-    return formatIndexFields(
-      responsesIndexFields,
-      Object.keys(indexesAliasIndices) as IndexAlias[]
-    );
-  }
-}
+    )
+  );
+  const fieldsPromiseCalls = await Promise.all(
+    fieldsPromiseArray.map((innerPromiseArray) => {
+      return Promise.all(innerPromiseArray);
+    })
+  );
+  const responsesIndexFields: IndexFieldDescriptor[][] = fieldsPromiseCalls.map((group) =>
+    group.reduce((acc, p) => [...acc, ...p], [])
+  );
+  return formatIndexFields(responsesIndexFields, Object.keys(indexesAliasIndices) as IndexAlias[]);
+};
+
+export const fetchIndiciesExist = async ({
+  indexPatternsService,
+  selectedPatterns,
+}: GetIndexFields) => {};
 
 const missingFields = [
   {

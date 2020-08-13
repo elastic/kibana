@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SOURCERER_FEATURE_FLAG_ON = false;
+export const SOURCERER_FEATURE_FLAG_ON = true;
 
-export enum SOURCE_GROUPS {
+export enum SecurityPageName {
   default = 'default',
   host = 'host',
   detections = 'detections',
@@ -14,10 +14,10 @@ export enum SOURCE_GROUPS {
   network = 'network',
 }
 
-export type SourceGroupsType = keyof typeof SOURCE_GROUPS;
+export type SourceGroupsType = keyof typeof SecurityPageName;
 
 export const sourceGroups = {
-  [SOURCE_GROUPS.default]: [
+  [SecurityPageName.default]: [
     'apm-*-transaction*',
     'auditbeat-*',
     'endgame-*',

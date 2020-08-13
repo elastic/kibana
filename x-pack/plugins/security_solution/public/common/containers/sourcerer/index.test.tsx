@@ -14,8 +14,8 @@ import {
   mockPatterns,
   mockSource,
 } from './mocks';
-import { SOURCE_GROUPS } from './constants';
-const mockSourceDefaults = mockSource(SOURCE_GROUPS.default);
+import { SecurityPageName } from './constants';
+const mockSourceDefaults = mockSource(SecurityPageName.default);
 jest.mock('../../lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
@@ -34,8 +34,8 @@ jest.mock('../../utils/apollo_context', () => ({
 }));
 
 describe('Sourcerer Hooks', () => {
-  const testId = SOURCE_GROUPS.default;
-  const uninitializedId = SOURCE_GROUPS.host;
+  const testId = SecurityPageName.default;
+  const uninitializedId = SecurityPageName.host;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
