@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { flatten, isEmpty } from 'lodash';
+import { flatten, isEmpty, mean } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -79,6 +79,18 @@ export function getMaxY(responseTimeSeries: TimeSeries[]) {
   const numbers: number[] = coordinates.map((c: Coordinate) => (c.y ? c.y : 0));
 
   return Math.max(...numbers, 0);
+}
+
+function getAverageY(responseTimeSeries: TimeSeries[]) {
+  const averageSeries = responseTimeSeries.find(
+    (serie) => serie.title === 'Avg.'
+  );
+  if (averageSeries) {
+    const averageYValues = (averageSeries.data as Coordinate[])
+      .map((c) => c.y)
+      .filter((y) => y && isFinite(y));
+    return mean(averageYValues);
+  }
 }
 
 export function TransactionCharts({
@@ -159,6 +171,10 @@ export function TransactionCharts({
   useEffect(() => {
     setMaxY(getMaxY(responseTimeSeries));
   }, [responseTimeSeries]);
+
+  const averageY = getAverageY(responseTimeSeries);
+
+  const formatTooltip = getDurationFormatter(averageY ?? maxY);
   const formatter = getDurationFormatter(maxY);
 
   const onToggleLegend = (series: Serie[]) => {
@@ -189,7 +205,9 @@ export function TransactionCharts({
                 onToggleLegend={onToggleLegend}
                 series={responseTimeSeries}
                 tickFormatY={getResponseTimeTickFormatter(formatter)}
-                formatTooltipValue={getResponseTimeTooltipFormatter(formatter)}
+                formatTooltipValue={getResponseTimeTooltipFormatter(
+                  formatTooltip
+                )}
               />
             </React.Fragment>
           </EuiPanel>
