@@ -5,7 +5,13 @@
  */
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FIELD_TYPES, UseField, Field, fieldValidators } from '../../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  UseField,
+  Field,
+  fieldValidators,
+  ValidationConfig,
+} from '../../../../../../../shared_imports';
 
 import { FieldsConfig } from '../shared';
 
@@ -32,8 +38,21 @@ export const fieldsConfig: FieldsConfig = {
 
 interface Props {
   helpText?: React.ReactNode;
+  /**
+   * The field name requires a value. Processor specific validation
+   * checks can be added here.
+   */
+  additionalValidations?: ValidationConfig[];
 }
 
-export const FieldNameField: FunctionComponent<Props> = ({ helpText }) => (
-  <UseField config={{ ...fieldsConfig.field, helpText }} component={Field} path="fields.field" />
+export const FieldNameField: FunctionComponent<Props> = ({ helpText, additionalValidations }) => (
+  <UseField
+    config={{
+      ...fieldsConfig.field,
+      helpText,
+      validations: fieldsConfig.field.validations!.concat(additionalValidations ?? []),
+    }}
+    component={Field}
+    path="fields.field"
+  />
 );

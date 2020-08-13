@@ -7,7 +7,12 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  UseField,
+  ComboBoxField,
+} from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
@@ -16,7 +21,8 @@ const { emptyField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
   value: {
-    type: FIELD_TYPES.TEXT,
+    type: FIELD_TYPES.COMBO_BOX,
+    deserializer: (v) => (Array.isArray(v) ? v : [String(v)]),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.appendForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),
@@ -44,7 +50,7 @@ export const Append: FunctionComponent = () => {
         })}
       />
 
-      <UseField config={fieldsConfig.value} component={Field} path="fields.value" />
+      <UseField config={fieldsConfig.value} component={ComboBoxField} path="fields.value" />
     </>
   );
 };
