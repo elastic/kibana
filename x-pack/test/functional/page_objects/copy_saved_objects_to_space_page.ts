@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function extractCountFromSummary(str: string) {
@@ -16,7 +15,6 @@ export function CopySavedObjectsToSpacePageProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const { savedObjects, common } = getPageObjects(['savedObjects', 'common']);
 
   return {
