@@ -52,7 +52,6 @@ const INJECTED_METADATA = {
 };
 
 const { createKibanaRequest, createRawRequest } = httpServerMock;
-const legacyApp = { getId: () => 'legacy' };
 
 describe('RenderingService', () => {
   let service: RenderingService;
