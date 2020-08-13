@@ -220,7 +220,7 @@ export const SeverityField = ({
           error={'errorMessage'}
           isInvalid={false}
           fullWidth
-          data-test-subj={dataTestSubj}
+          data-test-subj={`${dataTestSubj}-severityOverride`}
           describedByIds={idAria ? [idAria] : undefined}
         >
           <NestedContent>
@@ -245,7 +245,11 @@ export const SeverityField = ({
                 {(field.value as AboutStepSeverity).mapping.map(
                   (severityMappingItem: SeverityMappingItem, index) => (
                     <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexGroup
+                        data-test-subj="severityOverrideRow"
+                        alignItems="center"
+                        gutterSize="s"
+                      >
                         <EuiFlexItem>
                           <FieldComponent
                             placeholder={''}

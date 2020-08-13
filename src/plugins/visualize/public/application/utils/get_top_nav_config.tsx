@@ -114,7 +114,7 @@ export const getTopNavConfig = (
             application.navigateToApp(originatingApp);
           }
         } else {
-          if (setOriginatingApp && originatingApp && savedVis.copyOnSave) {
+          if (setOriginatingApp && originatingApp && newlyCreated) {
             setOriginatingApp(undefined);
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);

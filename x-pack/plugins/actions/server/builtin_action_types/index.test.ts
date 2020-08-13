@@ -44,8 +44,6 @@ beforeEach(() => {
 describe('action is registered', () => {
   test('gets registered with builtin actions', () => {
     const { actionTypeRegistry } = createActionTypeRegistry();
-    ACTION_TYPE_IDS.forEach((ACTION_TYPE_ID) =>
-      expect(actionTypeRegistry.has(ACTION_TYPE_ID)).toEqual(true)
-    );
+    ACTION_TYPE_IDS.forEach((id) => expect(actionTypeRegistry.has(id)).toEqual(true));
   });
 });

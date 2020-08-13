@@ -10,7 +10,6 @@ import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/al
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validateMetricThreshold } from './components/validation';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 export function createInventoryMetricAlertType(): AlertTypeModel {
   return {

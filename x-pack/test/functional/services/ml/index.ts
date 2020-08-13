@@ -13,6 +13,7 @@ import { MachineLearningCommonProvider } from './common';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
 import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
+import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
@@ -47,6 +48,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     common,
     api
   );
+  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, common);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, common);
@@ -76,6 +78,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     customUrls,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
+    dataFrameAnalyticsEdit,
     dataFrameAnalyticsTable,
     dataVisualizer,
     dataVisualizerFileBased,

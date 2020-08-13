@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
             description: 'Test',
           })
           .expect(200);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { id, updated_at, ...newConfig } = item;
 
         expect(success).to.be(true);

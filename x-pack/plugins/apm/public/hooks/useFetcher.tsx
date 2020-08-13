@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
-
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react-hooks/rules-of-hooks, complexity */
+/* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
@@ -71,8 +71,9 @@ import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_o
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
-import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
+import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
@@ -161,8 +162,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   const { globalFullScreen } = useFullScreen();
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
-  const hasMlPermissions =
-    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const ruleDetailTabs = getRuleDetailsTabs(rule);
 
   // persist rule until refresh is complete
@@ -247,7 +247,6 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         ))}
       </EuiTabs>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
   const ruleError = useMemo(
@@ -318,13 +317,13 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
         lists: ExceptionIdentifiers[];
         allowedExceptionListTypes: ExceptionListTypeEnum[];
       }>(
-        (acc, { id, list_id, namespace_type, type }) => {
+        (acc, { id, list_id: listId, namespace_type: namespaceType, type }) => {
           const { allowedExceptionListTypes, lists } = acc;
           const shouldAddEndpoint =
             type === ExceptionListTypeEnum.ENDPOINT &&
             !allowedExceptionListTypes.includes(ExceptionListTypeEnum.ENDPOINT);
           return {
-            lists: [...lists, { id, listId: list_id, namespaceType: namespace_type, type }],
+            lists: [...lists, { id, listId, namespaceType, type }],
             allowedExceptionListTypes: shouldAddEndpoint
               ? [...allowedExceptionListTypes, ExceptionListTypeEnum.ENDPOINT]
               : allowedExceptionListTypes,
