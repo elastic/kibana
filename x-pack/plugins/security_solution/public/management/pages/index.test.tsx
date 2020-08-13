@@ -30,7 +30,7 @@ describe('when in the Admistration tab', () => {
   it('should display the Management view when Ingest is ON', async () => {
     (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
     const renderResult = render();
-    const hostPage = await renderResult.findByTestId('hostPage');
-    expect(hostPage).not.toBeNull();
+    const endpointPage = await renderResult.findByTestId('endpointPage');
+    expect(endpointPage).not.toBeNull();
   });
 });

@@ -160,7 +160,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [onDeleteSelected, deleteTimelines, timelineStatus]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
-
     return (
       <>
         <EditOneTimelineAction
