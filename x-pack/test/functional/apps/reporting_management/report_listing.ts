@@ -68,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Paginates content', async () => {
+    it.skip('Paginates content', async () => {
       const previousButton = await testSubjects.find('pagination-button-previous');
 
       // previous CAN NOT be clicked
