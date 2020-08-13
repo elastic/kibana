@@ -7,12 +7,7 @@
 import Boom from 'boom';
 import { omit, omitBy, isUndefined, isEqual, map, uniq, pick, truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectReference,
-  SavedObject,
-} from 'src/core/server';
+import { Logger, SavedObjectReference, SavedObject } from 'src/core/server';
 import { ActionsClient, ActionsAuthorization } from '../../actions/server';
 import {
   Alert,
@@ -41,6 +36,7 @@ import {
   WriteOperations,
   ReadOperations,
 } from './authorization/alerts_authorization';
+import { SavedObjectsClientWithoutPartialUpdates } from './saved_objects';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -56,7 +52,7 @@ export type InvalidateAPIKeyResult =
 export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientWithoutPartialUpdates;
   authorization: AlertsAuthorization;
   actionsAuthorization: ActionsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
@@ -138,7 +134,7 @@ export class AlertsClient {
   private readonly spaceId?: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutPartialUpdates;
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -650,7 +646,10 @@ export class AlertsClient {
         'alert',
         id,
         {
-          ...omit(attributes, 'scheduledTaskId', 'apiKey', 'apiKeyOwner'),
+          ...attributes,
+          scheduledTaskId: undefined,
+          apiKey: null,
+          apiKeyOwner: null,
           enabled: false,
           updatedBy: await this.getUserName(),
         },

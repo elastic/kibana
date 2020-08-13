@@ -8,6 +8,8 @@ import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
+export { SavedObjectsClientWithoutPartialUpdates } from './saved_objects_client_without_partial_updates';
+
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
