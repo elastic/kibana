@@ -56,7 +56,7 @@ export async function loadIndexPatterns({
         )
         .concat(documentField);
 
-      const { typeMeta } = indexPattern;
+      const { typeMeta, id } = indexPattern;
       if (typeMeta?.aggs) {
         const aggs = Object.keys(typeMeta.aggs);
         newFields.forEach((field, index) => {
