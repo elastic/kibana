@@ -104,8 +104,6 @@ describe('endpointEntryNested', () => {
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "exists" supplied to "entries,type"',
       'Invalid value "undefined" supplied to "entries,value"',
-      'Invalid value "exists" supplied to "entries,type"',
-      'Invalid value "undefined" supplied to "entries,value"',
     ]);
     expect(message.schema).toEqual({});
   });

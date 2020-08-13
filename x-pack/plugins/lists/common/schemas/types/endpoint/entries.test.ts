@@ -72,10 +72,7 @@ describe('Endpoint', () => {
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "exists" supplied to "type"',
         'Invalid value "undefined" supplied to "value"',
-        'Invalid value "exists" supplied to "type"',
-        'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "entries"',
-        'Invalid value "exists" supplied to "type"',
       ]);
       expect(message.schema).toEqual({});
     });
@@ -88,10 +85,7 @@ describe('Endpoint', () => {
       expect(getPaths(left(message.errors))).toEqual([
         'Invalid value "list" supplied to "type"',
         'Invalid value "undefined" supplied to "value"',
-        'Invalid value "list" supplied to "type"',
-        'Invalid value "undefined" supplied to "value"',
         'Invalid value "undefined" supplied to "entries"',
-        'Invalid value "list" supplied to "type"',
       ]);
       expect(message.schema).toEqual({});
     });
