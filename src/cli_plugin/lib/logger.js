@@ -20,7 +20,7 @@
 /**
  * Logs messages and errors
  */
-export default class Logger {
+export class Logger {
   constructor(settings = {}) {
     this.previousLineEnded = true;
     this.silent = !!settings.silent;

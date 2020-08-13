@@ -76,6 +76,10 @@ exports[`should render 1`] = `
             "label": "Map location at save",
           },
           Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
+          },
+          Object {
             "id": "FIXED_LOCATION",
             "label": "Fixed location",
           },
@@ -164,6 +168,10 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
           Object {
             "id": "LAST_SAVED_LOCATION",
             "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
           },
           Object {
             "id": "FIXED_LOCATION",
@@ -274,6 +282,10 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
           Object {
             "id": "LAST_SAVED_LOCATION",
             "label": "Map location at save",
+          },
+          Object {
+            "id": "AUTO_FIT_TO_BOUNDS",
+            "label": "Auto fit map to data bounds",
           },
           Object {
             "id": "FIXED_LOCATION",

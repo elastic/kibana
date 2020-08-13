@@ -13,28 +13,6 @@ interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
-function xyTitles(layer: LayerConfig, datasourceLayers: Record<string, DatasourcePublicAPI>) {
-  const defaults = {
-    xTitle: 'x',
-    yTitle: 'y',
-  };
-
-  if (!layer || !layer.accessors.length) {
-    return defaults;
-  }
-  const datasource = datasourceLayers[layer.layerId];
-  if (!datasource) {
-    return defaults;
-  }
-  const x = layer.xAccessor ? datasource.getOperationForColumnId(layer.xAccessor) : null;
-  const y = layer.accessors[0] ? datasource.getOperationForColumnId(layer.accessors[0]) : null;
-
-  return {
-    xTitle: x ? x.label : defaults.xTitle,
-    yTitle: y ? y.label : defaults.yTitle,
-  };
-}
-
 export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>
@@ -53,12 +31,7 @@ export const toExpression = (
     });
   });
 
-  return buildExpression(
-    state,
-    metadata,
-    datasourceLayers,
-    xyTitles(state.layers[0], datasourceLayers)
-  );
+  return buildExpression(state, metadata, datasourceLayers);
 };
 
 export function toPreviewExpression(
@@ -108,8 +81,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers?: Record<string, DatasourcePublicAPI>,
-  { xTitle, yTitle }: { xTitle: string; yTitle: string } = { xTitle: '', yTitle: '' }
+  datasourceLayers?: Record<string, DatasourcePublicAPI>
 ): Ast | null => {
   const validLayers = state.layers.filter((layer): layer is ValidLayer =>
     Boolean(layer.xAccessor && layer.accessors.length)
@@ -125,8 +97,8 @@ export const buildExpression = (
         type: 'function',
         function: 'lens_xy_chart',
         arguments: {
-          xTitle: [xTitle],
-          yTitle: [yTitle],
+          xTitle: [state.xTitle || ''],
+          yTitle: [state.yTitle || ''],
           legend: [
             {
               type: 'expression',
@@ -146,6 +118,38 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          showXAxisTitle: [state.showXAxisTitle ?? true],
+          showYAxisTitle: [state.showYAxisTitle ?? true],
+          tickLabelsVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_tickLabelsConfig',
+                  arguments: {
+                    x: [state?.tickLabelsVisibilitySettings?.x ?? true],
+                    y: [state?.tickLabelsVisibilitySettings?.y ?? true],
+                  },
+                },
+              ],
+            },
+          ],
+          gridlinesVisibilitySettings: [
+            {
+              type: 'expression',
+              chain: [
+                {
+                  type: 'function',
+                  function: 'lens_xy_gridlinesConfig',
+                  arguments: {
+                    x: [state?.gridlinesVisibilitySettings?.x ?? true],
+                    y: [state?.gridlinesVisibilitySettings?.y ?? true],
+                  },
+                },
+              ],
+            },
+          ],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
