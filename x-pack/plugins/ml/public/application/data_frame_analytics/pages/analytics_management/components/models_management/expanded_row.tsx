@@ -195,19 +195,12 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
-                        defaultMessage="Inference Stats"
+                        id="xpack.ml.inference.modelsList.expandedRow.pipelinesTitle"
+                        defaultMessage="Pipelines"
                       />
                     </h5>
                   </EuiTitle>
                   <EuiSpacer size={'m'} />
-                  <EuiDescriptionList
-                    type="column"
-                    listItems={Object.entries(stats.inference_stats).map(([title, value]) => ({
-                      title,
-                      description: typeof value === 'object' ? JSON.stringify(value) : value,
-                    }))}
-                  />
                 </EuiPanel>
               </>
             ),

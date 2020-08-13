@@ -46,6 +46,13 @@ export interface InferenceConfigResponse {
 
 export type ModelConfigResponse = InferenceConfigResponse['trained_model_configs'][number];
 
+export interface IngestStats {
+  count: number;
+  time_in_millis: number;
+  current: number;
+  failed: number;
+}
+
 export interface InferenceStatsResponse {
   count: number;
   trained_model_stats: Array<{
@@ -57,6 +64,24 @@ export interface InferenceStatsResponse {
       cache_miss_count: number;
       missing_all_fields_count: number;
       timestamp: number;
+    };
+    ingest: {
+      total: IngestStats;
+      pipelines: Record<
+        string,
+        IngestStats & {
+          processors: Array<
+            Record<
+              string,
+              {
+                // TODO use type from ingest_pipelines
+                type: string;
+                stats: IngestStats;
+              }
+            >
+          >;
+        }
+      >;
     };
   }>;
 }
