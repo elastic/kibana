@@ -5,7 +5,6 @@
  */
 
 import { resolve } from 'path';
-import dedent from 'dedent';
 import { XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
@@ -63,7 +62,6 @@ export const xpackMain = (kibana) => {
           value: null,
         },
       },
-      hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
       replaceInjectedVars,
       injectDefaultVars(server) {
         const config = server.config();
@@ -72,15 +70,6 @@ export const xpackMain = (kibana) => {
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
         };
-      },
-      __webpackPluginProvider__(webpack) {
-        return new webpack.BannerPlugin({
-          banner: dedent`
-            /*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.
-             * Licensed under the Elastic License; you may not use this file except in compliance with the Elastic License. */
-          `,
-          raw: true,
-        });
       },
     },
 

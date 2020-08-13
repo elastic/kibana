@@ -206,12 +206,6 @@ locations for an RPM-based system:
     |  /var/log/kibana
     | path.logs
 
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | /usr/share/kibana/optimize
- d|
-
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.
   | /usr/share/kibana/plugins

@@ -49,7 +49,6 @@ const DEFAULTS_SETTINGS = {
   },
   logging: { silent: true },
   plugins: {},
-  optimize: { enabled: false },
   migrations: { skip: true },
 };
 
@@ -76,9 +75,11 @@ export function createRootWithSettings(
       watch: false,
       repl: false,
       basePath: false,
-      optimize: false,
       runExamples: false,
       oss: true,
+      disableOptimizer: true,
+      cache: true,
+      dist: false,
       ...cliArgs,
     },
     isDevClusterMaster: false,
