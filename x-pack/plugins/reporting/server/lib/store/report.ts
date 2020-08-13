@@ -73,7 +73,7 @@ export class Report implements Partial<ReportingDocument> {
   public readonly timeout?: number;
 
   /*
-   * Create an unsaved report, or an object to track a reporting document in ES
+   * Create an unsaved report
    */
   constructor(opts: Partial<ReportingDocument>) {
     this._id = opts._id != null ? opts._id : puid.generate();
