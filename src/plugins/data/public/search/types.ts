@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { PackageInfo } from 'kibana/server';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { LegacyApiCaller } from './legacy/es_client';
-import { SearchInterceptor } from './search_interceptor';
+import { ISearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -37,6 +37,7 @@ import { GetInternalStartServicesFn } from '../types';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
+  strategy?: string;
 }
 
 export type ISearch = (
@@ -44,37 +45,42 @@ export type ISearch = (
   options?: ISearchOptions
 ) => Observable<IKibanaSearchResponse>;
 
-// Service API types
-export interface IStrategyOptions extends ISearchOptions {
-  strategy?: string;
-}
-
 export type ISearchGeneric = (
   request: IEsSearchRequest,
-  options?: IStrategyOptions
+  options?: ISearchOptions
 ) => Observable<IEsSearchResponse>;
 
 export interface ISearchStartLegacy {
   esClient: LegacyApiCaller;
 }
 
+export interface SearchEnhancements {
+  searchInterceptor: ISearchInterceptor;
+}
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
  * point.
  */
 export interface ISearchSetup {
   aggs: SearchAggsSetup;
+  usageCollector?: SearchUsageCollector;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
-  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   searchSource: {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  usageCollector?: SearchUsageCollector;
+  /**
+   * @deprecated
+   * @internal
+   */
   __LEGACY: ISearchStartLegacy;
 }
 
