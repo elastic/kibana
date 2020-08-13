@@ -20,6 +20,7 @@ import {
   Drop,
   Enrich,
   Fail,
+  Foreach,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -122,7 +123,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   foreach: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Foreach,
     docLinkPath: '/foreach-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.foreach', {
       defaultMessage: 'Foreach',

@@ -62,7 +62,7 @@ export const CommonProcessorFields: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            language: 'painless',
+            languageId: 'painless',
             height: 75,
             options: { minimap: { enabled: false } },
           },

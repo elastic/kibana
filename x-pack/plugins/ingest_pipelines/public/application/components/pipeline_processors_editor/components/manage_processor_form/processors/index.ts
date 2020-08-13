@@ -16,3 +16,4 @@ export { DotExpander } from './dot_expander';
 export { Drop } from './drop';
 export { Enrich } from './enrich';
 export { Fail } from './fail';
+export { Foreach } from './foreach';
