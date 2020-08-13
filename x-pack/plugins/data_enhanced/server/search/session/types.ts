@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Moment } from 'moment';
 import { SessionService } from './session_service';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
     sessionService?: SessionService;
   }
-}
-export interface SessionInfo {
-  requests: Map<string, string>;
-  insertTime: Moment;
-  userId: string;
-  retryCount: number;
-  updateHandler: (searchId: string) => Promise<any>;
 }
 
 export interface SessionKeys {

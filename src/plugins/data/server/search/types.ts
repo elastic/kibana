@@ -48,7 +48,7 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   /**
-   * Get other registersrc/plugins/data/public/search/search_service.tsed search strategies. For example, if a new strategy needs to use the
+   * Get other registered search strategies. For example, if a new strategy needs to use the
    * already-registered ES search strategy, it can use this function to accomplish that.
    */
   getSearchStrategy: (name: string) => ISearchStrategy;

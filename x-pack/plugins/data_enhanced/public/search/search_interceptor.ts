@@ -110,7 +110,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return timer(pollInterval).pipe(
           // Send future requests using just the ID from the response
           mergeMap(() => {
-            const stored = this.deps.session.isRestoredSession();
+            const stored = this.deps.session.getStored();
             return this.runSearch({ id, stored }, combinedSignal, options?.strategy);
           })
         );
