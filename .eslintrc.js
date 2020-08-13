@@ -404,7 +404,7 @@ module.exports = {
               },
               {
                 target: ['(src|x-pack)/plugins/*/public/**/*'],
-                from: ['ui/**/*', 'uiExports/**/*'],
+                from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
               {
@@ -461,14 +461,13 @@ module.exports = {
     {
       files: [
         '**/public/**/*.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-ui-framework/doc_site/src/**/*.js',
         'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
       ],
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+        'import/core-modules': ['plugins', 'legacy/ui'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -609,7 +608,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',

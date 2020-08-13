@@ -62,12 +62,5 @@ export default function ({ getService }) {
         .set('Accept-Encoding', 'gzip;q=1.0, br;q=0.5')
         .expect(200)
         .expect('Content-Encoding', 'gzip'));
-
-    it('returns gzip files when no brotli version exists', () =>
-      supertest
-        .get(`/${buildNum}/bundles/light_theme.style.css`) // legacy optimizer does not create brotli outputs
-        .set('Accept-Encoding', 'gzip, br')
-        .expect(200)
-        .expect('Content-Encoding', 'gzip'));
   });
 }
