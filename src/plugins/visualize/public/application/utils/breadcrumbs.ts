@@ -23,7 +23,7 @@ import { VisualizeConstants } from '../visualize_constants';
 
 const appPrefixes: Record<string, any> = {
   dashboards: {
-    text: i18n.translate('dashboard.listing.breadcrumb', {
+    text: i18n.translate('visualize.dashboard.prefix.breadcrumb', {
       defaultMessage: 'Dashboard',
     }),
   },
