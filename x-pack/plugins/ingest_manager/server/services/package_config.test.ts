@@ -65,7 +65,7 @@ describe('Package config service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: { name: 'package.dataset1', type: 'logs' },
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
                 enabled: true,
                 vars: {
                   paths: {
@@ -85,7 +85,7 @@ describe('Package config service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: { name: 'package.dataset1', type: 'logs' },
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
               enabled: true,
               vars: {
                 paths: {
@@ -131,7 +131,7 @@ describe('Package config service', () => {
             streams: [
               {
                 id: 'dataset01',
-                dataset: { name: 'package.dataset1', type: 'logs' },
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
                 enabled: true,
               },
             ],
@@ -151,7 +151,7 @@ describe('Package config service', () => {
           streams: [
             {
               id: 'dataset01',
-              dataset: { name: 'package.dataset1', type: 'logs' },
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
               enabled: true,
               compiled_stream: {
                 metricset: ['dataset1'],

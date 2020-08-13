@@ -445,6 +445,10 @@ describe('xy_suggestions', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       preferredSeriesType: 'bar',
       layers: [
         {
@@ -483,6 +487,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -592,6 +600,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],
@@ -631,6 +643,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price'],
@@ -671,6 +687,10 @@ describe('xy_suggestions', () => {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
+      showXAxisTitle: true,
+      showYAxisTitle: true,
+      gridlinesVisibilitySettings: { x: true, y: true },
+      tickLabelsVisibilitySettings: { x: true, y: false },
       layers: [
         {
           accessors: ['price', 'quantity'],

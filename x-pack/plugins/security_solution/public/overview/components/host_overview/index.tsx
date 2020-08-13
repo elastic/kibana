@@ -23,7 +23,7 @@ import { HostItem } from '../../../graphql/types';
 import { Loader } from '../../../common/components/loader';
 import { IPDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';

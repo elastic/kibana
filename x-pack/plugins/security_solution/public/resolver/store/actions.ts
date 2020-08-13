@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CameraAction } from './camera';
-import { ResolverEvent } from '../../../common/endpoint/types';
+import { ResolverEvent, SafeResolverEvent } from '../../../common/endpoint/types';
 import { DataAction } from './data/action';
 
 /**
@@ -96,7 +96,7 @@ interface UserSelectedResolverNode {
 interface UserSelectedRelatedEventCategory {
   readonly type: 'userSelectedRelatedEventCategory';
   readonly payload: {
-    subject: ResolverEvent;
+    subject: SafeResolverEvent;
     category?: string;
   };
 }
