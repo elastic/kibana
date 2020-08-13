@@ -19,20 +19,8 @@ import { LevelLogger } from './lib';
 import { LayoutInstance } from './lib/layouts';
 
 /*
- * Routing / API types
+ * Routing types
  */
-
-interface ListQuery {
-  page: string;
-  size: string;
-  ids?: string; // optional field forbids us from extending RequestQuery
-}
-
-interface GenerateQuery {
-  jobParams: string;
-}
-
-export type ReportingRequestQuery = ListQuery | GenerateQuery;
 
 export interface ReportingRequestPre {
   management: {
