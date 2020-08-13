@@ -240,7 +240,7 @@ class AgentPolicyService {
       );
       await packagePolicyService.bulkCreate(soClient, newPackagePolicies, newAgentPolicy.id, {
         ...options,
-        bumpConfigRevision: false,
+        bumpRevision: false,
       });
     }
 
@@ -364,7 +364,7 @@ class AgentPolicyService {
     };
   }
 
-  public async getFullConfig(
+  public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
     options?: { standalone: boolean }

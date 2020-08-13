@@ -335,7 +335,10 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     // TODO change path
-    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.policyId);
+    const results = await AgentService.getAgentStatusForAgentPolicy(
+      soClient,
+      request.query.policyId
+    );
 
     const body: GetAgentStatusResponse = { results, success: true };
 

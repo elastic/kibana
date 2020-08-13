@@ -21,7 +21,7 @@ export async function getAgentStatusById(
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
-export async function getAgentStatusForConfig(
+export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string
 ) {

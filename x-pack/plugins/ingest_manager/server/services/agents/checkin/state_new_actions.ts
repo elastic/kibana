@@ -56,7 +56,9 @@ function createAgentPolicySharedObservable(agentPolicyId: string) {
       from(agentPolicyService.get(internalSOClient, agentPolicyId) as Promise<AgentPolicy>)
     ),
     distinctUntilKeyChanged('revision'),
-    switchMap((data) => from(agentPolicyService.getFullConfig(internalSOClient, agentPolicyId))),
+    switchMap((data) =>
+      from(agentPolicyService.getFullAgentPolicy(internalSOClient, agentPolicyId))
+    ),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }

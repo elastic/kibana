@@ -135,7 +135,7 @@ export const createAgentPolicyHandler: RequestHandler<
       newSysPackagePolicy.namespace = agentPolicy.namespace;
       await packagePolicyService.create(soClient, callCluster, newSysPackagePolicy, {
         user,
-        bumpConfigRevision: false,
+        bumpRevision: false,
       });
     }
 
@@ -240,7 +240,7 @@ export const getFullAgentPolicy: RequestHandler<
   const soClient = context.core.savedObjects.client;
 
   try {
-    const fullAgentPolicy = await agentPolicyService.getFullConfig(
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
       soClient,
       request.params.agentPolicyId,
       { standalone: request.query.standalone === true }
@@ -277,7 +277,7 @@ export const downloadFullAgentPolicy: RequestHandler<
   } = request;
 
   try {
-    const fullAgentPolicy = await agentPolicyService.getFullConfig(soClient, agentPolicyId, {
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
       standalone: request.query.standalone === true,
     });
     if (fullAgentPolicy) {

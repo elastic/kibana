@@ -42,12 +42,12 @@ jest.mock('./output', () => {
 });
 
 describe('agent policy', () => {
-  describe('getFullConfig', () => {
+  describe('getFullAgentPolicy', () => {
     it('should return a policy without monitoring if not monitoring is not enabled', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
       });
-      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
 
       expect(agentPolicy).toMatchObject({
         id: 'agent-policy',
@@ -76,7 +76,7 @@ describe('agent policy', () => {
         revision: 1,
         monitoring_enabled: ['logs'],
       });
-      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
 
       expect(agentPolicy).toMatchObject({
         id: 'agent-policy',
@@ -106,7 +106,7 @@ describe('agent policy', () => {
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
+      const agentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, 'agent-policy');
 
       expect(agentPolicy).toMatchObject({
         id: 'agent-policy',

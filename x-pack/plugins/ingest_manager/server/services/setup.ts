@@ -228,6 +228,6 @@ async function addPackageToAgentPolicy(
   );
 
   await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
-    bumpConfigRevision: false,
+    bumpRevision: false,
   });
 }

@@ -42,7 +42,7 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
-    options?: { id?: string; user?: AuthenticatedUser; bumpConfigRevision?: boolean }
+    options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id);
@@ -104,7 +104,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.config_id, [newSo.id], {
       user: options?.user,
-      bumpRevision: options?.bumpConfigRevision ?? true,
+      bumpRevision: options?.bumpRevision ?? true,
     });
 
     return {
@@ -118,7 +118,7 @@ class PackagePolicyService {
     soClient: SavedObjectsClientContract,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
+    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy[]> {
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -147,7 +147,7 @@ class PackagePolicyService {
       newSos.map((newSo) => newSo.id),
       {
         user: options?.user,
-        bumpRevision: options?.bumpConfigRevision ?? true,
+        bumpRevision: options?.bumpRevision ?? true,
       }
     );
 
