@@ -21,6 +21,7 @@ import {
   Enrich,
   Fail,
   Foreach,
+  GeoIP,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -130,7 +131,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   geoip: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: GeoIP,
     docLinkPath: '/geoip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.geoip', {
       defaultMessage: 'GeoIP',

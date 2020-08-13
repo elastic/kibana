@@ -16,11 +16,12 @@ import {
 } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
+import { to } from '../shared';
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
   serializer: (v) => (v === false ? undefined : v),
-  deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+  deserializer: to.booleanOrUndef,
   label: i18n.translate(
     'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
     {

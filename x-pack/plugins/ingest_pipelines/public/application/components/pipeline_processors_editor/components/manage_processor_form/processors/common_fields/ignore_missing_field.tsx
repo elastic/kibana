@@ -7,14 +7,14 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FIELD_TYPES, UseField, ToggleField } from '../../../../../../../shared_imports';
 
-import { FieldsConfig } from '../shared';
+import { FieldsConfig, to } from '../shared';
 
 export const fieldsConfig: FieldsConfig = {
   ignore_missing: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     serializer: (v) => (v === false ? undefined : v),
-    deserializer: (v) => (typeof v === 'boolean' ? v : undefined),
+    deserializer: to.maybeBoolean,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreMissingFieldLabel',
       {

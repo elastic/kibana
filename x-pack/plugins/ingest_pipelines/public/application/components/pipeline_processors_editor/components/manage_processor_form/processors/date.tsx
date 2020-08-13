@@ -17,7 +17,7 @@ import {
   ComboBoxField,
 } from '../../../../../../shared_imports';
 
-import { FieldsConfig, isArrayOfStrings } from './shared';
+import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 
 const { minLengthField } = fieldValidators;
@@ -26,9 +26,7 @@ const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   formats: {
     type: FIELD_TYPES.COMBO_BOX,
-    deserializer: (v) => {
-      return isArrayOfStrings(v) ? v : [];
-    },
+    deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldLabel', {
       defaultMessage: 'Formats',
     }),
