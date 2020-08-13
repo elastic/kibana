@@ -199,7 +199,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     return (
       <div {...rest}>
-        <EuiTable>
+        <EuiTable responsive={false} tableLayout="auto">
           <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
         <EuiSpacer size="m" />

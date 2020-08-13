@@ -34,6 +34,7 @@ import {
   DataSetupDependencies,
   DataStartDependencies,
   InternalStartServices,
+  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -156,16 +157,21 @@ export class DataPublicPlugin
       }))
     );
 
+    const searchService = this.searchService.setup(core, {
+      expressions,
+      usageCollection,
+      getInternalStartServices,
+      packageInfo: this.packageInfo,
+    });
+
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core, {
-        expressions,
-        usageCollection,
-        getInternalStartServices,
-        packageInfo: this.packageInfo,
-      }),
+      search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
+      __enhance: (enhancements: DataPublicPluginEnhancements) => {
+        searchService.__enhance(enhancements.search);
+      },
     };
   }
 
