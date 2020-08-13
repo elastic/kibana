@@ -49,14 +49,14 @@ export async function loadIndexPatterns({
 
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
-      const newFields = [...(indexPattern.fields as IndexPatternField[])]
+      const newFields = (indexPattern.fields as IndexPatternField[])
         .filter(
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
         .concat(documentField);
 
-      const { typeMeta, id } = indexPattern;
+      const { typeMeta } = indexPattern;
       if (typeMeta?.aggs) {
         const aggs = Object.keys(typeMeta.aggs);
         newFields.forEach((field, index) => {
@@ -74,12 +74,13 @@ export async function loadIndexPatterns({
         });
       }
 
+      const currentIndexPattern = {
+        ...indexPattern,
+        fields: newFields,
+      } as IndexPattern;
+
       return {
-        [id!]: {
-          ...indexPattern,
-          fields: newFields,
-        },
-        ...acc,
+        [currentIndexPattern.id]: currentIndexPattern,
       };
     },
     { ...cache }
