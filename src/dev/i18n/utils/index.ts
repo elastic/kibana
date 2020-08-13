@@ -40,7 +40,9 @@ export {
   extractMessageValueFromNode,
   extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
-  arrayify, // @ts-ignore
+  arrayify,
+  // classes
+  ErrorReporter, // @ts-ignore
 } from './utils';
 
 export { verifyICUMessage } from './verify_icu_message';
