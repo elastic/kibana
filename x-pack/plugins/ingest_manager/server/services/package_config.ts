@@ -121,6 +121,7 @@ class PackageConfigService {
     options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackageConfigSOAttributes>(
       packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
@@ -378,14 +379,14 @@ async function _assignPackageStreamToStream(
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDataset(stream.dataset.name);
+  const datasetPath = getDataset(stream.data_stream.dataset);
   const packageDatasets = pkgInfo.datasets;
   if (!packageDatasets) {
     throw new Error('Stream template not found, no datasets');
   }
 
   const packageDataset = packageDatasets.find(
-    (pkgDataset) => pkgDataset.name === stream.dataset.name
+    (pkgDataset) => pkgDataset.name === stream.data_stream.dataset
   );
   if (!packageDataset) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);

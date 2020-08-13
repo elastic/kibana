@@ -50,6 +50,7 @@ export class BaseAlert {
   protected getLogger!: (...scopes: string[]) => Logger;
   protected config!: MonitoringConfig;
   protected kibanaUrl!: string;
+  protected isCloud: boolean = false;
   protected defaultParams: CommonAlertParams | {} = {};
   public get paramDetails() {
     return {};
@@ -82,13 +83,15 @@ export class BaseAlert {
     monitoringCluster: ILegacyCustomClusterClient,
     getLogger: (...scopes: string[]) => Logger,
     config: MonitoringConfig,
-    kibanaUrl: string
+    kibanaUrl: string,
+    isCloud: boolean
   ) {
     this.getUiSettingsService = getUiSettingsService;
     this.monitoringCluster = monitoringCluster;
     this.config = config;
     this.kibanaUrl = kibanaUrl;
     this.getLogger = getLogger;
+    this.isCloud = isCloud;
   }
 
   public getAlertType(): AlertType {

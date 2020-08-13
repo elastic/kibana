@@ -179,7 +179,19 @@ export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
 
-
 let triggersActionsUi;
 export const setTriggersActionsUi = (pluginTriggersActionsUi) => (triggersActionsUi = pluginTriggersActionsUi);
 export const getTriggersActionsUi = () => triggersActionsUi;
+
+let embeddableService;
+export const setEmbeddableService = (_embeddableService) => {
+  embeddableService = _embeddableService;
+};
+export const getEmbeddableService = () => {
+  return embeddableService;
+};
+
+export let navigateToApp;
+export function setNavigateToApp(_navigateToApp) {
+  navigateToApp = _navigateToApp;
+}

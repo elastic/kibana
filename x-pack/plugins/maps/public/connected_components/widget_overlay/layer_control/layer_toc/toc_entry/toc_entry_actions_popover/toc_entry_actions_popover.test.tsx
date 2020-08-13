@@ -6,7 +6,7 @@
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
 import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
@@ -76,7 +76,7 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('is rendered', async () => {
-    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -87,9 +87,7 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('should not show edit actions in read only mode', async () => {
-    const component = shallowWithIntl(
-      <TOCEntryActionsPopover {...defaultProps} isReadOnly={true} />
-    );
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} isReadOnly={true} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -101,7 +99,22 @@ describe('TOCEntryActionsPopover', () => {
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
-    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should have "show layer" action when layer is not visible', async () => {
+    const layer = new LayerMock();
+    layer.isVisible = () => {
+      return false;
+    };
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} layer={layer} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

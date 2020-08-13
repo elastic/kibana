@@ -94,7 +94,6 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
           setPermissionsError('REQUEST_ERROR');
         }
       })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (isPermissionsLoading || permissionsError) {

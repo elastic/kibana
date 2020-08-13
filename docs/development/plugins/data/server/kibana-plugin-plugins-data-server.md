@@ -27,6 +27,7 @@
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
+|  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
 
@@ -35,6 +36,8 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
+|  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
+|  [IEsSearchResponse](./kibana-plugin-plugins-data-server.iessearchresponse.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IIndexPattern](./kibana-plugin-plugins-data-server.iindexpattern.md) |  |
@@ -49,6 +52,7 @@
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
+|  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TimeRange](./kibana-plugin-plugins-data-server.timerange.md) |  |
 
 ## Variables

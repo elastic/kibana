@@ -38,7 +38,7 @@ import {
   buildRuleTypeDescription,
   buildThresholdDescription,
 } from './helpers';
-import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
@@ -67,7 +67,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
 }) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const [, siemJobs] = useSiemJobs(true);
+  const { jobs } = useSecurityJobs(false);
 
   const keys = Object.keys(schema);
   const listItems = keys.reduce((acc: ListItems[], key: string) => {
@@ -77,7 +77,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         buildMlJobDescription(
           get(key, data) as string,
           (get(key, schema) as { label: string }).label,
-          siemJobs
+          jobs
         ),
       ];
     }
@@ -213,6 +213,8 @@ export const getDescriptionItem = (
   } else if (field === 'ruleType') {
     const ruleType: RuleType = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
+  } else if (field === 'kibanaSiemAppUrl') {
+    return [];
   }
 
   const description: string = get(field, data);

@@ -4,7 +4,8 @@
   ],
   "description": "Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Adversaries may use these binaries to 'live off the land' and execute malicious files that could bypass application allowlists and signature validation.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

@@ -66,6 +66,7 @@ export class SpacesClient {
     if (this.useRbac()) {
       const privilegeFactory = PURPOSE_PRIVILEGE_MAP[purpose];
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
@@ -111,6 +112,7 @@ export class SpacesClient {
     } else {
       this.debugLogger(`SpacesClient.getAll(), NOT USING RBAC. querying all spaces`);
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,

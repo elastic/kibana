@@ -4,7 +4,8 @@
   ],
   "description": "Adversaries may attempt to disable the iptables or firewall service in an attempt to affect how a host is allowed to receive or send network traffic.",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

@@ -322,29 +322,31 @@ export class CpuUsageAlert extends BaseAlert {
         ','
       )})`;
       const action = `[${fullActionText}](${url})`;
+      const internalShortMessage = i18n.translate(
+        'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
+        {
+          defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
+          values: {
+            count: firingCount,
+            clusterName: cluster.clusterName,
+            shortActionText,
+          },
+        }
+      );
+      const internalFullMessage = i18n.translate(
+        'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
+        {
+          defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
+          values: {
+            count: firingCount,
+            clusterName: cluster.clusterName,
+            action,
+          },
+        }
+      );
       instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage',
-          {
-            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
-            values: {
-              count: firingCount,
-              clusterName: cluster.clusterName,
-              shortActionText,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage',
-          {
-            defaultMessage: `CPU usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
-            values: {
-              count: firingCount,
-              clusterName: cluster.clusterName,
-              action,
-            },
-          }
-        ),
+        internalShortMessage,
+        internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
         state: FIRING,
         nodes: firingNodes,
         count: firingCount,

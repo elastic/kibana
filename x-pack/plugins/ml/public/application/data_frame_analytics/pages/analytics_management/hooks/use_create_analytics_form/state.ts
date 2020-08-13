@@ -18,7 +18,6 @@ import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
-  // eslint-disable-next-line @typescript-eslint/camelcase
   outlier_detection = '50mb',
   classification = '100mb',
 }
