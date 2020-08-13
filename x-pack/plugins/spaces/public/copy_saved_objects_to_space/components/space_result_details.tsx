@@ -123,7 +123,9 @@ export const SpaceCopyResultDetails = (props: Props) => {
           },
         };
         const selectContainerClass =
-          selectProps.options.length > 0 && isOverwritePending ? ' selectControl-isOpen' : '';
+          selectProps.options.length > 0 && isOverwritePending
+            ? ' spcCopyToSpaceResultDetails__selectControl-isOpen'
+            : '';
 
         return (
           <Fragment key={index}>
