@@ -5,8 +5,6 @@
  */
 
 import { useCallback, useMemo, useEffect } from 'react';
-// eslint-disable-next-line import/no-nodejs-modules
-import querystring from 'querystring';
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
 import * as selectors from '../store/selectors';
@@ -23,24 +21,21 @@ export function useResolverQueryParams() {
   const idKey: string = `resolver-${resolverComponentInstanceID}-id`;
   const eventKey: string = `resolver-${resolverComponentInstanceID}-event`;
   const pushToQueryParams = useCallback(
-    (newCrumbs: CrumbInfo) => {
-      // Construct a new set of parameters from the current set (minus empty parameters)
-      // by assigning the new set of parameters provided in `newCrumbs`
-      const crumbsToPass = {
-        ...querystring.parse(urlSearch.slice(1)),
-        [idKey]: newCrumbs.crumbId,
-        [eventKey]: newCrumbs.crumbEvent,
-      };
+    (queryStringState: CrumbInfo) => {
+      const urlSearchParams = new URLSearchParams(urlSearch);
 
-      // If either was passed in as empty, remove it from the record
-      if (newCrumbs.crumbId === '') {
-        delete crumbsToPass[idKey];
+      urlSearchParams.set(idKey, queryStringState.crumbId);
+      urlSearchParams.set(eventKey, queryStringState.crumbEvent);
+
+      // If either was passed in as empty, remove it
+      if (queryStringState.crumbId === '') {
+        urlSearchParams.delete(idKey);
       }
-      if (newCrumbs.crumbEvent === '') {
-        delete crumbsToPass[eventKey];
+      if (queryStringState.crumbEvent === '') {
+        urlSearchParams.delete(eventKey);
       }
 
-      const relativeURL = { search: querystring.stringify(crumbsToPass) };
+      const relativeURL = { search: urlSearchParams.toString() };
       // We probably don't want to nuke the user's history with a huge
       // trail of these, thus `.replace` instead of `.push`
       return history.replace(relativeURL);
@@ -48,31 +43,37 @@ export function useResolverQueryParams() {
     [history, urlSearch, idKey, eventKey]
   );
   const queryParams: CrumbInfo = useMemo(() => {
-    const parsed = querystring.parse(urlSearch.slice(1));
-    const crumbEvent = parsed[eventKey];
-    const crumbId = parsed[idKey];
-    function valueForParam(param: string | string[]): string {
-      if (Array.isArray(param)) {
-        return param[0] || '';
-      }
-      return param || '';
-    }
+    const urlSearchParams = new URLSearchParams(urlSearch);
     return {
-      crumbEvent: valueForParam(crumbEvent),
-      crumbId: valueForParam(crumbId),
+      // Use `''` for backwards compatibility with deprecated code.
+      crumbEvent: urlSearchParams.get(eventKey) ?? '',
+      crumbId: urlSearchParams.get(idKey) ?? '',
     };
   }, [urlSearch, idKey, eventKey]);
 
   useEffect(() => {
+    /**
+     * Keep track of the old query string keys so we can remove them.
+     */
     const oldIdKey = idKey;
     const oldEventKey = eventKey;
+    /**
+     * When `idKey` or `eventKey` changes (such as when the `resolverComponentInstanceID` has changed) or when the component unmounts, remove any state from the query string.
+     */
     return () => {
-      const crumbsToPass = {
-        ...querystring.parse(history.location.search.slice(1)),
-      };
-      delete crumbsToPass[oldIdKey];
-      delete crumbsToPass[oldEventKey];
-      const relativeURL = { search: querystring.stringify(crumbsToPass) };
+      /**
+       * This effect must not be invalidated when `search` changes.
+       * Use the current location.search via the `history` object.
+       * `history` doesn't change so this is effectively like accessing `search` via a ref.
+       */
+      const urlSearchParams = new URLSearchParams(history.location.search);
+
+      /**
+       * Remove old keys from the url
+       */
+      urlSearchParams.delete(oldIdKey);
+      urlSearchParams.delete(oldEventKey);
+      const relativeURL = { search: urlSearchParams.toString() };
       history.replace(relativeURL);
     };
   }, [idKey, eventKey, history]);
