@@ -179,7 +179,8 @@ export async function getKibanaStats(
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);
   const rawStats = await fetchHighLevelStats<KibanaUsageStats>(
@@ -188,7 +189,8 @@ export async function getKibanaStats(
     safeStart,
     safeEnd,
     KIBANA_SYSTEM_ID,
-    maxBucketSize
+    maxBucketSize,
+    metricbeatIndex
   );
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
   const usageStats = getUsageStats(rawStats);

@@ -252,7 +252,8 @@ export async function getHighLevelStats(
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
   product: string,
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ) {
   const response = await fetchHighLevelStats(
     callCluster,
@@ -260,7 +261,8 @@ export async function getHighLevelStats(
     start,
     end,
     product,
-    maxBucketSize
+    maxBucketSize,
+    metricbeatIndex
   );
   return handleHighLevelStatsResponse(response, product);
 }
@@ -273,7 +275,8 @@ export async function fetchHighLevelStats<
   start: StatsCollectionConfig['start'] | undefined,
   end: StatsCollectionConfig['end'] | undefined,
   product: string,
-  maxBucketSize: number
+  maxBucketSize: number,
+  metricbeatIndex: string
 ): Promise<SearchResponse<T>> {
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
   const filters: object[] = [{ terms: { cluster_uuid: clusterUuids } }];
@@ -300,7 +303,7 @@ export async function fetchHighLevelStats<
   }
 
   const params = {
-    index: getIndexPatternForStackProduct(product),
+    index: `${getIndexPatternForStackProduct(product)},${metricbeatIndex}`,
     size: maxBucketSize,
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
@@ -308,15 +311,24 @@ export async function fetchHighLevelStats<
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       `hits.hits._source.${product}_stats.${product}.version`,
+      `hits.hits._source.${product}.stats.${product}.version`,
       `hits.hits._source.${product}_stats.os`,
+      `hits.hits._source.${product}.stats.os`,
       `hits.hits._source.${product}_stats.usage`,
+      `hits.hits._source.${product}.stats.usage`,
       // we don't want metadata
       `hits.hits._source.${product}_stats.cloud.name`,
+      `hits.hits._source.${product}.stats.cloud.name`,
       `hits.hits._source.${product}_stats.cloud.id`,
+      `hits.hits._source.${product}.stats.cloud.id`,
       `hits.hits._source.${product}_stats.cloud.vm_type`,
+      `hits.hits._source.${product}.stats.cloud.vm_type`,
       `hits.hits._source.${product}_stats.cloud.region`,
+      `hits.hits._source.${product}.stats.cloud.region`,
       `hits.hits._source.${product}_stats.cloud.zone`,
+      `hits.hits._source.${product}.stats.cloud.zone`,
     ],
     body: {
       query: createQuery({

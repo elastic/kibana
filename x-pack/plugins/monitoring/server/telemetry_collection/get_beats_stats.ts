@@ -323,10 +323,11 @@ async function fetchBeatsByType(
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
   { page = 0, ...options }: { page?: number } & BeatsProcessOptions,
-  type: string
+  type: string,
+  metricbeatIndex: string
 ): Promise<void> {
   const params = {
-    index: INDEX_PATTERN_BEATS,
+    index: `${INDEX_PATTERN_BEATS},${metricbeatIndex}`,
     ignoreUnavailable: true,
     filterPath: [
       'hits.hits._source.cluster_uuid',
@@ -374,7 +375,15 @@ async function fetchBeatsByType(
       };
 
       // returns a promise and keeps the caller blocked from returning until the entire clusters object is built
-      return fetchBeatsByType(callCluster, clusterUuids, start, end, nextOptions, type);
+      return fetchBeatsByType(
+        callCluster,
+        clusterUuids,
+        start,
+        end,
+        nextOptions,
+        type,
+        metricbeatIndex
+      );
     }
   }
 
@@ -386,9 +395,18 @@ export async function fetchBeatsStats(
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
-  options: { page?: number } & BeatsProcessOptions
+  options: { page?: number } & BeatsProcessOptions,
+  metricbeatIndex: string
 ) {
-  return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_stats');
+  return fetchBeatsByType(
+    callCluster,
+    clusterUuids,
+    start,
+    end,
+    options,
+    'beats_stats',
+    metricbeatIndex
+  );
 }
 
 export async function fetchBeatsStates(
@@ -396,9 +414,18 @@ export async function fetchBeatsStates(
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
   end: StatsCollectionConfig['end'],
-  options: { page?: number } & BeatsProcessOptions
+  options: { page?: number } & BeatsProcessOptions,
+  metricbeatIndex: string
 ) {
-  return fetchBeatsByType(callCluster, clusterUuids, start, end, options, 'beats_state');
+  return fetchBeatsByType(
+    callCluster,
+    clusterUuids,
+    start,
+    end,
+    options,
+    'beats_state',
+    metricbeatIndex
+  );
 }
 
 /*
@@ -409,7 +436,8 @@ export async function getBeatsStats(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
+  end: StatsCollectionConfig['end'],
+  metricbeatIndex: string
 ) {
   const options: BeatsProcessOptions = {
     clusters: {}, // the result object to be built up
@@ -420,8 +448,8 @@ export async function getBeatsStats(
   };
 
   await Promise.all([
-    fetchBeatsStats(callCluster, clusterUuids, start, end, options),
-    fetchBeatsStates(callCluster, clusterUuids, start, end, options),
+    fetchBeatsStats(callCluster, clusterUuids, start, end, options, metricbeatIndex),
+    fetchBeatsStates(callCluster, clusterUuids, start, end, options, metricbeatIndex),
   ]);
 
   return options.clusters;

@@ -89,6 +89,7 @@ export class TelemetryCollectionManagerPlugin
       statsGetter,
       clusterDetailsGetter,
       licenseGetter,
+      customContext,
     } = collectionConfig;
 
     if (typeof priority !== 'number') {
@@ -118,6 +119,7 @@ export class TelemetryCollectionManagerPlugin
         clusterDetailsGetter,
         esCluster,
         title,
+        customContext,
       });
       this.usageGetterMethodPriority = priority;
     }

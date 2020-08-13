@@ -37,9 +37,17 @@ export const getAllStats: StatsGetter<CustomContext> = async (
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize, metricbeatIndex), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
-    getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize), // stack_stats.kibana
-    getHighLevelStats(callCluster, clusterUuids, start, end, LOGSTASH_SYSTEM_ID, maxBucketSize), // stack_stats.logstash
-    getBeatsStats(callCluster, clusterUuids, start, end), // stack_stats.beats
+    getKibanaStats(callCluster, clusterUuids, start, end, maxBucketSize, metricbeatIndex), // stack_stats.kibana
+    getHighLevelStats(
+      callCluster,
+      clusterUuids,
+      start,
+      end,
+      LOGSTASH_SYSTEM_ID,
+      maxBucketSize,
+      metricbeatIndex
+    ), // stack_stats.logstash
+    getBeatsStats(callCluster, clusterUuids, start, end, metricbeatIndex), // stack_stats.beats
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
