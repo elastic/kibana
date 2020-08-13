@@ -187,8 +187,8 @@ describe('editor_frame', () => {
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, []);
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, []);
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
@@ -842,7 +842,6 @@ describe('editor_frame', () => {
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
-      const dateRange = { fromDate: 'now-1w', toDate: 'now' };
       mockDatasource.initialize.mockResolvedValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
@@ -850,7 +849,6 @@ describe('editor_frame', () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
-            dateRange={dateRange}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -865,7 +863,6 @@ describe('editor_frame', () => {
       });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
-        dateRange,
         state: datasourceState,
         layerId: 'first',
       });
@@ -1487,14 +1484,21 @@ describe('editor_frame', () => {
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
         doc: {
-          expression: '',
           id: undefined,
+          description: undefined,
+          references: [
+            {
+              id: '1',
+              name: 'filterable-index-pattern-0',
+              type: 'index-pattern',
+            },
+          ],
           state: {
             visualization: null, // Not yet loaded
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'resolved' }] },
-            datasourceStates: { testDatasource: undefined },
+            datasourceMetaData: { numberFilterableIndexPatterns: 1 },
+            datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
@@ -1502,18 +1506,24 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: false,
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
         doc: {
-          expression: '',
+          references: [
+            {
+              id: '1',
+              name: 'filterable-index-pattern-0',
+              type: 'index-pattern',
+            },
+          ],
+          description: undefined,
           id: undefined,
           state: {
             visualization: { initialState: true }, // Now loaded
-            datasourceMetaData: {
-              filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
-            },
-            datasourceStates: { testDatasource: undefined },
+            datasourceMetaData: { numberFilterableIndexPatterns: 1 },
+            datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
@@ -1521,6 +1531,7 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: false,
       });
     });
 
@@ -1562,11 +1573,11 @@ describe('editor_frame', () => {
       expect(onChange).toHaveBeenNthCalledWith(3, {
         filterableIndexPatterns: [],
         doc: {
-          expression: expect.stringContaining('vis "expression"'),
           id: undefined,
+          references: [],
           state: {
-            datasourceMetaData: { filterableIndexPatterns: [] },
-            datasourceStates: { testDatasource: undefined },
+            datasourceMetaData: { numberFilterableIndexPatterns: 0 },
+            datasourceStates: { testDatasource: { datasource: '' } },
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
             filters: [],
@@ -1575,6 +1586,7 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: true,
       });
     });
 

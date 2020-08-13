@@ -13,8 +13,9 @@ export function getFilterableIndexPatternIds(doc: Document) {
   return new Array(doc.state.datasourceMetaData.numberFilterableIndexPatterns)
     .fill(undefined)
     .map((_, index) => {
-      return doc.references.find(({ name }) => name === `filterable-index-pattern-${index}`)!.id;
-    });
+      return doc.references.find(({ name }) => name === `filterable-index-pattern-${index}`)?.id;
+    })
+    .filter(Boolean) as string[];
 }
 
 export function filterableIndexPatternIdsToReferences(filterableIndexPatternIds: string[]) {

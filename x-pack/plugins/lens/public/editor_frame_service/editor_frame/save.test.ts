@@ -8,6 +8,8 @@ import { getSavedObjectFormat, Props } from './save';
 import { createMockDatasource, createMockVisualization } from '../mocks';
 import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plugins/data/public';
 
+jest.mock('./expression_helpers');
+
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
   const mockDatasource = createMockDatasource('a');
@@ -54,10 +56,12 @@ describe('save editor frame state', () => {
       },
       savedObjectReferences: [],
     }));
+    datasource.toExpression.mockReturnValue('my | expr');
 
     const visualization = createMockVisualization();
+    visualization.toExpression.mockReturnValue('vis | expr');
 
-    const doc = await getSavedObjectFormat({
+    const { doc, filterableIndexPatterns, isSaveable } = await getSavedObjectFormat({
       ...saveArgs,
       activeDatasources: {
         indexpattern: datasource,
@@ -76,12 +80,13 @@ describe('save editor frame state', () => {
       visualization,
     });
 
+    expect(filterableIndexPatterns).toEqual([]);
+    expect(isSaveable).toEqual(true);
     expect(doc).toEqual({
       id: undefined,
-      expression: '',
       state: {
         datasourceMetaData: {
-          filterableIndexPatterns: [],
+          numberFilterableIndexPatterns: 0,
         },
         datasourceStates: {
           indexpattern: {
@@ -92,11 +97,18 @@ describe('save editor frame state', () => {
         query: { query: '', language: 'lucene' },
         filters: [
           {
-            meta: { index: 'indexpattern' },
+            meta: { indexRefName: 'filter-index-pattern-0' },
             exists: { field: '@timestamp' },
           },
         ],
       },
+      references: [
+        {
+          id: 'indexpattern',
+          name: 'filter-index-pattern-0',
+          type: 'index-pattern',
+        },
+      ],
       title: 'bbb',
       type: 'lens',
       visualizationType: '3',

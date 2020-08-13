@@ -70,7 +70,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     clearLayer: jest.fn((state, _layerId) => state),
     getDatasourceSuggestionsForField: jest.fn((_state, _item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state) => []),
-    getPersistableState: jest.fn(),
+    getPersistableState: jest.fn((x) => ({ state: x, savedObjectReferences: [] })),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
