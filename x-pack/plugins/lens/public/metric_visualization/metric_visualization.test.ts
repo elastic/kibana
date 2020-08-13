@@ -162,7 +162,8 @@ describe('metric_visualization', () => {
         datasourceLayers: { l1: datasource },
       };
 
-      expect(metricVisualization.toExpression(exampleState(), frame)).toMatchInlineSnapshot(`
+      expect(metricVisualization.toExpression(exampleState(), frame.datasourceLayers))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

@@ -111,7 +111,6 @@ export function EditorFrame(props: EditorFrameProps) {
         datasourceLayers[layer] = props.datasourceMap[id].getPublicAPI({
           state: datasourceState,
           layerId: layer,
-          dateRange: props.dateRange,
         });
       });
     });

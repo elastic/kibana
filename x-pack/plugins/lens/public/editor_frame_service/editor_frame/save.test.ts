@@ -10,12 +10,14 @@ import { esFilters, IIndexPattern, IFieldType } from '../../../../../../src/plug
 
 describe('save editor frame state', () => {
   const mockVisualization = createMockVisualization();
-  mockVisualization.getPersistableState.mockImplementation((x) => x);
   const mockDatasource = createMockDatasource('a');
   const mockIndexPattern = ({ id: 'indexpattern' } as unknown) as IIndexPattern;
   const mockField = ({ name: '@timestamp' } as unknown) as IFieldType;
 
-  mockDatasource.getPersistableState.mockImplementation((x) => x);
+  mockDatasource.getPersistableState.mockImplementation((x) => ({
+    state: x,
+    savedObjectReferences: [],
+  }));
   const saveArgs: Props = {
     activeDatasources: {
       indexpattern: mockDatasource,
@@ -47,13 +49,13 @@ describe('save editor frame state', () => {
   it('transforms from internal state to persisted doc format', async () => {
     const datasource = createMockDatasource('a');
     datasource.getPersistableState.mockImplementation((state) => ({
-      stuff: `${state}_datasource_persisted`,
+      state: {
+        stuff: `${state}_datasource_persisted`,
+      },
+      savedObjectReferences: [],
     }));
 
     const visualization = createMockVisualization();
-    visualization.getPersistableState.mockImplementation((state) => ({
-      things: `${state}_vis_persisted`,
-    }));
 
     const doc = await getSavedObjectFormat({
       ...saveArgs,
@@ -86,7 +88,7 @@ describe('save editor frame state', () => {
             stuff: '2_datasource_persisted',
           },
         },
-        visualization: { things: '4_vis_persisted' },
+        visualization: '4',
         query: { query: '', language: 'lucene' },
         filters: [
           {

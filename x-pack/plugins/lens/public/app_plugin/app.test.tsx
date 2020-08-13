@@ -474,6 +474,7 @@ describe('Lens App', () => {
           onChange({
             filterableIndexPatterns: [],
             doc: { id: initialDocId, ...lastKnownDoc } as Document,
+            isSaveable: true,
           })
         );
 
@@ -507,7 +508,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: 'will save this' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -526,7 +528,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: 'will save this', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: 'will save this' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -605,7 +608,8 @@ describe('Lens App', () => {
         act(() =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: undefined, expression: 'new expression' } as unknown) as Document,
+            doc: ({ id: undefined } as unknown) as Document,
+            isSaveable: true,
           })
         );
 
@@ -683,7 +687,8 @@ describe('Lens App', () => {
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ id: '123', expression: 'valid expression' } as unknown) as Document,
+            doc: ({ id: '123' } as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -722,7 +727,8 @@ describe('Lens App', () => {
         await act(async () =>
           onChange({
             filterableIndexPatterns: [],
-            doc: ({ expression: 'valid expression' } as unknown) as Document,
+            doc: ({} as unknown) as Document,
+            isSaveable: true,
           })
         );
         instance.update();
@@ -790,8 +796,9 @@ describe('Lens App', () => {
 
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '1', title: 'newIndex' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['1'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
 
@@ -808,8 +815,9 @@ describe('Lens App', () => {
 
       await act(async () => {
         onChange({
-          filterableIndexPatterns: [{ id: '2', title: 'second index' }],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          filterableIndexPatterns: ['2'],
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         });
       });
 
@@ -1080,7 +1088,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1101,7 +1110,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined, expression: 'valid expression' } as unknown) as Document,
+          doc: ({ id: undefined } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1125,7 +1135,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: 'different expression' } as unknown) as Document,
+          doc: ({ id: '1234' } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1149,7 +1160,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: 'valid expression' } as unknown) as Document,
+          doc: ({ id: '1234' } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();
@@ -1173,7 +1185,8 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: '1234', expression: null } as unknown) as Document,
+          doc: ({ id: '1234' } as unknown) as Document,
+          isSaveable: true,
         })
       );
       instance.update();

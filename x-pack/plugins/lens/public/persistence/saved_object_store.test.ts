@@ -30,10 +30,10 @@ describe('LensStore', () => {
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
-        expression: '',
+        references: [],
         state: {
           datasourceMetaData: {
-            filterableIndexPatterns: [],
+            numberFilterableIndexPatterns: 0,
           },
           datasourceStates: {
             indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
@@ -87,9 +87,9 @@ describe('LensStore', () => {
         id: 'Gandalf',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
-        expression: '',
+        references: [],
         state: {
-          datasourceMetaData: { filterableIndexPatterns: [] },
+          datasourceMetaData: { numberFilterableIndexPatterns: 0 },
           datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
           visualization: { gear: ['staff', 'pointy hat'] },
           query: { query: '', language: 'lucene' },

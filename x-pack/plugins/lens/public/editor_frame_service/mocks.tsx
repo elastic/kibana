@@ -31,7 +31,6 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
     getDescription: jest.fn((_state) => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
-    getPersistableState: jest.fn((_state) => _state),
     getSuggestions: jest.fn((_options) => []),
     initialize: jest.fn((_frame, _state?) => ({})),
     getConfiguration: jest.fn((props) => ({

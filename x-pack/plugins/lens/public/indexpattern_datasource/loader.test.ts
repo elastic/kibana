@@ -368,10 +368,8 @@ describe('loader', () => {
 
     it('should initialize from saved state', async () => {
       const savedState: IndexPatternPersistedState = {
-        currentIndexPatternId: 'b',
         layers: {
           layerb: {
-            indexPatternId: 'b',
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
@@ -397,7 +395,12 @@ describe('loader', () => {
       };
       const storage = createMockStorage({ indexPatternId: 'a' });
       const state = await loadInitialState({
-        state: savedState,
+        persistedState: savedState,
+        references: [
+          { name: 'indexpattern-datasource-current-indexpattern', id: 'b', type: 'index-pattern' },
+          { name: 'indexpattern-datasource-layer-layerb', id: 'b', type: 'index-pattern' },
+          { name: 'another-reference', id: 'c', type: 'index-pattern' },
+        ],
         savedObjectsClient: mockClient(),
         storage,
       });
@@ -411,7 +414,7 @@ describe('loader', () => {
         indexPatterns: {
           b: sampleIndexPatterns.b,
         },
-        layers: savedState.layers,
+        layers: { ...savedState.layers, indexPatternId: 'b' },
       });
 
       expect(storage.set).toHaveBeenCalledWith('lens-settings', {

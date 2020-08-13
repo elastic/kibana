@@ -389,7 +389,6 @@ function getPreviewExpression(
       if (updatedLayerApis[layerId]) {
         updatedLayerApis[layerId] = datasource.getPublicAPI({
           layerId,
-          dateRange: frame.dateRange,
           state: datasourceState,
         });
       }
@@ -398,7 +397,7 @@ function getPreviewExpression(
 
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
-    suggestionFrameApi
+    suggestionFrameApi.datasourceLayers
   );
 }
 

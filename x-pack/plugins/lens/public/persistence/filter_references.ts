@@ -6,16 +6,8 @@
 
 import { Filter } from 'src/plugins/data/public';
 import { SavedObjectReference } from 'kibana/public';
-import { FilterMeta } from 'src/plugins/data/common';
 import { Document } from './saved_object_store';
-
-export interface PersistableFilterMeta extends FilterMeta {
-  indexRefName?: string;
-}
-
-export interface PersistableFilter extends Filter {
-  meta: PersistableFilterMeta;
-}
+import { PersistableFilter } from '../../common';
 
 export function getFilterableIndexPatternIds(doc: Document) {
   return new Array(doc.state.datasourceMetaData.numberFilterableIndexPatterns)

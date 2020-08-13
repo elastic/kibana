@@ -51,7 +51,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toMatchSnapshot();
   });
@@ -72,7 +72,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       ) as Ast).chain[0].arguments.fittingFunction[0]
     ).toEqual('None');
   });
@@ -93,7 +93,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toBeNull();
   });
@@ -114,7 +114,7 @@ describe('#toExpression', () => {
             },
           ],
         },
-        frame
+        frame.datasourceLayers
       )
     ).toBeNull();
   });
@@ -134,7 +134,7 @@ describe('#toExpression', () => {
           },
         ],
       },
-      frame
+      frame.datasourceLayers
     )! as Ast;
 
     expect(mockDatasource.publicAPIMock.getOperationForColumnId).toHaveBeenCalledWith('b');

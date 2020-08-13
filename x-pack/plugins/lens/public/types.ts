@@ -31,7 +31,6 @@ export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 export interface PublicAPIProps<T> {
   state: T;
   layerId: string;
-  dateRange: DateRange;
 }
 
 export interface EditorFrameProps {
@@ -500,12 +499,18 @@ export interface Visualization<T = unknown> {
    */
   getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 
-  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  toExpression: (
+    state: T,
+    datasourceLayers: Record<string, DatasourcePublicAPI>
+  ) => Ast | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
    */
-  toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  toPreviewExpression?: (
+    state: T,
+    datasourceLayers: Record<string, DatasourcePublicAPI>
+  ) => Ast | string | null;
 }
 
 export interface LensFilterEvent {

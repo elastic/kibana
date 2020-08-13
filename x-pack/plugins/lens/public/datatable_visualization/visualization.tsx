@@ -180,9 +180,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  toExpression(state, frame) {
+  toExpression(state, datasourceLayers) {
     const layer = state.layers[0];
-    const datasource = frame.datasourceLayers[layer.layerId];
+    const datasource = datasourceLayers[layer.layerId];
     const operations = layer.columns
       .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);

@@ -25,7 +25,7 @@ import { SavedObjectIndexStore, DOC_TYPE, getFilterableIndexPatternIds } from '.
 import { getEditPath } from '../../../common';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { buildExpression } from '../editor_frame/expression_helpers';
-import { Datasource, Visualization, DatasourcePublicAPI, FramePublicAPI } from '../../types';
+import { Datasource, Visualization, DatasourcePublicAPI } from '../../types';
 
 interface StartServices {
   timefilter: TimefilterContract;
@@ -126,24 +126,14 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
           datasourceLayers[layer] = datasource.getPublicAPI({
             state: datasourceState,
             layerId: layer,
-            dateRange: { fromDate: 'now', toDate: 'now' },
           });
         });
       });
 
-    const framePublicAPI: FramePublicAPI = {
+    const framePublicAPI = {
       datasourceLayers,
-      dateRange: { fromDate: 'now', toDate: 'now' },
       query: savedVis.state.query,
       filters: savedVis.state.filters,
-
-      addNewLayer() {
-        throw new Error('adding new layer is not allowed in embedded mode');
-      },
-
-      removeLayers() {
-        throw new Error('removing layers is not allowed in embedded mode');
-      },
     };
 
     const expression = buildExpression({

@@ -5,7 +5,8 @@
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { Visualization, Datasource, FramePublicAPI } from '../../types';
+import { DateRange } from '../../../common';
+import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 import { Filter, TimeRange, Query } from '../../../../../../src/plugins/data/public';
 
 export function prependDatasourceExpression(
@@ -114,22 +115,33 @@ export function buildExpression({
       state: unknown;
     }
   >;
-  framePublicAPI: FramePublicAPI;
+  framePublicAPI: {
+    datasourceLayers: Record<string, DatasourcePublicAPI>;
+    query: Query;
+    dateRange?: DateRange;
+    filters: Filter[];
+  };
+
   removeDateRange?: boolean;
 }): Ast | null {
   if (visualization === null) {
     return null;
   }
-  const visualizationExpression = visualization.toExpression(visualizationState, framePublicAPI);
+  const visualizationExpression = visualization.toExpression(
+    visualizationState,
+    framePublicAPI.datasourceLayers
+  );
 
   const expressionContext = removeDateRange
     ? { query: framePublicAPI.query, filters: framePublicAPI.filters }
     : {
         query: framePublicAPI.query,
-        timeRange: {
-          from: framePublicAPI.dateRange.fromDate,
-          to: framePublicAPI.dateRange.toDate,
-        },
+        timeRange: framePublicAPI.dateRange
+          ? {
+              from: framePublicAPI.dateRange.fromDate,
+              to: framePublicAPI.dateRange.toDate,
+            }
+          : undefined,
         filters: framePublicAPI.filters,
       };
 

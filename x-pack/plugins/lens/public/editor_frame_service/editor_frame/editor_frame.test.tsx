@@ -170,7 +170,6 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: datasource1State,
@@ -178,11 +177,12 @@ describe('editor_frame', () => {
                 },
                 visualization: {},
                 datasourceMetaData: {
-                  filterableIndexPatterns: [],
+                  numberFilterableIndexPatterns: 0,
                 },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -499,7 +499,6 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: {},
@@ -507,11 +506,12 @@ describe('editor_frame', () => {
                 },
                 visualization: {},
                 datasourceMetaData: {
-                  filterableIndexPatterns: [],
+                  numberFilterableIndexPatterns: 0,
                 },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -747,7 +747,6 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: {},
@@ -755,11 +754,12 @@ describe('editor_frame', () => {
                 },
                 visualization: {},
                 datasourceMetaData: {
-                  filterableIndexPatterns: [],
+                  numberFilterableIndexPatterns: 0,
                 },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -802,7 +802,6 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: datasource1State,
@@ -810,11 +809,12 @@ describe('editor_frame', () => {
                 },
                 visualization: {},
                 datasourceMetaData: {
-                  filterableIndexPatterns: [],
+                  numberFilterableIndexPatterns: 0,
                 },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -1461,7 +1461,7 @@ describe('editor_frame', () => {
       );
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
       });
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
@@ -1584,7 +1584,7 @@ describe('editor_frame', () => {
       mockDatasource.initialize.mockResolvedValue({});
       mockDatasource.getLayers.mockReturnValue(['first']);
       mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
       });
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
