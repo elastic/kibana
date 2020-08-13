@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { SOURCE_GROUPS } from '../../containers/sourcerer/constants';
+import { SecurityPageName } from '../../containers/sourcerer/constants';
 import { mockPatterns, mockSourceGroup } from '../../containers/sourcerer/mocks';
 import { MaybeSourcerer } from './index';
 import * as i18n from './translations';
@@ -14,10 +14,10 @@ import { ADD_INDEX_PATH } from '../../../../common/constants';
 
 const updateSourceGroupIndicies = jest.fn();
 const mockManageSource = {
-  activeSourceGroupId: SOURCE_GROUPS.default,
+  activeSourceGroupId: SecurityPageName.default,
   availableIndexPatterns: mockPatterns,
-  availableSourceGroupIds: [SOURCE_GROUPS.default],
-  getManageSourceGroupById: jest.fn().mockReturnValue(mockSourceGroup(SOURCE_GROUPS.default)),
+  availableSourceGroupIds: [SecurityPageName.default],
+  getManageSourceGroupById: jest.fn().mockReturnValue(mockSourceGroup(SecurityPageName.default)),
   initializeSourceGroup: jest.fn(),
   isIndexPatternsLoading: false,
   setActiveSourceGroupId: jest.fn(),
@@ -76,7 +76,7 @@ describe('Sourcerer component', () => {
       .prop('onChange');
     // @ts-ignore
     switcherOnChange([mockOptions[0], mockOptions[1]]);
-    expect(updateSourceGroupIndicies).toHaveBeenCalledWith(SOURCE_GROUPS.default, [
+    expect(updateSourceGroupIndicies).toHaveBeenCalledWith(SecurityPageName.default, [
       mockOptions[0].value,
       mockOptions[1].value,
     ]);

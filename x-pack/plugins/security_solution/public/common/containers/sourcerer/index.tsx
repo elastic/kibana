@@ -17,7 +17,7 @@ import { sourceQuery } from '../source/index.gql_query';
 import { useApolloClient } from '../../utils/apollo_context';
 import {
   sourceGroups,
-  SOURCE_GROUPS,
+  SecurityPageName,
   SourceGroupsType,
   SOURCERER_FEATURE_FLAG_ON,
 } from './constants';
@@ -111,7 +111,7 @@ export const getSourceDefaults = (id: SourceGroupsType, defaultIndex: string[]) 
 });
 
 const initManageSource: ManageSourcerer = {
-  activeSourceGroupId: SOURCE_GROUPS.default,
+  activeSourceGroupId: SecurityPageName.default,
   availableIndexPatterns: [],
   availableSourceGroupIds: [],
   isIndexPatternsLoading: true,
