@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
         await testSubjects.existOrFail('policyDetailsIdNotFoundMessage');
         expect(await testSubjects.getVisibleText('policyDetailsIdNotFoundMessage')).to.equal(
-          'Package Policy invalid-id not found'
+          'Package policy invalid-id not found'
         );
       });
     });
