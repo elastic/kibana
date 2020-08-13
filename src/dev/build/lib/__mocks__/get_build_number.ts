@@ -17,30 +17,6 @@
  * under the License.
  */
 
-import execa from 'execa';
-import { getBuildNumber } from './get_build_number';
-
-interface Options {
-  isRelease: boolean;
-  versionQualifier?: string;
-  pkg: {
-    version: string;
-  };
-}
-
-type ResolvedType<T extends Promise<any>> = T extends Promise<infer X> ? X : never;
-
-export type VersionInfo = ResolvedType<ReturnType<typeof getVersionInfo>>;
-
-export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Options) {
-  const buildVersion = pkg.version.concat(
-    versionQualifier ? `-${versionQualifier}` : '',
-    isRelease ? '' : '-SNAPSHOT'
-  );
-
-  return {
-    buildSha: (await execa('git', ['rev-parse', 'HEAD'])).stdout,
-    buildVersion,
-    buildNumber: await getBuildNumber(),
-  };
+export function getBuildNumber() {
+  return 12345;
 }

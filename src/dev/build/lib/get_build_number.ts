@@ -17,30 +17,18 @@
  * under the License.
  */
 
+import os from 'os';
 import execa from 'execa';
-import { getBuildNumber } from './get_build_number';
 
-interface Options {
-  isRelease: boolean;
-  versionQualifier?: string;
-  pkg: {
-    version: string;
-  };
-}
+export async function getBuildNumber() {
+  if (/^win/.test(os.platform())) {
+    // Windows does not have the wc process and `find /C /V ""` does not consistently work
+    const log = await execa('git', ['log', '--format="%h"']);
+    return log.stdout.split('\n').length;
+  }
 
-type ResolvedType<T extends Promise<any>> = T extends Promise<infer X> ? X : never;
-
-export type VersionInfo = ResolvedType<ReturnType<typeof getVersionInfo>>;
-
-export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Options) {
-  const buildVersion = pkg.version.concat(
-    versionQualifier ? `-${versionQualifier}` : '',
-    isRelease ? '' : '-SNAPSHOT'
-  );
-
-  return {
-    buildSha: (await execa('git', ['rev-parse', 'HEAD'])).stdout,
-    buildVersion,
-    buildNumber: await getBuildNumber(),
-  };
+  const wc = await execa.command('git log --format="%h" | wc -l', {
+    shell: true,
+  });
+  return parseFloat(wc.stdout.trim());
 }
