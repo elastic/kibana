@@ -11,14 +11,6 @@ import { RegistryError } from '../../../errors';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
-function isFetchError(error: FailedAttemptErrors): error is FetchError {
-  return error instanceof FetchError || error.name === 'FetchError';
-}
-
-function isSystemError(error: FailedAttemptErrors): boolean {
-  return isFetchError(error) && error.type === 'system';
-}
-
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
   const response = await fetch(url);
@@ -45,9 +37,6 @@ export async function getResponse(url: string): Promise<Response> {
         // we only want to retry certain types of errors, like `ECONNREFUSED` and other operational errors
         // and let the others through without retrying
         //
-        // node-fetch throws a FetchError for those types of errors and
-        // "All errors originating from Node.js core are marked with error.type = 'system'"
-        // https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
         // throwing in onFailedAttempt will abandon all retries & fail the request
         // we only want to retry system errors, so throw a RegistryError for everything else
         if (!isSystemError(error)) {
@@ -70,4 +59,15 @@ export async function getResponseStream(url: string): Promise<NodeJS.ReadableStr
 
 export async function fetchUrl(url: string): Promise<string> {
   return getResponseStream(url).then(streamToString);
+}
+
+// node-fetch throws a FetchError for those types of errors and
+// "All errors originating from Node.js core are marked with error.type = 'system'"
+// https://github.com/node-fetch/node-fetch/blob/master/docs/ERROR-HANDLING.md#error-handling-with-node-fetch
+function isFetchError(error: FailedAttemptErrors): error is FetchError {
+  return error instanceof FetchError || error.name === 'FetchError';
+}
+
+function isSystemError(error: FailedAttemptErrors): boolean {
+  return isFetchError(error) && error.type === 'system';
 }

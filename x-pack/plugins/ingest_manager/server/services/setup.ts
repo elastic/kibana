@@ -26,7 +26,7 @@ import { packageConfigService } from './package_config';
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { appContextService } from './app_context';
-import { firstSuccessOrTryAgain } from './retry_setup';
+import { limitOne } from './retry_setup';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -114,7 +114,7 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  return firstSuccessOrTryAgain(() => _setupIngestManager(soClient, callCluster));
+  return limitOne(() => _setupIngestManager(soClient, callCluster));
 }
 
 export async function setupFleet(
