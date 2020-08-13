@@ -47,6 +47,19 @@ for more information.
 [role="screenshot"]
 image::images/7.9-whats_new_search.png[Enterprise Search is side navigation]
 
+[float]
+[[lens-7-9]]
+=== Multiple y-axes in Lens
+
+Show two metrics on the y-axis at the same time in {kibana-ref}/lens.html[Lens].
+This enables you to compare and contrast data of vastly different types and ranges.
+For example, you might track the total page views for your web site,
+which tallies in the millions. You're also interested
+in the percentage of the web site bounce rates,
+typically between 1 and 100. You can stack both metrics on top of one
+another to quickly spot the outliers.
+
+Also in 7.9, Lens debuts color pick, sort, and a fitting function.
 
 [float]
 [[canvas-7-9]]
@@ -59,19 +72,6 @@ to connect your elements to a new index, you can use variables to quickly update
 instead of changing the index for each individual element. For instructions, refer to the
 {kibana-ref}/canvas.html[Canvas documentation].
 
-[float]
-[[lens-7-9]]
-=== Multiple Y-axes in Lens
-
-Compare two metrics on the y-axes at the same time.
-This enables you compare and contrast data of vastly different types and ranges.
-For example, you might track the total page views for your web site,
-which tallies in the millions. But you're also interested
-in the percentage of the web site bounce rates,
-typically between 1 and 100. You can now stack both metrics on top of one
-another to quickly spot the outliers.
-
-Also in 7.9, Lens debuts color pick, sort, and a fitting function.
 
 [float]
 [[dashboard-7-9]]
@@ -89,6 +89,24 @@ backed by a single index pattern.
 
 [role="screenshot"]
 image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+[float]
+[[maps-7-9]]
+=== geo_shape fields at scale in Maps
+
+Maps introduces {kibana-ref}/maps-grid-aggregation.html[geo_shape fields with {es} aggregations].
+This means that you can plot your geo_shape fields at scale
+just like your geo_point fields.
+You can create a layer that clusters your lines and polygons until
+you zoom into an area with less than 10,000 discrete documents. Then,
+you’ll see individual lines and polygons.
+
+{kibana-ref}//tile-layer.html[Vector tile layers] are also enhanced&mdash;add layers to your map for data services that implement the
+Mapbox vector tile specification.
+
+[role="screenshot"]
+image::images/7.9-whats_new_maps.png[Vector tile layer with Mapbox vector tile specification]
+
 
 [float]
 [[alert-7-9]]
