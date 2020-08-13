@@ -25,12 +25,16 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart } from './search';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+
+export interface DataPublicPluginEnhancements {
+  search: SearchEnhancements;
+}
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
@@ -47,6 +51,10 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
 export interface DataPublicPluginStart {
