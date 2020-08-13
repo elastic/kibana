@@ -38,8 +38,6 @@ export function useResolverQueryParamCleaner() {
     return () => {
       /**
        * This effect must not be invalidated when `search` changes.
-       * Use the current location.search via the `history` object.
-       * `history` doesn't change so this is effectively like accessing `search` via a ref.
        */
       const urlSearchParams = new URLSearchParams(searchRef.current);
 
