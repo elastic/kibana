@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   Direction,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiTitle,
+  EuiButton,
   EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
@@ -28,6 +31,7 @@ import {
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
+import { useNotifications } from '../../../../../contexts/kibana';
 
 type Stats = Omit<ModelStats, 'model_id'>;
 
@@ -39,6 +43,7 @@ export type ModelWithStats = Omit<ModelItem, 'stats'> & { stats: Stats };
 
 export const ModelsList: FC = () => {
   const inferenceApiService = useInferenceApiService();
+  const { toasts } = useNotifications();
 
   const [searchQueryText, setSearchQueryText] = useState('');
 
@@ -69,9 +74,12 @@ export const ModelsList: FC = () => {
           }),
         },
       });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
+    } catch (error) {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.ml.inference.modelsList.fetchFailedErrorMessage', {
+          defaultMessage: 'Models fetch failed',
+        }),
+      });
     }
     setIsLoading(false);
   }
@@ -80,23 +88,49 @@ export const ModelsList: FC = () => {
     fetchData();
   }, []);
 
+  /**
+   * Fetches models stats and update the original object
+   */
+  const fetchModelsStats = useCallback(
+    async (models: ModelItem[]) => {
+      const modelIdsToFetch = models
+        .filter((model) => model.stats === undefined)
+        .map((model) => model.model_id);
+
+      // no need to fetch
+      if (modelIdsToFetch.length === 0) return true;
+
+      try {
+        const {
+          trained_model_stats: modelsStatsResponse,
+        } = await inferenceApiService.getInferenceModelStats(modelIdsToFetch);
+        for (const { model_id: id, ...stats } of modelsStatsResponse) {
+          const model = models.find((m) => m.model_id === id);
+          model!.stats = stats;
+        }
+        setItems([...items]);
+        return true;
+      } catch (error) {
+        toasts.addError(new Error(error.body.message), {
+          title: i18n.translate('xpack.ml.inference.modelsList.fetchModelStatsErrorMessage', {
+            defaultMessage: 'Fetch model stats failed',
+          }),
+        });
+      }
+    },
+    [items]
+  );
+
   async function prepareModelsForDeletion(models: ModelItem[]) {
     // Fetch model stats to check associated pipelines
-    try {
-      const {
-        trained_model_stats: modelsStatsResponse,
-      } = await inferenceApiService.getInferenceModelStats(
-        models.filter((model) => model.stats === undefined).map((model) => model.model_id)
-      );
-      for (const { model_id: id, ...stats } of modelsStatsResponse) {
-        const model = models.find((m) => m.model_id === id);
-        model!.stats = stats;
-      }
+    if (await fetchModelsStats(models)) {
       setModelsToDelete(models as ModelWithStats[]);
-      setItems([...items]);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
+    } else {
+      toasts.addDanger(
+        i18n.translate('xpack.ml.inference.modelsList.unableToDeleteModelsErrorMessage', {
+          defaultMessage: 'Unable to delete models',
+        })
+      );
     }
   }
 
@@ -110,9 +144,12 @@ export const ModelsList: FC = () => {
           (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
         )
       );
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error(e);
+    } catch (error) {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.ml.inference.modelsList.fetchDeletionErrorMessage', {
+          defaultMessage: 'Model deletion failed',
+        }),
+      });
     }
   }
 
@@ -131,7 +168,9 @@ export const ModelsList: FC = () => {
       name: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
         defaultMessage: 'Delete model',
       }),
-      description: 'Delete this person',
+      description: i18n.translate('xpack.ml.inference.modelsList.deleteModelActionLabel', {
+        defaultMessage: 'Delete model',
+      }),
       icon: 'trash',
       type: 'icon',
       color: 'danger',
@@ -202,6 +241,36 @@ export const ModelsList: FC = () => {
     box: {
       incremental: true,
     },
+    ...(selectedModels.length > 0
+      ? {
+          toolsLeft: (
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.inference.modelsList.selectedModelsMessage"
+                      defaultMessage="{modelsCount, plural, one{# model} other {# models}} selected"
+                      values={{ modelsCount: selectedModels.length }}
+                    />
+                  </h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton
+                  color="danger"
+                  onClick={prepareModelsForDeletion.bind(null, selectedModels)}
+                >
+                  <FormattedMessage
+                    id="xpack.ml.inference.modelsList.deleteModelsButtonLabel"
+                    defaultMessage="Delete"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }
+      : {}),
   };
 
   const onTableChange: EuiInMemoryTable<ModelItem>['onTableChange'] = ({
