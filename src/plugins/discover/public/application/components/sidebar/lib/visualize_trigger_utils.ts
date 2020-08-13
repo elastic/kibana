@@ -54,7 +54,7 @@ export function triggerVisualizeActions(
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
-    contextualFields: trigger === VISUALIZE_GEO_FIELD_TRIGGER ? contextualFields : [],
+    contextualFields,
   };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
