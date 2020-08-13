@@ -9,6 +9,7 @@ import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
+import { urlSearch } from '../test_utilities/url_search';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -93,7 +94,7 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
         await expect(
           simulator.map(() => ({
             // the query string has a key showing that the second child is selected
-            queryStringSelectedNode: simulator.queryStringValues().selectedNode,
+            search: simulator.historyLocationSearch,
             // the second child is rendered in the DOM, and shows up as selected
             selectedSecondChildNodeCount: simulator.selectedProcessNode(entityIDs.secondChild)
               .length,
@@ -102,7 +103,9 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
           }))
         ).toYieldEqualTo({
           // Just the second child should be marked as selected in the query string
-          queryStringSelectedNode: [entityIDs.secondChild],
+          search: urlSearch(resolverComponentInstanceID, {
+            selectedEntityID: entityIDs.secondChild,
+          }),
           // The second child is rendered and has `[aria-selected]`
           selectedSecondChildNodeCount: 1,
           // The origin child is rendered and doesn't have `[aria-selected]`
@@ -175,9 +178,6 @@ describe('Resolver, when analyzing a tree that has two related events for the or
             simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
           )
         ).toYieldEqualTo(['2 registry']);
-        await expect(
-          simulator.map(() => simulator.testSubject('resolver:map:node-submenu-item').length)
-        ).toYieldEqualTo(1);
       });
     });
     describe('and when the related events button is clicked again', () => {
