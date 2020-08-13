@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'src/core/public';
 
-import { kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IAccount, IOrganization, IUser } from '../../types';
 import { IFlashMessagesProps, IKeaLogic, TKeaReducers, IKeaParams } from '../../../shared/types';
@@ -165,4 +165,7 @@ export const OverviewLogic = kea({
       }
     },
   }),
-} as IKeaParams<IOverviewValues, IOverviewActions>) as IKeaLogic<IOverviewValues, IOverviewActions>;
+} as MakeLogicType<IOverviewValues, IOverviewActions>) as IKeaLogic<
+  IOverviewValues,
+  IOverviewActions
+>;
