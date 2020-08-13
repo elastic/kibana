@@ -10,36 +10,36 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import React, { Component } from 'react';
-import { isEmpty, flatten } from 'lodash';
+import { flatten, isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
-import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import {
-  tpmUnit,
-  TimeFormatter,
-  getDurationFormatter,
-  asDecimal,
-} from '../../../../utils/formatters';
-import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
-import { LicenseContext } from '../../../../context/LicenseContext';
-import { TransactionLineChart } from './TransactionLineChart';
-import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { BrowserLineChart } from './BrowserLineChart';
-import { DurationByCountryMap } from './DurationByCountryMap';
 import {
   TRANSACTION_PAGE_LOAD,
-  TRANSACTION_ROUTE_CHANGE,
   TRANSACTION_REQUEST,
+  TRANSACTION_ROUTE_CHANGE,
 } from '../../../../../common/transaction_types';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { LicenseContext } from '../../../../context/LicenseContext';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import {
+  asDecimal,
+  getDurationFormatter,
+  TimeFormatter,
+  tpmUnit,
+} from '../../../../utils/formatters';
+import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
+import { BrowserLineChart } from './BrowserLineChart';
+import { DurationByCountryMap } from './DurationByCountryMap';
+import { Serie, TransactionLineChart } from './TransactionLineChart';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
@@ -81,27 +81,30 @@ export function getMaxY(responseTimeSeries: TimeSeries[]) {
   return Math.max(...numbers, 0);
 }
 
-export class TransactionCharts extends Component<TransactionChartProps> {
-  public getTPMFormatter = (t: number) => {
-    const { urlParams } = this.props;
+export function TransactionCharts({
+  charts,
+  location,
+  urlParams,
+}: TransactionChartProps) {
+  const getTPMFormatter = (t: number) => {
     const unit = tpmUnit(urlParams.transactionType);
     return `${asDecimal(t)} ${unit}`;
   };
 
-  public getTPMTooltipFormatter = (p: Coordinate) => {
+  const getTPMTooltipFormatter = (p: Coordinate) => {
     return isValidCoordinateValue(p.y)
-      ? this.getTPMFormatter(p.y)
+      ? getTPMFormatter(p.y)
       : NOT_AVAILABLE_LABEL;
   };
 
-  public renderMLHeader(hasValidMlLicense: boolean | undefined) {
-    const { mlJobId } = this.props.charts;
+  function renderMLHeader(hasValidMlLicense: boolean | undefined) {
+    const { mlJobId } = charts;
 
     if (!hasValidMlLicense || !mlJobId) {
       return null;
     }
 
-    const { serviceName, kuery, transactionType } = this.props.urlParams;
+    const { serviceName, kuery, transactionType } = urlParams;
     if (!serviceName) {
       return null;
     }
@@ -150,78 +153,83 @@ export class TransactionCharts extends Component<TransactionChartProps> {
     );
   }
 
-  public render() {
-    const { charts, urlParams } = this.props;
-    const { responseTimeSeries, tpmSeries } = charts;
-    const { transactionType } = urlParams;
-    const maxY = getMaxY(responseTimeSeries);
-    const formatter = getDurationFormatter(maxY);
+  const { responseTimeSeries, tpmSeries } = charts;
+  const { transactionType } = urlParams;
+  const [maxY, setMaxY] = useState(0);
+  useEffect(() => {
+    setMaxY(getMaxY(responseTimeSeries));
+  }, [responseTimeSeries]);
+  const formatter = getDurationFormatter(maxY);
 
-    return (
-      <>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          <EuiFlexItem data-cy={`transaction-duration-charts`}>
-            <EuiPanel>
-              <React.Fragment>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <span>{responseTimeLabel(transactionType)}</span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <LicenseContext.Consumer>
-                    {(license) =>
-                      this.renderMLHeader(license?.getFeature('ml').isAvailable)
-                    }
-                  </LicenseContext.Consumer>
-                </EuiFlexGroup>
-                <TransactionLineChart
-                  series={responseTimeSeries}
-                  tickFormatY={getResponseTimeTickFormatter(formatter)}
-                  formatTooltipValue={getResponseTimeTooltipFormatter(
-                    formatter
-                  )}
-                />
-              </React.Fragment>
-            </EuiPanel>
-          </EuiFlexItem>
+  const onToggleLegend = (series: Serie[]) => {
+    if (!isEmpty(series)) {
+      setMaxY(getMaxY(series as TimeSeries[]));
+    }
+  };
 
-          <EuiFlexItem style={{ flexShrink: 1 }}>
-            <EuiPanel>
-              <React.Fragment>
-                <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span>
-                </EuiTitle>
-                <TransactionLineChart
-                  series={tpmSeries}
-                  tickFormatY={this.getTPMFormatter}
-                  formatTooltipValue={this.getTPMTooltipFormatter}
-                  truncateLegends
-                />
-              </React.Fragment>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGrid>
-        {transactionType === TRANSACTION_PAGE_LOAD && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <EuiPanel>
-                  <DurationByCountryMap />
-                </EuiPanel>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiPanel>
-                  <BrowserLineChart />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGrid>
-          </>
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      <EuiFlexGrid columns={2} gutterSize="s">
+        <EuiFlexItem data-cy={`transaction-duration-charts`}>
+          <EuiPanel>
+            <React.Fragment>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <span>{responseTimeLabel(transactionType)}</span>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <LicenseContext.Consumer>
+                  {(license) =>
+                    renderMLHeader(license?.getFeature('ml').isAvailable)
+                  }
+                </LicenseContext.Consumer>
+              </EuiFlexGroup>
+              <TransactionLineChart
+                onToggleLegend={onToggleLegend}
+                series={responseTimeSeries}
+                tickFormatY={getResponseTimeTickFormatter(formatter)}
+                formatTooltipValue={getResponseTimeTooltipFormatter(formatter)}
+              />
+            </React.Fragment>
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem style={{ flexShrink: 1 }}>
+          <EuiPanel>
+            <React.Fragment>
+              <EuiTitle size="xs">
+                <span>{tpmLabel(transactionType)}</span>
+              </EuiTitle>
+              <TransactionLineChart
+                series={tpmSeries}
+                tickFormatY={getTPMFormatter}
+                formatTooltipValue={getTPMTooltipFormatter}
+                truncateLegends
+              />
+            </React.Fragment>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      {transactionType === TRANSACTION_PAGE_LOAD && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem>
+              <EuiPanel>
+                <DurationByCountryMap />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel>
+                <BrowserLineChart />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </>
+      )}
+    </>
+  );
 }
 
 function tpmLabel(type?: string) {
