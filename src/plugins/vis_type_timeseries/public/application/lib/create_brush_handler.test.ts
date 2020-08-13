@@ -30,7 +30,7 @@ describe('brushHandler', () => {
     onBrush = createBrushHandler(applyFilter);
   });
 
-  test('returns brushHandler() should updates timefilter through vis.API.events.brush', () => {
+  test('returns brushHandler() should updates timefilter through vis.API.events.applyFilter', () => {
     const gte = '2017-01-01T00:00:00Z';
     const lte = '2017-01-01T00:10:00Z';
 
