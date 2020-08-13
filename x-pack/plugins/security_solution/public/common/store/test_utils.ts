@@ -22,6 +22,17 @@ export interface MiddlewareActionSpyHelper<S = State, A extends AppAction = AppA
    */
   waitForAction: <T extends A['type']>(actionType: T) => Promise<A extends { type: T } ? A : never>;
   /**
+   * Returns a promise that is fulfilled when a timeout occurs on a given action when it is expected that it should not fire.
+   * An Error is sent and the promise is rejected if the action is returned.
+   * The use of this method instead of a `sleep()` type of delay should avoid test case instability
+   * especially when run in a CI environment.
+   *
+   * @param actionType
+   */
+  actionShouldTimeout: <T extends A['type']>(
+    actionType: T
+  ) => Promise<A extends { type: T } ? A : never>;
+  /**
    * A property holding the information around the calls that were processed by the  internal
    * `actionSpyMiddelware`. This property holds the information typically found in Jets's mocked
    * function `mock` property - [see here for more information](https://jestjs.io/docs/en/mock-functions#mock-property)
@@ -96,6 +107,32 @@ export const createSpyMiddleware = <
         const timeout = setTimeout(() => {
           watchers.delete(watch);
           reject(err);
+        }, 4500);
+        watchers.add(watch);
+      });
+    },
+
+    actionShouldTimeout: async (actionType) => {
+      type ResolvedAction = A extends { type: typeof actionType } ? A : never;
+
+      // Error is defined here so that we get a better stack trace that points to the test from where it was used
+      const err = new Error(
+        `action '${actionType}' was dispatched when it was expected it should not.`
+      );
+
+      return new Promise<ResolvedAction>((resolve, reject) => {
+        const watch: ActionWatcher = (action) => {
+          if (action.type === actionType) {
+            watchers.delete(watch);
+            clearTimeout(timeout);
+            reject(err);
+          }
+        };
+
+        // We timeout before jest's default 5s, so that a better error stack is returned
+        const timeout = setTimeout(() => {
+          watchers.delete(watch);
+          resolve();
         }, 4500);
         watchers.add(watch);
       });

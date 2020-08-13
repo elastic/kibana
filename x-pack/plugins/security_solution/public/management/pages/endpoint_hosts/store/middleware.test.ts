@@ -21,7 +21,7 @@ import { listData } from './selectors';
 import { EndpointState } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
-import { getEndpointListPath } from '../../../common/routing';
+import { getEndpointListPath, getPolicyDetailPath } from '../../../common/routing';
 
 jest.mock('../../policy/store/policy_list/services/ingest', () => ({
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
@@ -45,6 +45,7 @@ describe('endpoint list middleware', () => {
   let getState: EndpointListStore['getState'];
   let dispatch: EndpointListStore['dispatch'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
+  let actionShouldTimeout: MiddlewareActionSpyHelper['actionShouldTimeout'];
   let actionSpyMiddleware;
 
   let history: History<never>;
@@ -55,7 +56,9 @@ describe('endpoint list middleware', () => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
+    ({ actionSpyMiddleware, waitForAction, actionShouldTimeout } = createSpyMiddleware<
+      EndpointState
+    >());
     store = createStore(
       endpointListReducer,
       applyMiddleware(endpointMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
@@ -121,5 +124,22 @@ describe('endpoint list middleware', () => {
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);
+
+    // Navigate away
+    dispatch({
+      type: 'userChangedUrl',
+      payload: {
+        ...history.location,
+        pathname: getPolicyDetailPath('123'),
+      },
+    });
+
+    // Poll should toggle off
+    const action = await waitForAction('serverToggledEndpointListAutoRefresh');
+    expect(action.payload).toEqual(false);
+
+    // This action should timeout since polling is off
+    await actionShouldTimeout('appRequestedEndpointList');
+    expect(fakeHttpServices.post).toBeCalledTimes(3);
   });
 });
