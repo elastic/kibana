@@ -66,7 +66,13 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
         <div className="eui-textRight">
           <EuiCopy textToCopy={spec}>
             {(copy) => (
-              <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+              <EuiButtonEmpty
+                size="xs"
+                flush="right"
+                iconType="copyClipboard"
+                onClick={copy}
+                data-test-subj="vegaDataInspectorCopyClipboardButton"
+              >
                 {copyToClipboardLabel}
               </EuiButtonEmpty>
             )}

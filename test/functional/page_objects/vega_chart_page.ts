@@ -18,7 +18,13 @@
  */
 
 import { Key } from 'selenium-webdriver';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+const compareSpecs = (first: string, second: string) => {
+  const normalizeSpec = (spec: string) => spec.replace(/[\n ]/g, '');
+  return normalizeSpec(first) === normalizeSpec(second);
+};
 
 export function VegaChartPageProvider({
   getService,
@@ -28,24 +34,57 @@ export function VegaChartPageProvider({
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const { common } = getPageObjects(['common']);
+  const retry = getService('retry');
 
   class VegaChartPage {
-    public async getSpec() {
+    public getEditor() {
+      return testSubjects.find('vega-editor');
+    }
+
+    public getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    }
+
+    public getControlContainer() {
+      return find.byCssSelector('div.vgaVis__controls');
+    }
+
+    public async getRawSpec() {
       // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-      const editor = await testSubjects.find('vega-editor');
+      const editor = await this.getEditor();
       const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Promise.all(
+
+      return await Promise.all(
         lines.map(async (line) => {
           return await line.getVisibleText();
         })
       );
-      return linesText.join('\n');
+    }
+
+    public async getSpec() {
+      return (await this.getRawSpec()).join('\n');
+    }
+
+    public async focusEditor() {
+      const editor = await this.getEditor();
+      const textarea = await editor.findByClassName('ace_content');
+
+      await textarea.click();
+    }
+
+    public async fillSpec(newSpec: string) {
+      await retry.try(async () => {
+        await this.cleanSpec();
+        await this.focusEditor();
+        await browser.pressKeys(newSpec);
+
+        expect(compareSpecs(await this.getSpec(), newSpec)).to.be(true);
+      });
     }
 
     public async typeInSpec(text: string) {
-      const editor = await testSubjects.find('vega-editor');
-      const textarea = await editor.findByClassName('ace_content');
-      await textarea.click();
+      await this.focusEditor();
+
       let repeats = 20;
       while (--repeats > 0) {
         await browser.pressKeys(Key.ARROW_UP);
@@ -55,12 +94,16 @@ export function VegaChartPageProvider({
       await browser.pressKeys(text);
     }
 
-    public async getViewContainer() {
-      return await find.byCssSelector('div.vgaVis__view');
-    }
+    public async cleanSpec() {
+      const editor = await this.getEditor();
+      const aceGutter = await editor.findByClassName('ace_gutter');
 
-    public async getControlContainer() {
-      return await find.byCssSelector('div.vgaVis__controls');
+      await retry.try(async () => {
+        await aceGutter.doubleClick();
+        await browser.pressKeys(Key.BACK_SPACE);
+
+        expect(await this.getSpec()).to.be('');
+      });
     }
 
     public async getYAxisLabels() {
