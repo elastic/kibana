@@ -149,7 +149,7 @@ export interface FieldSpecExportFmt {
 }
 
 export interface FieldSpec {
-  count: number;
+  count?: number;
   script?: string;
   lang?: string;
   conflictDescriptions?: Record<string, string[]>;
@@ -158,7 +158,7 @@ export interface FieldSpec {
   name: string;
   type: string;
   esTypes?: string[];
-  scripted: boolean;
+  scripted?: boolean;
   searchable: boolean;
   aggregatable: boolean;
   readFromDocValues?: boolean;
