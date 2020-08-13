@@ -16,7 +16,6 @@ import { isThresholdRule } from '../../../../../../common/detection_engine/utils
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/create_rules_schema';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -237,16 +236,16 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   };
 };
 
-export const formatRule = (
+export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
   rule?: Rule | null
-): CreateRulesSchema =>
-  deepmerge.all([
+): T =>
+  (deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as CreateRulesSchema;
+  ]) as unknown) as T;

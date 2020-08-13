@@ -48,11 +48,6 @@ export interface UpdateRulesProps {
   signal: AbortSignal;
 }
 
-export interface AddRulesProps {
-  rule: UpdateRulesSchema | CreateRulesSchema;
-  signal: AbortSignal;
-}
-
 export interface PatchRuleProps {
   ruleProperties: PatchRulesSchema;
   signal: AbortSignal;

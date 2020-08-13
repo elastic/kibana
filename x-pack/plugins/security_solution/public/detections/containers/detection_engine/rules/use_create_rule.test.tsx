@@ -6,25 +6,25 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { usePersistRule, ReturnPersistRule } from './persist_rule';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { useCreateRule, ReturnCreateRule } from './use_create_rule';
+import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/update_rules_schema.mock';
 
 jest.mock('./api');
 
-describe('usePersistRule', () => {
+describe('useCreateRule', () => {
   test('init', async () => {
-    const { result } = renderHook<unknown, ReturnPersistRule>(() => usePersistRule());
+    const { result } = renderHook<unknown, ReturnCreateRule>(() => useCreateRule());
 
     expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
   });
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnPersistRule>(() =>
-        usePersistRule()
+      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnCreateRule>(() =>
+        useCreateRule()
       );
       await waitForNextUpdate();
-      result.current[1](getRulesSchemaMock());
+      result.current[1](getUpdateRulesSchemaMock());
       rerender();
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
@@ -32,11 +32,11 @@ describe('usePersistRule', () => {
 
   test('saved rule with isSaved === true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnPersistRule>(() =>
-        usePersistRule()
+      const { result, waitForNextUpdate } = renderHook<void, ReturnCreateRule>(() =>
+        useCreateRule()
       );
       await waitForNextUpdate();
-      result.current[1](getRulesSchemaMock());
+      result.current[1](getUpdateRulesSchemaMock());
       await waitForNextUpdate();
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });

@@ -5,8 +5,9 @@
  */
 
 import {
-  AddRulesProps,
   PatchRuleProps,
+  CreateRulesProps,
+  UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
   RuleStatusResponse,
@@ -19,7 +20,10 @@ import { savedRuleMock, rulesMock } from '../mock';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response';
 
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<RulesSchema> =>
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+  Promise.resolve(getRulesSchemaMock());
+
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
   Promise.resolve(getRulesSchemaMock());
 
 export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>

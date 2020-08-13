@@ -16,7 +16,6 @@ import {
   DETECTION_ENGINE_TAGS_URL,
 } from '../../../../../common/constants';
 import {
-  AddRulesProps,
   UpdateRulesProps,
   CreateRulesProps,
   DeleteRulesProps,
@@ -40,7 +39,6 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { RulesSchema, rulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { validateEither } from '../../../../../common';
 import {
-  UpdateRulesSchema,
   createRulesSchema,
   updateRulesSchema,
   patchRulesSchema,
@@ -48,21 +46,13 @@ import {
 import { toError, toPromise } from '../../../../../common/shared_imports';
 
 /**
- * Add provided Rule
+ * Create provided Rule
  *
- * @param rule to add
+ * @param rule CreateRulesSchema to add
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<RulesSchema> => {
-  if ((rule as UpdateRulesSchema).id != null) {
-    return updateRuleWithValidation({ rule, signal });
-  } else {
-    return createRuleWithValidation({ rule, signal });
-  }
-};
-
 const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
@@ -81,6 +71,14 @@ const createRuleWithValidation = async ({ rule, signal }: CreateRulesProps): Pro
 
 export { createRuleWithValidation as createRule };
 
+/**
+ * Update provided Rule using PUT
+ *
+ * @param rule UpdateRulesSchema to be updated
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
 const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
   KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',

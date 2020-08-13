@@ -10,7 +10,7 @@ import * as api from './api';
 
 jest.mock('./api');
 
-describe('usePersistRule', () => {
+describe('usePrePackagedRules', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
