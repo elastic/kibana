@@ -35,6 +35,10 @@ object DefaultTemplate : Template({
 
   params {
     param("env.CI", "true")
+
+    // TODO remove these
+    param("env.GCS_UPLOAD_PREFIX", "INVALID_PREFIX")
+    param("env.CI_PARALLEL_PROCESS_NUMBER", "1")
 //
 //        // For now these are just to ensure compatibility with existing Jenkins-based configuration
 //        param("env.JENKINS_URL", "%teamcity.serverUrl%")

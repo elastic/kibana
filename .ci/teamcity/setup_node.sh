@@ -10,7 +10,6 @@ tc_set_env NODE_VERSION "$(cat "$KIBANA_DIR/.node-version")"
 tc_set_env NODE_DIR "$CACHE_DIR/node/$NODE_VERSION"
 tc_set_env NODE_BIN_DIR "$NODE_DIR/bin"
 tc_set_env YARN_OFFLINE_CACHE "$CACHE_DIR/yarn-offline-cache"
-tc_set_env TEST_BROWSER_HEADLESS 1
 
 if [[ ! -d "$NODE_DIR" ]]; then
   nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz"

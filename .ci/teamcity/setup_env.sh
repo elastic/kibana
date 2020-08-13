@@ -19,6 +19,9 @@ tc_set_env CHROMEDRIVER_CDNURL "https://us-central1-elastic-kibana-184716.cloudf
 tc_set_env RE2_DOWNLOAD_MIRROR "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 tc_set_env CYPRESS_DOWNLOAD_MIRROR "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
+tc_set_env TEST_BROWSER_HEADLESS 1
+tc_set_env CHECKS_REPORTER_ACTIVE false # TODO
+
 if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
   echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
   tc_set_env DETECT_CHROMEDRIVER_VERSION true

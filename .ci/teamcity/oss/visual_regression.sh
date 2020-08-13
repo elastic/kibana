@@ -6,16 +6,13 @@ source "$(dirname "${0}")/../util.sh"
 
 tc_start_block "OSS Visual Regression"
 
-export CI_PARALLEL_PROCESS_NUMBER=1
 export JOB=oss-visualRegression
-export CI=true
-export GCS_UPLOAD_PREFIX=ehwihsihfiashdhfshfso
-
-mv /home/agent/work/kibana-build-oss/kibana-8.0.0-SNAPSHOT-linux-x86_64/* /home/agent/work/kibana-build-oss/
-
 export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 PUPPETEER_EXECUTABLE_PATH="$(command -v google-chrome-stable)"
 export PUPPETEER_EXECUTABLE_PATH
+export KIBANA_INSTALL_DIR="$WORKSPACE/kibana-build-oss"
+
+mv /home/agent/work/kibana-build-oss/kibana-8.0.0-SNAPSHOT-linux-x86_64/* "$KIBANA_INSTALL_DIR/"
 
 ###
 ### Set Percy parallel build support environment vars
@@ -28,7 +25,7 @@ echo " -- PERCY_TARGET_BRANCH='$PERCY_TARGET_BRANCH'"
 
 yarn percy exec -t 10000 -- -- node scripts/functional_tests \
   --debug --bail \
-  --kibana-install-dir "/home/agent/work/kibana-build-oss/" \
+  --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/visual_regression/config.ts;
 
 tc_end_block "OSS Visual Regression"
