@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 
 export function list(keystore, command, options = {}) {
   const logger = new Logger(options);

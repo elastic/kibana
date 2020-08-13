@@ -233,6 +233,18 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       const singleRequest = await testSubjects.find('inspectorRequestName');
       return await singleRequest.getVisibleText();
     }
+
+    public getOpenRequestStatisticButton() {
+      return testSubjects.find('inspectorRequestDetailStatistics');
+    }
+
+    public getOpenRequestDetailRequestButton() {
+      return testSubjects.find('inspectorRequestDetailRequest');
+    }
+
+    public getOpenRequestDetailResponseButton() {
+      return testSubjects.find('inspectorRequestDetailResponse');
+    }
   }
 
   return new Inspector();
