@@ -40,6 +40,7 @@ describe('Search service', () => {
         registerFunction: jest.fn(),
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
+      expect(setup).toHaveProperty('usageCollector');
       expect(setup).toHaveProperty('__enhance');
     });
   });
@@ -49,17 +50,7 @@ describe('Search service', () => {
       const start = searchService.start(mockCoreStart, {
         indexPatterns: {},
       } as any);
-      expect(start).toHaveProperty('search');
-    });
-  });
-
-  describe('start()', () => {
-    it('exposes proper contract', async () => {
-      const start = searchService.start(mockCoreStart, {
-        indexPatterns: {},
-      } as any);
       expect(start).toHaveProperty('aggs');
-      expect(start).toHaveProperty('setInterceptor');
       expect(start).toHaveProperty('search');
     });
   });

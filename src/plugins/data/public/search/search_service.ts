@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo, IUiSettingsClient } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, PackageInfo } from 'src/core/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
