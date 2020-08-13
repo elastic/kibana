@@ -15,8 +15,8 @@ import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
-
+import { Rule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/create_rules_schema';
 import {
   AboutStepRule,
   DefineStepRule,
@@ -243,10 +243,10 @@ export const formatRule = (
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
   rule?: Rule | null
-): NewRule =>
+): CreateRulesSchema =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as NewRule;
+  ]) as CreateRulesSchema;

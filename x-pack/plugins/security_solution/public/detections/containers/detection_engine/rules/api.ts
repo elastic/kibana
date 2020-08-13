@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
+import { flow } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
@@ -14,12 +17,13 @@ import {
 } from '../../../../../common/constants';
 import {
   AddRulesProps,
+  UpdateRulesProps,
+  CreateRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
   EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
-  NewRule,
   Rule,
   FetchRuleProps,
   BasicFetchProps,
@@ -33,6 +37,14 @@ import {
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
+import { RulesSchema, rulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { validateEither } from '../../../../../common';
+import {
+  UpdateRulesSchema,
+  createRulesSchema,
+  updateRulesSchema,
+} from '../../../../../common/detection_engine/schemas/request';
+import { toError, toPromise } from '../../../../../common/shared_imports';
 
 /**
  * Add provided Rule
@@ -42,12 +54,49 @@ import * as i18n from '../../../pages/detection_engine/rules/translations';
  *
  * @throws An error if response is not OK
  */
-export const addRule = async ({ rule, signal }: AddRulesProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
-    method: rule.id != null ? 'PUT' : 'POST',
+export const addRule = async ({ rule, signal }: AddRulesProps): Promise<RulesSchema> => {
+  if ((rule as UpdateRulesSchema).id != null) {
+    return updateRuleWithValidation({ rule, signal });
+  } else {
+    return createRuleWithValidation({ rule, signal });
+  }
+};
+
+const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'POST',
     body: JSON.stringify(rule),
     signal,
   });
+
+const createRuleWithValidation = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
+  pipe(
+    rule,
+    (body) => fromEither(validateEither(createRulesSchema, body)),
+    chain((payload) => tryCatch(() => createRule({ signal, rule: { ...payload } }), toError)),
+    chain((response) => fromEither(validateEither(rulesSchema, response))),
+    flow(toPromise)
+  );
+
+export { createRuleWithValidation as createRule };
+
+const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+    method: 'PUT',
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+const updateRuleWithValidation = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+  pipe(
+    rule,
+    (body) => fromEither(validateEither(updateRulesSchema, body)),
+    chain((payload) => tryCatch(() => updateRule({ signal, rule: { ...payload } }), toError)),
+    chain((response) => fromEither(validateEither(rulesSchema, response))),
+    flow(toPromise)
+  );
+
+export { updateRuleWithValidation as updateRule };
 
 /**
  * Patch provided Rule

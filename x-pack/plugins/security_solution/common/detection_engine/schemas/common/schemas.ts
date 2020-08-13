@@ -325,7 +325,7 @@ export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
 export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
 
 export const sort_order = t.keyof({ asc: null, desc: null });
-export type sortOrder = t.TypeOf<typeof sort_order>;
+export type SortOrder = t.TypeOf<typeof sort_order>;
 
 export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;

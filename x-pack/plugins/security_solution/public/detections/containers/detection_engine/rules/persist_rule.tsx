@@ -7,20 +7,26 @@
 import { useEffect, useState, Dispatch } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import {
+  UpdateRulesSchema,
+  CreateRulesSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 
 import { addRule as persistRule } from './api';
 import * as i18n from './translations';
-import { NewRule } from './types';
 
 interface PersistRuleReturn {
   isLoading: boolean;
   isSaved: boolean;
 }
 
-export type ReturnPersistRule = [PersistRuleReturn, Dispatch<NewRule | null>];
+export type ReturnPersistRule = [
+  PersistRuleReturn,
+  Dispatch<UpdateRulesSchema | CreateRulesSchema | null>
+];
 
 export const usePersistRule = (): ReturnPersistRule => {
-  const [rule, setRule] = useState<NewRule | null>(null);
+  const [rule, setRule] = useState<UpdateRulesSchema | CreateRulesSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();

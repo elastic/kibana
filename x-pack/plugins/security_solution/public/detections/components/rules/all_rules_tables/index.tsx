@@ -20,7 +20,8 @@ import {
   RulesColumns,
   RuleStatusRowItemType,
 } from '../../../pages/detection_engine/rules/all/columns';
-import { Rule, Rules } from '../../../containers/detection_engine/rules/types';
+import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { Rules } from '../../../containers/detection_engine/rules/types';
 import { AllRulesTabs } from '../../../pages/detection_engine/rules/all';
 
 // EuiBasicTable give me a hardtime with adding the ref attributes so I went the easy way
@@ -36,7 +37,7 @@ export interface SortingType {
 }
 
 interface AllRulesTablesProps {
-  euiBasicTableSelectionProps: EuiTableSelectionType<Rule>;
+  euiBasicTableSelectionProps: EuiTableSelectionType<RulesSchema>;
   hasNoPermissions: boolean;
   monitoringColumns: Array<EuiBasicTableColumn<RuleStatusRowItemType>>;
   pagination: {
