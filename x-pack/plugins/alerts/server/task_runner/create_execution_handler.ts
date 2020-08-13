@@ -5,7 +5,7 @@
  */
 
 import { map } from 'lodash';
-import { AlertAction, State, Context, AlertType, AlertParams } from '../types';
+import { AlertAction, State, Context, AlertType, AlertParams, RawAlert } from '../types';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
@@ -19,7 +19,7 @@ interface CreateExecutionHandlerOptions {
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
-  apiKey: string | null;
+  apiKey: RawAlert['apiKey'];
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
@@ -90,7 +90,7 @@ export function createExecutionHandler({
         id: action.id,
         params: action.params,
         spaceId,
-        apiKey,
+        apiKey: apiKey ?? null,
       });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };

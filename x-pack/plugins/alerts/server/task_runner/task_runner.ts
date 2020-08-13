@@ -73,7 +73,7 @@ export class TaskRunner {
     return apiKey;
   }
 
-  private getFakeKibanaRequest(spaceId: string, apiKey: string | null) {
+  private getFakeKibanaRequest(spaceId: string, apiKey: RawAlert['apiKey']) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
@@ -98,7 +98,7 @@ export class TaskRunner {
 
   private getServicesWithSpaceLevelPermissions(
     spaceId: string,
-    apiKey: string | null
+    apiKey: RawAlert['apiKey']
   ): [Services, PublicMethodsOf<AlertsClient>] {
     const request = this.getFakeKibanaRequest(spaceId, apiKey);
     return [this.context.getServices(request), this.context.getAlertsClientWithRequest(request)];
@@ -109,7 +109,7 @@ export class TaskRunner {
     alertName: string,
     tags: string[] | undefined,
     spaceId: string,
-    apiKey: string | null,
+    apiKey: RawAlert['apiKey'],
     actions: Alert['actions'],
     alertParams: RawAlert['params']
   ) {
@@ -250,7 +250,11 @@ export class TaskRunner {
     };
   }
 
-  async validateAndExecuteAlert(services: Services, apiKey: string | null, alert: SanitizedAlert) {
+  async validateAndExecuteAlert(
+    services: Services,
+    apiKey: RawAlert['apiKey'],
+    alert: SanitizedAlert
+  ) {
     const {
       params: { alertId, spaceId },
     } = this.taskInstance;
