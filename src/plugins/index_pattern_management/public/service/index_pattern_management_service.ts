@@ -21,6 +21,7 @@ import { HttpSetup } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
 import { FieldFormatEditors } from './field_format_editors';
+import { EnvironmentService } from './environment';
 
 import {
   BytesFormatEditor,
@@ -49,11 +50,13 @@ export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
   indexPatternListConfig: IndexPatternListManager;
   fieldFormatEditors: FieldFormatEditors;
+  environmentService: EnvironmentService;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
     this.fieldFormatEditors = new FieldFormatEditors();
+    this.environmentService = new EnvironmentService();
   }
 
   public setup({ httpClient }: SetupDependencies) {
@@ -83,6 +86,7 @@ export class IndexPatternManagementService {
       creation: creationManagerSetup,
       list: indexPatternListConfigSetup,
       fieldFormatEditors: fieldFormatEditorsSetup,
+      environment: this.environmentService.setup(),
     };
   }
 

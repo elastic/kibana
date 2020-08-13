@@ -7,17 +7,17 @@
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { JobsTableComponent } from './jobs_table';
-import { mockSiemJobs } from '../__mocks__/api';
+import { mockSecurityJobs } from '../api.mock';
 import { cloneDeep } from 'lodash/fp';
-import { SiemJob } from '../types';
+import { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
 
 describe('JobsTableComponent', () => {
-  let siemJobs: SiemJob[];
+  let securityJobs: SecurityJob[];
   let onJobStateChangeMock = jest.fn();
   beforeEach(() => {
-    siemJobs = cloneDeep(mockSiemJobs);
+    securityJobs = cloneDeep(mockSecurityJobs);
     onJobStateChangeMock = jest.fn();
   });
 
@@ -25,7 +25,7 @@ describe('JobsTableComponent', () => {
     const wrapper = shallow(
       <JobsTableComponent
         isLoading={true}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -36,7 +36,7 @@ describe('JobsTableComponent', () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={true}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -46,11 +46,11 @@ describe('JobsTableComponent', () => {
   });
 
   test('should render the hyperlink with URI encodings which points specifically to the job id', () => {
-    siemJobs[0].id = 'job id with spaces';
+    securityJobs[0].id = 'job id with spaces';
     const wrapper = mount(
       <JobsTableComponent
         isLoading={true}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -63,7 +63,7 @@ describe('JobsTableComponent', () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={false}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -73,14 +73,14 @@ describe('JobsTableComponent', () => {
       .simulate('click', {
         target: { checked: true },
       });
-    expect(onJobStateChangeMock.mock.calls[0]).toEqual([siemJobs[0], 1571022859393, true]);
+    expect(onJobStateChangeMock.mock.calls[0]).toEqual([securityJobs[0], 1571022859393, true]);
   });
 
   test('should have a switch when it is not in the loading state', () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={false}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
@@ -91,7 +91,7 @@ describe('JobsTableComponent', () => {
     const wrapper = mount(
       <JobsTableComponent
         isLoading={true}
-        jobs={siemJobs}
+        jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
       />
     );
