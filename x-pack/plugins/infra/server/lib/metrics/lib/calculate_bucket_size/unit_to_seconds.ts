@@ -17,7 +17,7 @@ const units: Record<string, number> = {
   d: 86400,
   w: 86400 * 7,
   M: 86400 * 30,
-  y: 86400 * 356,
+  y: 86400 * 365,
 };
 
 const sortedUnits = sortBy(Object.keys(units), (key) => units[key]);
