@@ -19,6 +19,7 @@ import {
   DotExpander,
   Drop,
   Enrich,
+  Fail,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -114,7 +115,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   fail: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Fail,
     docLinkPath: '/fail-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.fail', {
       defaultMessage: 'Fail',
