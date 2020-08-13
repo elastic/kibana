@@ -4,12 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+// @ts-expect-error untyped local
 import { WorkpadManager } from '../../../components/workpad_manager';
+// @ts-expect-error untyped local
 import { setDocTitle } from '../../../lib/doc_title';
 
-export const HomeApp = ({ onLoad = () => {} }) => {
+interface Props {
+  onLoad: () => void;
+}
+
+export const HomeApp: FC<Props> = ({ onLoad = () => {} }) => {
   onLoad();
   setDocTitle('Canvas');
   return (

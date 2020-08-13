@@ -6,12 +6,10 @@
 
 import { connect } from 'react-redux';
 import { resetWorkpad } from '../../../state/actions/workpad';
-import { HomeApp as Component } from './home_app';
+import { HomeApp as Component } from './home_app.component';
 
-const mapDispatchToProps = (dispatch) => ({
+export const HomeApp = connect(null, (dispatch) => ({
   onLoad() {
     dispatch(resetWorkpad());
   },
-});
-
-export const HomeApp = connect(null, mapDispatchToProps)(Component);
+}))(Component);

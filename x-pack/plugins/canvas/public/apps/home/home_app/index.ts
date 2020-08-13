@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export const LoadWorkpad = () => <div>Load a workpad...</div>;
+export { HomeApp } from './home_app';
+export { HomeApp as HomeAppComponent } from './home_app.component';

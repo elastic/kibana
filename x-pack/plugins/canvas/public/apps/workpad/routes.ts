@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ErrorStrings } from '../../../i18n';
+import { Dispatch } from 'redux';
+// @ts-expect-error
 import * as workpadService from '../../lib/workpad_service';
 import { notifyService } from '../../services';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
+// @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
+// @ts-expect-error
 import { setAssets, resetAssets } from '../../state/actions/assets';
+// @ts-expect-error
 import { setPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
+// @ts-expect-error
 import { setZoomScale } from '../../state/actions/transient';
+import { ErrorStrings } from '../../../i18n';
 import { WorkpadApp } from './workpad_app';
+import { State } from '../../../types';
 
 const { workpadRoutes: strings } = ErrorStrings;
 
@@ -25,7 +32,8 @@ export const routes = [
       {
         name: 'createWorkpad',
         path: '/create',
-        action: (dispatch) => async ({ router }) => {
+        // @ts-expect-error Fix when Router is typed.
+        action: (dispatch: Dispatch) => async ({ router }) => {
           const newWorkpad = getDefaultWorkpad();
           try {
             await workpadService.create(newWorkpad);
@@ -46,7 +54,13 @@ export const routes = [
       {
         name: 'loadWorkpad',
         path: '/:id(/page/:page)',
-        action: (dispatch, getState) => async ({ params, router }) => {
+        action: (dispatch: Dispatch, getState: () => State) => async ({
+          params,
+          // @ts-expect-error Fix when Router is typed.
+          router,
+        }: {
+          params: { id: string; page?: string };
+        }) => {
           // load workpad if given a new id via url param
           const state = getState();
           const currentWorkpad = getWorkpad(state);
@@ -70,10 +84,10 @@ export const routes = [
 
           // fetch the workpad again, to get changes
           const workpad = getWorkpad(getState());
-          const pageNumber = parseInt(params.page, 10);
+          const pageNumber = params.page ? parseInt(params.page, 10) : null;
 
           // no page provided, append current page to url
-          if (isNaN(pageNumber)) {
+          if (!pageNumber || isNaN(pageNumber)) {
             return router.redirectTo('loadWorkpad', { id: workpad.id, page: workpad.page + 1 });
           }
 
