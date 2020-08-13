@@ -30,6 +30,7 @@ import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ChartWrapper } from '../ChartWrapper';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from '../../../../hooks/useUrlParams';
 
 interface Props {
   data?: Array<Record<string, number | null>>;
@@ -37,7 +38,15 @@ interface Props {
 }
 
 export function PageViewsChart({ data, loading }: Props) {
-  const formatter = timeFormatter(niceTimeFormatByDay(2));
+  const { urlParams } = useUrlParams();
+
+  const { start, end } = urlParams;
+  const diffIndays = moment(new Date(end as string)).diff(
+    moment(new Date(start as string)),
+    'day'
+  );
+
+  const formatter = timeFormatter(niceTimeFormatByDay(diffIndays > 1 ? 2 : 1));
 
   const onBrushEnd: BrushEndListener = ({ x }) => {
     if (!x) {
@@ -91,11 +100,14 @@ export function PageViewsChart({ data, loading }: Props) {
             }
             showLegend
             onBrushEnd={onBrushEnd}
+            xDomain={{
+              min: new Date(start as string).valueOf(),
+              max: new Date(end as string).valueOf(),
+            }}
           />
           <Axis
             id="date_time"
             position={Position.Bottom}
-            title={I18LABELS.dateTime}
             tickFormat={formatter}
           />
           <Axis
