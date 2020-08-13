@@ -32,6 +32,7 @@ export interface UseSecurityJobsReturn {
  * list as necessary. E.g. installed jobs, running jobs, etc.
  *
  * NOTE: If the user is not an ml admin, jobs will be empty and isMlAdmin will be false.
+ * If you only need installed jobs, try the {@link useInstalledSecurityJobs} hook.
  *
  * @param refetchData
  */
