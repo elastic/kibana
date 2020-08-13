@@ -40,7 +40,7 @@ export async function runDockerGenerator(
   ubi: boolean = false
 ) {
   // UBI var config
-  const baseOSImage = ubi ? 'registry.access.redhat.com/ubi8/ubi-minimal:8.2' : 'centos:8';
+  const baseOSImage = ubi ? 'registry.access.redhat.com/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
   const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
 
