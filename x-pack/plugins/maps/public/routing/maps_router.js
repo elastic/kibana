@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
-import { getCoreI18n, getToasts } from '../kibana_services';
+import { getCoreI18n, getToasts, getEmbeddableService } from '../kibana_services';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -39,6 +39,11 @@ const App = ({ history, appBasePath, onAppLeave }) => {
   const store = getStore();
   const I18nContext = getCoreI18n().Context;
 
+  const stateTransfer = getEmbeddableService()?.getStateTransfer(history);
+
+  const { originatingApp } =
+    stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+
   return (
     <I18nContext>
       <Provider store={store}>
@@ -50,13 +55,21 @@ const App = ({ history, appBasePath, onAppLeave }) => {
                 <LoadMapAndRender
                   savedMapId={props.match.params.savedMapId}
                   onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
+                  originatingApp={originatingApp}
                 />
               )}
             />
             <Route
               exact
               path={`/map`}
-              render={() => <LoadMapAndRender onAppLeave={onAppLeave} />}
+              render={() => (
+                <LoadMapAndRender
+                  onAppLeave={onAppLeave}
+                  stateTransfer={stateTransfer}
+                  originatingApp={originatingApp}
+                />
+              )}
             />
             // Redirect other routes to list, or if hash-containing, their non-hash equivalents
             <Route

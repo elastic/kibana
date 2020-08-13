@@ -37,10 +37,8 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
-  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { AttributeService } from './lib/embeddables/attribute_service';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 
 export interface EmbeddableSetupDependencies {
@@ -75,14 +73,6 @@ export interface EmbeddableStart {
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-  getAttributeService: <
-    A,
-    V extends EmbeddableInput & { attributes: A },
-    R extends SavedObjectEmbeddableInput
-  >(
-    type: string
-  ) => AttributeService<A, V, R>;
-
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
@@ -159,7 +149,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
-      getAttributeService: (type: string) => new AttributeService(type, core.savedObjects.client),
       getStateTransfer: (history?: ScopedHistory) => {
         return history
           ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
