@@ -15,7 +15,17 @@ export const managementTabs: Record<string, NavTab> = {
       defaultMessage: 'Hosts',
     }),
     id: AdministrationSubTab.endpoints,
-    href: '/hosts',
+    href: `/${AdministrationSubTab.endpoints}`,
+    urlKey: 'administration',
+    pageId: SecurityPageName.administration,
+    disabled: false,
+  },
+  [AdministrationSubTab.trustedApps]: {
+    name: i18n.translate('xpack.securitySolution.managementTabs.trustedApps', {
+      defaultMessage: 'Trusted Applications',
+    }),
+    id: AdministrationSubTab.trustedApps,
+    href: `/${AdministrationSubTab.trustedApps}`,
     urlKey: 'administration',
     pageId: SecurityPageName.administration,
     disabled: false,
