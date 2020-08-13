@@ -40,18 +40,19 @@ export const ManageProcessorForm: FunctionComponent<Props> = ({
   const handleSubmit = useCallback(
     async (data: FormData, isValid: boolean) => {
       if (isValid) {
-        const { type, customOptions, ...options } = data;
+        const { type, customOptions, fields } = data;
         onSubmit({
           type,
-          options: customOptions ? customOptions : options,
+          options: customOptions ? customOptions : fields,
         });
       }
     },
     [onSubmit]
   );
 
+  const maybeProcessorOptions = processor?.options;
   const { form } = useForm({
-    defaultValue: processor?.options,
+    defaultValue: { fields: maybeProcessorOptions ?? {} },
     onSubmit: handleSubmit,
   });
 

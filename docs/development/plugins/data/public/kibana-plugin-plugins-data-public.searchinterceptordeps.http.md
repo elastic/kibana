@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-http: CoreStart['http'];
+http: CoreSetup['http'];
 ```
