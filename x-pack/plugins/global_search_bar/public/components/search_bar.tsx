@@ -40,7 +40,7 @@ const useIfMounted = () => {
 };
 
 interface Props {
-  globalSearch: SearchServiceStart;
+  globalSearch: SearchServiceStart['find'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
 }
 
@@ -65,11 +65,14 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
       let arr: GlobalSearchResult[] = [];
       // setLoadingState(true);
-      globalSearch.find(currentTerm, {}).subscribe({
+      globalSearch(currentTerm, {}).subscribe({
         next: ({ results }) => {
-          // if something was searched
           if (currentTerm.length > 0) {
-            arr.push(...results);
+            arr = [...results, ...arr].sort((a, b) => {
+              if (a.score < b.score) return 1;
+              if (a.score > b.score) return -1;
+              return 0;
+            });
             setOptions(arr);
             return;
           }
@@ -80,14 +83,8 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
           arr = [...results, ...arr].sort((a, b) => {
             const titleA = a.title.toUpperCase(); // ignore upper and lowercase
             const titleB = b.title.toUpperCase(); // ignore upper and lowercase
-            if (titleA < titleB) {
-              return -1;
-            }
-            if (titleA > titleB) {
-              return 1;
-            }
-
-            // titles must be equal
+            if (titleA < titleB) return -1;
+            if (titleA > titleB) return 1;
             return 0;
           });
 
@@ -159,19 +156,25 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
       options={options}
       // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
       renderOption={(option: EuiSelectableOption & GlobalSearchResult) => (
-        <EuiFlexGroup responsive={false} gutterSize="s" data-test-subj="header-search-option">
-          <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
-          <EuiFlexItem>{option.title}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              aria-hidden={true}
-              className="kibanaChromeSearch__itemGotoBadge"
-              color="hollow"
-            >
-              Go to <small>&#x21A9;</small>
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiFlexGroup responsive={false} gutterSize="s" data-test-subj="header-search-option">
+            <EuiFlexItem grow={false}>{option.icon && <EuiIcon type={option.icon} />}</EuiFlexItem>
+            <EuiFlexItem>
+              {option.title}
+              <br />
+              {(option.type as string) !== 'application' && option.type}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                aria-hidden={true}
+                className="kibanaChromeSearch__itemGotoBadge"
+                color="hollow"
+              >
+                Go to <small>&#x21A9;</small>
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
       // @ts-ignore EUI TS doesn't allow not list options to be passed but it all works
       onChange={async (selected: Array<EuiSelectableOption & GlobalSearchResult>) => {
@@ -179,9 +182,9 @@ export function SearchBar({ globalSearch, navigateToUrl }: Props) {
 
         if (url.startsWith('https://')) window.location.assign(url);
         else {
-          await navigateToUrl(url);
+          navigateToUrl(url);
           (document.activeElement as HTMLElement).blur();
-          setTerm('');
+          onSearch('');
           setSearchFocus(false);
           if (searchRef) searchRef.value = '';
         }

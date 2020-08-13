@@ -36,7 +36,7 @@ export class GlobalSearchProvidersPlugin implements Plugin<{}, {}> {
   ) {
     ReactDOM.render(
       <I18nProvider>
-        <SearchBar globalSearch={globalSearch} navigateToUrl={navigateToUrl} />
+        <SearchBar globalSearch={globalSearch.find} navigateToUrl={navigateToUrl} />
       </I18nProvider>,
       targetDomElement
     );
