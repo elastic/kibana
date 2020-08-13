@@ -18,7 +18,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
-import { ISearchSetup, ISearchStart } from './types';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
@@ -28,7 +28,7 @@ import { calculateBounds, TimeRange } from '../../common/query';
 
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor } from './search_interceptor';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -54,7 +54,7 @@ interface SearchServiceStartDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
-  private searchInterceptor!: SearchInterceptor;
+  private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   /**
@@ -91,15 +91,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const aggFunctions = getAggTypesFunctions();
     aggFunctions.forEach((fn) => expressions.registerFunction(fn));
 
-    return {
-      aggs: {
-        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
-        types: aggTypesSetup,
-      },
-    };
-  }
-
-  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
@@ -109,14 +100,27 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.searchInterceptor = new SearchInterceptor(
       {
         toasts: core.notifications.toasts,
-        application: core.application,
         http: core.http,
         uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
         usageCollector: this.usageCollector!,
       },
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
+    return {
+      usageCollector: this.usageCollector!,
+      __enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
+      },
+      aggs: {
+        calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
+        types: aggTypesSetup,
+      },
+    };
+  }
+
+  public start(core: CoreStart, dependencies: SearchServiceStartDependencies): ISearchStart {
     const aggTypesStart = this.aggTypesRegistry.start();
 
     const search: ISearchGeneric = (request, options) => {
@@ -145,16 +149,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search,
-      usageCollector: this.usageCollector!,
       searchSource: {
         create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
         createEmpty: () => {
           return new SearchSource({}, searchSourceDependencies);
         },
-      },
-      setInterceptor: (searchInterceptor: SearchInterceptor) => {
-        // TODO: should an intercepror have a destroy method?
-        this.searchInterceptor = searchInterceptor;
       },
       __LEGACY: legacySearch,
     };

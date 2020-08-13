@@ -71,8 +71,9 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
       });
     });
 
-    it(`should show the node list`, async () => {
-      await expect(simulator.map(() => simulator.nodeListElement().length)).toYieldEqualTo(1);
+    it(`should show links to the 3 nodes (with icons) in the node list.`, async () => {
+      await expect(simulator.map(() => simulator.nodeListNodeLinkText().length)).toYieldEqualTo(3);
+      await expect(simulator.map(() => simulator.nodeListNodeLinkIcons().length)).toYieldEqualTo(3);
     });
 
     describe("when the second child node's first button has been clicked", () => {
@@ -150,6 +151,39 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         }))
       ).toYieldEqualTo({
         relatedEventButtons: 1,
+      });
+    });
+    describe('when the related events button is clicked', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should open the submenu and display exactly one option with the correct count', async () => {
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().map((node) => node.text()))
+        ).toYieldEqualTo(['2 registry']);
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().length)
+        ).toYieldEqualTo(1);
+      });
+    });
+    describe('and when the related events button is clicked again', () => {
+      beforeEach(async () => {
+        const button = await simulator.resolveWrapper(() =>
+          simulator.processNodeRelatedEventButton(entityIDs.origin)
+        );
+        if (button) {
+          button.simulate('click');
+        }
+      });
+      it('should close the submenu', async () => {
+        await expect(
+          simulator.map(() => simulator.processNodeSubmenuItems().length)
+        ).toYieldEqualTo(0);
       });
     });
   });

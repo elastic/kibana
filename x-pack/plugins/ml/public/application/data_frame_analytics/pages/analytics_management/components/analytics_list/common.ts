@@ -35,6 +35,11 @@ interface ProgressSection {
 export interface DataFrameAnalyticsStats {
   assignment_explanation?: string;
   id: DataFrameAnalyticsId;
+  memory_usage?: {
+    timestamp?: string;
+    peak_usage_bytes: number;
+    status: string;
+  };
   node?: {
     attributes: Record<string, any>;
     ephemeral_id: string;
@@ -121,6 +126,7 @@ export enum DataFrameAnalyticsListColumn {
   configCreateTime = 'config.create_time',
   description = 'config.description',
   id = 'id',
+  memoryStatus = 'stats.memory_usage.status',
 }
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
