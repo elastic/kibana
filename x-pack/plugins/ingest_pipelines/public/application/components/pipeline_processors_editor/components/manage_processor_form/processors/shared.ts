@@ -6,11 +6,22 @@
 
 import * as rt from 'io-ts';
 import { isRight } from 'fp-ts/lib/Either';
-import { flow } from 'fp-ts/lib/function';
 
 import { FieldConfig } from '../../../../../../shared_imports';
 
 export const arrayOfStrings = rt.array(rt.string);
-export const isArrayOfStrings = flow(arrayOfStrings.decode, isRight);
+
+export function isArrayOfStrings(v: unknown): v is string[] {
+  const res = arrayOfStrings.decode(v);
+  return isRight(res);
+}
+
+/**
+ * Shared deserializer functions
+ */
+export const to = {
+  booleanOrUndef: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
+  arrayOfStrings: (v: unknown): string[] => (isArrayOfStrings(v) ? v : []),
+};
 
 export type FieldsConfig = Record<string, FieldConfig>;
