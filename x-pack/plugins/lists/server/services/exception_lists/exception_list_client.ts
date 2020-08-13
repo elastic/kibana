@@ -51,8 +51,6 @@ import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_li
 export class ExceptionListClient {
   private readonly user: string;
 
-  private trustedAppsListCreated: boolean = false;
-
   private readonly savedObjectsClient: SavedObjectsClientContract;
 
   constructor({ user, savedObjectsClient }: ConstructorOptions) {
@@ -97,17 +95,11 @@ export class ExceptionListClient {
    * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
    */
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
-    if (this.trustedAppsListCreated) {
-      return null;
-    }
     const { savedObjectsClient, user } = this;
     return createEndpointTrustedAppsList({
       savedObjectsClient,
       user,
       version: 1,
-    }).then((response) => {
-      this.trustedAppsListCreated = true;
-      return response;
     });
   };
 
@@ -284,6 +276,7 @@ export class ExceptionListClient {
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
+    await this.createTrustedAppsList();
     return createExceptionListItem({
       _tags,
       comments,
@@ -316,6 +309,7 @@ export class ExceptionListClient {
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
+    await this.createTrustedAppsList();
     return updateExceptionListItem({
       _tags,
       _version,
@@ -386,6 +380,7 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+    await this.createTrustedAppsList();
     return findExceptionListItem({
       filter,
       listId,
@@ -408,6 +403,7 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListsItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+    await this.createTrustedAppsList();
     return findExceptionListsItem({
       filter,
       listId,
