@@ -39,6 +39,7 @@ export interface InferenceConfigResponse {
     model_id: string;
     tags: string;
     version: string;
+    inference_config: any;
   }>;
 }
 

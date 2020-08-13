@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiSearchBarProps,
   EuiSpacer,
+  EuiButtonIcon,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -32,6 +33,7 @@ import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useNotifications } from '../../../../../contexts/kibana';
+import { ExpandedRow } from './expanded_row';
 
 type Stats = Omit<ModelStats, 'model_id'>;
 
@@ -58,6 +60,8 @@ export const ModelsList: FC = () => {
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
 
   const [modelsToDelete, setModelsToDelete] = useState<ModelWithStats[]>([]);
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
 
   async function fetchData() {
     setIsLoading(true);
@@ -158,7 +162,9 @@ export const ModelsList: FC = () => {
       name: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
         defaultMessage: 'View training data',
       }),
-      description: 'Clone this person',
+      description: i18n.translate('xpack.ml.inference.modelsList.viewTrainingDataActionLabel', {
+        defaultMessage: 'View training data',
+      }),
       icon: 'list',
       type: 'icon',
       href: 'temp',
@@ -181,7 +187,39 @@ export const ModelsList: FC = () => {
     },
   ];
 
+  const toggleDetails = async (item: ModelItem) => {
+    await fetchModelsStats([item]);
+
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.model_id]) {
+      delete itemIdToExpandedRowMapValues[item.model_id];
+    } else {
+      itemIdToExpandedRowMapValues[item.model_id] = <ExpandedRow item={item as ModelWithStats} />;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
   const columns: Array<EuiBasicTableColumn<ModelItem>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: ModelItem) => (
+        <EuiButtonIcon
+          onClick={() => toggleDetails(item)}
+          aria-label={
+            itemIdToExpandedRowMap[item.model_id]
+              ? i18n.translate('xpack.ml.inference.modelsList.collapseRow', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.ml.inference.modelsList.expandRow', {
+                  defaultMessage: 'Expand',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+    },
     {
       field: ModelsTableToConfigMapping.id,
       name: i18n.translate('xpack.ml.inference.modelsList.modelIdHeader', {
@@ -320,6 +358,7 @@ export const ModelsList: FC = () => {
           rowProps={(item) => ({
             'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
           })}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         />
       </div>
       {modelsToDelete.length > 0 && (
