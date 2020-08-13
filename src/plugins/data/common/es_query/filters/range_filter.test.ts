@@ -20,15 +20,15 @@
 import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
 import { fields, getField } from '../../index_patterns/mocks';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternSpec, IFieldType } from '../../index_patterns';
 
 describe('Range filter builder', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternSpec;
 
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-    } as IIndexPattern;
+    };
   });
 
   it('should be a function', () => {
@@ -174,9 +174,9 @@ describe('Range filter builder', () => {
 });
 
 describe('getRangeFilterField', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern = {
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');

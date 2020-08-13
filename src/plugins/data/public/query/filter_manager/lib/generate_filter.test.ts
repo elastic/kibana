@@ -23,7 +23,6 @@ import { FilterManager } from '../filter_manager';
 import {
   Filter,
   IFieldType,
-  IIndexPattern,
   isExistsFilter,
   buildExistsFilter,
   PhraseFilter,
@@ -79,7 +78,7 @@ describe('Generate filters', () => {
   });
 
   it('should update and re-enable EXISTING exists filter', () => {
-    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as IIndexPattern);
+    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME });
     filter.meta.disabled = true;
     filtersArray.push(filter);
 

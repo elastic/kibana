@@ -18,13 +18,12 @@
  */
 
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
-import { IIndexPattern } from '../../index_patterns';
 import { fields } from '../../index_patterns/fields/fields.mocks';
 
 describe('phrases filter', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern = {
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   describe('getPhrasesFilterField', function () {
     it('should return the name of the field a phrases query is targeting', () => {

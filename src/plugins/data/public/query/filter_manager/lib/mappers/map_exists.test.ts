@@ -20,7 +20,7 @@
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
 import {
-  IIndexPattern,
+  IndexPatternSpec,
   IFieldType,
   buildExistsFilter,
   buildEmptyFilter,
@@ -28,12 +28,12 @@ import {
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
       indexPattern = {
         id: 'index',
-      } as IIndexPattern;
+      };
     });
 
     test('should return the key and value for matching filters', async () => {

@@ -1204,7 +1204,7 @@ export interface IndexPatternSpec {
     // (undocumented)
     timeFieldName?: string;
     // (undocumented)
-    title: string;
+    title?: string;
     // (undocumented)
     typeMeta?: IndexPatternTypeMeta;
     // (undocumented)

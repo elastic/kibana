@@ -19,15 +19,15 @@
 
 import { dedupFilters } from './dedup_filters';
 import { Filter, buildRangeFilter, buildQueryFilter, FilterStateStore } from '../../es_query';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternSpec, IFieldType } from '../../index_patterns';
 
 describe('filter manager utilities', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternSpec;
 
   beforeEach(() => {
     indexPattern = {
       id: 'index',
-    } as IIndexPattern;
+    };
   });
 
   describe('dedupFilters(existing, filters)', () => {

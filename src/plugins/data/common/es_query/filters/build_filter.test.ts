@@ -19,6 +19,7 @@
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
 import { stubIndexPattern, stubFields } from '../../../common/stubs';
+import { IndexPatternSpec } from '../../..';
 
 describe('buildFilter', () => {
   it('should build phrase filters', () => {
@@ -26,7 +27,7 @@ describe('buildFilter', () => {
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
-      stubIndexPattern,
+      stubIndexPattern as IndexPatternSpec,
       stubFields[0],
       FILTERS.PHRASE,
       false,
@@ -49,7 +50,7 @@ describe('buildFilter', () => {
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
-      stubIndexPattern,
+      stubIndexPattern as IndexPatternSpec,
       stubFields[0],
       FILTERS.PHRASES,
       false,
@@ -72,7 +73,7 @@ describe('buildFilter', () => {
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
-      stubIndexPattern,
+      stubIndexPattern as IndexPatternSpec,
       stubFields[0],
       FILTERS.RANGE,
       false,
@@ -94,7 +95,7 @@ describe('buildFilter', () => {
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
-      stubIndexPattern,
+      stubIndexPattern as IndexPatternSpec,
       stubFields[0],
       FILTERS.EXISTS,
       false,
@@ -116,7 +117,7 @@ describe('buildFilter', () => {
     const alias = 'bar';
     const state = FilterStateStore.APP_STATE;
     const filter = buildFilter(
-      stubIndexPattern,
+      stubIndexPattern as IndexPatternSpec,
       stubFields[0],
       FILTERS.EXISTS,
       true,

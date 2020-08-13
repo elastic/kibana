@@ -20,7 +20,7 @@
 import { extractTimeFilter } from './extract_time_filter';
 import {
   Filter,
-  IIndexPattern,
+  IndexPatternSpec,
   IFieldType,
   buildQueryFilter,
   buildRangeFilter,
@@ -28,12 +28,12 @@ import {
 } from '../../../../common';
 
 describe('filter manager utilities', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternSpec;
 
   beforeEach(() => {
     indexPattern = {
       id: 'logstash-*',
-    } as IIndexPattern;
+    };
   });
 
   describe('extractTimeFilter()', () => {
