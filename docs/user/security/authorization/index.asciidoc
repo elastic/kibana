@@ -3,7 +3,7 @@
 === Authorization
 
 Authorizing users to use {kib} in simple configurations is as easy as assigning the user
-either the `kibana_user` or `kibana_dashboard_only_user` reserved role. If you're running 
+either the `kibana_user` or `kibana_dashboard_only_user` reserved role. If you're running
 a single tenant of {kib} against your {es} cluster, and you're not controlling access to individual spaces, then this is sufficient and no other action is required.
 
 ==== Spaces
@@ -12,7 +12,7 @@ If you want to control individual spaces in {kib}, do **not** use the `kibana_us
 
 ==== Multi-tenant {kib}
 
-When running multiple tenants of {kib}, and changing the `kibana.index` in your `kibana.yml`, you 
+When running multiple tenants of {kib}, and changing the `kibana.index` in your `kibana.yml`, you
 must create custom roles that authorize the user for that specific tenant. You can use
 either the *Management / Security / Roles* page in {kib} or the <<role-management-api>>
 to assign a specific <<kibana-privileges, Kibana privilege>> at that tenant. After creating the
@@ -32,5 +32,6 @@ a legacy role, the following is logged to your {kib} logs:
 <username> relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0
 ----------------------------------
 
-To disable legacy roles from being authorized in {kib}, set `xpack.security.authorization.legacyFallback` to `false`
+To disable legacy roles from being authorized in {kib},
+set `xpack.security.authorization.legacyFallback.enabled` to `false`
 in your `kibana.yml`.
