@@ -8,12 +8,12 @@ import { $Values } from '@kbn/utility-types';
 import _ from 'lodash';
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
 import Boom from 'boom';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';
+import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'src/core/public';
 import { Ensure } from '@kbn/utility-types';
@@ -65,7 +65,7 @@ import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/ex
 import { Subscription } from 'rxjs';
 import { Toast } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
-import { ToastsStart } from 'kibana/public';
+import { ToastsSetup } from 'kibana/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
@@ -222,6 +222,10 @@ export type CustomFilter = Filter & {
 //
 // @public (undocumented)
 export interface DataPublicPluginSetup {
+    // Warning: (ae-forgotten-export) The symbol "DataPublicPluginEnhancements" needs to be exported by the entry point index.d.ts
+    //
+    // @internal (undocumented)
+    __enhance: (enhancements: DataPublicPluginEnhancements) => void;
     // Warning: (ae-forgotten-export) The symbol "AutocompleteSetup" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -770,6 +774,8 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
 //
 // @public (undocumented)
 export interface IEsSearchResponse extends IKibanaSearchResponse {
+    isPartial?: boolean;
+    isRunning?: boolean;
     // (undocumented)
     rawResponse: SearchResponse_2<any>;
 }
@@ -1213,11 +1219,10 @@ export type InputTimeRange = TimeRange | {
 // @public (undocumented)
 export type ISearch = (request: IKibanaSearchRequest, options?: ISearchOptions) => Observable<IKibanaSearchResponse>;
 
-// Warning: (ae-forgotten-export) The symbol "IStrategyOptions" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ISearchGeneric" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOptions) => Observable<IEsSearchResponse>;
+export type ISearchGeneric = (request: IEsSearchRequest, options?: ISearchOptions) => Observable<IEsSearchResponse>;
 
 // Warning: (ae-missing-release-tag) "ISearchOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1225,6 +1230,8 @@ export type ISearchGeneric = (request: IEsSearchRequest, options?: IStrategyOpti
 export interface ISearchOptions {
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    strategy?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "SearchSource" needs to be exported by the entry point index.d.ts
@@ -1711,27 +1718,32 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
+    // @internal
     protected abortController: AbortController;
+    // @internal (undocumented)
+    protected application: CoreStart['application'];
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
-    getPendingCount$: () => Observable<number>;
-    // (undocumented)
+    getPendingCount$(): Observable<number>;
+    // @internal (undocumented)
     protected hideToast: () => void;
+    // @internal
     protected longRunningToast?: Toast;
+    // @internal
     protected pendingCount$: BehaviorSubject<number>;
-    protected pendingCount: number;
     // (undocumented)
     protected readonly requestTimeout?: number | undefined;
     // (undocumented)
-    protected runSearch(request: IEsSearchRequest, signal: AbortSignal): Observable<IEsSearchResponse>;
+    protected runSearch(request: IEsSearchRequest, signal: AbortSignal, strategy?: string): Observable<IEsSearchResponse>;
     search(request: IEsSearchRequest, options?: ISearchOptions): Observable<IEsSearchResponse>;
     // (undocumented)
     protected setupTimers(options?: ISearchOptions): {
         combinedSignal: AbortSignal;
         cleanup: () => void;
     };
-    // (undocumented)
+    // @internal (undocumented)
     protected showToast: () => void;
+    // @internal
     protected timeoutSubscriptions: Subscription;
 }
 
@@ -1740,13 +1752,13 @@ export class SearchInterceptor {
 // @public (undocumented)
 export interface SearchInterceptorDeps {
     // (undocumented)
-    application: ApplicationStart;
+    http: CoreSetup_2['http'];
     // (undocumented)
-    http: CoreStart['http'];
+    startServices: Promise<[CoreStart, any, unknown]>;
     // (undocumented)
-    toasts: ToastsStart;
+    toasts: ToastsSetup;
     // (undocumented)
-    uiSettings: CoreStart['uiSettings'];
+    uiSettings: CoreSetup_2['uiSettings'];
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -1977,9 +1989,9 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:393:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:396:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:45:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:54:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:55:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:62:5 - (ae-forgotten-export) The symbol "createFiltersFromValueClickAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:63:5 - (ae-forgotten-export) The symbol "createFiltersFromRangeSelectAction" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/types.ts:71:5 - (ae-forgotten-export) The symbol "IndexPatternSelectProps" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
