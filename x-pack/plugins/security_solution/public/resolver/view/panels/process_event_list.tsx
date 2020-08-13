@@ -165,6 +165,7 @@ export const ProcessEventList = memo(function ProcessEventList({
 
   const dispatch = useResolverDispatch();
 
+  // TODO: this action is used to make a request. remove.
   useEffect(() => {
     if (typeof relatedsReady === 'undefined') {
       dispatch({
@@ -223,7 +224,7 @@ export const ProcessEventList = memo(function ProcessEventList({
       {
         text: processName,
         onClick: () => {
-          pushToQueryParams({ crumbId: processEntityId, crumbEvent: '' });
+          pushToQueryParams({ crumbId: processEntityId, crumbEvent: 'process' });
         },
       },
       {

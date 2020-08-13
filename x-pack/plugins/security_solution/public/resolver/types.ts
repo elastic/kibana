@@ -183,6 +183,9 @@ export interface DataState {
   readonly pendingRequestDatabaseDocumentID?: string;
   readonly resolverComponentInstanceID: string | undefined;
 
+  readonly panelEventID: string | string[];
+  readonly panelEventType: string | string[];
+
   /**
    * The parameters and response from the last successful request.
    */

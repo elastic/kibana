@@ -157,6 +157,10 @@ export const ariaActiveDescendant = composeSelectors(
   uiSelectors.ariaActiveDescendant
 );
 
+export const panelEventType = composeSelectors(dataStateSelector, dataSelectors.panelEventType);
+
+export const panelEventID = composeSelectors(dataStateSelector, dataSelectors.panelEventID);
+
 /**
  * Returns the nodeID of the selected node
  */

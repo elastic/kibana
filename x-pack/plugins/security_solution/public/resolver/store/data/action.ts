@@ -76,6 +76,8 @@ interface AppReceivedNewExternalProperties {
      */
     databaseDocumentID?: string;
     resolverComponentInstanceID: string;
+    panelEventType: string | string[];
+    panelEventID: string | string[];
   };
 }
 

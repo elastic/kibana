@@ -49,6 +49,24 @@ export function resolverComponentInstanceID(state: DataState): string {
   return state.resolverComponentInstanceID ? state.resolverComponentInstanceID : '';
 }
 
+export function panelEventType(state: DataState): string {
+  const eventType = state.panelEventType;
+  if (Array.isArray(eventType)) {
+    return eventType[0];
+  } else {
+    return eventType;
+  }
+}
+
+export function panelEventID(state: DataState): string {
+  const eventID = state.panelEventID;
+  if (Array.isArray(eventID)) {
+    return eventID[0];
+  } else {
+    return eventID;
+  }
+}
+
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */

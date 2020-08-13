@@ -5,6 +5,9 @@
  */
 
 import { useLayoutEffect } from 'react';
+// eslint-disable-next-line import/no-nodejs-modules
+import querystring from 'querystring';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useResolverDispatch } from './use_resolver_dispatch';
 
 /**
@@ -22,10 +25,35 @@ export function useStateSyncingActions({
   resolverComponentInstanceID: string;
 }) {
   const dispatch = useResolverDispatch();
+  const history = useHistory();
+  const urlSearch = useLocation().search;
+  const panelIdKey: string = `resolver-${resolverComponentInstanceID}-id`;
+  const panelEventTypeKey: string = `resolver-${resolverComponentInstanceID}-event`;
+  const parsed = querystring.parse(urlSearch.slice(1));
+  const panelEventType = parsed[panelEventTypeKey];
+  const panelEventID = parsed[panelIdKey];
   useLayoutEffect(() => {
     dispatch({
       type: 'appReceivedNewExternalProperties',
-      payload: { databaseDocumentID, resolverComponentInstanceID },
+      payload: { databaseDocumentID, resolverComponentInstanceID, panelEventType, panelEventID },
     });
-  }, [dispatch, databaseDocumentID, resolverComponentInstanceID]);
+    // return () => {
+    //   console.log('return runnin');
+    //   const crumbsToPass = {
+    //     ...querystring.parse(urlSearch.slice(1)),
+    //   };
+    //   delete crumbsToPass[uniqueCrumbIdKey];
+    //   delete crumbsToPass[uniqueCrumbEventKey];
+    //   const relativeURL = { search: querystring.stringify(crumbsToPass) };
+    //   history.replace(relativeURL);
+    // };
+  }, [
+    dispatch,
+    databaseDocumentID,
+    resolverComponentInstanceID,
+    urlSearch,
+    history,
+    panelEventID,
+    panelEventType,
+  ]);
 }

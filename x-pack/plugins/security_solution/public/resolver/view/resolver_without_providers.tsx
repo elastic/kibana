@@ -70,11 +70,11 @@ export const ResolverWithoutProviders = React.memo(
     const hasError = useSelector(selectors.hasError);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
     const { colorMap } = useResolverTheme();
-    const { cleanUpQueryParams } = useResolverQueryParams();
+    // const { cleanUpQueryParams } = useResolverQueryParams();
 
-    useEffectOnce(() => {
-      return () => cleanUpQueryParams();
-    });
+    // useEffectOnce(() => {
+    //   return () => cleanUpQueryParams();
+    // });
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>

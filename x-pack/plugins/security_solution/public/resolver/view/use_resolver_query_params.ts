@@ -47,35 +47,8 @@ export function useResolverQueryParams() {
     },
     [history, urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]
   );
-  const queryParams: CrumbInfo = useMemo(() => {
-    const parsed = querystring.parse(urlSearch.slice(1));
-    const crumbEvent = parsed[uniqueCrumbEventKey];
-    const crumbId = parsed[uniqueCrumbIdKey];
-    function valueForParam(param: string | string[]): string {
-      if (Array.isArray(param)) {
-        return param[0] || '';
-      }
-      return param || '';
-    }
-    return {
-      crumbEvent: valueForParam(crumbEvent),
-      crumbId: valueForParam(crumbId),
-    };
-  }, [urlSearch, uniqueCrumbIdKey, uniqueCrumbEventKey]);
-
-  const cleanUpQueryParams = () => {
-    const crumbsToPass = {
-      ...querystring.parse(urlSearch.slice(1)),
-    };
-    delete crumbsToPass[uniqueCrumbIdKey];
-    delete crumbsToPass[uniqueCrumbEventKey];
-    const relativeURL = { search: querystring.stringify(crumbsToPass) };
-    history.replace(relativeURL);
-  };
 
   return {
     pushToQueryParams,
-    queryParams,
-    cleanUpQueryParams,
   };
 }

@@ -12,6 +12,8 @@ const initialState: DataState = {
   relatedEvents: new Map(),
   relatedEventsReady: new Map(),
   resolverComponentInstanceID: undefined,
+  panelEventType: '',
+  panelEventID: '',
 };
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -20,6 +22,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       ...state,
       databaseDocumentID: action.payload.databaseDocumentID,
       resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
+      panelEventID: action.payload.panelEventID,
+      panelEventType: action.payload.panelEventType,
     };
     return nextState;
   } else if (action.type === 'appRequestedResolverData') {

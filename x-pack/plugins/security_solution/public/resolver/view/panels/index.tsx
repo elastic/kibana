@@ -39,8 +39,9 @@ const PanelContent = memo(function PanelContent() {
 
   const { timestamp } = useContext(SideEffectContext);
 
-  const { pushToQueryParams, queryParams } = useResolverQueryParams();
-
+  const { pushToQueryParams } = useResolverQueryParams();
+  const panelEventID = useSelector(selectors.panelEventID);
+  const panelEventType = useSelector(selectors.panelEventType);
   const graphableProcesses = useSelector(selectors.graphableProcesses);
   const graphableProcessEntityIds = useMemo(() => {
     return new Set(graphableProcesses.map(event.entityId));
@@ -48,14 +49,14 @@ const PanelContent = memo(function PanelContent() {
   // The entity id in query params of a graphable process (or false if none is found)
   // For 1 case (the related detail, see below), the process id will be in crumbEvent instead of crumbId
   const idFromParams = useMemo(() => {
-    if (graphableProcessEntityIds.has(queryParams.crumbId)) {
-      return queryParams.crumbId;
+    if (graphableProcessEntityIds.has(panelEventID)) {
+      return panelEventID;
     }
-    if (graphableProcessEntityIds.has(queryParams.crumbEvent)) {
-      return queryParams.crumbEvent;
+    if (graphableProcessEntityIds.has(panelEventType)) {
+      return panelEventType;
     }
     return '';
-  }, [queryParams, graphableProcessEntityIds]);
+  }, [graphableProcessEntityIds, panelEventType, panelEventID]);
 
   // The "selected" node (and its corresponding event) in the tree control.
   // It may need to be synchronized with the ID indicated as selected via the `idFromParams`
@@ -98,7 +99,6 @@ const PanelContent = memo(function PanelContent() {
   }, [dispatch, uiSelectedEvent, paramsSelectedEvent, lastUpdatedProcess, timestamp]);
 
   const relatedEventStats = useSelector(selectors.relatedEventsStats);
-  const { crumbId, crumbEvent } = queryParams;
   const relatedStatsForIdFromParams: ResolverNodeStats | undefined = idFromParams
     ? relatedEventStats(idFromParams)
     : undefined;
@@ -109,7 +109,7 @@ const PanelContent = memo(function PanelContent() {
    *
    */
   const panelToShow = useMemo(() => {
-    if (crumbEvent === '' && crumbId === '') {
+    if (panelEventType === '' && panelEventID === '') {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
        * | :--------------------- | :------------------------- | :----------------------  |
@@ -118,13 +118,13 @@ const PanelContent = memo(function PanelContent() {
       return 'processListWithCounts';
     }
 
-    if (graphableProcessEntityIds.has(crumbId)) {
+    if (graphableProcessEntityIds.has(panelEventID)) {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
        * | :--------------------- | :------------------------- | :----------------------  |
        * | process detail         | entity_id of process       | null                     |
        */
-      if (crumbEvent === '' && uiSelectedEvent) {
+      if (panelEventType === '' && uiSelectedEvent) {
         return 'processDetails';
       }
 
@@ -134,7 +134,7 @@ const PanelContent = memo(function PanelContent() {
        * | relateds count by type | entity_id of process       | 'all'                    |
        */
 
-      if (crumbEvent === 'all' && uiSelectedEvent) {
+      if (panelEventType === 'all' && uiSelectedEvent) {
         return 'eventCountsForProcess';
       }
 
@@ -144,12 +144,12 @@ const PanelContent = memo(function PanelContent() {
        * | relateds list 1 type   | entity_id of process       | valid related event type |
        */
 
-      if (crumbEvent && crumbEvent.length && uiSelectedEvent) {
+      if (panelEventType && panelEventType.length && uiSelectedEvent) {
         return 'processEventList';
       }
     }
 
-    if (graphableProcessEntityIds.has(crumbEvent)) {
+    if (graphableProcessEntityIds.has(panelEventType)) {
       /**
        * | Crumb/Table            | &crumbId                   | &crumbEvent              |
        * | :--------------------- | :------------------------- | :----------------------  |
@@ -160,7 +160,7 @@ const PanelContent = memo(function PanelContent() {
 
     // The default 'Event List' / 'List of all processes' view
     return 'processListWithCounts';
-  }, [uiSelectedEvent, crumbEvent, crumbId, graphableProcessEntityIds]);
+  }, [uiSelectedEvent, panelEventType, panelEventID, graphableProcessEntityIds]);
 
   const panelInstance = useMemo(() => {
     if (panelToShow === 'processDetails') {
@@ -185,7 +185,7 @@ const PanelContent = memo(function PanelContent() {
           processEvent={uiSelectedEvent!}
           pushToQueryParams={pushToQueryParams}
           relatedStats={relatedStatsForIdFromParams!}
-          eventType={crumbEvent}
+          eventType={panelEventType}
         />
       );
     }
@@ -196,7 +196,7 @@ const PanelContent = memo(function PanelContent() {
       ).reduce((sum, val) => sum + val, 0);
       return (
         <RelatedEventDetail
-          relatedEventId={crumbId}
+          relatedEventId={panelEventID}
           parentEvent={uiSelectedEvent!}
           pushToQueryParams={pushToQueryParams}
           countForParent={parentCount}
@@ -207,8 +207,8 @@ const PanelContent = memo(function PanelContent() {
     return <ProcessListWithCounts pushToQueryParams={pushToQueryParams} />;
   }, [
     uiSelectedEvent,
-    crumbEvent,
-    crumbId,
+    panelEventType,
+    panelEventID,
     pushToQueryParams,
     relatedStatsForIdFromParams,
     panelToShow,
