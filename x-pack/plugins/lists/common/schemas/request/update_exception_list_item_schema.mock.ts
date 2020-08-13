@@ -9,6 +9,7 @@ import {
   DESCRIPTION,
   ENTRIES,
   ID,
+  ITEM_ID,
   ITEM_TYPE,
   LIST_ITEM_ID,
   META,
@@ -42,8 +43,7 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
 export const getUpdateMinimalExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   description: DESCRIPTION,
   entries: ENTRIES,
-  id: ID,
-  item_id: LIST_ITEM_ID,
+  item_id: ITEM_ID,
   name: NAME,
   type: ITEM_TYPE,
 });
