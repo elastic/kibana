@@ -78,6 +78,7 @@ describe('IndexPattern Field Item', () => {
       filters: [],
       field: {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,

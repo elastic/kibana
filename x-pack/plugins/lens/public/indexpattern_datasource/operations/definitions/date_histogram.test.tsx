@@ -60,6 +60,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'timestamp',
+              displayName: 'timestamp',
               type: 'date',
               esTypes: ['date'],
               aggregatable: true,
@@ -73,6 +74,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'other_timestamp',
+              displayName: 'other_timestamp',
               type: 'date',
               esTypes: ['date'],
               aggregatable: true,
@@ -170,6 +172,7 @@ describe('date_histogram', () => {
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,
@@ -187,6 +190,7 @@ describe('date_histogram', () => {
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'start_date',
+          displayName: 'start_date',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,
@@ -204,6 +208,7 @@ describe('date_histogram', () => {
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,
@@ -300,6 +305,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'dateField',
+              displayName: 'dateField',
               type: 'date',
               aggregatable: true,
               searchable: true,
@@ -342,6 +348,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'dateField',
+              displayName: 'dateField',
               type: 'date',
               aggregatable: true,
               searchable: true,

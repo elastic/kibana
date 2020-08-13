@@ -40,12 +40,14 @@ const indexPatternA = ({
   fields: [
     {
       name: 'timestamp',
+      displayName: 'timestamp',
       type: 'date',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'start_date',
+      displayName: 'start_date',
       type: 'date',
       aggregatable: true,
       searchable: true,
@@ -58,12 +60,14 @@ const indexPatternA = ({
     },
     {
       name: 'memory',
+      displayName: 'memory',
       type: 'number',
       aggregatable: true,
       searchable: true,
     },
     {
       name: 'source',
+      displayName: 'source',
       type: 'string',
       aggregatable: true,
       searchable: true,
@@ -71,6 +75,7 @@ const indexPatternA = ({
     },
     {
       name: 'dest',
+      displayName: 'dest',
       type: 'string',
       aggregatable: true,
       searchable: true,
@@ -87,6 +92,7 @@ const indexPatternB = ({
   fields: [
     {
       name: 'timestamp',
+      displayName: 'timestamp',
       type: 'date',
       aggregatable: true,
       searchable: true,
@@ -101,6 +107,7 @@ const indexPatternB = ({
     },
     {
       name: 'bytes',
+      displayName: 'bytes',
       type: 'number',
       aggregatable: true,
       searchable: true,
@@ -126,6 +133,7 @@ const indexPatternB = ({
     },
     {
       name: 'source',
+      displayName: 'source',
       type: 'string',
       aggregatable: false,
       searchable: false,
@@ -239,12 +247,14 @@ describe('loader', () => {
             fields: [
               {
                 name: 'timestamp',
+                displayName: 'timestamp',
                 type: 'date',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'bytes',
+                displayName: 'bytes',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
@@ -254,14 +264,17 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(cache.foo.fields.find((f) => f.name === 'bytes')!.aggregationRestrictions).toEqual({
+      expect(
+        cache.foo.fields.find((f: IndexPatternField) => f.name === 'bytes')!.aggregationRestrictions
+      ).toEqual({
         sum: { agg: 'sum' },
       });
-      expect(cache.foo.fields.find((f) => f.name === 'timestamp')!.aggregationRestrictions).toEqual(
-        {
-          date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
-        }
-      );
+      expect(
+        cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!
+          .aggregationRestrictions
+      ).toEqual({
+        date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
+      });
     });
   });
 

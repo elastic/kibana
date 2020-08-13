@@ -54,7 +54,7 @@ export async function loadIndexPatterns({
           (field) =>
             !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
         )
-        .concat(documentField as IndexPatternField[]);
+        .concat(documentField);
 
       const { typeMeta, id } = indexPattern;
       if (typeMeta?.aggs) {

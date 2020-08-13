@@ -87,36 +87,42 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'unsupported',
+          displayName: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'client',
+          displayName: 'client',
           type: 'ip',
           aggregatable: true,
           searchable: true,
@@ -131,6 +137,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -145,6 +152,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -166,6 +174,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -185,18 +194,21 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,

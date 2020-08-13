@@ -45,6 +45,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -52,6 +53,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -59,6 +61,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -66,6 +69,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -1095,12 +1099,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
               },
             },
           },
@@ -1145,12 +1149,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 0 } },
                 },
@@ -1195,12 +1199,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnOrder: ['col1'],
             columns: {
               col1: {
-                label: 'Average of bar',
+                label: 'Average of memory',
                 dataType: 'number',
                 isBucketed: false,
                 // Private
                 operationType: 'avg',
-                sourceField: 'bar',
+                sourceField: 'memory',
                 params: {
                   format: { id: 'bytes', params: { decimals: 2 } },
                 },
@@ -1253,12 +1257,14 @@ describe('IndexPatternDimensionEditorPanel', () => {
               {
                 aggregatable: true,
                 name: 'bar',
+                displayName: 'bar',
                 searchable: true,
                 type: 'number',
               },
               {
                 aggregatable: true,
                 name: 'mystring',
+                displayName: 'mystring',
                 searchable: true,
                 type: 'string',
               },

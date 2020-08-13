@@ -23,36 +23,42 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'start_date',
+        displayName: 'start_date',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'memory',
+        displayName: 'memory',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'dest',
+        displayName: 'dest',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -66,6 +72,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -80,6 +87,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -105,6 +113,7 @@ const expectedIndexPatterns = {
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -169,6 +178,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should apply a bucketed aggregation for a string field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -214,6 +224,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should apply a bucketed aggregation for a date field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -258,6 +269,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should select a metric for a number field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithoutLayer(), '1', {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -313,6 +325,7 @@ describe('IndexPattern Data Source suggestions', () => {
               fields: [
                 {
                   name: 'bytes',
+                  displayName: 'bytes',
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
@@ -331,6 +344,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
         const suggestions = getDatasourceSuggestionsForField(state, '1', {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -374,6 +388,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should apply a bucketed aggregation for a string field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -419,6 +434,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should apply a bucketed aggregation for a date field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -463,6 +479,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('should select a metric for a number field', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '1', {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -518,6 +535,7 @@ describe('IndexPattern Data Source suggestions', () => {
               fields: [
                 {
                   name: 'bytes',
+                  displayName: 'bytes',
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
@@ -536,6 +554,7 @@ describe('IndexPattern Data Source suggestions', () => {
 
         const suggestions = getDatasourceSuggestionsForField(state, '1', {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -563,6 +582,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('creates a new layer and replaces layer if no match is found', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithEmptyLayer(), '2', {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -693,6 +713,7 @@ describe('IndexPattern Data Source suggestions', () => {
           '1',
           {
             name: 'start_date',
+            displayName: 'start_date',
             type: 'date',
             aggregatable: true,
             searchable: true,
@@ -724,6 +745,7 @@ describe('IndexPattern Data Source suggestions', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -770,6 +792,7 @@ describe('IndexPattern Data Source suggestions', () => {
       it('does not use the same field for bucketing multiple times', () => {
         const suggestions = getDatasourceSuggestionsForField(stateWithNonEmptyTables(), '1', {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -785,6 +808,7 @@ describe('IndexPattern Data Source suggestions', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'dest',
+          displayName: 'dest',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -816,6 +840,7 @@ describe('IndexPattern Data Source suggestions', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -858,6 +883,7 @@ describe('IndexPattern Data Source suggestions', () => {
         };
         const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -908,6 +934,7 @@ describe('IndexPattern Data Source suggestions', () => {
         };
         const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -961,6 +988,7 @@ describe('IndexPattern Data Source suggestions', () => {
         const initialState = stateWithCurrentIndexPattern();
         const suggestions = getDatasourceSuggestionsForField(initialState, '2', {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -1015,6 +1043,7 @@ describe('IndexPattern Data Source suggestions', () => {
         const initialState = stateWithCurrentIndexPattern();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'timestamp',
+          displayName: 'timestamp',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -1324,30 +1353,35 @@ describe('IndexPattern Data Source suggestions', () => {
             fields: [
               {
                 name: 'field1',
+                displayName: 'field1',
                 type: 'string',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'field2',
+                displayName: 'field2',
                 type: 'string',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'field3',
+                displayName: 'field3',
                 type: 'string',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'field4',
+                displayName: 'field4',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'field5',
+                displayName: 'field5',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
@@ -1462,12 +1496,14 @@ describe('IndexPattern Data Source suggestions', () => {
             fields: [
               {
                 name: 'field1',
+                displayName: 'field1',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
               },
               {
                 name: 'field2',
+                displayName: 'field2',
                 type: 'date',
                 aggregatable: true,
                 searchable: true,
@@ -1522,6 +1558,7 @@ describe('IndexPattern Data Source suggestions', () => {
             fields: [
               {
                 name: 'field1',
+                displayName: 'field1',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,

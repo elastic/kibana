@@ -74,7 +74,7 @@ export function FieldSelect({
     function fieldNamesToOptions(items: string[]) {
       return items
         .map((field) => ({
-          label: field,
+          label: fieldMap[field].displayName,
           value: {
             type: 'field',
             field,
@@ -161,7 +161,7 @@ export function FieldSelect({
           ? selectedColumnSourceField
             ? [
                 {
-                  label: selectedColumnSourceField,
+                  label: fieldMap[selectedColumnSourceField].displayName,
                   value: { type: 'field', field: selectedColumnSourceField },
                 },
               ]

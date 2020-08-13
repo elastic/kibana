@@ -100,7 +100,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     isLoading: false,
   });
 
-  const wrappableName = wrapOnDot(field.name)!;
+  const wrappableName = wrapOnDot(field.displayName)!;
   const wrappableHighlight = wrapOnDot(highlight);
   const highlightIndex = wrappableHighlight
     ? wrappableName.toLowerCase().indexOf(wrappableHighlight.toLowerCase())
@@ -185,7 +185,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
       container={document.querySelector<HTMLElement>('.application') || undefined}
       button={
         <DragDrop
-          label={field.name}
+          label={field.displayName}
           value={value}
           data-test-subj="lnsFieldListPanelField"
           draggable
@@ -213,7 +213,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             >
               <LensFieldIcon type={field.type as DataType} />
 
-              <span className="lnsFieldItem__name" title={field.name}>
+              <span className="lnsFieldItem__name" title={field.displayName}>
                 {wrappableHighlightableFieldName}
               </span>
 
