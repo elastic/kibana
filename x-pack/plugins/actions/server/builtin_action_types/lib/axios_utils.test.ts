@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios';
+import HttpProxyAgent from 'http-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { addTimeZoneToDate, request, patch, getErrorMessage } from './axios_utils';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
@@ -34,7 +35,11 @@ describe('request', () => {
   });
 
   test('it fetch correctly with defaults', async () => {
-    const res = await request({ axios, url: '/test', logger });
+    const res = await request({
+      axios,
+      url: '/test',
+      logger,
+    });
 
     expect(axiosMock).toHaveBeenCalledWith('/test', {
       method: 'get',
@@ -42,6 +47,34 @@ describe('request', () => {
       headers: undefined,
       httpAgent: undefined,
       httpsAgent: undefined,
+      params: undefined,
+      proxy: false,
+      validateStatus: undefined,
+    });
+    expect(res).toEqual({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    });
+  });
+
+  test('it have been called with proper proxy agent', async () => {
+    const res = await request({
+      axios,
+      url: '/testProxy',
+      logger,
+      proxySettings: {
+        proxyUrl: 'http://localhost:1212',
+        rejectUnauthorizedCertificates: false,
+      },
+    });
+
+    expect(axiosMock).toHaveBeenCalledWith('/testProxy', {
+      method: 'get',
+      data: {},
+      headers: undefined,
+      httpAgent: new HttpProxyAgent('http://localhost:1212'),
+      httpsAgent: new HttpProxyAgent('http://localhost:1212'),
       params: undefined,
       proxy: false,
       validateStatus: undefined,

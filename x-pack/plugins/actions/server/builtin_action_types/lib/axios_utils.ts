@@ -39,6 +39,7 @@ export const request = async <T = unknown>({
     auth,
     // use httpsAgent and embedded proxy: false, to be able to handle fail on invalid certs
     httpsAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
+    httpAgent: proxySettings ? getProxyAgent(proxySettings, logger) : undefined,
     proxy: false, // the same way as it done for IncomingWebhook in
     headers,
     validateStatus,

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http from 'http';
-import httpProxy from 'http-proxy';
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
@@ -167,7 +165,6 @@ describe('execute()', () => {
         "text": "slack mockExecutor success: this invocation should succeed",
       }
     `);
-    // expect(mockedLogger.info).toHaveBeenCalledWith('Create proxy agent for ');
   });
 
   test('calls the mock executor with failure', async () => {
@@ -182,75 +179,5 @@ describe('execute()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
     );
-  });
-
-  describe('proxy support', function () {
-    const proxyPort = 1212;
-    const proxyUrl = `http://localhost:${proxyPort}`;
-    // const serverPort = 3434;
-    // const serverUrl = `http://localhost:${serverPort}`;
-    let actionTypeWithProxy: SlackActionType;
-
-    let proxyHit = false;
-    let proxyConnectHit = false;
-
-    const proxy = httpProxy.createProxyServer({
-      target: 'http://example.com',
-    });
-
-    proxy.on('proxyRes', (proxyRes: unknown, req: unknown, res: unknown) => {
-      proxyHit = true;
-    });
-
-    function expectProxyHit() {
-      expect(proxyHit).toBe(true);
-    }
-
-    function expectNoProxyHit() {
-      expect(proxyHit).toBe(false);
-    }
-
-    beforeAll(() => {
-      actionTypeWithProxy = getActionType({
-        logger: mockedLogger,
-        configurationUtilities: actionsConfigMock.create(),
-      });
-
-      // slackServer.listen(serverPort);
-      proxy.listen(proxyPort);
-    });
-
-    beforeEach(function () {
-      proxyHit = false;
-      proxyConnectHit = false;
-    });
-
-    test('should use http_proxy', async () => {
-      await actionTypeWithProxy.executor({
-        actionId: 'some-id',
-        services,
-        config: {},
-        secrets: { webhookUrl: 'http://example.com' },
-        params: { message: 'this invocation should succeed' },
-        proxySettings: {
-          proxyUrl,
-          rejectUnauthorizedCertificates: false,
-        },
-      });
-
-      expectProxyHit();
-    });
-
-    test('should not use http_proxy', async () => {
-      await actionTypeWithProxy.executor({
-        actionId: 'some-id',
-        services,
-        config: {},
-        secrets: { webhookUrl: 'http://example.com' },
-        params: { message: 'this invocation should succeed' },
-      });
-
-      expectNoProxyHit();
-    });
   });
 });

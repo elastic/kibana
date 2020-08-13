@@ -12,6 +12,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
+import { ProxySettings } from '../../types';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -63,16 +64,18 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        host: 'example.com',
-        port: 1025,
+    const sendEmailOptions = getSendEmailOptions(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
       },
-      proxySettings: {
+      {
         proxyUrl: 'https://example.com',
         rejectUnauthorizedCertificates: false,
-      },
-    });
+      }
+    );
     delete sendEmailOptions.transport.service;
     delete sendEmailOptions.transport.user;
     delete sendEmailOptions.transport.password;
@@ -89,6 +92,48 @@ describe('send_email module', () => {
           "tls": Object {
             "rejectUnauthorized": false,
           },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
+  test('rejectUnauthorized default setting email using not secure host/port', async () => {
+    const sendEmailOptions = getSendEmailOptions({
+      transport: {
+        host: 'example.com',
+        port: 1025,
+      },
+    });
+    delete sendEmailOptions.transport.service;
+    delete sendEmailOptions.transport.user;
+    delete sendEmailOptions.transport.password;
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "host": "example.com",
+          "port": 1025,
+          "secure": false,
         },
       ]
     `);
@@ -130,10 +175,8 @@ describe('send_email module', () => {
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "headers": undefined,
           "host": "example.com",
           "port": 1025,
-          "proxy": undefined,
           "secure": true,
         },
       ]
@@ -169,12 +212,10 @@ describe('send_email module', () => {
   });
 });
 
-function getSendEmailOptions({
-  content = {},
-  routing = {},
-  transport = {},
-  proxySettings = {},
-} = {}) {
+function getSendEmailOptions(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings
+) {
   return {
     content: {
       ...content,
