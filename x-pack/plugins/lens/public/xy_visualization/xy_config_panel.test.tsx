@@ -109,7 +109,6 @@ describe('XY Config panels', () => {
 
     it('should disable the select if there is no unstacked area or line series', () => {
       const state = testState();
-
       const component = shallow(
         <XyToolbar
           frame={frame}
@@ -126,6 +125,74 @@ describe('XY Config panels', () => {
       );
 
       expect(component.find(EuiSuperSelect).prop('disabled')).toEqual(true);
+    });
+
+    it('should show the values of the X and Y axes titles on the corresponding input text', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            xTitle: 'My custom X axis title',
+            yTitle: 'My custom Y axis title',
+          }}
+        />
+      );
+
+      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('value')).toBe(
+        'My custom X axis title'
+      );
+      expect(component.find('[data-test-subj="lnsYAxisTitle"]').prop('value')).toBe(
+        'My custom Y axis title'
+      );
+    });
+
+    it('should disable the input texts if the switch is off', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            showXAxisTitle: false,
+            showYAxisTitle: false,
+          }}
+        />
+      );
+
+      expect(component.find('[data-test-subj="lnsXAxisTitle"]').prop('disabled')).toBe(true);
+      expect(component.find('[data-test-subj="lnsYAxisTitle"]').prop('disabled')).toBe(true);
+    });
+
+    it('has the tick labels buttons enabled', () => {
+      const state = testState();
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const options = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('options') as EuiButtonGroupProps['options'];
+
+      expect(options!.map(({ label }) => label)).toEqual(['X-axis', 'Y-axis']);
+
+      const selections = component
+        .find('[data-test-subj="lnsTickLabelsSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: true, y: true });
+    });
+
+    it('has the gridlines buttons enabled', () => {
+      const state = testState();
+      const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);
+
+      const selections = component
+        .find('[data-test-subj="lnsGridlinesSettings"]')
+        .prop('idToSelectedMap');
+
+      expect(selections!).toEqual({ x: true, y: true });
     });
   });
 });
