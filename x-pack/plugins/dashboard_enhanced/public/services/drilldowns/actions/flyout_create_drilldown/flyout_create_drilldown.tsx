@@ -12,6 +12,7 @@ import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/publ
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
@@ -52,7 +53,9 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
       .map((factory) => factory.supportedTriggers())
       .reduce((res, next) => res.concat(next), []);
 
-    return supportedTriggers.some((trigger) => allPossibleTriggers.includes(trigger));
+    return ensureNestedTriggers(supportedTriggers).some((trigger) =>
+      allPossibleTriggers.includes(trigger)
+    );
   }
 
   public async isCompatible(context: EmbeddableContext) {
@@ -76,7 +79,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
           onClose={() => handle.close()}
           viewMode={'create'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          supportedTriggers={embeddable.supportedTriggers()}
+          supportedTriggers={ensureNestedTriggers(embeddable.supportedTriggers())}
         />
       ),
       {

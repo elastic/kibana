@@ -47,12 +47,7 @@ import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import {
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-  TriggerId,
-} from '../../../ui_actions/public';
+import { TriggerId } from '../../../ui_actions/public';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -400,13 +395,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   };
 
   public supportedTriggers(): TriggerId[] {
-    const triggers = this.vis.type.getSupportedTriggers?.() ?? [];
-    // TODO: this is a flaw of current "dynamic" nested triggers implementation
-    // we don't have a clear static dependecy that we could use saying that VALUE_CLICK or SELECT_RANGE
-    // will also produce APPLY_FILTER
-    if (triggers.includes(VALUE_CLICK_TRIGGER) || triggers.includes(SELECT_RANGE_TRIGGER)) {
-      return [...triggers, APPLY_FILTER_TRIGGER];
-    }
-    return triggers;
+    return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 }

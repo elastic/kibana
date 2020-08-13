@@ -21,12 +21,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  txtChangeButton,
-  txtTriggerPickerHelpText,
-  txtTriggerPickerHelpTooltip,
-  txtTriggerPickerLabel,
-} from './i18n';
+import { txtChangeButton, txtTriggerPickerHelpText, txtTriggerPickerLabel } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
@@ -167,11 +162,9 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
           <EuiText size="s">
             <h5>
               {txtTriggerPickerLabel}{' '}
-              <EuiToolTip position="top" content={txtTriggerPickerHelpTooltip}>
-                <EuiText size="xs">
-                  <EuiLink href={triggerPickerDocsLink}>{txtTriggerPickerHelpText}</EuiLink>
-                </EuiText>
-              </EuiToolTip>
+              <EuiText size="xs">
+                <EuiLink href={triggerPickerDocsLink}>{txtTriggerPickerHelpText}</EuiLink>
+              </EuiText>
             </h5>
           </EuiText>
         ),

@@ -26,10 +26,3 @@ export const txtTriggerPickerHelpText = i18n.translate(
     defaultMessage: "What's this?",
   }
 );
-
-export const txtTriggerPickerHelpTooltip = i18n.translate(
-  'xpack.uiActionsEnhanced.components.actionWizard.helpTooltip',
-  {
-    defaultMessage: 'Pick a trigger to attach your drilldown to.',
-  }
-);

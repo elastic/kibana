@@ -37,6 +37,7 @@ afterEach(cleanup);
 
 beforeEach(() => {
   storage.clear();
+  mockDynamicActionManager.state.set({ ...mockDynamicActionManager.state.get(), events: [] });
   (toasts as jest.Mocked<NotificationsStart['toasts']>).addSuccess.mockClear();
   (toasts as jest.Mocked<NotificationsStart['toasts']>).addError.mockClear();
 });
