@@ -34,7 +34,6 @@ export const ResolverWithoutProviders = React.memo(
     { className, databaseDocumentID, resolverComponentInstanceID }: ResolverProps,
     refToForward
   ) {
-    //
     useResolverQueryParamCleaner();
     /**
      * This is responsible for dispatching actions that include any external data.
