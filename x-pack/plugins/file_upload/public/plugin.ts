@@ -5,18 +5,13 @@
  */
 
 // @ts-ignore
+import { React } from 'react';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 // @ts-ignore
 import { JsonUploadAndParse } from './components/json_upload_and_parse';
 // @ts-ignore
 import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
 import { IDataPluginServices } from '../../../../src/plugins/data/public';
-
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadPluginSetupDependencies {}
@@ -25,7 +20,9 @@ export interface FileUploadPluginStartDependencies {
 }
 
 export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
-export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
+export interface FileUploadPluginStart {
+  JsonUploadAndParse: React.ComponentType<unknown>;
+}
 
 export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
   public setup(core: CoreSetup, plugins: FileUploadPluginSetupDependencies) {

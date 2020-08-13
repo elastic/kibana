@@ -5,6 +5,9 @@
  */
 
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import {
   CoreSetup,
   CoreStart,
@@ -37,6 +40,10 @@ import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { LicensingPluginStart } from '../../licensing/public';
+import { FileUploadPluginStart } from '../../file_upload/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -49,10 +56,11 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  fileUpload: unknown;
-  inspector: unknown;
-  navigation: NavigationStart;
-  uiActions: unknown;
+  fileUpload: FileUploadPluginStart;
+  inspector: InspectorStartContract;
+  licensing: LicensingPluginStart;
+  navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /**

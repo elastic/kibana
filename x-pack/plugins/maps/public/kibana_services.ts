@@ -10,19 +10,20 @@ import { esFilters, search, ISearchSource } from '../../../../src/plugins/data/p
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
+import { CoreStart } from '../../../../src/core/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
 
-let licenseId;
-export const setLicenseId = (latestLicenseId) => (licenseId = latestLicenseId);
+let licenseId: string | undefined;
+export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
 export const getLicenseId = () => licenseId;
-let isGoldPlus = false;
-export const setIsGoldPlus = (igp) => (isGoldPlus = igp);
+let isGoldPlus: boolean = false;
+export const setIsGoldPlus = (igp: boolean) => (isGoldPlus = igp);
 export const getIsGoldPlus = () => isGoldPlus;
 
-let kibanaVersion;
-export const setKibanaVersion = (version) => (kibanaVersion = version);
+let kibanaVersion: string;
+export const setKibanaVersion = (version: string) => (kibanaVersion = version);
 export const getKibanaVersion = () => kibanaVersion;
 
 let coreStart: CoreStart;
@@ -37,7 +38,7 @@ export const getInspector = () => pluginsStart.inspector;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.JsonUploadAndParse;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = (): any => pluginsStart.data.ui.IndexPatternSelect;
 export const getHttp = () => coreStart.http;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
@@ -94,7 +95,7 @@ export async function fetchSearchSourceAndRecordWithInspector({
   requestName: string;
   requestDesc: string;
   inspectorAdapters: Adapters;
-  abortSignal: unknown;
+  abortSignal: AbortSignal;
 }) {
   const inspectorRequest = inspectorAdapters.requests.start(requestName, {
     id: requestId,
