@@ -28,13 +28,13 @@ export const querySignalsRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { query, aggs, _source, track_total_hits, size } = request.body;
       const siemResponse = buildSiemResponse(response);
       if (
         query == null &&
         aggs == null &&
         _source == null &&
-        // eslint-disable-next-line @typescript-eslint/camelcase
         track_total_hits == null &&
         size == null
       ) {

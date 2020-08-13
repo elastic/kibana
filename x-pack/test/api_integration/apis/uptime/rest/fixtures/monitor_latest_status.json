@@ -7,6 +7,32 @@
     "hostname": "avc-x1x"
   },
   "@timestamp": "2019-09-11T03:40:34.371Z",
+  "http": {
+    "rtt": {
+      "response_header": {
+        "us": 262
+      },
+      "total": {
+        "us": 20331
+      },
+      "write_request": {
+        "us": 82
+      },
+      "content": {
+        "us": 57
+      },
+      "validate": {
+        "us": 319
+      }
+    },
+    "response": {
+      "status_code": 200,
+      "body": {
+        "bytes": 3,
+        "hash": "27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf"
+      }
+    }
+  },
   "monitor": {
     "duration": {
       "us": 24627

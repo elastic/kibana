@@ -42,7 +42,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (name: DataStream['name'], item: DataStream) => {
         return (
-          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
             data-test-subj="nameLink"
             {...reactRouterNavigate(history, {

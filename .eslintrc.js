@@ -133,12 +133,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',

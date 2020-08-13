@@ -11,6 +11,7 @@ import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
+import { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -21,6 +22,7 @@ interface EventLogServiceCtorParams {
   esContext: EsContext;
   kibanaUUID: string;
   systemLogger: SystemLogger;
+  savedObjectProviderRegistry: SavedObjectProviderRegistry;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
@@ -29,15 +31,23 @@ export class EventLogService implements IEventLogService {
   private esContext: EsContext;
   private systemLogger: SystemLogger;
   private registeredProviderActions: Map<string, Set<string>>;
+  private savedObjectProviderRegistry: SavedObjectProviderRegistry;
 
   public readonly kibanaUUID: string;
 
-  constructor({ config, esContext, kibanaUUID, systemLogger }: EventLogServiceCtorParams) {
+  constructor({
+    config,
+    esContext,
+    kibanaUUID,
+    systemLogger,
+    savedObjectProviderRegistry,
+  }: EventLogServiceCtorParams) {
     this.config = config;
     this.esContext = esContext;
     this.kibanaUUID = kibanaUUID;
     this.systemLogger = systemLogger;
     this.registeredProviderActions = new Map<string, Set<string>>();
+    this.savedObjectProviderRegistry = savedObjectProviderRegistry;
   }
 
   public isEnabled(): boolean {
@@ -75,6 +85,10 @@ export class EventLogService implements IEventLogService {
 
   getProviderActions() {
     return new Map(this.registeredProviderActions.entries());
+  }
+
+  registerSavedObjectProvider(type: string, provider: SavedObjectProvider) {
+    return this.savedObjectProviderRegistry.registerProvider(type, provider);
   }
 
   getLogger(initialProperties: IEvent): IEventLogger {

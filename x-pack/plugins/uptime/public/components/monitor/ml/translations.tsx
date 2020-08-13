@@ -162,3 +162,11 @@ export const START_TRAIL_DESC = i18n.translate(
       'In order to access duration anomaly detection, you have to be subscribed to an Elastic Platinum license.',
   }
 );
+
+export const ENABLE_MANAGE_JOB = i18n.translate(
+  'xpack.uptime.ml.enableAnomalyDetectionPanel.enable_or_manage_job',
+  {
+    defaultMessage:
+      'You can enable anomaly detection job or if job is already there you can manage the job or alert.',
+  }
+);

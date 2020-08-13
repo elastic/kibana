@@ -26,6 +26,13 @@ describe('data generator', () => {
     generator = new EndpointDocGenerator('seed');
   });
 
+  it('creates events with a numerically increasing sequence value', () => {
+    const event1 = generator.generateEvent();
+    const event2 = generator.generateEvent();
+
+    expect(event2.event.sequence).toBe(event1.event.sequence + 1);
+  });
+
   it('creates the same documents with same random seed', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');

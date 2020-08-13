@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// eslint-disable-next-line
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore

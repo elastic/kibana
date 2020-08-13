@@ -211,7 +211,6 @@ describe('ML - custom URL utils', () => {
       );
     });
 
-    // eslint-disable-next-line ban/ban
     test('truncates long queries', () => {
       const TEST_DOC_WITH_METHOD: AnomalyRecordDoc = {
         ...TEST_DOC,

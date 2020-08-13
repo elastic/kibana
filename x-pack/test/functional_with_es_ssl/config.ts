@@ -25,7 +25,6 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
