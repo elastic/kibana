@@ -17,16 +17,32 @@
  * under the License.
  */
 
-// @ts-ignore
-export { extractMessagesFromPathToMap } from './extract_default_translations';
-// @ts-ignore
-export { matchEntriesWithExctractors } from './extract_default_translations';
-export { arrayify, writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
-export { serializeToJson, serializeToJson5 } from './serializers';
 export {
-  I18nConfig,
-  filterConfigPaths,
-  assignConfigFromPath,
-  checkConfigNamespacePrefix,
-} from './config';
-export { integrateLocaleFiles } from './integrate_locale_files';
+  // constants
+  readFileAsync,
+  writeFileAsync,
+  makeDirAsync,
+  accessAsync,
+  globAsync,
+  // functions
+  normalizePath,
+  difference,
+  isPropertyWithKey,
+  isI18nTranslateFunction,
+  node,
+  formatJSString,
+  formatHTMLString,
+  traverseNodes,
+  createParserErrorMessage,
+  checkValuesProperty,
+  extractValueReferencesFromMessage,
+  extractMessageIdFromNode,
+  extractMessageValueFromNode,
+  extractDescriptionValueFromNode,
+  extractValuesKeysFromNode,
+  arrayify,
+  // classes
+  ErrorReporter, // @ts-ignore
+} from './utils';
+
+export { verifyICUMessage } from './verify_icu_message';
