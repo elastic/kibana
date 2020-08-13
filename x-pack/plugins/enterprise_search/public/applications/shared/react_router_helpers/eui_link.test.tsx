@@ -73,5 +73,14 @@ describe('EUI & React Router Component Helpers', () => {
 
       expect(mockHistory.push).not.toHaveBeenCalled();
     });
+
+    it('calls inherited onClick actions in addition to default navigation', () => {
+      const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
+      const wrapper = mount(<EuiReactRouterLink to="/narnia" onClick={customOnClick} />);
+
+      wrapper.find(EuiLink).simulate('click', { shiftKey: true });
+
+      expect(customOnClick).toHaveBeenCalled();
+    });
   });
 });
