@@ -126,62 +126,6 @@ describe('RenderingService', () => {
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
-
-      it('renders "legacy" page', async () => {
-        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" page for blank basepath', async () => {
-        mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
-
-        const content = await render(createRawRequest(), uiSettings, { app: legacyApp });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with custom vars', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          vars: {
-            fake: '__TEST_TOKEN__',
-          },
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with excluded user settings', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          includeUserSettings: false,
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
-
-      it('renders "legacy" with excluded user settings and custom vars', async () => {
-        const content = await render(createRawRequest(), uiSettings, {
-          app: legacyApp,
-          includeUserSettings: false,
-          vars: {
-            fake: '__TEST_TOKEN__',
-          },
-        });
-        const dom = load(content);
-        const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
-
-        expect(data).toMatchSnapshot(INJECTED_METADATA);
-      });
     });
   });
 });
