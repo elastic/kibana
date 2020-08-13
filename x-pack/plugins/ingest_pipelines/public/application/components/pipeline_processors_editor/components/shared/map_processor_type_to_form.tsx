@@ -18,6 +18,7 @@ import {
   Dissect,
   DotExpander,
   Drop,
+  Enrich,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -106,7 +107,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   enrich: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Enrich,
     docLinkPath: '/enrich-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',

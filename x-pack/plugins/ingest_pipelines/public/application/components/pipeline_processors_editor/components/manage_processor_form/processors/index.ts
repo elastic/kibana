@@ -14,3 +14,4 @@ export { DateIndexName } from './date_index_name';
 export { Dissect } from './dissect';
 export { DotExpander } from './dot_expander';
 export { Drop } from './drop';
+export { Enrich } from './enrich';
