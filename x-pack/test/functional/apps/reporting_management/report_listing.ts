@@ -26,7 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
 
   const testSubjects = getService('testSubjects');
-  const findInstance = getService('find');
   const esArchiver = getService('esArchiver');
 
   describe('Listing of Reports', function () {
