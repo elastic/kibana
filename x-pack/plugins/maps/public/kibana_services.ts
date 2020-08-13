@@ -5,15 +5,13 @@
  */
 
 import _ from 'lodash';
-import { Adapters } from 'src/plugins/inspector/public';
-import { esFilters, search, ISearchSource } from '../../../../src/plugins/data/public';
+import { esFilters } from '../../../../src/plugins/data/public';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { CoreStart } from '../../../../src/core/public';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
-const { getRequestInspectorStats, getResponseInspectorStats } = search;
 
 let licenseId: string | undefined;
 export const setLicenseId = (latestLicenseId: string | undefined) => (licenseId = latestLicenseId);
@@ -81,38 +79,3 @@ export const getProxyElasticMapsServiceInMaps = () =>
   getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
-
-export async function fetchSearchSourceAndRecordWithInspector({
-  searchSource,
-  requestId,
-  requestName,
-  requestDesc,
-  inspectorAdapters,
-  abortSignal,
-}: {
-  searchSource: ISearchSource;
-  requestId: string;
-  requestName: string;
-  requestDesc: string;
-  inspectorAdapters: Adapters;
-  abortSignal: AbortSignal;
-}) {
-  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
-    id: requestId,
-    description: requestDesc,
-  });
-  let resp;
-  try {
-    inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body) => {
-      inspectorRequest.json(body);
-    });
-    resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-  } catch (error) {
-    inspectorRequest.error({ error });
-    throw error;
-  }
-
-  return resp;
-}
