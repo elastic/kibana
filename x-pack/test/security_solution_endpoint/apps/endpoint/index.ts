@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
     this.tags('ciGroup7');
     const ingestManager = getService('ingestManager');
     const log = getService('log');
+    const retry = getService('retry');
 
     if (!isRegistryEnabled()) {
       log.warning('These tests are being run with an external package registry');
@@ -26,7 +27,9 @@ export default function (providerContext: FtrProviderContext) {
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
-      await ingestManager.setup();
+      await retry.try(async () => {
+        await ingestManager.setup();
+      });
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_details'));
