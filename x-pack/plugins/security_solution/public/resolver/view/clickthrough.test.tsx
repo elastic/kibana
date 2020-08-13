@@ -176,14 +176,14 @@ describe('Resolver, when analyzing a tree that has two related events for the or
           )
         ).toYieldEqualTo(['2 registry']);
         await expect(
-          simulator.map(() => simulator.processNodeSubmenuItems().length)
+          simulator.map(() => simulator.testSubject('resolver:map:node-submenu-item').length)
         ).toYieldEqualTo(1);
       });
     });
     describe('and when the related events button is clicked again', () => {
       beforeEach(async () => {
         const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeRelatedEventButton(entityIDs.origin)
+          simulator.processNodeChildElements(entityIDs.origin, 'resolver:submenu:button')
         );
         if (button) {
           button.simulate('click');
@@ -191,7 +191,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
       });
       it('should close the submenu', async () => {
         await expect(
-          simulator.map(() => simulator.processNodeSubmenuItems().length)
+          simulator.map(() => simulator.testSubject('resolver:map:node-submenu-item').length)
         ).toYieldEqualTo(0);
       });
     });
