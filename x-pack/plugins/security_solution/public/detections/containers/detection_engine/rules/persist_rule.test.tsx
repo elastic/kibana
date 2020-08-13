@@ -7,7 +7,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { usePersistRule, ReturnPersistRule } from './persist_rule';
-import { ruleMock } from './mock';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 jest.mock('./api');
 
@@ -24,7 +24,7 @@ describe('usePersistRule', () => {
         usePersistRule()
       );
       await waitForNextUpdate();
-      result.current[1](ruleMock);
+      result.current[1](getRulesSchemaMock());
       rerender();
       expect(result.current).toEqual([{ isLoading: true, isSaved: false }, result.current[1]]);
     });
@@ -36,7 +36,7 @@ describe('usePersistRule', () => {
         usePersistRule()
       );
       await waitForNextUpdate();
-      result.current[1](ruleMock);
+      result.current[1](getRulesSchemaMock());
       await waitForNextUpdate();
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
     });

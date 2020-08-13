@@ -9,7 +9,6 @@ import { HttpStart } from '../../../../../../../src/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import { List, ListArray } from '../../../../common/detection_engine/schemas/types';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response';
 import {
   fetchRuleById,
   patchRule,
@@ -29,7 +28,7 @@ export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSch
 
 export interface UseFetchOrCreateRuleExceptionListProps {
   http: HttpStart;
-  ruleId: RulesSchema['id'];
+  ruleId: Rule['id'];
   exceptionListType: ExceptionListSchema['type'];
   onError: (arg: Error) => void;
   onSuccess?: (ruleWasChanged: boolean) => void;

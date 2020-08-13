@@ -19,7 +19,8 @@ import {
   fetchTags,
   getPrePackagedRulesStatus,
 } from './api';
-import { ruleMock, rulesMock } from './mock';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { rulesMock } from './mock';
 import { buildEsQuery } from 'src/plugins/data/common';
 
 const abortCtrl = new AbortController();
@@ -33,11 +34,11 @@ describe('Detections Rules API', () => {
   describe('addRule', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(ruleMock);
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
     });
 
     test('check parameter url, body', async () => {
-      await addRule({ rule: ruleMock, signal: abortCtrl.signal });
+      await addRule({ rule: getRulesSchemaMock(), signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
           '{"description":"some desc","enabled":true,"false_positives":[],"filters":[],"from":"now-360s","index":["apm-*-transaction*","auditbeat-*","endgame-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf","language":"kuery","risk_score":75,"name":"Test rule","query":"user.email: \'root@elastic.co\'","references":[],"severity":"high","tags":["APM"],"to":"now","type":"query","threat":[],"throttle":null}',
@@ -47,8 +48,8 @@ describe('Detections Rules API', () => {
     });
 
     test('happy path', async () => {
-      const ruleResp = await addRule({ rule: ruleMock, signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(ruleMock);
+      const ruleResp = await addRule({ rule: getRulesSchemaMock(), signal: abortCtrl.signal });
+      expect(ruleResp).toEqual(getRulesSchemaMock());
     });
   });
 
@@ -280,7 +281,7 @@ describe('Detections Rules API', () => {
   describe('fetchRuleById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(ruleMock);
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
     });
 
     test('check parameter url, query', async () => {
@@ -296,7 +297,7 @@ describe('Detections Rules API', () => {
 
     test('happy path', async () => {
       const ruleResp = await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(ruleMock);
+      expect(ruleResp).toEqual(getRulesSchemaMock());
     });
   });
 

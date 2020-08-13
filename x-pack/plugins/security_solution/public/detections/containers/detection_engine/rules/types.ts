@@ -18,10 +18,7 @@ import {
   threshold,
   SortOrder,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  listArray,
-  listArrayOrUndefined,
-} from '../../../../../common/detection_engine/schemas/types';
+import { listArray } from '../../../../../common/detection_engine/schemas/types';
 import {
   CreateRulesSchema,
   PatchRulesSchema,

@@ -43,6 +43,7 @@ import {
   UpdateRulesSchema,
   createRulesSchema,
   updateRulesSchema,
+  patchRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
 import { toError, toPromise } from '../../../../../common/shared_imports';
 
@@ -99,19 +100,38 @@ const updateRuleWithValidation = async ({ rule, signal }: UpdateRulesProps): Pro
 export { updateRuleWithValidation as updateRule };
 
 /**
- * Patch provided Rule
+ * Patch provided rule
+ * NOTE: The rule edit flow does NOT use patch as it relies on the
+ * functionality of PUT to delete field values when not provided, if
+ * just expecting changes, use this `patchRule`
  *
  * @param ruleProperties to patch
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<NewRule> =>
-  KibanaServices.get().http.fetch<NewRule>(DETECTION_ENGINE_RULES_URL, {
+const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,
   });
+
+const patchRuleWithValidation = async ({
+  ruleProperties,
+  signal,
+}: PatchRuleProps): Promise<RulesSchema> =>
+  pipe(
+    ruleProperties,
+    (body) => fromEither(validateEither(patchRulesSchema, body)),
+    chain((payload) =>
+      tryCatch(() => patchRule({ signal, ruleProperties: { ...payload } }), toError)
+    ),
+    chain((response) => fromEither(validateEither(rulesSchema, response))),
+    flow(toPromise)
+  );
+
+export { patchRuleWithValidation as patchRule };
 
 /**
  * Fetches all rules from the Detection Engine API
