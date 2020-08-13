@@ -150,26 +150,6 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
     }
 
-    if (action.type === 'serverToggledEndpointListAutoRefresh' && isAutoRefreshEnabled(state)) {
-      startPoll({
-        pollAction: () => {
-          dispatch({
-            type: 'appRequestedEndpointList',
-          });
-        },
-        interval: POLL_INTERVAL,
-        shouldStop: () => {
-          return !isOnEndpointPage(getState());
-        },
-        stopAction: () => {
-          dispatch({
-            type: 'serverToggledEndpointListAutoRefresh',
-            payload: false,
-          });
-        },
-      });
-    }
-
     // Endpoint Details
     if (action.type === 'userChangedUrl' && hasSelectedEndpoint(state) === true) {
       dispatch({
@@ -267,6 +247,27 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: error,
         });
       }
+    }
+
+    if (action.type === 'serverToggledEndpointListAutoRefresh' && isAutoRefreshEnabled(state)) {
+      startPoll({
+        pollAction: () => {
+          dispatch({
+            type: 'appRequestedEndpointList',
+          });
+        },
+        interval: POLL_INTERVAL,
+        shouldStop: () => {
+          const currentState = getState();
+          return !isOnEndpointPage(currentState) || hasSelectedEndpoint(currentState);
+        },
+        stopAction: () => {
+          dispatch({
+            type: 'serverToggledEndpointListAutoRefresh',
+            payload: false,
+          });
+        },
+      });
     }
   };
 };
