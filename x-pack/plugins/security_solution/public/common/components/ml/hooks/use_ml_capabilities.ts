@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ML_GROUP_IDS } from '../constants';
+import { useContext } from 'react';
 
-export const isSecurityJob = (job: { groups: string[] }): boolean =>
-  job.groups.some((group) => ML_GROUP_IDS.includes(group));
+import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
+
+export const useMlCapabilities = () => useContext(MlCapabilitiesContext);

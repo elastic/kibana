@@ -5,26 +5,26 @@
  */
 
 import {
-  AugmentedSiemJobFields,
-  JobSummary,
+  AugmentedSecurityJobFields,
   Module,
   ModuleJob,
   RecognizerModule,
-  SiemJob,
+  SecurityJob,
 } from '../types';
 import { mlModules } from '../ml_modules';
+import { MlSummaryJob } from '../../../../../../ml/public';
 
 /**
- * Helper function for converting from ModuleJob -> SiemJob
+ * Helper function for converting from ModuleJob -> SecurityJob
  * @param module
  * @param moduleJob
  * @param isCompatible
  */
-export const moduleToSiemJob = (
+export const moduleToSecurityJob = (
   module: Module,
   moduleJob: ModuleJob,
   isCompatible: boolean
-): SiemJob => {
+): SecurityJob => {
   return {
     datafeedId: '',
     datafeedIndices: [],
@@ -46,7 +46,7 @@ export const moduleToSiemJob = (
 };
 
 /**
- * Returns fields necessary to augment a ModuleJob to a SiemJob
+ * Returns fields necessary to augment a ModuleJob to a SecurityJob
  *
  * @param jobId
  * @param moduleJobs
@@ -54,9 +54,9 @@ export const moduleToSiemJob = (
  */
 export const getAugmentedFields = (
   jobId: string,
-  moduleJobs: SiemJob[],
+  moduleJobs: SecurityJob[],
   compatibleModuleIds: string[]
-): AugmentedSiemJobFields => {
+): AugmentedSecurityJobFields => {
   const moduleJob = moduleJobs.find((mj) => mj.id === jobId);
   return moduleJob !== undefined
     ? {
@@ -74,24 +74,27 @@ export const getAugmentedFields = (
 };
 
 /**
- * Process Modules[] from the `get_module` ML API into SiemJobs[] by filtering to SIEM specific
+ * Process Modules[] from the `get_module` ML API into SecurityJobs[] by filtering to Security specific
  * modules and unpacking jobs from each module
  *
  * @param modulesData
  * @param compatibleModuleIds
  */
-export const getModuleJobs = (modulesData: Module[], compatibleModuleIds: string[]): SiemJob[] =>
+export const getModuleJobs = (
+  modulesData: Module[],
+  compatibleModuleIds: string[]
+): SecurityJob[] =>
   modulesData
     .filter((module) => mlModules.includes(module.id))
     .map((module) => [
       ...module.jobs.map((moduleJob) =>
-        moduleToSiemJob(module, moduleJob, compatibleModuleIds.includes(module.id))
+        moduleToSecurityJob(module, moduleJob, compatibleModuleIds.includes(module.id))
       ),
     ])
     .flat();
 
 /**
- * Process JobSummary[] from the `jobs_summary` ML API into SiemJobs[] by filtering to to SIEM jobs
+ * Process data from the `jobs_summary` ML API into SecurityJobs[] by filtering to Security jobs
  * and augmenting with moduleId/defaultIndexPattern/isCompatible
  *
  * @param jobSummaryData
@@ -99,57 +102,57 @@ export const getModuleJobs = (modulesData: Module[], compatibleModuleIds: string
  * @param compatibleModuleIds
  */
 export const getInstalledJobs = (
-  jobSummaryData: JobSummary[],
-  moduleJobs: SiemJob[],
+  jobSummaryData: MlSummaryJob[],
+  moduleJobs: SecurityJob[],
   compatibleModuleIds: string[]
-): SiemJob[] =>
+): SecurityJob[] =>
   jobSummaryData
     .filter(({ groups }) => groups.includes('siem') || groups.includes('security'))
-    .map<SiemJob>((jobSummary) => ({
+    .map<SecurityJob>((jobSummary) => ({
       ...jobSummary,
       ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
       isInstalled: true,
     }));
 
 /**
- * Combines installed jobs + moduleSiemJobs that don't overlap and sorts by name asc
+ * Combines installed jobs + moduleSecurityJobs that don't overlap and sorts by name asc
  *
  * @param installedJobs
- * @param moduleSiemJobs
+ * @param moduleSecurityJobs
  */
 export const composeModuleAndInstalledJobs = (
-  installedJobs: SiemJob[],
-  moduleSiemJobs: SiemJob[]
-): SiemJob[] => {
+  installedJobs: SecurityJob[],
+  moduleSecurityJobs: SecurityJob[]
+): SecurityJob[] => {
   const installedJobsIds = installedJobs.map((installedJob) => installedJob.id);
 
   return [
     ...installedJobs,
-    ...moduleSiemJobs.filter((mj) => !installedJobsIds.includes(mj.id)),
+    ...moduleSecurityJobs.filter((mj) => !installedJobsIds.includes(mj.id)),
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
 /**
- * Creates a list of SiemJobs by composing JobSummary jobs (installed jobs) and Module
- * jobs (pre-packaged SIEM jobs) into a single job object that can be used throughout the SIEM app
+ * Creates a list of SecurityJobs by composing jobs summaries (installed jobs) and Module
+ * jobs (pre-packaged Security jobs) into a single job object that can be used throughout the Security app
  *
  * @param jobSummaryData
  * @param modulesData
  * @param compatibleModules
  */
-export const createSiemJobs = (
-  jobSummaryData: JobSummary[],
+export const createSecurityJobs = (
+  jobSummaryData: MlSummaryJob[],
   modulesData: Module[],
   compatibleModules: RecognizerModule[]
-): SiemJob[] => {
+): SecurityJob[] => {
   // Create lookup of compatible modules
   const compatibleModuleIds = compatibleModules.map((module) => module.id);
 
-  // Process modulesData: Filter to SIEM specific modules, and unpack jobs from modules
-  const moduleSiemJobs = getModuleJobs(modulesData, compatibleModuleIds);
+  // Process modulesData: Filter to Security specific modules, and unpack jobs from modules
+  const moduleSecurityJobs = getModuleJobs(modulesData, compatibleModuleIds);
 
-  // Process jobSummaryData: Filter to SIEM jobs, and augment with moduleId/defaultIndexPattern/isCompatible
-  const installedJobs = getInstalledJobs(jobSummaryData, moduleSiemJobs, compatibleModuleIds);
+  // Process jobSummaryData: Filter to Security jobs, and augment with moduleId/defaultIndexPattern/isCompatible
+  const installedJobs = getInstalledJobs(jobSummaryData, moduleSecurityJobs, compatibleModuleIds);
 
-  // Combine installed jobs + moduleSiemJobs that don't overlap, and sort by name asc
-  return composeModuleAndInstalledJobs(installedJobs, moduleSiemJobs);
+  // Combine installed jobs + moduleSecurityJobs that don't overlap, and sort by name asc
+  return composeModuleAndInstalledJobs(installedJobs, moduleSecurityJobs);
 };
