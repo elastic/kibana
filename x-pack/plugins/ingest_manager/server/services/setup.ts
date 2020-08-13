@@ -193,7 +193,7 @@ export async function setupFleet(
     agentPolicies.map((agentPolicy) => {
       return generateEnrollmentAPIKey(soClient, {
         name: `Default`,
-        configId: agentPolicy.id,
+        agentPolicyId: agentPolicy.id,
       });
     })
   );

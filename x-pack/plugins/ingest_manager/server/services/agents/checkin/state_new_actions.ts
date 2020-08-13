@@ -49,14 +49,14 @@ function getInternalUserSOClient() {
   return appContextService.getInternalUserSOClient(fakeRequest);
 }
 
-function createAgentPolicySharedObservable(configId: string) {
+function createAgentPolicySharedObservable(agentPolicyId: string) {
   const internalSOClient = getInternalUserSOClient();
   return timer(0, AGENT_UPDATE_ACTIONS_INTERVAL_MS).pipe(
     switchMap(() =>
-      from(agentPolicyService.get(internalSOClient, configId) as Promise<AgentPolicy>)
+      from(agentPolicyService.get(internalSOClient, agentPolicyId) as Promise<AgentPolicy>)
     ),
     distinctUntilKeyChanged('revision'),
-    switchMap((data) => from(agentPolicyService.getFullConfig(internalSOClient, configId))),
+    switchMap((data) => from(agentPolicyService.getFullConfig(internalSOClient, agentPolicyId))),
     shareReplay({ refCount: true, bufferSize: 1 })
   );
 }
@@ -145,15 +145,15 @@ export function agentCheckinStateNewActionsFactory() {
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
     if (!agent.config_id) {
-      throw new Error('Agent do not have a config');
+      throw new Error('Agent does not have a config');
     }
-    const configId = agent.config_id;
-    if (!agentPolicies$.has(configId)) {
-      agentPolicies$.set(configId, createAgentPolicySharedObservable(configId));
+    const agentPolicyId = agent.config_id;
+    if (!agentPolicies$.has(agentPolicyId)) {
+      agentPolicies$.set(agentPolicyId, createAgentPolicySharedObservable(agentPolicyId));
     }
-    const agentPolicy$ = agentPolicies$.get(configId);
+    const agentPolicy$ = agentPolicies$.get(agentPolicyId);
     if (!agentPolicy$) {
-      throw new Error(`Invalid state no observable for config ${configId}`);
+      throw new Error(`Invalid state, no observable for policy ${agentPolicyId}`);
     }
 
     const stream$ = agentPolicy$.pipe(

@@ -90,7 +90,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   useEffect(() => {
     const getAgentCount = async () => {
       if (agentPolicyId) {
-        const { data } = await sendGetAgentStatus({ configId: agentPolicyId });
+        const { data } = await sendGetAgentStatus({ policyId: agentPolicyId });
         if (data?.results.total) {
           setAgentCount(data.results.total);
         }

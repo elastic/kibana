@@ -18,33 +18,33 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Config - update', async function () {
+  describe('Package Policy - update', async function () {
     skipIfNoDockerRegistry(providerContext);
-    let agentConfigId: string;
-    let packageConfigId: string;
-    let packageConfigId2: string;
+    let agentPolicyId: string;
+    let packagePolicyId: string;
+    let packagePolicyId2: string;
 
     before(async function () {
       if (!server.enabled) {
         return;
       }
-      const { body: agentConfigResponse } = await supertest
-        .post(`/api/ingest_manager/agent_configs`)
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test config',
+          name: 'Test policy',
           namespace: 'default',
         });
-      agentConfigId = agentConfigResponse.item.id;
+      agentPolicyId = agentPolicyResponse.item.id;
 
-      const { body: packageConfigResponse } = await supertest
-        .post(`/api/ingest_manager/package_configs`)
+      const { body: packagePolicyResponse } = await supertest
+        .post(`/api/ingest_manager/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          config_id: agentConfigId,
+          config_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -54,16 +54,16 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packageConfigId = packageConfigResponse.item.id;
+      packagePolicyId = packagePolicyResponse.item.id;
 
-      const { body: packageConfigResponse2 } = await supertest
-        .post(`/api/ingest_manager/package_configs`)
+      const { body: packagePolicyResponse2 } = await supertest
+        .post(`/api/ingest_manager/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-2',
           description: '',
           namespace: 'default',
-          config_id: agentConfigId,
+          config_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -73,18 +73,18 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packageConfigId2 = packageConfigResponse2.item.id;
+      packagePolicyId2 = packagePolicyResponse2.item.id;
     });
 
     it('should work with valid values', async function () {
       const { body: apiResponse } = await supertest
-        .put(`/api/ingest_manager/package_configs/${packageConfigId}`)
+        .put(`/api/ingest_manager/package_policies/${packagePolicyId}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
           description: '',
           namespace: 'updated_namespace',
-          config_id: agentConfigId,
+          config_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -99,15 +99,15 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.success).to.be(true);
     });
 
-    it('should return a 500 if there is another package config with the same name', async function () {
+    it('should return a 500 if there is another package policy with the same name', async function () {
       await supertest
-        .put(`/api/ingest_manager/package_configs/${packageConfigId2}`)
+        .put(`/api/ingest_manager/package_policies/${packagePolicyId2}`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
           description: '',
           namespace: 'updated_namespace',
-          config_id: agentConfigId,
+          config_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],

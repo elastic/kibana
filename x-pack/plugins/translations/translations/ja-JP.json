@@ -16340,7 +16340,7 @@
     "xpack.securitySolution.endpoint.policyDetailType": "タイプ",
     "xpack.securitySolution.endpoint.policyList.actionButtonText": "Endpoint Securityを追加",
     "xpack.securitySolution.endpoint.policyList.actionMenu": "開く",
-    "xpack.securitySolution.endpoint.policyList.agentConfigAction": "エージェント構成を表示",
+    "xpack.securitySolution.endpoint.policyList.agentPolicyAction": "エージェント構成を表示",
     "xpack.securitySolution.endpoint.policyList.beta": "ベータ",
     "xpack.securitySolution.endpoint.policyList.createdAt": "作成日時",
     "xpack.securitySolution.endpoint.policyList.createdBy": "作成者",

@@ -13,15 +13,15 @@ import { agentPolicyService } from '../agent_config';
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
-  newConfigId: string
+  newAgentPolicyId: string
 ) {
-  const config = await agentPolicyService.get(soClient, newConfigId);
+  const config = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!config) {
-    throw Boom.notFound(`Agent policy not found: ${newConfigId}`);
+    throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    config_id: newConfigId,
+    config_id: newAgentPolicyId,
     config_revision: null,
   });
 }

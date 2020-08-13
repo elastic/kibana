@@ -7,8 +7,8 @@
 export const API_ROOT = `/api/ingest_manager`;
 export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
-export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_configs`;
-export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_configs`;
+export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
+export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';

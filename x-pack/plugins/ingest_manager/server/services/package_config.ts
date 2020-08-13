@@ -117,7 +117,7 @@ class PackagePolicyService {
   public async bulkCreate(
     soClient: SavedObjectsClientContract,
     packagePolicies: NewPackagePolicy[],
-    configId: string,
+    agentPolicyId: string,
     options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackagePolicy[]> {
     const isoDate = new Date().toISOString();
@@ -127,7 +127,7 @@ class PackagePolicyService {
         type: SAVED_OBJECT_TYPE,
         attributes: {
           ...packagePolicy,
-          config_id: configId,
+          config_id: agentPolicyId,
           revision: 1,
           created_at: isoDate,
           created_by: options?.user?.username ?? 'system',
@@ -143,7 +143,7 @@ class PackagePolicyService {
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
       soClient,
-      configId,
+      agentPolicyId,
       newSos.map((newSo) => newSo.id),
       {
         user: options?.user,

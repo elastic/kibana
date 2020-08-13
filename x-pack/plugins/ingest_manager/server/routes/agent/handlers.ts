@@ -310,7 +310,11 @@ export const putAgentsReassignHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.config_id);
+    await AgentService.reassignAgent(
+      soClient,
+      request.params.agentId,
+      request.body.agent_policy_id
+    );
 
     const body: PutAgentReassignResponse = {
       success: true,
@@ -324,14 +328,14 @@ export const putAgentsReassignHandler: RequestHandler<
   }
 };
 
-export const getAgentStatusForConfigHandler: RequestHandler<
+export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
     // TODO change path
-    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.configId);
+    const results = await AgentService.getAgentStatusForConfig(soClient, request.query.policyId);
 
     const body: GetAgentStatusResponse = { results, success: true };
 

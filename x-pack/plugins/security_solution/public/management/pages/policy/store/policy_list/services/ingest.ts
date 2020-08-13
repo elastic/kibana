@@ -19,8 +19,8 @@ import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_configs`;
-export const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_configs`;
+export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_policies`;
+export const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
@@ -120,13 +120,13 @@ export const sendPutPackagePolicy = (
 export const sendGetFleetAgentStatusForPolicy = (
   http: HttpStart,
   /** the Agent (fleet) configuration id */
-  configId: string,
+  policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {
   return http.get(INGEST_API_FLEET_AGENT_STATUS, {
     ...options,
     query: {
-      configId,
+      policyId,
     },
   });
 };

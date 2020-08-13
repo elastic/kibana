@@ -106,7 +106,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * Used when looking a the Ingest create/edit package config pages. Finds the endpoint
+     * Used when looking a the Ingest create/edit package policy pages. Finds the endpoint
      * custom configuaration component
      * @param onEditPage
      */

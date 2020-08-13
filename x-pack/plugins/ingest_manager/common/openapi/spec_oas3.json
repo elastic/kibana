@@ -17,7 +17,7 @@
     }
   ],
   "paths": {
-    "/agent_configs": {
+    "/agent_policies": {
       "get": {
         "summary": "Agent policy - List",
         "tags": [],
@@ -80,7 +80,7 @@
             }
           }
         },
-        "operationId": "agent-config-list",
+        "operationId": "agent-policy-list",
         "parameters": [
           {
             "$ref": "#/components/parameters/pageSizeParam"
@@ -117,7 +117,7 @@
             }
           }
         },
-        "operationId": "post-agent_configs",
+        "operationId": "post-agent-policy",
         "requestBody": {
           "content": {
             "application/json": {
@@ -135,7 +135,7 @@
         ]
       }
     },
-    "/agent_configs/{agentPolicyId}": {
+    "/agent_policies/{agentPolicyId}": {
       "parameters": [
         {
           "schema": {
@@ -171,7 +171,7 @@
                     "value": {
                       "item": {
                         "id": "82da1fc0-8fbf-11ea-b2ce-01c4a6127154",
-                        "name": "Default config",
+                        "name": "Default policy",
                         "namespace": "default",
                         "description": "Default agent policy created by Kibana",
                         "status": "active",
@@ -716,7 +716,7 @@
             }
           }
         },
-        "operationId": "agent-config-info",
+        "operationId": "agent-policy-info",
         "description": "Get one agent policy",
         "parameters": []
       },
@@ -760,7 +760,7 @@
             }
           }
         },
-        "operationId": "put-agent_configs-agentPolicyId",
+        "operationId": "put-agent-policy-agentPolicyId",
         "requestBody": {
           "content": {
             "application/json": {
@@ -786,7 +786,7 @@
         ]
       }
     },
-    "/agent_configs/{agentPolicyId}/copy": {
+    "/agent_policies/{agentPolicyId}/copy": {
       "parameters": [
         {
           "schema": {
@@ -798,8 +798,8 @@
         }
       ],
       "post": {
-        "summary": "Agent policy - copy one config",
-        "operationId": "agent-config-copy",
+        "summary": "Agent policy - copy one policy",
+        "operationId": "agent-policy-copy",
         "responses": {
           "200": {
             "description": "OK",
@@ -844,10 +844,10 @@
         "description": "Copies one agent policy"
       }
     },
-    "/agent_configs/delete": {
+    "/agent_policies/delete": {
       "post": {
         "summary": "Agent policy - Delete",
-        "operationId": "post-agent_config-delete",
+        "operationId": "post-agent-policy-delete",
         "responses": {
           "200": {
             "description": "OK",
@@ -922,7 +922,7 @@
       },
       "parameters": []
     },
-    "/package_configs": {
+    "/package_policies": {
       "get": {
         "summary": "PackagePolicies - List",
         "tags": [],
@@ -1237,7 +1237,7 @@
         ]
       }
     },
-    "/package_configs/{packagePolicyId}": {
+    "/package_policies/{packagePolicyId}": {
       "get": {
         "summary": "PackagePolicies - Info",
         "tags": [],
@@ -3562,22 +3562,22 @@
         }
       }
     },
-    "/fleet/config/{configId}/agent-status": {
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "configId",
-          "in": "path",
-          "required": true
-        }
-      ],
+    "/fleet/agent-status": {
       "get": {
-        "summary": "Fleet - Agent - Status for config",
+        "summary": "Fleet - Agent - Status for policy",
         "tags": [],
         "responses": {},
-        "operationId": "get-fleet-config-configId-agent-status"
+        "operationId": "get-fleet-agent-status",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "policyId",
+            "in": "query",
+            "required": false
+          }
+        ]
       }
     },
     "/fleet/enrollment-api-keys": {

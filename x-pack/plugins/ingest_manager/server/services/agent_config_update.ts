@@ -5,14 +5,14 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './api_keys';
-import { unenrollForConfigId } from './agents';
+import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
+import { unenrollForAgentPolicyId } from './agents';
 import { outputService } from './output';
 
 export async function agentPolicyUpdateEventHandler(
   soClient: SavedObjectsClientContract,
   action: string,
-  configId: string
+  agentPolicyId: string
 ) {
   const adminUser = await outputService.getAdminUser(soClient);
   // If no admin user fleet is not enabled just skip this hook
@@ -22,12 +22,12 @@ export async function agentPolicyUpdateEventHandler(
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, {
-      configId,
+      agentPolicyId,
     });
   }
 
   if (action === 'deleted') {
-    await unenrollForConfigId(soClient, configId);
-    await deleteEnrollmentApiKeyForConfigId(soClient, configId);
+    await unenrollForAgentPolicyId(soClient, agentPolicyId);
+    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, agentPolicyId);
   }
 }

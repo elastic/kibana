@@ -16346,7 +16346,7 @@
     "xpack.securitySolution.endpoint.policyDetailType": "类型",
     "xpack.securitySolution.endpoint.policyList.actionButtonText": "添加 Endpoint Security",
     "xpack.securitySolution.endpoint.policyList.actionMenu": "打开",
-    "xpack.securitySolution.endpoint.policyList.agentConfigAction": "查看代理配置",
+    "xpack.securitySolution.endpoint.policyList.agentPolicyAction": "查看代理配置",
     "xpack.securitySolution.endpoint.policyList.beta": "公测版",
     "xpack.securitySolution.endpoint.policyList.createdAt": "创建日期",
     "xpack.securitySolution.endpoint.policyList.createdBy": "创建者",

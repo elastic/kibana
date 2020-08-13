@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `v${policyInfo.packageConfig.package?.version}`,
+          `v${policyInfo.packagePolicy.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
@@ -86,11 +86,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('should show agent config action as a link', async () => {
+      it('should show agent policy action as a link', async () => {
         await (await pageObjects.policy.findFirstActionsButton()).click();
-        const agentConfigLink = await testSubjects.find('agentConfigLink');
-        expect(await agentConfigLink.getAttribute('href')).to.match(
-          new RegExp(`\/ingestManager#\/configs\/${policyInfo.agentConfig.id}$`)
+        const agentPolicyLink = await testSubjects.find('agentPolicyLink');
+        expect(await agentPolicyLink.getAttribute('href')).to.match(
+          new RegExp(`\/ingestManager#\/policies\/${policyInfo.agentPolicy.id}$`)
         );
         // Close action menu
         await (await pageObjects.policy.findFirstActionsButton()).click();
@@ -111,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await (await pageObjects.policy.findHeaderCreateNewButton()).click();
       });
 
-      it('should redirect to ingest management integrations add package config', async () => {
+      it('should redirect to ingest management integrations add package policy', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.ensureOnCreatePageOrFail();
       });
 
@@ -131,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(endpointConfig).not.to.be(undefined);
       });
 
-      it('should have empty value for package configuration name', async () => {
+      it('should have empty value for package policy name', async () => {
         await pageObjects.ingestManagerCreatePackagePolicy.selectAgentPolicy();
         expect(await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyName()).to.be('');
       });
@@ -148,7 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('and user clicks on page header create button', () => {
-      it('should direct users to the ingest management integrations add package config', async () => {
+      it('should direct users to the ingest management integrations add package policy', async () => {
         await pageObjects.policy.navigateToPolicyList();
         await (await pageObjects.policy.findOnboardingStartButton()).click();
         await pageObjects.ingestManagerCreatePackagePolicy.ensureOnCreatePageOrFail();

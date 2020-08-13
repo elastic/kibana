@@ -18,32 +18,32 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Config - get by id', async function () {
+  describe('Package Policy - get by id', async function () {
     skipIfNoDockerRegistry(providerContext);
-    let agentConfigId: string;
-    let packageConfigId: string;
+    let agentPolicyId: string;
+    let packagePolicyId: string;
 
     before(async function () {
       if (!server.enabled) {
         return;
       }
-      const { body: agentConfigResponse } = await supertest
-        .post(`/api/ingest_manager/agent_configs`)
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test config',
+          name: 'Test policy',
           namespace: 'default',
         });
-      agentConfigId = agentConfigResponse.item.id;
+      agentPolicyId = agentPolicyResponse.item.id;
 
-      const { body: packageConfigResponse } = await supertest
-        .post(`/api/ingest_manager/package_configs`)
+      const { body: packagePolicyResponse } = await supertest
+        .post(`/api/ingest_manager/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          config_id: agentConfigId,
+          config_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],
@@ -53,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packageConfigId = packageConfigResponse.item.id;
+      packagePolicyId = packagePolicyResponse.item.id;
     });
 
     after(async function () {
@@ -62,28 +62,28 @@ export default function (providerContext: FtrProviderContext) {
       }
 
       await supertest
-        .post(`/api/ingest_manager/agent_configs/delete`)
+        .post(`/api/ingest_manager/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ agentConfigId })
+        .send({ agentPolicyId })
         .expect(200);
 
       await supertest
-        .post(`/api/ingest_manager/package_configs/delete`)
+        .post(`/api/ingest_manager/package_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ packageConfigIds: [packageConfigId] })
+        .send({ packagePolicyIds: [packagePolicyId] })
         .expect(200);
     });
 
     it('should succeed with a valid id', async function () {
       const { body: apiResponse } = await supertest
-        .get(`/api/ingest_manager/package_configs/${packageConfigId}`)
+        .get(`/api/ingest_manager/package_policies/${packagePolicyId}`)
         .expect(200);
 
       expect(apiResponse.success).to.be(true);
     });
 
     it('should return a 404 with an invalid id', async function () {
-      await supertest.get(`/api/ingest_manager/package_configs/IS_NOT_PRESENT`).expect(404);
+      await supertest.get(`/api/ingest_manager/package_policies/IS_NOT_PRESENT`).expect(404);
     });
   });
 }

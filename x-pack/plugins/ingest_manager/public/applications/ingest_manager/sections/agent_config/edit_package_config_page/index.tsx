@@ -147,7 +147,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const [agentCount, setAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      const { data } = await sendGetAgentStatus({ configId: policyId });
+      const { data } = await sendGetAgentStatus({ policyId });
       if (data?.results.total) {
         setAgentCount(data.results.total);
       }

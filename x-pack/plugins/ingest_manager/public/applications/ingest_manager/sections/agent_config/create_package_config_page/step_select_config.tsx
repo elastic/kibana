@@ -94,7 +94,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   const agentPolicies = agentPoliciesData?.items || [];
   const agentPoliciesById = agentPolicies.reduce(
     (acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
-      acc[policy.id] = agentPolicy;
+      acc[policy.id] = policy;
       return acc;
     },
     {}

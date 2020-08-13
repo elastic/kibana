@@ -86,7 +86,7 @@ describe('Policy Details', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/package_configs/1') {
+          if (path === '/api/ingest_manager/package_policies/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -208,7 +208,7 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/package_configs/1') {
+            if (path === '/api/ingest_manager/package_policies/1') {
               return Promise.resolve({
                 item: policyPackagePolicy,
                 success: true,
@@ -253,7 +253,7 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_configs/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_policies/1`);
         policyView.update();
 
         // Toast notification should be shown

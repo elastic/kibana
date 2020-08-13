@@ -114,7 +114,7 @@ export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
       // Retrieve agent count if fleet is enabled
       if (isFleetEnabled) {
         setIsLoading(true);
-        const { data } = await sendGetAgentStatus({ configId: agentPolicy.id });
+        const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
         if (data?.results.total) {
           setAgentCount(data.results.total);
         } else {

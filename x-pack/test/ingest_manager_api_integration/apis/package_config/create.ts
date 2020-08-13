@@ -18,30 +18,30 @@ export default function ({ getService }: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Config - create', async function () {
-    let agentConfigId: string;
+  describe('Package Policy - create', async function () {
+    let agentPolicyId: string;
 
     before(async function () {
-      const { body: agentConfigResponse } = await supertest
-        .post(`/api/ingest_manager/agent_configs`)
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/ingest_manager/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test config',
+          name: 'Test policy',
           namespace: 'default',
         });
-      agentConfigId = agentConfigResponse.item.id;
+      agentPolicyId = agentPolicyResponse.item.id;
     });
 
     it('should work with valid values', async function () {
       if (server.enabled) {
         const { body: apiResponse } = await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
             description: '',
             namespace: 'default',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],
@@ -62,13 +62,13 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a 400 with an invalid namespace', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'filetest-1',
             description: '',
             namespace: '',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],
@@ -84,16 +84,16 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should not allow multiple limited packages on the same agent config', async function () {
+    it('should not allow multiple limited packages on the same agent policy', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-1',
             description: '',
             namespace: 'default',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],
@@ -105,13 +105,13 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'endpoint-2',
             description: '',
             namespace: 'default',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],
@@ -127,16 +127,16 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should return a 500 if there is another package config with the same name', async function () {
+    it('should return a 500 if there is another package policy with the same name', async function () {
       if (server.enabled) {
         await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',
             description: '',
             namespace: 'default',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],
@@ -148,13 +148,13 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
         await supertest
-          .post(`/api/ingest_manager/package_configs`)
+          .post(`/api/ingest_manager/package_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'same-name-test-1',
             description: '',
             namespace: 'default',
-            config_id: agentConfigId,
+            config_id: agentPolicyId,
             enabled: true,
             output_id: '',
             inputs: [],

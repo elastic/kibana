@@ -33,7 +33,7 @@ import {
   getAgentEventsHandler,
   postAgentCheckinHandler,
   postAgentEnrollHandler,
-  getAgentStatusForConfigHandler,
+  getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
@@ -165,6 +165,6 @@ export const registerRoutes = (router: IRouter) => {
       validate: GetAgentStatusRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getAgentStatusForConfigHandler
+    getAgentStatusForAgentPolicyHandler
   );
 };

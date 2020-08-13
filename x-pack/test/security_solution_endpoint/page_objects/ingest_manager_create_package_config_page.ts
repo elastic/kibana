@@ -16,7 +16,7 @@ export function IngestManagerCreatePackagePolicy({
 
   return {
     /**
-     * Validates that the page shown is the Package Config Create Page
+     * Validates that the page shown is the Package Policy Create Page
      */
     async ensureOnCreatePageOrFail() {
       await testSubjects.existOrFail('createPackagePolicy_header');
@@ -44,62 +44,62 @@ export function IngestManagerCreatePackagePolicy({
     },
 
     /**
-     * Selects an agent configuration on the form
+     * Selects an agent policy on the form
      * @param name
-     * Visual name of the configuration. if one is not provided, the first agent
-     * configuration on the list will be chosen
+     * Visual name of the policy. if one is not provided, the first agent
+     * policy on the list will be chosen
      */
     async selectAgentPolicy(name?: string) {
       // if we have a name, then find the button with that `title` set.
       if (name) {
         await (
-          await find.byCssSelector(`[data-test-subj="agentConfigItem"][title="${name}"]`)
+          await find.byCssSelector(`[data-test-subj="agentPolicyItem"][title="${name}"]`)
         ).click();
       }
-      // Else, just select the first agent configuration that is present
+      // Else, just select the first agent policy that is present
       else {
-        await (await testSubjects.find('agentConfigItem')).click();
+        await (await testSubjects.find('agentPolicyItem')).click();
       }
     },
 
     /**
-     * Returns the package config name currently populated on the input field
+     * Returns the package Policy name currently populated on the input field
      */
     async getPackagePolicyName() {
-      return testSubjects.getAttribute('packageConfigNameInput', 'value');
+      return testSubjects.getAttribute('packagePolicyNameInput', 'value');
     },
 
     /**
-     * Set the name of the package config on the input field
+     * Set the name of the package Policy on the input field
      * @param name
      */
     async setPackagePolicyName(name: string) {
       // Because of the bottom sticky bar, we need to scroll section 2 into view
       // so that `setValue()` enters the data on the input field.
       await testSubjects.scrollIntoView('dataCollectionSetupStep');
-      await testSubjects.setValue('packageConfigNameInput', name);
+      await testSubjects.setValue('packagePolicyNameInput', name);
     },
 
     /**
      * Waits for the save Notification toast to be visible
      */
     async waitForSaveSuccessNotification() {
-      await testSubjects.existOrFail('packageConfigCreateSuccessToast');
+      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
     },
 
     /**
-     * Validates that the page shown is the Package Config Edit Page
+     * Validates that the page shown is the Package Policy Edit Page
      */
     async ensureOnEditPageOrFail() {
       await testSubjects.existOrFail('editPackagePolicy_header');
     },
 
     /**
-     * Navigates to the Ingest Agent configuration Edit Package Config page
+     * Navigates to the Ingest Agent configuration Edit Package Policy page
      */
-    async navigateToAgentPolicyEditPackagePolicy(agentConfigId: string, packageConfigId: string) {
+    async navigateToAgentPolicyEditPackagePolicy(agentPolicyId: string, packagePolicyId: string) {
       await pageObjects.common.navigateToApp('ingestManager', {
-        hash: `/configs/${agentConfigId}/edit-integration/${packageConfigId}`,
+        hash: `/policies/${agentPolicyId}/edit-integration/${packagePolicyId}`,
       });
       await this.ensureOnEditPageOrFail();
     },
