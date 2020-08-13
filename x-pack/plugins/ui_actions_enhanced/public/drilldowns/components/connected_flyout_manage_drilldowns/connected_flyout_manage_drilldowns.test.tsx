@@ -269,3 +269,53 @@ test('Should show drilldown welcome message. Should be able to dismiss it', asyn
   await wait(() => expect(screen.getByText(/Manage Drilldowns/i)).toBeVisible());
   expect(screen.queryByTestId(WELCOME_MESSAGE_TEST_SUBJ)).toBeNull();
 });
+
+test('Drilldown type is not shown if no supported trigger', async () => {
+  const screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={['VALUE_CLICK_TRIGGER']}
+      viewMode={'create'}
+    />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  expect(screen.queryByText(/Go to Dashboard/i)).not.toBeInTheDocument(); // dashboard action is not visible, because APPLY_FILTER_TRIGGER not supported
+  expect(screen.getByTestId('selectedActionFactory-Url')).toBeInTheDocument();
+});
+
+test('Can pick a trigger', async () => {
+  const screen = render(
+    <FlyoutManageDrilldowns
+      dynamicActionManager={mockDynamicActionManager}
+      supportedTriggers={mockSupportedTriggers}
+      viewMode={'create'}
+    />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+
+  // input drilldown name
+  const name = 'Test name';
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: name },
+  });
+
+  // select URL one
+  fireEvent.click(screen.getByText(/Go to URL/i));
+
+  // Input url
+  const URL = 'https://elastic.co';
+  fireEvent.change(screen.getByLabelText(/url/i), {
+    target: { value: URL },
+  });
+
+  fireEvent.click(screen.getByTestId('triggerPicker-SELECT_RANGE_TRIGGER').querySelector('input')!);
+
+  const [, createButton] = screen.getAllByText(/Create Drilldown/i);
+
+  expect(createButton).toBeEnabled();
+  fireEvent.click(createButton);
+  await wait(() => expect(toasts.addSuccess).toBeCalled());
+  expect(mockDynamicActionManager.state.get().events[0].triggers).toEqual(['SELECT_RANGE_TRIGGER']);
+});

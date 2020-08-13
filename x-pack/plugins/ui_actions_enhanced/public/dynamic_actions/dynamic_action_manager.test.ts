@@ -423,6 +423,21 @@ describe('DynamicActionManager', () => {
 
         expect(actions.size).toBe(0);
       });
+
+      test('throws when trigger is unknown', async () => {
+        const { manager, uiActions } = setup([]);
+
+        uiActions.registerActionFactory(actionFactoryDefinition1);
+        await manager.start();
+
+        const action: SerializedAction<unknown> = {
+          factoryId: actionFactoryDefinition1.id,
+          name: 'foo',
+          config: {},
+        };
+
+        await expect(manager.createEvent(action, ['SELECT_RANGE_TRIGGER'])).rejects;
+      });
     });
   });
 

@@ -202,6 +202,7 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
             value={trigger}
             checked={selectedTrigger === trigger}
             onChange={() => onSelectedTriggersChange([trigger])}
+            data-test-subj={`triggerPicker-${trigger}`}
           />
           <EuiSpacer size={'s'} />
         </React.Fragment>
