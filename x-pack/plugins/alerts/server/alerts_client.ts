@@ -19,6 +19,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
+  AlertUpdateRequiredFields,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -324,7 +325,7 @@ export class AlertsClient {
 
   public async delete({ id }: { id: string }) {
     let taskIdToRemove: string | undefined;
-    let apiKeyToInvalidate: string | null = null;
+    let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
 
     try {
@@ -470,7 +471,7 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
     let references: SavedObjectReference[];
     let version: string | undefined;
@@ -541,7 +542,7 @@ export class AlertsClient {
   }
 
   public async enable({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
     let version: string | undefined;
     let references: SavedObjectReference[];
@@ -610,7 +611,7 @@ export class AlertsClient {
   }
 
   public async disable({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let apiKeyToInvalidate: string | null | undefined = null;
     let attributes: RawAlert;
     let version: string | undefined;
     let references: SavedObjectReference[];
@@ -646,10 +647,12 @@ export class AlertsClient {
         'alert',
         id,
         {
-          ...attributes,
-          scheduledTaskId: undefined,
-          apiKey: null,
-          apiKeyOwner: null,
+          ...(omit(
+            attributes,
+            'scheduledTaskId',
+            'apiKey',
+            'apiKeyOwner'
+          ) as AlertUpdateRequiredFields),
           enabled: false,
           updatedBy: await this.getUserName(),
         },

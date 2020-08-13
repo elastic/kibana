@@ -109,12 +109,30 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
-  apiKey: string | null;
-  apiKeyOwner: string | null;
+  apiKey?: string | null;
+  apiKeyOwner?: string | null;
   throttle: string | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
 }
+
+export type AlertUpdateRequiredFields = Pick<
+  RawAlert,
+  | 'enabled'
+  | 'name'
+  | 'tags'
+  | 'alertTypeId'
+  | 'consumer'
+  | 'schedule'
+  | 'actions'
+  | 'params'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'throttle'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+>;
 
 export type AlertInfoParams = Pick<
   RawAlert,
