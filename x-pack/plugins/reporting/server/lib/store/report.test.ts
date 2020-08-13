@@ -85,7 +85,6 @@ describe('Class Report', () => {
           "meta": undefined,
           "payload": Object {
             "headers": "payload_test_field",
-            "layout": Object {},
             "objectType": "testOt",
           },
           "priority": 1,
@@ -109,7 +108,6 @@ describe('Class Report', () => {
         "meta": undefined,
         "payload": Object {
           "headers": "payload_test_field",
-          "layout": Object {},
           "objectType": "testOt",
         },
         "priority": 1,
