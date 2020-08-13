@@ -6,7 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback, useEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,7 +17,6 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions, useResolverTheme } from './assets';
 import { useStateSyncingActions } from './use_state_syncing_actions';
-import { useResolverQueryParams } from './use_resolver_query_params';
 import { StyledMapContainer, StyledPanel, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
