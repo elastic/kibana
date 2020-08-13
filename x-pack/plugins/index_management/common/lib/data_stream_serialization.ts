@@ -15,6 +15,8 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     status,
     template,
     ilm_policy: ilmPolicyName,
+    store_size: storageSize,
+    maximum_timestamp: maxTimeStamp,
   } = dataStreamFromEs;
 
   return {
@@ -31,6 +33,8 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     health: status.toLowerCase() as Health, // ES typically returns status in all-caps
     indexTemplateName: template,
     ilmPolicyName,
+    storageSize,
+    maxTimeStamp,
   };
 }
 

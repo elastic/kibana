@@ -27,6 +27,7 @@ import { reactRouterNavigate } from '../../../../../shared_imports';
 import { SectionLoading, SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
+import { humanizeTimeStamp } from '../humanize_time_stamp';
 
 interface DetailsListProps {
   details: Array<{
@@ -112,6 +113,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       generation,
       indexTemplateName,
       ilmPolicyName,
+      storageSize,
+      maxTimeStamp,
     } = dataStream;
     const details = [
       {
@@ -122,6 +125,24 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: `The health of the data stream's current backing indices`,
         }),
         content: <DataHealth health={health} />,
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
+          defaultMessage: 'The most recent document to be added to the data stream',
+        }),
+        content: humanizeTimeStamp(maxTimeStamp),
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
+          defaultMessage: 'Storage size',
+        }),
+        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
+          defaultMessage: `Total size of all shards in the data stream’s backing indices`,
+        }),
+        content: storageSize,
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesTitle', {
@@ -156,7 +177,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateToolTip', {
           defaultMessage:
-            'The index template that configured this data stream and configures its backing indices',
+            'The index template that configured the data stream and configures its backing indices',
         }),
         content: indexTemplateName,
       },
@@ -165,7 +186,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Index lifecycle policy',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
-          defaultMessage: `The index lifecycle policy that manages this data stream's data`,
+          defaultMessage: `The index lifecycle policy that manages the data stream's data`,
         }),
         content:
           ilmPolicyName ??

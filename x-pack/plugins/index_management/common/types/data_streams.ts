@@ -20,6 +20,8 @@ export interface DataStreamFromEs {
   status: HealthFromEs;
   template: string;
   ilm_policy?: string;
+  store_size?: string;
+  maximum_timestamp?: number;
 }
 
 export interface DataStreamIndexFromEs {
@@ -37,6 +39,8 @@ export interface DataStream {
   health: Health;
   indexTemplateName: string;
   ilmPolicyName?: string;
+  storageSize?: string;
+  maxTimeStamp?: number;
 }
 
 export interface DataStreamIndex {
