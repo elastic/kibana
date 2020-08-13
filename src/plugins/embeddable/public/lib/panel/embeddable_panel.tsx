@@ -205,6 +205,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.state.error) contentAttrs['data-error'] = true;
 
     const title = this.props.embeddable.getTitle();
+    const placeholderTitle = this.props.embeddable.getPlaceholderTitle
+      ? this.props.embeddable.getPlaceholderTitle()
+      : undefined;
     const headerId = this.generateId();
     return (
       <EuiPanel
@@ -225,6 +228,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             notifications={this.state.notifications}
             embeddable={this.props.embeddable}
             headerId={headerId}
+            placeholderTitle={placeholderTitle}
           />
         )}
         <EmbeddableErrorLabel error={this.state.error} />

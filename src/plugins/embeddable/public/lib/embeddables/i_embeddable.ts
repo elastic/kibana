@@ -164,6 +164,11 @@ export interface IEmbeddable<
   getTitle(): string | undefined;
 
   /**
+   * Returns the placeholder title of this embeddable, if it exists.
+   */
+  getPlaceholderTitle?(): string | undefined;
+
+  /**
    * Returns the top most parent embeddable, or itself if this embeddable
    * is not within a parent.
    */

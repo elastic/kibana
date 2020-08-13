@@ -465,8 +465,11 @@ export class DashboardAppController {
               } else if ('input' in incomingEmbeddable) {
                 const input = incomingEmbeddable.input;
                 delete input.id;
+                const placeholderTitle = input.placeholderTitle;
+                delete input.placeholderTitle;
                 const explicitInput = {
                   savedVis: input,
+                  placeholderTitle,
                 };
                 container.addOrUpdateEmbeddable<EmbeddableInput>(
                   incomingEmbeddable.type,

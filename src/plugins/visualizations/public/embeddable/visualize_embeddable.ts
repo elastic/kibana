@@ -67,6 +67,7 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   table?: unknown;
+  placeholderTitle?: string;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -96,6 +97,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
+  private readonly placeholderTitle?: string;
 
   constructor(
     timefilter: TimefilterContract,
@@ -119,6 +121,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
+    this.placeholderTitle = initialInput.placeholderTitle;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
 
@@ -240,6 +243,10 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
   }
 
+  getPlaceholderTitle = () => {
+    return this.placeholderTitle;
+  };
+
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
   hasInspector = () => Boolean(this.getInspectorAdapters());
@@ -323,6 +330,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     );
 
     div.setAttribute('data-title', this.output.title || '');
+    if (this.placeholderTitle) {
+      div.setAttribute('data-placeholder-title', this.placeholderTitle);
+    }
 
     if (this.vis.description) {
       div.setAttribute('data-description', this.vis.description);

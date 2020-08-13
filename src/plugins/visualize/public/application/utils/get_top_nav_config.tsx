@@ -247,6 +247,7 @@ export const getTopNavConfig = (
                 const input = {
                   ...vis.serialize(),
                   id: uuid.v4(),
+                  placeholderTitle: '[No Title]',
                 };
                 embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
                   state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
