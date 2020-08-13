@@ -135,6 +135,11 @@ describe('Resolver, when analyzing a tree that has two related events for the or
   });
 
   describe('when it has loaded', () => {
+    let originBounds: ReturnType<typeof getComputedNodeBoundaries>;
+    let firstChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
+    let secondChildBounds: ReturnType<typeof getComputedNodeBoundaries>;
+    let edgeStartingCoordinates: ReturnType<typeof getEdgeStartingCoordinates>;
+    let edgeTerminalCoordinates: ReturnType<typeof getEdgeTerminalCoordinates>;
     beforeEach(async () => {
       await expect(
         simulator.map(() => ({
@@ -149,6 +154,31 @@ describe('Resolver, when analyzing a tree that has two related events for the or
         graphErrorElements: 0,
         originNode: 1,
       });
+
+      originBounds = getComputedNodeBoundaries(entityIDs.origin);
+      firstChildBounds = getComputedNodeBoundaries(entityIDs.firstChild);
+      secondChildBounds = getComputedNodeBoundaries(entityIDs.secondChild);
+      edgeStartingCoordinates = getEdgeStartingCoordinates();
+      edgeTerminalCoordinates = getEdgeTerminalCoordinates();
+    });
+
+    it('should have one and only one outgoing edge from the origin node', () => {
+      // This winnows edges to the one(s) that "start" under the origin node
+      const edgesThatStartUnderneathOrigin = edgeStartingCoordinates.filter(
+        coordinateBoundaryFilter(originBounds)
+      );
+      expect(edgesThatStartUnderneathOrigin).toHaveLength(1);
+    });
+    it('leaf nodes should each have one and only one incoming edge', () => {
+      const edgesThatTerminateUnderneathFirstChild = edgeTerminalCoordinates.filter(
+        coordinateBoundaryFilter(firstChildBounds)
+      );
+      expect(edgesThatTerminateUnderneathFirstChild).toHaveLength(1);
+
+      const edgesThatTerminateUnderneathSecondChild = edgeTerminalCoordinates.filter(
+        coordinateBoundaryFilter(secondChildBounds)
+      );
+      expect(edgesThatTerminateUnderneathSecondChild).toHaveLength(1);
     });
 
     it('should render a related events button', async () => {
@@ -197,3 +227,70 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     });
   });
 });
+
+/**
+ * Get the integer in a CSS px unit string
+ * @param px a string with `px` preceded by numbers
+ */
+function pxNum(px: string): number {
+  return parseInt(px.match(/\d+/)![0], 10);
+}
+
+/**
+ * Get computed boundaries for process node elements
+ */
+function getComputedNodeBoundaries(entityID: string) {
+  const { left, top, width, height } = getComputedStyle(
+    simulator.processNodeElements({ entityID }).first().getDOMNode()
+  );
+  return {
+    xMin: pxNum(left),
+    xMax: pxNum(left) + pxNum(width),
+    yMin: pxNum(top),
+    yMax: pxNum(top) + pxNum(height),
+  };
+}
+
+/**
+ * Coordinates for where the edgelines "start"
+ */
+function getEdgeStartingCoordinates() {
+  return simulator.edgeLines().map((edge) => {
+    const { left, top } = getComputedStyle(edge.getDOMNode());
+    return { edgeX: pxNum(left), edgeY: pxNum(top) };
+  });
+}
+
+/**
+ * Coordinates for where edgelines "end" (after application of transform)
+ */
+function getEdgeTerminalCoordinates() {
+  return simulator.edgeLines().map((edge) => {
+    const { left, top, width, transform } = getComputedStyle(edge.getDOMNode());
+    /**
+     * Without the transform in the rotation, edgelines lay flat across the x-axis.
+     * Plotting the x/y of the line's terminal point here takes the rotation into account.
+     * This could cause tests to break if/when certain adjustments are made to the view that might
+     * regress the alignment of nodes and edges.
+     */
+    const edgeLineRotationInRadians = parseFloat(transform.match(/rotateZ\((-?\d+\.?\d+)/i)![1]);
+    const rotateDownTo = Math.sin(edgeLineRotationInRadians) * pxNum(width);
+    const rotateLeftTo = Math.cos(edgeLineRotationInRadians) * pxNum(width);
+    return { edgeX: pxNum(left) + rotateLeftTo, edgeY: pxNum(top) + rotateDownTo };
+  });
+}
+
+/**
+ *
+ * @param bounds Get a function that filters x/y of edges to those contained in a certain bounding box
+ */
+function coordinateBoundaryFilter(bounds: ReturnType<typeof getComputedNodeBoundaries>) {
+  return (coords: ReturnType<typeof getEdgeTerminalCoordinates>[0]) => {
+    return (
+      coords.edgeX >= bounds.xMin &&
+      coords.edgeX <= bounds.xMax &&
+      coords.edgeY >= bounds.yMin &&
+      coords.edgeY <= bounds.yMax
+    );
+  };
+}

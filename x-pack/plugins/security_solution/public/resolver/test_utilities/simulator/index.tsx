@@ -211,7 +211,70 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   */
+  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
+    return this.domNodes(
+      `${processNodeElementSelector({ entityID })} [data-test-subj="resolver:submenu:button"]`
+    );
+  }
+
+  /**
+   * The items in the submenu that is opened by expanding a node in the map.
+   */
+  public processNodeSubmenuItems(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:map:node-submenu-item"]');
+  }
+
+  /**
+   * Return the selected node query string values.
+   */
+  public queryStringValues(): { selectedNode: string[] } {
+    const urlSearchParams = new URLSearchParams(this.history.location.search);
+    return {
+      selectedNode: urlSearchParams.getAll(`resolver-${this.resolverComponentInstanceID}-id`),
+    };
+  }
+
+  /**
+   * The element that shows when Resolver is waiting for the graph data.
+   */
+  public graphLoadingElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph:loading"]');
+  }
+
+  /**
+   * The element that shows if Resolver couldn't draw the graph.
+   */
+  public graphErrorElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph:error"]');
+  }
+
+  /**
+   * The element where nodes get drawn.
+   */
+  public graphElement(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph"]');
+  }
+
+  /**
+   * The element where nodes get drawn.
+   */
+  public edgeLines(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:graph:edgeline"]');
+  }
+
+  /**
+   * The titles of the links that select a node in the node list view.
+   */
+  public nodeListNodeLinkText(): ReactWrapper {
+    return this.domNodes('[data-test-subj="resolver:node-list:node-link:title"]');
+  }
+
+  /**
+   * The icons in the links that select a node in the node list view.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;
