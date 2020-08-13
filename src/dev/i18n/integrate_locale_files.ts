@@ -111,7 +111,9 @@ export function verifyMessages(
     if (defaultMessage) {
       try {
         const message = localizedMessagesMap.get(messageId)!;
-        verifyICUMessage(typeof message === 'string' ? message : message.text);
+        if (message) {
+          verifyICUMessage(typeof message === 'string' ? message : message.text);
+        }
       } catch (err) {
         if (options.ignoreMalformed) {
           localizedMessagesMap.delete(messageId);
