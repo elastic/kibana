@@ -111,7 +111,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
       ) : (
         <FormattedMessage
           id="xpack.ingestManager.createPackagePolicy.pageDescriptionfromPackage"
-          defaultMessage="Follow the instructions below to add this integration to an agent configuraiton."
+          defaultMessage="Follow the instructions below to add this integration to an agent policy."
         />
       );
     }, [from]);

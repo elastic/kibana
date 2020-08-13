@@ -15,8 +15,8 @@ export async function reassignAgent(
   agentId: string,
   newAgentPolicyId: string
 ) {
-  const config = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!config) {
+  const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 

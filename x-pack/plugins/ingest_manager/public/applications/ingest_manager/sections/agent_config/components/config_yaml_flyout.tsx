@@ -33,7 +33,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
   ({ policyId, onClose }) => {
     const core = useCore();
     const { isLoading: isLoadingYaml, data: yamlData } = useGetOneAgentPolicyFull(policyId);
-    const { data: configData } = useGetOneAgentPolicy(policyId);
+    const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
 
     const body =
       isLoadingYaml && !yamlData ? (
@@ -53,11 +53,11 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
           <EuiTitle size="m">
             <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
-              {configData?.item ? (
+              {agentPolicyData?.item ? (
                 <FormattedMessage
                   id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithName"
                   defaultMessage="'{name}' agent policy"
-                  values={{ name: configData.item.name }}
+                  values={{ name: agentPolicyData.item.name }}
                 />
               ) : (
                 <FormattedMessage

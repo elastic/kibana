@@ -78,7 +78,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
           <EuiContextMenuItem
             icon="inspect"
             href={getHref('fleet_agent_details', { agentId: agent.id })}
-            key="viewConfig"
+            key="viewAgent"
           >
             <FormattedMessage
               id="xpack.ingestManager.agentList.viewActionText"
@@ -91,7 +91,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
               onReassignClick();
             }}
             disabled={!agent.active}
-            key="reassignConfig"
+            key="reassignPolicy"
           >
             <FormattedMessage
               id="xpack.ingestManager.agentList.reassignActionText"
@@ -165,12 +165,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [setSearch, setSelectedAgentPolicies, setSelectedStatus]);
 
   // Add a agent policy id to current search
-  const addConfigFilter = (policyId: string) => {
+  const addAgentPolicyFilter = (policyId: string) => {
     setSelectedAgentPolicies([...selectedAgentPolicies, policyId]);
   };
 
   // Remove a agent policy id from current search
-  const removeConfigFilter = (policyId: string) => {
+  const removeAgentPolicyFilter = (policyId: string) => {
     setSelectedAgentPolicies(
       selectedAgentPolicies.filter((agentPolicy) => agentPolicy !== policyId)
     );
@@ -272,16 +272,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
-        const configName = agentPolicies.find((p) => p.id === policyId)?.name;
+        const policyName = agentPolicies.find((p) => p.id === policyId)?.name;
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiLink
                 href={getHref('policy_details', { policyId })}
                 className="eui-textTruncate"
-                title={configName || policyId}
+                title={policyName || policyId}
               >
-                {configName || policyId}
+                {policyName || policyId}
               </EuiLink>
             </EuiFlexItem>
             {agent.config_revision && (
@@ -485,9 +485,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                         key={index}
                         onClick={() => {
                           if (selectedAgentPolicies.includes(agentPolicy.id)) {
-                            removeConfigFilter(agentPolicy.id);
+                            removeAgentPolicyFilter(agentPolicy.id);
                           } else {
-                            addConfigFilter(agentPolicy.id);
+                            addAgentPolicyFilter(agentPolicy.id);
                           }
                         }}
                       >

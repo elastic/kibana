@@ -88,7 +88,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  policy_details: ({ configName }) => [
+  policy_details: ({ policyName }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.policies(),
@@ -96,9 +96,9 @@ const breadcrumbGetters: {
         defaultMessage: 'Policies',
       }),
     },
-    { text: configName },
+    { text: policyName },
   ],
-  add_integration_from_policy: ({ configName, policyId }) => [
+  add_integration_from_policy: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.policies(),
@@ -108,7 +108,7 @@ const breadcrumbGetters: {
     },
     {
       href: pagePathGetters.policy_details({ policyId }),
-      text: configName,
+      text: policyName,
     },
     {
       text: i18n.translate('xpack.ingestManager.breadcrumbs.addPackagePolicyPageTitle', {
@@ -134,7 +134,7 @@ const breadcrumbGetters: {
       }),
     },
   ],
-  edit_integration: ({ configName, policyId }) => [
+  edit_integration: ({ policyName, policyId }) => [
     BASE_BREADCRUMB,
     {
       href: pagePathGetters.policies(),
@@ -144,7 +144,7 @@ const breadcrumbGetters: {
     },
     {
       href: pagePathGetters.policy_details({ policyId }),
-      text: configName,
+      text: policyName,
     },
     {
       text: i18n.translate('xpack.ingestManager.breadcrumbs.editPackagePolicyPageTitle', {

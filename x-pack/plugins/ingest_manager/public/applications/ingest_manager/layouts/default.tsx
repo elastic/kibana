@@ -77,7 +77,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       defaultMessage="Integrations"
                     />
                   </EuiTab>
-                  <EuiTab isSelected={section === 'agent_config'} href={getHref('policies_list')}>
+                  <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
                     <FormattedMessage
                       id="xpack.ingestManager.appNavigation.policiesLinkText"
                       defaultMessage="Policies"

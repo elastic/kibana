@@ -19,7 +19,7 @@ import { WithHeaderLayout } from '../../layouts';
 import { useGetAgentPolicies, useBreadcrumbs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/components';
 import { OverviewAgentSection } from './components/agent_section';
-import { OverviewConfigurationSection } from './components/configuration_section';
+import { OverviewPolicySection } from './components/configuration_section';
 import { OverviewIntegrationSection } from './components/integration_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
 
@@ -100,7 +100,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
 
       <EuiFlexGrid gutterSize="l" columns={2}>
         <OverviewIntegrationSection />
-        <OverviewConfigurationSection agentPolicies={agentPolicies} />
+        <OverviewPolicySection agentPolicies={agentPolicies} />
         <OverviewAgentSection />
         <OverviewDatastreamSection />
       </EuiFlexGrid>

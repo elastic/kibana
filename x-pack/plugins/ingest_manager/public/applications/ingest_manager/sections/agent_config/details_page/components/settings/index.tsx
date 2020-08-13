@@ -21,7 +21,7 @@ import {
 import {
   AgentPolicyForm,
   agentPolicyFormValidation,
-  ConfirmDeployConfigModal,
+  ConfirmDeployAgentPolicyModal,
 } from '../../../components';
 import { useConfigRefresh } from '../../hooks';
 
@@ -128,7 +128,7 @@ export const ConfigSettingsView = memo<{ agentPolicy: AgentPolicy }>(
     return (
       <FormWrapper>
         {agentCount ? (
-          <ConfirmDeployConfigModal
+          <ConfirmDeployAgentPolicyModal
             agentCount={agentCount}
             agentPolicy={agentPolicy}
             onConfirm={() => {

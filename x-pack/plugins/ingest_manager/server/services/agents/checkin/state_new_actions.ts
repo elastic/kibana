@@ -95,11 +95,12 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   return outputAPIKey.key;
 }
 
-function shouldCreateAgentPolicyAction(agent: Agent, config: FullAgentPolicy | null): boolean {
-  if (!config || !config.revision) {
+function shouldCreateAgentPolicyAction(agent: Agent, agentPolicy: FullAgentPolicy | null): boolean {
+  if (!agentPolicy || !agentPolicy.revision) {
     return false;
   }
-  const isAgentPolicyOutdated = !agent.config_revision || agent.config_revision < config.revision;
+  const isAgentPolicyOutdated =
+    !agent.config_revision || agent.config_revision < agentPolicy.revision;
   if (!isAgentPolicyOutdated) {
     return false;
   }
@@ -110,23 +111,26 @@ function shouldCreateAgentPolicyAction(agent: Agent, config: FullAgentPolicy | n
 async function createAgentActionFromConfig(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  config: FullAgentPolicy | null
+  policy: FullAgentPolicy | null
 ) {
   // Deep clone !not supporting Date, and undefined value.
-  const newConfig = JSON.parse(JSON.stringify(config));
+  const newAgentPolicy = JSON.parse(JSON.stringify(policy));
 
-  // Mutate the config to set the api token for this agent
-  newConfig.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  // Mutate the policy to set the api token for this agent
+  newAgentPolicy.outputs.default.api_key = await getOrCreateAgentDefaultOutputAPIKey(
+    soClient,
+    agent
+  );
 
-  const configChangeAction = await createAgentAction(soClient, {
+  const policyChangeAction = await createAgentAction(soClient, {
     agent_id: agent.id,
     type: 'CONFIG_CHANGE',
-    data: { config: newConfig } as any,
+    data: { config: newAgentPolicy } as any,
     created_at: new Date().toISOString(),
     sent_at: undefined,
   });
 
-  return [configChangeAction];
+  return [policyChangeAction];
 }
 
 export function agentCheckinStateNewActionsFactory() {
@@ -145,7 +149,7 @@ export function agentCheckinStateNewActionsFactory() {
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
     if (!agent.config_id) {
-      throw new Error('Agent does not have a config');
+      throw new Error('Agent does not have a policy');
     }
     const agentPolicyId = agent.config_id;
     if (!agentPolicies$.has(agentPolicyId)) {
@@ -158,9 +162,9 @@ export function agentCheckinStateNewActionsFactory() {
 
     const stream$ = agentPolicy$.pipe(
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
-      filter((config) => shouldCreateAgentPolicyAction(agent, config)),
+      filter((agentPolicy) => shouldCreateAgentPolicyAction(agent, agentPolicy)),
       rateLimiter(),
-      mergeMap((config) => createAgentActionFromConfig(soClient, agent, config)),
+      mergeMap((agentPolicy) => createAgentActionFromConfig(soClient, agent, agentPolicy)),
       merge(newActions$),
       mergeMap(async (data) => {
         if (!data) {

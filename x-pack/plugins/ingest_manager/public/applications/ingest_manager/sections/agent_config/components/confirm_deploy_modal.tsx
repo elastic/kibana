@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AgentPolicy } from '../../../types';
 
-export const ConfirmDeployConfigModal: React.FunctionComponent<{
+export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;

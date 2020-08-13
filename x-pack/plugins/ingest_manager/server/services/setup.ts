@@ -51,7 +51,7 @@ export async function setupIngestManager(
     });
   }
   try {
-    const [installedPackages, defaultOutput, config] = await Promise.all([
+    const [installedPackages, defaultOutput, defaultAgentPolicy] = await Promise.all([
       // packages installed by default
       ensureInstalledDefaultPackages(soClient, callCluster),
       outputService.ensureDefaultOutput(soClient),
@@ -86,15 +86,19 @@ export async function setupIngestManager(
     ]);
 
     // ensure default packages are added to the default conifg
-    const configWithPackagePolicies = await agentPolicyService.get(soClient, config.id, true);
-    if (!configWithPackagePolicies) {
-      throw new Error('Config not found');
+    const agentPolicyWithPackagePolicies = await agentPolicyService.get(
+      soClient,
+      defaultAgentPolicy.id,
+      true
+    );
+    if (!agentPolicyWithPackagePolicies) {
+      throw new Error('Policy not found');
     }
     if (
-      configWithPackagePolicies.package_configs.length &&
-      typeof configWithPackagePolicies.package_configs[0] === 'string'
+      agentPolicyWithPackagePolicies.package_configs.length &&
+      typeof agentPolicyWithPackagePolicies.package_configs[0] === 'string'
     ) {
-      throw new Error('Config not found');
+      throw new Error('Policy not found');
     }
     for (const installedPackage of installedPackages) {
       const packageShouldBeInstalled = DEFAULT_AGENT_POLICIES_PACKAGES.some(
@@ -104,18 +108,18 @@ export async function setupIngestManager(
         continue;
       }
 
-      const isInstalled = configWithPackagePolicies.package_configs.some(
+      const isInstalled = agentPolicyWithPackagePolicies.package_configs.some(
         (d: PackagePolicy | string) => {
           return typeof d !== 'string' && d.package?.name === installedPackage.name;
         }
       );
 
       if (!isInstalled) {
-        await addPackageToConfig(
+        await addPackageToAgentPolicy(
           soClient,
           callCluster,
           installedPackage,
-          configWithPackagePolicies,
+          agentPolicyWithPackagePolicies,
           defaultOutput
         );
       }
@@ -203,11 +207,11 @@ function generateRandomPassword() {
   return Buffer.from(uuid.v4()).toString('base64');
 }
 
-async function addPackageToConfig(
+async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
-  config: AgentPolicy,
+  agentPolicy: AgentPolicy,
   defaultOutput: Output
 ) {
   const packageInfo = await getPackageInfo({
@@ -218,9 +222,9 @@ async function addPackageToConfig(
 
   const newPackagePolicy = packageToPackagePolicy(
     packageInfo,
-    config.id,
+    agentPolicy.id,
     defaultOutput.id,
-    config.namespace
+    agentPolicy.namespace
   );
 
   await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {

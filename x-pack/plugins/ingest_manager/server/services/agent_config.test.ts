@@ -8,7 +8,7 @@ import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { agentPolicyService } from './agent_config';
 import { Output } from '../types';
 
-function getSavedObjectMock(configAttributes: any) {
+function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
 
   mock.get.mockImplementation(async (type: string, id: string) => {
@@ -16,7 +16,7 @@ function getSavedObjectMock(configAttributes: any) {
       type,
       id,
       references: [],
-      attributes: configAttributes,
+      attributes: agentPolicyAttributes,
     };
   });
 
@@ -43,14 +43,14 @@ jest.mock('./output', () => {
 
 describe('agent policy', () => {
   describe('getFullConfig', () => {
-    it('should return a config without monitoring if not monitoring is not enabled', async () => {
+    it('should return a policy without monitoring if not monitoring is not enabled', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
       });
-      const config = await agentPolicyService.getFullConfig(soClient, 'config');
+      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
 
-      expect(config).toMatchObject({
-        id: 'config',
+      expect(agentPolicy).toMatchObject({
+        id: 'agent-policy',
         outputs: {
           default: {
             type: 'elasticsearch',
@@ -71,15 +71,15 @@ describe('agent policy', () => {
       });
     });
 
-    it('should return a config with monitoring if monitoring is enabled for logs', async () => {
+    it('should return a policy with monitoring if monitoring is enabled for logs', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
         monitoring_enabled: ['logs'],
       });
-      const config = await agentPolicyService.getFullConfig(soClient, 'config');
+      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
 
-      expect(config).toMatchObject({
-        id: 'config',
+      expect(agentPolicy).toMatchObject({
+        id: 'agent-policy',
         outputs: {
           default: {
             type: 'elasticsearch',
@@ -101,15 +101,15 @@ describe('agent policy', () => {
       });
     });
 
-    it('should return a config with monitoring if monitoring is enabled for metrics', async () => {
+    it('should return a policy with monitoring if monitoring is enabled for metrics', async () => {
       const soClient = getSavedObjectMock({
         revision: 1,
         monitoring_enabled: ['metrics'],
       });
-      const config = await agentPolicyService.getFullConfig(soClient, 'config');
+      const agentPolicy = await agentPolicyService.getFullConfig(soClient, 'agent-policy');
 
-      expect(config).toMatchObject({
-        id: 'config',
+      expect(agentPolicy).toMatchObject({
+        id: 'agent-policy',
         outputs: {
           default: {
             type: 'elasticsearch',

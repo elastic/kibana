@@ -191,7 +191,7 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
                     </DefaultLayout>
                   </Route>
                   <Route path={PAGE_ROUTING_PATHS.policies}>
-                    <DefaultLayout section="agent_config">
+                    <DefaultLayout section="agent_policy">
                       <AgentPolicyApp />
                     </DefaultLayout>
                   </Route>

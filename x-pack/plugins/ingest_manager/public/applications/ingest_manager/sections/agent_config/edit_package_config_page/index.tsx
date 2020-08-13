@@ -28,7 +28,7 @@ import {
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
-import { ConfirmDeployConfigModal } from '../components';
+import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_config_page/components';
 import {
   PackagePolicyValidationResults,
@@ -337,7 +337,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
         <>
           <Breadcrumb configName={agentPolicy.name} policyId={policyId} />
           {formState === 'CONFIRM' && (
-            <ConfirmDeployConfigModal
+            <ConfirmDeployAgentPolicyModal
               agentCount={agentCount}
               agentPolicy={agentPolicy}
               onConfirm={onSubmit}

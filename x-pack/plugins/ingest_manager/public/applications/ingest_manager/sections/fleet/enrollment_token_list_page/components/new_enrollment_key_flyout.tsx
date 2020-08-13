@@ -26,13 +26,13 @@ import { useInput, useCore, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
 function useCreateApiKeyForm(
-  configDefaultValue: string | undefined,
+  policyIdDefaultValue: string | undefined,
   onSuccess: (keyId: string) => void
 ) {
   const { notifications } = useCore();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
-  const policyIdInput = useInput(configDefaultValue);
+  const policyIdInput = useInput(policyIdDefaultValue);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -80,8 +80,8 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicies = [],
 }) => {
-  const configDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
-  const form = useCreateApiKeyForm(configDefaultValue, () => {
+  const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
+  const form = useCreateApiKeyForm(policyIdDefaultValue, () => {
     onClose();
   });
 
@@ -108,7 +108,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
         >
           <EuiSelect
             required={true}
-            defaultValue={configDefaultValue}
+            defaultValue={policyIdDefaultValue}
             {...form.policyIdInput.props}
             options={agentPolicies.map((agentPolicy) => ({
               value: agentPolicy.id,

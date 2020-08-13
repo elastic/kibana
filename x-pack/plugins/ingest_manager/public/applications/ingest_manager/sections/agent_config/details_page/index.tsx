@@ -78,7 +78,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
               {(agentPolicy && agentPolicy.name) || (
                 <FormattedMessage
                   id="xpack.ingestManager.policyDetails.policyDetailsTitle"
-                  defaultMessage="Config '{id}'"
+                  defaultMessage="Policy '{id}'"
                   values={{
                     id: policyId,
                   }}
@@ -258,7 +258,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           }
           error={i18n.translate('xpack.ingestManager.policyDetails.policyNotFoundErrorTitle', {
-            defaultMessage: "Config '{id}' not found",
+            defaultMessage: "Policy '{id}' not found",
             values: {
               id: policyId,
             },

@@ -70,17 +70,17 @@ export async function acknowledgeAgentActions(
     await forceUnenrollAgent(soClient, agent.id);
   }
 
-  const config = getLatestConfigIfUpdated(agent, actions);
+  const agentPolicy = getLatestAgentPolicyIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(config ? [buildUpdateAgentPolicy(agent.id, config)] : []),
+    ...(agentPolicy ? [buildUpdateAgentPolicy(agent.id, agentPolicy)] : []),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
+function getLatestAgentPolicyIfUpdated(agent: Agent, actions: AgentAction[]) {
   return actions.reduce<null | FullAgentPolicy>((acc, action) => {
     if (action.type !== 'CONFIG_CHANGE') {
       return acc;
@@ -97,8 +97,8 @@ function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
   }, null);
 }
 
-function buildUpdateAgentPolicy(agentId: string, config: FullAgentPolicy) {
-  const packages = config.inputs.reduce<string[]>((acc, input) => {
+function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
+  const packages = agentPolicy.inputs.reduce<string[]>((acc, input) => {
     const packageName = input.meta?.package?.name;
     if (packageName && acc.indexOf(packageName) < 0) {
       return [packageName, ...acc];
@@ -110,7 +110,7 @@ function buildUpdateAgentPolicy(agentId: string, config: FullAgentPolicy) {
     type: AGENT_SAVED_OBJECT_TYPE,
     id: agentId,
     attributes: {
-      config_revision: config.revision,
+      config_revision: agentPolicy.revision,
       packages,
     },
   };

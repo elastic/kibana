@@ -19,7 +19,7 @@ import { useLink, useGetPackagePolicies } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
 import { Loading } from '../../fleet/components';
 
-export const OverviewConfigurationSection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
+export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
   agentPolicies,
 }) => {
   const { getHref } = useLink();

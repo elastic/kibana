@@ -120,7 +120,7 @@ export const createAgentPolicyHandler: RequestHandler<
         user,
       }),
       // If needed, retrieve System package information and build a new package policy for the system package
-      // NOTE: we ignore failures in attempting to create package policy, since config might have been created
+      // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
       // successfully
       withSysMonitoring
         ? packagePolicyService

@@ -40,7 +40,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   }>({});
 
   useEffect(
-    function triggerOnConfigChangeEffect() {
+    function triggerOnAgentPolicyChangeEffect() {
       if (onConfigChange && selectedState.agentPolicyId) {
         onConfigChange(selectedState.agentPolicyId);
       }
@@ -62,7 +62,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   );
 
   useEffect(
-    function useDefaultConfigEffect() {
+    function useDefaultAgentPolicyEffect() {
       if (agentPolicies && agentPolicies.length && !selectedState.agentPolicyId) {
         if (agentPolicies.length === 1) {
           setSelectedState({
@@ -72,11 +72,11 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           return;
         }
 
-        const defaultConfig = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
-        if (defaultConfig) {
+        const defaultAgentPolicy = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
+        if (defaultAgentPolicy) {
           setSelectedState({
             ...selectedState,
-            agentPolicyId: defaultConfig.id,
+            agentPolicyId: defaultAgentPolicy.id,
           });
         }
       }
@@ -85,7 +85,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   );
 
   useEffect(
-    function useEnrollmentKeysForConfigEffect() {
+    function useEnrollmentKeysForAgentPolicyEffect() {
       if (!withKeySelection) {
         return;
       }
@@ -123,7 +123,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   );
 
   useEffect(
-    function useDefaultEnrollmentKeyForConfigEffect() {
+    function useDefaultEnrollmentKeyForAgentPolicyEffect() {
       if (!withKeySelection) {
         return;
       }

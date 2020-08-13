@@ -186,7 +186,7 @@ describe('Package policy service', () => {
       await expect(
         packagePolicyService.update(
           savedObjectsClient,
-          'the-package-config-id',
+          'the-package-policy-id',
           createPackagePolicyMock()
         )
       ).rejects.toThrow('Saved object [abc/123] conflict');

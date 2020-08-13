@@ -6,7 +6,7 @@
 import { PackageInfo, InstallationStatus } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_config';
 
-describe('Ingest Manager - packageToConfig', () => {
+describe('Ingest Manager - packageToPackagePolicy', () => {
   const mockPackage: PackageInfo = {
     name: 'mock-package',
     title: 'Mock package',

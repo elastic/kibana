@@ -29,15 +29,14 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
   // Once we provide detailed telemetry on agent policies, this logic should probably be moved
   // to the (then to be created) agent policy collector, so we only query and loop over these
   // objects once.
-
-  const packagesInConfigs = agentPolicies.items.map((agentPolicy) => {
+  const packagesInAgentPolicies = agentPolicies.items.map((agentPolicy) => {
     const packagePolicies: NewPackagePolicy[] = agentPolicy.package_configs as NewPackagePolicy[];
     return packagePolicies
       .map((packagePolicy) => packagePolicy.package?.name)
       .filter((packageName): packageName is string => packageName !== undefined);
   });
 
-  const enabledPackages = _.uniq(_.flatten(packagesInConfigs));
+  const enabledPackages = _.uniq(_.flatten(packagesInAgentPolicies));
 
   return packagesSavedObjects.saved_objects.map((p) => {
     return {

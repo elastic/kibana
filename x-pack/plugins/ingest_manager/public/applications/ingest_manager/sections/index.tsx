@@ -9,4 +9,4 @@ export { AgentPolicyApp } from './agent_config';
 export { DataStreamApp } from './data_stream';
 export { FleetApp } from './fleet';
 
-export type Section = 'overview' | 'epm' | 'agent_config' | 'fleet' | 'data_stream';
+export type Section = 'overview' | 'epm' | 'agent_policy' | 'fleet' | 'data_stream';

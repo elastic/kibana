@@ -70,13 +70,13 @@ class AgentPolicyService {
   }
 
   public async ensureDefaultAgentPolicy(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find<AgentPolicySOAttributes>({
+    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
 
-    if (configs.total === 0) {
+    if (agentPolicies.total === 0) {
       const newDefaultAgentPolicy: NewAgentPolicy = {
         ...DEFAULT_AGENT_POLICY,
       };
@@ -85,8 +85,8 @@ class AgentPolicyService {
     }
 
     return {
-      id: configs.saved_objects[0].id,
-      ...configs.saved_objects[0].attributes,
+      id: agentPolicies.saved_objects[0].id,
+      ...agentPolicies.saved_objects[0].attributes,
     };
   }
 
@@ -213,7 +213,7 @@ class AgentPolicyService {
     newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    // Copy base config
+    // Copy base agent policy
     const baseAgentPolicy = await this.get(soClient, id, true);
     if (!baseAgentPolicy) {
       throw new Error('Agent policy not found');
@@ -244,7 +244,7 @@ class AgentPolicyService {
       });
     }
 
-    // Get updated config
+    // Get updated agent policy
     const updatedAgentPolicy = await this.get(soClient, newAgentPolicy.id, true);
     if (!updatedAgentPolicy) {
       throw new Error('Copied agent policy not found');
@@ -304,7 +304,7 @@ class AgentPolicyService {
       {
         package_configs: uniq(
           [...((oldAgentPolicy.package_configs || []) as string[])].filter(
-            (pkgConfigId) => !packagePolicyIds.includes(pkgConfigId)
+            (packagePolicyId) => !packagePolicyIds.includes(packagePolicyId)
           )
         ),
       },
@@ -313,30 +313,30 @@ class AgentPolicyService {
   }
 
   public async getDefaultAgentPolicyId(soClient: SavedObjectsClientContract) {
-    const configs = await soClient.find({
+    const agentPolicies = await soClient.find({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
 
-    if (configs.saved_objects.length === 0) {
+    if (agentPolicies.saved_objects.length === 0) {
       throw new Error('No default agent policy');
     }
 
-    return configs.saved_objects[0].id;
+    return agentPolicies.saved_objects[0].id;
   }
 
   public async delete(
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<DeleteAgentPolicyResponse> {
-    const config = await this.get(soClient, id, false);
-    if (!config) {
+    const agentPolicy = await this.get(soClient, id, false);
+    if (!agentPolicy) {
       throw new Error('Agent policy not found');
     }
 
-    const { id: defaultConfigId } = await this.ensureDefaultAgentPolicy(soClient);
-    if (id === defaultConfigId) {
+    const { id: defaultAgentPolicyId } = await this.ensureDefaultAgentPolicy(soClient);
+    if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
     }
 
@@ -351,8 +351,8 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
-    if (config.package_configs && config.package_configs.length) {
-      await packagePolicyService.delete(soClient, config.package_configs as string[], {
+    if (agentPolicy.package_configs && agentPolicy.package_configs.length) {
+      await packagePolicyService.delete(soClient, agentPolicy.package_configs as string[], {
         skipUnassignFromAgentPolicies: true,
       });
     }
@@ -369,17 +369,17 @@ class AgentPolicyService {
     id: string,
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
-    let config;
+    let agentPolicy;
 
     try {
-      config = await this.get(soClient, id);
+      agentPolicy = await this.get(soClient, id);
     } catch (err) {
       if (!err.isBoom || err.output.statusCode !== 404) {
         throw err;
       }
     }
 
-    if (!config) {
+    if (!agentPolicy) {
       return null;
     }
 
@@ -389,8 +389,8 @@ class AgentPolicyService {
     }
     const defaultOutput = await outputService.get(soClient, defaultOutputId);
 
-    const agentPolicy: FullAgentPolicy = {
-      id: config.id,
+    const fullAgentPolicy: FullAgentPolicy = {
+      id: agentPolicy.id,
       outputs: {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
@@ -415,16 +415,16 @@ class AgentPolicyService {
           {} as FullAgentPolicy['outputs']
         ),
       },
-      inputs: storedPackagePoliciesToAgentInputs(config.package_configs as PackagePolicy[]),
-      revision: config.revision,
-      ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
+      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_configs as PackagePolicy[]),
+      revision: agentPolicy.revision,
+      ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
         ? {
             agent: {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
-                logs: config.monitoring_enabled.indexOf('logs') >= 0,
-                metrics: config.monitoring_enabled.indexOf('metrics') >= 0,
+                logs: agentPolicy.monitoring_enabled.indexOf('logs') >= 0,
+                metrics: agentPolicy.monitoring_enabled.indexOf('metrics') >= 0,
               },
             },
           }
@@ -435,7 +435,7 @@ class AgentPolicyService {
           }),
     };
 
-    return agentPolicy;
+    return fullAgentPolicy;
   }
 }
 

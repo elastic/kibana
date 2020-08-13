@@ -20,7 +20,7 @@ ingesting data and the setup of Elasticsearch.
 
 ## Elastic Agent
 
-A single, unified agent that users can deploy to hosts or containers. It controls which data is collected from the host or containers and where the data is sent. It will run Beats, Endpoint or other monitoring programs as needed. It can operate standalone or pull a configuration policy from Fleet.
+A single, unified agent that users can deploy to hosts or containers. It controls which data is collected from the host or containers and where the data is sent. It will run Beats, Endpoint or other monitoring programs as needed. It can operate standalone or pull an agent policy from Fleet.
 
 ## Elastic Package Registry
 
@@ -29,8 +29,7 @@ More details about the registry can be found [here](https://github.com/elastic/p
 
 ## Fleet
 
-Fleet is the part of the Ingest Manager UI in Kibana that handles the part of enrolling Elastic Agents,
-managing agents and sending configurations to the Elastic Agent.
+Fleet is the part of the Ingest Manager UI in Kibana that handles the part of enrolling Elastic Agents, managing agents and sending policies to the Elastic Agent.
 
 ## Indexing Strategy
 

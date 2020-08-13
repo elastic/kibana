@@ -93,7 +93,7 @@ describe('test agent acks services', () => {
     ]);
   });
 
-  it('should update config field on the agent if a config change is acknowledged', async () => {
+  it('should update config field on the agent if a policy change is acknowledged', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({
@@ -235,7 +235,7 @@ describe('test agent acks services', () => {
     `);
   });
 
-  it('should not update config field on the agent if a config change for an old revision is acknowledged', async () => {
+  it('should not update config field on the agent if a policy change for an old revision is acknowledged', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
     const mockStartEncryptedSOPlugin = encryptedSavedObjectsMock.createStart();
     appContextService.start(({

@@ -7,6 +7,6 @@ export { AgentPolicyForm, agentPolicyFormValidation } from './config_form';
 export { AgentPolicyDeleteProvider } from './config_delete_provider';
 export { PackagePolicyDeleteProvider } from './package_config_delete_provider';
 export { LinkedAgentCount } from './linked_agent_count';
-export { ConfirmDeployConfigModal } from './confirm_deploy_modal';
+export { ConfirmDeployAgentPolicyModal } from './confirm_deploy_modal';
 export { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 export { AgentPolicyActionMenu } from './actions_menu';

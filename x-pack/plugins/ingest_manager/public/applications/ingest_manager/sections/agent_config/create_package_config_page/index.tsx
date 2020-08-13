@@ -33,7 +33,7 @@ import {
   sendGetAgentStatus,
 } from '../../../hooks';
 import { Loading } from '../../../components';
-import { ConfirmDeployConfigModal } from '../components';
+import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from './components';
 import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import {
@@ -379,7 +379,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   return (
     <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       {formState === 'CONFIRM' && agentPolicy && (
-        <ConfirmDeployConfigModal
+        <ConfirmDeployAgentPolicyModal
           agentCount={agentCount}
           agentPolicy={agentPolicy}
           onConfirm={onSubmit}
@@ -394,7 +394,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             />
           )
         : agentPolicy && (
-            <ConfigurationBreadcrumb configName={agentPolicy.name} policyId={agentPolicy.id} />
+            <PolicyBreadcrumb policyName={agentPolicy.name} policyId={agentPolicy.id} />
           )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="l" />
@@ -457,11 +457,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   );
 };
 
-const ConfigurationBreadcrumb: React.FunctionComponent<{
-  configName: string;
+const PolicyBreadcrumb: React.FunctionComponent<{
+  policyName: string;
   policyId: string;
-}> = ({ configName, policyId }) => {
-  useBreadcrumbs('add_integration_from_policy', { configName, policyId });
+}> = ({ policyName, policyId }) => {
+  useBreadcrumbs('add_integration_from_policy', { policyName, policyId });
   return null;
 };
 
