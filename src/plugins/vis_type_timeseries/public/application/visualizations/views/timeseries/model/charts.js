@@ -35,7 +35,6 @@ const Chart = {
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
   timeZone: PropTypes.string.isRequired,
-  enableHistogramMode: PropTypes.bool.isRequired,
   useDefaultGroupDomain: PropTypes.bool,
   sortIndex: PropTypes.number,
 };

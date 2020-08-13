@@ -37,7 +37,6 @@ export function AreaSeriesDecorator({
   xScaleType,
   yScaleType,
   timeZone,
-  enableHistogramMode,
   useDefaultGroupDomain,
   sortIndex,
   y1AccessorFormat,
@@ -64,15 +63,10 @@ export function AreaSeriesDecorator({
     xScaleType,
     yScaleType,
     timeZone,
-    enableHistogramMode,
     useDefaultGroupDomain,
     sortIndex,
     ...areaSeriesStyle,
   };
-
-  if (enableHistogramMode) {
-    seriesSettings.histogramModeAlignment = 'center';
-  }
 
   return <AreaSeries {...seriesSettings} />;
 }

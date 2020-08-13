@@ -67,7 +67,6 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
-  enableHistogramMode,
 }) => {
   const chartRef = useRef();
   const updateCursor = (_, cursor) => {
@@ -201,7 +200,6 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
@@ -227,7 +225,6 @@ export const TimeSeries = ({
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
@@ -283,5 +280,4 @@ TimeSeries.propTypes = {
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
-  enableHistogramMode: PropTypes.bool.isRequired,
 };
