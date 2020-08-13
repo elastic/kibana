@@ -4,7 +4,7 @@ set -euo pipefail
 
 source "$(dirname "${0}")/util.sh"
 
-tc_set_env KIBANA_DIR $(cd "$(dirname "$0")/../.." && pwd)
+tc_set_env KIBANA_DIR "$(cd "$(dirname "$0")/../.." && pwd)"
 tc_set_env XPACK_DIR "$KIBANA_DIR/x-pack"
 tc_set_env CACHE_DIR "$HOME/.kibana"
 

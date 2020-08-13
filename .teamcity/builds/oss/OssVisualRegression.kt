@@ -12,6 +12,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
 
   steps {
     script {
+      name = "Setup Environment"
       scriptContent = """
                 #!/bin/bash
                 ./.ci/teamcity/setup_env.sh
@@ -19,6 +20,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
     }
 
     script {
+      name = "Setup Node and Yarn"
       scriptContent = """
                 #!/bin/bash
                 ./.ci/teamcity/setup_node.sh
@@ -26,6 +28,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
     }
 
     script {
+      name = "Bootstrap"
       scriptContent = """
                 #!/bin/bash
                 ./.ci/teamcity/bootstrap.sh
@@ -33,6 +36,7 @@ class OssVisualRegression(val build: BuildType) : BuildType({
     }
 
     script {
+      name = "OSS Visual Regression"
       scriptContent = """
               #!/bin/bash
               ./.ci/teamcity/oss/visual_regression.sh
