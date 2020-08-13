@@ -407,6 +407,18 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     fittingFunction: currentState?.fittingFunction || 'None',
+    xTitle: currentState?.xTitle,
+    yTitle: currentState?.yTitle,
+    showXAxisTitle: currentState?.showXAxisTitle ?? true,
+    showYAxisTitle: currentState?.showYAxisTitle ?? true,
+    tickLabelsVisibilitySettings: currentState?.tickLabelsVisibilitySettings || {
+      x: true,
+      y: true,
+    },
+    gridlinesVisibilitySettings: currentState?.gridlinesVisibilitySettings || {
+      x: true,
+      y: true,
+    },
     preferredSeriesType: seriesType,
     layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };

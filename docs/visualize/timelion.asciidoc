@@ -504,3 +504,44 @@ image::images/timelion-conditional04.png[]
 {nbsp}
 
 For additional information on Timelion conditional capabilities, go to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].
+
+[float]
+[[timelion-deprecation]]
+=== Timelion App deprecation
+
+Deprecated since 7.0, the Timelion app will be removed in 8.0. If you have any Timelion worksheets, you must migrate them to a dashboard.
+
+NOTE: Only the Timelion app is deprecated. {kib} continues to support Timelion visualizations on dashboards, in Visualize, and in Canvas. 
+
+[float]
+[[timelion-app-to-vis]]
+==== Create a dashboard from a Timelion worksheet
+
+To replace a Timelion worksheet with a dashboard, follow the same process for adding a visualization. 
+In addition, you must migrate the Timelion graphs to Visualize.
+
+. Open the menu, click **Dashboard**, then click **Create dashboard**.
+
+. On the dashboard, click **Create New**, then select the Timelion visualization.
++
+[role="screenshot"]
+image::images/timelion-create-new-dashboard.png[]
++
+The only thing you need is the Timelion expression for each graph.
+
+. Open the Timelion app on a new tab, select the chart you want to copy, and copy its expression.
++
+[role="screenshot"]
+image::images/timelion-copy-expression.png[]
+
+. Return to the other tab and paste the copied expression to the *Timelion Expression* field and click **Update**.
++
+[role="screenshot"]
+image::images/timelion-vis-paste-expression.png[]
+
+. Save the new visualization, give it a name, and click **Save and Return**.
++
+Your Timelion visualization will appear on the dashboard. Repeat this for all your charts on each worksheet.
++
+[role="screenshot"]
+image::images/timelion-dashboard.png[]
