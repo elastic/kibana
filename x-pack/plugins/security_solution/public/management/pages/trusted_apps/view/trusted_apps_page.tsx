@@ -21,7 +21,7 @@ export function TrustedAppsPage() {
         title={
           <FormattedMessage
             id="xpack.securitySolution.trustedapps.list.pageTitle"
-            defaultMessage="Trusted applications"
+            defaultMessage="Trusted Applications"
           />
         }
         subtitle={

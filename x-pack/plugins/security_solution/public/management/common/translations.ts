@@ -15,5 +15,5 @@ export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab',
 });
 
 export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAppsTab', {
-  defaultMessage: 'Trusted Applications',
+  defaultMessage: 'Trusted applications',
 });
