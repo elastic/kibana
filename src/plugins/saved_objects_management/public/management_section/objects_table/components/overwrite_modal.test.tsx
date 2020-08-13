@@ -41,24 +41,10 @@ describe('OverwriteModal', () => {
     it('should render as expected', async () => {
       const wrapper = shallowWithI18nProvider(<OverwriteModal {...props} />);
 
-      expect(wrapper).toMatchInlineSnapshot(`
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            buttonColor="danger"
-            cancelButtonText="Skip"
-            confirmButtonText="Overwrite"
-            defaultFocusedButton="confirm"
-            maxWidth="500px"
-            onCancel={[Function]}
-            onConfirm={[Function]}
-            title="Overwrite foo?"
-          >
-            <p>
-              "baz" conflicts with an existing object, are you sure you want to overwrite it?
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      `);
+      expect(wrapper.find('p').text()).toMatchInlineSnapshot(
+        `"\\"baz\\" conflicts with an existing object, are you sure you want to overwrite it?"`
+      );
+      expect(wrapper.find('EuiSuperSelect')).toHaveLength(0);
     });
 
     it('should call finish with expected args when Skip is clicked', async () => {
@@ -97,80 +83,10 @@ describe('OverwriteModal', () => {
     it('should render as expected', async () => {
       const wrapper = shallowWithI18nProvider(<OverwriteModal {...props} />);
 
-      expect(wrapper).toMatchInlineSnapshot(`
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            buttonColor="danger"
-            cancelButtonText="Skip"
-            confirmButtonText="Overwrite"
-            defaultFocusedButton="confirm"
-            maxWidth="500px"
-            onCancel={[Function]}
-            onConfirm={[Function]}
-            title="Overwrite foo?"
-          >
-            <p>
-              "baz" conflicts with multiple existing objects, do you want to overwrite one of them?
-            </p>
-            <EuiSuperSelect
-              append="Object ID"
-              compressed={true}
-              fullWidth={true}
-              hasDividers={true}
-              isInvalid={false}
-              isLoading={false}
-              onChange={[Function]}
-              options={
-                Array [
-                  Object {
-                    "dropdownDisplay": <React.Fragment>
-                      <strong>
-                        some title
-                      </strong>
-                      <EuiText
-                        color="subdued"
-                        size="s"
-                      >
-                        <p
-                          className="euiTextColor--subdued"
-                        >
-                          ID: qux
-                          <br />
-                          Last updated: never
-                        </p>
-                      </EuiText>
-                    </React.Fragment>,
-                    "inputDisplay": "qux",
-                    "value": "qux",
-                  },
-                  Object {
-                    "dropdownDisplay": <React.Fragment>
-                      <strong>
-                        another title
-                      </strong>
-                      <EuiText
-                        color="subdued"
-                        size="s"
-                      >
-                        <p
-                          className="euiTextColor--subdued"
-                        >
-                          ID: quux
-                          <br />
-                          Last updated: never
-                        </p>
-                      </EuiText>
-                    </React.Fragment>,
-                    "inputDisplay": "quux",
-                    "value": "quux",
-                  },
-                ]
-              }
-              valueOfSelected="qux"
-            />
-          </EuiConfirmModal>
-        </EuiOverlayMask>
-      `);
+      expect(wrapper.find('p').text()).toMatchInlineSnapshot(
+        `"\\"baz\\" conflicts with multiple existing objects, do you want to overwrite one of them?"`
+      );
+      expect(wrapper.find('EuiSuperSelect')).toHaveLength(1);
     });
 
     it('should call finish with expected args when Skip is clicked', async () => {

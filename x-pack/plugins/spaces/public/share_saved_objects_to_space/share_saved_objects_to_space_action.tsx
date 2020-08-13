@@ -25,7 +25,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     }),
     icon: 'share',
     type: 'icon',
-    enabled: (object: SavedObjectsManagementRecord) => {
+    available: (object: SavedObjectsManagementRecord) => {
       return object.meta.namespaceType === 'multiple';
     },
     onClick: (object: SavedObjectsManagementRecord) => {

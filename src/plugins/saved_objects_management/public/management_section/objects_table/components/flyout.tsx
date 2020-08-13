@@ -726,6 +726,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiForm>
         <EuiFormRow
+          fullWidth
           label={
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
@@ -734,6 +735,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
         >
           <EuiFilePicker
+            fullWidth
             initialPromptText={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importPromptText"
@@ -743,7 +745,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             onChange={this.setImportFile}
           />
         </EuiFormRow>
-        <EuiFormRow>
+        <EuiFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
             isLegacyFile={isLegacyFile}

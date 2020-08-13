@@ -20,10 +20,6 @@
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { SavedObjectsManagementRecord } from '.';
 
-// type ArgumentsType<T extends (...args: any[]) => any> = T extends (...args: infer A) => any
-//   ? A
-//   : never;
-
 export abstract class SavedObjectsManagementColumn<T> {
   public abstract id: string;
   public abstract euiColumn: Omit<
@@ -31,11 +27,6 @@ export abstract class SavedObjectsManagementColumn<T> {
     'sortable'
   >;
 
-  // private;
-
-  // protected executor: (resolve, reject) => void;
-  // protected data: Promise<T> = new Promise<T>((resolve, reject) => {});
-  // public abstract load: () => Promise<T>;
   public data?: T;
   public abstract loadData: () => Promise<T>;
 }

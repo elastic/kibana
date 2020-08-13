@@ -123,7 +123,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
           },
         };
         const selectContainerClass =
-          selectProps.options.length > 0 && isOverwritePending ? '' : ' euiAccordion-isClosed';
+          selectProps.options.length > 0 && isOverwritePending ? ' selectControl-isOpen' : '';
 
         return (
           <Fragment key={index}>
@@ -171,12 +171,15 @@ export const SpaceCopyResultDetails = (props: Props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <div className={'spcCopyToSpaceResultDetails__selectControl' + selectContainerClass}>
-              <div className="euiAccordion__childWrapper">
+              <div className="spcCopyToSpaceResultDetails__selectControl__childWrapper">
                 <EuiSuperSelect
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
-                  append="Object ID"
+                  append={i18n.translate(
+                    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
+                    { defaultMessage: 'Object ID' }
+                  )}
                   hasDividers
                   fullWidth
                   compressed

@@ -24,13 +24,11 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportAmbiguousConflictError,
 } from 'src/core/public';
+import { Required } from '@kbn/utility-types';
 import { FailedImport, ProcessedImportResponse } from './process_import_response';
 
-interface RetryObject extends Partial<SavedObjectsImportRetry> {
-  // the HTTP route requires type and ID; all other field are optional
-  type: string;
-  id: string;
-}
+// the HTTP route requires type and ID; all other field are optional
+type RetryObject = Required<Partial<SavedObjectsImportRetry>, 'type' | 'id'>;
 
 interface Reference {
   type: string;

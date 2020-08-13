@@ -82,7 +82,10 @@ export const OverwriteModal = ({ conflict, finish }: OverwriteModalProps) => {
         options={selectProps.options}
         valueOfSelected={destinationId}
         onChange={selectProps.onChange}
-        append="Object ID"
+        append={i18n.translate(
+          'savedObjectsManagement.objectsTable.overwriteModal.selectControlLabel',
+          { defaultMessage: 'Object ID' }
+        )}
         hasDividers
         fullWidth
         compressed

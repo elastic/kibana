@@ -545,7 +545,7 @@ exports[`Flyout should render import step 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
+        fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
@@ -560,6 +560,7 @@ exports[`Flyout should render import step 1`] = `
         <EuiFilePicker
           compressed={false}
           display="large"
+          fullWidth={true}
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"
@@ -573,7 +574,7 @@ exports[`Flyout should render import step 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
+        fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"

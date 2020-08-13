@@ -13,13 +13,26 @@
 }
 
 .spcCopyToSpaceResultDetails__selectControl {
-  margin-left: 30px;
+  margin-left: $euiSizeL;
 }
 
-.spcCopyToSpaceResultDetails__selectControl.euiAccordion-isClosed {
-  .euiAccordion__childWrapper {
-    visibility: hidden;
-    opacity: 0;
-    height: 0;
+.spcCopyToSpaceResultDetails__selectControl__childWrapper {
+  // Derived from euiAccordion
+  visibility: hidden;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transform: translatez(0);
+  // sass-lint:disable-block indentation
+  transition:
+    height $euiAnimSpeedNormal $euiAnimSlightResistance,
+    opacity $euiAnimSpeedNormal $euiAnimSlightResistance;
+}
+
+.spcCopyToSpaceResultDetails__selectControl.selectControl-isOpen {
+  .spcCopyToSpaceResultDetails__selectControl__childWrapper {
+    visibility: visible;
+    opacity: 1;
+    height: auto;
   }
 }

@@ -8,15 +8,15 @@
 }
 
 .savedObjectsManagementImportSummary__createdCount {
-  color: $euiColorSuccess;
+  color: $euiColorSuccessText;
 }
 
 .savedObjectsManagementImportSummary__overwrittenCount {
-  color: $euiColorWarning;
+  color: $euiColorWarningText;
 }
 
 .savedObjectsManagementImportSummary__errorCount {
-  color: $euiColorDanger;
+  color: $euiColorDangerText;
 }
 
 .savedObjectsManagementImportSummary__icon {

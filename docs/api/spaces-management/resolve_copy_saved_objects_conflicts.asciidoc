@@ -272,7 +272,7 @@ The API returns the following:
 [source,sh]
 ----
 {
-  "sales": {
+  "marketing": {
     "success": true,
     "successCount": 3,
     "successResults": [
