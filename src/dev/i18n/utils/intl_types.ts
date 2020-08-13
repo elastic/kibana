@@ -17,16 +17,25 @@
  * under the License.
  */
 
-// @ts-ignore
-export { extractMessagesFromPathToMap } from './extract_default_translations';
-// @ts-ignore
-export { matchEntriesWithExctractors } from './extract_default_translations';
-export { arrayify, writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
-export { serializeToJson, serializeToJson5 } from './serializers';
-export {
-  I18nConfig,
-  filterConfigPaths,
-  assignConfigFromPath,
-  checkConfigNamespacePrefix,
-} from './config';
-export { integrateLocaleFiles } from './integrate_locale_files';
+export interface OptionalFormatPatternNode {
+  type: 'optionalFormatPattern';
+  selector: string;
+  value: any;
+}
+
+export interface LinePosition {
+  offset: number;
+  line: number;
+  column: number;
+}
+
+export interface LocationNode {
+  start: LinePosition;
+  end: LinePosition;
+}
+
+export interface SelectFormatNode {
+  type: 'selectFormat';
+  options: OptionalFormatPatternNode[];
+  location: LocationNode;
+}
