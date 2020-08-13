@@ -19,7 +19,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 import * as ast from '../ast';
 
 // @ts-ignore
@@ -30,12 +30,13 @@ const childNode2 = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 
 describe('kuery functions', () => {
   describe('and', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+        title: 'title',
+      };
     });
 
     describe('buildNodeParams', () => {

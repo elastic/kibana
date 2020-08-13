@@ -19,14 +19,14 @@
 
 import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
-import { IIndexPattern } from '../../index_patterns';
 import { fields } from '../../index_patterns/mocks';
 import { Query } from '../../query/types';
 
 describe('build query', () => {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern = {
     fields,
-  } as unknown) as IIndexPattern;
+    title: 'title',
+  };
 
   describe('buildQueryFromKuery', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {

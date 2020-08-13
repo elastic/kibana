@@ -81,11 +81,14 @@ export class ESTooltipProperty implements ITooltipProperty {
 
     const value = this.getRawValue();
     if (value == null) {
-      const existsFilter = esFilters.buildExistsFilter(indexPatternField, this._indexPattern);
+      const existsFilter = esFilters.buildExistsFilter(
+        indexPatternField,
+        this._indexPattern.toSpec()
+      );
       existsFilter.meta.negate = true;
       return [existsFilter];
     } else {
-      return [esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern)];
+      return [esFilters.buildPhraseFilter(indexPatternField, value, this._indexPattern.toSpec())];
     }
   }
 }

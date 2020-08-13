@@ -46,9 +46,9 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
+      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern.toSpec());
     } else {
-      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
+      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern.toSpec());
     }
 
     newFilter.meta.key = this.fieldName;

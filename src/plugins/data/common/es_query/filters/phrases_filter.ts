@@ -20,7 +20,7 @@
 import { Filter, FilterMeta } from './meta_filter';
 import { getPhraseScript } from './phrase_filter';
 import { FILTERS } from './index';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternSpec, IFieldType } from '../../index_patterns';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
@@ -45,7 +45,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
 export const buildPhrasesFilter = (
   field: IFieldType,
   params: any[],
-  indexPattern: IIndexPattern
+  indexPattern: IndexPatternSpec
 ) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;

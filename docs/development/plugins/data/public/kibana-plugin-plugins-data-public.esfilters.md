@@ -12,11 +12,11 @@ esFilters: {
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IIndexPattern) => import("../common").PhrasesFilter;
-    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IIndexPattern) => import("../common").ExistsFilter;
-    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IIndexPattern) => import("../common").PhraseFilter;
+    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IndexPatternSpec) => import("../common").PhrasesFilter;
+    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IndexPatternSpec) => import("../common").ExistsFilter;
+    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IndexPatternSpec) => import("../common").PhraseFilter;
     buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
-    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IIndexPattern, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternSpec, formattedValue?: string | undefined) => import("../common").RangeFilter;
     isPhraseFilter: (filter: any) => filter is import("../common").PhraseFilter;
     isExistsFilter: (filter: any) => filter is import("../common").ExistsFilter;
     isPhrasesFilter: (filter: any) => filter is import("../common").PhrasesFilter;

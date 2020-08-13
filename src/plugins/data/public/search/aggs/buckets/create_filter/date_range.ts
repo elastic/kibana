@@ -28,5 +28,5 @@ export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateR
   if (to) filter.lt = moment(to).toISOString();
   if (to && from) filter.format = 'strict_date_optional_time';
 
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern().toSpec());
 };

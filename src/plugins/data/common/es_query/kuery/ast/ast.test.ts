@@ -25,16 +25,17 @@ import {
 } from './ast';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 import { KueryNode } from '../types';
 
 describe('kuery AST API', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternSpec;
 
   beforeEach(() => {
-    indexPattern = ({
+    indexPattern = {
       fields,
-    } as unknown) as IIndexPattern;
+      title: 'title',
+    };
   });
 
   describe('fromKueryExpression', () => {

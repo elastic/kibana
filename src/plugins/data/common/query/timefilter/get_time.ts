@@ -74,6 +74,6 @@ function createTimeRangeFilter(
       ...(bounds.max && { lte: bounds.max.toISOString() }),
       format: 'strict_date_optional_time',
     },
-    indexPattern
+    indexPattern.toSpec()
   );
 }

@@ -19,7 +19,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 
 // @ts-ignore
 import * as geoPolygon from './geo_polygon';
@@ -41,12 +41,13 @@ const points = [
 
 describe('kuery functions', () => {
   describe('geoPolygon', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+        title: 'title',
+      };
     });
 
     describe('buildNodeParams', () => {

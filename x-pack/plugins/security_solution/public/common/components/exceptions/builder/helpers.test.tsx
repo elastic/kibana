@@ -79,7 +79,12 @@ const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
 });
 
 const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
-  field: { ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] },
+  field: {
+    ...getField('nestedField.child'),
+    name: 'nestedField',
+    esTypes: ['nested'],
+    type: 'string',
+  },
   operator: isOperator,
   value: undefined,
   nested: 'parent',
@@ -160,7 +165,7 @@ describe('Exception builder helpers', () => {
         const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IIndexPattern = {
+        const expected = {
           fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
           title: 'logstash-*',
@@ -172,7 +177,7 @@ describe('Exception builder helpers', () => {
         const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IIndexPattern = {
+        const expected = {
           fields: [{ ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] }],
           id: '1234',
           title: 'logstash-*',
@@ -187,7 +192,7 @@ describe('Exception builder helpers', () => {
           field: undefined,
         };
         const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
-        const expected: IIndexPattern = {
+        const expected = {
           fields: [
             { ...getField('nestedField.child') },
             { ...getField('nestedField.nestedChild.doublyNestedChild') },
@@ -934,7 +939,7 @@ describe('Exception builder helpers', () => {
   describe('#getEntryOnFieldChange', () => {
     test('it returns nested entry with single new subentry when "item.nested" is "parent"', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-      const payloadIFieldType: IFieldType = getField('nestedField.child');
+      const payloadIFieldType: IFieldType = getField('nestedField.child')!;
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry; index: number } = {
         index: 0,
@@ -959,7 +964,7 @@ describe('Exception builder helpers', () => {
           parentIndex: 0,
         },
       };
-      const payloadIFieldType: IFieldType = getField('nestedField.child');
+      const payloadIFieldType: IFieldType = getField('nestedField.child')!;
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry; index: number } = {
         index: 0,
@@ -977,7 +982,7 @@ describe('Exception builder helpers', () => {
 
     test('it returns field of type "match" with updated field if not a nested entry', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const payloadIFieldType: IFieldType = getField('ip');
+      const payloadIFieldType: IFieldType = getField('ip')!;
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
       const expected: { updatedEntry: BuilderEntry; index: number } = {
         index: 0,

@@ -486,7 +486,7 @@ class FilterEditorUI extends Component<Props, State> {
       this.props.onSubmit(filter);
     } else if (indexPattern && field && operator) {
       const filter = buildFilter(
-        indexPattern,
+        indexPattern.toSpec(),
         field,
         operator.type,
         operator.negate,

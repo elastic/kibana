@@ -83,7 +83,7 @@ describe('ExceptionBuilderComponent', () => {
             {
               ...getExceptionListItemSchemaMock(),
               entries: [
-                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+                { ...getEntryMatchAnyMock(), field: getField('ip')!.name, value: ['some ip'] },
               ],
             },
           ]}
@@ -270,7 +270,7 @@ describe('ExceptionBuilderComponent', () => {
             {
               ...getExceptionListItemSchemaMock(),
               entries: [
-                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+                { ...getEntryMatchAnyMock(), field: getField('ip')!.name, value: ['some ip'] },
               ],
             },
           ]}

@@ -65,7 +65,7 @@ export class RangeFilterManager extends FilterManager {
       // TODO: Fix type to be required
       this.indexPattern.fields.getByName(this.fieldName) as IFieldType,
       toRange(value),
-      this.indexPattern
+      this.indexPattern.toSpec()
     );
     newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;

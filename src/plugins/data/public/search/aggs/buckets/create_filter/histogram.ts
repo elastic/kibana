@@ -31,7 +31,7 @@ export const createFilterHistogram = (getInternalStartServices: GetInternalStart
     return buildRangeFilter(
       aggConfig.params.field,
       params,
-      aggConfig.getIndexPattern(),
+      aggConfig.getIndexPattern().toSpec(),
       fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
     );
   };

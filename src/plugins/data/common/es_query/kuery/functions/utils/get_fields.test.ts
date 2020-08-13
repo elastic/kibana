@@ -20,18 +20,19 @@
 import { fields } from '../../../../index_patterns/mocks';
 
 import { nodeTypes } from '../../index';
-import { IIndexPattern, IFieldType } from '../../../../index_patterns';
+import { IndexPatternSpec, IFieldType } from '../../../../index_patterns';
 
 // @ts-ignore
 import { getFields } from './get_fields';
 
 describe('getFields', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPatternSpec;
 
   beforeEach(() => {
-    indexPattern = ({
+    indexPattern = {
       fields,
-    } as unknown) as IIndexPattern;
+      title: 'title',
+    };
   });
 
   describe('field names without a wildcard', () => {
@@ -59,7 +60,7 @@ describe('getFields', () => {
             name: 'foo*',
           },
         ],
-      } as IIndexPattern;
+      } as IndexPatternSpec;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);

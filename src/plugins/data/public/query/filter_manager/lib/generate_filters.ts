@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import {
   IFieldType,
-  IIndexPattern,
+  IndexPatternSpec,
   Filter,
   isExistsFilter,
   isPhraseFilter,
@@ -102,7 +102,7 @@ export function generateFilters(
       updateExistingFilter(existing, negate);
       filter = existing;
     } else {
-      const tmpIndexPattern = { id: index } as IIndexPattern;
+      const tmpIndexPattern = { id: index } as IndexPatternSpec;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;

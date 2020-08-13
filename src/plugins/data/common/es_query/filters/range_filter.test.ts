@@ -36,7 +36,7 @@ describe('Range filter builder', () => {
   });
 
   it('should return a range filter when passed a standard field', () => {
-    const field = getField('bytes');
+    const field = getField('bytes')!;
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
@@ -53,7 +53,7 @@ describe('Range filter builder', () => {
   });
 
   it('should return a script filter when passed a scripted field', () => {
-    const field = getField('script number');
+    const field = getField('script number')!;
 
     expect(buildRangeFilter(field, { gte: 1, lte: 3 }, indexPattern)).toEqual({
       meta: {
@@ -76,7 +76,7 @@ describe('Range filter builder', () => {
   });
 
   it('should wrap painless scripts in comparator lambdas', () => {
-    const field = getField('script date');
+    const field = getField('script date')!;
     const expected =
       `boolean gte(Supplier s, def v) {return !s.get().toInstant().isBefore(Instant.parse(v))} ` +
       `boolean lte(Supplier s, def v) {return !s.get().toInstant().isAfter(Instant.parse(v))}` +
@@ -89,7 +89,7 @@ describe('Range filter builder', () => {
   });
 
   it('should throw an error when gte and gt, or lte and lt are both passed', () => {
-    const field = getField('script number');
+    const field = getField('script number')!;
 
     expect(() => {
       buildRangeFilter(field, { gte: 1, gt: 3 }, indexPattern);
@@ -101,7 +101,7 @@ describe('Range filter builder', () => {
   });
 
   it('to use the right operator for each of gte, gt, lt and lte', () => {
-    const field = getField('script number');
+    const field = getField('script number')!;
 
     each({ gte: '>=', gt: '>', lte: '<=', lt: '<' }, (operator: string, key: any) => {
       const params = {
@@ -122,7 +122,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = getField('script number')!;
       filter = buildRangeFilter(field, { gte: 0, lt: Infinity }, indexPattern);
     });
 
@@ -152,7 +152,7 @@ describe('Range filter builder', () => {
     let filter: RangeFilter;
 
     beforeEach(() => {
-      field = getField('script number');
+      field = getField('script number')!;
       filter = buildRangeFilter(field, { gte: -Infinity, lt: Infinity }, indexPattern);
     });
 

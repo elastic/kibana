@@ -22,16 +22,17 @@ import { fields } from '../../../index_patterns/mocks';
 
 // @ts-ignore
 import * as is from './is';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 
 describe('kuery functions', () => {
   describe('is', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+        title: 'title',
+      };
     });
 
     describe('buildNodeParams', () => {
@@ -112,7 +113,7 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect(result.bool!.should!.length).toBe(indexPattern.fields.length);
+        expect(result.bool!.should!.length).toBe(indexPattern.fields!.length);
       });
 
       test('should return an ES exists query when value is "*"', () => {

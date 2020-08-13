@@ -20,19 +20,20 @@
 import { fields } from '../../../index_patterns/mocks';
 
 import { nodeTypes } from './index';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 
 import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
 import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
 
 describe('kuery node types', () => {
   describe('function', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+        title: 'title',
+      };
     });
 
     describe('buildNode', () => {

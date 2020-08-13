@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern, IFieldType } from '../..';
+import { IndexPatternSpec, IFieldType } from '../..';
 import {
   Filter,
   FILTERS,
@@ -30,7 +30,7 @@ import {
 } from '.';
 
 export function buildFilter(
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternSpec,
   field: IFieldType,
   type: FILTERS,
   negate: boolean,
@@ -68,7 +68,7 @@ export function buildCustomFilter(
 }
 
 function buildBaseFilter(
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternSpec,
   field: IFieldType,
   type: FILTERS,
   params: any

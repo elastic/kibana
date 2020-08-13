@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
-import { IIndexPattern } from '../../../index_patterns';
+import { IndexPatternSpec } from '../../../index_patterns';
 import { RangeFilterParams } from '../../filters';
 
 // @ts-ignore
@@ -28,12 +28,13 @@ import * as range from './range';
 
 describe('kuery functions', () => {
   describe('range', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: IndexPatternSpec;
 
     beforeEach(() => {
-      indexPattern = ({
+      indexPattern = {
         fields,
-      } as unknown) as IIndexPattern;
+        title: 'title',
+      };
     });
 
     describe('buildNodeParams', () => {

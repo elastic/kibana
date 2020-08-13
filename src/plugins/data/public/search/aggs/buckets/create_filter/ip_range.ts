@@ -37,6 +37,6 @@ export const createFilterIpRange = (aggConfig: IBucketAggConfig, key: IpRangeKey
   return buildRangeFilter(
     aggConfig.params.field,
     { gte: range.from, lte: range.to },
-    aggConfig.getIndexPattern()
+    aggConfig.getIndexPattern().toSpec()
   );
 };

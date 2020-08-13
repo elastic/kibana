@@ -19,7 +19,7 @@
 
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType, IndexPatternSpec } from '../../index_patterns';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
@@ -71,7 +71,7 @@ export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue =>
 export const buildPhraseFilter = (
   field: IFieldType,
   value: any,
-  indexPattern: IIndexPattern
+  indexPattern: IndexPatternSpec
 ): PhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 

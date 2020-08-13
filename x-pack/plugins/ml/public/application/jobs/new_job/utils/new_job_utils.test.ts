@@ -5,15 +5,15 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
 describe('createSearchItems', () => {
   const kibanaConfig = {} as IUiSettingsClient;
-  const indexPattern = ({
+  const indexPattern = {
     fields: [],
-  } as unknown) as IIndexPattern;
+    title: 'title',
+  };
 
   let savedSearch = ({} as unknown) as SavedSearchSavedObject;
   beforeEach(() => {

@@ -35,6 +35,6 @@ export const createFilterDateHistogram = (
       lt: start.add(interval).toISOString(),
       format: 'strict_date_optional_time',
     },
-    agg.getIndexPattern()
+    agg.getIndexPattern().toSpec()
   );
 };

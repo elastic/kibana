@@ -28,7 +28,7 @@ export const createFilterRange = (getInternalStartServices: GetInternalStartServ
     return buildRangeFilter(
       aggConfig.params.field,
       params,
-      aggConfig.getIndexPattern(),
+      aggConfig.getIndexPattern().toSpec(),
       fieldFormats.deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
     );
   };

@@ -18,7 +18,7 @@
  */
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IndexPatternSpec, IFieldType } from '../../index_patterns';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -103,7 +103,7 @@ const format = (field: IFieldType, value: any) =>
 export const buildRangeFilter = (
   field: IFieldType,
   params: RangeFilterParams,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternSpec,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };
