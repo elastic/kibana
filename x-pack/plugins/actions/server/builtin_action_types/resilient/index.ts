@@ -21,7 +21,7 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): ActionType<Record<string, unknown>, Record<string, unknown>, Record<string, unknown>, void> {
+}): ActionType {
   return createConnector({
     api,
     config,

@@ -129,7 +129,7 @@ async function slackExecutor(
     });
     result = await webhook.send(message);
   } catch (err) {
-    logger.warn(`error on ${actionId} webhook event: ${err.message}`);
+    logger.warn(`error on ${actionId} slack event: ${err.message}`);
 
     if (err.original == null || err.original.response == null) {
       return serviceErrorResult(actionId, err.message);

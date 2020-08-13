@@ -29,9 +29,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
-  proxyUrl?: string;
-  proxyHeaders?: Record<string, string>;
-  rejectUnauthorizedCertificates: boolean;
+  proxySettings?: ProxySettings;
 }
 
 export interface ExecuteOptions {
@@ -82,9 +80,7 @@ export class ActionExecutor {
       eventLogger,
       preconfiguredActions,
       getActionsClientWithRequest,
-      proxyUrl,
-      proxyHeaders,
-      rejectUnauthorizedCertificates,
+      proxySettings,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -130,15 +126,6 @@ export class ActionExecutor {
         ],
       },
     };
-
-    let proxySettings: ProxySettings | undefined;
-    if (proxyUrl) {
-      proxySettings = {
-        proxyUrl,
-        proxyHeaders,
-        rejectUnauthorizedCertificates,
-      };
-    }
 
     eventLogger.startTiming(event);
     let rawResult: ActionTypeExecutorResult<unknown>;
