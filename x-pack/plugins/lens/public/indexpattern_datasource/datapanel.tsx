@@ -323,7 +323,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       fieldGroup.filter((field) => {
         if (
           localState.nameFilter.length &&
-          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
+          !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
+          !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
         ) {
           return false;
         }

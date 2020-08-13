@@ -81,6 +81,7 @@ export async function loadIndexPatterns({
 
       return {
         [currentIndexPattern.id]: currentIndexPattern,
+        ...acc,
       };
     },
     { ...cache }
