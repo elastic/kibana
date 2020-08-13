@@ -33,6 +33,7 @@ export const registerCreateRoute = ({
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
       const pipeline = req.body as Pipeline;
 
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { name, description, processors, version, on_failure } = pipeline;
 
       try {

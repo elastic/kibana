@@ -9,7 +9,9 @@
  */
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
-import { omit, difference, defaults } from 'lodash';
+import { omit, difference, partition, map, defaults } from 'lodash';
+
+import { some, none } from 'fp-ts/lib/Option';
 
 import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
 import {
@@ -31,6 +33,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   SerializedConcreteTaskInstance,
+  TaskStatus,
 } from './task';
 
 import { TaskClaim, asTaskClaimEvent } from './task_events';
@@ -221,13 +224,35 @@ export class TaskStore {
 
     // emit success/fail events for claimed tasks by id
     if (claimTasksById && claimTasksById.length) {
-      this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
+      const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
+        claimTasksById.includes(doc.id)
+      );
+
+      const [documentsClaimedById, documentsRequestedButNotClaimed] = partition(
+        documentsReturnedById,
+        // we filter the schduled tasks down by status is 'claiming' in the esearch,
+        // but we do not apply this limitation on tasks claimed by ID so that we can
+        // provide more detailed error messages when we fail to claim them
+        (doc) => doc.status === TaskStatus.Claiming
+      );
+
+      const documentsRequestedButNotReturned = difference(
+        claimTasksById,
+        map(documentsReturnedById, 'id')
+      );
 
       this.emitEvents(
-        difference(
-          claimTasksById,
-          docs.map((doc) => doc.id)
-        ).map((id) => asTaskClaimEvent(id, asErr(new Error(`failed to claim task '${id}'`))))
+        [...documentsClaimedById, ...documentsClaimedBySchedule].map((doc) =>
+          asTaskClaimEvent(doc.id, asOk(doc))
+        )
+      );
+
+      this.emitEvents(
+        documentsRequestedButNotClaimed.map((doc) => asTaskClaimEvent(doc.id, asErr(some(doc))))
+      );
+
+      this.emitEvents(
+        documentsRequestedButNotReturned.map((id) => asTaskClaimEvent(id, asErr(none)))
       );
     }
 
@@ -443,6 +468,7 @@ export class TaskStore {
 
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     { max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
@@ -458,6 +484,7 @@ export class TaskStore {
       },
     });
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;
     return {
       total,

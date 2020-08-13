@@ -11,7 +11,6 @@ import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/commo
 import { USER } from '../../../../functional/services/ml/security_common';
 import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');

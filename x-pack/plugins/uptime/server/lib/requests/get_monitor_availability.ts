@@ -23,6 +23,7 @@ export interface GetMonitorAvailabilityResult {
 }
 
 export const formatBuckets = async (buckets: any[]): Promise<GetMonitorAvailabilityResult[]> =>
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   buckets.map(({ key, fields, up_sum, down_sum, ratio }: any) => ({
     ...key,
     name: fields?.hits?.hits?.[0]?._source?.monitor.name,

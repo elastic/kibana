@@ -93,7 +93,7 @@ test('Renders list control', () => {
       refreshControl={refreshControlMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('Renders range control', () => {
@@ -114,7 +114,7 @@ test('Renders range control', () => {
       refreshControl={refreshControlMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('Apply and Cancel change btns enabled when there are changes', () => {
@@ -135,7 +135,7 @@ test('Apply and Cancel change btns enabled when there are changes', () => {
       refreshControl={refreshControlMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('Clear btns enabled when there are values', () => {
@@ -156,7 +156,7 @@ test('Clear btns enabled when there are values', () => {
       refreshControl={refreshControlMock}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('clearControls', () => {
