@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-uiSettings: CoreStart['uiSettings'];
+uiSettings: CoreSetup['uiSettings'];
 ```
