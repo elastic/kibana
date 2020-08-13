@@ -38,7 +38,7 @@ export const DotExpander: FunctionComponent = () => {
                 return !value.includes('.')
                   ? {
                       message: i18n.translate(
-                        'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameHelpText',
+                        'xpack.ingestPipelines.pipelineEditor.dotExpanderForm.fieldNameRequiresDotError',
                         { defaultMessage: 'A field value requires at least one dot character.' }
                       ),
                     }
