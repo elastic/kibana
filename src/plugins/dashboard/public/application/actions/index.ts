@@ -32,3 +32,8 @@ export {
   ClonePanelActionContext,
   ACTION_CLONE_PANEL,
 } from './clone_panel_action';
+export {
+  AddToLibraryAction,
+  AddToLibraryActionContext,
+  ACTION_ADD_TO_LIBRARY,
+} from './add_to_library_action';
