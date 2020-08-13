@@ -15,6 +15,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   htmlIdGenerator,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -221,7 +222,7 @@ export class Explorer extends React.Component {
       selectedJobs,
       tableData,
     } = this.props.explorerState;
-    const { annotationsData, aggregations } = annotations;
+    const { annotationsData, aggregations, error: annotationsError } = annotations;
 
     const jobSelectorProps = {
       dateFormatTz: getDateFormatTz(),
@@ -302,6 +303,34 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
+            {annotationsError !== null && (
+              <>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsErrorTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </h2>
+                </EuiTitle>
+                <EuiPanel>
+                  <EuiCallOut
+                    title={i18n.translate('xpack.ml.explorer.annotationsErrorCallOutTitle', {
+                      defaultMessage: 'An error occurred loading annotations:',
+                    })}
+                    color="danger"
+                    iconType="alert"
+                  >
+                    <p>
+                      {typeof annotationsError === 'string'
+                        ? annotationsError
+                        : JSON.stringify(annotationsError)}
+                    </p>
+                  </EuiCallOut>{' '}
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
             {annotationsData.length > 0 && (
               <>
                 <EuiPanel>

@@ -406,7 +406,11 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       .toPromise()
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
-          return resolve([]);
+          return resolve({
+            annotationsData: [],
+            aggregations: {},
+            error: typeof resp.error === 'string' ? resp.error : JSON.stringify(resp.error),
+          });
         }
 
         const annotationsData = [];
@@ -427,12 +431,22 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
               return d;
             }),
           aggregations: resp.aggregations,
+          error: null,
         });
       })
       .catch((resp) => {
         console.log('Error loading list of annotations for jobs list:', resp);
-        // Silently fail and just return an empty array for annotations to not break the UI.
-        return resolve([]);
+        return resolve({
+          annotationsData: [],
+          aggregations: {},
+          error:
+            resp &&
+            typeof resp.body.statusCode === 'number' &&
+            typeof resp.body.error === 'string' &&
+            typeof resp.body.message === 'string'
+              ? `${resp.body.error} (${resp.body.statusCode}): ${resp.body.message}`
+              : resp,
+        });
       });
   });
 }

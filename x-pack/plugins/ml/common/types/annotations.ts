@@ -103,8 +103,7 @@ export function isAnnotation(arg: any): arg is Annotation {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Annotations extends Array<Annotation> {}
+export type Annotations = Annotation[];
 
 export function isAnnotations(arg: any): arg is Annotations {
   if (Array.isArray(arg) === false) {
@@ -112,6 +111,8 @@ export function isAnnotations(arg: any): arg is Annotations {
   }
   return arg.every((d: Annotation) => isAnnotation(d));
 }
+
+export type AnnotationsError = null | string | Record<string, any>;
 
 export interface FieldToBucket {
   field: string;
@@ -134,5 +135,12 @@ export type EsAggregationResult = Record<string, TermAggregationResult>;
 export interface GetAnnotationsResponse {
   aggregations?: EsAggregationResult;
   annotations: Record<string, Annotations>;
+  error?: string;
   success: boolean;
+}
+
+export interface AnnotationsTable {
+  annotationsData: Annotations;
+  aggregations: EsAggregationResult;
+  error: AnnotationsError;
 }

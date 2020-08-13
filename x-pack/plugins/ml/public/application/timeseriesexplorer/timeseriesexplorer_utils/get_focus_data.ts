@@ -23,7 +23,7 @@ import {
 } from './timeseriesexplorer_utils';
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
-import { Annotation } from '../../../../common/types/annotations';
+import { GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
 
 export interface Interval {
@@ -36,7 +36,8 @@ export interface FocusData {
   anomalyRecords: any;
   scheduledEvents: any;
   showForecastCheckbox?: any;
-  focusAnnotationData?: any;
+  focusAnnotationError?: null | string;
+  focusAnnotationData?: any[];
   focusForecastData?: any;
   focusAggregations?: any;
 }
@@ -96,14 +97,20 @@ export function getFocusData(
         entities: nonBlankEntities,
       })
       .pipe(
-        catchError(() => {
-          // silent fail
-          return of({
-            annotations: {} as Record<string, Annotation[]>,
+        catchError((resp) =>
+          of({
+            annotations: {},
             aggregations: {},
+            error:
+              resp &&
+              typeof resp.body.statusCode === 'number' &&
+              typeof resp.body.error === 'string' &&
+              typeof resp.body.message === 'string'
+                ? `${resp.body.error} (${resp.body.statusCode}): ${resp.body.message}`
+                : resp,
             success: false,
-          });
-        })
+          } as GetAnnotationsResponse)
+        )
       ),
     // Plus query for forecast data if there is a forecastId stored in the appState.
     forecastId !== undefined
@@ -152,16 +159,23 @@ export function getFocusData(
       };
 
       if (annotations) {
-        refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i: number) => {
-            d.key = (i + 1).toString();
-            return d;
-          });
+        if (annotations.error !== undefined) {
+          refreshFocusData.focusAnnotationError = annotations.error;
+          refreshFocusData.focusAnnotationData = [];
+          refreshFocusData.focusAggregations = {};
+        } else {
+          refreshFocusData.focusAnnotationError = null;
+          refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i: number) => {
+              d.key = (i + 1).toString();
+              return d;
+            });
 
-        refreshFocusData.focusAggregations = annotations.aggregations;
+          refreshFocusData.focusAggregations = annotations.aggregations;
+        }
       }
 
       if (forecastData) {
