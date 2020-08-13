@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
+import {
+  AdvancedJobCreator,
+  CategorizationJobCreator,
+  isCategorizationJobCreator,
+} from '../../../../../common/job_creator';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
 import { Description } from './description';
 
@@ -16,18 +20,20 @@ import { CategorizationPerPartitionSwitch } from './categorization_per_partition
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 import { CategorizationPerPartitionStopOnWarnSwitch } from './categorization_stop_on_warn_switch';
 
-export const CategorizationPerPartitionField: FC = () => {
+export const CategorizationPerPartitionFieldDropdown = ({
+  setEnablePerPartitionCategorization,
+}: {
+  setEnablePerPartitionCategorization: Dispatch<SetStateAction<boolean>>;
+}) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
-  const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
+  const jobCreator = jc as CategorizationJobCreator;
+
   const [categorizationPartitionFieldName, setCategorizationPartitionFieldName] = useState<
     string | null
   >(jobCreator.categorizationPerPartitionField);
-
   const { catFields } = newJobCapsService;
 
   const filteredCategories = catFields.filter((c) => c.id !== jobCreator.categorizationFieldName);
-
   useEffect(() => {
     jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
     jobCreatorUpdate();
@@ -45,6 +51,30 @@ export const CategorizationPerPartitionField: FC = () => {
       jobCreator.categorizationPerPartitionField = filteredCategories[0].id;
     }
     setCategorizationPartitionFieldName(jobCreator.categorizationPerPartitionField);
+    setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+  }, [jobCreatorUpdated]);
+  return (
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel"
+          defaultMessage="Partition field"
+        />
+      }
+    >
+      <CategorizationPerPartitionFieldSelect
+        fields={filteredCategories}
+        changeHandler={setCategorizationPartitionFieldName}
+        selectedField={categorizationPartitionFieldName || ''}
+      />
+    </EuiFormRow>
+  );
+};
+export const CategorizationPerPartitionField: FC = () => {
+  const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
+  const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);
+  useEffect(() => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
   }, [jobCreatorUpdated]);
 
@@ -73,21 +103,12 @@ export const CategorizationPerPartitionField: FC = () => {
           >
             <CategorizationPerPartitionStopOnWarnSwitch />
           </EuiFormRow>
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.extraStep.categorizationJob.partitionFieldLabel"
-                defaultMessage="Partition field"
-              />
-            }
-          >
-            <CategorizationPerPartitionFieldSelect
-              fields={filteredCategories}
-              changeHandler={setCategorizationPartitionFieldName}
-              selectedField={categorizationPartitionFieldName || ''}
-            />
-          </EuiFormRow>
         </>
+      )}
+      {isCategorizationJobCreator(jobCreator) && enablePerPartitionCategorization && (
+        <CategorizationPerPartitionFieldDropdown
+          setEnablePerPartitionCategorization={setEnablePerPartitionCategorization}
+        />
       )}
     </Description>
   );

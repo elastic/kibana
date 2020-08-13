@@ -43,6 +43,22 @@ export const getMessages = once(() => {
   const createJobsDocsUrl = `https://www.elastic.co/guide/en/machine-learning/{{version}}/create-jobs.html`;
 
   return {
+    varying_per_partition_fields: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.varyingPerPartitionFieldNamesMessage',
+        {
+          defaultMessage:
+            'Detectors with keyword "mlcategory" cannot have different partition_field_name when per-partition categorization is enabled. Found [{fields}].',
+
+          values: {
+            fields: '"{{fields}}"',
+          },
+        }
+      ),
+      url:
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
+    },
     field_not_aggregatable: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldNotAggregatableMessage', {
