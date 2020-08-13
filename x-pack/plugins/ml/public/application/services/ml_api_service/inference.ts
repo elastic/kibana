@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
+import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -30,9 +31,9 @@ export interface InferenceConfigResponse {
     estimated_heap_memory_usage_bytes: number;
     estimated_operations: number;
     license_level: string;
-    metadata:
+    metadata?:
       | {
-          analysis_config: any;
+          analytics_config: DataFrameAnalyticsConfig;
           input: any;
         }
       | Record<string, any>;

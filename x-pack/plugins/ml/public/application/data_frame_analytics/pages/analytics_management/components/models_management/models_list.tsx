@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -17,6 +17,7 @@ import {
   EuiSearchBarProps,
   EuiSpacer,
   EuiButtonIcon,
+  EuiBadge,
 } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
@@ -32,18 +33,25 @@ import {
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
-import { useNotifications } from '../../../../../contexts/kibana';
+import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
+import { getResultsUrl } from '../analytics_list/common';
 
 type Stats = Omit<ModelStats, 'model_id'>;
 
 export type ModelItem = ModelConfigResponse & {
+  type?: string;
   stats?: Stats;
 };
 
 export type ModelWithStats = Omit<ModelItem, 'stats'> & { stats: Stats };
 
 export const ModelsList: FC = () => {
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
   const inferenceApiService = useInferenceApiService();
   const { toasts } = useNotifications();
 
@@ -67,7 +75,14 @@ export const ModelsList: FC = () => {
     setIsLoading(true);
     try {
       const response = await inferenceApiService.getInferenceModel();
-      setItems(response.trained_model_configs);
+      setItems(
+        response.trained_model_configs.map((v) => ({
+          ...v,
+          ...(typeof v.inference_config === 'object'
+            ? { type: Object.keys(v.inference_config)[0] }
+            : {}),
+        }))
+      );
 
       setModelsStats({
         total: {
@@ -125,6 +140,23 @@ export const ModelsList: FC = () => {
     [items]
   );
 
+  /**
+   * Unique inference types from models
+   */
+  const inferenceTypesOptions = useMemo(() => {
+    const result = items.reduce((acc, item) => {
+      const type = item.inference_config && Object.keys(item.inference_config)[0];
+      if (type) {
+        acc.add(type);
+      }
+      return acc;
+    }, new Set<string>());
+    return [...result].map((v) => ({
+      value: v,
+      name: v,
+    }));
+  }, [items]);
+
   async function prepareModelsForDeletion(models: ModelItem[]) {
     // Fetch model stats to check associated pipelines
     if (await fetchModelsStats(models)) {
@@ -167,7 +199,15 @@ export const ModelsList: FC = () => {
       }),
       icon: 'list',
       type: 'icon',
-      href: 'temp',
+      available: (item) => item.metadata?.analytics_config?.id,
+      onClick: async (item) => {
+        await navigateToUrl(
+          getResultsUrl(
+            item.metadata?.analytics_config.id,
+            Object.keys(item.metadata?.analytics_config.analysis)[0]
+          )
+        );
+      },
       isPrimary: true,
     },
     {
@@ -235,6 +275,7 @@ export const ModelsList: FC = () => {
       }),
       sortable: true,
       align: 'left',
+      render: (type: string) => <EuiBadge color="hollow">{type}</EuiBadge>,
     },
     {
       field: ModelsTableToConfigMapping.createdAt,
@@ -279,6 +320,21 @@ export const ModelsList: FC = () => {
     box: {
       incremental: true,
     },
+    ...(inferenceTypesOptions && inferenceTypesOptions.length > 0
+      ? {
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'type',
+              name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+                defaultMessage: 'Type',
+              }),
+              multiSelect: 'or',
+              options: inferenceTypesOptions,
+            },
+          ],
+        }
+      : {}),
     ...(selectedModels.length > 0
       ? {
           toolsLeft: (

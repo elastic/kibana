@@ -9,5 +9,5 @@ export * from './models_list';
 export enum ModelsTableToConfigMapping {
   id = 'model_id',
   createdAt = 'create_time',
-  type = 'metadata.analysis_config.type',
+  type = 'type',
 }

@@ -6,7 +6,14 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiPanel,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTitle,
+  EuiNotificationBadge,
+} from '@elastic/eui';
 import { ModelWithStats } from './models_list';
 
 interface ExpandedRowProps {
@@ -38,6 +45,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 />
               </h5>
             </EuiTitle>
+            <EuiSpacer size={'m'} />
             <EuiDescriptionList
               type="column"
               listItems={Object.entries(details).map(([title, value]) => ({
@@ -69,6 +77,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 />
               </h5>
             </EuiTitle>
+            <EuiSpacer size={'m'} />
             <EuiDescriptionList
               type="column"
               listItems={Object.entries(inference_config).map(([title, value]) => ({
@@ -80,37 +89,45 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         </>
       ),
     },
-    {
-      id: 'stats',
-      name: (
-        <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.statsTabLabel"
-          defaultMessage="Stats"
-        />
-      ),
-      content: (
-        <>
-          <EuiSpacer size={'m'} />
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
+    ...(stats.pipeline_count > 0
+      ? [
+          {
+            id: 'pipelines',
+            name: (
+              <>
                 <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
-                  defaultMessage="Inference Stats"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiDescriptionList
-              type="column"
-              listItems={Object.entries(stats.inference_stats).map(([title, value]) => ({
-                title,
-                description: typeof value === 'object' ? JSON.stringify(value) : value,
-              }))}
-            />
-          </EuiPanel>
-        </>
-      ),
-    },
+                  id="xpack.ml.inference.modelsList.expandedRow.pipelinesTabLabel"
+                  defaultMessage="Pipelines"
+                />{' '}
+                <EuiNotificationBadge>{stats.pipeline_count}</EuiNotificationBadge>
+              </>
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'m'} />
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
+                        defaultMessage="Inference Stats"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    type="column"
+                    listItems={Object.entries(stats.inference_stats).map(([title, value]) => ({
+                      title,
+                      description: typeof value === 'object' ? JSON.stringify(value) : value,
+                    }))}
+                  />
+                </EuiPanel>
+              </>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
