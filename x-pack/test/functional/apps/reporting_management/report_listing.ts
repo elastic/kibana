@@ -67,7 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Paginates historical reports', async () => {
+    it.skip('Paginates historical reports', async () => {
       // wait for first row of page 1
       await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
 
