@@ -14,20 +14,20 @@ const delayRejection = (ms: number, result: unknown) =>
 
 describe('Promise Timeout', () => {
   test('resolves when wrapped promise resolves', async () => {
-    return expect(timeoutPromiseAfter(delay(100, 'OK'), 1000)).resolves.toMatchInlineSnapshot(
-      `"OK"`
-    );
+    return expect(
+      timeoutPromiseAfter(delay(100, 'OK'), 1000, () => 'TIMEOUT ERR')
+    ).resolves.toMatchInlineSnapshot(`"OK"`);
   });
 
   test('reject when wrapped promise rejects', async () => {
     return expect(
-      timeoutPromiseAfter(delayRejection(100, 'ERR'), 1000)
+      timeoutPromiseAfter(delayRejection(100, 'ERR'), 1000, () => 'TIMEOUT ERR')
     ).rejects.toMatchInlineSnapshot(`"ERR"`);
   });
 
   test('reject it the timeout elapses', async () => {
     return expect(
-      timeoutPromiseAfter(delay(1000, 'OK'), 100, () => 'ERR')
-    ).rejects.toMatchInlineSnapshot(`"ERR"`);
+      timeoutPromiseAfter(delay(1000, 'OK'), 100, () => 'TIMEOUT ERR')
+    ).rejects.toMatchInlineSnapshot(`"TIMEOUT ERR"`);
   });
 });
