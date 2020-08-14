@@ -40,7 +40,14 @@ export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }
     </EuiTitle>
     <EuiSpacer size="m" />
     <EuiText>
-      <strong>{indexPattern}</strong>
+      <FormattedMessage
+        id="indexPatternManagement.createIndexPattern.stepTimeLabel"
+        defaultMessage="Specify settings for your {indexPattern} {indexPatternName}."
+        values={{
+          indexPattern: <strong>{indexPattern}</strong>,
+          indexPatternName,
+        }}
+      />
     </EuiText>
   </div>
 );
