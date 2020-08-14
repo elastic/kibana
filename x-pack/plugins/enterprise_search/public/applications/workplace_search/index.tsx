@@ -44,10 +44,14 @@ export const WorkplaceSearch: React.FC = () => {
         <Route path={SETUP_GUIDE_PATH}>
           <SetupGuide />
         </Route>
+        <Route exact path="/">
+          <Overview />
+        </Route>
         <Route>
           <Layout navigation={<WorkplaceSearchNav />}>
             <Switch>
-              <Route exact path="/">
+              <Route exact path="/groups">
+                {/* Will replace with groups component subsequent PR */}
                 <Overview />
               </Route>
             </Switch>
