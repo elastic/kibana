@@ -22,9 +22,9 @@ export const getHttpProxyServer = (
 };
 
 export const getProxyUrl = (kbnTestServerConfig: any) => {
-  const proxySlackSimulatorURL = kbnTestServerConfig
+  const proxyUrl = kbnTestServerConfig
     .find((val: string) => val.startsWith('--xpack.actions.proxyUrl='))
     .replace('--xpack.actions.proxyUrl=', '');
 
-  return new URL(proxySlackSimulatorURL);
+  return new URL(proxyUrl);
 };

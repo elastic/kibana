@@ -165,7 +165,7 @@ export async function executor(
     if (error.response) {
       const { status, statusText, headers: responseHeaders } = error.response;
       const message = `[${status}] ${statusText}`;
-      logger.warn(`error on ${actionId} webhook event: ${message}`);
+      logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -184,7 +184,7 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     }
 
-    logger.warn(`error on ${actionId} webhook action: unexpected error`);
+    logger.error(`error on ${actionId} webhook action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }

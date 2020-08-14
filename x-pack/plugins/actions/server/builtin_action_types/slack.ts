@@ -129,7 +129,7 @@ async function slackExecutor(
     });
     result = await webhook.send(message);
   } catch (err) {
-    logger.warn(`error on ${actionId} slack event: ${err.message}`);
+    logger.error(`error on ${actionId} slack event: ${err.message}`);
 
     if (err.original == null || err.original.response == null) {
       return serviceErrorResult(actionId, err.message);
@@ -161,7 +161,7 @@ async function slackExecutor(
         },
       }
     );
-    logger.warn(`error on ${actionId} slack action: ${errMessage}`);
+    logger.error(`error on ${actionId} slack action: ${errMessage}`);
 
     return errorResult(actionId, errMessage);
   }

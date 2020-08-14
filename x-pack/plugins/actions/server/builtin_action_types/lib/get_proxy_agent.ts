@@ -15,7 +15,7 @@ export function getProxyAgent(
 ): HttpsProxyAgent | HttpProxyAgent {
   logger.debug(`Create proxy agent for ${proxySettings.proxyUrl}.`);
 
-  if (/^https/.test(proxySettings.proxyUrl)) {
+  if (/^https/i.test(proxySettings.proxyUrl)) {
     const proxyUrl = new URL(proxySettings.proxyUrl);
     return new HttpsProxyAgent({
       host: proxyUrl.hostname,

@@ -59,8 +59,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     const actionsProxyUrl = options.enableActionsProxy
-      ? `http://localhost:${await getPort()}`
-      : undefined;
+      ? [`--xpack.actions.proxyUrl=http://localhost:${await getPort()}`]
+      : [];
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -91,8 +91,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.proxyUrl=${actionsProxyUrl}`,
+          ...actionsProxyUrl,
           '--xpack.actions.rejectUnauthorizedCertificates=false',
+
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {

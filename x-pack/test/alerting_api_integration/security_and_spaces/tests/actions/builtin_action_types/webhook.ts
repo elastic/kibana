@@ -229,7 +229,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, unexpected error/);
+      expect(result.message).to.match(/error calling webhook, retry later/);
     });
 
     it('should handle failing webhook targets', async () => {
