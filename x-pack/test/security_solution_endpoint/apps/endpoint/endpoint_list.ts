@@ -82,6 +82,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.missingOrFail('endpointDetailsFlyout');
       });
 
+      it('shows an empty table when the user enters a filter that will return no matches into the KQL bar', async () => {
+        await testSubjects.existOrFail('adminSearchBar');
+      });
+
       describe('when the hostname is clicked on,', () => {
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
