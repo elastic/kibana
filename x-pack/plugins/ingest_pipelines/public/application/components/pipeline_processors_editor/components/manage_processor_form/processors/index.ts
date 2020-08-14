@@ -19,3 +19,4 @@ export { Fail } from './fail';
 export { Foreach } from './foreach';
 export { GeoIP } from './geoip';
 export { Grok } from './grok';
+export { Gsub } from './gsub';
