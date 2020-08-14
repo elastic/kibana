@@ -14,6 +14,7 @@ import {
   getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -66,6 +67,15 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
+        }
+
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({
