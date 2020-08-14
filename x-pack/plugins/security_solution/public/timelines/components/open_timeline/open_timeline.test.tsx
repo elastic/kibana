@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { act } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -51,7 +52,7 @@ describe('OpenTimeline', () => {
     title,
     timelineType: TimelineType.default,
     timelineStatus: TimelineStatus.active,
-    templateTimelineFilter: [<div />],
+    templateTimelineFilter: [<div key="mock-a" />, <div key="mock-b" />],
     totalSearchResultsCount: mockSearchResults.length,
   });
 
@@ -277,6 +278,86 @@ describe('OpenTimeline', () => {
     );
 
     expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(true);
+  });
+
+  test('it should disable export-timeline if no timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await act(async () => {
+      expect(
+        wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  test('it should disable delete timeline if no timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await act(async () => {
+      expect(
+        wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  test('it should enable export-timeline if a timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [{}],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await act(async () => {
+      expect(
+        wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
+      ).toEqual(false);
+    });
+  });
+
+  test('it should enable delete timeline if a timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [{}],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await act(async () => {
+      expect(
+        wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
+      ).toEqual(false);
+    });
   });
 
   test("it should render a selectable timeline table if timelineStatus is active (selecting custom templates' tab)", () => {
