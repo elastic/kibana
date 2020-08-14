@@ -8,12 +8,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFieldNumber, EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
 
 import { PHASE_INDEX_PRIORITY } from '../../../constants';
-import { LearnMoreLink, OptionalLabel } from '../../components';
-import { ErrableFormRow } from '../form_errors';
 
-export const SetPriorityInput = (props) => {
-  const { errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
+import { LearnMoreLink } from './';
+import { OptionalLabel } from './';
+import { ErrableFormRow } from './';
 
+interface Props {
+  errors: Record<string, string[]>;
+  // TODO add types for phaseData and setPhaseData after policy is typed
+  phase: string;
+  phaseData: any;
+  setPhaseData: (dataKey: string, value: any) => void;
+  isShowingErrors: boolean;
+}
+export const SetPriorityInput: React.FunctionComponent<Props> = ({
+  errors,
+  phaseData,
+  phase,
+  setPhaseData,
+  isShowingErrors,
+}) => {
   return (
     <EuiDescribedFormGroup
       title={

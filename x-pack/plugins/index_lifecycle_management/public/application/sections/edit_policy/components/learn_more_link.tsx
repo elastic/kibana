@@ -8,7 +8,7 @@ import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { createDocLink } from '../../services/documentation';
+import { createDocLink } from '../../../services/documentation';
 
 interface Props {
   docPath: string;
