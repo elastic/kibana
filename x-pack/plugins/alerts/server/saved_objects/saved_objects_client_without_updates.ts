@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsClientContract, SavedObjectsCreateOptions } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsCreateOptions, SavedObject } from 'kibana/server';
 
 type AlertSavedObjectsCreateOptions = Omit<SavedObjectsCreateOptions, 'id' | 'overwrite'>;
 type AlertSavedObjectsUpdateOptions = Omit<SavedObjectsCreateOptions, 'id' | 'overwrite'> &
