@@ -154,10 +154,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     it('should render a related events button', async () => {
       await expect(
         simulator.map(() => ({
-          relatedEventButtons: simulator.processNodeChildElements(
-            entityIDs.origin,
-            'resolver:submenu:button'
-          ).length,
+          relatedEventButtons: simulator.processNodeSubmenuButton(entityIDs.origin).length,
         }))
       ).toYieldEqualTo({
         relatedEventButtons: 1,
@@ -166,7 +163,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     describe('when the related events button is clicked', () => {
       beforeEach(async () => {
         const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeChildElements(entityIDs.origin, 'resolver:submenu:button')
+          simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
           button.simulate('click');
@@ -183,7 +180,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
     describe('and when the related events button is clicked again', () => {
       beforeEach(async () => {
         const button = await simulator.resolveWrapper(() =>
-          simulator.processNodeChildElements(entityIDs.origin, 'resolver:submenu:button')
+          simulator.processNodeSubmenuButton(entityIDs.origin)
         );
         if (button) {
           button.simulate('click');

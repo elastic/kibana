@@ -433,6 +433,7 @@ const UnstyledProcessEventDot = React.memo(
                   menuTitle={subMenuAssets.relatedEvents.title}
                   projectionMatrix={projectionMatrix}
                   optionsWithActions={relatedEventStatusOrOptions}
+                  nodeID={nodeID}
                 />
               )}
             </EuiFlexItem>
