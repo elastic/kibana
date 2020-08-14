@@ -14,6 +14,7 @@ import { TextEditor } from '../field_components';
 import { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
 
@@ -58,18 +59,6 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
-
-  /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText', {
-      defaultMessage: 'The field to assign the converted value to.',
-    }),
-  },
 };
 
 export const Gsub: FunctionComponent = () => {
@@ -96,7 +85,14 @@ export const Gsub: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.replacement} component={Field} path="fields.replacement" />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText',
+          {
+            defaultMessage: 'The field to assign the converted value to.',
+          }
+        )}
+      />
 
       <IgnoreMissingField />
     </>

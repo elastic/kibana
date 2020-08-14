@@ -19,6 +19,8 @@ import {
 
 import { XJsonEditor } from '../field_components';
 
+import { TargetField } from './common_fields/target_field';
+
 import { FieldsConfig, to, from } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
@@ -96,21 +98,6 @@ const fieldsConfig: FieldsConfig = {
   },
 
   /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
-        defaultMessage="Field added to incoming documents to contain results objects. Default value is {targetField}."
-        values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
-      />
-    ),
-  },
-
   field_map: {
     type: FIELD_TYPES.TEXT,
     deserializer: to.jsonString,
@@ -173,14 +160,22 @@ export const Inference: FunctionComponent = () => {
     <>
       <UseField config={fieldsConfig.model_id} component={Field} path="fields.model_id" />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
+            defaultMessage="Field added to incoming documents to contain results objects. Default value is {targetField}."
+            values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
+          />
+        }
+      />
 
       <UseField
         config={fieldsConfig.field_map}
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 100,
+            height: 200,
             options: { minimap: { enabled: false } },
           },
         }}
@@ -195,7 +190,7 @@ export const Inference: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
-            height: 100,
+            height: 200,
             options: { minimap: { enabled: false } },
           },
         }}

@@ -7,29 +7,9 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FIELD_TYPES, UseField, Field } from '../../../../../../shared_imports';
-
-import { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-
-const fieldsConfig: FieldsConfig = {
-  /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldHelpText',
-      {
-        defaultMessage:
-          'The field to assign the stripped value to. If blank the field will be updated in-place.',
-      }
-    ),
-  },
-};
+import { TargetField } from './common_fields/target_field';
 
 export const HtmlStrip: FunctionComponent = () => {
   return (
@@ -41,7 +21,15 @@ export const HtmlStrip: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.htmlStripForm.targetFieldHelpText',
+          {
+            defaultMessage:
+              'The field to assign the stripped value to. If blank the field will be updated in-place.',
+          }
+        )}
+      />
 
       <IgnoreMissingField />
     </>
