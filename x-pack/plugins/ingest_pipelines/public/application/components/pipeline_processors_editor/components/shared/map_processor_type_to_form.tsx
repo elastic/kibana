@@ -24,6 +24,7 @@ import {
   GeoIP,
   Grok,
   Gsub,
+  HtmlStrip,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -154,7 +155,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   html_strip: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: HtmlStrip,
     docLinkPath: '/htmlstrip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.htmlStrip', {
       defaultMessage: 'HTML Strip',
