@@ -130,10 +130,10 @@ class AgentPolicyService {
     const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
 
     if (withPackagePolicies) {
-      agentPolicy.package_configs =
+      agentPolicy.package_policies =
         (await packagePolicyService.getByIDs(
           soClient,
-          (agentPolicySO.attributes.package_configs as string[]) || []
+          (agentPolicySO.attributes.package_policies as string[]) || []
         )) || [];
     }
 
@@ -183,7 +183,7 @@ class AgentPolicyService {
             withPackagePolicies
           );
           if (agentPolicyWithPackagePolicies) {
-            agentPolicy.package_configs = agentPolicyWithPackagePolicies.package_configs;
+            agentPolicy.package_policies = agentPolicyWithPackagePolicies.package_policies;
           }
         }
         return agentPolicy;
@@ -231,8 +231,8 @@ class AgentPolicyService {
     );
 
     // Copy all package policies
-    if (baseAgentPolicy.package_configs.length) {
-      const newPackagePolicies = (baseAgentPolicy.package_configs as PackagePolicy[]).map(
+    if (baseAgentPolicy.package_policies.length) {
+      const newPackagePolicies = (baseAgentPolicy.package_policies as PackagePolicy[]).map(
         (packagePolicy: PackagePolicy) => {
           const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
           return newPackagePolicy;
@@ -277,8 +277,8 @@ class AgentPolicyService {
       soClient,
       id,
       {
-        package_configs: uniq(
-          [...((oldAgentPolicy.package_configs || []) as string[])].concat(packagePolicyIds)
+        package_policies: uniq(
+          [...((oldAgentPolicy.package_policies || []) as string[])].concat(packagePolicyIds)
         ),
       },
       options?.user,
@@ -302,8 +302,8 @@ class AgentPolicyService {
       soClient,
       id,
       {
-        package_configs: uniq(
-          [...((oldAgentPolicy.package_configs || []) as string[])].filter(
+        package_policies: uniq(
+          [...((oldAgentPolicy.package_policies || []) as string[])].filter(
             (packagePolicyId) => !packagePolicyIds.includes(packagePolicyId)
           )
         ),
@@ -351,8 +351,8 @@ class AgentPolicyService {
       throw new Error('Cannot delete agent policy that is assigned to agent(s)');
     }
 
-    if (agentPolicy.package_configs && agentPolicy.package_configs.length) {
-      await packagePolicyService.delete(soClient, agentPolicy.package_configs as string[], {
+    if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
+      await packagePolicyService.delete(soClient, agentPolicy.package_policies as string[], {
         skipUnassignFromAgentPolicies: true,
       });
     }
@@ -415,7 +415,7 @@ class AgentPolicyService {
           {} as FullAgentPolicy['outputs']
         ),
       },
-      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_configs as PackagePolicy[]),
+      inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
       revision: agentPolicy.revision,
       ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
         ? {

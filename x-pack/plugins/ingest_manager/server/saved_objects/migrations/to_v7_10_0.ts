@@ -6,7 +6,7 @@
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { Agent } from '../../types';
+import { Agent, AgentPolicy, PackagePolicy } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
   Exclude<Agent, 'policy_id' | 'policy_revision'> & {
@@ -24,4 +24,18 @@ export const migrateAgentToV7100: SavedObjectMigrationFn<
   delete updatedAgentDoc.attributes.policy_revision;
 
   return updatedAgentDoc;
+};
+
+export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
+  Exclude<AgentPolicy, 'package_policies'> & {
+    package_configs: string[] | PackagePolicy[];
+  },
+  AgentPolicy
+> = (agentPolicyDoc) => {
+  const updatedAgentPolicyDoc = cloneDeep(agentPolicyDoc);
+
+  updatedAgentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
+  delete updatedAgentPolicyDoc.attributes.package_configs;
+
+  return updatedAgentPolicyDoc;
 };

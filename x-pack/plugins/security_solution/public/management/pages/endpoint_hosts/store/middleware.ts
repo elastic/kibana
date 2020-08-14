@@ -265,13 +265,13 @@ const getNonExistingPoliciesForEndpointsList = async (
   const policiesFound = (
     await sendGetAgentPolicyList(http, {
       query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToCheck.join(
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
           ' or '
         )})`,
       },
     })
   ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentPolicy) => {
-    (agentPolicy.package_configs as string[]).forEach((packagePolicy) => {
+    (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
       list[packagePolicy as string] = true;
     });
     return list;

@@ -59,7 +59,7 @@ export const StepSelectPackage: React.FunctionComponent<{
     if (packagesData?.response && limitedPackagesData?.response && agentPolicyData?.item) {
       const allPackages = packagesData.response;
       const limitedPackages = limitedPackagesData.response;
-      const usedLimitedPackages = (agentPolicyData.item.package_configs as PackagePolicy[])
+      const usedLimitedPackages = (agentPolicyData.item.package_policies as PackagePolicy[])
         .map((packagePolicy) => packagePolicy.package?.name || '')
         .filter((pkgName) => limitedPackages.includes(pkgName));
       setPackages(allPackages.filter((pkg) => !usedLimitedPackages.includes(pkg.name)));

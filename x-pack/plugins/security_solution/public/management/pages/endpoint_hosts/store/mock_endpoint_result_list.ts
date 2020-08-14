@@ -108,7 +108,7 @@ const endpointListApiPathHandlerMocks = ({
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
     [INGEST_API_AGENT_CONFIGS]: (): GetAgentPoliciesResponse => {
       const agentPolicy = generator.generateAgentPolicy();
-      (agentPolicy.package_configs as string[]).push(
+      (agentPolicy.package_policies as string[]).push(
         ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
       );
       return {

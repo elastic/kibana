@@ -50,7 +50,7 @@ class PackagePolicyService {
       throw new Error('Agent policy not found');
     } else {
       if (
-        (parentAgentPolicy.package_configs as PackagePolicy[]).find(
+        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
           (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
         )
       ) {
@@ -251,7 +251,7 @@ class PackagePolicyService {
       throw new Error('Agent policy not found');
     } else {
       if (
-        (parentAgentPolicy.package_configs as PackagePolicy[]).find(
+        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
           (siblingPackagePolicy) =>
             siblingPackagePolicy.id !== id && siblingPackagePolicy.name === packagePolicy.name
         )

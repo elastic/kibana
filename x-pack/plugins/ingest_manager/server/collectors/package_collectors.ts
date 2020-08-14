@@ -30,7 +30,7 @@ export const getPackageUsage = async (soClient?: SavedObjectsClient): Promise<Pa
   // to the (then to be created) agent policy collector, so we only query and loop over these
   // objects once.
   const packagesInAgentPolicies = agentPolicies.items.map((agentPolicy) => {
-    const packagePolicies: NewPackagePolicy[] = agentPolicy.package_configs as NewPackagePolicy[];
+    const packagePolicies: NewPackagePolicy[] = agentPolicy.package_policies as NewPackagePolicy[];
     return packagePolicies
       .map((packagePolicy) => packagePolicy.package?.name)
       .filter((packageName): packageName is string => packageName !== undefined);

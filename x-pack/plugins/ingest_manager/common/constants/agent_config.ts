@@ -12,7 +12,7 @@ export const DEFAULT_AGENT_POLICY = {
   namespace: 'default',
   description: 'Default agent policy created by Kibana',
   status: AgentPolicyStatus.Active,
-  package_configs: [],
+  package_policies: [],
   is_default: true,
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };

@@ -40,10 +40,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // If package has changed, create shell package policy with input&stream values based on package info
     if (currentPkgKey !== pkgKey) {
       // Existing package policies on the agent policy using the package name, retrieve highest number appended to package policy name
-      const dsPackageNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
-      const dsWithMatchingNames = (agentPolicy.package_configs as PackagePolicy[])
-        .filter((ds) => Boolean(ds.name.match(dsPackageNamePattern)))
-        .map((ds) => parseInt(ds.name.match(dsPackageNamePattern)![1], 10))
+      const pkgPoliciesNamePattern = new RegExp(`${packageInfo.name}-(\\d+)`);
+      const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
+        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
         .sort();
 
       updatePackagePolicy({
@@ -53,8 +53,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
           packageInfo.name !== 'endpoint'
             ? `${packageInfo.name}-${
-                dsWithMatchingNames.length
-                  ? dsWithMatchingNames[dsWithMatchingNames.length - 1] + 1
+                pkgPoliciesWithMatchingNames.length
+                  ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
                   : 1
               }`
             : '',

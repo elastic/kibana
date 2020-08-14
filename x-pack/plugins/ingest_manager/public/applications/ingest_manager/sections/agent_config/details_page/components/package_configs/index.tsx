@@ -10,14 +10,14 @@ import { NoPackagePolicies } from './no_package_configs';
 import { PackagePoliciesTable } from './package_configs_table';
 
 export const PackagePoliciesView = memo<{ agentPolicy: AgentPolicy }>(({ agentPolicy }) => {
-  if (agentPolicy.package_configs.length === 0) {
+  if (agentPolicy.package_policies.length === 0) {
     return <NoPackagePolicies policyId={agentPolicy.id} />;
   }
 
   return (
     <PackagePoliciesTable
       agentPolicy={agentPolicy}
-      packagePolicies={(agentPolicy.package_configs || []) as PackagePolicy[]}
+      packagePolicies={(agentPolicy.package_policies || []) as PackagePolicy[]}
     />
   );
 });

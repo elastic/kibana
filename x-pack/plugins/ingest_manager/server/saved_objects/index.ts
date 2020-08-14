@@ -17,7 +17,7 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { migrateAgentToV7100 } from './migrations/to_v7_10_0';
+import { migrateAgentToV7100, migrateAgentPolicyToV7100 } from './migrations/to_v7_10_0';
 
 /*
  * Saved object types and mappings
@@ -131,12 +131,15 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
         status: { type: 'keyword' },
-        package_configs: { type: 'keyword' },
+        package_policies: { type: 'keyword' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
         monitoring_enabled: { type: 'keyword', index: false },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentPolicyToV7100,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {

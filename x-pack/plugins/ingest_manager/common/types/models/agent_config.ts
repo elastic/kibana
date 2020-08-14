@@ -22,7 +22,7 @@ export interface NewAgentPolicy {
 export interface AgentPolicy extends NewAgentPolicy {
   id: string;
   status: AgentPolicyStatus;
-  package_configs: string[] | PackagePolicy[];
+  package_policies: string[] | PackagePolicy[];
   updated_at: string;
   updated_by: string;
   revision: number;

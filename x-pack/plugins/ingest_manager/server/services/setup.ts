@@ -95,8 +95,8 @@ export async function setupIngestManager(
       throw new Error('Policy not found');
     }
     if (
-      agentPolicyWithPackagePolicies.package_configs.length &&
-      typeof agentPolicyWithPackagePolicies.package_configs[0] === 'string'
+      agentPolicyWithPackagePolicies.package_policies.length &&
+      typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
     ) {
       throw new Error('Policy not found');
     }
@@ -108,7 +108,7 @@ export async function setupIngestManager(
         continue;
       }
 
-      const isInstalled = agentPolicyWithPackagePolicies.package_configs.some(
+      const isInstalled = agentPolicyWithPackagePolicies.package_policies.some(
         (d: PackagePolicy | string) => {
           return typeof d !== 'string' && d.package?.name === installedPackage.name;
         }

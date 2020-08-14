@@ -184,7 +184,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'package_configs',
+        field: 'package_policies',
         name: i18n.translate(
           'xpack.ingestManager.agentPolicyList.packagePoliciesCountColumnTitle',
           {
@@ -192,7 +192,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           }
         ),
         dataType: 'number',
-        render: (packagePolicies: AgentPolicy['package_configs']) =>
+        render: (packagePolicies: AgentPolicy['package_policies']) =>
           packagePolicies ? packagePolicies.length : 0,
       },
       {

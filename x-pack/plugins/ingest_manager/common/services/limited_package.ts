@@ -14,10 +14,10 @@ export const doesAgentPolicyAlreadyIncludePackage = (
   agentPolicy: AgentPolicy,
   packageName: string
 ): boolean => {
-  if (agentPolicy.package_configs.length && typeof agentPolicy.package_configs[0] === 'string') {
+  if (agentPolicy.package_policies.length && typeof agentPolicy.package_policies[0] === 'string') {
     throw new Error('Unable to read full package policy information');
   }
-  return (agentPolicy.package_configs as PackagePolicy[])
+  return (agentPolicy.package_policies as PackagePolicy[])
     .map((packagePolicy) => packagePolicy.package?.name || '')
     .includes(packageName);
 };

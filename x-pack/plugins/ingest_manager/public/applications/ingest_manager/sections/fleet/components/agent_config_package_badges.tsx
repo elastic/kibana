@@ -28,13 +28,13 @@ export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({ agent
           id="xpack.ingestManager.agentReassignPolicy.policyDescription"
           defaultMessage="The selected agent policy will collect data for {count, plural, one {{countValue} integration} other {{countValue} integrations}}:"
           values={{
-            count: agentPolicy.package_configs.length,
-            countValue: <b>{agentPolicy.package_configs.length}</b>,
+            count: agentPolicy.package_policies.length,
+            countValue: <b>{agentPolicy.package_policies.length}</b>,
           }}
         />
       </EuiText>
       <EuiSpacer size="s" />
-      {(agentPolicy.package_configs as PackagePolicy[]).map((packagePolicy, idx) => {
+      {(agentPolicy.package_policies as PackagePolicy[]).map((packagePolicy, idx) => {
         if (!packagePolicy.package) {
           return null;
         }

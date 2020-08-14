@@ -1,11 +1,11 @@
 classDiagram
-  agent_configs "1" -- "*"  package_configs
+  agent_configs "1" -- "*"  package_policies
   agent_configs "1" -- "*"  enrollment_api_keys
   agent_configs "1" -- "*"  agents : is used
   agent_configs "*" -- "*"  outputs
   agents "1" -- "*"  agent_events
   agents "1" -- "*"  agent_events
-  package "1" -- "*"  package_configs
+  package "1" -- "*"  package_policies
 
   class package {
     installed
@@ -37,14 +37,14 @@ classDiagram
   }
 
   class agent_configs {
-    package_configs // package_config ids
+    package_policies // package_config ids
     name
     namespace
     description
     status
   }
 
-	class package_configs {
+	class package_policies {
     name
     namespace
     config_id

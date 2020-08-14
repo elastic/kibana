@@ -127,8 +127,8 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                 <EuiI18nNumber
                   value={
                     (agentPolicy &&
-                      agentPolicy.package_configs &&
-                      agentPolicy.package_configs.length) ||
+                      agentPolicy.package_policies &&
+                      agentPolicy.package_policies.length) ||
                     0
                   }
                 />
