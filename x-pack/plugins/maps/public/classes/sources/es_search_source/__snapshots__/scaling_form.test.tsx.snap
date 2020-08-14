@@ -50,6 +50,20 @@ exports[`should disable clusters option when clustering is not supported 1`] = `
           onChange={[Function]}
         />
       </EuiToolTip>
+      <EuiRadio
+        checked={false}
+        id="MVT"
+        label={
+          <React.Fragment>
+            .mvt tile protocol
+            <EuiBetaBadge
+              label="beta"
+              tooltipContent="Using .mvt tiles is a beta feature."
+            />
+          </React.Fragment>
+        }
+        onChange={[Function]}
+      />
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -114,6 +128,20 @@ exports[`should render 1`] = `
         label="Show clusters when results exceed 10000."
         onChange={[Function]}
       />
+      <EuiRadio
+        checked={false}
+        id="MVT"
+        label={
+          <React.Fragment>
+            .mvt tile protocol
+            <EuiBetaBadge
+              label="beta"
+              tooltipContent="Using .mvt tiles is a beta feature."
+            />
+          </React.Fragment>
+        }
+        onChange={[Function]}
+      />
     </div>
   </EuiFormRow>
   <EuiFormRow
@@ -176,6 +204,20 @@ exports[`should render top hits form when scaling type is TOP_HITS 1`] = `
         disabled={false}
         id="CLUSTERS"
         label="Show clusters when results exceed 10000."
+        onChange={[Function]}
+      />
+      <EuiRadio
+        checked={false}
+        id="MVT"
+        label={
+          <React.Fragment>
+            .mvt tile protocol
+            <EuiBetaBadge
+              label="beta"
+              tooltipContent="Using .mvt tiles is a beta feature."
+            />
+          </React.Fragment>
+        }
         onChange={[Function]}
       />
     </div>
