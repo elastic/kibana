@@ -8,7 +8,7 @@ import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
-import { ESQueueWorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../..//types';
+import { WorkerExecuteFn, RunTaskFnFactory, TaskRunResult } from '../../..//types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -18,7 +18,7 @@ import {
 import { generatePngObservableFactory } from '../lib/generate_png';
 import { ScheduledTaskParamsPNG } from '../types';
 
-type QueuedPngExecutorFactory = RunTaskFnFactory<ESQueueWorkerExecuteFn<ScheduledTaskParamsPNG>>;
+type QueuedPngExecutorFactory = RunTaskFnFactory<WorkerExecuteFn<ScheduledTaskParamsPNG>>;
 
 export const runTaskFnFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   reporting,

@@ -118,6 +118,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
+              fullWidth
               placeholder={filterPlaceholder}
               value={fieldFilter}
               onChange={(e) => setFieldFilter(e.target.value)}
