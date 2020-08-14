@@ -211,7 +211,7 @@ export class Simulator {
   }
 
   /**
-   * The element where nodes get drawn.
+   * Lines that connect the nodes in the graph
    */
   public edgeLines(): ReactWrapper {
     return this.domNodes('[data-test-subj="resolver:graph:edgeline"]');
