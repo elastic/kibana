@@ -66,9 +66,7 @@ export interface LegacyPluginOptions {
     hacks: string[];
     visualize: string[];
     devTools: string[];
-    styleSheetPaths: string;
     injectDefaultVars: (server: Server) => Record<string, any>;
-    noParse: string[];
     home: string[];
     mappings: any;
     migrations: any;

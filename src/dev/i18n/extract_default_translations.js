@@ -19,7 +19,7 @@
 
 import path from 'path';
 
-import { extractHtmlMessages, extractCodeMessages, extractPugMessages } from './extractors';
+import { extractHtmlMessages, extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@kbn/dev-utils';
@@ -70,7 +70,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/*.d.ts',
   ].concat(additionalIgnore);
 
-  const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
+  const entries = await globAsync('*.{js,jsx,ts,tsx,html}', {
     cwd: inputPath,
     matchBase: true,
     ignore,
@@ -78,27 +78,24 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     absolute,
   });
 
-  const { htmlEntries, codeEntries, pugEntries } = entries.reduce(
+  const { htmlEntries, codeEntries } = entries.reduce(
     (paths, entry) => {
       const resolvedPath = path.resolve(inputPath, entry);
 
       if (resolvedPath.endsWith('.html')) {
         paths.htmlEntries.push(resolvedPath);
-      } else if (resolvedPath.endsWith('.pug')) {
-        paths.pugEntries.push(resolvedPath);
       } else {
         paths.codeEntries.push(resolvedPath);
       }
 
       return paths;
     },
-    { htmlEntries: [], codeEntries: [], pugEntries: [] }
+    { htmlEntries: [], codeEntries: [] }
   );
 
   return [
     [htmlEntries, extractHtmlMessages],
     [codeEntries, extractCodeMessages],
-    [pugEntries, extractPugMessages],
   ];
 }
 

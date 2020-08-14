@@ -45,12 +45,12 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
       {isVisible ? (
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
-          defaultMessage="Hide advanced options"
+          defaultMessage="Hide advanced settings"
         />
       ) : (
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
-          defaultMessage="Show advanced options"
+          defaultMessage="Show advanced settings"
         />
       )}
     </EuiButtonEmpty>
