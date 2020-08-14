@@ -36,6 +36,15 @@ export const createListItemRoute = (router: IRouter): void => {
             statusCode: 404,
           });
         } else {
+          if (id != null) {
+            const listItem = await lists.getListItem({ id });
+            if (listItem != null) {
+              return siemResponse.error({
+                body: `list item id: "${id}" already exists`,
+                statusCode: 409,
+              });
+            }
+          }
           const createdListItem = await lists.createListItem({
             deserializer: list.deserializer,
             id,

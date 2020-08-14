@@ -6,8 +6,10 @@
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
+import { NavigateToAppOptions } from 'kibana/public';
 import { MapsConfigType } from '../config';
 import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
@@ -77,3 +79,12 @@ export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
 export function setMapAppConfig(config: MapsConfigType): void;
 export function setKibanaVersion(version: string): void;
 export function setIsGoldPlus(isGoldPlus: boolean): void;
+export function setEmbeddableService(embeddableService: EmbeddableStart): void;
+export function getEmbeddableService(): EmbeddableStart;
+export function setNavigateToApp(
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>
+): void;
+export const navigateToApp: (
+  appId: string,
+  options?: NavigateToAppOptions | undefined
+) => Promise<void>;
