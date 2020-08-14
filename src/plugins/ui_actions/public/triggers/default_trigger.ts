@@ -17,29 +17,11 @@
  * under the License.
  */
 
-import { createBrushHandler } from './create_brush_handler';
-import moment from 'moment';
+import { Trigger } from '.';
 
-describe('brushHandler', () => {
-  let mockTimefilter;
-  let onBrush;
-
-  beforeEach(() => {
-    mockTimefilter = {
-      time: {},
-      setTime: function (time) {
-        this.time = time;
-      },
-    };
-    onBrush = createBrushHandler(mockTimefilter);
-  });
-
-  it('returns brushHandler() that updates timefilter', () => {
-    const from = '2017-01-01T00:00:00Z';
-    const to = '2017-01-01T00:10:00Z';
-    onBrush(from, to);
-    expect(mockTimefilter.time.from).toEqual(moment(from).toISOString());
-    expect(mockTimefilter.time.to).toEqual(moment(to).toISOString());
-    expect(mockTimefilter.time.mode).toEqual('absolute');
-  });
-});
+export const DEFAULT_TRIGGER = '';
+export const defaultTrigger: Trigger<''> = {
+  id: DEFAULT_TRIGGER,
+  title: 'Unknown',
+  description: 'Unknown trigger.',
+};
