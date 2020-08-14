@@ -128,7 +128,7 @@ import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics } from 'src/plugins/inspector/common';
-import { SavedObject } from 'src/core/server';
+import { SavedObject as SavedObject_2 } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'src/core/server';
 import { ScrollParams } from 'elasticsearch';
 import { SearchParams } from 'elasticsearch';

@@ -36,6 +36,7 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [getAggregationRestrictions(indexPattern)](./kibana-plugin-plugins-data-public.getaggregationrestrictions.md) |  |
 |  [getDefaultQuery(language)](./kibana-plugin-plugins-data-public.getdefaultquery.md) |  |
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
@@ -54,6 +55,7 @@
 |  [FetchOptions](./kibana-plugin-plugins-data-public.fetchoptions.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-public.fieldformatconfig.md) |  |
 |  [FieldMappingSpec](./kibana-plugin-plugins-data-public.fieldmappingspec.md) |  |
+|  [FieldSpec](./kibana-plugin-plugins-data-public.fieldspec.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-public.filter.md) |  |
 |  [IDataPluginServices](./kibana-plugin-plugins-data-public.idatapluginservices.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-public.iessearchrequest.md) |  |
