@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { debounce, pick } from 'lodash';
+import { debounce, pick, uniqBy, isEqual } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getCustomMetricLabel } from '../../../pages/metrics/inventory_view/components/waffle/metric_control/get_custom_metric_label';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -429,7 +429,23 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     alertsContextMetadata,
   } = props;
   const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
-  const { customMetrics } = alertsContextMetadata || {};
+  const [customMetrics, updateCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
+
+  // Create and uniquify a list of custom metrics including:
+  // - The alert metadata context (which only gives us custom metrics on the inventory page)
+  // - The custom metric stored in the expression (necessary when editing this alert without having
+  //    access to the metadata context)
+  // - Whatever custom metrics were previously stored in this list (to preserve the custom metric in the dropdown
+  //    if the user edits the alert and switches away from the custom metric)
+  useEffect(() => {
+    const ctxCustomMetrics = alertsContextMetadata?.customMetrics ?? [];
+    const expressionCustomMetrics = customMetric ? [customMetric] : [];
+    const newCustomMetrics = uniqBy(
+      [...customMetrics, ...ctxCustomMetrics, ...expressionCustomMetrics],
+      (cm: SnapshotCustomMetricInput) => cm.id
+    );
+    if (!isEqual(customMetrics, newCustomMetrics)) updateCustomMetrics(newCustomMetrics);
+  }, [alertsContextMetadata, customMetric, customMetrics, updateCustomMetrics]);
 
   const updateMetric = useCallback(
     (m?: SnapshotMetricType | string) => {
