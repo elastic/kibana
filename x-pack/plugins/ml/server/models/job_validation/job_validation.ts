@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-
+import uniq from 'lodash/uniq';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
@@ -27,6 +27,7 @@ import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { MLCATEGORY } from '../../../common/constants/field_types';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -77,6 +78,32 @@ export async function validateJob(
       }
 
       validationMessages = filteredBasicValidationMessages;
+      let perPartitionError = false;
+      // check if the detectors with mlcategory might have different per_partition_field values
+      // if per_partition_categorization is enabled
+      if (job.analysis_config.per_partition_categorization !== undefined) {
+        if (
+          job.analysis_config.per_partition_categorization.enabled ||
+          (job.analysis_config.per_partition_categorization.stop_on_warn &&
+            Array.isArray(job.analysis_config.detectors) &&
+            job.analysis_config.detectors.length >= 2)
+        ) {
+          const categorizationDetectors = job.analysis_config.detectors.filter(
+            (d) =>
+              d.by_field_name === MLCATEGORY ||
+              d.over_field_name === MLCATEGORY ||
+              d.partition_field_name === MLCATEGORY
+          );
+          const uniqPartitions = uniq(categorizationDetectors.map((d) => d.partition_field_name));
+          if (uniqPartitions.length > 1) {
+            perPartitionError = true;
+            validationMessages.push({
+              id: 'varying_per_partition_fields',
+              fields: uniqPartitions.join(', '),
+            });
+          }
+        }
+      }
 
       // next run only the cardinality tests to find out if they trigger an error
       // so we can decide later whether certain additional tests should be run
@@ -93,7 +120,7 @@ export async function validateJob(
 
       // only run the influencer and model memory limit checks
       // if cardinality checks didn't return a message with an error level
-      if (cardinalityError === false) {
+      if (cardinalityError === false && perPartitionError === false) {
         validationMessages.push(...(await validateInfluencers(job)));
         validationMessages.push(
           ...(await validateModelMemoryLimit(mlClusterClient, job, duration))
