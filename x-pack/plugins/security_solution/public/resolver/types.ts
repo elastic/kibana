@@ -410,7 +410,7 @@ export interface SideEffectSimulator {
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**

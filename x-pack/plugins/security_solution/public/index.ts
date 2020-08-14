@@ -11,3 +11,5 @@ import { PluginSetup, PluginStart } from './types';
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
 export { Plugin, PluginSetup, PluginStart };
+
+export * from './resolver';
