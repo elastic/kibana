@@ -139,10 +139,23 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await renderable.waitForRender();
     }
 
-    async saveMap(name) {
+    async saveMap(name, uncheckReturnToOriginModeSwitch = false) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
+      if (uncheckReturnToOriginModeSwitch) {
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
+        if (!redirectToOriginCheckboxExists) {
+          throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
+        }
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
+      }
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    }
+
+    async clickSaveAndReturnButton() {
+      await testSubjects.click('mapSaveAndReturnButton');
     }
 
     async expectMissingSaveButton() {

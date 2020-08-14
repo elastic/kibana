@@ -10,37 +10,16 @@ import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { setWriteable } from '../../state/actions/workpad';
 import { State } from '../../../types';
-import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header.component';
+import { WorkpadHeader as Component } from './workpad_header.component';
 
-interface StateProps {
-  isWriteable: boolean;
-  canUserWrite: boolean;
-  selectedPage: string;
-}
-
-interface DispatchProps {
-  setWriteable: (isWorkpadWriteable: boolean) => void;
-}
-
-const mapStateToProps = (state: State): StateProps => ({
+const mapStateToProps = (state: State) => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
   selectedPage: getSelectedPage(state),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  setWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
+  onSetWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
 });
 
-const mergeProps = (
-  stateProps: StateProps,
-  dispatchProps: DispatchProps,
-  ownProps: ComponentProps
-): ComponentProps => ({
-  ...stateProps,
-  ...dispatchProps,
-  ...ownProps,
-  toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
-});
-
-export const WorkpadHeader = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
+export const WorkpadHeader = connect(mapStateToProps, mapDispatchToProps)(Component);

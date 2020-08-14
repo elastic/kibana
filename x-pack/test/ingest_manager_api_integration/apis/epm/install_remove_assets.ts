@@ -23,7 +23,10 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
   };
   const installPackage = async (pkg: string) => {
-    await supertest.post(`/api/ingest_manager/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+    await supertest
+      .post(`/api/ingest_manager/epm/packages/${pkg}`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true });
   };
 
   describe('installs and uninstalls all assets', async () => {

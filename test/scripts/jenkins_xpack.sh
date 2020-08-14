@@ -2,12 +2,6 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-echo " -> Building legacy styles for x-pack canvas storyshot tests"
-cd "$KIBANA_DIR"
-node scripts/build_sass
-echo ""
-echo ""
-
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
 checks-reporter-with-killswitch "X-Pack Jest" node --max-old-space-size=6144 scripts/jest --ci --verbose

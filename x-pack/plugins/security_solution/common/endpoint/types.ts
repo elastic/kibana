@@ -183,6 +183,15 @@ export interface ResolverRelatedEvents {
 }
 
 /**
+ * Safe version of `ResolverRelatedEvents`
+ */
+export interface SafeResolverRelatedEvents {
+  entityID: string;
+  events: SafeResolverEvent[];
+  nextEvent: string | null;
+}
+
+/**
  * Response structure for the alerts route.
  */
 export interface ResolverRelatedAlerts {
