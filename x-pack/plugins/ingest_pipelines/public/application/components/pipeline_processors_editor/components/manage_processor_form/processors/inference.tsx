@@ -84,9 +84,12 @@ const fieldsConfig: FieldsConfig = {
     validations: [
       {
         validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternRequiredError', {
-            defaultMessage: 'A model ID value is required.',
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.pipelineEditor.inferenceForm.patternRequiredError',
+            {
+              defaultMessage: 'A model ID value is required.',
+            }
+          )
         ),
       },
     ],
@@ -96,12 +99,12 @@ const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldLabel', {
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldLabel', {
       defaultMessage: 'Target field (optional)',
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
         defaultMessage="Field added to incoming documents to contain results objects. Default value is {targetField}."
         values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
       />

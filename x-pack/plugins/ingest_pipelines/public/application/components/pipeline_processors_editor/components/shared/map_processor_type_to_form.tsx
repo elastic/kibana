@@ -26,6 +26,7 @@ import {
   Gsub,
   HtmlStrip,
   Inference,
+  Join,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -170,7 +171,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   join: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Join,
     docLinkPath: '/join-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.join', {
       defaultMessage: 'Join',
