@@ -19,7 +19,7 @@ import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, to, from } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
@@ -49,16 +49,8 @@ const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
   pattern_definitions: {
     type: FIELD_TYPES.TEXT,
-    deserializer: (v) => (v ? JSON.stringify(v, null, 2) : '{}'),
-    serializer: (v) => {
-      if (v) {
-        try {
-          return JSON.parse(v);
-        } catch (e) {
-          // Ignore
-        }
-      }
-    },
+    deserializer: to.jsonString,
+    serializer: from.optionalJson,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternDefinitionsLabel', {
       defaultMessage: 'Pattern definitions (optional)',
     }),
