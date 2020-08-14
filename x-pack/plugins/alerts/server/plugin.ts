@@ -106,6 +106,7 @@ export class AlertingPlugin {
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
+  private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -150,6 +151,7 @@ export class AlertingPlugin {
 
     setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
+    this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
@@ -253,6 +255,11 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+    });
+
+    this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
+      const client = getAlertsClientWithRequest(request);
+      return (type: string, id: string) => client.get({ id });
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
