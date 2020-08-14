@@ -6,7 +6,6 @@
 
 import geojsonvt from 'geojson-vt';
 import vtpbf from 'vt-pbf';
-import _ from 'lodash';
 import {
   FEATURE_ID_PROPERTY_NAME,
   MVT_SOURCE_LAYER_NAME,
@@ -25,9 +24,7 @@ export async function getTile({
 }) {
   const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
 
-  logger.warn({ polygon: geojsonBbox });
   let resultFeatures;
-
   try {
     let result;
     try {
@@ -54,10 +51,10 @@ export async function getTile({
         },
       };
 
-      logger.warn(`going to call elasticsearch count`);
       const countResult = await callElasticSearch('count', esCountQuery);
 
       if (countResult.count > requestBody.size) {
+        // Generate "too many features"-bounds
         const bboxAggName = 'data_bounds';
         const bboxQuery = {
           index: indexPattern,
@@ -74,17 +71,8 @@ export async function getTile({
           },
         };
 
-        logger.warn(`going to call size`);
         const bboxResult = await callElasticSearch('search', bboxQuery);
-        logger.warn({ agg: bboxResult.aggregations[bboxAggName] });
-
-        const bboxForData = esBboxToGeoJsonPolygon(
-          bboxResult.aggregations[bboxAggName].bounds,
-          logger
-        );
-
-        logger.warn({ bboxForData });
-        logger.warn({ coordinates: bboxForData.coordinates });
+        const bboxForData = esBboxToGeoJsonPolygon(bboxResult.aggregations[bboxAggName].bounds);
 
         resultFeatures = [
           {
@@ -92,11 +80,11 @@ export async function getTile({
             properties: {
               [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
             },
-            // geometry: geojsonBbox,
             geometry: bboxForData,
           },
         ];
       } else {
+        // Perform actual search
         result = await callElasticSearch('search', esSearchQuery);
 
         const feats = result.hits.hits.map((hit) => {
@@ -196,7 +184,7 @@ function tileToGeoJsonPolygon(x, y, z) {
   const eLon = tile2long(x + 1, z);
   const nLat = tile2lat(y, z);
 
-  const polygon = {
+  return {
     type: 'Polygon',
     coordinates: [
       [
@@ -208,8 +196,6 @@ function tileToGeoJsonPolygon(x, y, z) {
       ],
     ],
   };
-
-  return polygon;
 }
 
 tile2long(0, 1);
@@ -224,14 +210,12 @@ function tile2lat(y, z) {
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
 }
 
-function esBboxToGeoJsonPolygon(esBounds, logger) {
+function esBboxToGeoJsonPolygon(esBounds) {
   let minLon = esBounds.top_left.lon;
   const maxLon = esBounds.bottom_right.lon;
   minLon = minLon > maxLon ? minLon - 360 : minLon; // fixes an ES bbox to straddle dateline
   const minLat = esBounds.bottom_right.lat;
   const maxLat = esBounds.top_left.lat;
-
-  logger.warn({ minLon, maxLon, minLat, maxLat });
 
   return {
     type: 'Polygon',

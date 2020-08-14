@@ -588,13 +588,7 @@ export class ESSearchSource extends AbstractESSource {
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
     //assuming only geo_shape fields for now
-    const initialSearchContext = {
-      // docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
-    };
-    // const geoField = await this._getGeoField();
-    // const docValueFields = await this._excludeDateFields(searchFilters.fieldNames);
-    // const withoutGeoField = docValueFields.filter((field) => field !== geoField.name);
-    // initialSearchContext.docvalue_fields.push(...withoutGeoField);
+    const initialSearchContext = {};
 
     const searchSource = await this.makeSearchSource(
       searchFilters,
@@ -605,7 +599,7 @@ export class ESSearchSource extends AbstractESSource {
 
     const ipTitle = indexPattern.title;
     const geometryFieldName = this._descriptor.geoField;
-    const fields = ['_id']; //todo needs to include correct fields
+    const fields = ['_id']; // todo needs to include correct fields
     const fieldsParam = fields.join(',');
 
     const dsl = await searchSource.getSearchRequestBody();

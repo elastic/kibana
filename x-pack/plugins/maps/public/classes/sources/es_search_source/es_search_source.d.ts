@@ -5,7 +5,7 @@
  */
 
 import { AbstractESSource } from '../es_source';
-import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
+import { ESSearchSourceDescriptor, MapFilters } from '../../../../common/descriptor_types';
 import { ITiledSingleLayerVectorSource } from '../vector_source';
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
@@ -13,4 +13,16 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   constructor(sourceDescriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters: unknown);
   getFieldNames(): string[];
+
+  getUrlTemplateWithMeta(
+    searchFilters: MapFilters
+  ): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }>;
+  getMinZoom(): number;
+  getMaxZoom(): number;
+  getLayerName(): string;
 }

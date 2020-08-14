@@ -9,12 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { MVT_GETTILE_API_PATH, API_ROOT_PATH } from '../../common/constants';
 import { getTile } from './get_tile';
 
-const CACHE_TIMEOUT = 0;
+const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
 
 export function initMVTRoutes({ router, logger }) {
-  logger.info('init mvt routes');
-  logger.warn('init');
-
   router.get(
     {
       path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}`,
@@ -33,8 +30,6 @@ export function initMVTRoutes({ router, logger }) {
     async (context, request, response) => {
       const { query } = request;
 
-      logger.info({ query });
-
       const callElasticSearch = async (...args) => {
         return await context.core.elasticsearch.legacy.client.callAsCurrentUser(...args);
       };
@@ -48,12 +43,8 @@ export function initMVTRoutes({ router, logger }) {
       const geometryFieldName = query.geometryFieldName;
       const fields = query.fields ? query.fields.split(',') : [];
       const size = parseInt(query.size, 10) || 10000;
-
-      logger.info({ size });
-      logger.info({ x, y, z });
-
       const requestBodyDSL = rison.decode(query.requestBody);
-      logger.info({ requestBodyDSL });
+
       const tile = await getTile({
         logger,
         callElasticSearch,
@@ -68,9 +59,17 @@ export function initMVTRoutes({ router, logger }) {
         requestBody: requestBodyDSL,
       });
 
-      logger.info({ tile });
-      if (!tile) {
-        logger.info('empty tile');
+      if (tile) {
+        return response.ok({
+          body: tile,
+          headers: {
+            'content-disposition': 'inline',
+            'content-length': tile.length,
+            'Content-Type': 'application/x-protobuf',
+            'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
+          },
+        });
+      } else {
         return response.ok({
           headers: {
             'content-disposition': 'inline',
@@ -80,16 +79,6 @@ export function initMVTRoutes({ router, logger }) {
           },
         });
       }
-
-      return response.ok({
-        body: tile,
-        headers: {
-          'content-disposition': 'inline',
-          'content-length': tile.length,
-          'Content-Type': 'application/x-protobuf',
-          'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
-        },
-      });
     }
   );
 }
