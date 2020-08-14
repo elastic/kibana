@@ -190,7 +190,7 @@ describe('When the edit exception modal is opened', () => {
     });
   });
 
-  describe('when an detection exception with exception data is passed', () => {
+  describe('when an detection exception with entries is passed', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       wrapper = mount(

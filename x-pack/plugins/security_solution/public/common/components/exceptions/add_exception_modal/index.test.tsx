@@ -24,6 +24,7 @@ import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
+import { ExceptionListItemSchema } from '../../../../../../lists/common';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -243,7 +244,10 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
-    let callProps;
+    let callProps: {
+      onChange: (props: { exceptionItems: ExceptionListItemSchema[] }) => void;
+      exceptionListItems: ExceptionListItemSchema[];
+    };
     beforeEach(() => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
