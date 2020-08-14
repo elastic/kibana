@@ -16,10 +16,10 @@ import {
   PHASE_COLD,
   PHASE_DELETE,
 } from '../../../constants';
-import { LearnMoreLink } from '../../components';
-import { ErrableFormRow } from '../form_errors';
+import { LearnMoreLink } from './learn_more_link';
+import { ErrableFormRow } from './form_errors';
 
-function getTimingLabelForPhase(phase) {
+function getTimingLabelForPhase(phase: string) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
     case PHASE_WARM:
@@ -39,7 +39,7 @@ function getTimingLabelForPhase(phase) {
   }
 }
 
-function getUnitsAriaLabelForPhase(phase) {
+function getUnitsAriaLabelForPhase(phase: string) {
   // NOTE: Hot phase isn't necessary, because indices begin in the hot phase.
   switch (phase) {
     case PHASE_WARM:
@@ -68,9 +68,24 @@ function getUnitsAriaLabelForPhase(phase) {
   }
 }
 
-export const MinAgeInput = (props) => {
-  const { rolloverEnabled, errors, phaseData, phase, setPhaseData, isShowingErrors } = props;
+interface Props {
+  rolloverEnabled: boolean;
+  errors: Record<string, string[]>;
+  phase: string;
+  // TODO add types for phaseData and setPhaseData after policy is typed
+  phaseData: any;
+  setPhaseData: (dataKey: string, value: any) => void;
+  isShowingErrors: boolean;
+}
 
+export const MinAgeInput: React.FunctionComponent<Props> = ({
+  rolloverEnabled,
+  errors,
+  phaseData,
+  phase,
+  setPhaseData,
+  isShowingErrors,
+}) => {
   let daysOptionLabel;
   let hoursOptionLabel;
   let minutesOptionLabel;
