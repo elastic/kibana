@@ -39,17 +39,17 @@ export const WorkplaceSearchNav: React.FC = () => {
           defaultMessage: 'Sources',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(GROUPS_PATH)}>
+      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${GROUPS_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
           defaultMessage: 'Groups',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(ROLE_MAPPINGS_PATH)}>
+      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
           defaultMessage: 'Role Mappings',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(SECURITY_PATH)}>
+      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
           defaultMessage: 'Security',
         })}
@@ -60,7 +60,7 @@ export const WorkplaceSearchNav: React.FC = () => {
         })}
       </SideNavLink>
       <EuiSpacer />
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(SOURCES_PATH)}>
+      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SOURCES_PATH}`)}>
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard', {
           defaultMessage: 'View my personal dashboard',
         })}
