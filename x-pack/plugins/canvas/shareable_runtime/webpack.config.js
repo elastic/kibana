@@ -43,6 +43,7 @@ module.exports = {
         'src/legacy/core_plugins/interpreter/public/types'
       ),
       tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.es5.js'),
+      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
   },
@@ -124,22 +125,6 @@ module.exports = {
         ],
       },
       {
-        test: /\.less$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: require.resolve('./postcss.config.js'),
-              },
-            },
-          },
-          { loader: 'less-loader' },
-        ],
-      },
-      {
         test: /\.scss$/,
         exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
         use: [
@@ -162,33 +147,12 @@ module.exports = {
             },
           },
           {
-            loader: 'resolve-url-loader',
-            options: {
-              // eslint-disable-next-line no-unused-vars
-              join: (_, __) => (uri, base) => {
-                if (!base) {
-                  return null;
-                }
-
-                // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                if (uri.startsWith('ui/') && base.split(path.sep).includes('legacy')) {
-                  return path.resolve(KIBANA_ROOT, 'src/legacy/ui/public', uri.replace('ui/', ''));
-                }
-
-                return null;
-              },
-            },
-          },
-          {
             loader: 'sass-loader',
             options: {
-              // must always be enabled as long as we're using the `resolve-url-loader` to
-              // rewrite `ui/*` urls. They're dropped by subsequent loaders though
-              sourceMap: true,
               prependData(loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/legacy/ui/public/styles/_globals_v7light.scss')
+                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
                 )};\n`;
               },
               webpackImporter: false,
