@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { debounce, pick } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
@@ -22,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { getCustomMetricLabel } from '../../../pages/metrics/inventory_view/components/waffle/metric_control/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -49,13 +51,21 @@ import { hostMetricTypes } from '../../../../common/inventory_models/host/toolba
 import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
 import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '../../../../common/inventory_models/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import {
+  SnapshotCustomMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
 
@@ -65,6 +75,7 @@ interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  customMetrics?: SnapshotCustomMetricInput[];
 }
 
 interface Props {
@@ -89,6 +100,7 @@ const defaultExpression = {
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
+  customMetric: undefined,
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
@@ -204,6 +216,9 @@ export const Expressions: React.FC<Props> = (props) => {
         {
           ...defaultExpression,
           metric: md.options.metric!.type,
+          customMetric: SnapshotCustomMetricInputRT.is(md.options.metric)
+            ? md.options.metric
+            : undefined,
         } as InventoryMetricConditions,
       ]);
     } else {
@@ -282,6 +297,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setAlertParams={updateParams}
               errors={errors[idx] || emptyError}
               expression={e || {}}
+              alertsContextMetadata={alertsContext.metadata}
             />
           );
         })}
@@ -389,6 +405,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
+  alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -402,14 +419,32 @@ const StyledExpression = euiStyled.div`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const { setAlertParams, expression, errors, expressionId, remove, canDelete } = props;
-  const { metric, comparator = Comparator.GT, threshold = [] } = expression;
+  const {
+    setAlertParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    canDelete,
+    alertsContextMetadata,
+  } = props;
+  const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
+  const { customMetrics } = alertsContextMetadata || {};
 
   const updateMetric = useCallback(
-    (m?: SnapshotMetricType) => {
-      setAlertParams(expressionId, { ...expression, metric: m });
+    (m?: SnapshotMetricType | string) => {
+      const newMetric = SnapshotMetricTypeRT.is(m) ? m : 'custom';
+      const newAlertParams = { ...expression, metric: newMetric };
+      if (newMetric === 'custom' && customMetrics) {
+        set(
+          newAlertParams,
+          'customMetric',
+          customMetrics.find((cm) => cm.id === m)
+        );
+      }
+      setAlertParams(expressionId, newAlertParams);
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setAlertParams, customMetrics]
   );
 
   const updateComparator = useCallback(
@@ -446,6 +481,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         break;
       case 'host':
         myMetrics = hostMetricTypes;
+
         break;
       case 'pod':
         myMetrics = podMetricTypes;
@@ -454,8 +490,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         myMetrics = containerMetricTypes;
         break;
     }
-    return myMetrics.map(toMetricOpt);
-  }, [props.nodeType]);
+    const baseMetricOpts = myMetrics.map(toMetricOpt);
+    const customMetricOpts = customMetrics
+      ? customMetrics.map((m, i) => ({
+          text: getCustomMetricLabel(m),
+          value: m.id,
+        }))
+      : [];
+    return [...baseMetricOpts, ...customMetricOpts];
+  }, [props.nodeType, customMetrics]);
+
+  const selectedMetricValue = metric === 'custom' && customMetric ? customMetric.id : metric!;
 
   return (
     <>
@@ -465,8 +510,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <StyledExpression>
               <MetricExpression
                 metric={{
-                  value: metric!,
-                  text: ofFields.find((v) => v?.value === metric)?.text || '',
+                  value: selectedMetricValue,
+                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
                 }}
                 metrics={
                   ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
@@ -568,4 +613,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
   rdsLatency: { label: 'ms' },
+  custom: { label: '' },
 };

@@ -5,6 +5,7 @@
  */
 
 import React, { useContext } from 'react';
+import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -18,10 +19,18 @@ interface Props {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
+  customMetrics: SnapshotCustomMetricInput[];
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertFlyout = (props: Props) => {
+export const AlertFlyout = ({
+  options,
+  nodeType,
+  filter,
+  customMetrics,
+  visible,
+  setVisible,
+}: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const { services } = useKibana();
 
@@ -30,7 +39,12 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: { options: props.options, nodeType: props.nodeType, filter: props.filter },
+            metadata: {
+              options,
+              nodeType,
+              filter,
+              customMetrics,
+            },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
             docLinks: services.docLinks,
@@ -40,8 +54,8 @@ export const AlertFlyout = (props: Props) => {
           }}
         >
           <AlertAdd
-            addFlyoutVisible={props.visible!}
-            setAddFlyoutVisibility={props.setVisible}
+            addFlyoutVisible={visible!}
+            setAddFlyoutVisibility={setVisible}
             alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
             canChangeTrigger={false}
             consumer={'infrastructure'}

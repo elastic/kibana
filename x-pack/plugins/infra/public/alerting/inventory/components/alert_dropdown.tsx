@@ -16,7 +16,7 @@ export const InventoryAlertDropdown = () => {
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
+  const { nodeType, metric, filterQuery, customMetrics } = inventoryPrefill;
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -52,6 +52,7 @@ export const InventoryAlertDropdown = () => {
         nodeType={nodeType}
         options={{ metric }}
         filter={filterQuery}
+        customMetrics={customMetrics}
       />
     </>
   );
