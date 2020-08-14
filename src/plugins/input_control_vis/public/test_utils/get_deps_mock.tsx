@@ -48,6 +48,7 @@ export const getDepsMock = ({
             indexPatterns: {
               get: () => ({
                 fields,
+                toSpec: () => ({ fields }),
               }),
             },
           },
