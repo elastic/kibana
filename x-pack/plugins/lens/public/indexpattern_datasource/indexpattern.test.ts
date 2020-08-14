@@ -24,7 +24,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
-        displayName: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -73,7 +73,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
-        displayName: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,

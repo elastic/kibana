@@ -40,7 +40,7 @@ const indexPatternA = ({
   fields: [
     {
       name: 'timestamp',
-      displayName: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,
@@ -92,7 +92,7 @@ const indexPatternB = ({
   fields: [
     {
       name: 'timestamp',
-      displayName: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,
@@ -244,7 +244,7 @@ describe('loader', () => {
             fields: [
               {
                 name: 'timestamp',
-                displayName: 'timestamp',
+                displayName: 'timestampLabel',
                 type: 'date',
                 aggregatable: true,
                 searchable: true,

@@ -60,7 +60,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -102,7 +102,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -158,7 +158,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,

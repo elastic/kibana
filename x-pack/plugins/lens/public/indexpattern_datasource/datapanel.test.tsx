@@ -87,7 +87,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -101,7 +101,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'memory',
-          displayName: 'memory',
+          displayName: 'amemory',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -137,7 +137,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -194,7 +194,7 @@ const initialState: IndexPatternPrivateState = {
       fields: [
         {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -593,18 +593,19 @@ describe('IndexPattern Data Panel', () => {
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
-      ).toEqual(['bytes', 'memory']);
+      ).toEqual(['memory', 'bytes']);
       wrapper
         .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
+      const emptyAccordion = wrapper.find('[data-test-subj="lnsIndexPatternEmptyFields"]');
       expect(
-        wrapper
-          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
-          .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').name)
+        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
+      expect(
+        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['client', 'source', 'timestampLabel']);
     });
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
@@ -627,8 +628,8 @@ describe('IndexPattern Data Panel', () => {
         wrapper
           .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').name)
-      ).toEqual(['bytes', 'client', 'memory', 'source', 'timestamp']);
+          .map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
     it('should display spinner for available fields accordion if existing fields are not loaded yet', async () => {
@@ -668,10 +669,9 @@ describe('IndexPattern Data Panel', () => {
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'bytes',
-        'memory',
-      ]);
+      expect(
+        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['amemory', 'bytes']);
     });
 
     it('should display no fields in groups when filtered by type Record', () => {
@@ -698,14 +698,9 @@ describe('IndexPattern Data Panel', () => {
         .find('button')
         .first()
         .simulate('click');
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'memory',
-        'client',
-        'source',
-        'timestamp',
-      ]);
+      expect(
+        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
     it('should filter down by type and by name', () => {

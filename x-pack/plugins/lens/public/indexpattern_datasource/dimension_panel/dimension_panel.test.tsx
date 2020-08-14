@@ -45,7 +45,7 @@ const expectedIndexPatterns = {
     fields: [
       {
         name: 'timestamp',
-        displayName: 'timestamp',
+        displayName: 'timestampLabel',
         type: 'date',
         aggregatable: true,
         searchable: true,
@@ -214,9 +214,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options).toHaveLength(2);
 
       expect(options![0].label).toEqual('Records');
-
       expect(options![1].options!.map(({ label }) => label)).toEqual([
-        'timestamp',
+        'timestampLabel',
         'bytes',
         'memory',
         'source',
@@ -243,7 +242,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .filter('[data-test-subj="indexPattern-dimension-field"]')
         .prop('options');
 
-      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestamp', 'source']);
+      expect(options![1].options!.map(({ label }) => label)).toEqual(['timestampLabel', 'source']);
     });
 
     it('should indicate fields which are incompatible for the operation of the current column', () => {
@@ -281,7 +280,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'memory')[0]['data-test-subj']
@@ -655,7 +654,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -773,7 +774,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
         expect(options![0]['data-test-subj']).toContain('Incompatible');
 
         expect(
-          options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+          options![1].options!.filter(({ label }) => label === 'timestampLabel')[0][
+            'data-test-subj'
+          ]
         ).toContain('Incompatible');
         expect(
           options![1].options!.filter(({ label }) => label === 'source')[0]['data-test-subj']
@@ -927,7 +930,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(options![0]['data-test-subj']).toContain('Incompatible');
 
       expect(
-        options![1].options!.filter(({ label }) => label === 'timestamp')[0]['data-test-subj']
+        options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
       ).toContain('Incompatible');
       expect(
         options![1].options!.filter(({ label }) => label === 'bytes')[0]['data-test-subj']

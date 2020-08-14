@@ -14,7 +14,7 @@ export const createMockedIndexPattern = (): IndexPattern => ({
   fields: [
     {
       name: 'timestamp',
-      displayName: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,
@@ -48,6 +48,13 @@ export const createMockedIndexPattern = (): IndexPattern => ({
       searchable: true,
     },
     {
+      name: 'unsupported',
+      displayName: 'unsupported',
+      type: 'geo',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
       name: 'dest',
       displayName: 'dest',
       type: 'string',
@@ -58,13 +65,13 @@ export const createMockedIndexPattern = (): IndexPattern => ({
 });
 
 export const createMockedRestrictedIndexPattern = () => ({
-  id: '2',
+  id: '1',
   title: 'my-fake-restricted-pattern',
   timeFieldName: 'timestamp',
   fields: [
     {
       name: 'timestamp',
-      displayName: 'timestamp',
+      displayName: 'timestampLabel',
       type: 'date',
       aggregatable: true,
       searchable: true,

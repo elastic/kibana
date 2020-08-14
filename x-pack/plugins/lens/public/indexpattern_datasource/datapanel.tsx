@@ -59,7 +59,7 @@ const FixedEuiContextMenuPanel = (EuiContextMenuPanel as unknown) as React.Funct
 >;
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
-  return fieldA.name.localeCompare(fieldB.name, undefined, { sensitivity: 'base' });
+  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
 }
 
 const supportedFieldTypes = new Set(['string', 'number', 'boolean', 'date', 'ip', 'document']);

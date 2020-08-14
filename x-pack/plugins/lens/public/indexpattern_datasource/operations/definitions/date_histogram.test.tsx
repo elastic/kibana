@@ -60,7 +60,7 @@ describe('date_histogram', () => {
           fields: [
             {
               name: 'timestamp',
-              displayName: 'timestamp',
+              displayName: 'timestampLabel',
               type: 'date',
               esTypes: ['date'],
               aggregatable: true,
@@ -172,7 +172,7 @@ describe('date_histogram', () => {
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,
@@ -208,7 +208,7 @@ describe('date_histogram', () => {
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
-          displayName: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           esTypes: ['date'],
           aggregatable: true,

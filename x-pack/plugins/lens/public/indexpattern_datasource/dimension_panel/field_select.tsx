@@ -105,7 +105,7 @@ export function FieldSelect({
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnFieldSelect__option--nonExistant': !exists,
           }),
-          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${label}`,
+          'data-test-subj': `lns-fieldOption${compatible ? '' : 'Incompatible'}-${value.field}`,
         }));
     }
 

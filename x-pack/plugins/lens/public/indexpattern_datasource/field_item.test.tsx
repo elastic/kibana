@@ -31,30 +31,35 @@ describe('IndexPattern Field Item', () => {
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytesLabel',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'unsupported',
+          displayName: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -78,7 +83,7 @@ describe('IndexPattern Field Item', () => {
       filters: [],
       field: {
         name: 'bytes',
-        displayName: 'bytes',
+        displayName: 'bytesLabel',
         type: 'number',
         aggregatable: true,
         searchable: true,
@@ -92,6 +97,13 @@ describe('IndexPattern Field Item', () => {
         convert: jest.fn((s: unknown) => JSON.stringify(s)),
       })),
     } as unknown) as DataPublicPluginStart['fieldFormats'];
+  });
+
+  it('should display displayName of a field', () => {
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
+    expect(wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').text()).toEqual(
+      'bytesLabel'
+    );
   });
 
   it('should request field stats without a time field, if the index pattern has none', async () => {
@@ -145,7 +157,7 @@ describe('IndexPattern Field Item', () => {
           timeFieldName: 'timestamp',
           field: {
             name: 'bytes',
-            displayName: 'bytes',
+            displayName: 'bytesLabel',
             type: 'number',
             aggregatable: true,
             searchable: true,
@@ -232,7 +244,7 @@ describe('IndexPattern Field Item', () => {
           timeFieldName: 'timestamp',
           field: {
             name: 'bytes',
-            displayName: 'bytes',
+            displayName: 'bytesLabel',
             type: 'number',
             aggregatable: true,
             searchable: true,

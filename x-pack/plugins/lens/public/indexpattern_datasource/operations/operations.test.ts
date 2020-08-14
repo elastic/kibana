@@ -49,7 +49,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -61,7 +61,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -73,7 +73,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -85,7 +85,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: '_source',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -99,7 +99,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -116,7 +116,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -136,7 +136,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
-          displayName: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
