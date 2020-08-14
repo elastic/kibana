@@ -104,22 +104,6 @@ module.exports = {
         ],
       },
       {
-        test: /\.less$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader', options: { importLoaders: 2 } },
-          {
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: require.resolve('@kbn/optimizer/postcss.config.js'),
-              },
-            },
-          },
-          { loader: 'less-loader' },
-        ],
-      },
-      {
         test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
         loader: 'file-loader',
       },

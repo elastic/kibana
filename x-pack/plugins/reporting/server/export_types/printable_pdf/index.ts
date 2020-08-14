@@ -12,17 +12,17 @@ import {
   LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE as jobType,
 } from '../../../common/constants';
-import { ESQueueCreateJobFn, ESQueueWorkerExecuteFn, ExportTypeDefinition } from '../../types';
-import { metadata } from './metadata';
+import { CreateJobFn, WorkerExecuteFn, ExportTypeDefinition } from '../../types';
 import { scheduleTaskFnFactory } from './create_job';
 import { runTaskFnFactory } from './execute_job';
+import { metadata } from './metadata';
 import { JobParamsPDF, ScheduledTaskParamsPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
   JobParamsPDF,
-  ESQueueCreateJobFn<JobParamsPDF>,
+  CreateJobFn<JobParamsPDF>,
   ScheduledTaskParamsPDF,
-  ESQueueWorkerExecuteFn<ScheduledTaskParamsPDF>
+  WorkerExecuteFn<ScheduledTaskParamsPDF>
 > => ({
   ...metadata,
   jobType,
