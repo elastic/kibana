@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { jobServiceProvider } from '../../models/job_service';
 import { SharedServicesChecks } from '../shared_services';
 
@@ -12,7 +12,7 @@ type OrigJobServiceProvider = ReturnType<typeof jobServiceProvider>;
 
 export interface JobServiceProvider {
   jobServiceProvider(
-    mlClusterClient: ILegacyScopedClusterClient,
+    client: IScopedClusterClient,
     request: KibanaRequest
   ): {
     jobsSummary: OrigJobServiceProvider['jobsSummary'];
@@ -24,9 +24,9 @@ export function getJobServiceProvider({
   getHasMlCapabilities,
 }: SharedServicesChecks): JobServiceProvider {
   return {
-    jobServiceProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
+    jobServiceProvider(client: IScopedClusterClient, request: KibanaRequest) {
       // const hasMlCapabilities = getHasMlCapabilities(request);
-      const { jobsSummary } = jobServiceProvider(mlClusterClient);
+      const { jobsSummary } = jobServiceProvider(client);
       return {
         async jobsSummary(...args) {
           isFullLicense();

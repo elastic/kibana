@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -36,11 +36,11 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 
 const getAnomalies = async (
   plugins: UptimeCorePlugins,
-  mlClusterClient: ILegacyScopedClusterClient,
+  clusterClient: IScopedClusterClient,
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(mlClusterClient, {
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(clusterClient, {
     params: 'DummyKibanaRequest',
   } as any);
 

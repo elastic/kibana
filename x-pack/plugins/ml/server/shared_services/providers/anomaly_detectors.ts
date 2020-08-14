@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient, KibanaRequest } from 'kibana/server';
+import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { SharedServicesChecks } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
-    mlClusterClient: ILegacyScopedClusterClient,
+    client: IScopedClusterClient,
     request: KibanaRequest
   ): {
     jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
@@ -22,16 +22,16 @@ export function getAnomalyDetectorsProvider({
   getHasMlCapabilities,
 }: SharedServicesChecks): AnomalyDetectorsProvider {
   return {
-    anomalyDetectorsProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
+    anomalyDetectorsProvider(client: IScopedClusterClient, request: KibanaRequest) {
       const hasMlCapabilities = getHasMlCapabilities(request);
       return {
         async jobs(jobId?: string) {
           isFullLicense();
           await hasMlCapabilities(['canGetJobs']);
-          return mlClusterClient.callAsInternalUser(
-            'ml.jobs',
-            jobId !== undefined ? { jobId } : {}
+          const { body } = await client.asInternalUser.ml.getJobs<{ count: number; jobs: Job[] }>(
+            jobId !== undefined ? { job_id: jobId } : undefined
           );
+          return body;
         },
       };
     },

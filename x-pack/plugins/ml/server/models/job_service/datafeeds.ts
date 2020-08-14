@@ -27,7 +27,7 @@ interface Results {
 }
 
 export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
-  async function forceStartDatafeeds(datafeedIds: string[], start?: string, end?: string) {
+  async function forceStartDatafeeds(datafeedIds: string[], start?: number, end?: number) {
     const jobIds = await getJobIdsByDatafeedId();
     const doStartsCalled = datafeedIds.reduce((acc, cur) => {
       acc[cur] = false;
@@ -97,8 +97,12 @@ export function datafeedsProvider({ asInternalUser }: IScopedClusterClient) {
     return opened;
   }
 
-  async function startDatafeed(datafeedId: string, start?: string, end?: string) {
-    return asInternalUser.ml.startDatafeed({ datafeed_id: datafeedId, start, end });
+  async function startDatafeed(datafeedId: string, start?: number, end?: number) {
+    return asInternalUser.ml.startDatafeed({
+      datafeed_id: datafeedId,
+      start: (start as unknown) as string,
+      end: (end as unknown) as string,
+    });
   }
 
   async function stopDatafeeds(datafeedIds: string[]) {

@@ -114,16 +114,17 @@ function getMlSetup(context: APMRequestHandlerContext, request: KibanaRequest) {
   if (!context.plugins.ml) {
     return;
   }
+
   const ml = context.plugins.ml;
-  const mlClient = ml.mlClient.asScoped(request);
+  const client = context.core.elasticsearch.client;
   return {
-    mlSystem: ml.mlSystemProvider(mlClient, request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(mlClient, request),
+    mlSystem: ml.mlSystemProvider(client, request),
+    anomalyDetectors: ml.anomalyDetectorsProvider(client, request),
     modules: ml.modulesProvider(
-      mlClient,
+      client,
       request,
       context.core.savedObjects.client
     ),
-    mlClient,
+    client,
   };
 }

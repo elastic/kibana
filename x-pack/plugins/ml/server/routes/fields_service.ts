@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -13,14 +13,14 @@ import {
 } from './schemas/fields_service_schema';
 import { fieldsServiceProvider } from '../models/fields_service';
 
-function getCardinalityOfFields(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const fs = fieldsServiceProvider(legacyClient);
+function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {
+  const fs = fieldsServiceProvider(client);
   const { index, fieldNames, query, timeFieldName, earliestMs, latestMs } = payload;
   return fs.getCardinalityOfFields(index, fieldNames, query, timeFieldName, earliestMs, latestMs);
 }
 
-function getTimeFieldRange(legacyClient: ILegacyScopedClusterClient, payload: any) {
-  const fs = fieldsServiceProvider(legacyClient);
+function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
+  const fs = fieldsServiceProvider(client);
   const { index, timeFieldName, query } = payload;
   return fs.getTimeFieldRange(index, timeFieldName, query);
 }
@@ -50,9 +50,9 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCardinalityOfFields(legacyClient, request.body);
+        const resp = await getCardinalityOfFields(client, request.body);
 
         return response.ok({
           body: resp,
@@ -85,9 +85,9 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getTimeFieldRange(legacyClient, request.body);
+        const resp = await getTimeFieldRange(client, request.body);
 
         return response.ok({
           body: resp,

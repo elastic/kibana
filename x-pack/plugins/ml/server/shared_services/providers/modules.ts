@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ILegacyScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { DataRecognizer } from '../../models/data_recognizer';
 import { SharedServicesChecks } from '../shared_services';
@@ -20,7 +16,7 @@ export type ModuleSetupPayload = TypeOf<typeof moduleIdParamSchema> &
 
 export interface ModulesProvider {
   modulesProvider(
-    mlClusterClient: ILegacyScopedClusterClient,
+    client: IScopedClusterClient,
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): {
@@ -37,7 +33,7 @@ export function getModulesProvider({
 }: SharedServicesChecks): ModulesProvider {
   return {
     modulesProvider(
-      mlClusterClient: ILegacyScopedClusterClient,
+      client: IScopedClusterClient,
       request: KibanaRequest,
       savedObjectsClient: SavedObjectsClientContract
     ) {
@@ -47,7 +43,7 @@ export function getModulesProvider({
       } else {
         hasMlCapabilities = getHasMlCapabilities(request);
       }
-      const dr = dataRecognizerFactory(mlClusterClient, savedObjectsClient, request);
+      const dr = dataRecognizerFactory(client, savedObjectsClient, request);
 
       return {
         async recognize(...args) {
@@ -93,9 +89,9 @@ export function getModulesProvider({
 }
 
 function dataRecognizerFactory(
-  mlClusterClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   savedObjectsClient: SavedObjectsClientContract,
   request: KibanaRequest
 ) {
-  return new DataRecognizer(mlClusterClient, savedObjectsClient, request);
+  return new DataRecognizer(client, savedObjectsClient, request);
 }
