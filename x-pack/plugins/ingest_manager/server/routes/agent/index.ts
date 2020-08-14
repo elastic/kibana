@@ -158,7 +158,7 @@ export const registerRoutes = (router: IRouter) => {
     getAgentEventsHandler
   );
 
-  // Get agent status for config
+  // Get agent status for policy
   router.get(
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,

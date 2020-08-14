@@ -250,7 +250,7 @@ export const mockFleetEventsObjectsResponse = (
             running ? 'RUNNING' : 'FAILED'
           }: `,
           payload: running ? mockPolicyPayload(policyStatus, policyMode) : undefined,
-          config_id: testAgentPolicyId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,
@@ -267,7 +267,7 @@ export const mockFleetEventsObjectsResponse = (
           subtype: 'STARTING',
           message:
             'Application: endpoint-security--8.0.0[d8f7f6e8-9375-483c-b456-b479f1d7a4f2]: State changed to STARTING: Starting',
-          config_id: testAgentPolicyId,
+          policy_id: testAgentPolicyId,
         },
         references: [],
         updated_at: updatedDate,

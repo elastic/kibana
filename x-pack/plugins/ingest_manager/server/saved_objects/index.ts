@@ -19,6 +19,7 @@ import {
 } from '../constants';
 import {
   migrateAgentToV7100,
+  migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
@@ -113,13 +114,16 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         subtype: { type: 'keyword' },
         agent_id: { type: 'keyword' },
         action_id: { type: 'keyword' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         stream_id: { type: 'keyword' },
         timestamp: { type: 'date' },
         message: { type: 'text' },
         payload: { type: 'text' },
         data: { type: 'text' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateAgentEventToV7100,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

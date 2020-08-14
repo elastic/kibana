@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/ingest_manager/agent_policies/{agentConfigId}/copy', () => {
+    describe('POST /api/ingest_manager/agent_policies/{agentPolicyId}/copy', () => {
       before(async () => {
         await esArchiver.loadIfNeeded('fleet/agents');
       });
@@ -46,40 +46,40 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.unload('fleet/agents');
       });
 
-      const TEST_CONFIG_ID = 'config1';
+      const TEST_POLICY_ID = 'policy1';
 
       it('should work with valid values', async () => {
         const {
           body: { success, item },
         } = await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_CONFIG_ID}/copy`)
+          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Copied config',
+            name: 'Copied policy',
             description: 'Test',
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newConfig } = item;
+        const { id, updated_at, ...newPolicy } = item;
 
         expect(success).to.be(true);
-        expect(newConfig).to.eql({
-          name: 'Copied config',
+        expect(newPolicy).to.eql({
+          name: 'Copied policy',
           description: 'Test',
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
           updated_by: 'elastic',
-          package_configs: [],
+          package_policies: [],
         });
       });
 
-      it('should return a 500 with invalid source config', async () => {
+      it('should return a 500 with invalid source policy', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/INVALID_CONFIG_ID/copy`)
+          .post(`/api/ingest_manager/agent_policies/INVALID_POLICY_ID/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Copied config',
+            name: 'Copied policy',
             description: '',
           })
           .expect(500);
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with invalid payload', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_CONFIG_ID}/copy`)
+          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({})
           .expect(400);
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return a 400 with invalid name', async () => {
         await supertest
-          .post(`/api/ingest_manager/agent_policies/${TEST_CONFIG_ID}/copy`)
+          .post(`/api/ingest_manager/agent_policies/${TEST_POLICY_ID}/copy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: '',

@@ -14,9 +14,9 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
-  INGEST_API_AGENT_CONFIGS,
+  INGEST_API_AGENT_POLICIES,
   INGEST_API_EPM_PACKAGES,
-  INGEST_API_PACKAGE_CONFIGS,
+  INGEST_API_PACKAGE_POLICIES,
 } from '../../policy/store/policy_list/services/ingest';
 import {
   GetAgentPoliciesResponse,
@@ -106,7 +106,7 @@ const endpointListApiPathHandlerMocks = ({
 
     // Do policies referenced in endpoint list exist
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
-    [INGEST_API_AGENT_CONFIGS]: (): GetAgentPoliciesResponse => {
+    [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
       const agentPolicy = generator.generateAgentPolicy();
       (agentPolicy.package_policies as string[]).push(
         ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
@@ -126,7 +126,7 @@ const endpointListApiPathHandlerMocks = ({
     },
 
     // List of Policies (package policies) for onboarding
-    [INGEST_API_PACKAGE_CONFIGS]: (): GetPolicyListResponse => {
+    [INGEST_API_PACKAGE_POLICIES]: (): GetPolicyListResponse => {
       return {
         items: endpointPackagePolicies,
         page: 1,

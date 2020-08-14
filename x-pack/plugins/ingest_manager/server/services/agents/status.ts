@@ -58,7 +58,7 @@ export async function getAgentStatusForAgentPolicy(
 async function getEventsCount(soClient: SavedObjectsClientContract, agentPolicyId?: string) {
   const { total } = await soClient.find({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    searchFields: ['config_id'],
+    searchFields: ['policy_id'],
     search: agentPolicyId,
     perPage: 0,
     page: 1,

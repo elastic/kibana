@@ -288,7 +288,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
 const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
   agentPolicy,
 }) => {
-  useBreadcrumbs('policy_details', { configName: agentPolicy.name });
+  useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Switch>
       <Route

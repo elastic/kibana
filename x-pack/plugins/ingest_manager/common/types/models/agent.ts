@@ -64,7 +64,7 @@ export interface NewAgentEvent {
   payload?: any;
   agent_id: string;
   action_id?: string;
-  config_id?: string;
+  policy_id?: string;
   stream_id?: string;
 }
 

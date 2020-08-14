@@ -110,7 +110,7 @@ function shouldCreateAgentPolicyAction(agent: Agent, agentPolicy: FullAgentPolic
   return true;
 }
 
-async function createAgentActionFromConfig(
+async function createAgentActionFromAgentPolicy(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   policy: FullAgentPolicy | null
@@ -166,7 +166,7 @@ export function agentCheckinStateNewActionsFactory() {
       timeout(appContextService.getConfig()?.fleet.pollingRequestTimeout || 0),
       filter((agentPolicy) => shouldCreateAgentPolicyAction(agent, agentPolicy)),
       rateLimiter(),
-      mergeMap((agentPolicy) => createAgentActionFromConfig(soClient, agent, agentPolicy)),
+      mergeMap((agentPolicy) => createAgentActionFromAgentPolicy(soClient, agent, agentPolicy)),
       merge(newActions$),
       mergeMap(async (data) => {
         if (!data) {

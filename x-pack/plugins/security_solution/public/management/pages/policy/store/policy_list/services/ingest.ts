@@ -19,12 +19,12 @@ import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
 const INGEST_API_ROOT = `/api/ingest_manager`;
-export const INGEST_API_PACKAGE_CONFIGS = `${INGEST_API_ROOT}/package_policies`;
-export const INGEST_API_AGENT_CONFIGS = `${INGEST_API_ROOT}/agent_policies`;
+export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
+export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
 const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-const INGEST_API_DELETE_PACKAGE_CONFIG = `${INGEST_API_PACKAGE_CONFIGS}/delete`;
+const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 
 /**
  * Retrieves a list of endpoint specific package policies (those created with a `package.name` of
@@ -36,7 +36,7 @@ export const sendGetEndpointSpecificPackagePolicies = (
   http: HttpStart,
   options: HttpFetchOptions & Partial<GetPackagePoliciesRequest> = {}
 ): Promise<GetPolicyListResponse> => {
-  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_CONFIGS, {
+  return http.get<GetPolicyListResponse>(INGEST_API_PACKAGE_POLICIES, {
     ...options,
     query: {
       ...options.query,
@@ -58,7 +58,7 @@ export const sendGetPackagePolicy = (
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_CONFIGS}/${packagePolicyId}`, options);
+  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, options);
 };
 
 /**
@@ -72,7 +72,7 @@ export const sendDeletePackagePolicy = (
   body: DeletePackagePoliciesRequest,
   options?: HttpFetchOptions
 ) => {
-  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_CONFIG, {
+  return http.post<DeletePackagePoliciesResponse>(INGEST_API_DELETE_PACKAGE_POLICY, {
     ...options,
     body: JSON.stringify(body.body),
   });
@@ -87,7 +87,7 @@ export const sendGetAgentPolicyList = (
   http: HttpStart,
   options: HttpFetchOptions & GetAgentPoliciesRequest
 ) => {
-  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_CONFIGS, options);
+  return http.get<GetAgentPoliciesResponse>(INGEST_API_AGENT_POLICIES, options);
 };
 
 /**
@@ -104,7 +104,7 @@ export const sendPutPackagePolicy = (
   packagePolicy: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
 ): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_PACKAGE_CONFIGS}/${packagePolicyId}`, {
+  return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
     ...options,
     body: JSON.stringify(packagePolicy),
   });
@@ -114,12 +114,12 @@ export const sendPutPackagePolicy = (
  * Get a status summary for all Agents that are currently assigned to a given agent policy
  *
  * @param http
- * @param configId
+ * @param policyId
  * @param options
  */
 export const sendGetFleetAgentStatusForPolicy = (
   http: HttpStart,
-  /** the Agent (fleet) configuration id */
+  /** the Agent (fleet) policy id */
   policyId: string,
   options: Exclude<HttpFetchOptions, 'query'> = {}
 ): Promise<GetAgentStatusResponse> => {

@@ -6,24 +6,38 @@
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { Agent, AgentPolicy, PackagePolicy, EnrollmentAPIKey } from '../../types';
+import { Agent, AgentEvent, AgentPolicy, PackagePolicy, EnrollmentAPIKey } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
   Exclude<Agent, 'policy_id' | 'policy_revision'> & {
-    config_id?: string;
+    policy_id?: string;
     policy_revision?: number | null;
   },
   Agent
 > = (agentDoc) => {
   const updatedAgentDoc = cloneDeep(agentDoc);
 
-  updatedAgentDoc.attributes.policy_id = agentDoc.attributes.config_id;
-  delete updatedAgentDoc.attributes.config_id;
+  updatedAgentDoc.attributes.policy_id = agentDoc.attributes.policy_id;
+  delete updatedAgentDoc.attributes.policy_id;
 
   updatedAgentDoc.attributes.policy_revision = agentDoc.attributes.policy_revision;
   delete updatedAgentDoc.attributes.policy_revision;
 
   return updatedAgentDoc;
+};
+
+export const migrateAgentEventToV7100: SavedObjectMigrationFn<
+  Exclude<AgentEvent, 'policy_id'> & {
+    policy_id?: string;
+  },
+  AgentEvent
+> = (agentEventDoc) => {
+  const updatedAgentEventDoc = cloneDeep(agentEventDoc);
+
+  updatedAgentEventDoc.attributes.policy_id = agentEventDoc.attributes.policy_id;
+  delete updatedAgentEventDoc.attributes.policy_id;
+
+  return updatedAgentEventDoc;
 };
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
@@ -42,28 +56,28 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
 
 export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
   Exclude<EnrollmentAPIKey, 'policy_id'> & {
-    config_id?: string;
+    policy_id?: string;
   },
   EnrollmentAPIKey
 > = (enrollmentApiKeyDoc) => {
   const updatedEnrollmentApiKeyDoc = cloneDeep(enrollmentApiKeyDoc);
 
-  updatedEnrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.config_id;
-  delete updatedEnrollmentApiKeyDoc.attributes.config_id;
+  updatedEnrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.policy_id;
+  delete updatedEnrollmentApiKeyDoc.attributes.policy_id;
 
   return updatedEnrollmentApiKeyDoc;
 };
 
 export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
   Exclude<PackagePolicy, 'policy_id'> & {
-    config_id: string;
+    policy_id: string;
   },
   PackagePolicy
 > = (packagePolicyDoc) => {
   const updatedPackagePolicyDoc = cloneDeep(packagePolicyDoc);
 
-  updatedPackagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.config_id;
-  delete updatedPackagePolicyDoc.attributes.config_id;
+  updatedPackagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.policy_id;
+  delete updatedPackagePolicyDoc.attributes.policy_id;
 
   return updatedPackagePolicyDoc;
 };
