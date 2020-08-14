@@ -25,19 +25,16 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { StatsBar, ModelsBarStats } from '../../../../../components/stats_bar';
-import {
-  ModelConfigResponse,
-  ModelStats,
-  useInferenceApiService,
-} from '../../../../../services/ml_api_service/inference';
+import { useInferenceApiService } from '../../../../../services/ml_api_service/inference';
 import { ModelsTableToConfigMapping } from './index';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { DeleteModelsModal } from './delete_models_modal';
 import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
 import { getResultsUrl } from '../analytics_list/common';
+import { ModelConfigResponse, TrainedModelStat } from '../../../../../../../common/types/inference';
 
-type Stats = Omit<ModelStats, 'model_id'>;
+type Stats = Omit<TrainedModelStat, 'model_id'>;
 
 export type ModelItem = ModelConfigResponse & {
   type?: string;

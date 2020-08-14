@@ -5,18 +5,21 @@
  */
 
 import { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { filter, distinctUntilChanged } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
+import {
+  AnalysisConfig,
+  ClassificationAnalysis,
+  OutlierAnalysis,
+  RegressionAnalysis,
+} from '../../../../common/types/data_frame_analytics';
 
-export type IndexName = string;
 export type IndexPattern = string;
-export type DataFrameAnalyticsId = string;
 
 export enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
@@ -44,34 +47,6 @@ export enum OUTLIER_ANALYSIS_METHOD {
   LDOF = 'ldof',
   DISTANCE_KTH_NN = 'distance_kth_nn',
   DISTANCE_KNN = 'distance_knn',
-}
-
-interface OutlierAnalysis {
-  [key: string]: {};
-  outlier_detection: {};
-}
-
-interface Regression {
-  dependent_variable: string;
-  training_percent?: number;
-  num_top_feature_importance_values?: number;
-  prediction_field_name?: string;
-}
-export interface RegressionAnalysis {
-  [key: string]: Regression;
-  regression: Regression;
-}
-
-interface Classification {
-  dependent_variable: string;
-  training_percent?: number;
-  num_top_classes?: string;
-  num_top_feature_importance_values?: number;
-  prediction_field_name?: string;
-}
-export interface ClassificationAnalysis {
-  [key: string]: Classification;
-  classification: Classification;
 }
 
 export interface LoadExploreDataArg {
@@ -165,21 +140,11 @@ export interface ClassificationEvaluateResponse {
   };
 }
 
-interface GenericAnalysis {
-  [key: string]: Record<string, any>;
-}
-
 interface LoadEvaluateResult {
   success: boolean;
   eval: RegressionEvaluateResponse | ClassificationEvaluateResponse | null;
   error: string | null;
 }
-
-type AnalysisConfig =
-  | OutlierAnalysis
-  | RegressionAnalysis
-  | ClassificationAnalysis
-  | GenericAnalysis;
 
 export const getAnalysisType = (analysis: AnalysisConfig): string => {
   const keys = Object.keys(analysis);
@@ -340,29 +305,6 @@ export interface UpdateDataFrameAnalyticsConfig {
   description?: string;
   model_memory_limit?: string;
   max_num_threads?: number;
-}
-
-export interface DataFrameAnalyticsConfig {
-  id: DataFrameAnalyticsId;
-  description?: string;
-  dest: {
-    index: IndexName;
-    results_field: string;
-  };
-  source: {
-    index: IndexName | IndexName[];
-    query?: any;
-  };
-  analysis: AnalysisConfig;
-  analyzed_fields: {
-    includes: string[];
-    excludes: string[];
-  };
-  model_memory_limit: string;
-  max_num_threads?: number;
-  create_time: number;
-  version: string;
-  allow_lazy_start?: boolean;
 }
 
 export enum REFRESH_ANALYTICS_LIST_STATE {

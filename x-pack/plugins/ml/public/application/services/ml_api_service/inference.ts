@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { useMlKibana } from '../../contexts/kibana';
-import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/analytics';
+import { ModelConfigResponse, TrainedModelStat } from '../../../../common/types/inference';
 
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
@@ -24,27 +24,8 @@ export interface InferenceStatsQueryParams {
 }
 
 export interface InferenceConfigResponse {
-  trained_model_configs: Array<{
-    created_by: string;
-    create_time: string;
-    default_field_map: Record<string, string>;
-    estimated_heap_memory_usage_bytes: number;
-    estimated_operations: number;
-    license_level: string;
-    metadata?:
-      | {
-          analytics_config: DataFrameAnalyticsConfig;
-          input: any;
-        }
-      | Record<string, any>;
-    model_id: string;
-    tags: string;
-    version: string;
-    inference_config: any;
-  }>;
+  trained_model_configs: ModelConfigResponse[];
 }
-
-export type ModelConfigResponse = InferenceConfigResponse['trained_model_configs'][number];
 
 export interface IngestStats {
   count: number;
@@ -55,38 +36,8 @@ export interface IngestStats {
 
 export interface InferenceStatsResponse {
   count: number;
-  trained_model_stats: Array<{
-    model_id: string;
-    pipeline_count: number;
-    inference_stats: {
-      failure_count: number;
-      inference_count: number;
-      cache_miss_count: number;
-      missing_all_fields_count: number;
-      timestamp: number;
-    };
-    ingest: {
-      total: IngestStats;
-      pipelines: Record<
-        string,
-        IngestStats & {
-          processors: Array<
-            Record<
-              string,
-              {
-                // TODO use type from ingest_pipelines
-                type: string;
-                stats: IngestStats;
-              }
-            >
-          >;
-        }
-      >;
-    };
-  }>;
+  trained_model_stats: TrainedModelStat[];
 }
-
-export type ModelStats = InferenceStatsResponse['trained_model_stats'][number];
 
 /**
  * Service with APIs calls to perform inference operations.
