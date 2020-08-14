@@ -154,7 +154,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
           },
         ]
       : []),
-
     {
       id: 'stats',
       name: (
@@ -167,29 +166,51 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         <>
           <EuiSpacer size={'m'} />
           <EuiFlexGrid columns={2}>
-            <EuiFlexItem>
-              <EuiPanel>
-                <EuiTitle size={'xs'}>
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
-                      defaultMessage="Inference Stats"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size={'m'} />
-                <EuiDescriptionList
-                  compressed={true}
-                  type="column"
-                  listItems={formatToListItems(stats.inference_stats)}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
+            {stats.inference_stats && (
+              <EuiFlexItem>
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.inference.modelsList.expandedRow.inferenceStatsTitle"
+                        defaultMessage="Inference Stats"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    compressed={true}
+                    type="column"
+                    listItems={formatToListItems(stats.inference_stats)}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
+            {stats.ingest?.total && (
+              <EuiFlexItem>
+                <EuiPanel>
+                  <EuiTitle size={'xs'}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.ml.inference.modelsList.expandedRow.ingestStatsTitle"
+                        defaultMessage="Ingest Stats"
+                      />
+                    </h5>
+                  </EuiTitle>
+                  <EuiSpacer size={'m'} />
+                  <EuiDescriptionList
+                    compressed={true}
+                    type="column"
+                    listItems={formatToListItems(stats.ingest.total)}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            )}
           </EuiFlexGrid>
         </>
       ),
     },
-    ...(stats.pipeline_count > 0
+    ...(stats.ingest?.pipelines
       ? [
           {
             id: 'pipelines',
@@ -205,17 +226,54 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
             content: (
               <>
                 <EuiSpacer size={'m'} />
-                <EuiPanel>
-                  <EuiTitle size={'xs'}>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.pipelinesTitle"
-                        defaultMessage="Pipelines"
-                      />
-                    </h5>
-                  </EuiTitle>
-                  <EuiSpacer size={'m'} />
-                </EuiPanel>
+                <EuiFlexGrid columns={2}>
+                  {Object.entries(stats.ingest?.pipelines).map(
+                    ([pipelineName, { processors, ...pipelineStats }]) => {
+                      return (
+                        <EuiFlexItem key={pipelineName}>
+                          <EuiPanel>
+                            <EuiTitle size={'xs'}>
+                              <h5>{pipelineName}</h5>
+                            </EuiTitle>
+                            <EuiSpacer size={'m'} />
+                            <EuiDescriptionList
+                              compressed={true}
+                              type="column"
+                              listItems={formatToListItems(pipelineStats)}
+                            />
+                            <EuiSpacer size={'m'} />
+                            <EuiTitle size={'xxs'}>
+                              <h6>
+                                <FormattedMessage
+                                  id="xpack.ml.inference.modelsList.expandedRow.processorsTitle"
+                                  defaultMessage="Processors"
+                                />
+                              </h6>
+                            </EuiTitle>
+                            <EuiFlexGrid columns={2}>
+                              {processors.map((processor) => {
+                                const name = Object.keys(processor)[0];
+                                const { stats: processorStats } = processor[name];
+                                return (
+                                  <EuiFlexItem key={name}>
+                                    <EuiTitle size={'xxs'}>
+                                      <h6>{name}</h6>
+                                    </EuiTitle>
+                                    <EuiDescriptionList
+                                      compressed={true}
+                                      type="column"
+                                      listItems={formatToListItems(processorStats)}
+                                    />
+                                  </EuiFlexItem>
+                                );
+                              })}
+                            </EuiFlexGrid>
+                          </EuiPanel>
+                        </EuiFlexItem>
+                      );
+                    }
+                  )}
+                </EuiFlexGrid>
               </>
             ),
           },

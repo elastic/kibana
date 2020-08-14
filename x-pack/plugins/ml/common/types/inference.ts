@@ -16,14 +16,14 @@ export interface IngestStats {
 export interface TrainedModelStat {
   model_id: string;
   pipeline_count: number;
-  inference_stats: {
+  inference_stats?: {
     failure_count: number;
     inference_count: number;
     cache_miss_count: number;
     missing_all_fields_count: number;
     timestamp: number;
   };
-  ingest: {
+  ingest?: {
     total: IngestStats;
     pipelines: Record<
       string,
