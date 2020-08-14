@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.navigateToPolicyDetails('invalid-id');
         await testSubjects.existOrFail('policyDetailsIdNotFoundMessage');
         expect(await testSubjects.getVisibleText('policyDetailsIdNotFoundMessage')).to.equal(
-          'Saved object [ingest-package-configs/invalid-id] not found'
+          'Saved object [ingest-package-policies/invalid-id] not found'
         );
       });
     });
@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           inputs: [
             {
               id: policyInfo.packageConfig.id,
-              dataset: { namespace: 'default' },
+              data_stream: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
                 package: {

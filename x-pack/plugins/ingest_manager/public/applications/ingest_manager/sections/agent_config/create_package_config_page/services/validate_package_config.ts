@@ -134,7 +134,7 @@ export const validatePackageConfig = (
         if (stream.vars) {
           const streamVarsByName = (
             (
-              registryStreamsByDataset[stream.dataset.name].find(
+              registryStreamsByDataset[stream.data_stream.dataset].find(
                 (registryStream) => registryStream.input === input.type
               ) || {}
             ).vars || []

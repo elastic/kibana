@@ -98,12 +98,8 @@ describe('CoordinateMapsVisualizationTest', function () {
         emsLandingPageUrl: '',
       };
       const tilemapsConfig = {
-        deprecated: {
-          config: {
-            options: {
-              attribution: '123',
-            },
-          },
+        options: {
+          attribution: '123',
         },
       };
 

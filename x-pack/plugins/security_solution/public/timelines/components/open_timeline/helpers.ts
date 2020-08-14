@@ -367,6 +367,7 @@ export const queryTimelineById = <TCache>({
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
   id,
+  forceNotes = false,
   from,
   notes,
   timeline,
@@ -411,7 +412,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
   }
 
-  if (!duplicate) {
+  if (!duplicate || forceNotes) {
     dispatch(
       dispatchAddNotes({
         notes:

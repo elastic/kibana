@@ -34,7 +34,6 @@ interface EntryItemProps {
   indexPattern: IIndexPattern;
   showLabel: boolean;
   listType: ExceptionListType;
-  addNested: boolean;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
 }
@@ -43,7 +42,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   entry,
   indexPattern,
   listType,
-  addNested,
   showLabel,
   onChange,
   onlyShowListOperators = false,
@@ -51,7 +49,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const handleFieldChange = useCallback(
     ([newField]: IFieldType[]): void => {
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
-
       onChange(updatedEntry, index);
     },
     [onChange, entry]

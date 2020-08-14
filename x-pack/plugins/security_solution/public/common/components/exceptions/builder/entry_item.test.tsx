@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { BuilderEntryItem } from './builder_entry_item';
+import { BuilderEntryItem } from './entry_item';
 import {
   isOperator,
   isNotOperator,
@@ -64,7 +64,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={true}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -91,7 +90,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -122,7 +120,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -155,7 +152,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -188,7 +184,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -221,7 +216,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={true}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -254,7 +248,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={true}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -287,7 +280,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -323,7 +315,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -377,7 +368,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={jest.fn()}
       />
     );
@@ -416,7 +406,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -451,7 +440,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -486,7 +474,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -521,7 +508,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={mockOnChange}
       />
     );
@@ -556,7 +542,6 @@ describe('BuilderEntryItem', () => {
         }}
         showLabel={false}
         listType="detection"
-        addNested={false}
         onChange={mockOnChange}
       />
     );

@@ -15,11 +15,11 @@ import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/s
 import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
-import { ExceptionListItemComponent } from './builder_exception_item';
+import { BuilderExceptionListItemComponent } from './exception_item';
 
 jest.mock('../../../../common/lib/kibana');
 
-describe('ExceptionListItemComponent', () => {
+describe('BuilderExceptionListItemComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
 
   beforeAll(() => {
@@ -46,7 +46,7 @@ describe('ExceptionListItemComponent', () => {
       };
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <ExceptionListItemComponent
+          <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
             exceptionItemIndex={0}
@@ -58,7 +58,6 @@ describe('ExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -71,11 +70,11 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders "and" badge when more than one exception item entry exists and it is not the first exception item', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <ExceptionListItemComponent
+          <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
             exceptionItemIndex={1}
@@ -87,7 +86,6 @@ describe('ExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -98,11 +96,11 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders indented "and" badge when "andLogicIncluded" is "true" and only one entry exists', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <ExceptionListItemComponent
+          <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
             exceptionItemIndex={1}
@@ -114,7 +112,6 @@ describe('ExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -127,11 +124,11 @@ describe('ExceptionListItemComponent', () => {
     });
 
     test('it renders no "and" badge when "andLogicIncluded" is "false"', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-          <ExceptionListItemComponent
+          <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
             exceptionItemIndex={1}
@@ -143,7 +140,6 @@ describe('ExceptionListItemComponent', () => {
             andLogicIncluded={false}
             isOnlyItem={false}
             listType="detection"
-            addNested={false}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -167,7 +163,7 @@ describe('ExceptionListItemComponent', () => {
         entries: [{ ...getEntryMatchMock(), field: '' }],
       };
       const wrapper = mount(
-        <ExceptionListItemComponent
+        <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
           exceptionId={'123'}
           exceptionItemIndex={0}
@@ -179,23 +175,22 @@ describe('ExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
       );
 
       expect(
-        wrapper.find('[data-test-subj="exceptionItemEntryDeleteButton"] button').props().disabled
+        wrapper.find('[data-test-subj="builderItemEntryDeleteButton"] button').props().disabled
       ).toBeTruthy();
     });
 
     test('it does not render delete button disabled when it is not the only entry left in builder', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
 
       const wrapper = mount(
-        <ExceptionListItemComponent
+        <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
           exceptionId={'123'}
           exceptionItemIndex={0}
@@ -207,22 +202,21 @@ describe('ExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={false}
           listType="detection"
-          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
       );
 
       expect(
-        wrapper.find('[data-test-subj="exceptionItemEntryDeleteButton"] button').props().disabled
+        wrapper.find('[data-test-subj="builderItemEntryDeleteButton"] button').props().disabled
       ).toBeFalsy();
     });
 
     test('it does not render delete button disabled when "exceptionItemIndex" is not "0"', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <ExceptionListItemComponent
+        <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
           exceptionId={'123'}
           exceptionItemIndex={1}
@@ -236,22 +230,21 @@ describe('ExceptionListItemComponent', () => {
           // this to be true, but done for testing purposes
           isOnlyItem={true}
           listType="detection"
-          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
       );
 
       expect(
-        wrapper.find('[data-test-subj="exceptionItemEntryDeleteButton"] button').props().disabled
+        wrapper.find('[data-test-subj="builderItemEntryDeleteButton"] button').props().disabled
       ).toBeFalsy();
     });
 
     test('it does not render delete button disabled when more than one entry exists', () => {
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
-        <ExceptionListItemComponent
+        <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
           exceptionId={'123'}
           exceptionItemIndex={0}
@@ -263,24 +256,23 @@ describe('ExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          addNested={false}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
       );
 
       expect(
-        wrapper.find('[data-test-subj="exceptionItemEntryDeleteButton"] button').at(0).props()
+        wrapper.find('[data-test-subj="builderItemEntryDeleteButton"] button').at(0).props()
           .disabled
       ).toBeFalsy();
     });
 
     test('it invokes "onChangeExceptionItem" when delete button clicked', () => {
       const mockOnDeleteExceptionItem = jest.fn();
-      const exceptionItem = { ...getExceptionListItemSchemaMock() };
+      const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchAnyMock()];
       const wrapper = mount(
-        <ExceptionListItemComponent
+        <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
           exceptionId={'123'}
           exceptionItemIndex={0}
@@ -292,14 +284,13 @@ describe('ExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          addNested={false}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           onChangeExceptionItem={jest.fn()}
         />
       );
 
       wrapper
-        .find('[data-test-subj="exceptionItemEntryDeleteButton"] button')
+        .find('[data-test-subj="builderItemEntryDeleteButton"] button')
         .at(0)
         .simulate('click');
 

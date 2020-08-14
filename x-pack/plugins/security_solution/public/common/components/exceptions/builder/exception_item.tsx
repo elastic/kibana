@@ -5,23 +5,16 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { AndOrBadge } from '../../and_or_badge';
-import { BuilderEntryItem } from './builder_entry_item';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
 import { ExceptionListType } from '../../../../../public/lists_plugin_deps';
-
-const MyInvisibleAndBadge = styled(EuiFlexItem)`
-  visibility: hidden;
-`;
-
-const MyFirstRowContainer = styled(EuiFlexItem)`
-  padding-top: 20px;
-`;
+import { BuilderEntryItem } from './entry_item';
+import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
+import { BuilderAndBadgeComponent } from './and_badge';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -33,7 +26,7 @@ const MyBeautifulLine = styled(EuiFlexItem)`
   }
 `;
 
-interface ExceptionListItemProps {
+interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionId: string;
   exceptionItemIndex: number;
@@ -41,13 +34,12 @@ interface ExceptionListItemProps {
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
-  addNested: boolean;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onlyShowListOperators?: boolean;
 }
 
-export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
+export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
   ({
     exceptionItem,
     exceptionId,
@@ -55,7 +47,6 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
     indexPattern,
     isOnlyItem,
     listType,
-    addNested,
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
@@ -81,8 +72,8 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
       (entryIndex: number, parentIndex: number | null): void => {
         const updatedExceptionItem = getUpdatedEntriesOnDelete(
           exceptionItem,
-          parentIndex ? parentIndex : entryIndex,
-          parentIndex ? entryIndex : null
+          entryIndex,
+          parentIndex
         );
 
         onDeleteExceptionItem(updatedExceptionItem, exceptionItemIndex);
@@ -98,63 +89,15 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
       [exceptionItem.entries, indexPattern]
     );
 
-    const getAndBadge = useCallback((): JSX.Element => {
-      const badge = <AndOrBadge includeAntennas type="and" />;
-
-      if (andLogicIncluded && exceptionItem.entries.length > 1 && exceptionItemIndex === 0) {
-        return (
-          <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
-            {badge}
-          </MyFirstRowContainer>
-        );
-      } else if (andLogicIncluded && exceptionItem.entries.length <= 1) {
-        return (
-          <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
-            {badge}
-          </MyInvisibleAndBadge>
-        );
-      } else if (andLogicIncluded && exceptionItem.entries.length > 1) {
-        return (
-          <EuiFlexItem grow={false} data-test-subj="exceptionItemEntryAndBadge">
-            {badge}
-          </EuiFlexItem>
-        );
-      } else {
-        return <></>;
-      }
-    }, [exceptionItem.entries.length, exceptionItemIndex, andLogicIncluded]);
-
-    const getDeleteButton = useCallback(
-      (entryIndex: number, parentIndex: number | null): JSX.Element => {
-        const button = (
-          <EuiButtonIcon
-            color="danger"
-            iconType="trash"
-            onClick={() => handleDeleteEntry(entryIndex, parentIndex)}
-            isDisabled={
-              isOnlyItem &&
-              exceptionItem.entries.length === 1 &&
-              exceptionItemIndex === 0 &&
-              (exceptionItem.entries[0].field == null || exceptionItem.entries[0].field === '')
-            }
-            aria-label="entryDeleteButton"
-            className="exceptionItemEntryDeleteButton"
-            data-test-subj="exceptionItemEntryDeleteButton"
-          />
-        );
-        if (entryIndex === 0 && exceptionItemIndex === 0 && parentIndex == null) {
-          return <MyFirstRowContainer grow={false}>{button}</MyFirstRowContainer>;
-        } else {
-          return <EuiFlexItem grow={false}>{button}</EuiFlexItem>;
-        }
-      },
-      [exceptionItemIndex, exceptionItem.entries, handleDeleteEntry, isOnlyItem]
-    );
-
     return (
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
-          {getAndBadge()}
+          {andLogicIncluded && (
+            <BuilderAndBadgeComponent
+              entriesLength={exceptionItem.entries.length}
+              exceptionItemIndex={exceptionItemIndex}
+            />
+          )}
           <EuiFlexItem grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => (
@@ -166,7 +109,6 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
                         entry={item}
                         indexPattern={indexPattern}
                         listType={listType}
-                        addNested={addNested}
                         showLabel={
                           exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                         }
@@ -174,10 +116,14 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
                         onlyShowListOperators={onlyShowListOperators}
                       />
                     </EuiFlexItem>
-                    {getDeleteButton(
-                      item.entryIndex,
-                      item.parent != null ? item.parent.parentIndex : null
-                    )}
+                    <BuilderEntryDeleteButtonComponent
+                      entries={exceptionItem.entries}
+                      isOnlyItem={isOnlyItem}
+                      entryIndex={item.entryIndex}
+                      exceptionItemIndex={exceptionItemIndex}
+                      nestedParentIndex={item.parent != null ? item.parent.parentIndex : null}
+                      onDelete={handleDeleteEntry}
+                    />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               ))}
@@ -189,4 +135,4 @@ export const ExceptionListItemComponent = React.memo<ExceptionListItemProps>(
   }
 );
 
-ExceptionListItemComponent.displayName = 'ExceptionListItem';
+BuilderExceptionListItemComponent.displayName = 'BuilderExceptionListItem';

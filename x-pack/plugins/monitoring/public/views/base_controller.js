@@ -11,7 +11,8 @@ import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from '../components';
 import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
-import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
+import { SetupModeFeature } from '../../common/enums';
+import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -150,11 +151,10 @@ export class MonitoringViewBaseController {
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
       const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
-      const setupMode = getSetupModeState();
       if (alerts.shouldFetch) {
         promises.push(fetchAlerts());
       }
-      if (setupMode.enabled) {
+      if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
       this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
