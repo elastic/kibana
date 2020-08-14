@@ -95,7 +95,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filters: decodedQuery.query,
+            filters: { kql: decodedQuery.query },
           }),
         });
         endpointResponse.request_page_index = Number(pageIndex);
