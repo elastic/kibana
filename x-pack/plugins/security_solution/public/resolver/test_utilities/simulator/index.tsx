@@ -10,22 +10,18 @@ import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
+import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
+import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
  */
 export class Simulator {
-  /**
-   * A string that uniquely identifies this Resolver instance among others mounted in the DOM.
-   */
-  private readonly resolverComponentInstanceID: string;
   /**
    * The redux store, creating in the constructor using the `dataAccessLayer`.
    * This code subscribes to state transitions.
@@ -44,10 +40,16 @@ export class Simulator {
    * This is used by `debugActions`.
    */
   private readonly spyMiddleware: SpyMiddleware;
+  /**
+   * Simulator which allows you to explicitly simulate resize events and trigger animation frames
+   */
+  private readonly sideEffectSimulator: SideEffectSimulator;
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    history,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -61,8 +63,8 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID?: string;
+    history?: HistoryPackageHistoryInterface<never>;
   }) {
-    this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
 
@@ -79,25 +81,47 @@ export class Simulator {
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
-    // Create a fake 'history' instance that Resolver will use to read and write query string values
-    this.history = createMemoryHistory();
+    // If needed, create a fake 'history' instance.
+    // Resolver will use to read and write query string values.
+    this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
 
+    this.sideEffectSimulator = sideEffectSimulatorFactory();
+
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
-        resolverComponentInstanceID={this.resolverComponentInstanceID}
+        resolverComponentInstanceID={resolverComponentInstanceID}
         history={this.history}
+        sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
       />
     );
+  }
 
-    // Update the enzyme wrapper after each state transition
-    connectEnzymeWrapperAndStore(this.store, this.wrapper);
+  /**
+   * Unmount the Resolver component. Use this to test what happens when code that uses Resolver unmounts it.
+   */
+  public unmount(): void {
+    this.wrapper.unmount();
+  }
+
+  /**
+   * Get the component instance ID from the component.
+   */
+  public get resolverComponentInstanceID(): string {
+    return this.wrapper.prop('resolverComponentInstanceID');
+  }
+
+  /**
+   * Change the component instance ID (updates the React component props.)
+   */
+  public set resolverComponentInstanceID(value: string) {
+    this.wrapper.setProps({ resolverComponentInstanceID: value });
   }
 
   /**
@@ -113,6 +137,16 @@ export class Simulator {
   }
 
   /**
+   * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
+   * This forces any `AutoSizer` instances to have a large size.
+   */
+  private forceAutoSizerOpen() {
+    this.wrapper
+      .find('AutoSizer')
+      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
+  }
+
+  /**
    * Yield the result of `mapper` over and over, once per event-loop cycle.
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
@@ -124,6 +158,7 @@ export class Simulator {
       yield mapper();
       await new Promise((resolve) => {
         setTimeout(() => {
+          this.forceAutoSizerOpen();
           this.wrapper.update();
           resolve();
         }, 0);
@@ -137,6 +172,18 @@ export class Simulator {
    */
   public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): ReactWrapper {
     return this.domNodes(processNodeElementSelector(options));
+  }
+
+  /**
+   * Return an Enzyme ReactWrapper for any child elements of a specific processNodeElement
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   * @param selector The selector for the child element of the process node
+   */
+  public processNodeChildElements(entityID: string, selector: string): ReactWrapper {
+    return this.domNodes(
+      `${processNodeElementSelector({ entityID })} [data-test-subj="${selector}"]`
+    );
   }
 
   /**
@@ -164,80 +211,33 @@ export class Simulator {
   }
 
   /**
-   * Return an Enzyme ReactWrapper that includes the Related Events host button for a given process node
-   *
-   * @param entityID The entity ID of the proocess node to select in
+   * This manually runs the animation frames tied to a configurable timestamp in the future
    */
-  public processNodeRelatedEventButton(entityID: string): ReactWrapper {
-    return this.domNodes(
-      `${processNodeElementSelector({ entityID })} [data-test-subj="resolver:submenu:button"]`
-    );
+  public runAnimationFramesTimeFromNow(time: number = 0) {
+    this.sideEffectSimulator.controls.time = time;
+    this.sideEffectSimulator.controls.provideAnimationFrame();
   }
 
   /**
-   * Return the selected node query string values.
+   * The 'search' part of the URL.
    */
-  public queryStringValues(): { selectedNode: string[] } {
-    const urlSearchParams = new URLSearchParams(this.history.location.search);
-    return {
-      selectedNode: urlSearchParams.getAll(`resolver-${this.resolverComponentInstanceID}-id`),
-    };
+  public get historyLocationSearch(): string {
+    // Wrap the `search` value from the MemoryHistory using `URLSearchParams` in order to standardize it.
+    return new URLSearchParams(this.history.location.search).toString();
   }
 
   /**
-   * The element that shows when Resolver is waiting for the graph data.
+   * Given a 'data-test-subj' value, it will resolve the react wrapper or undefined if not found
    */
-  public graphLoadingElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:loading"]');
+  public async resolve(selector: string): Promise<ReactWrapper | undefined> {
+    return this.resolveWrapper(() => this.domNodes(`[data-test-subj="${selector}"]`));
   }
 
   /**
-   * The element that shows if Resolver couldn't draw the graph.
+   * Given a 'data-test-subj' selector, it will return the domNode
    */
-  public graphErrorElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph:error"]');
-  }
-
-  /**
-   * The element where nodes get drawn.
-   */
-  public graphElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:graph"]');
-  }
-
-  /**
-   * An element with a list of all nodes.
-   */
-  public nodeListElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list"]');
-  }
-
-  /**
-   * Return the items in the node list (the default panel view.)
-   */
-  public nodeListItems(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-list:item"]');
-  }
-
-  /**
-   * The element containing the details for the selected node.
-   */
-  public nodeDetailElement(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail"]');
-  }
-
-  /**
-   * The details of the selected node are shown in a description list. This returns the title elements of the description list.
-   */
-  private nodeDetailEntryTitle(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
-  }
-
-  /**
-   * The details of the selected node are shown in a description list. This returns the description elements of the description list.
-   */
-  private nodeDetailEntryDescription(): ReactWrapper {
-    return this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
+  public testSubject(selector: string): ReactWrapper {
+    return this.domNodes(`[data-test-subj="${selector}"]`);
   }
 
   /**
@@ -253,8 +253,14 @@ export class Simulator {
    * The titles and descriptions (as text) from the node detail panel.
    */
   public nodeDetailDescriptionListEntries(): Array<[string, string]> {
-    const titles = this.nodeDetailEntryTitle();
-    const descriptions = this.nodeDetailEntryDescription();
+    /**
+     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     */
+    const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
+    /**
+     * The details of the selected node are shown in a description list. This returns the description elements of the description list.
+     */
+    const descriptions = this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
     const entries: Array<[string, string]> = [];
     for (let index = 0; index < Math.min(titles.length, descriptions.length); index++) {
       const title = titles.at(index).text();
@@ -274,7 +280,7 @@ export class Simulator {
   public async resolveWrapper(
     wrapperFactory: () => ReactWrapper,
     predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
-  ): Promise<ReactWrapper | void> {
+  ): Promise<ReactWrapper | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {
       if (predicate(wrapper)) {
         return wrapper;

@@ -296,7 +296,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor({ services, params, state }: AlertExecutorOptions) {
       throw new Error('this alert is intended to fail');
@@ -306,27 +306,35 @@ export function defineAlertTypes(
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor(alertExecutorOptions: AlertExecutorOptions) {
       const { services, state, params } = alertExecutorOptions;
-      const pattern = params.pattern;
-      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
-      if (pattern.length === 0) throw new Error('pattern is empty');
+      const pattern = params.pattern as Record<string, boolean[]>;
+      if (typeof pattern !== 'object') throw new Error('pattern is not an object');
+      let maxPatternLength = 0;
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        if (!Array.isArray(instancePattern)) {
+          throw new Error(`pattern for instance ${instanceId} is not an array`);
+        }
+        maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
+      }
 
       // get the pattern index, return if past it
       const patternIndex = state.patternIndex ?? 0;
-      if (patternIndex > pattern.length) {
+      if (patternIndex >= maxPatternLength) {
         return { patternIndex };
       }
 
       // fire if pattern says to
-      if (pattern[patternIndex]) {
-        services.alertInstanceFactory('instance').scheduleActions('default');
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        if (instancePattern[patternIndex]) {
+          services.alertInstanceFactory(instanceId).scheduleActions('default');
+        }
       }
 
       return {
-        patternIndex: (patternIndex + 1) % pattern.length,
+        patternIndex: patternIndex + 1,
       };
     },
   };

@@ -15,12 +15,14 @@ export function mockEndpointEvent({
   parentEntityId,
   timestamp,
   lifecycleType,
+  pid = 0,
 }: {
   entityID: string;
   name: string;
   parentEntityId?: string;
   timestamp: number;
   lifecycleType?: string;
+  pid?: number;
 }): EndpointEvent {
   return {
     '@timestamp': timestamp,
@@ -45,7 +47,7 @@ export function mockEndpointEvent({
       executable: 'executable',
       args: 'args',
       name,
-      pid: 0,
+      pid,
       hash: {
         md5: 'hash.md5',
       },
