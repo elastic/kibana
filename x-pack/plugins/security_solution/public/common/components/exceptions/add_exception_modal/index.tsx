@@ -196,7 +196,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [

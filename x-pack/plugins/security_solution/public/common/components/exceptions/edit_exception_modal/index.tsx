@@ -137,7 +137,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       setShouldDisableBulkClose(
         entryHasListType(exceptionItemsToAdd) ||
           entryHasNonEcsType(exceptionItemsToAdd, signalIndexPatterns) ||
-          exceptionItemsToAdd.length === 0
+          exceptionItemsToAdd.every((item) => item.entries.length === 0)
       );
     }
   }, [

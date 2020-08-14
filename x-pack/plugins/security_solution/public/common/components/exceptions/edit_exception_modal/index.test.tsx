@@ -8,6 +8,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { act } from 'react-dom/test-utils';
 
 import { EditExceptionModal } from './';
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
@@ -21,7 +22,7 @@ import { useSignalIndex } from '../../../../detections/containers/detection_engi
 import { createUseKibanaMock } from '../../../mock/kibana_react';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { EntriesArray } from '../../../../../../lists/common/schemas/types';
-import { ExceptionBuilderComponent } from '../builder';
+import * as builder from '../builder';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
@@ -35,7 +36,15 @@ const useKibanaMock = useKibana as jest.Mock;
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
 
+  let ExceptionBuilderComponent: jest.SpyInstance<ReturnType<
+    typeof builder.ExceptionBuilderComponent
+  >>;
+
   beforeEach(() => {
+    ExceptionBuilderComponent = jest
+      .spyOn(builder, 'ExceptionBuilderComponent')
+      .mockReturnValue(<></>);
+
     const kibanaMock = createUseKibanaMock()();
     useKibanaMock.mockImplementation(() => ({
       ...kibanaMock,
@@ -55,8 +64,11 @@ describe('When the edit exception modal is opened', () => {
       },
     ]);
     (useCurrentUser as jest.Mock).mockReturnValue({ username: 'test-username' });
-    // Unsafe casting for mocking of internal component
-    ((ExceptionBuilderComponent as unknown) as jest.Mock).mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -108,6 +120,20 @@ describe('When the edit exception modal is opened', () => {
             />
           </ThemeProvider>
         );
+        const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      });
+      it('has the edit exception button enabled', () => {
+        expect(
+          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+      it('should have the bulk close checkbox enabled', () => {
+        expect(
+          wrapper
+            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+            .getDOMNode()
+        ).not.toBeDisabled();
       });
       it('renders the exceptions builder', () => {
         expect(
@@ -136,6 +162,20 @@ describe('When the edit exception modal is opened', () => {
             />
           </ThemeProvider>
         );
+        const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+        act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+      });
+      it('has the edit exception button enabled', () => {
+        expect(
+          wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+        ).not.toBeDisabled();
+      });
+      it('should have the bulk close checkbox disabled', () => {
+        expect(
+          wrapper
+            .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+            .getDOMNode()
+        ).toBeDisabled();
       });
       it('renders the exceptions builder', () => {
         expect(
@@ -165,12 +205,62 @@ describe('When the edit exception modal is opened', () => {
           />
         </ThemeProvider>
       );
+      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+    });
+    it('has the edit exception button enabled', () => {
+      expect(
+        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+      ).not.toBeDisabled();
     });
     it('renders the exceptions builder', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
     });
     it('should not contain the endpoint specific documentation text', () => {
       expect(wrapper.find('[data-test-subj="edit-exception-endpoint-text"]').exists()).toBeFalsy();
+    });
+    it('should have the bulk close checkbox disabled', () => {
+      expect(
+        wrapper
+          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+          .getDOMNode()
+      ).toBeDisabled();
+    });
+  });
+
+  describe('when an exception is passed with no exception data', () => {
+    let wrapper: ReactWrapper;
+    beforeEach(() => {
+      const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
+      wrapper = mount(
+        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <EditExceptionModal
+            ruleIndices={['filebeat-*']}
+            ruleName={ruleName}
+            exceptionListType={'detection'}
+            onCancel={() => {}}
+            onConfirm={() => {}}
+            exceptionItem={exceptionItemMock}
+          />
+        </ThemeProvider>
+      );
+      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
+    });
+    it('has the edit exception button disabled', () => {
+      expect(
+        wrapper.find('button[data-test-subj="edit-exception-confirm-button"]').getDOMNode()
+      ).toBeDisabled();
+    });
+    it('renders the exceptions builder', () => {
+      expect(wrapper.find('[data-test-subj="edit-exception-modal-builder"]').exists()).toBeTruthy();
+    });
+    it('should have the bulk close checkbox disabled', () => {
+      expect(
+        wrapper
+          .find('input[data-test-subj="close-alert-on-add-edit-exception-checkbox"]')
+          .getDOMNode()
+      ).toBeDisabled();
     });
   });
 });
