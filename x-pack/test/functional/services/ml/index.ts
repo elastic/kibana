@@ -34,6 +34,7 @@ import { MachineLearningSecurityCommonProvider } from './security_common';
 import { MachineLearningSecurityUIProvider } from './security_ui';
 import { MachineLearningSettingsProvider } from './settings';
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
@@ -70,6 +71,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
 
   return {
@@ -101,6 +103,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     securityUI,
     settings,
     singleMetricViewer,
+    testExecution,
     testResources,
   };
 }
