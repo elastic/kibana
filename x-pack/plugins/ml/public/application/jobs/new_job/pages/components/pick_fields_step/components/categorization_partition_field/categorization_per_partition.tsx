@@ -31,9 +31,11 @@ export const CategorizationPerPartitionFieldDropdown = ({
   const [categorizationPartitionFieldName, setCategorizationPartitionFieldName] = useState<
     string | null
   >(jobCreator.categorizationPerPartitionField);
-  const { catFields } = newJobCapsService;
+  const { categoryFields } = newJobCapsService;
 
-  const filteredCategories = catFields.filter((c) => c.id !== jobCreator.categorizationFieldName);
+  const filteredCategories = categoryFields.filter(
+    (c) => c.id !== jobCreator.categorizationFieldName
+  );
   useEffect(() => {
     jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
     jobCreatorUpdate();
