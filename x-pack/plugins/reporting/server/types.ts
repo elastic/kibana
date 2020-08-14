@@ -171,6 +171,8 @@ export interface CreateJobBaseParams {
   browserTimezone: string;
   layout?: LayoutInstance; // for screenshot type reports
   objectType: string;
+  savedObjectId?: string; // legacy (7.x) only
+  queryString?: string; // legacy (7.x) only
 }
 
 export interface CreateJobBaseParamsEncryptedFields extends CreateJobBaseParams {
