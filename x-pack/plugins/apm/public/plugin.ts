@@ -75,7 +75,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       const getApmDataHelper = async () => {
         const { fetchOverviewPageData, hasData } = await import(
-          './services/rest/apm_overview_fetchers'
+          './application/dynamicImports'
         );
 
         return { fetchOverviewPageData, hasData };
@@ -94,15 +94,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     }
 
     const setupLazyStuff = async (coreStart: CoreStart) => {
-      const { createCallApmApi } = await import(
-        './services/rest/createCallApmApi'
-      );
-
-      createCallApmApi(core.http);
-
       // render APM feedback link in global help menu
-      const { setHelpExtension } = await import('./setHelpExtension');
-      const { setReadonlyBadge } = await import('./updateBadge');
+      const {
+        setHelpExtension,
+        setReadonlyBadge,
+        createCallApmApi,
+      } = await import('./application/dynamicImports');
+      createCallApmApi(core.http);
       setHelpExtension(coreStart);
       setReadonlyBadge(coreStart);
     };
@@ -124,7 +122,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         await setupLazyStuff(coreStart);
 
         const { createStaticIndexPattern } = await import(
-          './services/rest/index_pattern'
+          './application/dynamicImports'
         );
         // Automatically creates static index pattern and stores as saved object
         createStaticIndexPattern().catch((e) => {
@@ -137,16 +135,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'clientSideMonitoring',
+      id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
-      euiIconType: 'apmApp',
-      icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle
-        const { renderApp } = await import('./application/rumApp');
+        const { renderApp } = await import('./application/csmApp');
         // Get start services
         const [coreStart] = await core.getStartServices();
         await setupLazyStuff(coreStart);
