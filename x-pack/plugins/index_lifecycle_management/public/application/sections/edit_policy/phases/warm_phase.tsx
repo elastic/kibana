@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -28,21 +27,26 @@ import {
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
   PHASE_SHRINK_ENABLED,
-} from '../../../../constants';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
-import { ErrableFormRow } from '../../form_errors';
-import { SetPriorityInput } from '../set_priority_input';
-import { NodeAllocation } from '../node_allocation';
-import { MinAgeInput } from '../min_age_input';
+} from '../../../constants';
+import {
+  LearnMoreLink,
+  ActiveBadge,
+  PhaseErrorMessage,
+  OptionalLabel,
+  ErrableFormRow,
+  SetPriorityInput,
+  NodeAllocation,
+  MinAgeInput,
+} from '../components';
 
-export class WarmPhase extends PureComponent {
-  static propTypes = {
-    setPhaseData: PropTypes.func.isRequired,
-
-    isShowingErrors: PropTypes.bool.isRequired,
-    errors: PropTypes.object.isRequired,
-  };
-
+interface Props {
+  setPhaseData: (key: string, value: any) => void;
+  phaseData: any;
+  isShowingErrors: boolean;
+  errors: Record<string, string[]>;
+  hotPhaseRolloverEnabled: boolean;
+}
+export class WarmPhase extends PureComponent<Props> {
   render() {
     const {
       setPhaseData,
