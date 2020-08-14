@@ -236,9 +236,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
             {
               defaultMessage: 'Something went wrong fetching analysis fields data.',
-              values: {
-                index: sourceIndex,
-              },
             }
           ),
           text: errorMessage,
