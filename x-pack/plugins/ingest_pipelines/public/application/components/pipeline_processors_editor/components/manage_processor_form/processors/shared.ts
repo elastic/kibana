@@ -61,6 +61,7 @@ export const from = {
       }
     }
   },
+  defaultBoolToUndef: (defaultBool: boolean) => (v: boolean) => (v === defaultBool ? undefined : v),
 };
 
 export type FieldsConfig = Record<string, FieldConfig>;

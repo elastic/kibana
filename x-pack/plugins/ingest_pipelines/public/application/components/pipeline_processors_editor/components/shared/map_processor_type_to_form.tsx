@@ -27,6 +27,7 @@ import {
   HtmlStrip,
   Inference,
   Join,
+  Json,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -178,7 +179,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   json: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Json,
     docLinkPath: '/json-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.json', {
       defaultMessage: 'JSON',

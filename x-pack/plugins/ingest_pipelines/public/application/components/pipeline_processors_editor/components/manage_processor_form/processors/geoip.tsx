@@ -19,7 +19,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
@@ -66,8 +66,8 @@ const fieldsConfig: FieldsConfig = {
   first_only: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
-    serializer: (v) => (v === true ? undefined : v),
     deserializer: to.booleanOrUndef,
+    serializer: from.defaultBoolToUndef(true),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.firstOnlyFieldLabel', {
       defaultMessage: 'First only',
     }),

@@ -18,7 +18,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
 const { emptyField, numberSmallerThanField, numberGreaterThanField } = fieldValidators;
 
@@ -94,8 +94,8 @@ const fieldsConfig: FieldsConfig = {
   override: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
-    serializer: (v) => (v === true ? undefined : v),
     deserializer: to.booleanOrUndef,
+    serializer: from.defaultBoolToUndef,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.overrideFieldLabel', {
       defaultMessage: 'Override',
     }),
