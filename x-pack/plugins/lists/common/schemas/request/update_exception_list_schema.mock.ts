@@ -20,3 +20,14 @@ export const getUpdateExceptionListSchemaMock = (): UpdateExceptionListSchema =>
   tags: ['malware'],
   type: 'endpoint',
 });
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ * after doing a get of the structure.
+ */
+export const getUpdateMinimalExceptionListSchemaMock = (): UpdateExceptionListSchema => ({
+  description: DESCRIPTION,
+  list_id: LIST_ID,
+  name: NAME,
+  type: 'endpoint',
+});

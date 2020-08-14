@@ -62,10 +62,37 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
 <Fragment>
-  <EmptyState
-    onRefresh={[Function]}
-    prependBasePath={[Function]}
-  />
+  <EuiPageContent>
+    <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
+      indexPatternName="name"
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepIndexPattern
+      allIndices={Array []}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      showSystemIndices={true}
+    />
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
@@ -161,10 +188,43 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
 <Fragment>
-  <EmptyState
-    onRefresh={[Function]}
-    prependBasePath={[Function]}
-  />
+  <EuiPageContent>
+    <Header
+      docLinks={
+        Object {
+          "links": Object {
+            "indexPatterns": Object {},
+            "scriptedFields": Object {},
+          },
+        }
+      }
+      indexPatternName="name"
+      isBeta={false}
+      prompt={null}
+    />
+    <EuiHorizontalRule />
+    <StepIndexPattern
+      allIndices={
+        Array [
+          Object {
+            "name": ".kibana ",
+          },
+        ]
+      }
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        IndexPatternCreationConfig {
+          "httpClient": null,
+          "isBeta": false,
+          "key": "default",
+          "name": "name",
+          "showSystemIndices": true,
+          "type": "default",
+        }
+      }
+      showSystemIndices={true}
+    />
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     side="right"
