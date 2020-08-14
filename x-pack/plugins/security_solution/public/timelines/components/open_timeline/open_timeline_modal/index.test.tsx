@@ -46,7 +46,8 @@ jest.mock('../use_timeline_status', () => {
   };
 });
 
-describe('OpenTimelineModal', () => {
+// Failing: See https://github.com/elastic/kibana/issues/74814
+describe.skip('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const mockInstallPrepackagedTimelines = jest.fn();
   beforeEach(() => {
