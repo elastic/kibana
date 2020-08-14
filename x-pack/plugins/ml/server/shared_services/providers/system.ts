@@ -5,8 +5,8 @@
  */
 
 import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-// import { SearchResponse, SearchParams } from 'elasticsearch';
-import { RequestParams, ApiResponse } from '@elastic/elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { RequestParams } from '@elastic/elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
@@ -24,7 +24,7 @@ export interface MlSystemProvider {
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
-    mlAnomalySearch<T>(searchParams: RequestParams.Search<any>): Promise<ApiResponse<T>>;
+    mlAnomalySearch<T>(searchParams: RequestParams.Search<any>): Promise<SearchResponse<T>>;
   };
 }
 
@@ -71,14 +71,16 @@ export function getMlSystemProvider(
             cloudId,
           };
         },
-        async mlAnomalySearch<T>(searchParams: RequestParams.Search<any>): Promise<ApiResponse<T>> {
+        async mlAnomalySearch<T>(
+          searchParams: RequestParams.Search<any>
+        ): Promise<SearchResponse<T>> {
           isFullLicense();
           // Removed while https://github.com/elastic/kibana/issues/64588 exists.
           // SIEM are calling this endpoint with a dummy request object from their alerting
           // integration and currently alerting does not supply a request object.
           // await hasMlCapabilities(['canAccessML']);
 
-          const { body } = await asInternalUser.search<ApiResponse<T>>({
+          const { body } = await asInternalUser.search<SearchResponse<T>>({
             ...searchParams,
             index: ML_RESULTS_INDEX_PATTERN,
           });

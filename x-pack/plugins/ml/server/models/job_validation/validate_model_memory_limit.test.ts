@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
-import { ModelMemoryEstimate } from '../calculate_model_memory_limit/calculate_model_memory_limit';
+import { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 
 describe('ML - validateModelMemoryLimit', () => {
@@ -65,12 +65,12 @@ describe('ML - validateModelMemoryLimit', () => {
   };
 
   // mock estimate model memory
-  const modelMemoryEstimateResponse: ModelMemoryEstimate = {
+  const modelMemoryEstimateResponse: ModelMemoryEstimateResponse = {
     model_memory_estimate: '40mb',
   };
 
   interface MockAPICallResponse {
-    'ml.estimateModelMemory'?: ModelMemoryEstimate;
+    'ml.estimateModelMemory'?: ModelMemoryEstimateResponse;
   }
 
   // mock callAsCurrentUser
@@ -80,7 +80,7 @@ describe('ML - validateModelMemoryLimit', () => {
   // - to retrieve field capabilities used in search for split field cardinality
   const getMockMlClusterClient = ({
     'ml.estimateModelMemory': estimateModelMemory,
-  }: MockAPICallResponse = {}): ILegacyScopedClusterClient => {
+  }: MockAPICallResponse = {}): IScopedClusterClient => {
     const callAs = (call: string) => {
       if (typeof call === undefined) {
         return Promise.reject();
@@ -96,13 +96,13 @@ describe('ML - validateModelMemoryLimit', () => {
       } else if (call === 'ml.estimateModelMemory') {
         response = estimateModelMemory || modelMemoryEstimateResponse;
       }
-      return Promise.resolve(response);
+      return Promise.resolve({ body: response });
     };
 
-    return {
-      callAsCurrentUser: callAs,
-      callAsInternalUser: callAs,
-    };
+    return ({
+      asCurrentUser: callAs,
+      asInternalUser: callAs,
+    } as unknown) as IScopedClusterClient;
   };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {

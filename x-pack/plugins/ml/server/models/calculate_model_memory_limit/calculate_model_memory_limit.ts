@@ -11,7 +11,7 @@ import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 
-interface ModelMemoryEstimationResult {
+export interface ModelMemoryEstimationResult {
   /**
    * Result model memory limit
    */

@@ -4,48 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
 
 const mlClusterClient = ({
   // mock callAsCurrentUser
-  callAsCurrentUser: (method: string) => {
+  asCurrentUser: (method: string) => {
     return new Promise((resolve) => {
       if (method === 'fieldCaps') {
-        resolve({ fields: [] });
+        resolve({ body: { fields: [] } });
         return;
       } else if (method === 'ml.info') {
         resolve({
-          limits: {
-            effective_max_model_memory_limit: '100MB',
-            max_model_memory_limit: '1GB',
+          body: {
+            limits: {
+              effective_max_model_memory_limit: '100MB',
+              max_model_memory_limit: '1GB',
+            },
           },
         });
       }
-      resolve({});
+      resolve({ body: {} });
     }) as Promise<any>;
   },
 
   // mock callAsInternalUser
-  callAsInternalUser: (method: string) => {
+  asInternalUser: (method: string) => {
     return new Promise((resolve) => {
       if (method === 'fieldCaps') {
-        resolve({ fields: [] });
+        resolve({ body: { fields: [] } });
         return;
       } else if (method === 'ml.info') {
         resolve({
-          limits: {
-            effective_max_model_memory_limit: '100MB',
-            max_model_memory_limit: '1GB',
+          body: {
+            limits: {
+              effective_max_model_memory_limit: '100MB',
+              max_model_memory_limit: '1GB',
+            },
           },
         });
       }
-      resolve({});
+      resolve({ body: {} });
     }) as Promise<any>;
   },
-} as unknown) as ILegacyScopedClusterClient;
+} as unknown) as IScopedClusterClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads

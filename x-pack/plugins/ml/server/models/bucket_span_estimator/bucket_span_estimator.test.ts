@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 
@@ -12,14 +12,14 @@ import { estimateBucketSpanFactory, BucketSpanEstimatorData } from './bucket_spa
 
 const callAs = () => {
   return new Promise((resolve) => {
-    resolve({});
+    resolve({ body: {} });
   }) as Promise<any>;
 };
 
-const mlClusterClient: ILegacyScopedClusterClient = {
-  callAsCurrentUser: callAs,
-  callAsInternalUser: callAs,
-};
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
+} as unknown) as IScopedClusterClient;
 
 // mock configuration to be passed to the estimator
 const formConfig: BucketSpanEstimatorData = {

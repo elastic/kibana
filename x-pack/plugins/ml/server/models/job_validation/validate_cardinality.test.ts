@@ -6,7 +6,7 @@
 
 import cloneDeep from 'lodash/cloneDeep';
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -24,21 +24,21 @@ const mockResponses = {
 const mlClusterClientFactory = (
   responses: Record<string, any>,
   fail = false
-): ILegacyScopedClusterClient => {
+): IScopedClusterClient => {
   const callAs = (requestName: string) => {
     return new Promise((resolve, reject) => {
       const response = responses[requestName];
       if (fail) {
         reject(response);
       } else {
-        resolve(response);
+        resolve({ body: response });
       }
     }) as Promise<any>;
   };
-  return {
-    callAsCurrentUser: callAs,
-    callAsInternalUser: callAs,
-  };
+  return ({
+    asCurrentUser: callAs,
+    asInternalUser: callAs,
+  } as unknown) as IScopedClusterClient;
 };
 
 describe('ML - validateCardinality', () => {
