@@ -607,7 +607,7 @@ Use AlertsClient instead.
 ====
 
 [[breaking_79_oss_features]]
-.OSS features registration moved to Kibana platform
+.Open source features registration moved to Kibana platform
 [%collapsible]
 ====
 
