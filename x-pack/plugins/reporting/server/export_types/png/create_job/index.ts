@@ -5,11 +5,11 @@
  */
 
 import { cryptoFactory } from '../../../lib';
-import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, ScheduleTaskFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPNG } from '../types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
   JobParamsPNG
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();

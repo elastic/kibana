@@ -26,10 +26,12 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { ExclusiveUnion } from '@elastic/eui';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { FetchOptions as FetchOptions_2 } from 'src/plugins/data/public';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
+import { ISearchSource as ISearchSource_2 } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/public';
@@ -153,12 +155,12 @@ export interface ApplyGlobalFilterActionContext {
     timeFieldName?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DateFormat" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DateNanosFormat" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "baseFormattersPublic" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateNanosFormat | typeof DateFormat)[];
+export const baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateFormat | typeof DateNanosFormat)[];
 
 // Warning: (ae-missing-release-tag) "BUCKET_TYPES" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1653,7 +1655,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
         } | {
             display: string;
             val: string;
@@ -1662,9 +1664,9 @@ export const search: {
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
         Ipv4Address: typeof Ipv4Address;
         isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
-        isNumberType: (agg: import("./search").AggConfig) => boolean;
-        isStringType: (agg: import("./search").AggConfig) => boolean;
-        isType: (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
+        isNumberType: (agg: import("../common").AggConfig) => boolean;
+        isStringType: (agg: import("../common").AggConfig) => boolean;
+        isType: (...types: string[]) => (agg: import("../common").AggConfig) => boolean;
         isValidEsInterval: typeof isValidEsInterval;
         isValidInterval: typeof isValidInterval;
         parentPipelineType: string;
