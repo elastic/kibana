@@ -6,9 +6,10 @@
 
 import _ from 'lodash';
 import React from 'react';
+import rison from 'rison-node';
 
 import { AbstractESSource } from '../es_source';
-import { getSearchService } from '../../../kibana_services';
+import { getSearchService, getHttp } from '../../../kibana_services';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -18,6 +19,11 @@ import {
   SORT_ORDER,
   SCALING_TYPES,
   VECTOR_SHAPE_TYPE,
+  MVT_SOURCE_LAYER_NAME,
+  GIS_API_PATH,
+  MVT_GETTILE_API_PATH,
+  MIN_ZOOM,
+  MAX_ZOOM,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
@@ -448,9 +454,13 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   isFilterByMapBounds() {
-    return this._descriptor.scalingType === SCALING_TYPES.CLUSTER
-      ? true
-      : this._descriptor.filterByMapBounds;
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTER) {
+      return true;
+    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      return false;
+    } else {
+      return this._descriptor.filterByMapBounds;
+    }
   }
 
   async getLeftJoinFields() {
@@ -553,11 +563,66 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   getJoinsDisabledReason() {
-    return this._descriptor.scalingType === SCALING_TYPES.CLUSTERS
-      ? i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
-          defaultMessage: 'Joins are not supported when scaling by clusters',
-        })
-      : null;
+    let reason;
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
+        defaultMessage: 'Joins are not supported when scaling by clusters',
+      });
+    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
+      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
+        defaultMessage: 'Joins are not supported when scaling by mvt vector tiles',
+      });
+    } else {
+      reason = null;
+    }
+    return reason;
+  }
+
+  // MVT methods. Do we really need different source-type?????
+  getLayerName() {
+    return 'water';
+  }
+
+  async getUrlTemplateWithMeta(searchFilters) {
+    const indexPattern = await this.getIndexPattern();
+    const indexSettings = await loadIndexSettings(indexPattern.title);
+
+    //assuming only geo_shape fields for now
+    const initialSearchContext = {
+      // docvalue_fields: await this._getDateDocvalueFields(searchFilters.fieldNames),
+    };
+    // const geoField = await this._getGeoField();
+    // const docValueFields = await this._excludeDateFields(searchFilters.fieldNames);
+    // const withoutGeoField = docValueFields.filter((field) => field !== geoField.name);
+    // initialSearchContext.docvalue_fields.push(...withoutGeoField);
+
+    const searchSource = await this.makeSearchSource(
+      searchFilters,
+      indexSettings.maxResultWindow,
+      initialSearchContext
+    );
+    searchSource.setField('fields', searchFilters.fieldNames);
+
+    const ipTitle = indexPattern.title;
+    const geometryFieldName = this._descriptor.geoField;
+    const fields = ['_id']; //todo needs to include correct fields
+    const fieldsParam = fields.join(',');
+
+    const dsl = await searchSource.getSearchRequestBody();
+
+    const risonDsl = rison.encode(dsl);
+
+    const mvtUrlServicePath = getHttp().basePath.prepend(
+      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
+    );
+
+    const urlTemplate = `${mvtUrlServicePath}?x={x}&y={y}&z={z}&geometryFieldName=${geometryFieldName}&indexPattern=${ipTitle}&fields=${fieldsParam}&requestBody=${risonDsl}`;
+    return {
+      layerName: MVT_SOURCE_LAYER_NAME,
+      minSourceZoom: MIN_ZOOM,
+      maxSourceZoom: MAX_ZOOM,
+      urlTemplate: urlTemplate,
+    };
   }
 }
 

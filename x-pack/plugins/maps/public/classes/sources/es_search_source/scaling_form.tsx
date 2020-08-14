@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiRadio,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiRadio,
   EuiToolTip,
+  EuiText,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -24,8 +26,8 @@ import { ValidatedRange } from '../../../components/validated_range';
 import {
   DEFAULT_MAX_INNER_RESULT_WINDOW,
   DEFAULT_MAX_RESULT_WINDOW,
-  SCALING_TYPES,
   LAYER_TYPE,
+  SCALING_TYPES,
 } from '../../../../common/constants';
 // @ts-ignore
 import { loadIndexSettings } from './load_index_settings';
@@ -80,8 +82,15 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _onScalingTypeChange = (optionId: string): void => {
-    const layerType =
-      optionId === SCALING_TYPES.CLUSTERS ? LAYER_TYPE.BLENDED_VECTOR : LAYER_TYPE.VECTOR;
+    let layerType;
+    if (optionId === SCALING_TYPES.CLUSTERS) {
+      layerType = LAYER_TYPE.BLENDED_VECTOR;
+    } else if (optionId === SCALING_TYPES.MVT) {
+      layerType = LAYER_TYPE.TILED_VECTOR;
+    } else {
+      layerType = LAYER_TYPE.VECTOR;
+    }
+
     this.props.onChange({ propName: 'scalingType', value: optionId, newLayerType: layerType });
   };
 
@@ -154,6 +163,33 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
+  _renderLimitResultsRadio() {
+    return (
+      <EuiRadio
+        id={SCALING_TYPES.LIMIT}
+        label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
+          defaultMessage: 'Limit results to {maxResultWindow}.',
+          values: { maxResultWindow: this.state.maxResultWindow },
+        })}
+        checked={this.props.scalingType === SCALING_TYPES.LIMIT}
+        onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
+      />
+    );
+  }
+
+  _renderTopHitsRadio() {
+    return (
+      <EuiRadio
+        id={SCALING_TYPES.TOP_HITS}
+        label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
+          defaultMessage: 'Show top hits per entity.',
+        })}
+        checked={this.props.scalingType === SCALING_TYPES.TOP_HITS}
+        onChange={() => this._onScalingTypeChange(SCALING_TYPES.TOP_HITS)}
+      />
+    );
+  }
+
   _renderClusteringRadio() {
     const clusteringRadio = (
       <EuiRadio
@@ -177,9 +213,40 @@ export class ScalingForm extends Component<Props, State> {
     );
   }
 
+  _renderMVTRadio() {
+    const labelText = i18n.translate('xpack.maps.source.esSearch.useMVTVectorTiles', {
+      defaultMessage: '.mvt tile protocol',
+    });
+    const label = (
+      <>
+        {labelText}
+        <EuiBetaBadge
+          label={'beta'}
+          tooltipContent={i18n.translate(
+            'xpack.maps.source.esSearch.useMVTVectorTilesBetaTooltip',
+            {
+              defaultMessage: 'Using .mvt tiles is a beta feature.',
+            }
+          )}
+        />
+      </>
+    );
+    return (
+      <EuiRadio
+        id={SCALING_TYPES.MVT}
+        label={label}
+        checked={this.props.scalingType === SCALING_TYPES.MVT}
+        onChange={() => this._onScalingTypeChange(SCALING_TYPES.MVT)}
+      />
+    );
+  }
+
   render() {
     let filterByBoundsSwitch;
-    if (this.props.scalingType !== SCALING_TYPES.CLUSTERS) {
+    if (
+      this.props.scalingType === SCALING_TYPES.TOP_HITS ||
+      this.props.scalingType === SCALING_TYPES.LIMIT
+    ) {
       filterByBoundsSwitch = (
         <EuiFormRow>
           <EuiSwitch
@@ -194,12 +261,27 @@ export class ScalingForm extends Component<Props, State> {
       );
     }
 
-    let scalingForm = null;
+    let topHitsOptionsForm = null;
     if (this.props.scalingType === SCALING_TYPES.TOP_HITS) {
-      scalingForm = (
+      topHitsOptionsForm = (
         <Fragment>
           <EuiHorizontalRule margin="xs" />
           {this._renderTopHitsForm()}
+        </Fragment>
+      );
+    }
+
+    let mvtDisclaimer = null;
+    if (this.props.scalingType === SCALING_TYPES.MVT) {
+      mvtDisclaimer = (
+        <Fragment>
+          <EuiHorizontalRule margin="xs" />
+          <EuiText grow={false} size={'s'}>
+            {i18n.translate('xpack.maps.source.esSearch.mvtDescription', {
+              defaultMessage:
+                'Using .mvt tiles allows for faster display of large datasets. Not all layer-functionality is supported.',
+            })}
+          </EuiText>
         </Fragment>
       );
     }
@@ -216,30 +298,16 @@ export class ScalingForm extends Component<Props, State> {
 
         <EuiFormRow>
           <div>
-            <EuiRadio
-              id={SCALING_TYPES.LIMIT}
-              label={i18n.translate('xpack.maps.source.esSearch.limitScalingLabel', {
-                defaultMessage: 'Limit results to {maxResultWindow}.',
-                values: { maxResultWindow: this.state.maxResultWindow },
-              })}
-              checked={this.props.scalingType === SCALING_TYPES.LIMIT}
-              onChange={() => this._onScalingTypeChange(SCALING_TYPES.LIMIT)}
-            />
-            <EuiRadio
-              id={SCALING_TYPES.TOP_HITS}
-              label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-                defaultMessage: 'Show top hits per entity.',
-              })}
-              checked={this.props.scalingType === SCALING_TYPES.TOP_HITS}
-              onChange={() => this._onScalingTypeChange(SCALING_TYPES.TOP_HITS)}
-            />
+            {this._renderLimitResultsRadio()}
+            {this._renderTopHitsRadio()}
             {this._renderClusteringRadio()}
+            {this._renderMVTRadio()}
           </div>
         </EuiFormRow>
 
         {filterByBoundsSwitch}
-
-        {scalingForm}
+        {topHitsOptionsForm}
+        {mvtDisclaimer}
       </Fragment>
     );
   }

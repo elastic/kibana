@@ -77,7 +77,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      const templateWithMeta = await this._source.getUrlTemplateWithMeta();
+      const templateWithMeta = await this._source.getUrlTemplateWithMeta(dataFilters);
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
@@ -158,6 +158,11 @@ export class TiledVectorLayer extends VectorLayer {
 
     if (!tiledSourceMeta) {
       return false;
+    }
+
+    if (!mbTileSource.tiles) {
+      // Expected source is not compatible, so remove.
+      return true;
     }
 
     const isSourceDifferent =

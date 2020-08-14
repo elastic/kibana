@@ -14,6 +14,7 @@ import {
   MapExtent,
   MapFilters,
   MapQuery,
+  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -78,7 +79,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
-  getUrlTemplateWithMeta(): Promise<{
+  getUrlTemplateWithMeta(
+    searchFilters: MapFilters
+  ): Promise<{
     layerName: string;
     urlTemplate: string;
     minSourceZoom: number;
