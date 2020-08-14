@@ -3387,7 +3387,7 @@
                     "events": [
                       {
                         "type": "ACTION_RESULT",
-                        "subtype": "CONFIG",
+                        "subtype": "POLICY",
                         "timestamp": "2019-01-04T14:32:03.36764-05:00",
                         "action_id": "51c6ad1e-a9c0-4c70-80da-99a5c51eedaf",
                         "agent_id": "a6f14bd2-1a2a-481c-9212-9494d064ffdf",
@@ -4199,7 +4199,7 @@
               "RUNNING",
               "STARTING",
               "IN_PROGRESS",
-              "CONFIG",
+              "POLICY",
               "FAILED",
               "STOPPING",
               "STOPPED",

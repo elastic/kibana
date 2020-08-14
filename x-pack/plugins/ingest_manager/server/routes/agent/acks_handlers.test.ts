@@ -20,7 +20,7 @@ describe('test acks schema', () => {
     expect(() =>
       AckEventSchema.validate({
         type: 'ACTION_RESULT',
-        subtype: 'CONFIG',
+        subtype: 'POLICY',
         timestamp: '2019-01-04T14:32:03.36764-05:00',
         agent_id: 'agent',
         message: 'hello',
@@ -31,7 +31,7 @@ describe('test acks schema', () => {
     expect(
       AckEventSchema.validate({
         type: 'ACTION_RESULT',
-        subtype: 'CONFIG',
+        subtype: 'POLICY',
         timestamp: '2019-01-04T14:32:03.36764-05:00',
         agent_id: 'agent',
         action_id: 'actionId',
@@ -60,7 +60,7 @@ describe('test acks handlers', () => {
         events: [
           {
             type: 'ACTION_RESULT',
-            subtype: 'CONFIG',
+            subtype: 'POLICY',
             timestamp: '2019-01-04T14:32:03.36764-05:00',
             action_id: 'action1',
             agent_id: 'agent',
