@@ -6,12 +6,12 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommon } from './common';
+import { MlCommonUI } from './common_ui';
 import { MlCustomUrls } from './custom_urls';
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon,
+  mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls
 ) {
   const comboBox = getService('comboBox');
@@ -128,7 +128,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -148,7 +148,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobId(jobId: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputJobId', jobId, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputJobId', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
@@ -169,7 +169,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobDescription(jobDescription: string) {
-      await mlCommon.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
+      await mlCommonUI.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
@@ -372,7 +372,7 @@ export function MachineLearningJobWizardCommonProvider(
         subj = advancedSectionSelector(subj);
       }
       await retry.tryForTime(15 * 1000, async () => {
-        await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
+        await mlCommonUI.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
         await this.assertModelMemoryLimitValue(modelMemoryLimit, {
           withAdvancedSection: sectionOptions.withAdvancedSection,
         });

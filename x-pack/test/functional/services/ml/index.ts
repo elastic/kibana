@@ -9,7 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MachineLearningAnomaliesTableProvider } from './anomalies_table';
 import { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
 import { MachineLearningAPIProvider } from './api';
-import { MachineLearningCommonProvider } from './common';
+import { MachineLearningCommonAPIProvider } from './common_api';
+import { MachineLearningCommonUIProvider } from './common_ui';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
 import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
@@ -36,7 +37,8 @@ import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewe
 import { MachineLearningTestResourcesProvider } from './test_resources';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
-  const common = MachineLearningCommonProvider(context);
+  const commonAPI = MachineLearningCommonAPIProvider(context);
+  const commonUI = MachineLearningCommonUIProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
@@ -45,22 +47,22 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
-    common,
+    commonUI,
     api
   );
-  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, common);
+  const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
-  const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, common);
+  const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
-  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
+  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
@@ -74,7 +76,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     anomaliesTable,
     anomalyExplorer,
     api,
-    common,
+    commonAPI,
+    commonUI,
     customUrls,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,

@@ -11,7 +11,7 @@ import {
 } from '../../../../plugins/ml/public/application/data_frame_analytics/common/analytics';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommon } from './common';
+import { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
 
 enum ANALYSIS_CONFIG_TYPE {
@@ -32,7 +32,7 @@ const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon,
+  mlCommonUI: MlCommonUI,
   mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
@@ -113,16 +113,20 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setJobId(jobId: string) {
-      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
+      await mlCommonUI.setValueWithChecks('mlAnalyticsCreateJobFlyoutJobIdInput', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
     },
 
     async setJobDescription(jobDescription: string) {
-      await mlCommon.setValueWithChecks('mlDFAnalyticsJobCreationJobDescription', jobDescription, {
-        clearWithKeyboard: true,
-      });
+      await mlCommonUI.setValueWithChecks(
+        'mlDFAnalyticsJobCreationJobDescription',
+        jobDescription,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertJobDescriptionValue(jobDescription);
     },
 
@@ -218,7 +222,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setDestIndex(destIndex: string) {
-      await mlCommon.setValueWithChecks(
+      await mlCommonUI.setValueWithChecks(
         'mlAnalyticsCreateJobFlyoutDestinationIndexInput',
         destIndex,
         {
@@ -405,7 +409,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async setModelMemory(modelMemory: string) {
       await retry.tryForTime(15 * 1000, async () => {
-        await mlCommon.setValueWithChecks(
+        await mlCommonUI.setValueWithChecks(
           'mlAnalyticsCreateJobWizardModelMemoryInput',
           modelMemory,
           {
