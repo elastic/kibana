@@ -4,42 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import styled from 'styled-components';
+
+import { i18n } from '@kbn/i18n';
+
+/* eslint-disable react/display-name */
+
 import React, { memo } from 'react';
 import { useResolverTheme } from '../assets';
 
 /**
- * During user testing, one user indicated they wanted to see stronger visual relationships between
- * Nodes on the graph and what's in the table. Using the same symbol in both places (as below) could help with that.
+ * Icon representing a process node.
  */
-export const CubeForProcess = memo(function CubeForProcess({
-  isProcessTerminated,
+export const CubeForProcess = memo(function ({
+  running,
+  'data-test-subj': dataTestSubj,
 }: {
-  isProcessTerminated: boolean;
+  'data-test-subj'?: string;
+  /**
+   * True if the process represented by the node is still running.
+   */
+  running: boolean;
 }) {
   const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol, descriptionText } = cubeAssetsForNode(isProcessTerminated, false);
+  const { cubeSymbol } = cubeAssetsForNode(!running, false);
 
   return (
-    <>
-      <svg
-        style={{ position: 'relative', top: '0.4em', marginRight: '.25em' }}
-        className="table-process-icon"
-        width="1.5em"
-        height="1.5em"
-        viewBox="0 0 1 1"
-      >
-        <desc>{descriptionText}</desc>
-        <use
-          role="presentation"
-          xlinkHref={cubeSymbol}
-          x={0}
-          y={0}
-          width={1}
-          height={1}
-          opacity="1"
-          className="cube"
-        />
-      </svg>
-    </>
+    <StyledSVG width="1.5em" height="1.5em" viewBox="0 0 1 1" data-test-subj={dataTestSubj}>
+      <desc>
+        {i18n.translate('xpack.securitySolution.resolver.node_icon', {
+          defaultMessage: '{running, select, true {Running Process} false {Terminated Process}}',
+          values: { running },
+        })}
+      </desc>
+      <use
+        role="presentation"
+        xlinkHref={cubeSymbol}
+        x={0}
+        y={0}
+        width={1}
+        height={1}
+        opacity="1"
+        className="cube"
+      />
+    </StyledSVG>
   );
 });
+
+const StyledSVG = styled.svg`
+  position: relative;
+  top: 0.4em;
+  margin-right: 0.25em;
+`;

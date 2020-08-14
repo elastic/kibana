@@ -51,6 +51,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
 
         await this.setPublicUrl(config, coreStart.http);
 
@@ -68,6 +70,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+        const { chrome } = coreStart;
+        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+
+        await this.setPublicUrl(config, coreStart.http);
 
         const { renderApp } = await import('./applications');
         const { WorkplaceSearch } = await import('./applications/workplace_search');

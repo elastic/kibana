@@ -21,20 +21,6 @@ import * as Rx from 'rxjs';
 
 import { mockCluster } from './cluster_manager.test.mocks';
 
-jest.mock('./run_kbn_optimizer', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires,no-shadow
-  const Rx = require('rxjs');
-
-  return {
-    runKbnOptimizer: () =>
-      new Rx.BehaviorSubject({
-        type: 'compiler success',
-        durSec: 0,
-        bundles: [],
-      }),
-  };
-});
-
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({
     on: jest.fn(),
@@ -43,17 +29,25 @@ jest.mock('readline', () => ({
   })),
 }));
 
-const mockConfig: any = {
-  get: (key: string) => {
-    expect(key).toBe('optimize.enabled');
-    return false;
-  },
-};
+const mockConfig: any = {};
 
 import { sample } from 'lodash';
 
-import { ClusterManager } from './cluster_manager';
+import { ClusterManager, SomeCliArgs } from './cluster_manager';
 import { Worker } from './worker';
+
+const CLI_ARGS: SomeCliArgs = {
+  disableOptimizer: true,
+  open: false,
+  oss: false,
+  quiet: false,
+  repl: false,
+  runExamples: false,
+  silent: false,
+  watch: false,
+  cache: false,
+  dist: false,
+};
 
 describe('CLI cluster manager', () => {
   beforeEach(() => {
@@ -75,17 +69,18 @@ describe('CLI cluster manager', () => {
   });
 
   test('has two workers', () => {
-    const manager = new ClusterManager({}, mockConfig);
+    const manager = new ClusterManager(CLI_ARGS, mockConfig);
 
-    expect(manager.workers).toHaveLength(2);
-    for (const worker of manager.workers) expect(worker).toBeInstanceOf(Worker);
+    expect(manager.workers).toHaveLength(1);
+    for (const worker of manager.workers) {
+      expect(worker).toBeInstanceOf(Worker);
+    }
 
-    expect(manager.optimizer).toBeInstanceOf(Worker);
     expect(manager.server).toBeInstanceOf(Worker);
   });
 
   test('delivers broadcast messages to other workers', () => {
-    const manager = new ClusterManager({}, mockConfig);
+    const manager = new ClusterManager(CLI_ARGS, mockConfig);
 
     for (const worker of manager.workers) {
       Worker.prototype.start.call(worker); // bypass the debounced start method
@@ -110,7 +105,7 @@ describe('CLI cluster manager', () => {
     test('correctly configures `BasePathProxy`.', async () => {
       const basePathProxyMock = { start: jest.fn() };
 
-      new ClusterManager({}, mockConfig, basePathProxyMock as any);
+      new ClusterManager(CLI_ARGS, mockConfig, basePathProxyMock as any);
 
       expect(basePathProxyMock.start).toHaveBeenCalledWith({
         shouldRedirectFromOldBasePath: expect.any(Function),
@@ -125,7 +120,7 @@ describe('CLI cluster manager', () => {
 
       beforeEach(async () => {
         const basePathProxyMock = { start: jest.fn() };
-        clusterManager = new ClusterManager({}, mockConfig, basePathProxyMock as any);
+        clusterManager = new ClusterManager(CLI_ARGS, mockConfig, basePathProxyMock as any);
         [[{ delayUntil, shouldRedirectFromOldBasePath }]] = basePathProxyMock.start.mock.calls;
       });
 
@@ -147,7 +142,6 @@ describe('CLI cluster manager', () => {
       describe('delayUntil()', () => {
         test('returns an observable which emits when the server and kbnOptimizer are ready and completes', async () => {
           clusterManager.serverReady$.next(false);
-          clusterManager.optimizerReady$.next(false);
           clusterManager.kbnOptimizerReady$.next(false);
 
           const events: Array<string | Error> = [];

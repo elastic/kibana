@@ -21,7 +21,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
         type="button"
       >
         <span
-          className="euiButtonEmpty__content"
+          className="euiButtonContent euiButtonEmpty__content"
         >
           <span
             className="euiButtonEmpty__text"
