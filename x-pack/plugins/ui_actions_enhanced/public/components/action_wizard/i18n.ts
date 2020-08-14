@@ -16,7 +16,7 @@ export const txtChangeButton = i18n.translate(
 export const txtTriggerPickerLabel = i18n.translate(
   'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerLabel',
   {
-    defaultMessage: 'Show drilldown for:',
+    defaultMessage: 'Pick a trigger:',
   }
 );
 

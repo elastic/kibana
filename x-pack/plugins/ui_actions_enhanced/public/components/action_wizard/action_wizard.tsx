@@ -161,10 +161,10 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
         children: (
           <EuiText size="s">
             <h5>
-              {txtTriggerPickerLabel}{' '}
-              <EuiText size="xs">
-                <EuiLink href={triggerPickerDocsLink}>{txtTriggerPickerHelpText}</EuiLink>
-              </EuiText>
+              <span>{txtTriggerPickerLabel}</span>{' '}
+              <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                {txtTriggerPickerHelpText}
+              </EuiLink>
             </h5>
           </EuiText>
         ),
