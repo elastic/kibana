@@ -4,6 +4,8 @@
 <titleabbrev>7.9</titleabbrev>
 ++++
 
+coming[7.9.0]
+
 This page discusses the breaking changes that you need to be aware of when migrating
 your application to Kibana 7.9.
 
