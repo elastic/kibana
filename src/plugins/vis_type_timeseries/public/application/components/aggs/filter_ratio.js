@@ -24,19 +24,19 @@ import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {
   const indexFields = fields[indexPattern];
@@ -51,13 +51,13 @@ export const FilterRatioAgg = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, props.model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
+  const handleQueryChange = (name, value) => handleChange?.({ [name]: value });
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const defaults = {
-    numerator: '*',
-    denominator: '*',
+    numerator: { query: '', language: getDefaultQueryLanguage() },
+    denominator: { query: '', language: getDefaultQueryLanguage() },
     metric_agg: 'count',
   };
 
@@ -101,7 +101,14 @@ export const FilterRatioAgg = (props) => {
               />
             }
           >
-            <EuiFieldText onChange={handleTextChange('numerator')} value={model.numerator} />
+            <QueryBarWrapper
+              query={{
+                language: model.numerator.language || getDefaultQueryLanguage(),
+                query: model.numerator.query || '',
+              }}
+              onChange={(query) => handleQueryChange('numerator', query)}
+              indexPatterns={[indexPattern]}
+            />
           </EuiFormRow>
         </EuiFlexItem>
 
@@ -115,7 +122,14 @@ export const FilterRatioAgg = (props) => {
               />
             }
           >
-            <EuiFieldText onChange={handleTextChange('denominator')} value={model.denominator} />
+            <QueryBarWrapper
+              query={{
+                language: model.denominator.language || getDefaultQueryLanguage(),
+                query: model.denominator.query || '',
+              }}
+              onChange={(query) => handleQueryChange('denominator', query)}
+              indexPatterns={[indexPattern]}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

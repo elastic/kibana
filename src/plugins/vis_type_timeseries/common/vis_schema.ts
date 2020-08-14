@@ -80,8 +80,18 @@ export const metricsItems = schema.object({
   field: stringOptionalNullable,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
-  numerator: stringOptionalNullable,
-  denominator: stringOptionalNullable,
+  numerator: schema.maybe(
+    schema.object({
+      language: schema.string(),
+      query: schema.string(),
+    })
+  ),
+  denominator: schema.maybe(
+    schema.object({
+      language: schema.string(),
+      query: schema.string(),
+    })
+  ),
   sigma: stringOptionalNullable,
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
