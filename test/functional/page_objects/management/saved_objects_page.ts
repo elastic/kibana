@@ -133,7 +133,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         ).click();
       } else {
         log.debug(
-          `we didn't find a menu element so should be a relastionships element for (${title}) to click`
+          `we didn't find a menu element so should be a "copy to space" element for (${title}) to click`
         );
         // or the action elements are on the row without the menu
         await table[title].copySaveObjectsElement?.click();
