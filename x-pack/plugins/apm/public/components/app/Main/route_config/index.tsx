@@ -37,7 +37,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-const renderAsRedirectTo = (to: string) => {
+export const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
       to={{
@@ -266,15 +266,5 @@ export const routes: BreadcrumbRoute[] = [
       }
     ),
     name: RouteName.ANOMALY_DETECTION,
-  },
-];
-
-export const rumRoutes: BreadcrumbRoute[] = [
-  {
-    exact: true,
-    path: '/',
-    render: renderAsRedirectTo('/client-side-monitoring'),
-    breadcrumb: 'Client Side Monitoring',
-    name: RouteName.CLIENT_SIDE_MONITORING,
   },
 ];

@@ -4,22 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmRoute } from '@elastic/apm-rum-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
+import { CoreStart, AppMountParameters } from 'kibana/public';
 import { ApmPluginSetupDeps } from '../plugin';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LicenseProvider } from '../context/LicenseContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
+
 import {
   KibanaContextProvider,
   useUiSetting$,
@@ -27,17 +20,40 @@ import {
 import { px, units } from '../style/variables';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { routes } from '../components/app/Main/route_config';
 import { history, resetHistory } from '../utils/history';
-import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
+import { RumHome } from '../components/app/RumDashboard/RumHome';
+import { ConfigSchema } from '../index';
+import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
+import { RouteName } from '../components/app/Main/route_config/route_names';
+import {
+  renderAsRedirectTo,
+  routes,
+} from '../components/app/Main/route_config';
+import { ApmPluginContext } from '../context/ApmPluginContext';
+import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
+import { LocationProvider } from '../context/LocationContext';
+import { MatchedRouteProvider } from '../context/MatchedRouteContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
+import { LicenseProvider } from '../context/LicenseContext';
 
-const MainContainer = styled.div`
+const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
   height: 100%;
 `;
 
-function App() {
+export const rumRoutes: BreadcrumbRoute[] = [
+  {
+    exact: true,
+    path: '/',
+    render: renderAsRedirectTo('/csm'),
+    breadcrumb: 'Client Side Monitoring',
+    name: RouteName.CSM,
+  },
+];
+
+function CsmApp() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
@@ -48,20 +64,16 @@ function App() {
         darkMode,
       })}
     >
-      <MainContainer data-test-subj="apmMainContainer" role="main">
-        <UpdateBreadcrumbs routes={routes} />
+      <CsmMainContainer data-test-subj="csmMainContainer" role="main">
+        <UpdateBreadcrumbs routes={rumRoutes} />
         <Route component={ScrollToTopOnPathChange} />
-        <Switch>
-          {routes.map((route, i) => (
-            <ApmRoute key={i} {...route} />
-          ))}
-        </Switch>
-      </MainContainer>
+        <RumHome />
+      </CsmMainContainer>
     </ThemeProvider>
   );
 }
 
-export function ApmAppRoot({
+export function CsmAppRoot({
   core,
   deps,
   routerHistory,
@@ -99,7 +111,7 @@ export function ApmAppRoot({
                   <UrlParamsProvider>
                     <LoadingIndicatorProvider>
                       <LicenseProvider>
-                        <App />
+                        <CsmApp />
                       </LicenseProvider>
                     </LoadingIndicatorProvider>
                   </UrlParamsProvider>
@@ -124,12 +136,12 @@ export const renderApp = (
 ) => {
   resetHistory();
   ReactDOM.render(
-    <ApmAppRoot
+    <CsmAppRoot
       core={core}
       deps={deps}
       routerHistory={history}
       config={config}
-      app={<App />}
+      app={<CsmApp />}
     />,
     element
   );

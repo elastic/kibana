@@ -137,16 +137,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     core.application.register({
-      id: 'clientSideMonitoring',
+      id: 'csm',
       title: 'Client Side Monitoring',
       order: 8500,
-      euiIconType: 'apmApp',
-      icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle
-        const { renderApp } = await import('./application/rumApp');
+        const { renderApp } = await import('./application/csmApp');
         // Get start services
         const [coreStart] = await core.getStartServices();
         await setupLazyStuff(coreStart);
