@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NodeAttrsDetails } from './node_attrs_details';
+export { WorkplaceSearchNav } from './nav';
