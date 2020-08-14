@@ -9,3 +9,5 @@ import { FileUploadPlugin } from './plugin';
 export function plugin() {
   return new FileUploadPlugin();
 }
+
+export { FileUploadComponentProps } from './get_file_upload_component';
