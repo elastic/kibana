@@ -35,7 +35,13 @@ export interface ISearchSetup {
    * Extension point exposed for other plugins to register their own search
    * strategies.
    */
-  registerSearchStrategy: (name: string, strategy: ISearchStrategy) => void;
+  registerSearchStrategy: <
+    SearchStrategyRequest = IEsSearchRequest,
+    SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  >(
+    name: string,
+    strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
+  ) => void;
 
   /**
    * Used internally for telemetry
@@ -43,12 +49,17 @@ export interface ISearchSetup {
   usage?: SearchUsage;
 }
 
-export interface ISearchStart {
+export interface ISearchStart<
+  SearchStrategyRequest = any,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+> {
   /**
    * Get other registered search strategies. For example, if a new strategy needs to use the
    * already-registered ES search strategy, it can use this function to accomplish that.
    */
-  getSearchStrategy: (name: string) => ISearchStrategy;
+  getSearchStrategy: (
+    name: string
+  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
   search: (
     context: RequestHandlerContext,
     request: IKibanaSearchRequest,
@@ -60,11 +71,14 @@ export interface ISearchStart {
  * Search strategy interface contains a search method that takes in a request and returns a promise
  * that resolves to a response.
  */
-export interface ISearchStrategy {
+export interface ISearchStrategy<
+  SearchStrategyRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+> {
   search: (
     context: RequestHandlerContext,
-    request: IEsSearchRequest,
+    request: SearchStrategyRequest,
     options?: ISearchOptions
-  ) => Promise<IEsSearchResponse>;
+  ) => Promise<SearchStrategyResponse>;
   cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
 }

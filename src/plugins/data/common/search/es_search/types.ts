@@ -30,6 +30,6 @@ export interface IEsSearchRequest extends IKibanaSearchRequest {
   indexType?: string;
 }
 
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  rawResponse: SearchResponse<any>;
+export interface IEsSearchResponse<Source = any, Aggs = any> extends IKibanaSearchResponse {
+  rawResponse: SearchResponse<Source, Aggs>;
 }
