@@ -30,7 +30,6 @@ Array [
         },
       ]
     }
-    data-test-page={0}
     data-test-subj="reportJobListing"
     isSelectable={true}
     itemId="id"
@@ -57,7 +56,6 @@ Array [
   >
     <div
       className="euiBasicTable euiBasicTable-loading"
-      data-test-page={0}
       data-test-subj="reportJobListing"
     >
       <div>
@@ -368,7 +366,6 @@ Array [
   </EuiBasicTable>,
   <div
     className="euiBasicTable euiBasicTable-loading"
-    data-test-page={0}
     data-test-subj="reportJobListing"
   >
     <div>

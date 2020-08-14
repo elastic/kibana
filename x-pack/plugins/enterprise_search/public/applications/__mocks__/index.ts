@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { mockHistory } from './react_router_history.mock';
+export { mockHistory, mockLocation } from './react_router_history.mock';
 export { mockKibanaContext } from './kibana_context.mock';
 export { mockLicenseContext } from './license_context.mock';
 export {
