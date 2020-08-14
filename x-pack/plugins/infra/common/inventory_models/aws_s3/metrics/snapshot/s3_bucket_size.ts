@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const s3BucketSize: SnapshotModel = {
+export const s3BucketSize: MetricsUIAggregation = {
   s3BucketSize: {
     max: {
       field: 'aws.s3_daily_storage.bucket.size.bytes',
