@@ -27,6 +27,7 @@ import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC = () => {
   const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+
   if (!enterpriseSearchUrl)
     return (
       <Switch>

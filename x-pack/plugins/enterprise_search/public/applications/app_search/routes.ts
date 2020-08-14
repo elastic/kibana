@@ -11,3 +11,7 @@ export const CREDENTIALS_PATH = '/credentials';
 export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
 
 export const ENGINES_PATH = '/engines';
+export const CREATE_ENGINES_PATH = `${ENGINES_PATH}/new`;
+
+export const ENGINE_PATH = '/engines/:engineName';
+export const getEngineRoute = (engineName: string) => `${ENGINES_PATH}/${engineName}`;
