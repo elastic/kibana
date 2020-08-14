@@ -1398,7 +1398,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     type="button"
                   >
                     <span
-                      className="euiButtonEmpty__content"
+                      className="euiButtonContent euiButtonEmpty__content"
                     >
                       <span
                         className="euiButtonEmpty__text"
@@ -2880,7 +2880,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     type="button"
                   >
                     <span
-                      className="euiButtonEmpty__content"
+                      className="euiButtonContent euiButtonEmpty__content"
                     >
                       <span
                         className="euiButtonEmpty__text"
@@ -3178,7 +3178,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     type="button"
                   >
                     <span
-                      className="euiButtonEmpty__content"
+                      className="euiButtonContent euiButtonEmpty__content"
                     >
                       <span
                         className="euiButtonEmpty__text"
