@@ -63,8 +63,9 @@ export const AppSearch: React.FC = () => {
 };
 
 export const AppSearchNav: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
-  const externalUrl = `${enterpriseSearchUrl}/as#`;
+  const {
+    externalUrl: { getAppSearchUrl },
+  } = useContext(KibanaContext) as IKibanaContext;
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
@@ -73,17 +74,17 @@ export const AppSearchNav: React.FC = () => {
           defaultMessage: 'Engines',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={externalUrl + SETTINGS_PATH}>
+      <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
           defaultMessage: 'Account Settings',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={externalUrl + CREDENTIALS_PATH}>
+      <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
           defaultMessage: 'Credentials',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={externalUrl + ROLE_MAPPINGS_PATH}>
+      <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
           defaultMessage: 'Role Mappings',
         })}

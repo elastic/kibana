@@ -8,6 +8,6 @@ export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
 export const SETTINGS_PATH = '/settings/account';
 export const CREDENTIALS_PATH = '/credentials';
-export const ROLE_MAPPINGS_PATH = '/role-mappings';
+export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
 
 export const ENGINES_PATH = '/engines';
