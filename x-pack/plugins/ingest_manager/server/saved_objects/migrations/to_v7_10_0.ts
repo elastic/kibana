@@ -15,15 +15,13 @@ export const migrateAgentToV7100: SavedObjectMigrationFn<
   },
   Agent
 > = (agentDoc) => {
-  const updatedAgentDoc = cloneDeep(agentDoc);
+  agentDoc.attributes.policy_id = agentDoc.attributes.policy_id;
+  delete agentDoc.attributes.policy_id;
 
-  updatedAgentDoc.attributes.policy_id = agentDoc.attributes.policy_id;
-  delete updatedAgentDoc.attributes.policy_id;
+  agentDoc.attributes.policy_revision = agentDoc.attributes.policy_revision;
+  delete agentDoc.attributes.policy_revision;
 
-  updatedAgentDoc.attributes.policy_revision = agentDoc.attributes.policy_revision;
-  delete updatedAgentDoc.attributes.policy_revision;
-
-  return updatedAgentDoc;
+  return agentDoc;
 };
 
 export const migrateAgentEventToV7100: SavedObjectMigrationFn<
@@ -32,12 +30,10 @@ export const migrateAgentEventToV7100: SavedObjectMigrationFn<
   },
   AgentEvent
 > = (agentEventDoc) => {
-  const updatedAgentEventDoc = cloneDeep(agentEventDoc);
+  agentEventDoc.attributes.policy_id = agentEventDoc.attributes.policy_id;
+  delete agentEventDoc.attributes.policy_id;
 
-  updatedAgentEventDoc.attributes.policy_id = agentEventDoc.attributes.policy_id;
-  delete updatedAgentEventDoc.attributes.policy_id;
-
-  return updatedAgentEventDoc;
+  return agentEventDoc;
 };
 
 export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
@@ -46,12 +42,10 @@ export const migrateAgentPolicyToV7100: SavedObjectMigrationFn<
   },
   AgentPolicy
 > = (agentPolicyDoc) => {
-  const updatedAgentPolicyDoc = cloneDeep(agentPolicyDoc);
+  agentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
+  delete agentPolicyDoc.attributes.package_configs;
 
-  updatedAgentPolicyDoc.attributes.package_policies = agentPolicyDoc.attributes.package_configs;
-  delete updatedAgentPolicyDoc.attributes.package_configs;
-
-  return updatedAgentPolicyDoc;
+  return agentPolicyDoc;
 };
 
 export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
@@ -60,12 +54,10 @@ export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
   },
   EnrollmentAPIKey
 > = (enrollmentApiKeyDoc) => {
-  const updatedEnrollmentApiKeyDoc = cloneDeep(enrollmentApiKeyDoc);
+  enrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.policy_id;
+  delete enrollmentApiKeyDoc.attributes.policy_id;
 
-  updatedEnrollmentApiKeyDoc.attributes.policy_id = enrollmentApiKeyDoc.attributes.policy_id;
-  delete updatedEnrollmentApiKeyDoc.attributes.policy_id;
-
-  return updatedEnrollmentApiKeyDoc;
+  return enrollmentApiKeyDoc;
 };
 
 export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
@@ -74,10 +66,8 @@ export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
   },
   PackagePolicy
 > = (packagePolicyDoc) => {
-  const updatedPackagePolicyDoc = cloneDeep(packagePolicyDoc);
+  packagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.policy_id;
+  delete packagePolicyDoc.attributes.policy_id;
 
-  updatedPackagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.policy_id;
-  delete updatedPackagePolicyDoc.attributes.policy_id;
-
-  return updatedPackagePolicyDoc;
+  return packagePolicyDoc;
 };
