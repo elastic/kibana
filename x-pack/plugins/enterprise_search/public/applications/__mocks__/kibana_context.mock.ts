@@ -5,6 +5,7 @@
  */
 
 import { httpServiceMock } from 'src/core/public/mocks';
+import { ExternalUrl } from '../shared/enterprise_search_url';
 
 /**
  * A set of default Kibana context values to use across component tests.
@@ -15,4 +16,5 @@ export const mockKibanaContext = {
   setBreadcrumbs: jest.fn(),
   setDocTitle: jest.fn(),
   enterpriseSearchUrl: 'http://localhost:3002',
+  externalUrl: new ExternalUrl('http://localhost:3002'),
 };

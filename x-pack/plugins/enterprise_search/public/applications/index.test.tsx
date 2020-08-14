@@ -21,6 +21,7 @@ describe('renderApp', () => {
   const plugins = {
     licensing: licensingMock.createSetup(),
   } as any;
+  const data = { externalUrl: {} } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,19 +31,19 @@ describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
     const MockApp = () => <div className="hello-world">Hello world!</div>;
 
-    const unmount = renderApp(MockApp, core, params, config, plugins);
+    const unmount = renderApp(MockApp, core, params, config, plugins, data);
     expect(params.element.querySelector('.hello-world')).not.toBeNull();
     unmount();
     expect(params.element.innerHTML).toEqual('');
   });
 
   it('renders AppSearch', () => {
-    renderApp(AppSearch, core, params, config, plugins);
+    renderApp(AppSearch, core, params, config, plugins, data);
     expect(params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 
   it('renders WorkplaceSearch', () => {
-    renderApp(WorkplaceSearch, core, params, config, plugins);
+    renderApp(WorkplaceSearch, core, params, config, plugins, data);
     expect(params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 });
