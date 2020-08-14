@@ -1,0 +1,17 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+kibanaPipeline(timeoutMinutes: 180) {
+  catchError {
+    workers.base(size: 's', ramDisk: false) {
+      kibanaPipeline.bash('test/scripts/jenkins_security_solution_cypress.sh', 'Execute Security Solution Cypress Tests')
+    }
+  }
+
+  if (params.NOTIFY_ON_FAILURE) {
+    slackNotifications.onFailure(channel: '#security-solution-slack-testing')
+    kibanaPipeline.sendMail(to: 'gloria.delatorre@elastic.co')
+  }
+}
