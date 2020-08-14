@@ -17,7 +17,7 @@ import { LastEventTime } from '../../../common/components/last_event_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../common/components/navigation';
 import { KpiHostsComponent } from '../../components/kpi_hosts';
