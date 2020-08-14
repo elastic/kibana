@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFormFieldset,
   EuiTitle,
@@ -12,6 +12,9 @@ import {
   EuiRadioGroup,
   EuiText,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -31,11 +34,11 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
 
   const createNewCopiesDisabled = {
     id: 'createNewCopiesDisabled',
-    title: i18n.translate(
+    text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledTitle',
       { defaultMessage: 'Check for existing objects' }
     ),
-    text: i18n.translate(
+    tooltip: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.disabledText',
       {
         defaultMessage:
@@ -45,11 +48,11 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
   };
   const createNewCopiesEnabled = {
     id: 'createNewCopiesEnabled',
-    title: i18n.translate(
+    text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledTitle',
       { defaultMessage: 'Create new objects with random IDs' }
     ),
-    text: i18n.translate(
+    tooltip: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.createNewCopies.enabledText',
       { defaultMessage: 'All copied objects will be created with new random IDs.' }
     ),
@@ -70,11 +73,11 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
   };
   const includeRelated = {
     id: 'includeRelated',
-    title: i18n.translate(
+    text: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.title',
       { defaultMessage: 'Include related saved objects' }
     ),
-    text: i18n.translate(
+    tooltip: i18n.translate(
       'xpack.spaces.management.copyToSpace.copyModeControl.includeRelated.text',
       {
         defaultMessage:
@@ -82,19 +85,24 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
       }
     ),
   };
-  const formTitle = i18n.translate(
-    'xpack.spaces.management.copyToSpace.copyModeControl.formTitle',
+  const copyOptionsTitle = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.copyOptionsTitle',
     { defaultMessage: 'Copy options' }
   );
+  const relationshipOptionsTitle = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyModeControl.relationshipOptionsTitle',
+    { defaultMessage: 'Relationship options' }
+  );
 
-  const createLabel = ({ title, text }: { title: string; text: string }, subduedText = true) => (
-    <Fragment>
-      <EuiText>{title}</EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText color={subduedText ? 'subdued' : undefined} size="s">
-        {text}
-      </EuiText>
-    </Fragment>
+  const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>{text}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   const onChange = (partial: Partial<CopyMode>) => {
     if (partial.createNewCopies !== undefined) {
@@ -106,49 +114,61 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
   };
 
   return (
-    <EuiFormFieldset
-      legend={{
-        children: (
-          <EuiTitle size="xs">
-            <span>{formTitle}</span>
-          </EuiTitle>
-        ),
-      }}
-    >
-      <EuiCheckableCard
-        id={createNewCopiesDisabled.id}
-        label={createLabel(createNewCopiesDisabled)}
-        checked={!createNewCopies}
-        onChange={() => onChange({ createNewCopies: false })}
+    <>
+      <EuiFormFieldset
+        legend={{
+          children: (
+            <EuiTitle size="xs">
+              <span>{copyOptionsTitle}</span>
+            </EuiTitle>
+          ),
+        }}
       >
-        <EuiRadioGroup
-          options={[overwriteEnabled, overwriteDisabled]}
-          idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
-          onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
-          disabled={createNewCopies}
-          data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
+        <EuiCheckableCard
+          id={createNewCopiesDisabled.id}
+          label={createLabel(createNewCopiesDisabled)}
+          checked={!createNewCopies}
+          onChange={() => onChange({ createNewCopies: false })}
+        >
+          <EuiRadioGroup
+            options={[overwriteEnabled, overwriteDisabled]}
+            idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
+            onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
+            disabled={createNewCopies}
+            data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
+          />
+        </EuiCheckableCard>
+
+        <EuiSpacer size="s" />
+
+        <EuiCheckableCard
+          id={createNewCopiesEnabled.id}
+          label={createLabel(createNewCopiesEnabled)}
+          checked={createNewCopies}
+          onChange={() => onChange({ createNewCopies: true })}
         />
-      </EuiCheckableCard>
+      </EuiFormFieldset>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      <EuiCheckableCard
-        id={createNewCopiesEnabled.id}
-        label={createLabel(createNewCopiesEnabled)}
-        checked={createNewCopies}
-        onChange={() => onChange({ createNewCopies: true })}
-      />
-
-      <EuiSpacer size="s" />
-
-      <EuiCheckableCard
-        id={includeRelated.id}
-        label={createLabel(includeRelated, false)}
-        checkableType="checkbox"
-        checked={true}
-        onChange={() => {}} // noop
-        disabled
-      />
-    </EuiFormFieldset>
+      <EuiFormFieldset
+        legend={{
+          children: (
+            <EuiTitle size="xs">
+              <span>{relationshipOptionsTitle}</span>
+            </EuiTitle>
+          ),
+        }}
+      >
+        <EuiCheckableCard
+          id={includeRelated.id}
+          label={createLabel(includeRelated)}
+          checkableType="checkbox"
+          checked={true}
+          onChange={() => {}} // noop
+          disabled
+        />
+      </EuiFormFieldset>
+    </>
   );
 };

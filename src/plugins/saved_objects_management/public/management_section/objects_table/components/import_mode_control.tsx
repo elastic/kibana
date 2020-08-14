@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFormFieldset,
   EuiTitle,
@@ -25,6 +25,9 @@ import {
   EuiRadioGroup,
   EuiText,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -49,11 +52,11 @@ export const ImportModeControl = ({
 
   const createNewCopiesDisabled = {
     id: 'createNewCopiesDisabled',
-    title: i18n.translate(
+    text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledTitle',
       { defaultMessage: 'Check for existing objects' }
     ),
-    text: i18n.translate(
+    tooltip: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
       {
         defaultMessage:
@@ -63,11 +66,11 @@ export const ImportModeControl = ({
   };
   const createNewCopiesEnabled = {
     id: 'createNewCopiesEnabled',
-    title: i18n.translate(
+    text: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledTitle',
       { defaultMessage: 'Create new objects with random IDs' }
     ),
-    text: i18n.translate(
+    tooltip: i18n.translate(
       'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
       { defaultMessage: 'All imported objects will be created with new random IDs.' }
     ),
@@ -86,19 +89,20 @@ export const ImportModeControl = ({
       { defaultMessage: 'Request action when conflict occurs' }
     ),
   };
-  const formTitle = i18n.translate(
-    'savedObjectsManagement.objectsTable.importModeControl.formTitle',
+  const importOptionsTitle = i18n.translate(
+    'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
     { defaultMessage: 'Import options' }
   );
 
-  const createLabel = ({ title, text }: { title: string; text: string }, subduedText = true) => (
-    <Fragment>
-      <EuiText>{title}</EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText color={subduedText ? 'subdued' : undefined} size="s">
-        {text}
-      </EuiText>
-    </Fragment>
+  const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>{text}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   const onChange = (partial: Partial<ImportMode>) => {
     if (partial.createNewCopies !== undefined) {
@@ -128,7 +132,7 @@ export const ImportModeControl = ({
       legend={{
         children: (
           <EuiTitle size="xs">
-            <span>{formTitle}</span>
+            <span>{importOptionsTitle}</span>
           </EuiTitle>
         ),
       }}
