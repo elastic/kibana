@@ -224,10 +224,10 @@ describe('test agent acks services', () => {
     expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "policy_revision": 4,
           "packages": Array [
             "system",
           ],
+          "policy_revision": 4,
         },
         "id": "id",
         "type": "fleet-agents",
