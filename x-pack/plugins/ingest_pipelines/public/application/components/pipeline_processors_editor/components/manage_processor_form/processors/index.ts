@@ -22,3 +22,4 @@ export { Grok } from './grok';
 export { Gsub } from './gsub';
 export { HtmlStrip } from './html_strip';
 export { Inference } from './inference';
+export { Join } from './join';

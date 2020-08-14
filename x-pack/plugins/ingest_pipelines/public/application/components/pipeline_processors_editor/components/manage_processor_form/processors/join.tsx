@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+
+import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
+
+import { FieldsConfig } from './shared';
+import { FieldNameField } from './common_fields/field_name_field';
+
+const { emptyField } = fieldValidators;
+
+const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
+  separator: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.separatorFieldLabel', {
+      defaultMessage: 'Separator',
+    }),
+    deserializer: String,
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.joinForm.separatorFieldHelpText',
+      {
+        defaultMessage: 'The separator character',
+      }
+    ),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.separatorRequiredError', {
+            defaultMessage: 'A separator value is required.',
+          })
+        ),
+      },
+    ],
+  },
+
+  /* Optional fields config */
+  target_field: {
+    type: FIELD_TYPES.TEXT,
+    deserializer: String,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldLabel', {
+      defaultMessage: 'Target field (optional)',
+    }),
+    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText', {
+      defaultMessage:
+        'The field to assign the joined value to. If empty, the field is updated in-place.',
+    }),
+  },
+};
+
+export const Join: FunctionComponent = () => {
+  return (
+    <>
+      <FieldNameField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.joinForm.fieldNameHelpText',
+          { defaultMessage: 'The field to be separated.' }
+        )}
+      />
+
+      <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
+
+      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+    </>
+  );
+};
