@@ -19,14 +19,22 @@
 import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
+  visualizeFieldTrigger,
+  visualizeGeoFieldTrigger,
 } from '../../../../../../ui_actions/public';
 import { getUiActions } from '../../../../kibana_services';
 import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
 
-function getTrigger(type: string) {
+function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
     ? VISUALIZE_GEO_FIELD_TRIGGER
     : VISUALIZE_FIELD_TRIGGER;
+}
+
+function getTrigger(type: string) {
+  return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
+    ? visualizeGeoFieldTrigger
+    : visualizeFieldTrigger;
 }
 
 async function getCompatibleActions(
@@ -48,18 +56,18 @@ export async function getVisualizeHref(
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
-  const trigger = getTrigger(field.type);
   if (!indexPatternId) return '';
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
     contextualFields,
+    trigger: getTrigger(field.type),
   };
   const compatibleActions = await getCompatibleActions(
     field.name,
     indexPatternId,
     contextualFields,
-    trigger
+    getTriggerConstant(field.type)
   );
   // enable the link only if only one action is registered
   return compatibleActions.length === 1 ? compatibleActions[0].getHref?.(triggerOptions) : '';
@@ -71,7 +79,7 @@ export function triggerVisualizeActions(
   contextualFields: string[]
 ) {
   if (!indexPatternId) return;
-  const trigger = getTrigger(field.type);
+  const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
     indexPatternId,
     fieldName: field.name,
@@ -89,7 +97,7 @@ export async function isFieldVisualizable(
     // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
     return false;
   }
-  const trigger = getTrigger(field.type);
+  const trigger = getTriggerConstant(field.type);
   const compatibleActions = await getCompatibleActions(
     field.name,
     indexPatternId,
