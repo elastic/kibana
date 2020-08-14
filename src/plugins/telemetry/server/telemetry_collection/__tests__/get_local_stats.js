@@ -179,23 +179,36 @@ describe('get_local_stats', () => {
 
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
-      const result = handleLocalStats(clusterInfo, clusterStatsWithNodesUsage, void 0, context);
+      const result = handleLocalStats(
+        clusterInfo,
+        clusterStatsWithNodesUsage,
+        void 0,
+        void 0,
+        context
+      );
       expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
       expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
       expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
-      expect(result.stack_stats).to.eql({ kibana: undefined });
+      expect(result.stack_stats).to.eql({ kibana: undefined, data: undefined });
     });
 
     it('returns expected object with xpack', () => {
-      const result = handleLocalStats(clusterInfo, clusterStatsWithNodesUsage, void 0, context);
+      const result = handleLocalStats(
+        clusterInfo,
+        clusterStatsWithNodesUsage,
+        void 0,
+        void 0,
+        context
+      );
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).to.be(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).to.be(combinedStatsResult.cluster_name);
       expect(stack.kibana).to.be(undefined); // not mocked for this test
+      expect(stack.data).to.be(undefined); // not mocked for this test
 
       expect(cluster.version).to.eql(combinedStatsResult.version);
       expect(cluster.cluster_stats).to.eql(combinedStatsResult.cluster_stats);

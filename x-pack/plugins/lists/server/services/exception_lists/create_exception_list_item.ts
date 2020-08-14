@@ -12,8 +12,8 @@ import {
   Description,
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemType,
   ExceptionListSoSchema,
-  ExceptionListType,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -43,7 +43,7 @@ interface CreateExceptionListItemOptions {
   user: string;
   tags: Tags;
   tieBreaker?: string;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
 }
 
 export const createExceptionListItem = async ({
@@ -64,7 +64,10 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
-  const transformedComments = transformCreateCommentsToComments({ comments, user });
+  const transformedComments = transformCreateCommentsToComments({
+    incomingComments: comments,
+    user,
+  });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
     comments: transformedComments,
@@ -72,6 +75,7 @@ export const createExceptionListItem = async ({
     created_by: user,
     description,
     entries,
+    immutable: undefined,
     item_id: itemId,
     list_id: listId,
     list_type: 'item',
@@ -81,6 +85,7 @@ export const createExceptionListItem = async ({
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_by: user,
+    version: undefined,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

@@ -36,6 +36,8 @@ export function MochaReporterProvider({ getService }) {
   let originalLogWriters;
   let reporterCaptureStartTime;
 
+  const failuresOverTime = [];
+
   return class MochaReporter extends Mocha.reporters.Base {
     constructor(runner, options) {
       super(runner, options);
@@ -154,29 +156,49 @@ export function MochaReporterProvider({ getService }) {
       //  - I started by trying to extract the Base.list() logic from mocha
       //    but it's a lot more complicated than this is horrible.
       //  - In order to fix the numbering and indentation we monkey-patch
-      //    console.log and parse the logged output.
+      //    Mocha.reporters.Base.consoleLog and parse the logged output.
       //
       let output = '';
-      const realLog = console.log;
-      console.log = (...args) => (output += `${format(...args)}\n`);
+      const realLog = Mocha.reporters.Base.consoleLog;
+      Mocha.reporters.Base.consoleLog = (...args) => (output += `${format(...args)}\n`);
       try {
         Mocha.reporters.Base.list([runnable]);
       } finally {
-        console.log = realLog;
+        Mocha.reporters.Base.consoleLog = realLog;
       }
 
+      const outputLines = output.split('\n');
+
+      const errorMarkerStart = outputLines.reduce((index, line, i) => {
+        if (index >= 0) {
+          return index;
+        }
+        return /Error:/.test(line) ? i : index;
+      }, -1);
+
+      const errorMessage = outputLines
+        // drop the first ${errorMarkerStart} lines, (empty + test title)
+        .slice(errorMarkerStart)
+        // move leading colors behind leading spaces
+        .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
+        .map((line) => ` ${line}`)
+        .join('\n');
+
       log.write(
-        `- ${colors.fail(`${symbols.err} fail: "${runnable.fullTitle()}"`)}` +
-          '\n' +
-          output
-            .split('\n')
-            // drop the first two lines, (empty + test title)
-            .slice(2)
-            // move leading colors behind leading spaces
-            .map((line) => line.replace(/^((?:\[.+m)+)(\s+)/, '$2$1'))
-            .map((line) => ` ${line}`)
-            .join('\n')
+        `- ${colors.fail(`${symbols.err} fail: ${runnable.fullTitle()}`)}` + '\n' + errorMessage
       );
+
+      // Prefer to reuse the nice Mocha nested title format for final summary
+      const nestedTitleFormat = outputLines
+        .slice(1, errorMarkerStart)
+        .join('\n')
+        // make sure to remove the list number
+        .replace(/\d+\)/, '');
+
+      failuresOverTime.push({
+        title: nestedTitleFormat,
+        error: errorMessage,
+      });
 
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
       // them here. Tests will re-capture the snapshot in `onTestEnd()`
@@ -188,7 +210,7 @@ export function MochaReporterProvider({ getService }) {
         log.setWriters(originalLogWriters);
       }
 
-      writeEpilogue(log, this.stats);
+      writeEpilogue(log, this.stats, failuresOverTime);
     };
   };
 }

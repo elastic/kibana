@@ -21,16 +21,15 @@ import Path from 'path';
 
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-ignore
+// @ts-expect-error
 import webpackMerge from 'webpack-merge';
-// @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
+import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
@@ -53,7 +52,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     output: {
       path: bundle.outputDir,
-      filename: `[name].${bundle.type}.js`,
+      filename: `${bundle.id}.${bundle.type}.js`,
+      chunkFilename: `${bundle.id}.chunk.[id].js`,
       devtoolModuleFilenameTemplate: (info) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
@@ -70,8 +70,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     plugins: [
       new CleanWebpackPlugin(),
-      new DisallowedSyntaxPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
     module: {
@@ -134,8 +134,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            {
-              resourceQuery: /dark|light/,
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
               use: [
                 {
                   loader: 'style-loader',
@@ -151,79 +151,39 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   options: {
                     sourceMap: !worker.dist,
                     config: {
-                      path: require.resolve('./postcss.config'),
-                    },
-                  },
-                },
-                {
-                  loader: 'resolve-url-loader',
-                  options: {
-                    join: (_: string, __: any) => (uri: string, base?: string) => {
-                      // apply only to legacy platform styles
-                      if (!base || !parseDirPath(base).dirs.includes('legacy')) {
-                        return null;
-                      }
-
-                      if (uri.startsWith('ui/assets')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/core/server/core_app/',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      // manually force ui/* urls in legacy styles to resolve to ui/legacy/public
-                      if (uri.startsWith('ui/')) {
-                        return Path.resolve(
-                          worker.repoRoot,
-                          'src/legacy/ui/public',
-                          uri.replace('ui/', '')
-                        );
-                      }
-
-                      return null;
+                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
                     },
                   },
                 },
                 {
                   loader: 'sass-loader',
                   options: {
-                    // must always be enabled as long as we're using the `resolve-url-loader` to
-                    // rewrite `ui/*` urls. They're dropped by subsequent loaders though
-                    sourceMap: true,
                     prependData(loaderContext: webpack.loader.LoaderContext) {
                       return `@import ${stringifyRequest(
                         loaderContext,
                         Path.resolve(
                           worker.repoRoot,
-                          'src/legacy/ui/public/styles/_styling_constants.scss'
+                          `src/core/public/core_app/styles/_globals_${theme}.scss`
                         )
                       )};\n`;
                     },
                     webpackImporter: false,
                     implementation: require('node-sass'),
-                    sassOptions(loaderContext: webpack.loader.LoaderContext) {
-                      const darkMode = loaderContext.resourceQuery === '?dark';
-
-                      return {
-                        outputStyle: 'nested',
-                        includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                        sourceMapRoot: `/${bundle.type}:${bundle.id}`,
-                        importer: (url: string) => {
-                          if (darkMode && url.includes('eui_colors_light')) {
-                            return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
-                          }
-
-                          return { file: url };
-                        },
-                      };
+                    sassOptions: {
+                      outputStyle: 'nested',
+                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
                 },
               ],
-            },
+            })),
             {
               loader: require.resolve('./theme_loader'),
+              options: {
+                bundleId: bundle.id,
+                themeTags: worker.themeTags,
+              },
             },
           ],
         },
@@ -261,6 +221,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
+        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
     },
 

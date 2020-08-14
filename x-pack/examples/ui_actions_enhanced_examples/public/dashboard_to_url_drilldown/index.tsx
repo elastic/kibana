@@ -8,11 +8,9 @@ import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/ui_actions_enhanced/public';
-import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
+import { ChartActionContext } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
   try {
@@ -23,7 +21,7 @@ function isValidUrl(url: string) {
   }
 }
 
-export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
+export type ActionContext = ChartActionContext;
 
 export interface Config {
   url: string;
@@ -104,7 +102,15 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext>
     return config.url;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
+  public readonly execute = async (
+    config: Config,
+    context: ActionExecutionContext<ActionContext>
+  ) => {
+    // Just for showcasing:
+    // we can get trigger a which caused this drilldown execution
+    // eslint-disable-next-line no-console
+    console.log(context.trigger?.id);
+
     const url = await this.getHref(config, context);
 
     if (config.openInNewTab) {

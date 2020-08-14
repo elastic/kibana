@@ -21,6 +21,8 @@ export {
   calculateObjectHash,
   defer,
   Defer,
+  fieldWildcardFilter,
+  fieldWildcardMatcher,
   Get,
   JsonArray,
   JsonObject,
@@ -34,8 +36,6 @@ export {
 } from '../common';
 export * from './core';
 export * from '../common/errors';
-export * from './field_wildcard';
-export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';
 export * from '../common/state_containers';
@@ -58,6 +58,7 @@ export {
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
   setStateToKbnUrl,
+  withNotifyOnErrors,
 } from './state_management/url';
 export {
   syncState,

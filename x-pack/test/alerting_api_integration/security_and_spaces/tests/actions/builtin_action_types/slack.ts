@@ -5,32 +5,28 @@
  */
 
 import expect from '@kbn/expect';
-
+import http from 'http';
+import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  getExternalServiceSimulatorPath,
-  ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSlackServer } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
     let simulatedActionId = '';
-    let slackSimulatorURL: string = '<could not determine kibana url>';
 
+    let slackSimulatorURL: string = '';
+    let slackServer: http.Server;
     // need to wait for kibanaServer to settle ...
-    before(() => {
-      slackSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
-      );
+    before(async () => {
+      slackServer = await getSlackServer();
+      const availablePort = await getPort({ port: 9000 });
+      slackServer.listen(availablePort);
+      slackSimulatorURL = `http://localhost:${availablePort}`;
     });
-
-    after(() => esArchiver.unload('empty_kibana'));
 
     it('should return 200 when creating a slack action successfully', async () => {
       const { body: createdAction } = await supertest
@@ -222,6 +218,10 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(result.status).to.equal('error');
       expect(result.message).to.match(/error posting a slack message, retry later/);
       expect(result.retry).to.equal(true);
+    });
+
+    after(() => {
+      slackServer.close();
     });
   });
 }

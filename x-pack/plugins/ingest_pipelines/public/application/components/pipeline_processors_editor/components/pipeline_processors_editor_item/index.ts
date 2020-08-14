@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineProcessorsEditorItem, Handlers } from './pipeline_processors_editor_item';
+export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item.container';
+
+export { Handlers } from './types';

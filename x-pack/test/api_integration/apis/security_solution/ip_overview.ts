@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
               sourceId: 'default',
               ip: '151.205.0.17',
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -52,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
               sourceId: 'default',
               ip: '185.53.91.88',
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })

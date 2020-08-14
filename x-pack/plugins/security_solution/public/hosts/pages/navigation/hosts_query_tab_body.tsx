@@ -15,6 +15,7 @@ const HostsTableManage = manageQuery(HostsTable);
 
 export const HostsQueryTabBody = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
   indexPattern,
@@ -24,6 +25,7 @@ export const HostsQueryTabBody = ({
   type,
 }: HostsComponentsQueryProps) => (
   <HostsQuery
+    docValueFields={docValueFields}
     endDate={endDate}
     filterQuery={filterQuery}
     skip={skip}

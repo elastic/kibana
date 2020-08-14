@@ -34,7 +34,7 @@ import { getInterval } from '../../lib/get_interval';
 import { areFieldsDifferent } from '../../lib/charts';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
-import { getCoreStart, getUISettings } from '../../../../services';
+import { getCoreStart } from '../../../../services';
 
 export class TimeseriesVisualization extends Component {
   static propTypes = {
@@ -154,7 +154,7 @@ export class TimeseriesVisualization extends Component {
     const styles = reactCSS({
       default: {
         tvbVis: {
-          backgroundColor: get(model, 'background_color'),
+          borderColor: get(model, 'background_color'),
         },
       },
     });
@@ -237,7 +237,6 @@ export class TimeseriesVisualization extends Component {
       }
     });
 
-    const darkMode = getUISettings().get('theme:darkMode');
     return (
       <div className="tvbVis" style={styles.tvbVis}>
         <TimeSeries
@@ -246,7 +245,6 @@ export class TimeseriesVisualization extends Component {
           onBrush={onBrush}
           enableHistogramMode={enableHistogramMode}
           backgroundColor={model.background_color}
-          darkMode={darkMode}
           showGrid={Boolean(model.show_grid)}
           legend={Boolean(model.show_legend)}
           legendPosition={model.legend_position}

@@ -6,6 +6,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import ParamsFields from './es_index_params';
+import { DocLinksStart } from 'kibana/public';
 
 describe('IndexParamsFields renders', () => {
   test('all params fields is rendered', () => {
@@ -18,9 +19,10 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
-    expect(wrapper.find('[data-test-subj="actionIndexDoc"]').first().prop('value')).toBe(`{
+    expect(wrapper.find('[data-test-subj="documentsJsonEditor"]').first().prop('value')).toBe(`{
   "test": 123
 }`);
     expect(wrapper.find('[data-test-subj="documentsAddVariableButton"]').length > 0).toBeTruthy();

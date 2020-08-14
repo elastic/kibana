@@ -32,7 +32,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
               "message_type": null,
               "object": Object {
                 "primary": Array [
-                  "93.184.216.34",
+                  "192.168.216.34",
                 ],
                 "secondary": Array [
                   "80",
@@ -46,7 +46,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
           },
           "destination": Object {
             "ip": Array [
-              "93.184.216.34",
+              "192.168.216.34",
             ],
             "port": Array [
               80,
@@ -113,7 +113,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
           "zeek": null,
         }
       }
-      text="some text"
+      text="connected using"
       timelineId="test"
     />
   </RowRendererContainer>
@@ -135,7 +135,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "success",
             ],
             "session": Array [
-              "unset",
+              "242",
             ],
             "summary": Object {
               "actor": Object {
@@ -259,7 +259,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
         }
       }
       fileIcon="document"
-      text="some text"
+      text="opened file using"
       timelineId="test"
     />
   </RowRendererContainer>

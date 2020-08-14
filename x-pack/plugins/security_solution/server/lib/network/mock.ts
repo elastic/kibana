@@ -21,7 +21,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
       timestamp: '@timestamp',
     },
   },
-  timerange: { interval: '12h', to: 1549852006071, from: 1549765606071 },
+  timerange: { interval: '12h', to: '2019-02-11T02:26:46.071Z', from: '2019-02-11T02:26:46.071Z' },
   pagination: {
     activePage: 0,
     cursorStart: 0,

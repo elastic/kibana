@@ -95,6 +95,14 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
       />
     </EuiBadge>
   ),
+  DEGRADED: (
+    <EuiBadge color="hollow">
+      <FormattedMessage
+        id="xpack.ingestManager.agentEventSubtype.degradedLabel"
+        defaultMessage="Degraded"
+      />
+    </EuiBadge>
+  ),
   DATA_DUMP: (
     <EuiBadge color="hollow">
       <FormattedMessage

@@ -1,4 +1,4 @@
-import os, platform
+import os, platform, sys
 from build_util import runcmd, mkdir, md5_file, root_dir, configure_environment
 
 # This is a cross-platform initialization script which should only be run
@@ -29,4 +29,10 @@ runcmd('fetch chromium')
 # Build Linux deps
 if platform.system() == 'Linux':
   os.chdir('src')
+
+  if len(sys.argv) >= 2:
+    sysroot_cmd = 'build/linux/sysroot_scripts/install-sysroot.py --arch=' + sys.argv[1]
+    print('Running `' + sysroot_cmd + '`')
+    runcmd(sysroot_cmd)
+
   runcmd('build/install-build-deps.sh')

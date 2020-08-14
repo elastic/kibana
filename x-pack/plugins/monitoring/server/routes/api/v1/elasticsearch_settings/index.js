@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { internalMonitoringCheckRoute } from './check/internal_monitoring';
 export { clusterSettingsCheckRoute } from './check/cluster';
 export { nodesSettingsCheckRoute } from './check/nodes';
 export { setCollectionEnabledRoute } from './set/collection_enabled';

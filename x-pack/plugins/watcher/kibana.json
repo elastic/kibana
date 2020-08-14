@@ -10,5 +10,9 @@
     "data"
   ],
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaReact"
+  ]
 }

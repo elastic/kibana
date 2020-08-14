@@ -12,12 +12,16 @@ import {
   ListItemSchema,
   MetaOrUndefined,
   UpdateEsListItemSchema,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
+import { decodeVersion } from '../utils/decode_version';
+import { encodeHitVersion } from '../utils/encode_hit_version';
 
 import { getListItem } from './get_list_item';
 
 export interface UpdateListItemOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   value: string | null | undefined;
   callCluster: LegacyAPICaller;
@@ -28,6 +32,7 @@ export interface UpdateListItemOptions {
 }
 
 export const updateListItem = async ({
+  _version,
   id,
   value,
   callCluster,
@@ -41,31 +46,45 @@ export const updateListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    const doc: UpdateEsListItemSchema = {
-      meta,
-      updated_at: updatedAt,
-      updated_by: user,
-      ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
-    };
-
-    const response = await callCluster<CreateDocumentResponse>('update', {
-      body: {
-        doc,
-      },
-      id: listItem.id,
-      index: listItemIndex,
-    });
-    return {
-      created_at: listItem.created_at,
-      created_by: listItem.created_by,
-      id: response._id,
-      list_id: listItem.list_id,
-      meta: meta ?? listItem.meta,
-      tie_breaker_id: listItem.tie_breaker_id,
+    const elasticQuery = transformListItemToElasticQuery({
+      serializer: listItem.serializer,
       type: listItem.type,
-      updated_at: updatedAt,
-      updated_by: listItem.updated_by,
       value: value ?? listItem.value,
-    };
+    });
+    if (elasticQuery == null) {
+      return null;
+    } else {
+      const doc: UpdateEsListItemSchema = {
+        meta,
+        updated_at: updatedAt,
+        updated_by: user,
+        ...elasticQuery,
+      };
+
+      const response = await callCluster<CreateDocumentResponse>('update', {
+        ...decodeVersion(_version),
+        body: {
+          doc,
+        },
+        id: listItem.id,
+        index: listItemIndex,
+        refresh: 'wait_for',
+      });
+      return {
+        _version: encodeHitVersion(response),
+        created_at: listItem.created_at,
+        created_by: listItem.created_by,
+        deserializer: listItem.deserializer,
+        id: response._id,
+        list_id: listItem.list_id,
+        meta: meta ?? listItem.meta,
+        serializer: listItem.serializer,
+        tie_breaker_id: listItem.tie_breaker_id,
+        type: listItem.type,
+        updated_at: updatedAt,
+        updated_by: listItem.updated_by,
+        value: value ?? listItem.value,
+      };
+    }
   }
 };

@@ -30,9 +30,9 @@ export class IframeEmbeddedPlugin implements Plugin {
         validate: false,
       },
       async (context, request, response) => {
-        const { protocol, port, host } = core.http.getServerInfo();
+        const { protocol, port, hostname } = core.http.getServerInfo();
 
-        const kibanaUrl = Url.format({ protocol, hostname: host, port });
+        const kibanaUrl = Url.format({ protocol, hostname, port });
 
         return response.renderHtml({
           body: renderBody(kibanaUrl),

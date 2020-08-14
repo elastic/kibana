@@ -11,7 +11,7 @@ import { getOtherCategoryLabel } from '../../style_util';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
-import { PREFERRED_ICONS } from '../../symbol_utils';
+import { PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -20,7 +20,7 @@ function isDuplicateStop(targetStop, iconStops) {
   return stops.length > 1;
 }
 
-export function getFirstUnusedSymbol(symbolOptions, iconStops) {
+export function getFirstUnusedSymbol(iconStops) {
   const firstUnusedPreferredIconId = PREFERRED_ICONS.find((iconId) => {
     const isSymbolBeingUsed = iconStops.some(({ icon }) => {
       return icon === iconId;
@@ -32,7 +32,7 @@ export function getFirstUnusedSymbol(symbolOptions, iconStops) {
     return firstUnusedPreferredIconId;
   }
 
-  const firstUnusedSymbol = symbolOptions.find(({ value }) => {
+  const firstUnusedSymbol = SYMBOL_OPTIONS.find(({ value }) => {
     const isSymbolBeingUsed = iconStops.some(({ icon }) => {
       return icon === value;
     });
@@ -42,19 +42,7 @@ export function getFirstUnusedSymbol(symbolOptions, iconStops) {
   return firstUnusedSymbol ? firstUnusedSymbol.value : DEFAULT_ICON;
 }
 
-const DEFAULT_ICON_STOPS = [
-  { stop: null, icon: PREFERRED_ICONS[0] }, //first stop is the "other" color
-  { stop: '', icon: PREFERRED_ICONS[1] },
-];
-
-export function IconStops({
-  field,
-  getValueSuggestions,
-  iconStops = DEFAULT_ICON_STOPS,
-  isDarkMode,
-  onChange,
-  symbolOptions,
-}) {
+export function IconStops({ field, getValueSuggestions, iconStops, onChange }) {
   return iconStops.map(({ stop, icon }, index) => {
     const onIconSelect = (selectedIconId) => {
       const newIconStops = [...iconStops];
@@ -62,7 +50,7 @@ export function IconStops({
         ...iconStops[index],
         icon: selectedIconId,
       };
-      onChange({ customMapStops: newIconStops });
+      onChange({ customStops: newIconStops });
     };
     const onStopChange = (newStopValue) => {
       const newIconStops = [...iconStops];
@@ -71,17 +59,17 @@ export function IconStops({
         stop: newStopValue,
       };
       onChange({
-        customMapStops: newIconStops,
+        customStops: newIconStops,
         isInvalid: isDuplicateStop(newStopValue, iconStops),
       });
     };
     const onAdd = () => {
       onChange({
-        customMapStops: [
+        customStops: [
           ...iconStops.slice(0, index + 1),
           {
             stop: '',
-            icon: getFirstUnusedSymbol(symbolOptions, iconStops),
+            icon: getFirstUnusedSymbol(iconStops),
           },
           ...iconStops.slice(index + 1),
         ],
@@ -89,7 +77,7 @@ export function IconStops({
     };
     const onRemove = () => {
       onChange({
-        customMapStops: [...iconStops.slice(0, index), ...iconStops.slice(index + 1)],
+        customStops: [...iconStops.slice(0, index), ...iconStops.slice(index + 1)],
       });
     };
 
@@ -157,13 +145,7 @@ export function IconStops({
             {stopInput}
           </EuiFlexItem>
           <EuiFlexItem>
-            <IconSelect
-              isDarkMode={isDarkMode}
-              onChange={onIconSelect}
-              symbolOptions={symbolOptions}
-              value={icon}
-              append={iconStopButtons}
-            />
+            <IconSelect onChange={onIconSelect} value={icon} append={iconStopButtons} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>

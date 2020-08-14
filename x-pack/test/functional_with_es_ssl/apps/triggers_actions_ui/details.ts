@@ -361,7 +361,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          const { instances: alertInstances } = await alerting.alerts.getAlertStatus(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
       });
@@ -373,15 +373,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const status = await alerting.alerts.getAlertStatus(alert.id);
 
-        const dateOnAllInstancesFromApiResponse = mapValues<Record<string, number>>(
-          alertInstances,
-          ({
-            meta: {
-              lastScheduledActions: { date },
-            },
-          }) => date
+        const dateOnAllInstancesFromApiResponse = mapValues(
+          status.instances,
+          (instance) => instance.activeStartDate
         );
 
         log.debug(
@@ -471,7 +467,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.eql([
           {
             instance: 'eu-east',
-            status: 'Inactive',
+            status: 'OK',
             start: '',
             duration: '',
           },
@@ -574,7 +570,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          const { instances: alertInstances } = await alerting.alerts.getAlertStatus(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -595,7 +591,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const { instances: alertInstances } = await alerting.alerts.getAlertStatus(alert.id);
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -608,7 +604,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+        const { instances: alertInstances } = await alerting.alerts.getAlertStatus(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

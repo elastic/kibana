@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiEmptyPrompt } from '@elastic/eui';
 
 /*
  * React component for rendering EuiEmptyPrompt when no influencers were found.
@@ -15,26 +14,17 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 export const ExplorerNoInfluencersFound: FC<{
   viewBySwimlaneFieldName: string;
   showFilterMessage?: boolean;
-}> = ({ viewBySwimlaneFieldName, showFilterMessage = false }) => (
-  <EuiEmptyPrompt
-    titleSize="xs"
-    title={
-      <h2>
-        {showFilterMessage === false && (
-          <FormattedMessage
-            id="xpack.ml.explorer.noInfluencersFoundTitle"
-            defaultMessage="No {viewBySwimlaneFieldName} influencers found"
-            values={{ viewBySwimlaneFieldName }}
-          />
-        )}
-        {showFilterMessage === true && (
-          <FormattedMessage
-            id="xpack.ml.explorer.noInfluencersFoundTitleFilterMessage"
-            defaultMessage="No {viewBySwimlaneFieldName} influencers found for specified filter"
-            values={{ viewBySwimlaneFieldName }}
-          />
-        )}
-      </h2>
-    }
-  />
-);
+}> = ({ viewBySwimlaneFieldName, showFilterMessage = false }) =>
+  showFilterMessage === false ? (
+    <FormattedMessage
+      id="xpack.ml.explorer.noInfluencersFoundTitle"
+      defaultMessage="No {viewBySwimlaneFieldName} influencers found"
+      values={{ viewBySwimlaneFieldName }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.ml.explorer.noInfluencersFoundTitleFilterMessage"
+      defaultMessage="No {viewBySwimlaneFieldName} influencers found for specified filter"
+      values={{ viewBySwimlaneFieldName }}
+    />
+  );

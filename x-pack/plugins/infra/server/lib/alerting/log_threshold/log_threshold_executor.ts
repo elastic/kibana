@@ -21,8 +21,8 @@ import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
-const UNGROUPED_FACTORY_KEY = '*';
 const COMPOSITE_GROUP_SIZE = 40;
 
 const checkValueAgainstComparatorMap: {
@@ -34,7 +34,7 @@ const checkValueAgainstComparatorMap: {
   [Comparator.LT_OR_EQ]: (a: number, b: number) => a <= b,
 };
 
-export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLibs) =>
+export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   async function ({ services, params }: AlertExecutorOptions) {
     const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
     const { sources } = libs;
@@ -42,7 +42,7 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const indexPattern = sourceConfiguration.configuration.logAlias;
-    const alertInstance = alertInstanceFactory(alertId);
+    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
 
     try {
       const validatedParams = decodeOrThrow(LogDocumentCountAlertParamsRT)(params);
@@ -60,15 +60,13 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
         processGroupByResults(
           await getGroupedResults(query, callCluster),
           validatedParams,
-          alertInstanceFactory,
-          alertId
+          alertInstanceFactory
         );
       } else {
         processUngroupedResults(
           await getUngroupedResults(query, callCluster),
           validatedParams,
-          alertInstanceFactory,
-          alertId
+          alertInstanceFactory
         );
       }
     } catch (e) {
@@ -83,12 +81,11 @@ export const createLogThresholdExecutor = (alertId: string, libs: InfraBackendLi
 const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: LogDocumentCountAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
-  alertId: string
+  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory']
 ) => {
   const { count, criteria } = params;
 
-  const alertInstance = alertInstanceFactory(`${alertId}-${UNGROUPED_FACTORY_KEY}`);
+  const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
@@ -116,8 +113,7 @@ interface ReducedGroupByResults {
 const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: LogDocumentCountAlertParams,
-  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory'],
-  alertId: string
+  alertInstanceFactory: AlertExecutorOptions['services']['alertInstanceFactory']
 ) => {
   const { count, criteria } = params;
 
@@ -128,7 +124,7 @@ const processGroupByResults = (
   }, []);
 
   groupResults.forEach((group) => {
-    const alertInstance = alertInstanceFactory(`${alertId}-${group.name}`);
+    const alertInstance = alertInstanceFactory(group.name);
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {

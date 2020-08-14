@@ -9,8 +9,14 @@ import { ElasticDocsLink } from '../../../../../shared/Links/ElasticDocsLink';
 interface Props {
   label: string;
 }
-export const Documentation = ({ label }: Props) => (
-  <ElasticDocsLink section="/kibana" path="/custom-links.html" target="_blank">
-    {label}
-  </ElasticDocsLink>
-);
+export function Documentation({ label }: Props) {
+  return (
+    <ElasticDocsLink
+      section="/kibana"
+      path="/custom-links.html"
+      target="_blank"
+    >
+      {label}
+    </ElasticDocsLink>
+  );
+}

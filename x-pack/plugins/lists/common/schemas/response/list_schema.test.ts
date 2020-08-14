@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getListResponseMock } from './list_schema.mock';
 import { ListSchema, listSchema } from './list_schema';
@@ -37,6 +37,28 @@ describe('list_schema', () => {
   test('it should accept an undefined for "meta"', () => {
     const payload = getListResponseMock();
     delete payload.meta;
+    const decoded = listSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "serializer"', () => {
+    const payload = getListResponseMock();
+    delete payload.serializer;
+    const decoded = listSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "deserializer"', () => {
+    const payload = getListResponseMock();
+    delete payload.deserializer;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);

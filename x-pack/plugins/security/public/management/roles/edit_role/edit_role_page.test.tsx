@@ -8,7 +8,7 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { Capabilities, ScopedHistory } from 'src/core/public';
+import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../features/public';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
@@ -187,7 +187,7 @@ function getProps({
     docLinks: new DocumentationLinksService(docLinks),
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
-    history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    history: scopedHistoryMock.create(),
   };
 }
 

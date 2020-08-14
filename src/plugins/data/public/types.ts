@@ -25,15 +25,21 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart } from './search';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
 import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+
+export interface DataPublicPluginEnhancements {
+  search: SearchEnhancements;
+}
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface DataStartDependencies {
@@ -45,6 +51,10 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
 export interface DataPublicPluginStart {
@@ -72,15 +82,3 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }
-
-/** @internal **/
-export interface InternalStartServices {
-  readonly fieldFormats: FieldFormatsStart;
-  readonly notifications: CoreStart['notifications'];
-  readonly uiSettings: CoreStart['uiSettings'];
-  readonly searchService: DataPublicPluginStart['search'];
-  readonly injectedMetadata: CoreStart['injectedMetadata'];
-}
-
-/** @internal **/
-export type GetInternalStartServicesFn = () => InternalStartServices;

@@ -11,7 +11,7 @@ const customRulesSchema = schema.maybe(
     schema.maybe(
       schema.object({
         actions: schema.arrayOf(schema.string()),
-        conditions: schema.arrayOf(schema.any()),
+        conditions: schema.maybe(schema.arrayOf(schema.any())),
         scope: schema.maybe(schema.any()),
       })
     )
@@ -70,6 +70,7 @@ export const anomalyDetectionUpdateJobSchema = schema.object({
   ),
   groups: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
   model_snapshot_retention_days: schema.maybe(schema.number()),
+  daily_model_snapshot_retention_after_days: schema.maybe(schema.number()),
 });
 
 export const analysisConfigSchema = schema.object({

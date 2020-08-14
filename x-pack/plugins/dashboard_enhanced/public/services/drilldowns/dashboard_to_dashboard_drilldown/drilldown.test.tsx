@@ -5,9 +5,8 @@
  */
 
 import { DashboardToDashboardDrilldown } from './drilldown';
-import { savedObjectsServiceMock, coreMock } from '../../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { ActionContext, Config } from './types';
+import { Config } from './types';
+import { coreMock, savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
 import {
   Filter,
   FilterStateStore,
@@ -15,16 +14,13 @@ import {
   RangeFilter,
   TimeRange,
 } from '../../../../../../../src/plugins/data/common';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-
+import {
+  ApplyGlobalFilterActionContext,
+  esFilters,
+} from '../../../../../../../src/plugins/data/public';
 // convenient to use real implementation here.
 import { createDashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public/url_generator';
 import { UrlGeneratorsService } from '../../../../../../../src/plugins/share/public/url_generators';
-import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
-import {
-  RangeSelectTriggerContext,
-  ValueClickTriggerContext,
-} from '../../../../../../../src/plugins/embeddable/public';
 import { StartDependencies } from '../../../plugin';
 import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
 import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
@@ -82,11 +78,10 @@ describe('.execute() & getHref', () => {
     config: Partial<Config>,
     embeddableInput: { filters?: Filter[]; timeRange?: TimeRange; query?: Query },
     filtersFromEvent: Filter[],
-    useRangeEvent = false
+    timeFieldName?: string
   ) {
     const navigateToApp = jest.fn();
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
-    const dataPluginActions = dataPluginMock.createStartContract().actions;
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
     const drilldown = new DashboardToDashboardDrilldown({
@@ -102,9 +97,6 @@ describe('.execute() & getHref', () => {
         },
         plugins: {
           uiActionsEnhanced: {},
-          data: {
-            actions: dataPluginActions,
-          },
         },
         self: {},
       })) as unknown) as StartServicesGetter<Pick<StartDependencies, 'data' | 'uiActionsEnhanced'>>,
@@ -119,12 +111,6 @@ describe('.execute() & getHref', () => {
           )
         ),
     });
-    const selectRangeFiltersSpy = jest
-      .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
-      .mockImplementation(() => Promise.resolve(filtersFromEvent));
-    const valueClickFiltersSpy = jest
-      .spyOn(dataPluginActions, 'createFiltersFromValueClickAction')
-      .mockImplementation(() => Promise.resolve(filtersFromEvent));
 
     const completeConfig: Config = {
       dashboardId: 'id',
@@ -134,12 +120,7 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: {
-        ...(useRangeEvent
-          ? ({ range: {} } as RangeSelectTriggerContext['data'])
-          : ({ data: [] } as ValueClickTriggerContext['data'])),
-        timeFieldName: 'order_date',
-      },
+      filters: filtersFromEvent,
       embeddable: {
         getInput: () => ({
           filters: [],
@@ -148,17 +129,10 @@ describe('.execute() & getHref', () => {
           ...embeddableInput,
         }),
       },
-    } as unknown) as ActionContext<VisualizeEmbeddableContract>;
+      timeFieldName,
+    } as unknown) as ApplyGlobalFilterActionContext;
 
     await drilldown.execute(completeConfig, context);
-
-    if (useRangeEvent) {
-      expect(selectRangeFiltersSpy).toBeCalledTimes(1);
-      expect(valueClickFiltersSpy).toBeCalledTimes(0);
-    } else {
-      expect(selectRangeFiltersSpy).toBeCalledTimes(0);
-      expect(valueClickFiltersSpy).toBeCalledTimes(1);
-    }
 
     expect(navigateToApp).toBeCalledTimes(1);
     expect(navigateToApp.mock.calls[0][0]).toBe('dashboards');
@@ -180,8 +154,7 @@ describe('.execute() & getHref', () => {
         dashboardId: testDashboardId,
       },
       {},
-      [],
-      false
+      []
     );
 
     expect(href).toEqual(expect.stringContaining(`view/${testDashboardId}`));
@@ -289,8 +262,7 @@ describe('.execute() & getHref', () => {
           to: 'now',
         },
       },
-      [],
-      false
+      []
     );
 
     expect(href).not.toEqual(expect.stringContaining('now-300m'));
@@ -308,7 +280,7 @@ describe('.execute() & getHref', () => {
         },
       },
       [getMockTimeRangeFilter()],
-      true
+      getMockTimeRangeFilter().meta.key
     );
 
     expect(href).not.toEqual(expect.stringContaining('now-300m'));

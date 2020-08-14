@@ -6,6 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
+import '../../../../common/mock/match_media';
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';

@@ -37,13 +37,13 @@ describe('Security Plugin', () => {
 
     mockCoreSetup = coreMock.createSetup();
     mockCoreSetup.http.getServerInfo.mockReturnValue({
-      host: 'localhost',
+      hostname: 'localhost',
       name: 'kibana',
       port: 80,
       protocol: 'https',
     });
 
-    mockClusterClient = elasticsearchServiceMock.createCustomClusterClient();
+    mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
     mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
 
     mockDependencies = ({
@@ -69,6 +69,9 @@ describe('Security Plugin', () => {
                 },
                 "authz": Object {
                   "actions": Actions {
+                    "alerting": AlertingActions {
+                      "prefix": "alerting:version:",
+                    },
                     "api": ApiActions {
                       "prefix": "api:version:",
                     },
@@ -88,6 +91,7 @@ describe('Security Plugin', () => {
                     "version": "version:version",
                     "versionNumber": "version",
                   },
+                  "checkPrivilegesDynamicallyWithRequest": [Function],
                   "checkPrivilegesWithRequest": [Function],
                   "mode": Object {
                     "useRbacForRequest": [Function],

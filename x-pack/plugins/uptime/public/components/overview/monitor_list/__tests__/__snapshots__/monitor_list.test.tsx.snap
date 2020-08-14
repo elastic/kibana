@@ -199,33 +199,55 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 2,
                     "up": 1,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "foo1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "124",
+                    },
+                    Object {
+                      "docId": "foo2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.2",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "foo3",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.3",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "123",
                   "url": Object {},
                 },
@@ -233,26 +255,41 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 0,
                     "up": 2,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "bar1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "bar2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "125",
                   "url": Object {},
                 },
@@ -470,33 +507,55 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 2,
                     "up": 1,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "foo1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "124",
+                    },
+                    Object {
+                      "docId": "foo2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.2",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "foo3",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.3",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "123",
                   "url": Object {},
                 },
@@ -504,26 +563,41 @@ exports[`MonitorList component renders error list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 0,
                     "up": 2,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "bar1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "bar2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "125",
                   "url": Object {},
                 },
@@ -636,33 +710,55 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 2,
                     "up": 1,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "foo1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "124",
+                    },
+                    Object {
+                      "docId": "foo2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.2",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "foo3",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.3",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "123",
                   "url": Object {},
                 },
@@ -670,26 +766,41 @@ exports[`MonitorList component renders loading state 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 0,
                     "up": 2,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "bar1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "bar2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "125",
                   "url": Object {},
                 },
@@ -717,7 +828,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
 }
 
 .c1 {
-  margin-left: auto;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+}
+
+.c0 {
+  position: relative;
 }
 
 .c4 {
@@ -729,26 +846,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
 @media (max-width:574px) {
   .c2 {
     min-width: 230px;
-  }
-}
-
-@media only screen and (max-width:768px) {
-  .c0.c0 > :first-child {
-    -webkit-flex-basis: 40% !important;
-    -ms-flex-preferred-size: 40% !important;
-    flex-basis: 40% !important;
-  }
-
-  .c0.c0 > :nth-child(2) {
-    -webkit-order: 3;
-    -ms-flex-order: 3;
-    order: 3;
-  }
-
-  .c0.c0 > :nth-child(3) {
-    -webkit-flex-basis: 60% !important;
-    -ms-flex-preferred-size: 60% !important;
-    flex-basis: 60% !important;
   }
 }
 
@@ -774,12 +871,12 @@ exports[`MonitorList component renders the monitor list 1`] = `
         class="euiFilterGroup"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
           data-test-subj="xpack.uptime.filterBar.filterStatusAll"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
@@ -795,12 +892,12 @@ exports[`MonitorList component renders the monitor list 1`] = `
           </span>
         </button>
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton--withNext"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--withNext"
           data-test-subj="xpack.uptime.filterBar.filterStatusUp"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
@@ -818,12 +915,12 @@ exports[`MonitorList component renders the monitor list 1`] = `
           </span>
         </button>
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton"
+          class="euiButtonEmpty euiButtonEmpty--text euiFilterButton"
           data-test-subj="xpack.uptime.filterBar.filterStatusDown"
           type="button"
         >
           <span
-            class="euiButtonEmpty__content"
+            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
           >
             <span
               class="euiButtonEmpty__text"
@@ -840,20 +937,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
         </button>
       </div>
     </div>
-    <div
-      class="euiFlexItem"
+    <a
+      class="c1"
+      data-test-subj="uptimeCertificatesLink"
+      href="/certificates"
     >
-      <h5
-        class="euiTitle euiTitle--xsmall c1"
-      >
-        <a
-          data-test-subj="uptimeCertificatesLink"
-          href="/certificates"
-        >
-          Certificates status
-        </a>
-      </h5>
-    </div>
+      Certificates status
+    </a>
   </div>
   <div
     class="euiSpacer euiSpacer--m"
@@ -879,6 +969,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
       </div>
       <table
         class="euiTable euiTable--responsive"
+        id="generated-id"
+        tabindex="-1"
       >
         <caption
           class="euiScreenReaderOnly euiTableCaption"
@@ -887,7 +979,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
           <tr>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-              data-test-subj="tableHeaderCell_state.monitor.status_0"
+              data-test-subj="tableHeaderCell_state.summary.status_0"
               role="columnheader"
               scope="col"
             >
@@ -935,7 +1027,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_state.tls_3"
+              data-test-subj="tableHeaderCell_state.tls.server.x509_3"
               role="columnheader"
               scope="col"
             >
@@ -1036,7 +1128,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1897 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1213,7 +1305,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           <div
                             class="euiTextColor euiTextColor--subdued"
                           >
-                            1895 Yr ago
+                            5m ago
                           </div>
                         </div>
                       </span>
@@ -1225,7 +1317,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     <div
                       class="euiText euiText--small"
                     >
-                      in 1/1 Location
+                      in 0/1 Location
                     </div>
                   </div>
                 </div>
@@ -1357,16 +1449,15 @@ exports[`MonitorList component renders the monitor list 1`] = `
           class="euiPopover__anchor"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight"
+            class="euiButtonEmpty euiButtonEmpty--text"
             data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
             type="button"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
             >
               <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+                class="euiButtonContent__icon"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -1520,33 +1611,55 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "foo",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 124,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "down",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.3",
-                        "status": "down",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 2,
                     "up": 1,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "foo1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "124",
+                    },
+                    Object {
+                      "docId": "foo2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.2",
+                        "name": undefined,
+                        "status": "up",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "foo3",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "foo",
+                        "ip": "127.0.0.3",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "123",
                   "url": Object {},
                 },
@@ -1554,26 +1667,41 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
               Object {
                 "monitor_id": "bar",
                 "state": Object {
-                  "checks": Array [
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.1",
-                        "status": "up",
-                      },
-                      "timestamp": 125,
-                    },
-                    Object {
-                      "monitor": Object {
-                        "ip": "127.0.0.2",
-                        "status": "up",
-                      },
-                      "timestamp": 126,
-                    },
-                  ],
+                  "monitor": Object {},
                   "summary": Object {
                     "down": 0,
                     "up": 2,
                   },
+                  "summaryPings": Array [
+                    Object {
+                      "docId": "bar1",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "125",
+                    },
+                    Object {
+                      "docId": "bar2",
+                      "monitor": Object {
+                        "duration": Object {
+                          "us": 123,
+                        },
+                        "id": "bar",
+                        "ip": "127.0.0.1",
+                        "name": undefined,
+                        "status": "down",
+                        "type": "icmp",
+                      },
+                      "timestamp": "126",
+                    },
+                  ],
                   "timestamp": "125",
                   "url": Object {},
                 },

@@ -84,7 +84,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   );
 };
 
-const editableFormStatus = ['required', 'failed'];
+const editableFormStatus = ['required', 'failed', 'skipped'];
 
 const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',

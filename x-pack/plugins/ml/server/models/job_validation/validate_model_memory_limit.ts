@@ -5,7 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { LegacyAPICaller } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
@@ -16,10 +16,11 @@ import { MlInfoResponse } from '../../../common/types/ml_server_info';
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
 
 export async function validateModelMemoryLimit(
-  callWithRequest: LegacyAPICaller,
+  mlClusterClient: ILegacyScopedClusterClient,
   job: CombinedJob,
   duration?: { start?: number; end?: number }
 ) {
+  const { callAsInternalUser } = mlClusterClient;
   validateJobObject(job);
 
   // retrieve the model memory limit specified by the user in the job config.
@@ -51,12 +52,12 @@ export async function validateModelMemoryLimit(
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
-  const info = await callWithRequest<MlInfoResponse>('ml.info');
+  const info = (await callAsInternalUser('ml.info')) as MlInfoResponse;
   const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
   const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
   if (runCalcModelMemoryTest) {
-    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(callWithRequest)(
+    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(mlClusterClient)(
       job.analysis_config,
       job.datafeed_config.indices.join(','),
       job.datafeed_config.query,
@@ -65,14 +66,14 @@ export async function validateModelMemoryLimit(
       duration!.end as number,
       true
     );
-    // @ts-ignore
+    // @ts-expect-error
     const mmlEstimateBytes: number = numeral(modelMemoryLimit).value();
 
     let runEstimateGreaterThenMml = true;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (typeof maxModelMemoryLimit !== 'undefined') {
-      // @ts-ignore
+      // @ts-expect-error
       const maxMmlBytes: number = numeral(maxModelMemoryLimit).value();
       if (mmlEstimateBytes > maxMmlBytes) {
         runEstimateGreaterThenMml = false;
@@ -89,7 +90,7 @@ export async function validateModelMemoryLimit(
     // do not run this if we've already found that it's larger than
     // the max mml
     if (runEstimateGreaterThenMml && mml !== null) {
-      // @ts-ignore
+      // @ts-expect-error
       const mmlBytes: number = numeral(mml).value();
       if (mmlBytes < MODEL_MEMORY_LIMIT_MINIMUM_BYTES) {
         messages.push({
@@ -116,11 +117,11 @@ export async function validateModelMemoryLimit(
   // make sure the user defined MML is not greater than it
   if (mml !== null) {
     let maxMmlExceeded = false;
-    // @ts-ignore
+    // @ts-expect-error
     const mmlBytes = numeral(mml).value();
 
     if (maxModelMemoryLimit !== undefined) {
-      // @ts-ignore
+      // @ts-expect-error
       const maxMmlBytes = numeral(maxModelMemoryLimit).value();
       if (mmlBytes > maxMmlBytes) {
         maxMmlExceeded = true;
@@ -133,7 +134,7 @@ export async function validateModelMemoryLimit(
     }
 
     if (effectiveMaxModelMemoryLimit !== undefined && maxMmlExceeded === false) {
-      // @ts-ignore
+      // @ts-expect-error
       const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
       if (mmlBytes > effectiveMaxMmlBytes) {
         messages.push({

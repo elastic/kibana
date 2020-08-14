@@ -47,6 +47,7 @@ describe('delete_list_item', () => {
     const deleteQuery = {
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toBeCalledWith('delete', deleteQuery);
   });

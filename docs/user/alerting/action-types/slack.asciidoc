@@ -38,3 +38,23 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
 Slack actions have the following properties:
 
 Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
+
+[[configuring-slack]]
+==== Configuring Slack Accounts
+
+You configure the accounts Slack action type can use to communicate with Slack in the
+connector form.
+
+You need a https://api.slack.com/incoming-webhooks[Slack webhook URL] to 
+configure a Slack account. To create a webhook
+URL, set up an an **Incoming Webhook Integration** through the Slack console:
+
+. Log in to http://slack.com[slack.com] as a team administrator.
+. Go to https://my.slack.com/services/new/incoming-webhook.
+. Select a default channel for the integration.
++
+image::images/slack-add-webhook-integration.png[]
+. Click *Add Incoming Webhook Integration*.
+. Copy the generated webhook URL so you can paste it into your Slack connector form.
++
+image::images/slack-copy-webhook-url.png[]

@@ -131,4 +131,5 @@ export interface InternalStatusServiceSetup extends StatusServiceSetup {
    * Overall system status used for HTTP API
    */
   overall$: Observable<ServiceStatus>;
+  isStatusPageAnonymous: () => boolean;
 }

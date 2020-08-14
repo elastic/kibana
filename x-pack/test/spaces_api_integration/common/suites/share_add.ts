@@ -45,7 +45,7 @@ export function shareAddTestSuiteFactory(esArchiver: any, supertest: SuperTest<a
     const { id, failure, fail400Param, fail403Param } = testCase;
     const object = response.body;
     if (failure === 403) {
-      await expectResponses.forbidden(fail403Param!)(TYPE)(response);
+      await expectResponses.forbiddenTypes(fail403Param!)(TYPE)(response);
     } else if (failure) {
       let error: any;
       if (failure === 400) {

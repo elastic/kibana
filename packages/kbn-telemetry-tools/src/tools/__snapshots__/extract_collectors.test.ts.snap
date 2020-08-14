@@ -122,6 +122,16 @@ Array [
             "kind": 143,
             "type": "StringKeyword",
           },
+          "my_array": Object {
+            "total": Object {
+              "kind": 140,
+              "type": "NumberKeyword",
+            },
+            "type": Object {
+              "kind": 128,
+              "type": "BooleanKeyword",
+            },
+          },
           "my_objects": Object {
             "total": Object {
               "kind": 140,
@@ -136,6 +146,10 @@ Array [
             "kind": 143,
             "type": "StringKeyword",
           },
+          "my_str_array": Object {
+            "kind": 143,
+            "type": "StringKeyword",
+          },
         },
         "typeName": "Usage",
       },
@@ -143,6 +157,14 @@ Array [
         "value": Object {
           "flat": Object {
             "type": "keyword",
+          },
+          "my_array": Object {
+            "total": Object {
+              "type": "number",
+            },
+            "type": Object {
+              "type": "boolean",
+            },
           },
           "my_objects": Object {
             "total": Object {
@@ -154,6 +176,9 @@ Array [
           },
           "my_str": Object {
             "type": "text",
+          },
+          "my_str_array": Object {
+            "type": "keyword",
           },
         },
       },

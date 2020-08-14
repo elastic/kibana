@@ -10,6 +10,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadgeGroup,
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -42,20 +43,23 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 
 export const TagList = React.memo(
   ({ disabled = false, isLoading, onSubmit, tags }: TagListProps) => {
+    const initialState = { tags };
     const { form } = useForm({
-      defaultValue: { tags },
+      defaultValue: initialState,
       options: { stripEmptyFields: false },
       schema,
     });
+    const { submit } = form;
     const [isEditTags, setIsEditTags] = useState(false);
 
     const onSubmitTags = useCallback(async () => {
-      const { isValid, data: newData } = await form.submit();
+      const { isValid, data: newData } = await submit();
       if (isValid && newData.tags) {
         onSubmit(newData.tags);
         setIsEditTags(false);
       }
-    }, [form, onSubmit]);
+    }, [onSubmit, submit]);
+
     const { tags: tagOptions } = useGetTags();
     const [options, setOptions] = useState(
       tagOptions.map((label) => ({
@@ -95,15 +99,15 @@ export const TagList = React.memo(
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          {tags.length > 0 &&
-            !isEditTags &&
-            tags.map((tag, key) => (
-              <EuiFlexItem grow={false} key={`${tag}${key}`}>
-                <EuiBadge data-test-subj="case-tag" color="hollow">
+          <EuiBadgeGroup>
+            {tags.length > 0 &&
+              !isEditTags &&
+              tags.map((tag, key) => (
+                <EuiBadge data-test-subj={`case-tag-${tag}`} color="hollow">
                   {tag}
                 </EuiBadge>
-              </EuiFlexItem>
-            ))}
+              ))}
+          </EuiBadgeGroup>
           {isEditTags && (
             <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>

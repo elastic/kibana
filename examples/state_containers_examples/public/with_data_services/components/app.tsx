@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
@@ -85,16 +85,9 @@ const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps
   useGlobalStateSyncing(data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
-  const onQuerySubmit = useCallback(
-    ({ query }) => {
-      appStateContainer.set({ ...appState, query });
-    },
-    [appStateContainer, appState]
-  );
-
   const indexPattern = useIndexPattern(data);
   if (!indexPattern)
-    return <div>No index pattern found. Please create an intex patter before loading...</div>;
+    return <div>No index pattern found. Please create an index patter before loading...</div>;
 
   // Render the application DOM.
   // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
@@ -107,8 +100,6 @@ const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps
             showSearchBar={true}
             indexPatterns={[indexPattern]}
             useDefaultBehaviors={true}
-            onQuerySubmit={onQuerySubmit}
-            query={appState.query}
             showSaveQuery={true}
           />
           <EuiPage restrictWidth="1000px">
@@ -200,7 +191,7 @@ function useAppStateSyncing<AppState extends QueryState>(
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       query,
       appStateContainer,
-      { filters: esFilters.FilterStateStore.APP_STATE }
+      { filters: esFilters.FilterStateStore.APP_STATE, query: true }
     );
 
     // sets up syncing app state container with url

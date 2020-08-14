@@ -157,6 +157,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       ),
       createRouter: () => router,
       resources: deps.httpResources.createRegistrar(router),
+      registerOnPreRouting: deps.http.registerOnPreRouting,
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
@@ -185,6 +186,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getInstanceUuid: deps.uuid.getInstanceUuid,
     },
     getStartServices: () => plugin.startDependencies,
+    auditTrail: deps.auditTrail,
   };
 }
 
@@ -209,7 +211,11 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
-    elasticsearch: deps.elasticsearch,
+    elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
+      legacy: deps.elasticsearch.legacy,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
@@ -228,5 +234,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
+    auditTrail: deps.auditTrail,
   };
 }

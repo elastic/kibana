@@ -9,8 +9,10 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
+  CoreStart,
 } from '../../../../src/core/public';
 import { registerDataHandler } from './data_handler';
+import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -43,5 +45,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
       dashboard: { register: registerDataHandler },
     };
   }
-  public start() {}
+  public start(core: CoreStart) {
+    toggleOverviewLinkInNav(core);
+  }
 }

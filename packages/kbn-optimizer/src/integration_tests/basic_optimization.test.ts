@@ -24,7 +24,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { toArray, tap } from 'rxjs/operators';
+import { toArray, tap, filter } from 'rxjs/operators';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '@kbn/optimizer';
 
@@ -66,7 +66,7 @@ afterAll(async () => {
 it('builds expected bundles, saves bundle counts to metadata', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
     dist: false,
   });
@@ -74,7 +74,11 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(config).toMatchSnapshot('OptimizerConfig');
 
   const msgs = await runOptimizer(config)
-    .pipe(logOptimizerState(log, config), toArray())
+    .pipe(
+      logOptimizerState(log, config),
+      filter((x) => x.event?.type !== 'worker stdio'),
+      toArray()
+    )
     .toPromise();
 
   const assert = (statement: string, truth: boolean, altStates?: OptimizerUpdate[]) => {
@@ -96,7 +100,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
+  assert('produce three bundle cache events while initializing', bundleCacheStates.length === 3);
 
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
@@ -106,17 +110,17 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert(
-    'produce two or three "running" states',
-    runningStates.length === 2 || runningStates.length === 3
+    'produce three to five "running" states',
+    runningStates.length >= 3 && runningStates.length <= 5
   );
 
   const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+  assert('produce three "bundle not cached" events', bundleNotCachedEvents.length === 3);
 
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
-    'produce one or two "compiler success" states',
-    successStates.length === 1 || successStates.length === 2
+    'produce one to three "compiler success" states',
+    successStates.length >= 1 && successStates.length <= 3
   );
 
   const otherStates = msgs.filter(
@@ -135,6 +139,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
@@ -149,18 +154,36 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
     // code + styles + style/css-loader runtimes + public path updater
-    18
+    16
   );
 
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/postcss.config.js,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/_other_styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/lib.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7dark.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/core_app/styles/_globals_v7light.scss,
+      <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
+      <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
+    ]
+  `);
+
+  const baz = config.bundles.find((b) => b.id === 'baz')!;
+  expect(baz).toBeTruthy();
+  baz.cache.refresh();
+  expect(baz.cache.getModuleCount()).toBe(3);
+
+  expect(baz.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
       <absolute path>/packages/kbn-optimizer/target/worker/entry_point_creator.js,
       <absolute path>/packages/kbn-ui-shared-deps/public_path_module_creator.js,
     ]
@@ -170,7 +193,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 it('uses cache on second run and exist cleanly', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
     dist: false,
   });
@@ -180,7 +203,7 @@ it('uses cache on second run and exist cleanly', async () => {
       tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.line);
         }
       }),
       toArray()
@@ -189,6 +212,7 @@ it('uses cache on second run and exist cleanly', async () => {
 
   expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
+      "initializing",
       "initializing",
       "initializing",
       "initializing",
@@ -201,7 +225,7 @@ it('uses cache on second run and exist cleanly', async () => {
 it('prepares assets for distribution', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins'), Path.resolve(MOCK_REPO_DIR, 'x-pack')],
     maxWorkerCount: 1,
     dist: true,
   });
@@ -210,10 +234,11 @@ it('prepares assets for distribution', async () => {
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
-    'plugins/foo/target/public/1.plugin.js',
+    'plugins/foo/target/public/foo.chunk.1.js',
     'foo async bundle'
   );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
+  expectFileMatchesSnapshotWithCompression('x-pack/baz/target/public/baz.plugin.js', 'baz bundle');
 });
 
 /**
@@ -226,7 +251,7 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
 
   // Verify the brotli variant matches
   expect(
-    // @ts-ignore @types/node is missing the brotli functions
+    // @ts-expect-error @types/node is missing the brotli functions
     Zlib.brotliDecompressSync(
       Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
     ).toString()

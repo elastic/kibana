@@ -51,6 +51,10 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         .map((tick) => $(tick).text().trim());
     }
 
+    public async getYAxisLabelsAsNumbers() {
+      return (await this.getYAxisLabels()).map((label) => Number(label.replace(',', '')));
+    }
+
     /**
      * Gets the chart data and scales it based on chart height and label.
      * @param dataLabel data-label value
@@ -300,6 +304,20 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
       return element.getVisibleText();
+    }
+
+    public async getFieldLinkInVisTable(fieldName: string, rowIndex: number = 1) {
+      const tableVis = await testSubjects.find('tableVis');
+      const $ = await tableVis.parseDomContent();
+      const headers = $('span[ng-bind="::col.title"]')
+        .toArray()
+        .map((header: any) => $(header).text());
+      const fieldColumnIndex = headers.indexOf(fieldName);
+      return await find.byCssSelector(
+        `[data-test-subj="paginated-table-body"] tr:nth-of-type(${rowIndex}) td:nth-of-type(${
+          fieldColumnIndex + 1
+        }) a`
+      );
     }
 
     /**

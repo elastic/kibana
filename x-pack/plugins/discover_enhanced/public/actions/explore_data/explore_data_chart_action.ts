@@ -5,17 +5,19 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import {
-  ValueClickTriggerContext,
-  RangeSelectTriggerContext,
-} from '../../../../../../src/plugins/embeddable/public';
 import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
+import {
+  isTimeRange,
+  isQuery,
+  isFilters,
+  ApplyGlobalFilterActionContext,
+  esFilters,
+} from '../../../../../../src/plugins/data/public';
 import { KibanaURL } from './kibana_url';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export type ExploreDataChartActionContext = ValueClickTriggerContext | RangeSelectTriggerContext;
+export type ExploreDataChartActionContext = ApplyGlobalFilterActionContext;
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
@@ -31,6 +33,11 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
 
   public readonly order = 200;
 
+  public async isCompatible(context: ExploreDataChartActionContext): Promise<boolean> {
+    if (context.embeddable?.type === 'map') return false; // TODO: https://github.com/elastic/kibana/issues/73043
+    return super.isCompatible(context);
+  }
+
   protected readonly getUrl = async (
     context: ExploreDataChartActionContext
   ): Promise<KibanaURL> => {
@@ -42,14 +49,18 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     }
 
     const { embeddable } = context;
-    const { filters, timeRange } = await plugins.embeddable.filtersAndTimeRangeFromContext(context);
+    const { restOfFilters: filters, timeRange } = esFilters.extractTimeRange(
+      context.filters,
+      context.timeFieldName
+    );
+
     const state: DiscoverUrlGeneratorState = {
       filters,
       timeRange,
     };
 
     if (embeddable) {
-      state.indexPatternId = shared.getIndexPattern(embeddable) || undefined;
+      state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
       const input = embeddable.getInput();
 

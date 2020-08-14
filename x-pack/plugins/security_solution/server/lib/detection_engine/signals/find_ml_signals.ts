@@ -6,13 +6,13 @@
 
 import dateMath from '@elastic/datemath';
 
-import { LegacyAPICaller, KibanaRequest } from '../../../../../../../src/core/server';
+import { ILegacyScopedClusterClient, KibanaRequest } from '../../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../../ml/server';
 import { getAnomalies } from '../../machine_learning';
 
 export const findMlSignals = async ({
   ml,
-  callCluster,
+  clusterClient,
   request,
   jobId,
   anomalyThreshold,
@@ -20,14 +20,14 @@ export const findMlSignals = async ({
   to,
 }: {
   ml: MlPluginSetup;
-  callCluster: LegacyAPICaller;
+  clusterClient: ILegacyScopedClusterClient;
   request: KibanaRequest;
   jobId: string;
   anomalyThreshold: number;
   from: string;
   to: string;
 }) => {
-  const { mlAnomalySearch } = ml.mlSystemProvider(callCluster, request);
+  const { mlAnomalySearch } = ml.mlSystemProvider(clusterClient, request);
   const params = {
     jobIds: [jobId],
     threshold: anomalyThreshold,

@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
 
-      const FROM = new Date('2019-02-09T01:57:24.870Z').valueOf();
-      const TO = new Date('2019-02-12T01:57:24.870Z').valueOf();
+      const FROM = '2019-02-09T01:57:24.870Z';
+      const TO = '2019-02-12T01:57:24.870Z';
 
       it('Make sure that we get Source NetworkTopNFlow data with bytes_in descending sort', () => {
         return client
@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -84,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -121,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 10,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })
@@ -155,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
                 querySize: 20,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              docValueFields: [],
               inspect: false,
             },
           })

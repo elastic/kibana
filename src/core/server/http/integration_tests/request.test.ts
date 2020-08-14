@@ -23,6 +23,7 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { schema } from '@kbn/config-schema';
 
 let server: HttpService;
 
@@ -194,6 +195,96 @@ describe('KibanaRequest', () => {
 
         expect(nextSpy).toHaveBeenCalledTimes(0);
         expect(completeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not complete before response has been sent', async () => {
+        const { server: innerServer, createRouter, registerOnPreAuth } = await server.setup(
+          setupDeps
+        );
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        registerOnPreAuth((req, res, toolkit) => {
+          req.events.aborted$.subscribe({
+            next: nextSpy,
+            complete: completeSpy,
+          });
+          return toolkit.next();
+        });
+
+        router.post(
+          { path: '/', validate: { body: schema.any() } },
+          async (context, request, res) => {
+            expect(completeSpy).not.toHaveBeenCalled();
+            return res.ok({ body: 'ok' });
+          }
+        );
+
+        await server.start();
+
+        await supertest(innerServer.listener).post('/').send({ data: 'test' }).expect(200);
+
+        expect(nextSpy).toHaveBeenCalledTimes(0);
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('completed$', () => {
+      it('emits once and completes when response is sent', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        router.get({ path: '/', validate: false }, async (context, req, res) => {
+          req.events.completed$.subscribe({
+            next: nextSpy,
+            complete: completeSpy,
+          });
+
+          expect(nextSpy).not.toHaveBeenCalled();
+          expect(completeSpy).not.toHaveBeenCalled();
+          return res.ok({ body: 'ok' });
+        });
+
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200);
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('emits once and completes when response is aborted', async (done) => {
+        expect.assertions(2);
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+
+        router.get({ path: '/', validate: false }, async (context, req, res) => {
+          req.events.completed$.subscribe({
+            next: nextSpy,
+            complete: () => {
+              expect(nextSpy).toHaveBeenCalledTimes(1);
+              done();
+            },
+          });
+
+          expect(nextSpy).not.toHaveBeenCalled();
+          await delay(30000);
+          return res.ok({ body: 'ok' });
+        });
+
+        await server.start();
+
+        const incomingRequest = supertest(innerServer.listener)
+          .get('/')
+          // end required to send request
+          .end();
+        setTimeout(() => incomingRequest.abort(), 50);
       });
     });
   });

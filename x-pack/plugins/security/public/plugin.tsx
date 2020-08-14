@@ -139,9 +139,8 @@ export class SecurityPlugin
   public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
-
     if (management) {
-      this.managementService.start({ management });
+      this.managementService.start();
     }
   }
 

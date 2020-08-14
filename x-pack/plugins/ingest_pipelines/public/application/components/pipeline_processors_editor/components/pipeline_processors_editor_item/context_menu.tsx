@@ -9,7 +9,7 @@ import React, { FunctionComponent, useState } from 'react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
-import { editorItemMessages } from './messages';
+import { i18nTexts } from './i18n_texts';
 
 interface Props {
   disabled: boolean;
@@ -26,6 +26,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const containerClasses = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__item--displayNone': hidden,
   });
 
@@ -39,7 +40,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
         onDuplicate();
       }}
     >
-      {editorItemMessages.duplicateButtonLabel}
+      {i18nTexts.duplicateButtonLabel}
     </EuiContextMenuItem>,
     showAddOnFailure ? (
       <EuiContextMenuItem
@@ -51,7 +52,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
           onAddOnFailure();
         }}
       >
-        {editorItemMessages.addOnFailureButtonLabel}
+        {i18nTexts.addOnFailureButtonLabel}
       </EuiContextMenuItem>
     ) : undefined,
     <EuiContextMenuItem
@@ -64,7 +65,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
         onDelete();
       }}
     >
-      {editorItemMessages.deleteButtonLabel}
+      {i18nTexts.deleteButtonLabel}
     </EuiContextMenuItem>,
   ].filter(Boolean) as JSX.Element[];
 
@@ -82,7 +83,7 @@ export const ContextMenu: FunctionComponent<Props> = (props) => {
             disabled={disabled}
             onClick={() => setIsOpen((v) => !v)}
             iconType="boxesHorizontal"
-            aria-label={editorItemMessages.moreButtonAriaLabel}
+            aria-label={i18nTexts.moreButtonAriaLabel}
           />
         }
       >

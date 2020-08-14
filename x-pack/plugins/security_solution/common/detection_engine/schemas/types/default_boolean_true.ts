@@ -11,12 +11,10 @@ import { Either } from 'fp-ts/lib/Either';
  * Types the DefaultBooleanTrue as:
  *   - If null or undefined, then a default true will be set
  */
-export const DefaultBooleanTrue = new t.Type<boolean, boolean, unknown>(
+export const DefaultBooleanTrue = new t.Type<boolean, boolean | undefined, unknown>(
   'DefaultBooleanTrue',
   t.boolean.is,
   (input, context): Either<t.Errors, boolean> =>
     input == null ? t.success(true) : t.boolean.validate(input, context),
   t.identity
 );
-
-export type DefaultBooleanTrueC = typeof DefaultBooleanTrue;

@@ -71,7 +71,7 @@ export function getSeries(table: Table, chart: Chart) {
         seriesLabel = prefix + seriesLabel;
       }
 
-      point.seriesId = seriesId;
+      (point.seriesId as string | number) = seriesId;
       addToSiri(
         seriesMap,
         point,

@@ -17,42 +17,55 @@
  * under the License.
  */
 
-import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent } from 'rxjs';
-import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
-import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
+import { trimEnd } from 'lodash';
+import { BehaviorSubject, throwError, timer, Subscription, defer, from, Observable } from 'rxjs';
+import { finalize, filter } from 'rxjs/operators';
+import { Toast, CoreStart, ToastsSetup, CoreSetup } from 'kibana/public';
 import { getCombinedSignal, AbortError } from '../../common/utils';
-import { IKibanaSearchRequest } from '../../common/search';
-import { ISearchGeneric, ISearchOptions } from './i_search';
-import { RequestTimeoutError } from './request_timeout_error';
+import { IEsSearchRequest, IEsSearchResponse, ES_SEARCH_STRATEGY } from '../../common/search';
+import { ISearchOptions } from './types';
 import { getLongQueryNotification } from './long_query_notification';
+import { SearchUsageCollector } from './collectors';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 10000;
+
+export interface SearchInterceptorDeps {
+  toasts: ToastsSetup;
+  http: CoreSetup['http'];
+  uiSettings: CoreSetup['uiSettings'];
+  startServices: Promise<[CoreStart, any, unknown]>;
+  usageCollector?: SearchUsageCollector;
+}
 
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
+   *  @internal
    */
   protected abortController = new AbortController();
 
   /**
-   * The number of pending search requests.
-   */
-  private pendingCount = 0;
-
-  /**
    * Observable that emits when the number of pending requests changes.
+   * @internal
    */
-  private pendingCount$ = new BehaviorSubject(this.pendingCount);
+  protected pendingCount$ = new BehaviorSubject(0);
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
+   * @internal
    */
-  protected timeoutSubscriptions: Set<Subscription> = new Set();
+  protected timeoutSubscriptions: Subscription = new Subscription();
 
   /**
    * The current long-running toast (if there is one).
+   * @internal
    */
   protected longRunningToast?: Toast;
+
+  /**
+   * @internal
+   */
+  protected application!: CoreStart['application'];
 
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
@@ -62,10 +75,15 @@ export class SearchInterceptor {
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
   constructor(
-    protected readonly toasts: ToastsStart,
-    protected readonly application: ApplicationStart,
+    protected readonly deps: SearchInterceptorDeps,
     protected readonly requestTimeout?: number
   ) {
+    this.deps.http.addLoadingCountSource(this.pendingCount$);
+
+    this.deps.startServices.then(([coreStart]) => {
+      this.application = coreStart.application;
+    });
+
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
     this.getPendingCount$()
@@ -77,73 +95,100 @@ export class SearchInterceptor {
    * Returns an `Observable` over the current number of pending searches. This could mean that one
    * of the search requests is still in flight, or that it has only received partial responses.
    */
-  public getPendingCount$ = () => {
+  public getPendingCount$() {
     return this.pendingCount$.asObservable();
-  };
+  }
+
+  protected runSearch(
+    request: IEsSearchRequest,
+    signal: AbortSignal,
+    strategy?: string
+  ): Observable<IEsSearchResponse> {
+    const { id, ...searchRequest } = request;
+    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
+    const body = JSON.stringify(id != null ? {} : searchRequest);
+    return from(
+      this.deps.http.fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      })
+    );
+  }
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
    * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates the `pendingCount` when the request is started/finalized.
+   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
    */
-  public search = (
-    search: ISearchGeneric,
-    request: IKibanaSearchRequest,
+  public search(
+    request: IEsSearchRequest,
     options?: ISearchOptions
-  ) => {
+  ): Observable<IEsSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
-      this.pendingCount$.next(++this.pendingCount);
+      if (options?.signal?.aborted) {
+        return throwError(new AbortError());
+      }
 
-      // Schedule this request to automatically timeout after some interval
-      const timeoutController = new AbortController();
-      const { signal: timeoutSignal } = timeoutController;
-      const timeout$ = timer(this.requestTimeout);
-      const subscription = timeout$.subscribe(() => timeoutController.abort());
-      this.timeoutSubscriptions.add(subscription);
+      const { combinedSignal, cleanup } = this.setupTimers(options);
+      this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      // If the request timed out, throw a `RequestTimeoutError`
-      const timeoutError$ = fromEvent(timeoutSignal, 'abort').pipe(
-        mergeMapTo(throwError(new RequestTimeoutError()))
-      );
-
-      const userAbort$ = fromEvent(this.abortController.signal, 'abort').pipe(
-        mergeMapTo(throwError(new AbortError()))
-      );
-
-      // Schedule the notification to allow users to cancel or wait beyond the timeout
-      const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(
-        this.showToast
-      );
-
-      // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
-      // 1. The user manually aborts (via `cancelPending`)
-      // 2. The request times out
-      // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
-      const signals = [
-        this.abortController.signal,
-        timeoutSignal,
-        ...(options?.signal ? [options.signal] : []),
-      ];
-      const combinedSignal = getCombinedSignal(signals);
-
-      return search(request as any, { ...options, signal: combinedSignal }).pipe(
-        takeUntil(timeoutError$),
-        takeUntil(userAbort$),
+      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
         finalize(() => {
-          this.pendingCount$.next(--this.pendingCount);
-          this.timeoutSubscriptions.delete(subscription);
-          notificationSubscription.unsubscribe();
+          this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+          cleanup();
         })
       );
     });
-  };
+  }
 
+  protected setupTimers(options?: ISearchOptions) {
+    // Schedule this request to automatically timeout after some interval
+    const timeoutController = new AbortController();
+    const { signal: timeoutSignal } = timeoutController;
+    const timeout$ = timer(this.requestTimeout);
+    const subscription = timeout$.subscribe(() => {
+      timeoutController.abort();
+    });
+    this.timeoutSubscriptions.add(subscription);
+
+    // Schedule the notification to allow users to cancel or wait beyond the timeout
+    const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(this.showToast);
+
+    // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
+    // 1. The user manually aborts (via `cancelPending`)
+    // 2. The request times out
+    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+    const signals = [
+      this.abortController.signal,
+      timeoutSignal,
+      ...(options?.signal ? [options.signal] : []),
+    ];
+
+    const combinedSignal = getCombinedSignal(signals);
+    const cleanup = () => {
+      this.timeoutSubscriptions.remove(subscription);
+      notificationSubscription.unsubscribe();
+    };
+
+    combinedSignal.addEventListener('abort', cleanup);
+
+    return {
+      combinedSignal,
+      cleanup,
+    };
+  }
+
+  /**
+   *  @internal
+   */
   protected showToast = () => {
     if (this.longRunningToast) return;
-    this.longRunningToast = this.toasts.addInfo(
+    this.longRunningToast = this.deps.toasts.addInfo(
       {
-        title: 'Your query is taking awhile',
+        title: 'Your query is taking a while',
         text: getLongQueryNotification({
           application: this.application,
         }),
@@ -154,10 +199,18 @@ export class SearchInterceptor {
     );
   };
 
+  /**
+   *  @internal
+   */
   protected hideToast = () => {
     if (this.longRunningToast) {
-      this.toasts.remove(this.longRunningToast);
+      this.deps.toasts.remove(this.longRunningToast);
       delete this.longRunningToast;
+      if (this.deps.usageCollector) {
+        this.deps.usageCollector.trackLongQueryDialogDismissed();
+      }
     }
   };
 }
+
+export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;

@@ -86,7 +86,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           >
             <FormattedMessage
               id="xpack.ingestManager.agentDetails.viewAgentListTitle"
-              defaultMessage="View all agent configurations"
+              defaultMessage="View all agents"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -135,6 +135,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               ) : agentConfigData?.item ? (
                 <EuiLink
                   href={getHref('configuration_details', { configId: agentData.item.config_id! })}
+                  className="eui-textBreakWord"
                 >
                   {agentConfigData.item.name || agentData.item.config_id}
                 </EuiLink>

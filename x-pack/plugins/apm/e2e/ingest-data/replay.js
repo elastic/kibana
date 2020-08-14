@@ -69,6 +69,14 @@ function incrementSpinnerCount({ success }) {
   spinner.text = `Remaining: ${remaining}. Succeeded: ${requestProgress.succeeded}. Failed: ${requestProgress.failed}.`;
 }
 let iterIndex = 0;
+
+function setRumAgent(item) {
+  item.body = item.body.replace(
+    '"name":"client"',
+    '"name":"opbean-client-rum"'
+  );
+}
+
 async function insertItem(item) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
@@ -78,6 +86,8 @@ async function insertItem(item) {
 
     if (item.url === '/intake/v2/rum/events') {
       if (iterIndex === userAgents.length) {
+        // set some event agent to opbean
+        setRumAgent(item);
         iterIndex = 0;
       }
       headers['User-Agent'] = userAgents[iterIndex];

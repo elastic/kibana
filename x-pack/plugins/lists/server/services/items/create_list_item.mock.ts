@@ -20,10 +20,12 @@ import {
 export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
   callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
+  deserializer: undefined,
   id: LIST_ITEM_ID,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
+  serializer: undefined,
   tieBreaker: TIE_BREAKER,
   type: TYPE,
   user: USER,

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+
 import { createQueryFilterClauses, calculateTimeSeriesInterval } from '../../utils/build_query';
 import { buildTimelineQuery } from '../events/query.dsl';
 import { RequestOptions, MatrixHistogramRequestOptions } from '../framework';
@@ -62,6 +64,7 @@ export const buildAlertsHistogramQuery = ({
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },
@@ -76,8 +79,8 @@ export const buildAlertsHistogramQuery = ({
         fixed_interval: interval,
         min_doc_count: 0,
         extended_bounds: {
-          min: from,
-          max: to,
+          min: moment(from).valueOf(),
+          max: moment(to).valueOf(),
         },
       },
     };

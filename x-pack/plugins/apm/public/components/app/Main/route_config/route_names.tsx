@@ -27,4 +27,5 @@ export enum RouteName {
   LINK_TO_TRACE = 'link_to_trace',
   CUSTOMIZE_UI = 'customize_ui',
   RUM_OVERVIEW = 'rum_overview',
+  ANOMALY_DETECTION = 'anomaly_detection',
 }

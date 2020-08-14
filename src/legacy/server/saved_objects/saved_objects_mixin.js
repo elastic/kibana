@@ -34,8 +34,8 @@ export function savedObjectsMixin(kbnServer, server) {
   const typeRegistry = kbnServer.newPlatform.start.core.savedObjects.getTypeRegistry();
   const mappings = migrator.getActiveMappings();
   const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
+  const visibleTypes = typeRegistry.getVisibleTypes().map((t) => t.name);
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
-  const visibleTypes = allTypes.filter((type) => !schema.isHiddenType(type));
 
   server.decorate('server', 'kibanaMigrator', migrator);
 

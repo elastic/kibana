@@ -20,7 +20,7 @@ export function createAlertsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: AlertsUsage = get(doc, 'state');
+        const state: AlertsUsage = get(doc, 'state') as AlertsUsage;
 
         return {
           ...state,

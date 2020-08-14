@@ -29,11 +29,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indices } from '../../../../../../src/plugins/es_ui_shared/public';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 
+import { extractQueryParams, indices } from '../../shared_imports';
 import { routing } from '../services/routing';
-import { extractQueryParams } from '../services/query_params';
 import { getRemoteClusterName } from '../services/get_remote_cluster_name';
 import { API_STATUS } from '../constants';
 import { SectionError } from './section_error';

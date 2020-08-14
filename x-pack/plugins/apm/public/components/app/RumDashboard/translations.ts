@@ -7,14 +7,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const I18LABELS = {
-  endUserExperience: i18n.translate('xpack.apm.rum.dashboard.title', {
-    defaultMessage: 'End User Experience',
-  }),
-  getWhatIsGoingOn: (environmentVal: string) =>
-    i18n.translate('xpack.apm.rum.dashboard.environment.title', {
-      defaultMessage: `What's going on in {environmentVal}?`,
-      values: { environmentVal },
-    }),
   backEnd: i18n.translate('xpack.apm.rum.dashboard.backend', {
     defaultMessage: 'Backend',
   }),
@@ -58,3 +50,10 @@ export const I18LABELS = {
     defaultMessage: 'seconds',
   }),
 };
+
+export const VisitorBreakdownLabel = i18n.translate(
+  'xpack.apm.rum.visitorBreakdown',
+  {
+    defaultMessage: 'Visitor breakdown',
+  }
+);

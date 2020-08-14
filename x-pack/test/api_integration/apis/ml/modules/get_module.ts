@@ -25,13 +25,13 @@ const moduleIds = [
   'sample_data_weblogs',
   'siem_auditbeat',
   'siem_auditbeat_auth',
+  'siem_cloudtrail',
   'siem_packetbeat',
   'siem_winlogbeat',
   'siem_winlogbeat_auth',
   'uptime_heartbeat',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');

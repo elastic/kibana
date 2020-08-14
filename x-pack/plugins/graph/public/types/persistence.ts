@@ -33,7 +33,7 @@ export interface GraphWorkspaceSavedObject {
 export interface SerializedWorkspaceState {
   indexPattern: string;
   selectedFields: SerializedField[];
-  blacklist: SerializedNode[];
+  blocklist: SerializedNode[];
   vertices: SerializedNode[];
   links: SerializedEdge[];
   urlTemplates: SerializedUrlTemplate[];

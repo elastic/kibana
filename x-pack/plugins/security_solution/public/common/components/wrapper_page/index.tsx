@@ -5,18 +5,16 @@
  */
 
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
+import { useFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
-const Wrapper = styled.div<{ noPadding?: boolean }>`
-  padding: ${(props) =>
-    props.noPadding
-      ? '0'
-      : `${props.theme.eui.paddingSizes.l} ${gutterTimeline} ${props.theme.eui.paddingSizes.l}
-  ${props.theme.eui.paddingSizes.l}`};
+const Wrapper = styled.div`
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l}`};
   &.siemWrapperPage--restrictWidthDefault,
   &.siemWrapperPage--restrictWidthCustom {
     box-sizing: content-box;
@@ -25,6 +23,14 @@ const Wrapper = styled.div<{ noPadding?: boolean }>`
 
   &.siemWrapperPage--restrictWidthDefault {
     max-width: 1000px;
+  }
+
+  &.siemWrapperPage--fullHeight {
+    height: 100%;
+  }
+
+  &.siemWrapperPage--noPadding {
+    padding: 0;
   }
 `;
 
@@ -45,8 +51,15 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   style,
   noPadding,
 }) => {
+  const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
+  useEffect(() => {
+    setGlobalFullScreen(false); // exit full screen mode on page load
+  }, [setGlobalFullScreen]);
+
   const classes = classNames(className, {
     siemWrapperPage: true,
+    'siemWrapperPage--noPadding': noPadding,
+    'siemWrapperPage--fullHeight': globalFullScreen,
     'siemWrapperPage--restrictWidthDefault':
       restrictWidth && typeof restrictWidth === 'boolean' && restrictWidth === true,
     'siemWrapperPage--restrictWidthCustom': restrictWidth && typeof restrictWidth !== 'boolean',
@@ -60,7 +73,7 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   }
 
   return (
-    <Wrapper className={classes} style={customStyle || style} noPadding={noPadding}>
+    <Wrapper className={classes} style={customStyle || style}>
       {children}
       <AppGlobalStyle />
     </Wrapper>

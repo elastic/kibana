@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
-import { isEmpty, isEqual, mapValues, omit, pick } from 'lodash';
+import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -173,7 +173,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         const model: InputObject = mapValues(pick(models[index], modelNames), 'model');
 
         // we need to skip empty values since they are not stored in saved object
-        return !isEqual(item, omit(model, isEmpty));
+        return !isEqual(item, omitBy(model, isEmpty));
       })
     ) {
       setModels(

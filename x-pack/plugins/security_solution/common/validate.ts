@@ -27,9 +27,9 @@ export const validate = <T extends t.Mixed>(
 export const validateEither = <T extends t.Mixed, A extends unknown>(
   schema: T,
   obj: A
-): Either<string, A> =>
+): Either<Error, A> =>
   pipe(
     obj,
     (a) => schema.validate(a, t.getDefaultContext(schema.asDecoder())),
-    mapLeft((errors) => formatErrors(errors).join(','))
+    mapLeft((errors) => new Error(formatErrors(errors).join(',')))
   );

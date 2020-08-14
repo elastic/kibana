@@ -35,8 +35,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '2020-07-07T08:20:18.966Z',
+        '2020-07-08T08:20:18.966Z',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable
@@ -50,8 +50,8 @@ describe('embedded_map_helpers', () => {
         [],
         [],
         { query: '', language: 'kuery' },
-        0,
-        0,
+        '2020-07-07T08:20:18.966Z',
+        '2020-07-08T08:20:18.966Z',
         setQueryMock,
         createPortalNode(),
         mockEmbeddable

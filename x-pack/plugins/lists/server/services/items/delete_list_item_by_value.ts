@@ -48,6 +48,7 @@ export const deleteListItemByValue = async ({
       },
     },
     index: listItemIndex,
+    refresh: 'wait_for',
   });
   return listItems;
 };

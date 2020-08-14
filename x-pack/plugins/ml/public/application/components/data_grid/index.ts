@@ -12,7 +12,7 @@ export {
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
 } from './common';
-export { fetchChartsData, ChartData } from './use_column_chart';
+export { getFieldType, ChartData } from './use_column_chart';
 export { useDataGrid } from './use_data_grid';
 export { DataGrid } from './data_grid';
 export {

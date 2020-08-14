@@ -30,6 +30,7 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
   EmbeddableContext,
+  contextMenuTrigger,
 } from '../triggers';
 import { IEmbeddable, EmbeddableOutput, EmbeddableError } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
@@ -311,8 +312,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const sortedActions = [...regularActions, ...extraActions].sort(sortByOrderField);
 
     return await buildContextMenuForActions({
-      actions: sortedActions,
-      actionContext: { embeddable: this.props.embeddable },
+      actions: sortedActions.map((action) => ({
+        action,
+        context: { embeddable: this.props.embeddable },
+        trigger: contextMenuTrigger,
+      })),
       closeMenu: this.closeMyContextMenuPanel,
     });
   };

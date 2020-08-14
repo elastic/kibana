@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { diffMappings } from './build_active_mappings';
 import * as Index from './elastic_index';
 import { migrateRawDocs } from './migrate_raw_docs';
@@ -71,11 +70,11 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiresMigration(context: Context): Promise<boolean> {
-  const { callCluster, alias, documentMigrator, dest, log } = context;
+  const { client, alias, documentMigrator, dest, log } = context;
 
   // Have all of our known migrations been run against the index?
   const hasMigrations = await Index.migrationsUpToDate(
-    callCluster,
+    client,
     alias,
     documentMigrator.migrationVersion
   );
@@ -85,7 +84,7 @@ async function requiresMigration(context: Context): Promise<boolean> {
   }
 
   // Is our index aliased?
-  const refreshedSource = await Index.fetchInfo(callCluster, alias);
+  const refreshedSource = await Index.fetchInfo(client, alias);
 
   if (!refreshedSource.aliases[alias]) {
     return true;
@@ -109,19 +108,19 @@ async function requiresMigration(context: Context): Promise<boolean> {
  */
 async function migrateIndex(context: Context): Promise<MigrationResult> {
   const startTime = Date.now();
-  const { callCluster, alias, source, dest, log } = context;
+  const { client, alias, source, dest, log } = context;
 
   await deleteIndexTemplates(context);
 
   log.info(`Creating index ${dest.indexName}.`);
 
-  await Index.createIndex(callCluster, dest.indexName, dest.mappings);
+  await Index.createIndex(client, dest.indexName, dest.mappings);
 
   await migrateSourceToDest(context);
 
   log.info(`Pointing alias ${alias} to ${dest.indexName}.`);
 
-  await Index.claimAlias(callCluster, dest.indexName, alias);
+  await Index.claimAlias(client, dest.indexName, alias);
 
   const result: MigrationResult = {
     status: 'migrated',
@@ -139,12 +138,12 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
  * If the obsoleteIndexTemplatePattern option is specified, this will delete any index templates
  * that match it.
  */
-async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePattern }: Context) {
+async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern }: Context) {
   if (!obsoleteIndexTemplatePattern) {
     return;
   }
 
-  const templates = await callCluster('cat.templates', {
+  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -157,7 +156,7 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map((name) => callCluster('indices.deleteTemplate', { name })));
+  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name })));
 }
 
 /**
@@ -166,7 +165,7 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
  * a situation where the alias moves out from under us as we're migrating docs.
  */
 async function migrateSourceToDest(context: Context) {
-  const { callCluster, alias, dest, source, batchSize } = context;
+  const { client, alias, dest, source, batchSize } = context;
   const { scrollDuration, documentMigrator, log, serializer } = context;
 
   if (!source.exists) {
@@ -176,10 +175,10 @@ async function migrateSourceToDest(context: Context) {
   if (!source.aliases[alias]) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
-    await Index.convertToAlias(callCluster, source, alias, batchSize, context.convertToAliasScript);
+    await Index.convertToAlias(client, source, alias, batchSize, context.convertToAliasScript);
   }
 
-  const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });
+  const read = Index.reader(client, source.indexName, { batchSize, scrollDuration });
 
   log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
 
@@ -193,7 +192,7 @@ async function migrateSourceToDest(context: Context) {
     log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
-      callCluster,
+      client,
       dest.indexName,
       await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
     );

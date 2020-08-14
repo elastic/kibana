@@ -27,6 +27,7 @@ import {
 import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';
+import { Filter, Query, TimeRange } from '../../data/common';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
@@ -71,9 +72,9 @@ export const getTimelionVisualizationConfig = (
     const visParams = { expression: args.expression, interval: args.interval };
 
     const response = await timelionRequestHandler({
-      timeRange: get(input, 'timeRange'),
-      query: get(input, 'query'),
-      filters: get(input, 'filters'),
+      timeRange: get(input, 'timeRange') as TimeRange,
+      query: get(input, 'query') as Query,
+      filters: get(input, 'filters') as Filter[],
       visParams,
       forceFetch: true,
     });

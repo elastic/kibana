@@ -54,20 +54,20 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: {
-              from: 0,
+              from: '2020-07-07T08:20:18.966Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1,
+              to: '2020-07-08T08:20:18.966Z',
               toStr: 'now',
             },
             linkTo: ['timeline'],
           },
           timeline: {
             [CONSTANTS.timerange]: {
-              from: 0,
+              from: '2020-07-07T08:20:18.966Z',
               fromStr: 'now-24h',
               kind: 'relative',
-              to: 1,
+              to: '2020-07-08T08:20:18.966Z',
               toStr: 'now',
             },
             linkTo: ['global'],
@@ -83,7 +83,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
         state: '',
       });
     });
@@ -114,7 +114,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         state: '',
       });
     });
@@ -147,7 +147,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)',
+          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)",
         state: '',
       });
     });
@@ -176,7 +176,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
               hash: '',
               pathname: examplePath,
               search:
-                '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+                "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
               state: '',
             });
           }
@@ -204,7 +204,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            '?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))'
+            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
 
           wrapper.setProps({ hookProps: updatedProps });
@@ -213,7 +213,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
+            "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
         });
       });

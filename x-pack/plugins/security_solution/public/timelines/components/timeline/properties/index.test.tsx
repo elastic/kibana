@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import {
   mockGlobalState,
@@ -15,6 +16,7 @@ import {
   TestProviders,
   kibanaObservable,
 } from '../../../../common/mock';
+import '../../../../common/mock/match_media';
 import { createStore, State } from '../../../../common/store';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
@@ -25,7 +27,7 @@ import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../common/components/link_to');
 
-const mockNavigateToApp = jest.fn();
+const mockNavigateToApp = jest.fn().mockImplementation(() => Promise.resolve());
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
@@ -369,6 +371,11 @@ describe('Properties', () => {
     );
     wrapper.find('[data-test-subj="settings-gear"]').at(0).simulate('click');
     wrapper.find('[data-test-subj="attach-timeline-case"]').first().simulate('click');
+
+    await act(async () => {
+      await Promise.resolve({});
+    });
+
     expect(mockNavigateToApp).toBeCalledWith('securitySolution:case', { path: '/create' });
     expect(mockDispatch).toBeCalledWith(
       setInsertTimeline({

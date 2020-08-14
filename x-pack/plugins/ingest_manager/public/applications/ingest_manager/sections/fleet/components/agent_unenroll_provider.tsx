@@ -14,6 +14,7 @@ import { agentRouteService } from '../../../services';
 
 interface Props {
   children: (unenrollAgents: UnenrollAgents) => React.ReactElement;
+  forceUnenroll?: boolean;
 }
 
 export type UnenrollAgents = (
@@ -24,7 +25,10 @@ export type UnenrollAgents = (
 
 type OnSuccessCallback = (agentsUnenrolled: string[]) => void;
 
-export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({
+  children,
+  forceUnenroll = false,
+}) => {
   const core = useCore();
   const [agents, setAgents] = useState<string[] | string>([]);
   const [agentsCount, setAgentsCount] = useState<number>(0);
@@ -65,19 +69,24 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
       const { error } = await sendRequest<PostAgentUnenrollResponse>({
         path: agentRouteService.getUnenrollPath(agentId),
         method: 'post',
+        body: {
+          force: forceUnenroll,
+        },
       });
 
       if (error) {
         throw new Error(error.message);
       }
 
-      const successMessage = i18n.translate(
-        'xpack.ingestManager.unenrollAgents.successSingleNotificationTitle',
-        {
-          defaultMessage: "Unenrolled agent '{id}'",
-          values: { id: agentId },
-        }
-      );
+      const successMessage = forceUnenroll
+        ? i18n.translate('xpack.ingestManager.unenrollAgents.successForceSingleNotificationTitle', {
+            defaultMessage: "Agent '{id}' unenrolled",
+            values: { id: agentId },
+          })
+        : i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
+            defaultMessage: "Unenrolling agent '{id}'",
+            values: { id: agentId },
+          });
       core.notifications.toasts.addSuccess(successMessage);
 
       if (onSuccessCallback.current) {
@@ -107,11 +116,19 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
         <EuiConfirmModal
           title={
             isSingle && !unenrollByKuery ? (
-              <FormattedMessage
-                id="xpack.ingestManager.unenrollAgents.confirmModal.deleteSingleTitle"
-                defaultMessage="Unenroll agent '{id}'?"
-                values={{ id: agents[0] }}
-              />
+              forceUnenroll ? (
+                <FormattedMessage
+                  id="xpack.ingestManager.unenrollAgents.confirmModal.forceDeleteSingleTitle"
+                  defaultMessage="Force unenroll agent '{id}'?"
+                  values={{ id: agents[0] }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ingestManager.unenrollAgents.confirmModal.deleteSingleTitle"
+                  defaultMessage="Unenroll agent '{id}'?"
+                  values={{ id: agents[0] }}
+                />
+              )
             ) : (
               <FormattedMessage
                 id="xpack.ingestManager.unenrollAgents.confirmModal.deleteMultipleTitle"

@@ -32,8 +32,8 @@ export interface OverviewNetworkArgs {
 export interface OverviewNetworkProps extends QueryTemplateProps {
   children: (args: OverviewNetworkArgs) => React.ReactNode;
   sourceId: string;
-  endDate: number;
-  startDate: number;
+  endDate: string;
+  startDate: string;
 }
 
 export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & PropsFromRedux>(

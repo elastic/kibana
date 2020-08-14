@@ -24,7 +24,7 @@ do {
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules \
    -d @${RULE} \
-  | jq .;
+  | jq -S .;
 } &
 done
 

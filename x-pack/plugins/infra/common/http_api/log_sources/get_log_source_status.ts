@@ -40,9 +40,17 @@ const logIndexFieldRT = rt.strict({
 
 export type LogIndexField = rt.TypeOf<typeof logIndexFieldRT>;
 
+const logIndexStatusRT = rt.keyof({
+  missing: null,
+  empty: null,
+  available: null,
+});
+
+export type LogIndexStatus = rt.TypeOf<typeof logIndexStatusRT>;
+
 const logSourceStatusRT = rt.strict({
   logIndexFields: rt.array(logIndexFieldRT),
-  logIndexNames: rt.array(rt.string),
+  logIndexStatus: logIndexStatusRT,
 });
 
 export type LogSourceStatus = rt.TypeOf<typeof logSourceStatusRT>;

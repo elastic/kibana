@@ -20,6 +20,7 @@ import {
   TimelineStatusActions,
 } from './utils/common';
 import { createTimelines } from './utils/create_timelines';
+import { DEFAULT_ERROR } from './utils/failure_cases';
 
 export const createTimelinesRoute = (
   router: IRouter,
@@ -33,7 +34,7 @@ export const createTimelinesRoute = (
         body: buildRouteValidation(createTimelineSchema),
       },
       options: {
-        tags: ['access:siem'],
+        tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
@@ -85,7 +86,7 @@ export const createTimelinesRoute = (
           return siemResponse.error(
             compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.create) || {
               statusCode: 405,
-              body: 'update timeline error',
+              body: DEFAULT_ERROR,
             }
           );
         }

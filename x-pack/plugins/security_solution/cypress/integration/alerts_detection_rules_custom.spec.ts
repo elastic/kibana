@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { newRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -62,19 +62,19 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
-import { ALERTS_URL } from '../urls/navigation';
+import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Detection rules, custom', () => {
   before(() => {
-    esArchiverLoad('custom_rule_with_timeline');
+    esArchiverLoad('timeline');
   });
 
   after(() => {
-    esArchiverUnload('custom_rule_with_timeline');
+    esArchiverUnload('timeline');
   });
 
   it('Creates and activates a new custom rule', () => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
@@ -89,7 +89,7 @@ describe('Detection rules, custom', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
+    const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -130,6 +130,7 @@ describe('Detection rules, custom', () => {
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
+      'logs-*',
       'packetbeat-*',
       'winlogbeat-*',
     ];
@@ -169,7 +170,7 @@ describe('Detection rules, custom', () => {
 describe('Deletes custom rules', () => {
   beforeEach(() => {
     esArchiverLoad('custom_rules');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();

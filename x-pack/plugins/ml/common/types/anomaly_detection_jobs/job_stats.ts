@@ -45,6 +45,7 @@ export interface ModelSizeStats {
   model_bytes: number;
   model_bytes_exceeded: number;
   model_bytes_memory_limit: number;
+  peak_model_bytes?: number;
   total_by_field_count: number;
   total_over_field_count: number;
   total_partition_field_count: number;

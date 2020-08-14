@@ -19,10 +19,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { first } from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGrid } from '@elastic/eui';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { TransactionList } from './List';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -33,7 +35,7 @@ import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../observability/public';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
@@ -101,7 +103,7 @@ export function TransactionOverview() {
         serviceName,
         transactionType,
       },
-      projection: PROJECTION.TRANSACTION_GROUPS,
+      projection: Projection.transactionGroups,
     }),
     [serviceName, transactionType]
   );
@@ -125,13 +127,18 @@ export function TransactionOverview() {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <TransactionBreakdown initialIsOpen={true} />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <TransactionBreakdown />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErroneousTransactionsRateChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
 
             <EuiSpacer size="s" />
 
             <TransactionCharts
-              // TODO [APM ML] set hasMLJob prop when ML integration is reintroduced:
-              hasMLJob={false}
               charts={transactionCharts}
               location={location}
               urlParams={urlParams}

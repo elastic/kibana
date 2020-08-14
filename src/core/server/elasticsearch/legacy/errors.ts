@@ -26,7 +26,10 @@ enum ErrorCode {
   NOT_AUTHORIZED = 'Elasticsearch/notAuthorized',
 }
 
-/** @public */
+/**
+ * @deprecated. The new elasticsearch client doesn't wrap errors anymore.
+ * @public
+ * */
 export interface LegacyElasticsearchError extends Boom {
   [code]?: string;
 }
@@ -81,7 +84,7 @@ export class LegacyElasticsearchErrorHelpers {
 
   public static decorateNotAuthorizedError(error: Error, reason?: string) {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
-    const wwwAuthHeader = get<string>(error, 'body.error.header[WWW-Authenticate]');
+    const wwwAuthHeader = get(error, 'body.error.header[WWW-Authenticate]') as string;
 
     decoratedError.output.headers['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';

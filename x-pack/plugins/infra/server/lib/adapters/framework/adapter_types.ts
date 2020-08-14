@@ -38,6 +38,7 @@ export interface CallWithRequestParams extends GenericParams {
   fields?: string | string[];
   path?: string;
   query?: string | object;
+  track_total_hits?: boolean | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -170,6 +171,6 @@ export interface InfraTSVBSeries {
 
 export type InfraTSVBDataPoint = [number, number];
 
-export type InfraRouteConfig<params, query, body, method extends RouteMethod> = {
+export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;

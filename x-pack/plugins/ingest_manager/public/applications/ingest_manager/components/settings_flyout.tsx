@@ -254,7 +254,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
                 id="xpack.ingestManager.settings.cancelButtonLabel"
                 defaultMessage="Cancel"

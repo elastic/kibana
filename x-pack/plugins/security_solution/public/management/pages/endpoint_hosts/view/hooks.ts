@@ -7,16 +7,18 @@
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
 } from '../../../common/constants';
 import { State } from '../../../../common/store';
-export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
+export function useEndpointSelector<TSelected>(selector: (state: EndpointState) => TSelected) {
   return useSelector(function (state: State) {
     return selector(
-      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][MANAGEMENT_STORE_ENDPOINTS_NAMESPACE] as HostState
+      state[MANAGEMENT_STORE_GLOBAL_NAMESPACE][
+        MANAGEMENT_STORE_ENDPOINTS_NAMESPACE
+      ] as EndpointState
     );
   });
 }
@@ -24,16 +26,16 @@ export function useHostSelector<TSelected>(selector: (state: HostState) => TSele
 /**
  * Returns an object that contains Ingest app and URL information
  */
-export const useHostIngestUrl = (): { url: string; appId: string; appPath: string } => {
+export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
-    const appPath = `#/fleet`;
+    const appPath = `#/${subpath}`;
     return {
       url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
       appId: 'ingestManager',
       appPath,
     };
-  }, [services.application]);
+  }, [services.application, subpath]);
 };
 
 /**

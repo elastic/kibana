@@ -13,16 +13,16 @@ import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
-export const PageViewsTrend = () => {
+export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end } = urlParams;
+  const { start, end, serviceName } = urlParams;
 
   const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceName) {
         return callApmApi({
           pathname: '/api/apm/rum-client/page-view-trends',
           params: {
@@ -39,8 +39,9 @@ export const PageViewsTrend = () => {
           },
         });
       }
+      return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdowns]
+    [end, start, serviceName, uiFilters, breakdowns]
   );
 
   const onBreakdownChange = (values: BreakdownItem[]) => {
@@ -67,4 +68,4 @@ export const PageViewsTrend = () => {
       <PageViewsChart data={data} loading={status !== 'success'} />
     </div>
   );
-};
+}

@@ -7,8 +7,8 @@
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { StickyContainer } from 'react-sticky';
 
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -32,7 +32,7 @@ import { State, inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { NetworkEmptyPage } from '../network_empty_page';
+import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { NetworkHttpQueryTable } from './network_http_query_table';
 import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
 import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
@@ -51,14 +51,11 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
   detailName,
   filters,
   flowTarget,
-  from,
-  isInitializing,
   query,
   setAbsoluteRangeDatePicker,
   setIpDetailsTablesActivePageToZero,
-  setQuery,
-  to,
 }) => {
+  const { to, from, setQuery, isInitializing } = useGlobalTime();
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
@@ -79,7 +76,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
     setIpDetailsTablesActivePageToZero();
   }, [detailName, setIpDetailsTablesActivePageToZero]);
 
-  const { indicesExist, indexPattern } = useWithSource();
+  const { docValueFields, indicesExist, indexPattern } = useWithSource();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -91,7 +88,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
   return (
     <div data-test-subj="ip-details-page">
       {indicesExist ? (
-        <StickyContainer>
+        <>
           <FiltersGlobal>
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
@@ -108,6 +105,7 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
             </HeaderPage>
 
             <IpOverviewQuery
+              docValueFields={docValueFields}
               skip={isInitializing}
               sourceId="default"
               filterQuery={filterQuery}
@@ -261,12 +259,12 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
               AnomaliesTableComponent={AnomaliesNetworkTable}
             />
           </WrapperPage>
-        </StickyContainer>
+        </>
       ) : (
         <WrapperPage>
           <HeaderPage border title={ip} />
 
-          <NetworkEmptyPage />
+          <OverviewEmpty />
         </WrapperPage>
       )}
 

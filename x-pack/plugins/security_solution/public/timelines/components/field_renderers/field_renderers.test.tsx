@@ -9,6 +9,7 @@ import React from 'react';
 
 import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../../graphql/types';
 import { TestProviders } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { getEmptyValue } from '../../../common/components/empty_value';
 
 import {

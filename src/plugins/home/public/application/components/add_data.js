@@ -81,12 +81,12 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     const siemData = {
       title: intl.formatMessage({
         id: 'home.addData.securitySolution.nameTitle',
-        defaultMessage: 'Security',
+        defaultMessage: 'SIEM + Endpoint Security',
       }),
       description: intl.formatMessage({
         id: 'home.addData.securitySolution.nameDescription',
         defaultMessage:
-          'Centralize security events for interactive investigation in ready-to-go visualizations.',
+          'Protect hosts, analyze security information and events, hunt threats, automate detections, and create cases.',
       }),
       ariaDescribedby: 'aria-describedby.addSiemButtonLabel',
     };

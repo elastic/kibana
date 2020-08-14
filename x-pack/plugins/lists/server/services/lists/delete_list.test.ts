@@ -47,6 +47,7 @@ describe('delete_list', () => {
     const deleteByQuery = {
       body: { query: { term: { list_id: LIST_ID } } },
       index: LIST_ITEM_INDEX,
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
   });
@@ -59,6 +60,7 @@ describe('delete_list', () => {
     const deleteQuery = {
       id: LIST_ID,
       index: LIST_INDEX,
+      refresh: 'wait_for',
     };
     expect(options.callCluster).toHaveBeenNthCalledWith(2, 'delete', deleteQuery);
   });

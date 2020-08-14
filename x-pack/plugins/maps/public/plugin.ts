@@ -41,6 +41,8 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
+  setEmbeddableService,
+  setNavigateToApp,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -55,7 +57,7 @@ import { getAppTitle } from '../common/i18n_getters';
 import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
-import { createSecurityLayerDescriptors } from './api/create_security_layer_descriptors';
+import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -113,6 +115,8 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
+  setEmbeddableService(plugins.embeddable);
+  setNavigateToApp(core.application.navigateToApp);
 };
 
 /**
@@ -170,6 +174,8 @@ export class MapsPlugin
     bindStartCoreAndPlugins(core, plugins);
     return {
       createSecurityLayerDescriptors,
+      registerLayerWizard,
+      registerSource,
     };
   }
 }

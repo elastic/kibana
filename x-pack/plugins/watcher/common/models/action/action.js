@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { getActionType } from '../../lib/get_action_type';
 import { ACTION_TYPES } from '../../constants';
 import { LoggingAction } from './logging_action';

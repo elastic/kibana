@@ -4,17 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { getFirstUnusedSymbol } from './icon_stops';
 
-describe('getFirstUnusedSymbol', () => {
-  const symbolOptions = [{ value: 'icon1' }, { value: 'icon2' }];
+jest.mock('./icon_select', () => ({
+  IconSelect: () => {
+    return <div>mockIconSelect</div>;
+  },
+}));
 
+jest.mock('../../symbol_utils', () => {
+  return {
+    SYMBOL_OPTIONS: [{ value: 'icon1' }, { value: 'icon2' }],
+    PREFERRED_ICONS: [
+      'circle',
+      'marker',
+      'square',
+      'star',
+      'triangle',
+      'hospital',
+      'circle-stroked',
+      'marker-stroked',
+      'square-stroked',
+      'star-stroked',
+      'triangle-stroked',
+    ],
+  };
+});
+
+describe('getFirstUnusedSymbol', () => {
   test('Should return first unused icon from PREFERRED_ICONS', () => {
     const iconStops = [
       { stop: 'category1', icon: 'circle' },
       { stop: 'category2', icon: 'marker' },
     ];
-    const nextIcon = getFirstUnusedSymbol(symbolOptions, iconStops);
+    const nextIcon = getFirstUnusedSymbol(iconStops);
     expect(nextIcon).toBe('square');
   });
 
@@ -33,7 +57,7 @@ describe('getFirstUnusedSymbol', () => {
       { stop: 'category11', icon: 'triangle-stroked' },
       { stop: 'category12', icon: 'icon1' },
     ];
-    const nextIcon = getFirstUnusedSymbol(symbolOptions, iconStops);
+    const nextIcon = getFirstUnusedSymbol(iconStops);
     expect(nextIcon).toBe('icon2');
   });
 
@@ -53,7 +77,7 @@ describe('getFirstUnusedSymbol', () => {
       { stop: 'category12', icon: 'icon1' },
       { stop: 'category13', icon: 'icon2' },
     ];
-    const nextIcon = getFirstUnusedSymbol(symbolOptions, iconStops);
+    const nextIcon = getFirstUnusedSymbol(iconStops);
     expect(nextIcon).toBe('marker');
   });
 });

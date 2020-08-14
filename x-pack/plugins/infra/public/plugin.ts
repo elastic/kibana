@@ -19,6 +19,7 @@ import {
   InfraClientPluginClass,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
+import { createMetricsHasData, createMetricsFetchData } from './metrics_overview_fetchers';
 
 export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
@@ -35,6 +36,12 @@ export class Plugin implements InfraClientPluginClass {
         appName: 'infra_logs',
         hasData: getLogsHasDataFetcher(core.getStartServices),
         fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+      });
+
+      pluginsSetup.observability.dashboard.register({
+        appName: 'infra_metrics',
+        hasData: createMetricsHasData(core.getStartServices),
+        fetchData: createMetricsFetchData(core.getStartServices),
       });
     }
 

@@ -6,12 +6,14 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { KibanaRequest } from 'src/core/server';
 
 export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
-import { KibanaRequest } from 'kibana/server';
 import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
 
@@ -40,7 +42,7 @@ export interface IEventLogService {
   registerProviderActions(provider: string, actions: string[]): void;
   isProviderActionRegistered(provider: string, action: string): boolean;
   getProviderActions(): Map<string, Set<string>>;
-
+  registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
 }
 

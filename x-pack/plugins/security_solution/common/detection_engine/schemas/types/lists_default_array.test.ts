@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 
 import { foldLeftRight, getPaths } from '../../../test_utils';
 
-import { DefaultListArray, DefaultListArrayC } from './lists_default_array';
+import { DefaultListArray } from './lists_default_array';
 import { getListArrayMock } from './lists.mock';
 
 describe('lists_default_array', () => {
@@ -51,7 +51,7 @@ describe('lists_default_array', () => {
 
   test('it should not validate an array of non accepted types', () => {
     // Terrible casting for purpose of tests
-    const payload = ([1] as unknown) as DefaultListArrayC;
+    const payload = [1] as unknown;
     const decoded = DefaultListArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 

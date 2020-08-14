@@ -10,9 +10,9 @@ The [Webpack config][WebpackConfig] is designed to provide the majority of what 
 
 Source maps are enabled except when building the distributable. They show the code actually being executed by the browser to strike a balance between debuggability and performance. They are not configurable at this time but will be configurable once we have a developer configuration solution that doesn't rely on the server (see [#55656](https://github.com/elastic/kibana/issues/55656)).
 
-### IE Support
+### Browser Support
 
-To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=dev` environment variable (by default) to build JS and CSS that is compatible with modern browsers. In order to support older browsers like IE in development you will need to specify the `BROWSERSLIST_ENV=production` environment variable or build a distributable for testing.
+To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=dev` environment variable (by default) to build JS and CSS that is compatible with modern browsers. In order to support all browsers that we support with the distributable you will need to specify the `BROWSERSLIST_ENV=production` environment variable or build a distributable for testing.
 
 ## Running the optimizer
 
@@ -41,6 +41,26 @@ At runtime the bundles share a set of entry points via the `__kbnBundles__` glob
 When a directory is listed in the "extraPublicDirs" it will always be included in the bundle so that other plugins have access to it. The worker building the bundle has no way of knowing whether another plugin is using the directory, so be careful of adding test code or unnecessary directories to that list.
 
 Any import in a bundle which resolves into another bundles "context" directory, ie `src/plugins/*`, must map explicitly to a "public dir" exported by that plugin. If the resolved import is not in the list of public dirs an error will be thrown and the optimizer will fail to build that bundle until the error is fixed.
+
+## Themes
+
+SASS imports in bundles are automatically converted to CSS for one or more themes. In development we build the `v7light` and `v7dark` themes by default to improve build performance. When producing distributable bundles the default shifts to `*` so that the distributable bundles will include all themes, preventing the bundles from needing to be rebuilt when users change the active theme in Kibana's advanced settings.
+
+To customize the themes that are built for development you can specify the `KBN_OPTIMIZER_THEMES` environment variable to one or more theme tags, or use `*` to build styles for all themes. Unfortunately building more than one theme significantly impacts build performance, so try to be strategic about which themes you build.
+
+Currently supported theme tags: `v7light`, `v7dark`, `v8light`, `v8dark`
+
+Examples:
+```sh
+# start Kibana with only a single theme
+KBN_OPTIMIZER_THEMES=v7light yarn start
+
+# start Kibana with dark themes for version 7 and 8
+KBN_OPTIMIZER_THEMES=v7dark,v8dark yarn start
+
+# start Kibana with all the themes
+KBN_OPTIMIZER_THEMES=* yarn start
+```
 
 ## API
 

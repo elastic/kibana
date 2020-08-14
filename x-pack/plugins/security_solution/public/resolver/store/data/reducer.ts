@@ -9,9 +9,9 @@ import { DataState } from '../../types';
 import { ResolverAction } from '../actions';
 
 const initialState: DataState = {
-  relatedEventsStats: new Map(),
   relatedEvents: new Map(),
   relatedEventsReady: new Map(),
+  resolverComponentInstanceID: undefined,
 };
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
@@ -19,6 +19,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     const nextState: DataState = {
       ...state,
       databaseDocumentID: action.payload.databaseDocumentID,
+      resolverComponentInstanceID: action.payload.resolverComponentInstanceID,
     };
     return nextState;
   } else if (action.type === 'appRequestedResolverData') {

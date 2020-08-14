@@ -9,16 +9,14 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { inputsModel } from '../../store';
-import { SetQuery } from '../../../hosts/pages/navigation/types';
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 
-interface OwnProps {
-  deleteQuery?: ({ id }: { id: string }) => void;
+interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
   id: string;
   legendPosition?: Position;
   loading: boolean;
   refetch: inputsModel.Refetch;
-  setQuery: SetQuery;
   inspect?: inputsModel.InspectQuery;
 }
 

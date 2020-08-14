@@ -11,7 +11,6 @@ import {
   AgentEvent,
   AgentSOAttributes,
   AgentEventSOAttributes,
-  AgentMetadata,
 } from '../../../types';
 
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -21,20 +20,24 @@ import { getAgentActionsForCheckin } from '../actions';
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  events: NewAgentEvent[],
-  localMetadata?: any,
+  data: {
+    events: NewAgentEvent[];
+    localMetadata?: any;
+    status?: 'online' | 'error' | 'degraded';
+  },
   options?: { signal: AbortSignal }
 ) {
-  const updateData: {
-    local_metadata?: AgentMetadata;
-    current_error_events?: string;
-  } = {};
-  const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, events);
+  const updateData: Partial<AgentSOAttributes> = {};
+  const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, data.events);
   if (updatedErrorEvents) {
     updateData.current_error_events = JSON.stringify(updatedErrorEvents);
   }
-  if (localMetadata) {
-    updateData.local_metadata = localMetadata;
+  if (data.localMetadata) {
+    updateData.local_metadata = data.localMetadata;
+  }
+
+  if (data.status !== agent.last_checkin_status) {
+    updateData.last_checkin_status = data.status;
   }
   if (Object.keys(updateData).length > 0) {
     await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);

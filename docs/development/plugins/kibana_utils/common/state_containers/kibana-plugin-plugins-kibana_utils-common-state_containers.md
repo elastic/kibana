@@ -11,8 +11,8 @@ State containers are Redux-store-like objects meant to help you manage state in 
 |  Function | Description |
 |  --- | --- |
 |  [createStateContainer(defaultState)](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainer.md) | Creates a state container without transitions and without selectors. |
-|  [createStateContainer(defaultState, pureTransitions)](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainer_1.md) | Creates a state container with transitions, but without selectors |
-|  [createStateContainer(defaultState, pureTransitions, pureSelectors, options)](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainer_2.md) | Creates a state container with transitions and selectors |
+|  [createStateContainer(defaultState, pureTransitions)](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainer_1.md) | Creates a state container with transitions, but without selectors. |
+|  [createStateContainer(defaultState, pureTransitions, pureSelectors, options)](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontainer_2.md) | Creates a state container with transitions and selectors. |
 
 ## Interfaces
 
@@ -20,8 +20,8 @@ State containers are Redux-store-like objects meant to help you manage state in 
 |  --- | --- |
 |  [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md) | Base state container shape without transitions or selectors |
 |  [CreateStateContainerOptions](./kibana-plugin-plugins-kibana_utils-common-state_containers.createstatecontaineroptions.md) | State container options |
-|  [ReduxLikeStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reduxlikestatecontainer.md) | Fully featured state container which matches Redux store interface. Extends [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) Allows to use state container with redux libraries |
-|  [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) | Fully featured state container with [Selectors](./kibana-plugin-plugins-kibana_utils-common-state_containers.selector.md) and . Extends [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md) |
+|  [ReduxLikeStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.reduxlikestatecontainer.md) | Fully featured state container which matches Redux store interface. Extends [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md)<!-- -->. Allows to use state container with redux libraries. |
+|  [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) | Fully featured state container with [Selectors](./kibana-plugin-plugins-kibana_utils-common-state_containers.selector.md) and . Extends [BaseStateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestatecontainer.md)<!-- -->. |
 
 ## Variables
 
@@ -36,8 +36,8 @@ State containers are Redux-store-like objects meant to help you manage state in 
 |  Type Alias | Description |
 |  --- | --- |
 |  [BaseState](./kibana-plugin-plugins-kibana_utils-common-state_containers.basestate.md) | Base [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) state shape |
-|  [Comparator](./kibana-plugin-plugins-kibana_utils-common-state_containers.comparator.md) | Used to compare state. see [useContainerSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerselector.md) |
-|  [Connect](./kibana-plugin-plugins-kibana_utils-common-state_containers.connect.md) | Similar to <code>connect</code> from react-redux, allows to map state from state container to component's props |
+|  [Comparator](./kibana-plugin-plugins-kibana_utils-common-state_containers.comparator.md) | Used to compare state, see [useContainerSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.usecontainerselector.md)<!-- -->. |
+|  [Connect](./kibana-plugin-plugins-kibana_utils-common-state_containers.connect.md) | Similar to <code>connect</code> from react-redux, allows to map state from state container to component's props. |
 |  [Dispatch](./kibana-plugin-plugins-kibana_utils-common-state_containers.dispatch.md) | Redux like dispatch |
 |  [EnsurePureSelector](./kibana-plugin-plugins-kibana_utils-common-state_containers.ensurepureselector.md) |  |
 |  [EnsurePureTransition](./kibana-plugin-plugins-kibana_utils-common-state_containers.ensurepuretransition.md) |  |

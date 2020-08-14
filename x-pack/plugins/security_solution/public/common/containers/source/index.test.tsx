@@ -7,6 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 jest.mock('../../lib/kibana');
@@ -25,10 +26,12 @@ describe('Index Fields & Browser Fields', () => {
 
     return expect(initialResult).toEqual({
       browserFields: {},
+      docValueFields: [],
       errorMessage: null,
       indexPattern: {
         fields: [],
-        title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+        title:
+          'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
       },
       indicesExist: true,
       loading: true,
@@ -55,15 +58,37 @@ describe('Index Fields & Browser Fields', () => {
       current: {
         indicesExist: true,
         browserFields: mockBrowserFields,
+        docValueFields: [
+          {
+            field: '@timestamp',
+            format: 'date_time',
+          },
+          {
+            field: 'event.end',
+            format: 'date_time',
+          },
+        ],
         indexPattern: {
           fields: mockIndexFields,
-          title: 'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,packetbeat-*,winlogbeat-*',
+          title:
+            'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*',
         },
         loading: false,
         errorMessage: null,
       },
       error: undefined,
     });
+  });
+
+  test('Make sure we are not querying for NO_ALERT_INDEX and it is not includes in the index pattern', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useWithSource('default', [NO_ALERT_INDEX])
+    );
+
+    await waitForNextUpdate();
+    return expect(result.current.indexPattern.title).toEqual(
+      'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*'
+    );
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

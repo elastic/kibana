@@ -7,6 +7,7 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
 import { configSchema } from './config';
+export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';
 
 export const plugin = (ctx: PluginInitializerContext) => new AlertingBuiltinsPlugin(ctx);
 

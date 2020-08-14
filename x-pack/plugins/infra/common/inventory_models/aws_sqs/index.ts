@@ -35,4 +35,11 @@ export const awsSQS: InventoryModel = {
     'awsSQSMessagesEmpty',
     'awsSQSOldestMessage',
   ],
+  tooltipMetrics: [
+    'sqsMessagesVisible',
+    'sqsMessagesDelayed',
+    'sqsMessagesEmpty',
+    'sqsMessagesSent',
+    'sqsOldestMessage',
+  ],
 };

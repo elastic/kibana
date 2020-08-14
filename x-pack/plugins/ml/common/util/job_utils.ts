@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
+import isEqual from 'lodash/isEqual';
+import each from 'lodash/each';
+import pick from 'lodash/pick';
+
 import semver from 'semver';
-import { Duration } from 'moment';
+import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
@@ -307,7 +311,7 @@ export function getSafeAggregationName(fieldName: string, index: number): string
 
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {
   return arr.reduce((dedupedArray, value) => {
-    if (dedupedArray.filter((compareValue: any) => _.isEqual(compareValue, value)).length === 0) {
+    if (dedupedArray.filter((compareValue: any) => isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -328,7 +332,7 @@ export function basicJobValidation(
 
   if (job) {
     // Job details
-    if (_.isEmpty(job.job_id)) {
+    if (isEmpty(job.job_id)) {
       messages.push({ id: 'job_id_empty' });
       valid = false;
     } else if (isJobIdValid(job.job_id) === false) {
@@ -350,7 +354,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, (d) => {
+      each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -382,8 +386,8 @@ export function basicJobValidation(
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, (d) => {
-        if (_.isEmpty(d.function)) {
+      each(job.analysis_config.detectors, (d) => {
+        if (isEmpty(d.function)) {
           v = false;
         }
       });
@@ -400,7 +404,7 @@ export function basicJobValidation(
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
       const compareSubSet = job.analysis_config.detectors.map((d) =>
-        _.pick(d, [
+        pick(d, [
           'function',
           'field_name',
           'by_field_name',
@@ -619,6 +623,23 @@ function isValidTimeInterval(value: string | undefined): boolean {
     return true;
   }
   return parseTimeIntervalForJob(value) !== null;
+}
+
+// The earliest start time for the datafeed should be the max(latest_record_timestamp, latest_bucket.timestamp + bucket_span).
+export function getEarliestDatafeedStartTime(
+  latestRecordTimestamp: number | undefined,
+  latestBucketTimestamp: number | undefined,
+  bucketSpan?: Duration | null | undefined
+): number | undefined {
+  if (latestRecordTimestamp !== undefined && latestBucketTimestamp !== undefined) {
+    // if bucket span is available (e.g. 15m) add it to the latest bucket timestamp in ms
+    const adjustedBucketStartTime = bucketSpan
+      ? moment(latestBucketTimestamp).add(bucketSpan).valueOf()
+      : latestBucketTimestamp;
+    return Math.max(latestRecordTimestamp, adjustedBucketStartTime);
+  } else {
+    return latestRecordTimestamp !== undefined ? latestRecordTimestamp : latestBucketTimestamp;
+  }
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,

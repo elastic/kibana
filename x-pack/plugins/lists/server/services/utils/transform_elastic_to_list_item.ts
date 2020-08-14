@@ -9,6 +9,9 @@ import { SearchResponse } from 'elasticsearch';
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
+import { encodeHitVersion } from './encode_hit_version';
+import { findSourceValue } from './find_source_value';
+
 export interface TransformElasticToListItemOptions {
   response: SearchResponse<SearchEsListItemSchema>;
   type: Type;
@@ -22,54 +25,38 @@ export const transformElasticToListItem = ({
     const {
       _id,
       _source: {
+        /* eslint-disable @typescript-eslint/naming-convention */
         created_at,
+        deserializer,
+        serializer,
         updated_at,
         updated_by,
         created_by,
         list_id,
         tie_breaker_id,
-        ip,
-        keyword,
         meta,
+        /* eslint-enable @typescript-eslint/naming-convention */
       },
     } = hit;
-
-    const baseTypes = {
-      created_at,
-      created_by,
-      id: _id,
-      list_id,
-      meta,
-      tie_breaker_id,
-      type,
-      updated_at,
-      updated_by,
-    };
-
-    switch (type) {
-      case 'ip': {
-        if (ip == null) {
-          throw new ErrorWithStatusCode('Was expecting ip to not be null/undefined', 400);
-        }
-        return {
-          ...baseTypes,
-          value: ip,
-        };
-      }
-      case 'keyword': {
-        if (keyword == null) {
-          throw new ErrorWithStatusCode('Was expecting keyword to not be null/undefined', 400);
-        }
-        return {
-          ...baseTypes,
-          value: keyword,
-        };
-      }
+    const value = findSourceValue(hit._source);
+    if (value == null) {
+      throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
+    } else {
+      return {
+        _version: encodeHitVersion(hit),
+        created_at,
+        created_by,
+        deserializer,
+        id: _id,
+        list_id,
+        meta,
+        serializer,
+        tie_breaker_id,
+        type,
+        updated_at,
+        updated_by,
+        value,
+      };
     }
-    return assertUnreachable();
   });
-};
-
-const assertUnreachable = (): never => {
-  throw new Error('Unknown type in elastic_to_list_items');
 };

@@ -13,16 +13,19 @@ export {
   NewAgentConfig,
   AgentEvent,
   EnrollmentAPIKey,
-  Datasource,
-  NewDatasource,
-  DatasourceInput,
-  DatasourceInputStream,
-  DatasourceConfigRecordEntry,
+  PackageConfig,
+  NewPackageConfig,
+  UpdatePackageConfig,
+  PackageConfigInput,
+  PackageConfigInputStream,
+  PackageConfigConfigRecord,
+  PackageConfigConfigRecordEntry,
   Output,
   DataStream,
   // API schema - misc setup, status
   GetFleetStatusResponse,
   // API schemas - Agent Config
+  GetAgentConfigsRequest,
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
@@ -35,11 +38,11 @@ export {
   CopyAgentConfigResponse,
   DeleteAgentConfigRequest,
   DeleteAgentConfigResponse,
-  // API schemas - Datasource
-  CreateDatasourceRequest,
-  CreateDatasourceResponse,
-  UpdateDatasourceRequest,
-  UpdateDatasourceResponse,
+  // API schemas - Package config
+  CreatePackageConfigRequest,
+  CreatePackageConfigResponse,
+  UpdatePackageConfigRequest,
+  UpdatePackageConfigResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -89,8 +92,11 @@ export {
   RequirementVersion,
   ScreenshotItem,
   ServiceName,
+  GetCategoriesRequest,
   GetCategoriesResponse,
+  GetPackagesRequest,
   GetPackagesResponse,
+  GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
@@ -98,6 +104,7 @@ export {
   InstallStatus,
   InstallationStatus,
   Installable,
+  RegistryRelease,
 } from '../../../../common';
 
 export * from './intra_app_route_state';

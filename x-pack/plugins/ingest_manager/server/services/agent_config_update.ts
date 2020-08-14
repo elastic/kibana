@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './api_keys';
-import { updateAgentsForConfigId, unenrollForConfigId } from './agents';
+import { unenrollForConfigId } from './agents';
 import { outputService } from './output';
 
 export async function agentConfigUpdateEventHandler(
@@ -24,10 +24,6 @@ export async function agentConfigUpdateEventHandler(
     await generateEnrollmentAPIKey(soClient, {
       configId,
     });
-  }
-
-  if (action === 'updated') {
-    await updateAgentsForConfigId(soClient, configId);
   }
 
   if (action === 'deleted') {

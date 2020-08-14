@@ -12,7 +12,7 @@ import { hostIpFilter } from '../objects/filter';
 import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 
-describe('SearchBar', () => {
+describe.skip('SearchBar', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();

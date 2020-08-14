@@ -32,7 +32,8 @@ it('returns the first argument with all original references', () => {
 it('prevents adding properties to argument', () => {
   const frozen = deepFreeze({});
   expect(() => {
-    // @ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo = true;
   }).toThrowError(`object is not extensible`);
 });
@@ -40,7 +41,8 @@ it('prevents adding properties to argument', () => {
 it('prevents changing properties on argument', () => {
   const frozen = deepFreeze({ foo: false });
   expect(() => {
-    // @ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo = true;
   }).toThrowError(`read only property 'foo'`);
 });
@@ -48,7 +50,8 @@ it('prevents changing properties on argument', () => {
 it('prevents changing properties on nested children of argument', () => {
   const frozen = deepFreeze({ foo: { bar: { baz: { box: 1 } } } });
   expect(() => {
-    // @ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo.bar.baz.box = 2;
   }).toThrowError(`read only property 'box'`);
 });
@@ -56,7 +59,8 @@ it('prevents changing properties on nested children of argument', () => {
 it('prevents adding items to a frozen array', () => {
   const frozen = deepFreeze({ foo: [1] });
   expect(() => {
-    // @ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo.push(2);
   }).toThrowError(`object is not extensible`);
 });
@@ -64,7 +68,8 @@ it('prevents adding items to a frozen array', () => {
 it('prevents reassigning items in a frozen array', () => {
   const frozen = deepFreeze({ foo: [1] });
   expect(() => {
-    // @ts-expect-error ts knows this shouldn't be possible, but just making sure
+    // ts knows this shouldn't be possible, but just making sure
+    // @ts-expect-error
     frozen.foo[0] = 2;
   }).toThrowError(`read only property '0'`);
 });

@@ -33,7 +33,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { addHelpMenuToAppChrome } from '../../../help_menu_util';
 import { Link } from 'react-router-dom';
-import { updateBreadcrumbs } from '../../page_elements/breadcrumbs';
 import { goToSpecifiedPath } from '../../maps_router';
 
 export const EMPTY_FILTER = '';
@@ -53,17 +52,13 @@ export class MapsListView extends React.Component {
     listingLimit: getUiSettings().get('savedObjects:listingLimit'),
   };
 
-  UNSAFE_componentWillMount() {
-    this._isMounted = true;
-    updateBreadcrumbs();
-  }
-
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFetch.cancel();
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.initMapList();
   }
 

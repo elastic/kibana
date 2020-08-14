@@ -8,14 +8,21 @@ jest.mock('axios', () => ({
   request: jest.fn(),
 }));
 
-import { getActionType } from './webhook';
-import { ActionType, Services } from '../types';
+import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsMock } from '../mocks';
 import axios from 'axios';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  getActionType,
+  WebhookActionType,
+  WebhookMethods,
+} from './webhook';
 
 const axiosRequestMock = axios.request as jest.Mock;
 
@@ -23,12 +30,16 @@ const ACTION_TYPE_ID = '.webhook';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: WebhookActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 
@@ -112,6 +123,17 @@ describe('config validation', () => {
       ...defaultValues,
       ...config,
     });
+  });
+
+  test('config validation failed when a url is invalid', () => {
+    const config: Record<string, string> = {
+      url: 'example.com/do-something',
+    };
+    expect(() => {
+      validateConfig(actionType, config);
+    }).toThrowErrorMatchingInlineSnapshot(
+      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+    );
   });
 
   test('config validation passes when valid headers are provided', () => {
@@ -224,16 +246,17 @@ describe('execute()', () => {
   });
 
   test('execute with username/password sends request with basic auth', async () => {
+    const config: ActionTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+    };
     await actionType.executor({
       actionId: 'some-id',
       services,
-      config: {
-        url: 'https://abc.def/my-webhook',
-        method: 'post',
-        headers: {
-          aheader: 'a value',
-        },
-      },
+      config,
       secrets: { user: 'abc', password: '123' },
       params: { body: 'some data' },
     });
@@ -255,17 +278,19 @@ describe('execute()', () => {
   });
 
   test('execute without username/password sends request without basic auth', async () => {
+    const config: ActionTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+    };
+    const secrets: ActionTypeSecretsType = { user: null, password: null };
     await actionType.executor({
       actionId: 'some-id',
       services,
-      config: {
-        url: 'https://abc.def/my-webhook',
-        method: 'post',
-        headers: {
-          aheader: 'a value',
-        },
-      },
-      secrets: {},
+      config,
+      secrets,
       params: { body: 'some data' },
     });
 

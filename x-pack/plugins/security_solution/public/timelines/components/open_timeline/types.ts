@@ -13,6 +13,8 @@ import {
   TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
+  RowRendererId,
+  TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -46,6 +48,7 @@ export interface OpenTimelineResult {
   created?: number | null;
   description?: string | null;
   eventIdToNoteIds?: Readonly<Record<string, string[]>> | null;
+  excludedRowRendererIds?: RowRendererId[] | null;
   favorite?: FavoriteTimelineResult[] | null;
   noteIds?: string[] | null;
   notes?: TimelineResultNote[] | null;
@@ -54,7 +57,7 @@ export interface OpenTimelineResult {
   status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypeLiteral;
+  timelineType?: TimelineTypeLiteral;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -82,9 +85,11 @@ export type OnDeleteOneTimeline = (timelineIds: string[]) => void;
 export type OnOpenTimeline = ({
   duplicate,
   timelineId,
+  timelineType,
 }: {
   duplicate: boolean;
   timelineId: string;
+  timelineType?: TimelineTypeLiteral;
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
@@ -117,7 +122,7 @@ export interface OnTableChangeParams {
 /** Invoked by the EUI table implementation when the user interacts with the table */
 export type OnTableChange = (tableChange: OnTableChangeParams) => void;
 
-export type ActionTimelineToShow = 'duplicate' | 'delete' | 'export' | 'selectable';
+export type ActionTimelineToShow = 'createFrom' | 'duplicate' | 'delete' | 'export' | 'selectable';
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */
@@ -170,9 +175,11 @@ export interface OpenTimelineProps {
   sortField: string;
   /** this affects timeline's behaviour like editable / duplicatible */
   timelineType: TimelineTypeLiteralWithNull;
+  /* active or immutable */
+  timelineStatus: TimelineStatusLiteralWithNull;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
-  /** timeline / template timeline */
+  /** timeline / timeline template */
   timelineFilter?: JSX.Element | JSX.Element[] | null;
   /** The title of the Open Timeline component  */
   title: string;
@@ -185,10 +192,11 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
-  from: number;
+  forceNotes?: boolean;
+  from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;
-  to: number;
+  to: string;
   ruleNote?: string;
 }
 

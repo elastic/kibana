@@ -30,7 +30,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { getBaseMapsVis, IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { setFormatService, setNotifications, setKibanaLegacy } from './kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
@@ -94,7 +94,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
-      BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
+      BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
     };
 
     expressions.registerFunction(createRegionMapFn);

@@ -9,7 +9,7 @@ import React from 'react';
 import { TextField, UseField, FieldConfig } from '../../../shared_imports';
 import { validateUniqueName } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
-import { useMappingsState } from '../../../mappings_state';
+import { useMappingsState } from '../../../mappings_state_context';
 
 export const NameParameter = () => {
   const {

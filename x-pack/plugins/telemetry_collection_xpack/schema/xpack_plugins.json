@@ -7,10 +7,117 @@
         }
       }
     },
+    "app_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "engines_overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "create_first_engine_button": {
+              "type": "long"
+            },
+            "header_launch_button": {
+              "type": "long"
+            },
+            "engine_table_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "workplace_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "header_launch_button": {
+              "type": "long"
+            },
+            "org_name_change_button": {
+              "type": "long"
+            },
+            "onboarding_card_button": {
+              "type": "long"
+            },
+            "recent_activity_source_details_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
     "fileUploadTelemetry": {
       "properties": {
         "filesUploadedTotalCount": {
           "type": "long"
+        }
+      }
+    },
+    "ingest_manager": {
+      "properties": {
+        "fleet_enabled": {
+          "type": "boolean"
+        },
+        "agents": {
+          "properties": {
+            "total": {
+              "type": "long"
+            },
+            "online": {
+              "type": "long"
+            },
+            "error": {
+              "type": "long"
+            },
+            "offline": {
+              "type": "long"
+            }
+          }
+        },
+        "packages": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },
@@ -52,6 +159,105 @@
             },
             "total": {
               "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "security_solution": {
+      "properties": {
+        "detections": {
+          "properties": {
+            "detection_rules": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "ml_jobs": {
+              "properties": {
+                "custom": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "elastic": {
+                  "properties": {
+                    "enabled": {
+                      "type": "long"
+                    },
+                    "disabled": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "endpoints": {
+          "properties": {
+            "total_installed": {
+              "type": "long"
+            },
+            "active_within_last_24_hours": {
+              "type": "long"
+            },
+            "os": {
+              "properties": {
+                "full_name": {
+                  "type": "keyword"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                },
+                "count": {
+                  "type": "long"
+                }
+              }
+            },
+            "policies": {
+              "properties": {
+                "malware": {
+                  "properties": {
+                    "active": {
+                      "type": "long"
+                    },
+                    "inactive": {
+                      "type": "long"
+                    },
+                    "failure": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             }
           }
         }

@@ -54,16 +54,15 @@ Array [
             >
               <button
                 aria-label="Open alert context menu"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+                class="euiButtonEmpty euiButtonEmpty--primary"
                 data-test-subj="xpack.uptime.alertsPopover.toggleButton"
                 type="button"
               >
                 <span
-                  class="euiButtonEmpty__content"
+                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
                   <div
-                    aria-hidden="true"
-                    class="euiButtonEmpty__icon"
+                    class="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                   />
                   <span
@@ -80,28 +79,24 @@ Array [
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <a
+            class="euiButtonEmpty euiButtonEmpty--primary"
+            data-test-subj="settings-page-link"
             href="/settings"
+            rel="noreferrer"
           >
-            <button
-              class="euiButtonEmpty euiButtonEmpty--primary"
-              data-test-subj="settings-page-link"
-              type="button"
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
             >
+              <div
+                class="euiButtonContent__icon"
+                data-euiicon-type="gear"
+              />
               <span
-                class="euiButtonEmpty__content"
+                class="euiButtonEmpty__text"
               >
-                <div
-                  aria-hidden="true"
-                  class="euiButtonEmpty__icon"
-                  data-euiicon-type="gear"
-                />
-                <span
-                  class="euiButtonEmpty__text"
-                >
-                  Settings
-                </span>
+                Settings
               </span>
-            </button>
+            </span>
           </a>
         </div>
         <div
@@ -112,11 +107,10 @@ Array [
             type="button"
           >
             <span
-              class="euiButtonEmpty__content"
+              class="euiButtonContent euiButtonEmpty__content"
             >
               <div
-                aria-hidden="true"
-                class="euiButtonEmpty__icon"
+                class="euiButtonContent__icon"
                 data-euiicon-type="plusInCircle"
               />
               <span
@@ -151,16 +145,15 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
                     <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -207,11 +200,10 @@ Array [
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
                 <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span
@@ -302,16 +294,15 @@ Array [
               >
                 <button
                   aria-label="Date quick select"
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiFormControlLayout__prepend"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
                   data-test-subj="superDatePickerToggleQuickMenuButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonEmpty__content"
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
                     <div
-                      aria-hidden="true"
-                      class="euiButtonEmpty__icon"
+                      class="euiButtonContent__icon"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -358,11 +349,10 @@ Array [
               type="button"
             >
               <span
-                class="euiButton__content"
+                class="euiButtonContent euiButton__content"
               >
                 <div
-                  aria-hidden="true"
-                  class="euiButton__icon"
+                  class="euiButtonContent__icon"
                   data-euiicon-type="refresh"
                 />
                 <span

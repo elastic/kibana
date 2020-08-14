@@ -10,6 +10,8 @@ const alwaysImportedTests = [
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/functional/config_security_trial.ts'),
+  require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),
@@ -51,7 +53,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
   require.resolve('../test/reporting_api_integration/config.js'),
-  require.resolve('../test/functional_embedded/config.ts'),
+  require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
 ];
 

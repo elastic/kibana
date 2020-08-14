@@ -12,9 +12,14 @@ import { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
 import { setDependencyCache, clearCache } from '../../util/dependency_cache';
+import './_index.scss';
 
-const renderApp = (element: HTMLElement, coreStart: CoreStart) => {
-  ReactDOM.render(React.createElement(JobsListPage, { coreStart }), element);
+const renderApp = (
+  element: HTMLElement,
+  history: ManagementAppMountParams['history'],
+  coreStart: CoreStart
+) => {
+  ReactDOM.render(React.createElement(JobsListPage, { coreStart, history }), element);
   return () => {
     unmountComponentAtNode(element);
     clearCache();
@@ -36,5 +41,5 @@ export async function mountApp(
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
 
-  return renderApp(params.element, coreStart);
+  return renderApp(params.element, params.history, coreStart);
 }

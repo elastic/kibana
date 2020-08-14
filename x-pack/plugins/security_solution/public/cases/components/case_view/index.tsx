@@ -44,6 +44,13 @@ interface Props {
   userCanCrud: boolean;
 }
 
+export interface OnUpdateFields {
+  key: keyof Case;
+  value: Case[keyof Case];
+  onSuccess?: () => void;
+  onError?: () => void;
+}
+
 const MyWrapper = styled.div`
   padding: ${({
     theme,
@@ -88,12 +95,12 @@ export const CaseComponent = React.memo<CaseProps>(
 
     // Update Fields
     const onUpdateField = useCallback(
-      (newUpdateKey: keyof Case, updateValue: Case[keyof Case]) => {
+      ({ key, value, onSuccess, onError }: OnUpdateFields) => {
         const handleUpdateNewCase = (newCase: Case) =>
           updateCase({ ...newCase, comments: caseData.comments });
-        switch (newUpdateKey) {
+        switch (key) {
           case 'title':
-            const titleUpdate = getTypedPayload<string>(updateValue);
+            const titleUpdate = getTypedPayload<string>(value);
             if (titleUpdate.length > 0) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -101,11 +108,13 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateValue: titleUpdate,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
+                onSuccess,
+                onError,
               });
             }
             break;
           case 'connectorId':
-            const connectorId = getTypedPayload<string>(updateValue);
+            const connectorId = getTypedPayload<string>(value);
             if (connectorId.length > 0) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -113,11 +122,13 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateValue: connectorId,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
+                onSuccess,
+                onError,
               });
             }
             break;
           case 'description':
-            const descriptionUpdate = getTypedPayload<string>(updateValue);
+            const descriptionUpdate = getTypedPayload<string>(value);
             if (descriptionUpdate.length > 0) {
               updateCaseProperty({
                 fetchCaseUserActions,
@@ -125,28 +136,34 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateValue: descriptionUpdate,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
+                onSuccess,
+                onError,
               });
             }
             break;
           case 'tags':
-            const tagsUpdate = getTypedPayload<string[]>(updateValue);
+            const tagsUpdate = getTypedPayload<string[]>(value);
             updateCaseProperty({
               fetchCaseUserActions,
               updateKey: 'tags',
               updateValue: tagsUpdate,
               updateCase: handleUpdateNewCase,
               version: caseData.version,
+              onSuccess,
+              onError,
             });
             break;
           case 'status':
-            const statusUpdate = getTypedPayload<string>(updateValue);
-            if (caseData.status !== updateValue) {
+            const statusUpdate = getTypedPayload<string>(value);
+            if (caseData.status !== value) {
               updateCaseProperty({
                 fetchCaseUserActions,
                 updateKey: 'status',
                 updateValue: statusUpdate,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
+                onSuccess,
+                onError,
               });
             }
           default:
@@ -191,15 +208,28 @@ export const CaseComponent = React.memo<CaseProps>(
     });
 
     const onSubmitConnector = useCallback(
-      (connectorId) => onUpdateField('connectorId', connectorId),
+      (connectorId, onSuccess, onError) =>
+        onUpdateField({
+          key: 'connectorId',
+          value: connectorId,
+          onSuccess,
+          onError,
+        }),
       [onUpdateField]
     );
-    const onSubmitTags = useCallback((newTags) => onUpdateField('tags', newTags), [onUpdateField]);
-    const onSubmitTitle = useCallback((newTitle) => onUpdateField('title', newTitle), [
+    const onSubmitTags = useCallback((newTags) => onUpdateField({ key: 'tags', value: newTags }), [
       onUpdateField,
     ]);
+    const onSubmitTitle = useCallback(
+      (newTitle) => onUpdateField({ key: 'title', value: newTitle }),
+      [onUpdateField]
+    );
     const toggleStatusCase = useCallback(
-      (e) => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
+      (e) =>
+        onUpdateField({
+          key: 'status',
+          value: e.target.checked ? 'closed' : 'open',
+        }),
       [onUpdateField]
     );
     const handleRefresh = useCallback(() => {

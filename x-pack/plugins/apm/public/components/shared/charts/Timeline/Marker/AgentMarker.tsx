@@ -27,7 +27,7 @@ interface Props {
   mark: AgentMark;
 }
 
-export const AgentMarker: React.FC<Props> = ({ mark }) => {
+export function AgentMarker({ mark }: Props) {
   const theme = useTheme();
 
   return (
@@ -46,4 +46,4 @@ export const AgentMarker: React.FC<Props> = ({ mark }) => {
       </EuiToolTip>
     </>
   );
-};
+}

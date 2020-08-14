@@ -19,12 +19,10 @@
 
 import { createHash } from 'crypto';
 import Boom from 'boom';
-import Path from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
-import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -38,9 +36,6 @@ import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
  * @param {KbnServer['config']} config
  */
 export function uiRenderMixin(kbnServer, server, config) {
-  // render all views from ./views
-  server.setupViews(Path.resolve(__dirname, 'views'));
-
   const translationsCache = { translations: null, hash: null };
   server.route({
     path: '/translations/{locale}.json',
@@ -77,18 +72,15 @@ export function uiRenderMixin(kbnServer, server, config) {
     const authEnabled = !!server.auth.settings.default;
 
     server.route({
-      path: '/bundles/app/{id}/bootstrap.js',
+      path: '/bootstrap.js',
       method: 'GET',
       config: {
         tags: ['api'],
         auth: authEnabled ? { mode: 'try' } : false,
       },
       async handler(request, h) {
-        const { id } = request.params;
-        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        const isCore = !app;
-
         const uiSettings = request.getUiSettingsService();
+
         const darkMode =
           !authEnabled || request.auth.isAuthenticated
             ? await uiSettings.get('theme:darkMode')
@@ -99,21 +91,14 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? await uiSettings.get('theme:version')
             : 'v7';
 
+        const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
 
         const regularBundlePath = `${basePath}/${buildHash}/bundles`;
-        const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
-
-        const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
-          (chunk) => `${dllBundlePath}/vendors${chunk}.style.dll.css`
-        );
-        const dllJsChunks = DllCompiler.getRawDllConfig().chunks.map(
-          (chunk) => `${dllBundlePath}/vendors${chunk}.bundle.dll.js`
-        );
 
         const styleSheetPaths = [
-          ...(isCore ? [] : dllStyleChunks),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
@@ -121,45 +106,43 @@ export function uiRenderMixin(kbnServer, server, config) {
                   ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
                   : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-                `${regularBundlePath}/dark_theme.style.css`,
+                `${basePath}/ui/legacy_dark_theme.css`,
               ]
             : [
                 themeVersion === 'v7'
                   ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
                   : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-                `${regularBundlePath}/light_theme.style.css`,
-              ]),
-          ...(isCore
-            ? []
-            : [
-                `${regularBundlePath}/${app.getId()}.style.css`,
-                ...kbnServer.uiExports.styleSheetPaths
-                  .filter(
-                    (path) => path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
-                  )
-                  .map((path) =>
-                    path.localPath.endsWith('.scss')
-                      ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
-                      : `${basePath}/${path.publicPath}`
-                  )
-                  .reverse(),
+                `${basePath}/ui/legacy_light_theme.css`,
               ]),
         ];
 
-        const kpPluginIds = Array.from(kbnServer.newPlatform.__internals.uiPlugins.public.keys());
+        const kpUiPlugins = kbnServer.newPlatform.__internals.uiPlugins;
+        const kpPluginPublicPaths = new Map();
+        const kpPluginBundlePaths = new Set();
+
+        // recursively iterate over the kpUiPlugin ids and their required bundles
+        // to populate kpPluginPublicPaths and kpPluginBundlePaths
+        (function readKpPlugins(ids) {
+          for (const id of ids) {
+            if (kpPluginPublicPaths.has(id)) {
+              continue;
+            }
+
+            kpPluginPublicPaths.set(id, `${regularBundlePath}/plugin/${id}/`);
+            kpPluginBundlePaths.add(`${regularBundlePath}/plugin/${id}/${id}.plugin.js`);
+            readKpPlugins(kpUiPlugins.internal.get(id).requiredBundles);
+          }
+        })(kpUiPlugins.public.keys());
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
             (filename) => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
           ),
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
-          ...(isCore ? [] : [`${dllBundlePath}/vendors_runtime.bundle.dll.js`, ...dllJsChunks]),
 
           `${regularBundlePath}/core/core.entry.js`,
-          ...kpPluginIds.map(
-            (pluginId) => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
-          ),
+          ...kpPluginBundlePaths,
         ];
 
         // These paths should align with the bundle routes configured in
@@ -167,23 +150,15 @@ export function uiRenderMixin(kbnServer, server, config) {
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...kpPluginIds.reduce(
-            (acc, pluginId) => ({
-              ...acc,
-              [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
-            }),
-            {}
-          ),
+          ...Object.fromEntries(kpPluginPublicPaths),
         });
 
         const bootstrap = new AppBootstrap({
           templateData: {
-            darkMode,
-            themeVersion,
+            themeTag,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
-            legacyBundlePath: isCore ? undefined : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });
 
@@ -205,13 +180,8 @@ export function uiRenderMixin(kbnServer, server, config) {
     async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-
       try {
-        if (kbnServer.status.isGreen()) {
-          return await h.renderApp(app);
-        } else {
-          return await h.renderStatusPage();
-        }
+        return await h.renderApp(app);
       } catch (err) {
         throw Boom.boomify(err);
       }

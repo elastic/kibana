@@ -51,6 +51,7 @@ import { LegacyVars, LegacyServiceSetupDeps, LegacyServiceStartDeps } from './ty
 import { LegacyService } from './legacy_service';
 import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
+import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -98,6 +99,7 @@ beforeEach(() => {
       rendering: renderingServiceMock,
       uuid: uuidSetup,
       status: statusServiceMock.createInternalSetupContract(),
+      auditTrail: auditTrailServiceMock.createSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
@@ -107,6 +109,7 @@ beforeEach(() => {
         [
           'plugin-id',
           {
+            requiredBundles: [],
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },
@@ -119,7 +122,6 @@ beforeEach(() => {
   startDeps = {
     core: {
       ...coreMock.createInternalStart(),
-      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       plugins: { contracts: new Map() },
     },
     plugins: {},

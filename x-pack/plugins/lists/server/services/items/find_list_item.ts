@@ -5,6 +5,7 @@
  */
 
 import { LegacyAPICaller } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import {
   Filter,
@@ -19,14 +20,14 @@ import {
 import { getList } from '../lists';
 import {
   encodeCursor,
-  getQueryFilter,
+  getQueryFilterWithListId,
   getSearchAfterWithTieBreaker,
   getSortWithTieBreaker,
   scrollToStartPage,
   transformElasticToListItem,
 } from '../utils';
 
-interface FindListItemOptions {
+export interface FindListItemOptions {
   listId: ListId;
   filter: Filter;
   currentIndexPosition: number;
@@ -53,11 +54,11 @@ export const findListItem = async ({
   listItemIndex,
   sortOrder,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
-  const query = getQueryFilter({ filter });
   const list = await getList({ callCluster, id: listId, listIndex });
   if (list == null) {
     return null;
   } else {
+    const query = getQueryFilterWithListId({ filter, listId });
     const sortField =
       sortFieldWithPossibleValue === 'value' ? list.type : sortFieldWithPossibleValue;
     const scroll = await scrollToStartPage({
@@ -82,7 +83,10 @@ export const findListItem = async ({
     });
 
     if (scroll.validSearchAfterFound) {
-      const response = await callCluster<SearchEsListItemSchema>('search', {
+      // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+      // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
+      // to explicitly define the type <T>.
+      const response = await callCluster<SearchResponse<SearchEsListItemSchema>>('search', {
         body: {
           query,
           search_after: scroll.searchAfter,
@@ -90,6 +94,7 @@ export const findListItem = async ({
         },
         ignoreUnavailable: true,
         index: listItemIndex,
+        seq_no_primary_term: true,
         size: perPage,
       });
       return {

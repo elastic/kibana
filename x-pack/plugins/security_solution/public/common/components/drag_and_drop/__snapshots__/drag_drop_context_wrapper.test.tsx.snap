@@ -369,6 +369,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
               "auditbeat-*",
               "endgame-*",
               "filebeat-*",
+              "logs-*",
               "packetbeat-*",
               "winlogbeat-*",
             ],

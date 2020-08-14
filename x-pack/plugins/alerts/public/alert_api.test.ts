@@ -22,7 +22,7 @@ describe('loadAlertTypes', () => {
         actionVariables: ['var1'],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: 'alerts',
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -45,7 +45,7 @@ describe('loadAlertType', () => {
       actionVariables: ['var1'],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
 
@@ -65,7 +65,7 @@ describe('loadAlertType', () => {
       actionVariables: [],
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
-      producer: 'alerting',
+      producer: 'alerts',
     };
     http.get.mockResolvedValueOnce([alertType]);
 
@@ -80,7 +80,7 @@ describe('loadAlertType', () => {
         actionVariables: [],
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
-        producer: 'alerting',
+        producer: 'alerts',
       },
     ]);
 

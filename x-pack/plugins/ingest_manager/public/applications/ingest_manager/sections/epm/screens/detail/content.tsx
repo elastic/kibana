@@ -4,35 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
 import { PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
-import { DataSourcesPanel } from './data_sources_panel';
+import { PackageConfigsPanel } from './package_configs_panel';
 import { SettingsPanel } from './settings_panel';
 
-type ContentProps = PackageInfo & Pick<DetailParams, 'panel'> & { hasIconPanel: boolean };
-export function Content(props: ContentProps) {
-  const { hasIconPanel, name, panel, version } = props;
-  const SideNavColumn = hasIconPanel
-    ? styled(LeftColumn)`
-        /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
-        &&& {
-          margin-top: 77px;
-        }
-      `
-    : LeftColumn;
+type ContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 
-  // fixes IE11 problem with nested flex items
-  const ContentFlexGroup = styled(EuiFlexGroup)`
-    flex: 0 0 auto !important;
-  `;
+const SideNavColumn = styled(LeftColumn)`
+  /* 🤢🤷 https://www.styled-components.com/docs/faqs#how-can-i-override-styles-with-higher-specificity */
+  &&& {
+    margin-top: 77px;
+  }
+`;
+
+// fixes IE11 problem with nested flex items
+const ContentFlexGroup = styled(EuiFlexGroup)`
+  flex: 0 0 auto !important;
+`;
+
+export function Content(props: ContentProps) {
+  const { name, panel, version } = props;
   return (
     <ContentFlexGroup>
       <SideNavColumn>
@@ -63,8 +62,8 @@ export function ContentPanel(props: ContentPanelProps) {
           latestVersion={latestVersion}
         />
       );
-    case 'data-sources':
-      return <DataSourcesPanel name={name} version={version} />;
+    case 'usages':
+      return <PackageConfigsPanel name={name} version={version} />;
     case 'overview':
     default:
       return <OverviewPanel {...props} />;
@@ -73,22 +72,16 @@ export function ContentPanel(props: ContentPanelProps) {
 
 type RightColumnContentProps = PackageInfo & Pick<DetailParams, 'panel'>;
 function RightColumnContent(props: RightColumnContentProps) {
-  const { assets, requirement, panel } = props;
+  const { assets, panel } = props;
   switch (panel) {
     case 'overview':
-      return (
+      return assets ? (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <Requirements requirements={requirement} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule margin="xl" />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AssetsFacetGroup assets={assets} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      );
+      ) : null;
     default:
       return <EuiSpacer />;
   }

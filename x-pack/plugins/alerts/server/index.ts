@@ -17,11 +17,14 @@ export {
   AlertExecutorOptions,
   AlertActionParams,
   AlertServices,
-  State,
+  AlertTypeState,
+  AlertTypeParams,
   PartialAlert,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
-export { FindOptions, FindResult } from './alerts_client';
+export { FindResult } from './alerts_client';
 export { AlertInstance } from './alert_instance';
 export { parseDuration } from './lib';
 

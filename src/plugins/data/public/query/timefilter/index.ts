@@ -23,4 +23,5 @@ export * from './types';
 export { Timefilter, TimefilterContract } from './timefilter';
 export { TimeHistory, TimeHistoryContract } from './time_history';
 export { changeTimeFilter, convertRangeFilterToTimeRangeString } from './lib/change_time_filter';
-export { extractTimeFilter } from './lib/extract_time_filter';
+export { extractTimeFilter, extractTimeRange } from './lib/extract_time_filter';
+export { validateTimeRange } from './lib/validate_timerange';

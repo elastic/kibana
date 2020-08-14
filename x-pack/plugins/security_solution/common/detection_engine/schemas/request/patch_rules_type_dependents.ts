@@ -66,6 +66,19 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
   }
 };
 
+export const validateThreshold = (rule: PatchRulesSchema): string[] => {
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      return ['when "type" is "threshold", "threshold" is required'];
+    } else if (rule.threshold.value <= 0) {
+      return ['"threshold.value" has to be bigger than 0'];
+    } else {
+      return [];
+    }
+  }
+  return [];
+};
+
 export const patchRuleValidateTypeDependents = (schema: PatchRulesSchema): string[] => {
   return [
     ...validateId(schema),
@@ -73,5 +86,6 @@ export const patchRuleValidateTypeDependents = (schema: PatchRulesSchema): strin
     ...validateLanguage(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
+    ...validateThreshold(schema),
   ];
 };

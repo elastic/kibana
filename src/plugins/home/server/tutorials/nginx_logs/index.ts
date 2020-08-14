@@ -37,6 +37,7 @@ export function nginxLogsSpecProvider(context: TutorialContext): TutorialSchema 
     name: i18n.translate('home.tutorials.nginxLogs.nameTitle', {
       defaultMessage: 'Nginx logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.nginxLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the Nginx HTTP server.',

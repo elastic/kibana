@@ -9,6 +9,11 @@ import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { defineDockerServersConfig } from '@kbn/test';
 
+// Docker image to use for Ingest Manager API integration tests.
+// This hash comes from the commit hash here: https://github.com/elastic/package-storage/commit
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:f6b01daec8cfe355101e366de9941d35a4c3763e';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
@@ -21,12 +26,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     `${path.join(
       path.dirname(__filename),
       './apis/fixtures/package_registry_config.yml'
-    )}:/registry/config.yml`,
+    )}:/package-registry/config.yml`,
     '-v',
     `${path.join(
       path.dirname(__filename),
       './apis/fixtures/test_packages'
-    )}:/registry/packages/test-packages`,
+    )}:/packages/test-packages`,
   ];
 
   return {
@@ -35,16 +40,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!registryPort,
-        image: 'docker.elastic.co/package-registry/package-registry:kibana-testing-1',
+        image: dockerImage,
         portInContainer: 8080,
         port: registryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
       },
     }),
+    esArchiver: xPackAPITestsConfig.get('esArchiver'),
     services: {
-      supertest: xPackAPITestsConfig.get('services.supertest'),
-      es: xPackAPITestsConfig.get('services.es'),
+      ...xPackAPITestsConfig.get('services'),
     },
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
@@ -59,7 +64,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         ...(registryPort
-          ? [`--xpack.ingestManager.epm.registryUrl=http://localhost:${registryPort}`]
+          ? [`--xpack.ingestManager.registryUrl=http://localhost:${registryPort}`]
           : []),
       ],
     },

@@ -4,6 +4,7 @@ exports[`renders matching snapshot 1`] = `
 <EuiGlobalToastList
   data-test-subj="globalToastList"
   dismissToast={[Function]}
+  side="right"
   toastLifeTimeMs={Infinity}
   toasts={Array []}
 />

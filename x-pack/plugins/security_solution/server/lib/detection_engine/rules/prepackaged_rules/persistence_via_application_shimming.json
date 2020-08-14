@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "The Application Shim was created to allow for backward compatibility of software as the operating system codebase changes over time. This Windows functionality has been abused by attackers to stealthily gain persistence and arbitrary code execution in legitimate Windows processes.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Potential Application Shimming via Sdbinst",
+  "query": "event.code:1 and process.name:sdbinst.exe",
+  "risk_score": 21,
+  "rule_id": "fd4a992d-6130-4802-9ff8-829b89ae801f",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1138",
+          "name": "Application Shimming",
+          "reference": "https://attack.mitre.org/techniques/T1138/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1138",
+          "name": "Application Shimming",
+          "reference": "https://attack.mitre.org/techniques/T1138/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 3
+}

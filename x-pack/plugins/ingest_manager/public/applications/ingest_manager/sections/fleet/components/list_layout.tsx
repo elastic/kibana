@@ -66,6 +66,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             online: agentStatus?.online || 0,
             offline: agentStatus?.offline || 0,
             error: agentStatus?.error || 0,
+            other: agentStatus?.other || 0,
           }}
         />
       </EuiFlexItem>
@@ -112,7 +113,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
                 id="xpack.ingestManager.agentList.enrollButton"
-                defaultMessage="Enroll new agent"
+                defaultMessage="Add agent"
               />
             </EuiButton>
           </EuiFlexItem>

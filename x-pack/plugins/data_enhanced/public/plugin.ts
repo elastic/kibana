@@ -5,18 +5,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-  ES_SEARCH_STRATEGY,
-} from '../../../../src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
-import {
-  ASYNC_SEARCH_STRATEGY,
-  asyncSearchStrategyProvider,
-  enhancedEsSearchStrategyProvider,
-} from './search';
+
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 
 export interface DataEnhancedSetupDependencies {
@@ -39,19 +31,26 @@ export class DataEnhancedPlugin
       KUERY_LANGUAGE_NAME,
       setupKqlQuerySuggestionProvider(core)
     );
-    const asyncSearchStrategy = asyncSearchStrategyProvider(core);
-    const esSearchStrategy = enhancedEsSearchStrategyProvider(core, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ASYNC_SEARCH_STRATEGY, asyncSearchStrategy);
-    data.search.registerSearchStrategy(ES_SEARCH_STRATEGY, esSearchStrategy);
+
+    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
+    );
+
+    data.__enhance({
+      search: {
+        searchInterceptor: enhancedSearchInterceptor,
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
-    const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
-      core.notifications.toasts,
-      core.application,
-      core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
-    );
-    plugins.data.search.setInterceptor(enhancedSearchInterceptor);
   }
 }

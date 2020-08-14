@@ -18,7 +18,7 @@
  */
 
 import { getMatchedIndices } from './get_matched_indices';
-import { Tag } from '../types';
+import { Tag, MatchedItem } from '../types';
 
 jest.mock('./../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
@@ -32,18 +32,18 @@ const indices = [
   { name: 'packetbeat', tags },
   { name: 'metricbeat', tags },
   { name: '.kibana', tags },
-];
+] as MatchedItem[];
 
 const partialIndices = [
   { name: 'kibana', tags },
   { name: 'es', tags },
   { name: '.kibana', tags },
-];
+] as MatchedItem[];
 
 const exactIndices = [
   { name: 'kibana', tags },
   { name: '.kibana', tags },
-];
+] as MatchedItem[];
 
 describe('getMatchedIndices', () => {
   it('should return all indices', () => {

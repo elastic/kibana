@@ -17,83 +17,42 @@
  * under the License.
  */
 
-import Path from 'path';
-
-import globby from 'globby';
-import loadJsonFile from 'load-json-file';
+import { simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;
+  readonly manifestPath: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
   readonly extraPublicDirs: string[];
 }
 
+const isArrayOfStrings = (input: any): input is string[] =>
+  Array.isArray(input) && input.every((p) => typeof p === 'string');
+
 /**
  * Helper to find the new platform plugins.
  */
 export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
-  return globby
-    .sync(
-      Array.from(
-        new Set([
-          ...scanDirs.map(nestedScanDirPaths).reduce((dirs, current) => [...dirs, ...current], []),
-          ...paths.map((path) => `${path}/kibana.json`),
-        ])
-      ),
-      {
-        absolute: true,
+  return simpleKibanaPlatformPluginDiscovery(scanDirs, paths).map(
+    ({ directory, manifestPath, manifest }): KibanaPlatformPlugin => {
+      let extraPublicDirs: string[] | undefined;
+      if (manifest.extraPublicDirs) {
+        if (!isArrayOfStrings(manifest.extraPublicDirs)) {
+          throw new TypeError(
+            'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
+          );
+        }
+        extraPublicDirs = manifest.extraPublicDirs;
       }
-    )
-    .map((path) =>
-      // absolute paths returned from globby are using normalize or something so the path separators are `/` even on windows, Path.resolve solves this
-      readKibanaPlatformPlugin(Path.resolve(path))
-    );
-}
 
-function nestedScanDirPaths(dir: string): string[] {
-  // down to 5 level max
-  return [
-    `${dir}/*/kibana.json`,
-    `${dir}/*/*/kibana.json`,
-    `${dir}/*/*/*/kibana.json`,
-    `${dir}/*/*/*/*/kibana.json`,
-    `${dir}/*/*/*/*/*/kibana.json`,
-  ];
-}
-
-function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
-  if (!Path.isAbsolute(manifestPath)) {
-    throw new TypeError('expected new platform manifest path to be absolute');
-  }
-
-  const manifest = loadJsonFile.sync(manifestPath);
-  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
-    throw new TypeError('expected new platform plugin manifest to be a JSON encoded object');
-  }
-
-  if (typeof manifest.id !== 'string') {
-    throw new TypeError('expected new platform plugin manifest to have a string id');
-  }
-
-  let extraPublicDirs: string[] | undefined;
-  if (manifest.extraPublicDirs) {
-    if (
-      !Array.isArray(manifest.extraPublicDirs) ||
-      !manifest.extraPublicDirs.every((p) => typeof p === 'string')
-    ) {
-      throw new TypeError(
-        'expected new platform plugin manifest to have an array of strings `extraPublicDirs` property'
-      );
+      return {
+        directory,
+        manifestPath,
+        id: manifest.id,
+        isUiPlugin: !!manifest.ui,
+        extraPublicDirs: extraPublicDirs || [],
+      };
     }
-
-    extraPublicDirs = manifest.extraPublicDirs as string[];
-  }
-
-  return {
-    directory: Path.dirname(manifestPath),
-    id: manifest.id,
-    isUiPlugin: !!manifest.ui,
-    extraPublicDirs: extraPublicDirs || [],
-  };
+  );
 }

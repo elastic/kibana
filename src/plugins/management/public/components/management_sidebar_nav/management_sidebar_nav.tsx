@@ -21,7 +21,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import { EuiIcon, EuiSideNav, EuiScreenReaderOnly, EuiSideNavItemType } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiSideNav,
+  EuiScreenReaderOnly,
+  EuiSideNavItemType,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
@@ -79,6 +87,23 @@ export const ManagementSidebarNav = ({
       }),
     }));
 
+  interface TooltipWrapperProps {
+    text: string;
+    tip?: string;
+  }
+
+  const TooltipWrapper = ({ text, tip }: TooltipWrapperProps) => (
+    <EuiToolTip content={tip} position="right">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="questionInCircle" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
+
   const createNavItem = <T extends ManagementItem>(
     item: T,
     customParams: Partial<EuiSideNavItemType<any>> = {}
@@ -87,7 +112,7 @@ export const ManagementSidebarNav = ({
 
     return {
       id: item.id,
-      name: item.title,
+      name: item.tip ? <TooltipWrapper text={item.title} tip={item.tip} /> : item.title,
       isSelected: item.id === selectedId,
       icon: iconType ? <EuiIcon type={iconType} size="m" /> : undefined,
       'data-test-subj': item.id,

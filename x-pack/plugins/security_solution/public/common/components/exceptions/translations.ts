@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 
 export const DETECTION_LIST = i18n.translate(
@@ -76,21 +77,28 @@ export const ADD_EXCEPTION_LABEL = i18n.translate(
 export const ADD_TO_ENDPOINT_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToEndpointListLabel',
   {
-    defaultMessage: 'Add to endpoint list',
+    defaultMessage: 'Add Endpoint exception',
   }
 );
 
 export const ADD_TO_DETECTIONS_LIST = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.addToDetectionsListLabel',
   {
-    defaultMessage: 'Add to detections list',
+    defaultMessage: 'Add rule exception',
   }
 );
 
 export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptTitle',
   {
-    defaultMessage: 'You have no exceptions',
+    defaultMessage: 'This rule has no exceptions',
+  }
+);
+
+export const EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.noSearchResultsPromptBody',
+  {
+    defaultMessage: 'No search results found.',
   }
 );
 
@@ -98,7 +106,7 @@ export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
     defaultMessage:
-      'You can add an exception to fine tune the rule so that it suppresses alerts that meet specified conditions. Exceptions leverage detection accuracy, which can help reduce the number of false positives.',
+      'You can add exceptions to fine tune the rule so that detection alerts are not created when exception conditions are met. Exceptions improve detection accuracy, which can help reduce the number of false positives.',
   }
 );
 
@@ -137,3 +145,48 @@ export const SHOWING_EXCEPTIONS = (items: number) =>
     values: { items },
     defaultMessage: 'Showing {items} {items, plural, =1 {exception} other {exceptions}}',
   });
+
+export const FIELD = i18n.translate('xpack.securitySolution.exceptions.fieldDescription', {
+  defaultMessage: 'Field',
+});
+
+export const OPERATOR = i18n.translate('xpack.securitySolution.exceptions.operatorDescription', {
+  defaultMessage: 'Operator',
+});
+
+export const VALUE = i18n.translate('xpack.securitySolution.exceptions.valueDescription', {
+  defaultMessage: 'Value',
+});
+
+export const AND = i18n.translate('xpack.securitySolution.exceptions.andDescription', {
+  defaultMessage: 'AND',
+});
+
+export const OR = i18n.translate('xpack.securitySolution.exceptions.orDescription', {
+  defaultMessage: 'OR',
+});
+
+export const ADD_COMMENT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addCommentPlaceholder',
+  {
+    defaultMessage: 'Add a new comment...',
+  }
+);
+
+export const ADD_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.addToClipboard',
+  {
+    defaultMessage: 'Comment',
+  }
+);
+
+export const DESCRIPTION = i18n.translate('xpack.securitySolution.exceptions.descriptionLabel', {
+  defaultMessage: 'Description',
+});
+
+export const TOTAL_ITEMS_FETCH_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.fetchTotalsError',
+  {
+    defaultMessage: 'Error getting exception item totals',
+  }
+);

@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import '../../../../../common/mock/match_media';
 import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';

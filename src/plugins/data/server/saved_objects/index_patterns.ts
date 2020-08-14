@@ -42,17 +42,11 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
-      fieldFormatMap: { type: 'text' },
-      fields: { type: 'text' },
-      intervalName: { type: 'keyword' },
-      notExpandable: { type: 'boolean' },
-      sourceFilters: { type: 'text' },
-      timeFieldName: { type: 'keyword' },
       title: { type: 'text' },
       type: { type: 'keyword' },
-      typeMeta: { type: 'keyword' },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations,
+  migrations: indexPatternSavedObjectTypeMigrations as any,
 };

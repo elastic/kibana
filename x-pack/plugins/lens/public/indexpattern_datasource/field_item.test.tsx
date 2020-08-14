@@ -13,6 +13,9 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+
+const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
@@ -80,6 +83,7 @@ describe('IndexPattern Field Item', () => {
         searchable: true,
       },
       exists: true,
+      chartsThemeService,
     };
 
     data.fieldFormats = ({

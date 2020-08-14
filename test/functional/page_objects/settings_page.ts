@@ -55,15 +55,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // check for the index pattern info flyout that covers the
-      // create index pattern button on smaller screens
-      // @ts-ignore
-      await retry.waitFor('index pattern info flyout', async () => {
-        if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-          await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
-        } else return true;
-      });
     }
 
     async getAdvancedSettings(propertyName: string) {
@@ -303,10 +294,15 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       );
     }
 
+    async getAllIndexPatternNames() {
+      const indexPatterns = await this.getIndexPatternList();
+      return await mapAsync(indexPatterns, async (index) => {
+        return await index.getVisibleText();
+      });
+    }
+
     async isIndexPatternListEmpty() {
-      await testSubjects.existOrFail('indexPatternTable', { timeout: 5000 });
-      const indexPatternList = await this.getIndexPatternList();
-      return indexPatternList.length === 0;
+      return !(await testSubjects.exists('indexPatternTable', { timeout: 5000 }));
     }
 
     async removeLogstashIndexPatternIfExist() {

@@ -10,6 +10,7 @@
 
 // @ts-ignore not typed by @types/webpack
 import Module from 'webpack/lib/Module';
+import { BundleRef } from '../common';
 
 export class BundleRefModule extends Module {
   public built = false;
@@ -17,12 +18,12 @@ export class BundleRefModule extends Module {
   public buildInfo?: any;
   public exportsArgument = '__webpack_exports__';
 
-  constructor(public readonly exportId: string) {
+  constructor(public readonly ref: BundleRef) {
     super('kbn/bundleRef', null);
   }
 
   libIdent() {
-    return this.exportId;
+    return this.ref.exportId;
   }
 
   chunkCondition(chunk: any) {
@@ -30,7 +31,7 @@ export class BundleRefModule extends Module {
   }
 
   identifier() {
-    return '@kbn/bundleRef ' + JSON.stringify(this.exportId);
+    return '@kbn/bundleRef ' + JSON.stringify(this.ref.exportId);
   }
 
   readableIdentifier() {
@@ -51,7 +52,7 @@ export class BundleRefModule extends Module {
   source() {
     return `
       __webpack_require__.r(__webpack_exports__);
-      var ns = __kbnBundles__.get('${this.exportId}');
+      var ns = __kbnBundles__.get('${this.ref.exportId}');
       Object.defineProperties(__webpack_exports__, Object.getOwnPropertyDescriptors(ns))
     `;
   }

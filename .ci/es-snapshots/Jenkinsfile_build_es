@@ -25,7 +25,7 @@ def PROMOTE_WITHOUT_VERIFY = !!params.PROMOTE_WITHOUT_VERIFICATION
 timeout(time: 120, unit: 'MINUTES') {
   timestamps {
     ansiColor('xterm') {
-      node(workers.label('s')) {
+      node(workers.label('l')) {
         catchErrors {
           def VERSION
           def SNAPSHOT_ID
@@ -154,9 +154,10 @@ def buildArchives(destination) {
     "NODE_NAME=",
   ]) {
     sh """
-      ./gradlew -p distribution/archives assemble --parallel
+      ./gradlew -Dbuild.docker=true assemble --parallel
       mkdir -p ${destination}
-      find distribution/archives -type f \\( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
+      find distribution -type f \\( -name 'elasticsearch-*-*-*-*.tar.gz' -o -name 'elasticsearch-*-*-*-*.zip' \\) -not -path *no-jdk* -not -path *build-context* -exec cp {} ${destination} \\;
+      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:\${0} | gzip > ${destination}/elasticsearch-\${0}-docker-image.tar.gz'
     """
   }
 }

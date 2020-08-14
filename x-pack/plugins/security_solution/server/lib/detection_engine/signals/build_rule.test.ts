@@ -5,7 +5,7 @@
  */
 
 import { buildRule } from './build_rule';
-import { sampleRuleAlertParams, sampleRuleGuid } from './__mocks__/es_results';
+import { sampleDocNoSortId, sampleRuleAlertParams, sampleRuleGuid } from './__mocks__/es_results';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 
@@ -29,6 +29,7 @@ describe('buildRule', () => {
     ];
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -43,6 +44,8 @@ describe('buildRule', () => {
     });
     const expected: Partial<RulesSchema> = {
       actions: [],
+      author: ['Elastic'],
+      building_block_type: 'default',
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: false,
@@ -53,14 +56,17 @@ describe('buildRule', () => {
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       interval: 'some interval',
       language: 'kuery',
+      license: 'Elastic License',
       max_signals: 10000,
       name: 'some-name',
       output_index: '.siem-signals',
       query: 'user.name: root or user.name: admin',
       references: ['http://google.com'],
       risk_score: 50,
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       severity: 'high',
+      severity_mapping: [],
       tags: ['some fake tag 1', 'some fake tag 2'],
       threat: [],
       to: 'now',
@@ -92,6 +98,7 @@ describe('buildRule', () => {
     ruleParams.filters = undefined;
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -106,6 +113,8 @@ describe('buildRule', () => {
     });
     const expected: Partial<RulesSchema> = {
       actions: [],
+      author: ['Elastic'],
+      building_block_type: 'default',
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,
@@ -116,14 +125,17 @@ describe('buildRule', () => {
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       interval: 'some interval',
       language: 'kuery',
+      license: 'Elastic License',
       max_signals: 10000,
       name: 'some-name',
       output_index: '.siem-signals',
       query: 'user.name: root or user.name: admin',
       references: ['http://google.com'],
       risk_score: 50,
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       severity: 'high',
+      severity_mapping: [],
       tags: ['some fake tag 1', 'some fake tag 2'],
       threat: [],
       to: 'now',
@@ -144,6 +156,7 @@ describe('buildRule', () => {
     ruleParams.filters = undefined;
     const rule = buildRule({
       actions: [],
+      doc: sampleDocNoSortId(),
       ruleParams,
       name: 'some-name',
       id: sampleRuleGuid,
@@ -158,6 +171,8 @@ describe('buildRule', () => {
     });
     const expected: Partial<RulesSchema> = {
       actions: [],
+      author: ['Elastic'],
+      building_block_type: 'default',
       created_by: 'elastic',
       description: 'Detecting root and admin users',
       enabled: true,
@@ -168,6 +183,7 @@ describe('buildRule', () => {
       index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
       interval: 'some interval',
       language: 'kuery',
+      license: 'Elastic License',
       max_signals: 10000,
       name: 'some-name',
       note: '',
@@ -175,8 +191,10 @@ describe('buildRule', () => {
       query: 'user.name: root or user.name: admin',
       references: ['http://google.com'],
       risk_score: 50,
+      risk_score_mapping: [],
       rule_id: 'rule-1',
       severity: 'high',
+      severity_mapping: [],
       tags: ['some fake tag 1', 'some fake tag 2'],
       threat: [],
       to: 'now',

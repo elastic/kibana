@@ -4,20 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { LegacyScopedClusterClient } from 'src/core/server';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { setupMockEsCompositeQuery } from './helper';
 
-interface BucketItemCriteria {
-  monitor_id: string;
+export interface BucketItemCriteria {
+  monitorId: string;
   status: string;
   location: string;
   doc_count: number;
 }
 
 interface BucketKey {
-  monitor_id: string;
+  monitorId: string;
   status: string;
   location: string;
 }
@@ -27,80 +26,57 @@ interface BucketItem {
   doc_count: number;
 }
 
-interface MultiPageCriteria {
-  after_key?: BucketKey;
-  bucketCriteria: BucketItemCriteria[];
-}
-
 const genBucketItem = ({
-  monitor_id,
+  monitorId,
   status,
   location,
-  doc_count,
+  doc_count: count,
 }: BucketItemCriteria): BucketItem => ({
   key: {
-    monitor_id,
+    monitorId,
     status,
     location,
   },
-  doc_count,
+  doc_count: count,
 });
-
-type MockCallES = (method: any, params: any) => Promise<any>;
-
-const setupMock = (
-  criteria: MultiPageCriteria[]
-): [MockCallES, jest.Mocked<Pick<LegacyScopedClusterClient, 'callAsCurrentUser'>>] => {
-  const esMock = elasticsearchServiceMock.createScopedClusterClient();
-
-  criteria.forEach(({ after_key, bucketCriteria }) => {
-    const mockResponse = {
-      aggregations: {
-        monitors: {
-          after_key,
-          buckets: bucketCriteria.map((item) => genBucketItem(item)),
-        },
-      },
-    };
-    esMock.callAsCurrentUser.mockResolvedValueOnce(mockResponse);
-  });
-  return [(method: any, params: any) => esMock.callAsCurrentUser(method, params), esMock];
-};
 
 describe('getMonitorStatus', () => {
   it('applies bool filters to params', async () => {
-    const [callES, esMock] = setupMock([]);
-    const exampleFilter = `{
-      "bool": {
-        "should": [
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
+    const exampleFilter = {
+      bool: {
+        should: [
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "apm-dev"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'apm-dev',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
+              minimum_should_match: 1,
+            },
           },
           {
-            "bool": {
-              "should": [
+            bool: {
+              should: [
                 {
-                  "match_phrase": {
-                    "monitor.id": "auto-http-0X8D6082B94BBE3B8A"
-                  }
-                }
+                  match_phrase: {
+                    'monitor.id': 'auto-http-0X8D6082B94BBE3B8A',
+                  },
+                },
               ],
-              "minimum_should_match": 1
-            }
-          }
+              minimum_should_match: 1,
+            },
+          },
         ],
-        "minimum_should_match": 1
-      }
-    }`;
+        minimum_should_match: 1,
+      },
+    };
     await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -120,11 +96,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -203,7 +186,10 @@ describe('getMonitorStatus', () => {
   });
 
   it('applies locations to params', async () => {
-    const [callES, esMock] = setupMock([]);
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [],
+      genBucketItem
+    );
     await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -222,11 +208,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -294,30 +287,33 @@ describe('getMonitorStatus', () => {
   });
 
   it('fetches single page of results', async () => {
-    const [callES, esMock] = setupMock([
-      {
-        bucketCriteria: [
-          {
-            monitor_id: 'foo',
-            status: 'down',
-            location: 'fairbanks',
-            doc_count: 43,
-          },
-          {
-            monitor_id: 'bar',
-            status: 'down',
-            location: 'harrisburg',
-            doc_count: 53,
-          },
-          {
-            monitor_id: 'foo',
-            status: 'down',
-            location: 'harrisburg',
-            doc_count: 44,
-          },
-        ],
-      },
-    ]);
+    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      [
+        {
+          bucketCriteria: [
+            {
+              monitorId: 'foo',
+              status: 'down',
+              location: 'fairbanks',
+              doc_count: 43,
+            },
+            {
+              monitorId: 'bar',
+              status: 'down',
+              location: 'harrisburg',
+              doc_count: 53,
+            },
+            {
+              monitorId: 'foo',
+              status: 'down',
+              location: 'harrisburg',
+              doc_count: 44,
+            },
+          ],
+        },
+      ],
+      genBucketItem
+    );
     const clientParameters = {
       filters: undefined,
       locations: [],
@@ -340,11 +336,18 @@ describe('getMonitorStatus', () => {
         "body": Object {
           "aggs": Object {
             "monitors": Object {
+              "aggs": Object {
+                "fields": Object {
+                  "top_hits": Object {
+                    "size": 1,
+                  },
+                },
+              },
               "composite": Object {
                 "size": 2000,
                 "sources": Array [
                   Object {
-                    "monitor_id": Object {
+                    "monitorId": Object {
                       "terms": Object {
                         "field": "monitor.id",
                       },
@@ -393,54 +396,58 @@ describe('getMonitorStatus', () => {
         "index": "heartbeat-8*",
       }
     `);
+    expect(result.length).toBe(3);
 
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
           "count": 43,
           "location": "fairbanks",
-          "monitor_id": "foo",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 53,
           "location": "harrisburg",
-          "monitor_id": "bar",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 44,
           "location": "harrisburg",
-          "monitor_id": "foo",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
           "status": "down",
         },
       ]
     `);
   });
 
-  it('fetches multiple pages of results in the thing', async () => {
+  it('fetches multiple pages of ES results', async () => {
     const criteria = [
       {
         after_key: {
-          monitor_id: 'foo',
+          monitorId: 'foo',
           location: 'harrisburg',
           status: 'down',
         },
         bucketCriteria: [
           {
-            monitor_id: 'foo',
+            monitorId: 'foo',
             status: 'down',
             location: 'fairbanks',
             doc_count: 43,
           },
           {
-            monitor_id: 'bar',
+            monitorId: 'bar',
             status: 'down',
             location: 'harrisburg',
             doc_count: 53,
           },
           {
-            monitor_id: 'foo',
+            monitorId: 'foo',
             status: 'down',
             location: 'harrisburg',
             doc_count: 44,
@@ -449,25 +456,25 @@ describe('getMonitorStatus', () => {
       },
       {
         after_key: {
-          monitor_id: 'bar',
+          monitorId: 'bar',
           status: 'down',
           location: 'fairbanks',
         },
         bucketCriteria: [
           {
-            monitor_id: 'sna',
+            monitorId: 'sna',
             status: 'down',
             location: 'fairbanks',
             doc_count: 21,
           },
           {
-            monitor_id: 'fu',
+            monitorId: 'fu',
             status: 'down',
             location: 'fairbanks',
             doc_count: 21,
           },
           {
-            monitor_id: 'bar',
+            monitorId: 'bar',
             status: 'down',
             location: 'fairbanks',
             doc_count: 45,
@@ -477,13 +484,13 @@ describe('getMonitorStatus', () => {
       {
         bucketCriteria: [
           {
-            monitor_id: 'sna',
+            monitorId: 'sna',
             status: 'down',
             location: 'harrisburg',
             doc_count: 21,
           },
           {
-            monitor_id: 'fu',
+            monitorId: 'fu',
             status: 'down',
             location: 'harrisburg',
             doc_count: 21,
@@ -491,7 +498,10 @@ describe('getMonitorStatus', () => {
         ],
       },
     ];
-    const [callES] = setupMock(criteria);
+    const [callES] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+      criteria,
+      genBucketItem
+    );
     const result = await getMonitorStatus({
       callES,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -502,54 +512,63 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
+    expect(result.length).toBe(8);
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
           "count": 43,
           "location": "fairbanks",
-          "monitor_id": "foo",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 53,
           "location": "harrisburg",
-          "monitor_id": "bar",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 44,
           "location": "harrisburg",
-          "monitor_id": "foo",
+          "monitorId": "foo",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 21,
           "location": "fairbanks",
-          "monitor_id": "sna",
+          "monitorId": "sna",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 21,
           "location": "fairbanks",
-          "monitor_id": "fu",
+          "monitorId": "fu",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 45,
           "location": "fairbanks",
-          "monitor_id": "bar",
+          "monitorId": "bar",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 21,
           "location": "harrisburg",
-          "monitor_id": "sna",
+          "monitorId": "sna",
+          "monitorInfo": undefined,
           "status": "down",
         },
         Object {
           "count": 21,
           "location": "harrisburg",
-          "monitor_id": "fu",
+          "monitorId": "fu",
+          "monitorInfo": undefined,
           "status": "down",
         },
       ]

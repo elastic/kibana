@@ -13,10 +13,10 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiComboBox,
   EuiIconTip,
+  EuiCheckbox,
   EuiCheckboxGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -174,7 +174,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.ingestManager.agentConfigForm.namespaceFieldDescription"
-            defaultMessage="Apply a default namespace to data sources that use this configuration. Data sources can specify their own namespaces."
+            defaultMessage="Apply a default namespace to integrations that use this configuration. Integrations can specify their own namespaces."
           />
         }
       >
@@ -221,16 +221,48 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
           options={[
             {
               id: 'logs',
-              label: i18n.translate(
-                'xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel',
-                { defaultMessage: 'Collect agent logs' }
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel"
+                    defaultMessage="Collect agent logs"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringLogsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect logs from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
             {
               id: 'metrics',
-              label: i18n.translate(
-                'xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel',
-                { defaultMessage: 'Collect agent metrics' }
+              label: (
+                <>
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel"
+                    defaultMessage="Collect agent metrics"
+                  />{' '}
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.ingestManager.agentConfigForm.monitoringMetricsTooltipText',
+                      {
+                        defaultMessage:
+                          'Collect metrics from Elastic Agents that use this configuration.',
+                      }
+                    )}
+                    position="right"
+                    type="iInCircle"
+                    color="subdued"
+                  />
+                </>
               ),
             },
           ]}
@@ -315,16 +347,14 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
       {!isEditing ? (
         <EuiFormRow
           label={
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel"
-                defaultMessage="Optional"
-              />
-            </EuiText>
+            <FormattedMessage
+              id="xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel"
+              defaultMessage="System monitoring"
+            />
           }
         >
-          <EuiSwitch
-            showLabel={true}
+          <EuiCheckbox
+            id="agentConfigFormSystemMonitoringCheckbox"
             label={
               <>
                 <FormattedMessage
@@ -336,11 +366,12 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                     'xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText',
                     {
                       defaultMessage:
-                        'Enable this option to bootstrap your configuration with a data source that collects system metrics and information.',
+                        'Enable this option to bootstrap your configuration with an integration that collects system metrics and information.',
                     }
                   )}
                   position="right"
                   type="iInCircle"
+                  color="subdued"
                 />
               </>
             }

@@ -35,5 +35,14 @@ export default function ({ getPageObjects, getService }) {
       expect(features.length).to.equal(2);
       expect(features[0].geometry.type).to.equal('LineString');
     });
+
+    it('should fit to bounds', async () => {
+      // Set view to other side of world so no matching results
+      await PageObjects.maps.setView(-70, 0, 6);
+      await PageObjects.maps.clickFitToBounds('connections');
+      const { lat, lon } = await PageObjects.maps.getView();
+      expect(Math.round(lat)).to.equal(41);
+      expect(Math.round(lon)).to.equal(-70);
+    });
   });
 }

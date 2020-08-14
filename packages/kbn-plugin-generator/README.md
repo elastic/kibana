@@ -71,10 +71,6 @@ Generated plugins receive a handful of scripts that can be used during developme
 
     Build a distributable archive of your plugin.
 
-  - `yarn test:karma`
-
-    Run the browser tests in a real web browser.
-
   - `yarn test:mocha`
 
     Run the server tests using mocha.

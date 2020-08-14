@@ -28,6 +28,7 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       validate: { body: bodySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
       const { templates } = req.body as TypeOf<typeof bodySchema>;
       const response: { templatesDeleted: Array<TemplateDeserialized['name']>; errors: any[] } = {
         templatesDeleted: [],
@@ -37,13 +38,15 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       await Promise.all(
         templates.map(async ({ name, isLegacy }) => {
           try {
-            if (!isLegacy) {
-              return res.badRequest({ body: 'Only legacy index template can be deleted.' });
+            if (isLegacy) {
+              await callAsCurrentUser('indices.deleteTemplate', {
+                name,
+              });
+            } else {
+              await callAsCurrentUser('dataManagement.deleteComposableIndexTemplate', {
+                name,
+              });
             }
-
-            await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.deleteTemplate', {
-              name,
-            });
 
             return response.templatesDeleted.push(name);
           } catch (e) {

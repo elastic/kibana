@@ -13,7 +13,6 @@ export const allTimelinesQuery = gql`
     $sort: SortTimeline
     $onlyUserFavorite: Boolean
     $timelineType: TimelineType
-    $templateTimelineType: TemplateTimelineType
     $status: TimelineStatus
   ) {
     getAllTimeline(
@@ -22,7 +21,6 @@ export const allTimelinesQuery = gql`
       sort: $sort
       onlyUserFavorite: $onlyUserFavorite
       timelineType: $timelineType
-      templateTimelineType: $templateTimelineType
       status: $status
     ) {
       totalCount
@@ -51,6 +49,7 @@ export const allTimelinesQuery = gql`
           updatedBy
           version
         }
+        excludedRowRendererIds
         notes {
           eventId
           note

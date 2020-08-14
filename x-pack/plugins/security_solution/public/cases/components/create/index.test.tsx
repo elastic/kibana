@@ -19,7 +19,9 @@ import { useGetTags } from '../../containers/use_get_tags';
 jest.mock('../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline');
 jest.mock('../../containers/use_post_case');
 import { useForm } from '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { wait } from '../../../common/lib/helpers';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 jest.mock(
   '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
@@ -97,8 +99,7 @@ describe('Create case', () => {
       </TestProviders>
     );
     wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    await wait();
-    expect(postCase).toBeCalledWith(sampleData);
+    await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
   });
 
   it('should redirect to all cases on cancel click', () => {

@@ -11,6 +11,7 @@ import React from 'react';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../../common/mock';
+import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';

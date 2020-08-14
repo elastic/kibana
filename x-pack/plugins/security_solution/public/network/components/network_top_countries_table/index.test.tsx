@@ -10,6 +10,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
+import '../../../common/mock/match_media';
 import { FlowTargetSourceDest } from '../../../graphql/types';
 import {
   apolloClientObservable,

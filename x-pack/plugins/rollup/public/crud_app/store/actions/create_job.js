@@ -102,7 +102,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
   // here, because it would partially obscure the detail panel.
   getRouter().history.push({
     pathname: `/job_list`,
-    search: `?job=${jobConfig.id}`,
+    search: `?job=${encodeURIComponent(jobConfig.id)}`,
   });
 };
 

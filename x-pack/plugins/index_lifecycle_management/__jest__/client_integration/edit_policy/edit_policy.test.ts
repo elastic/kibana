@@ -7,11 +7,10 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers/setup_environment';
-
 import { EditPolicyTestBed, setup } from './edit_policy.helpers';
-import { DELETE_PHASE_POLICY } from './constants';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import { DELETE_PHASE_POLICY, NEW_SNAPSHOT_POLICY_NAME, SNAPSHOT_POLICY_NAME } from './constants';
 
 window.scrollTo = jest.fn();
 
@@ -25,6 +24,10 @@ describe('<EditPolicy />', () => {
   describe('delete phase', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([DELETE_PHASE_POLICY]);
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([
+        SNAPSHOT_POLICY_NAME,
+        NEW_SNAPSHOT_POLICY_NAME,
+      ]);
 
       await act(async () => {
         testBed = await setup();
@@ -35,16 +38,18 @@ describe('<EditPolicy />', () => {
     });
 
     test('wait for snapshot policy field should correctly display snapshot policy name', () => {
-      expect(testBed.find('waitForSnapshotField').props().value).toEqual(
-        DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy
-      );
+      expect(testBed.find('snapshotPolicyCombobox').prop('data-currentvalue')).toEqual([
+        {
+          label: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
+          value: DELETE_PHASE_POLICY.policy.phases.delete.actions.wait_for_snapshot.policy,
+        },
+      ]);
     });
 
     test('wait for snapshot field should correctly update snapshot policy name', async () => {
       const { actions } = testBed;
 
-      const newPolicyName = 'my_new_snapshot_policy';
-      actions.setWaitForSnapshotPolicy(newPolicyName);
+      await actions.setWaitForSnapshotPolicy(NEW_SNAPSHOT_POLICY_NAME);
       await actions.savePolicy();
 
       const expected = {
@@ -56,7 +61,7 @@ describe('<EditPolicy />', () => {
             actions: {
               ...DELETE_PHASE_POLICY.policy.phases.delete.actions,
               wait_for_snapshot: {
-                policy: newPolicyName,
+                policy: NEW_SNAPSHOT_POLICY_NAME,
               },
             },
           },
@@ -67,6 +72,15 @@ describe('<EditPolicy />', () => {
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/policies`);
       expect(latestRequest.method).toBe('POST');
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    test('wait for snapshot field should display a callout when the input is not an existing policy', async () => {
+      const { actions } = testBed;
+
+      await actions.setWaitForSnapshotPolicy('my_custom_policy');
+      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
+      expect(testBed.find('customPolicyCallout').exists()).toBeTruthy();
     });
 
     test('wait for snapshot field should delete action if field is empty', async () => {
@@ -91,6 +105,32 @@ describe('<EditPolicy />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    test('wait for snapshot field should display a callout when there are no snapshot policies', async () => {
+      // need to call setup on testBed again for it to use a newly defined snapshot policies response
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeFalsy();
+      expect(testBed.find('noPoliciesCallout').exists()).toBeTruthy();
+    });
+
+    test('wait for snapshot field should display a callout when there is an error loading snapshot policies', async () => {
+      // need to call setup on testBed again for it to use a newly defined snapshot policies response
+      httpRequestsMockHelpers.setLoadSnapshotPolicies([], { status: 500, body: 'error' });
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+      expect(testBed.find('customPolicyCallout').exists()).toBeFalsy();
+      expect(testBed.find('noPoliciesCallout').exists()).toBeFalsy();
+      expect(testBed.find('policiesErrorCallout').exists()).toBeTruthy();
     });
   });
 });

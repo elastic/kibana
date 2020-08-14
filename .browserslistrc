@@ -1,7 +1,9 @@
 [production]
-last 2 versions
-> 5%
-Safari 7 # for PhantomJS support: https://github.com/elastic/kibana/issues/27136
+last 2 Firefox versions
+last 2 Chrome versions
+last 2 Safari versions
+> 0.25%
+not ie 11
 
 [dev]
 last 1 chrome versions

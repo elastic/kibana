@@ -6,10 +6,9 @@
 
 // @ts-ignore
 import contentDisposition from 'content-disposition';
-import * as _ from 'lodash';
+import { get } from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { statuses } from '../../lib/esqueue/constants/statuses';
-import { ExportTypesRegistry } from '../../lib/export_types_registry';
+import { ExportTypesRegistry, statuses } from '../../lib';
 import { ExportTypeDefinition, JobSource, TaskRunResult } from '../../types';
 
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
@@ -18,11 +17,11 @@ interface ErrorFromPayload {
   message: string;
 }
 
-// A camelCase version of TaskRunResult
+// interface of the API result
 interface Payload {
   statusCode: number;
   content: string | Buffer | ErrorFromPayload;
-  contentType: string;
+  contentType: string | null;
   headers: Record<string, any>;
 }
 
@@ -35,8 +34,8 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeType) 
   const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
-    const csvContainsFormulas = _.get(output, 'csv_contains_formulas', false);
-    const maxSizedReach = _.get(output, 'max_size_reached', false);
+    const csvContainsFormulas = get(output, 'csv_contains_formulas', false);
+    const maxSizedReach = get(output, 'max_size_reached', false);
 
     metaDataHeaders['kbn-csv-contains-formulas'] = csvContainsFormulas;
     metaDataHeaders['kbn-max-size-reached'] = maxSizedReach;

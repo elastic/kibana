@@ -4,7 +4,11 @@
 
 ## IKbnUrlStateStorage interface
 
-KbnUrlStateStorage is a state storage for [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) utility which: 1. Keeps state in sync with the URL. 2. Serializes data and stores it in the URL in one of the supported formats: \* Rison encoded. \* Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See kibana's advanced option for more context state:storeInSessionStorage 3. Takes care of listening to the URL updates and notifies state about the updates. 4. Takes care of batching URL updates to prevent redundant browser history records. [GUIDE](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md)
+KbnUrlStateStorage is a state storage for [syncState()](./kibana-plugin-plugins-kibana_utils-public-state_sync.syncstate.md) utility which:
+
+1. Keeps state in sync with the URL. 2. Serializes data and stores it in the URL in one of the supported formats: \* Rison encoded. \* Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context. 3. Takes care of listening to the URL updates and notifies state about the updates. 4. Takes care of batching URL updates to prevent redundant browser history records.
+
+[Refer to this guide for more info](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md)
 
 <b>Signature:</b>
 
@@ -18,7 +22,7 @@ export interface IKbnUrlStateStorage extends IStateStorage
 |  --- | --- | --- |
 |  [cancel](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.cancel.md) | <code>() =&gt; void</code> | cancels any pending url updates |
 |  [change$](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.change_.md) | <code>&lt;State = unknown&gt;(key: string) =&gt; Observable&lt;State &#124; null&gt;</code> |  |
-|  [flush](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.flush.md) | <code>(opts?: {</code><br/><code>        replace?: boolean;</code><br/><code>    }) =&gt; boolean</code> | synchronously runs any pending url updates returned boolean indicates if change occurred |
+|  [flush](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.flush.md) | <code>(opts?: {</code><br/><code>        replace?: boolean;</code><br/><code>    }) =&gt; boolean</code> | Synchronously runs any pending url updates, returned boolean indicates if change occurred. |
 |  [get](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.get.md) | <code>&lt;State = unknown&gt;(key: string) =&gt; State &#124; null</code> |  |
 |  [set](./kibana-plugin-plugins-kibana_utils-public-state_sync.ikbnurlstatestorage.set.md) | <code>&lt;State&gt;(key: string, state: State, opts?: {</code><br/><code>        replace: boolean;</code><br/><code>    }) =&gt; Promise&lt;string &#124; undefined&gt;</code> |  |
 

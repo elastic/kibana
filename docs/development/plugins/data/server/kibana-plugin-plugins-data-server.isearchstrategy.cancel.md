@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-cancel?: ISearchCancel<T>;
+cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
 ```

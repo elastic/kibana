@@ -1,0 +1,12 @@
+.insInspectorPanel__flyoutBody {
+  // TODO: EUI to allow for custom classNames to inner elements
+  // Or supply this as default
+  > div {
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      flex-grow: 1;
+    }
+  }
+}

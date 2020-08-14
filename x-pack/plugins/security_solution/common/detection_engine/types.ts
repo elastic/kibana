@@ -15,5 +15,6 @@ export const RuleTypeSchema = t.keyof({
   query: null,
   saved_query: null,
   machine_learning: null,
+  threshold: null,
 });
 export type RuleType = t.TypeOf<typeof RuleTypeSchema>;

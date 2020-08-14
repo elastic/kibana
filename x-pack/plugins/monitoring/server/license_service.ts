@@ -46,7 +46,7 @@ export class LicenseService {
       license$,
       getMessage: () => rawLicense?.getUnavailableReason() || 'N/A',
       getMonitoringFeature: () => rawLicense?.getFeature('monitoring') || defaultLicenseFeature,
-      getWatcherFeature: () => rawLicense?.getFeature('monitoring') || defaultLicenseFeature,
+      getWatcherFeature: () => rawLicense?.getFeature('watcher') || defaultLicenseFeature,
       getSecurityFeature: () => rawLicense?.getFeature('security') || defaultLicenseFeature,
       stop: () => {
         if (licenseSubscription) {

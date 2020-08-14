@@ -18,7 +18,7 @@
  */
 
 import * as ts from 'typescript';
-import * as _ from 'lodash';
+import { pick, isObject, each, isArray, reduce, isEmpty, merge, transform, isEqual } from 'lodash';
 import * as path from 'path';
 import glob from 'glob';
 import { readFile, writeFile } from 'fs';
@@ -178,17 +178,17 @@ export function getPropertyValue(
 }
 
 export function pickDeep(collection: any, identity: any, thisArg?: any) {
-  const picked: any = _.pick(collection, identity, thisArg);
-  const collections = _.pick(collection, _.isObject, thisArg);
+  const picked: any = pick(collection, identity, thisArg);
+  const collections = pick(collection, isObject, thisArg);
 
-  _.each(collections, function (item, key) {
+  each(collections, function (item, key) {
     let object;
-    if (_.isArray(item)) {
-      object = _.reduce(
+    if (isArray(item)) {
+      object = reduce(
         item,
         function (result, value) {
           const pickedDeep = pickDeep(value, identity, thisArg);
-          if (!_.isEmpty(pickedDeep)) {
+          if (!isEmpty(pickedDeep)) {
             result.push(pickedDeep);
           }
           return result;
@@ -199,7 +199,7 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
       object = pickDeep(item, identity, thisArg);
     }
 
-    if (!_.isEmpty(object)) {
+    if (!isEmpty(object)) {
       picked[key || ''] = object;
     }
   });
@@ -208,12 +208,12 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
 }
 
 export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
-  if (_.isObject(obj)) {
-    return _.reduce(
+  if (isObject(obj)) {
+    return reduce(
       obj,
       (cum, next, key) => {
         const keys = [...keyPath, key];
-        return _.merge(cum, flattenKeys(next, keys));
+        return merge(cum, flattenKeys(next, keys));
       },
       {}
     );
@@ -223,10 +223,9 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
 
 export function difference(actual: any, expected: any) {
   function changes(obj: any, base: any) {
-    return _.transform(obj, function (result, value, key) {
-      if (key && !_.isEqual(value, base[key])) {
-        result[key] =
-          _.isObject(value) && _.isObject(base[key]) ? changes(value, base[key]) : value;
+    return transform(obj, function (result, value, key) {
+      if (key && !isEqual(value, base[key])) {
+        result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
       }
     });
   }

@@ -19,23 +19,17 @@
 
 import { buildTask } from '../tasks/build';
 import { startTask } from '../tasks/start';
-import { testAllTask } from '../tasks/test/all';
-import { testKarmaTask } from '../tasks/test/karma';
 import { testMochaTask } from '../tasks/test/mocha';
 
 // define a tasks interface that we can extend in the tests
 export interface Tasks {
   build: typeof buildTask;
   start: typeof startTask;
-  testAll: typeof testAllTask;
-  testKarma: typeof testKarmaTask;
   testMocha: typeof testMochaTask;
 }
 
 export const tasks: Tasks = {
   build: buildTask,
   start: startTask,
-  testAll: testAllTask,
-  testKarma: testKarmaTask,
   testMocha: testMochaTask,
 };

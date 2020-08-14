@@ -1,0 +1,14 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "transaction" } },
+        { "exists": { "field": "transaction.duration.us" } }
+      ]
+    }
+  }
+}

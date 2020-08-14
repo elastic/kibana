@@ -40,8 +40,7 @@ export function DimensionPopover({
       }}
       button={trigger}
       anchorPosition="leftUp"
-      withTitle
-      panelPaddingSize="s"
+      panelPaddingSize="none"
     >
       {panel}
     </EuiPopover>

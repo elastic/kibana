@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeepWith } from 'lodash';
 
 // We should add `any` return type to overcome bug in lodash types, customizer
 // in lodash 3.* can return `undefined` if cloning is handled by the lodash, but
@@ -29,5 +29,5 @@ function cloneBuffersCustomizer(val: unknown): any {
 }
 
 export function deepCloneWithBuffers<T>(val: T): T {
-  return cloneDeep(val, cloneBuffersCustomizer);
+  return cloneDeepWith(val, cloneBuffersCustomizer);
 }

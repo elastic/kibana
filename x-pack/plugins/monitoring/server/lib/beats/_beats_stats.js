@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { capitalize, get } from 'lodash';
+import { upperFirst, get } from 'lodash';
 
 export const getDiffCalculation = (max, min) => {
   // no need to test max >= 0, but min <= 0 which is normal for a derivative after restart
@@ -105,7 +105,7 @@ export const beatsAggResponseHandler = (response) => {
     return [
       ...types,
       {
-        type: capitalize(typeBucket.key),
+        type: upperFirst(typeBucket.key),
         count: get(typeBucket, 'uuids.buckets.length'),
       },
     ];

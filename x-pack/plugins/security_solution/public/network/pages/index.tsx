@@ -7,13 +7,12 @@
 import React, { useMemo } from 'react';
 import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
 
-import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
+import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { GlobalTime } from '../../common/containers/global_time';
 import { getNetworkRoutePath } from './navigation';
 import { NetworkRouteType } from './navigation/types';
 import { MlNetworkConditionalContainer } from '../../common/components/ml/conditional_links/ml_network_conditional_container';
@@ -36,71 +35,48 @@ const NetworkContainerComponent: React.FC<Props> = () => {
   );
 
   return (
-    <GlobalTime>
-      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
-        <Switch>
-          <Route
-            path="/ml-network"
-            render={({ location, match }) => (
-              <MlNetworkConditionalContainer location={location} url={match.url} />
-            )}
-          />
-          <Route
-            strict
-            path={networkRoutePath}
-            render={() => (
-              <Network
-                networkPagePath={networkPagePath}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-                capabilitiesFetched={capabilities.capabilitiesFetched}
-                hasMlUserPermissions={userHasMlUserPermissions}
-              />
-            )}
-          />
-          <Route
-            path={`${ipDetailsPageBasePath}/:flowTarget`}
-            render={({
-              match: {
-                params: { detailName, flowTarget },
-              },
-            }) => (
-              <IPDetails
-                detailName={detailName}
-                flowTarget={flowTarget}
-                to={to}
-                from={from}
-                setQuery={setQuery}
-                deleteQuery={deleteQuery}
-                isInitializing={isInitializing}
-              />
-            )}
-          />
-          <Route
-            path={ipDetailsPageBasePath}
-            render={({
-              location: { search = '' },
-              match: {
-                params: { detailName },
-              },
-            }) => {
-              history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
-              return null;
-            }}
-          />
-          <Route
-            path="/"
-            render={({ location: { search = '' } }) => {
-              history.replace(`${NetworkRouteType.flows}${search}`);
-              return null;
-            }}
-          />
-        </Switch>
-      )}
-    </GlobalTime>
+    <Switch>
+      <Route
+        path="/ml-network"
+        render={({ location, match }) => (
+          <MlNetworkConditionalContainer location={location} url={match.url} />
+        )}
+      />
+      <Route strict path={networkRoutePath}>
+        <Network
+          networkPagePath={networkPagePath}
+          capabilitiesFetched={capabilities.capabilitiesFetched}
+          hasMlUserPermissions={userHasMlUserPermissions}
+        />
+      </Route>
+      <Route
+        path={`${ipDetailsPageBasePath}/:flowTarget`}
+        render={({
+          match: {
+            params: { detailName, flowTarget },
+          },
+        }) => <IPDetails detailName={detailName} flowTarget={flowTarget} />}
+      />
+      <Route
+        path={ipDetailsPageBasePath}
+        render={({
+          location: { search = '' },
+          match: {
+            params: { detailName },
+          },
+        }) => {
+          history.replace(`ip/${detailName}/${FlowTarget.source}${search}`);
+          return null;
+        }}
+      />
+      <Route
+        path="/"
+        render={({ location: { search = '' } }) => {
+          history.replace(`${NetworkRouteType.flows}${search}`);
+          return null;
+        }}
+      />
+    </Switch>
   );
 };
 

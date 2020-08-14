@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
@@ -32,7 +32,7 @@ export type ValueMember = EuiDualRangeProps['value'][0];
 interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
   value?: Value;
   allowEmptyRange?: boolean;
-  label?: string;
+  label?: string | ReactNode;
   formRowDisplay?: EuiFormRowDisplayKeys;
   onChange?: (val: [string, string]) => void;
   min?: number;
@@ -100,9 +100,9 @@ export class ValidatedDualRange extends Component<Props> {
       fullWidth,
       label,
       formRowDisplay,
-      value, // eslint-disable-line no-unused-vars
-      onChange, // eslint-disable-line no-unused-vars
-      allowEmptyRange, // eslint-disable-line no-unused-vars
+      value,
+      onChange,
+      allowEmptyRange,
       ...rest // TODO: Consider alternatives for spread operator in component
     } = this.props;
 

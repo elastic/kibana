@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext, ILegacyScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
 import {
   dataAnalyticsJobConfigSchema,
+  dataAnalyticsJobUpdateSchema,
   dataAnalyticsEvaluateSchema,
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
@@ -18,6 +19,7 @@ import {
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -34,13 +36,13 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
  */
 export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
   async function userCanDeleteIndex(
-    context: RequestHandlerContext,
+    legacyClient: ILegacyScopedClusterClient,
     destinationIndex: string
   ): Promise<boolean> {
     if (!mlLicense.isSecurityEnabled()) {
       return true;
     }
-    const privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
+    const privilege = await legacyClient.callAsCurrentUser('ml.privilegeCheck', {
       body: {
         index: [
           {
@@ -74,9 +76,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics');
+        const results = await legacyClient.callAsInternalUser('ml.getDataFrameAnalytics');
         return response.ok({
           body: results,
         });
@@ -105,10 +107,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+        const results = await legacyClient.callAsInternalUser('ml.getDataFrameAnalytics', {
           analyticsId,
         });
         return response.ok({
@@ -135,11 +137,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.getDataFrameAnalyticsStats'
-        );
+        const results = await legacyClient.callAsInternalUser('ml.getDataFrameAnalyticsStats');
         return response.ok({
           body: results,
         });
@@ -168,15 +168,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.getDataFrameAnalyticsStats',
-          {
-            analyticsId,
-          }
-        );
+        const results = await legacyClient.callAsInternalUser('ml.getDataFrameAnalyticsStats', {
+          analyticsId,
+        });
         return response.ok({
           body: results,
         });
@@ -208,16 +205,14 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.createDataFrameAnalytics',
-          {
-            body: request.body,
-            analyticsId,
-          }
-        );
+        const results = await legacyClient.callAsInternalUser('ml.createDataFrameAnalytics', {
+          body: request.body,
+          analyticsId,
+          ...getAuthorizationHeader(request),
+        });
         return response.ok({
           body: results,
         });
@@ -246,14 +241,12 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.evaluateDataFrameAnalytics',
-          {
-            body: request.body,
-          }
-        );
+        const results = await legacyClient.callAsInternalUser('ml.evaluateDataFrameAnalytics', {
+          body: request.body,
+          ...getAuthorizationHeader(request),
+        });
         return response.ok({
           body: results,
         });
@@ -283,14 +276,11 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canCreateDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.explainDataFrameAnalytics',
-          {
-            body: request.body,
-          }
-        );
+        const results = await legacyClient.callAsInternalUser('ml.explainDataFrameAnalytics', {
+          body: request.body,
+        });
         return response.ok({
           body: results,
         });
@@ -320,7 +310,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response, context }) => {
       try {
         const { analyticsId } = request.params;
         const { deleteDestIndex, deleteDestIndexPattern } = request.query;
@@ -334,7 +324,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         // Check if analyticsId is valid and get destination index
         if (deleteDestIndex || deleteDestIndexPattern) {
           try {
-            const dfa = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+            const dfa = await legacyClient.callAsInternalUser('ml.getDataFrameAnalytics', {
               analyticsId,
             });
             if (Array.isArray(dfa.data_frame_analytics) && dfa.data_frame_analytics.length > 0) {
@@ -347,11 +337,11 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
           // If user checks box to delete the destinationIndex associated with the job
           if (destinationIndex && deleteDestIndex) {
             // Verify if user has privilege to delete the destination index
-            const userCanDeleteDestIndex = await userCanDeleteIndex(context, destinationIndex);
+            const userCanDeleteDestIndex = await userCanDeleteIndex(legacyClient, destinationIndex);
             // If user does have privilege to delete the index, then delete the index
             if (userCanDeleteDestIndex) {
               try {
-                await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
+                await legacyClient.callAsCurrentUser('indices.delete', {
                   index: destinationIndex,
                 });
                 destIndexDeleted.success = true;
@@ -380,7 +370,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         // Delete the data frame analytics
 
         try {
-          await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+          await legacyClient.callAsInternalUser('ml.deleteDataFrameAnalytics', {
             analyticsId,
           });
           analyticsJobDeleted.success = true;
@@ -423,10 +413,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const results = await context.ml!.mlClient.callAsCurrentUser('ml.startDataFrameAnalytics', {
+        const results = await legacyClient.callAsInternalUser('ml.startDataFrameAnalytics', {
           analyticsId,
         });
         return response.ok({
@@ -459,21 +449,54 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const options: { analyticsId: string; force?: boolean | undefined } = {
           analyticsId: request.params.analyticsId,
         };
-        // @ts-ignore TODO: update types
+        // @ts-expect-error TODO: update types
         if (request.url?.query?.force !== undefined) {
-          // @ts-ignore TODO: update types
+          // @ts-expect-error TODO: update types
           options.force = request.url.query.force;
         }
 
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.stopDataFrameAnalytics',
-          options
-        );
+        const results = await legacyClient.callAsInternalUser('ml.stopDataFrameAnalytics', options);
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_update Update specified analytics job
+   * @apiName UpdateDataFrameAnalyticsJob
+   * @apiDescription Updates a data frame analytics job.
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/data_frame/analytics/{analyticsId}/_update',
+      validate: {
+        params: analyticsIdSchema,
+        body: dataAnalyticsJobUpdateSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      try {
+        const { analyticsId } = request.params;
+        const results = await legacyClient.callAsInternalUser('ml.updateDataFrameAnalytics', {
+          body: request.body,
+          analyticsId,
+        });
         return response.ok({
           body: results,
         });
@@ -502,12 +525,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         const { analyticsId } = request.params;
-        const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(
-          context.ml!.mlClient.callAsCurrentUser
-        );
+        const { getAnalyticsAuditMessages } = analyticsAuditMessagesProvider(legacyClient);
 
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({

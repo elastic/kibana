@@ -32,9 +32,6 @@ export const executeActionRoute = (router: IRouter, licenseState: ILicenseState)
         body: bodySchema,
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
     router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
@@ -51,7 +48,7 @@ export const executeActionRoute = (router: IRouter, licenseState: ILicenseState)
       const { params } = req.body;
       const { id } = req.params;
       try {
-        const body: ActionTypeExecutorResult = await actionsClient.execute({
+        const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
         });

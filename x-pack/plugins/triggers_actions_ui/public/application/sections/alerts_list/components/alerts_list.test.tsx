@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { ScopedHistory } from 'kibana/public';
 
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
@@ -18,6 +17,7 @@ import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
+import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -48,6 +48,17 @@ const alertType = {
   alertParamsExpression: () => null,
   requiresAppContext: false,
 };
+const alertTypeFromApi = {
+  id: 'test_alert_type',
+  name: 'some alert type',
+  actionGroups: [{ id: 'default', name: 'Default' }],
+  actionVariables: { context: [], state: [] },
+  defaultActionGroupId: 'default',
+  producer: ALERTS_FEATURE_ID,
+  authorizedConsumers: {
+    [ALERTS_FEATURE_ID]: { read: true, all: true },
+  },
+};
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
@@ -74,7 +85,7 @@ describe('alerts_list component empty', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
     const mockes = coreMock.createSetup();
@@ -95,15 +106,8 @@ describe('alerts_list component empty', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      capabilities,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -194,7 +198,7 @@ describe('alerts_list component with items', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
@@ -214,15 +218,8 @@ describe('alerts_list component with items', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': true,
-          'alerting:delete': true,
-        },
-      },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      capabilities,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
@@ -296,15 +293,8 @@ describe('alerts_list component empty with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      capabilities,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -391,7 +381,8 @@ describe('alerts_list with show only capability', () => {
         name: 'Test2',
       },
     ]);
-    loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
+
+    loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
@@ -411,15 +402,8 @@ describe('alerts_list with show only capability', () => {
       http: mockes.http,
       uiSettings: mockes.uiSettings,
       navigateToApp,
-      capabilities: {
-        ...capabilities,
-        securitySolution: {
-          'alerting:show': true,
-          'alerting:save': false,
-          'alerting:delete': false,
-        },
-      },
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      capabilities,
+      history: scopedHistoryMock.create(),
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,

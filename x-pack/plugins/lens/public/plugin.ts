@@ -11,12 +11,19 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
-import { IndexPatternDatasource } from './indexpattern_datasource';
-import { XyVisualization } from './xy_visualization';
-import { MetricVisualization } from './metric_visualization';
-import { DatatableVisualization } from './datatable_visualization';
-import { PieVisualization } from './pie_visualization';
+import {
+  IndexPatternDatasource,
+  IndexPatternDatasourceSetupPlugins,
+} from './indexpattern_datasource';
+import { XyVisualization, XyVisualizationPluginSetupPlugins } from './xy_visualization';
+import { MetricVisualization, MetricVisualizationPluginSetupPlugins } from './metric_visualization';
+import {
+  DatatableVisualization,
+  DatatableVisualizationPluginSetupPlugins,
+} from './datatable_visualization';
+import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
@@ -33,6 +40,7 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -63,16 +71,28 @@ export class LensPlugin {
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
-    { kibanaLegacy, expressions, data, embeddable, visualizations }: LensPluginSetupDependencies
+    {
+      kibanaLegacy,
+      expressions,
+      data,
+      embeddable,
+      visualizations,
+      charts,
+    }: LensPluginSetupDependencies
   ) {
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
       data,
       embeddable,
       expressions,
     });
-    const dependencies = {
+    const dependencies: IndexPatternDatasourceSetupPlugins &
+      XyVisualizationPluginSetupPlugins &
+      DatatableVisualizationPluginSetupPlugins &
+      MetricVisualizationPluginSetupPlugins &
+      PieVisualizationPluginSetupPlugins = {
       expressions,
       data,
+      charts,
       editorFrame: editorFrameSetupInterface,
       formatFactory: core
         .getStartServices()

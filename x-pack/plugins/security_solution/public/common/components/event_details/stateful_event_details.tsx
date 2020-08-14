@@ -18,13 +18,23 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   data: DetailItem[];
   id: string;
+  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const StatefulEventDetails = React.memo<Props>(
-  ({ browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn }) => {
+  ({
+    browserFields,
+    columnHeaders,
+    data,
+    id,
+    onEventToggled,
+    onUpdateColumns,
+    timelineId,
+    toggleColumn,
+  }) => {
     const [view, setView] = useState<View>('table-view');
 
     const handleSetView = useCallback((newView) => setView(newView), []);
@@ -34,6 +44,7 @@ export const StatefulEventDetails = React.memo<Props>(
         columnHeaders={columnHeaders}
         data={data}
         id={id}
+        onEventToggled={onEventToggled}
         onUpdateColumns={onUpdateColumns}
         onViewSelected={handleSetView}
         timelineId={timelineId}

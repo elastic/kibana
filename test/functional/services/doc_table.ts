@@ -58,6 +58,11 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
         : (await this.getBodyRows())[options.rowIndex];
     }
 
+    public async getDetailsRow(): Promise<WebElementWrapper> {
+      const table = await this.getTable();
+      return await table.findByCssSelector('[data-test-subj~="docTableDetailsRow"]');
+    }
+
     public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
       const table = await this.getTable();
       return await table.findByCssSelector(
@@ -129,6 +134,22 @@ export function DocTableProvider({ getService, getPageObjects }: FtrProviderCont
     ): Promise<void> {
       const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
       const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
+      await addInclusiveFilterButton.click();
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    public async getRemoveInclusiveFilterButton(
+      tableDocViewRow: WebElementWrapper
+    ): Promise<WebElementWrapper> {
+      return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
+    }
+
+    public async removeInclusiveFilter(
+      detailsRow: WebElementWrapper,
+      fieldName: WebElementWrapper
+    ): Promise<void> {
+      const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
+      const addInclusiveFilterButton = await this.getRemoveInclusiveFilterButton(tableDocViewRow);
       await addInclusiveFilterButton.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }

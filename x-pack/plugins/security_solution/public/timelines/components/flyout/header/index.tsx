@@ -9,10 +9,10 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { isEmpty, get } from 'lodash/fp';
+import { TimelineType } from '../../../../../common/types/timeline';
 import { History } from '../../../../common/lib/history';
 import { Note } from '../../../../common/lib/note';
 import { appSelectors, inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
 import { appActions } from '../../../../common/store/app';
 import { inputsActions } from '../../../../common/store/inputs';
@@ -31,7 +31,6 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     graphEventId,
     isDataInTimeline,
@@ -57,7 +56,6 @@ const StatefulFlyoutHeader = React.memo<Props>(
     return (
       <Properties
         associateNote={associateNote}
-        createTimeline={createTimeline}
         description={description}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
@@ -102,7 +100,7 @@ const makeMapStateToProps = () => {
       title = '',
       noteIds = emptyNotesId,
       status,
-      timelineType,
+      timelineType = TimelineType.default,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector
@@ -127,14 +125,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  createTimeline: ({ id, show }: { id: string; show?: boolean }) =>
-    dispatch(
-      timelineActions.createTimeline({
-        id,
-        columns: defaultHeaders,
-        show,
-      })
-    ),
   updateDescription: ({ id, description }: { id: string; description: string }) =>
     dispatch(timelineActions.updateDescription({ id, description })),
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>

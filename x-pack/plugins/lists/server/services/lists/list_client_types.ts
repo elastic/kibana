@@ -11,18 +11,25 @@ import { LegacyAPICaller } from 'kibana/server';
 import {
   Description,
   DescriptionOrUndefined,
+  DeserializerOrUndefined,
   Filter,
   Id,
   IdOrUndefined,
+  Immutable,
   ListId,
+  ListIdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
   Page,
   PerPage,
+  SerializerOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
+  Version,
+  VersionOrUndefined,
+  _VersionOrUndefined,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
@@ -47,18 +54,26 @@ export interface DeleteListItemOptions {
 
 export interface CreateListOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  immutable: Immutable;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
   meta: MetaOrUndefined;
+  version: Version;
 }
 
 export interface CreateListIfItDoesNotExistOptions {
   id: Id;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   name: Name;
   description: Description;
   type: Type;
   meta: MetaOrUndefined;
+  version: Version;
+  immutable: Immutable;
 }
 
 export interface DeleteListItemByValueOptions {
@@ -80,14 +95,19 @@ export interface ExportListItemsToStreamOptions {
 }
 
 export interface ImportListItemsToStreamOptions {
-  listId: string;
+  listId: ListIdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   type: Type;
   stream: Readable;
   meta: MetaOrUndefined;
+  version: Version;
 }
 
 export interface CreateListItemOptions {
   id: IdOrUndefined;
+  deserializer: DeserializerOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string;
@@ -95,16 +115,19 @@ export interface CreateListItemOptions {
 }
 
 export interface UpdateListItemOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   value: string | null | undefined;
   meta: MetaOrUndefined;
 }
 
 export interface UpdateListOptions {
+  _version: _VersionOrUndefined;
   id: Id;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   meta: MetaOrUndefined;
+  version: VersionOrUndefined;
 }
 
 export interface GetListItemOptions {

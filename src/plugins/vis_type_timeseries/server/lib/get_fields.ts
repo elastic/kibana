@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 import { first, map } from 'rxjs/operators';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
@@ -87,5 +87,5 @@ export async function getFields(
     (field) => field.aggregatable && !indexPatterns.isNestedField(field)
   );
 
-  return uniq(fields, (field) => field.name);
+  return uniqBy(fields, (field) => field.name);
 }

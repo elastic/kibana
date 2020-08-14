@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/** The minimum (fixed) width of the Actions column */
+export const MINIMUM_ACTIONS_COLUMN_WIDTH = 50; // px;
+
 /** The (fixed) width of the Actions column */
-export const DEFAULT_ACTIONS_COLUMN_WIDTH = 76; // px;
+export const DEFAULT_ACTIONS_COLUMN_WIDTH = 24 * 4; // px;
 /**
  * The (fixed) width of the Actions column when the timeline body is used as
  * an events viewer, which has fewer actions than a regular events viewer
  */
-export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 26; // px;
+export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 24 * 3; // px;
 /** Additional column width to include when checkboxes are shown **/
 export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 24; // px;
 /** The default minimum width of a column (when a width for the column type is not specified) */

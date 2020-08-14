@@ -32,6 +32,7 @@ export default {
     '<rootDir>/src/cli_plugin',
     '<rootDir>/packages/kbn-test/target/functional_test_runner',
     '<rootDir>/src/dev',
+    '<rootDir>/src/optimize',
     '<rootDir>/src/legacy/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
@@ -52,7 +53,6 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,mjs,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    '!src/legacy/core_plugins/tests_bundle/**',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
@@ -84,7 +84,7 @@ export default {
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
   testEnvironment: 'jest-environment-jsdom-thirteen',
-  testMatch: ['**/*.test.{js,ts,tsx}'],
+  testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/(dist|doc_site|generator-kui)/',
     '<rootDir>/packages/kbn-pm/dist/',

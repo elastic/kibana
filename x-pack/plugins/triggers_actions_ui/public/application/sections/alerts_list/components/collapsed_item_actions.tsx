@@ -20,8 +20,6 @@ import {
 } from '@elastic/eui';
 
 import { AlertTableItem } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
-import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -43,16 +41,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   muteAlert,
   setAlertsToDelete,
 }: ComponentOpts) => {
-  const { capabilities } = useAppDependencies();
-
-  const canDelete = hasDeleteAlertsCapability(capabilities);
-  const canSave = hasSaveAlertsCapability(capabilities);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const button = (
     <EuiButtonIcon
-      disabled={!canDelete && !canSave}
+      disabled={!item.isEditable}
       iconType="boxesVertical"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(
@@ -75,7 +68,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"
-            disabled={!canSave}
+            disabled={!item.isEditable}
             compressed
             checked={!item.enabled}
             data-test-subj="disableSwitch"
@@ -106,7 +99,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiSwitch
             name="mute"
             checked={item.muteAll}
-            disabled={!(canSave && item.enabled)}
+            disabled={!(item.isEditable && item.enabled)}
             compressed
             data-test-subj="muteSwitch"
             onChange={async () => {
@@ -134,7 +127,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         </div>
         <EuiHorizontalRule margin="none" />
         <EuiContextMenuItem
-          disabled={!canDelete}
+          disabled={!item.isEditable}
           data-test-subj="deleteAlert"
           onClick={() => setAlertsToDelete([item.id])}
         >

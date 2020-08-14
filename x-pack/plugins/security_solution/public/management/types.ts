@@ -7,7 +7,7 @@
 import { CombinedState } from 'redux';
 import { SecurityPageName } from '../app/types';
 import { PolicyListState, PolicyDetailsState } from './pages/policy/types';
-import { HostState } from './pages/endpoint_hosts/types';
+import { EndpointState } from './pages/endpoint_hosts/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
@@ -18,13 +18,13 @@ export type ManagementStoreGlobalNamespace = 'management';
 export type ManagementState = CombinedState<{
   policyList: PolicyListState;
   policyDetails: PolicyDetailsState;
-  endpoints: HostState;
+  endpoints: EndpointState;
 }>;
 
 /**
  * The management list of sub-tabs. Changes to these will impact the Router routes.
  */
-export enum ManagementSubTab {
+export enum AdministrationSubTab {
   endpoints = 'endpoints',
   policies = 'policy',
 }
@@ -33,8 +33,8 @@ export enum ManagementSubTab {
  * The URL route params for the Management Policy List section
  */
 export interface ManagementRoutePolicyListParams {
-  pageName: SecurityPageName.management;
-  tabName: ManagementSubTab.policies;
+  pageName: SecurityPageName.administration;
+  tabName: AdministrationSubTab.policies;
 }
 
 /**

@@ -70,6 +70,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Policy Details Page Cancel Button
+     */
+    async findCancelButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('policyDetailsCancelButton');
+    },
+
+    /**
      * ensures that the Details Page is the currently display view
      */
     async ensureIsOnDetailsPage() {
@@ -98,12 +106,12 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
-     * Used when looking a the Ingest create/edit datasource pages. Finds the endpoint
+     * Used when looking a the Ingest create/edit package config pages. Finds the endpoint
      * custom configuaration component
      * @param onEditPage
      */
-    async findDatasourceEndpointCustomConfiguration(onEditPage: boolean = false) {
-      return await testSubjects.find(`endpointDatasourceConfig_${onEditPage ? 'edit' : 'create'}`);
+    async findPackageConfigEndpointCustomConfiguration(onEditPage: boolean = false) {
+      return await testSubjects.find(`endpointPackageConfig_${onEditPage ? 'edit' : 'create'}`);
     },
 
     /**

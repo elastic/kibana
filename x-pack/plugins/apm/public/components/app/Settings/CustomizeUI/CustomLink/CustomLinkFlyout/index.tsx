@@ -37,13 +37,13 @@ interface Props {
 
 const filtersEmptyState: Filter[] = [{ key: '', value: '' }];
 
-export const CustomLinkFlyout = ({
+export function CustomLinkFlyout({
   onClose,
   onSave,
   onDelete,
   defaults,
   customLinkId,
-}: Props) => {
+}: Props) {
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -139,4 +139,4 @@ export const CustomLinkFlyout = ({
       </form>
     </EuiPortal>
   );
-};
+}

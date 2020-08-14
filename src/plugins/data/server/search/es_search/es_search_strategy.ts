@@ -17,17 +17,20 @@
  * under the License.
  */
 import { first } from 'rxjs/operators';
-import { RequestHandlerContext, SharedGlobalConfig } from 'kibana/server';
+import { SharedGlobalConfig, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
-import { ES_SEARCH_STRATEGY } from '../../../common/search';
+import { SearchUsage } from '../collectors/usage';
 import { ISearchStrategy, getDefaultSearchParams, getTotalLoaded } from '..';
 
 export const esSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy => {
   return {
-    search: async (context: RequestHandlerContext, request, options) => {
+    search: async (context, request, options) => {
+      logger.info(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const defaultParams = getDefaultSearchParams(config);
 
@@ -42,15 +45,27 @@ export const esSearchStrategyProvider = (
         ...request.params,
       };
 
-      const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-        'search',
-        params,
-        options
-      )) as SearchResponse<any>;
+      try {
+        const rawResponse = (await context.core.elasticsearch.legacy.client.callAsCurrentUser(
+          'search',
+          params,
+          options
+        )) as SearchResponse<any>;
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
+        if (usage) usage.trackSuccess(rawResponse.took);
+
+        // The above query will either complete or timeout and throw an error.
+        // There is no progress indication on this api.
+        return {
+          isPartial: false,
+          isRunning: false,
+          rawResponse,
+          ...getTotalLoaded(rawResponse._shards),
+        };
+      } catch (e) {
+        if (usage) usage.trackError();
+        throw e;
+      }
     },
   };
 };

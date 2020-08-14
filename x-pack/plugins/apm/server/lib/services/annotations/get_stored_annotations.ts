@@ -29,8 +29,6 @@ export async function getStoredAnnotations({
   logger: Logger;
 }): Promise<Annotation[]> {
   try {
-    const environmentFilter = getEnvironmentUiFilterES(environment);
-
     const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
       'search',
       {
@@ -51,7 +49,7 @@ export async function getStoredAnnotations({
                 { term: { 'annotation.type': 'deployment' } },
                 { term: { tags: 'apm' } },
                 { term: { [SERVICE_NAME]: serviceName } },
-                ...(environmentFilter ? [environmentFilter] : []),
+                ...getEnvironmentUiFilterES(environment),
               ],
             },
           },

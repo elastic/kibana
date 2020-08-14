@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isInteger } from 'lodash/fp';
 import {
   TimelineTypeLiteralWithNull,
   TimelineType,
@@ -71,13 +71,28 @@ export class CompareTimelinesStatus {
   }
 
   public get isCreatable() {
+    const noExistingTimeline = this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline;
+
+    const templateCreatable =
+      this.isHandlingTemplateTimeline && this.templateTimelineObject.isCreatable;
+
+    const noExistingTimelineOrTemplate = templateCreatable && this.timelineObject.isCreatable;
+
+    // From Line 87-91 is the condition for creating a template via import without given a templateTimelineId or templateTimelineVersion,
+    // but keep the existing savedObjectId and version there.
+    // Therefore even the timeline exists, we still allow it to create a new timeline template by assigning a templateTimelineId and templateTimelineVersion.
+    // https://github.com/elastic/kibana/pull/67496#discussion_r454337222
+    // Line 90-91 means that we want to make sure the existing timeline retrieved by savedObjectId is atemplate.
+    // If it is not a template, we show an error this timeline is already exist instead.
+    const retriveTemplateViaSavedObjectId =
+      templateCreatable &&
+      !this.timelineObject.isCreatable &&
+      this.timelineObject.getData?.timelineType === this.timelineType;
+
     return (
       this.isTitleValid &&
       !this.isSavedObjectVersionConflict &&
-      ((this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
-        (this.templateTimelineObject.isCreatable &&
-          this.timelineObject.isCreatable &&
-          this.isHandlingTemplateTimeline))
+      (noExistingTimeline || noExistingTimelineOrTemplate || retriveTemplateViaSavedObjectId)
     );
   }
 
@@ -195,24 +210,27 @@ export class CompareTimelinesStatus {
   }
 
   private get isTemplateVersionConflict() {
-    const version = this.templateTimelineObject?.getVersion;
+    const templateTimelineVersion = this.templateTimelineObject?.getVersion;
     const existingTemplateTimelineVersion = this.templateTimelineObject?.data
       ?.templateTimelineVersion;
     if (
-      version != null &&
+      templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&
       existingTemplateTimelineVersion != null
     ) {
-      return version <= existingTemplateTimelineVersion;
-    } else if (this.templateTimelineObject.isExists && version == null) {
+      return templateTimelineVersion <= existingTemplateTimelineVersion;
+    } else if (this.templateTimelineObject.isExists && templateTimelineVersion == null) {
       return true;
     }
     return false;
   }
 
   private get isTemplateVersionValid() {
-    const version = this.templateTimelineObject?.getVersion;
-    return typeof version === 'number' && !this.isTemplateVersionConflict;
+    const templateTimelineVersion = this.templateTimelineObject?.getVersion;
+    return (
+      templateTimelineVersion == null ||
+      (isInteger(templateTimelineVersion) && !this.isTemplateVersionConflict)
+    );
   }
 
   private get isUpdatedTimelineStatusValid() {

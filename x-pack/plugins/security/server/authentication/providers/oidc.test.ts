@@ -389,7 +389,7 @@ describe('OIDCAuthenticationProvider', () => {
       };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -446,7 +446,7 @@ describe('OIDCAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       const failureReason = new Error('Token is not valid!');
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -466,7 +466,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
         if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
             LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
           );
@@ -474,7 +474,7 @@ describe('OIDCAuthenticationProvider', () => {
         }
 
         if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
-          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
           mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
           return mockScopedClusterClient;
         }
@@ -514,7 +514,7 @@ describe('OIDCAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'invalid-refresh-token' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -554,7 +554,7 @@ describe('OIDCAuthenticationProvider', () => {
           '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc',
       });
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -602,7 +602,7 @@ describe('OIDCAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );
@@ -631,7 +631,7 @@ describe('OIDCAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'expired-token', refreshToken: 'expired-refresh-token' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
         LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
       );

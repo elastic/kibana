@@ -22,7 +22,7 @@ pidfile="/var/run/kibana/$name.pid"
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
 
-export KIBANA_PATH_CONF
+export KBN_PATH_CONF
 export NODE_OPTIONS
 
 [ -z "$nice" ] && nice=0
@@ -39,7 +39,7 @@ emit() {
 start() {
   [ ! -d "/var/log/kibana/" ] && mkdir "/var/log/kibana/"
   chown "$user":"$group" "/var/log/kibana/"
-  chmod 755 "/var/log/kibana/"
+  chmod 2750 "/var/log/kibana/"
 
   [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
   chown "$user":"$group" "/var/run/kibana/"

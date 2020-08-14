@@ -22,6 +22,8 @@ export {
   UseRequestConfig,
   WithPrivileges,
   Monaco,
+  JsonEditor,
+  OnJsonEditorUpdateHandler,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
@@ -41,6 +43,8 @@ export {
   FieldConfig,
   FieldHook,
   getFieldValidityAndErrorMessage,
+  ValidationFunc,
+  ValidationConfig,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -55,6 +59,9 @@ export {
   FormRow,
   ToggleField,
   ComboBoxField,
+  RadioGroupField,
+  NumericField,
+  SelectField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {

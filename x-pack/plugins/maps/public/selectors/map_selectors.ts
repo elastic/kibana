@@ -5,6 +5,7 @@
  */
 
 import { createSelector } from 'reselect';
+import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
@@ -22,8 +23,7 @@ import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util'
 import { IJoin } from '../classes/joins/join';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
-// @ts-ignore
-import { GeojsonFileSource } from '../classes/sources/client_file_source';
+import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
@@ -247,7 +247,7 @@ export const getSpatialFiltersLayer = createSelector(
   getFilters,
   getMapSettings,
   (filters, settings) => {
-    const featureCollection = {
+    const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
     };
@@ -296,6 +296,10 @@ export const getLayerList = createSelector(
     );
   }
 );
+
+export const getLayerListConfigOnly = createSelector(getLayerListRaw, (layerDescriptorList) => {
+  return copyPersistentState(layerDescriptorList);
+});
 
 export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find((layer) => {

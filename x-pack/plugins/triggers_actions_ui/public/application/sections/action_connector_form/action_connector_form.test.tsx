@@ -15,10 +15,16 @@ describe('action_connector_form', () => {
   let deps: any;
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
     deps = {
       http: mocks.http,
       actionTypeRegistry: actionTypeRegistry as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+      capabilities,
     };
   });
 
@@ -56,6 +62,7 @@ describe('action_connector_form', () => {
           http={deps!.http}
           actionTypeRegistry={deps!.actionTypeRegistry}
           docLinks={deps!.docLinks}
+          capabilities={deps!.capabilities}
         />
       );
     }

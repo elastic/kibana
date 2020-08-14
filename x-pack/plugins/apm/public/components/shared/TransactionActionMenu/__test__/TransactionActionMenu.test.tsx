@@ -94,7 +94,7 @@ describe('TransactionActionMenu component', () => {
 
     expect(mock.core.application.navigateToApp).toHaveBeenCalledWith('logs', {
       path:
-        'link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%208b60bd32ecc6e1506735a8b6cfcf175c',
+        'link-to/logs?time=1545092070952&filter=trace.id:%228b60bd32ecc6e1506735a8b6cfcf175c%22%20OR%20%228b60bd32ecc6e1506735a8b6cfcf175c%22',
     });
   });
 

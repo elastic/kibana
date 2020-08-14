@@ -14,9 +14,9 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-
   const PageObjects = getPageObjects(['common', 'settings', 'discover', 'timePicker']);
   const queryBar = getService('queryBar');
+  const security = getService('security');
 
   describe('async search with scripted fields', function () {
     this.tags(['skipFirefox']);
@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.load('kibana_scripted_fields_on_logstash');
       await esArchiver.loadIfNeeded('logstash_functional');
+      await security.testUser.setRoles(['test_logstash_reader', 'global_discover_read']);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults':
@@ -36,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.update({});
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
+      await security.testUser.restoreDefaults();
     });
 
     it('query should show failed shards pop up', async function () {

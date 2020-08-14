@@ -5,14 +5,14 @@
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
+import { GlobalTimeArgs } from '../../containers/use_global_time';
 import { EventsByDataset } from '../../../overview/components/events_by_dataset';
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/data/public';
-import { inputsModel } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { EventType } from '../../../timelines/store/timeline/model';
 
@@ -43,30 +43,22 @@ const TopNContent = styled.div`
   }
 `;
 
-export interface Props {
+export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   combinedQueries?: string;
   defaultView: EventType;
-  deleteQuery?: ({ id }: { id: string }) => void;
   field: string;
   filters: Filter[];
-  from: number;
   indexPattern: IIndexPattern;
   indexToAdd?: string[] | null;
   options: TopNOption[];
   query: Query;
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
-    from: number;
-    to: number;
+    from: string;
+    to: string;
   }>;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
-  setQuery: (params: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
-  to: number;
+  timelineId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   value?: string[] | string | null;
@@ -89,11 +81,16 @@ const TopNComponent: React.FC<Props> = ({
   setAbsoluteRangeDatePicker,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
+  timelineId,
   to,
   toggleTopN,
 }) => {
   const [view, setView] = useState<EventType>(defaultView);
   const onViewSelected = useCallback((value: string) => setView(value as EventType), [setView]);
+
+  useEffect(() => {
+    setView(defaultView);
+  }, [defaultView]);
 
   const headerChildren = useMemo(
     () => (
@@ -132,6 +129,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
+            timelineId={timelineId}
             to={to}
           />
         ) : (
@@ -145,6 +143,7 @@ const TopNComponent: React.FC<Props> = ({
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
+            timelineId={timelineId}
             to={to}
           />
         )}

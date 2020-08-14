@@ -25,13 +25,11 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
 import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  getDefaultPanelTitle,
-} from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { getDefaultPanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useDashboardService } from '../services/dashboard_service';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../../embeddables';
 
 export interface DashboardItem {
   id: string;
@@ -52,7 +50,6 @@ function getDefaultEmbeddablepaPanelConfig(jobIds: JobId[]) {
 interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
-  limit: number;
   onClose: (callback?: () => Promise<any>) => void;
 }
 
@@ -63,7 +60,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
   viewBy,
-  limit,
 }) => {
   const {
     notifications: { toasts },
@@ -141,7 +137,6 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
               jobIds,
               swimlaneType,
               viewBy,
-              limit,
             },
           };
         }
@@ -206,8 +201,8 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
     {
       id: SWIMLANE_TYPE.VIEW_BY,
       label: i18n.translate('xpack.ml.explorer.viewByFieldLabel', {
-        defaultMessage: 'View by {viewByField}, up to {limit} rows',
-        values: { viewByField: viewBy, limit },
+        defaultMessage: 'View by {viewByField}',
+        values: { viewByField: viewBy },
       }),
     },
   ];

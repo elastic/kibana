@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import styled from 'styled-components';
-import { Panel } from './panel';
+import { Panel } from './panels';
 
 /**
  * The top level DOM element for Resolver
@@ -48,6 +48,8 @@ export const StyledPanel = styled(Panel)`
   overflow: auto;
   width: 25em;
   max-width: 50%;
+  border-radius: 0;
+  border-top: none;
 `;
 
 /**

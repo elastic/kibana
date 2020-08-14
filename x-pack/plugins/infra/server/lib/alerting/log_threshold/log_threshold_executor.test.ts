@@ -54,19 +54,19 @@ services.alertInstanceFactory.mockImplementation((instanceId: string) => {
 /*
  * Helper functions
  */
-function getAlertState(instanceId: string): AlertStates {
-  const alert = alertInstances.get(`${instanceId}-*`);
+function getAlertState(): AlertStates {
+  const alert = alertInstances.get('*');
   if (alert) {
     return alert.state.alertState;
   } else {
-    throw new Error('Could not find alert instance `' + instanceId + '`');
+    throw new Error('Could not find alert instance');
   }
 }
 
 /*
  * Executor instance (our test subject)
  */
-const executor = (createLogThresholdExecutor('test', libsMock) as unknown) as (opts: {
+const executor = (createLogThresholdExecutor(libsMock) as unknown) as (opts: {
   params: LogDocumentCountAlertParams;
   services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
 }) => Promise<void>;
@@ -109,30 +109,30 @@ describe('Ungrouped alerts', () => {
   describe('Comparators trigger alerts correctly', () => {
     it('does not alert when counts do not reach the threshold', async () => {
       await callExecutor([0, Comparator.GT, 1]);
-      expect(getAlertState('test')).toBe(AlertStates.OK);
+      expect(getAlertState()).toBe(AlertStates.OK);
 
       await callExecutor([0, Comparator.GT_OR_EQ, 1]);
-      expect(getAlertState('test')).toBe(AlertStates.OK);
+      expect(getAlertState()).toBe(AlertStates.OK);
 
       await callExecutor([1, Comparator.LT, 0]);
-      expect(getAlertState('test')).toBe(AlertStates.OK);
+      expect(getAlertState()).toBe(AlertStates.OK);
 
       await callExecutor([1, Comparator.LT_OR_EQ, 0]);
-      expect(getAlertState('test')).toBe(AlertStates.OK);
+      expect(getAlertState()).toBe(AlertStates.OK);
     });
 
     it('alerts when counts reach the threshold', async () => {
       await callExecutor([2, Comparator.GT, 1]);
-      expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      expect(getAlertState()).toBe(AlertStates.ALERT);
 
       await callExecutor([1, Comparator.GT_OR_EQ, 1]);
-      expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      expect(getAlertState()).toBe(AlertStates.ALERT);
 
       await callExecutor([1, Comparator.LT, 2]);
-      expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      expect(getAlertState()).toBe(AlertStates.ALERT);
 
       await callExecutor([2, Comparator.LT_OR_EQ, 2]);
-      expect(getAlertState('test')).toBe(AlertStates.ALERT);
+      expect(getAlertState()).toBe(AlertStates.ALERT);
     });
   });
 

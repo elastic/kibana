@@ -36,7 +36,7 @@ export function migrateAppState(appState: VisualizeAppState) {
     return appState;
   }
 
-  const visAggs: any = get<VisualizeAppState>(appState, 'vis.aggs');
+  const visAggs: any = get(appState, 'vis.aggs');
 
   if (visAggs) {
     let splitCount = 0;

@@ -304,9 +304,12 @@
 
   .series > path,
   .series > rect {
-    fill-opacity: .8;
     stroke-opacity: 1;
     stroke-width: 0;
+  }
+
+  .series > path {
+    fill-opacity: .8;
   }
 
   .blur_shape {

@@ -50,7 +50,14 @@ export const NOTES = i18n.translate('xpack.securitySolution.recentTimelines.note
 export const OPEN_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.recentTimelines.openAsDuplicateTooltip',
   {
-    defaultMessage: 'Open as a duplicate timeline',
+    defaultMessage: 'Open as a timeline duplicate',
+  }
+);
+
+export const OPEN_AS_DUPLICATE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.recentTimelines.openAsDuplicateTemplateTooltip',
+  {
+    defaultMessage: 'Open as a template duplicate',
   }
 );
 

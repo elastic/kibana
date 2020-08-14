@@ -13,13 +13,23 @@ export const getSnapshot = ({
   state = 'SUCCESS',
   indexFailures = [],
   totalIndices = getRandomNumber(),
-} = {}) => ({
+  totalDataStreams = getRandomNumber(),
+}: Partial<{
+  repository: string;
+  snapshot: string;
+  uuid: string;
+  state: string;
+  indexFailures: any[];
+  totalIndices: number;
+  totalDataStreams: number;
+}> = {}) => ({
   repository,
   snapshot,
   uuid,
   versionId: 8000099,
   version: '8.0.0',
   indices: new Array(totalIndices).fill('').map(getRandomString),
+  dataStreams: new Array(totalDataStreams).fill('').map(getRandomString),
   includeGlobalState: 1,
   state,
   startTime: '2019-05-23T06:25:15.896Z',

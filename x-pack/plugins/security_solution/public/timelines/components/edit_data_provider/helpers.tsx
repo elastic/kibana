@@ -31,22 +31,26 @@ export const operatorLabels: EuiComboBoxOptionOption[] = [
   },
 ];
 
+export const EMPTY_ARRAY_RESULT = [];
+
 /** Returns the names of fields in a category */
 export const getFieldNames = (category: Partial<BrowserField>): string[] =>
   category.fields != null && Object.keys(category.fields).length > 0
     ? Object.keys(category.fields)
-    : [];
+    : EMPTY_ARRAY_RESULT;
 
 /** Returns all field names by category, for display in an `EuiComboBox`  */
 export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionOption[] =>
-  Object.keys(browserFields)
-    .sort()
-    .map((categoryId) => ({
-      label: categoryId,
-      options: getFieldNames(browserFields[categoryId]).map((fieldId) => ({
-        label: fieldId,
-      })),
-    }));
+  !browserFields
+    ? EMPTY_ARRAY_RESULT
+    : Object.keys(browserFields)
+        .sort()
+        .map((categoryId) => ({
+          label: categoryId,
+          options: getFieldNames(browserFields[categoryId]).map((fieldId) => ({
+            label: fieldId,
+          })),
+        }));
 
 /** Returns true if the specified field name is valid */
 export const selectionsAreValid = ({
@@ -61,7 +65,7 @@ export const selectionsAreValid = ({
   const fieldId = selectedField.length > 0 ? selectedField[0].label : '';
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
-  const fieldIsValid = getAllFieldsByName(browserFields)[fieldId] != null;
+  const fieldIsValid = browserFields && getAllFieldsByName(browserFields)[fieldId] != null;
   const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
 
   return fieldIsValid && operatorIsValid;

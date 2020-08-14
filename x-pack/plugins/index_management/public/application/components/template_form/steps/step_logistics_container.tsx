@@ -10,13 +10,19 @@ import { WizardContent } from '../template_form';
 import { StepLogistics } from './step_logistics';
 
 interface Props {
+  isLegacy?: boolean;
   isEditing?: boolean;
 }
 
-export const StepLogisticsContainer = ({ isEditing = false }: Props) => {
-  const { defaultValue, updateContent } = Forms.useContent<WizardContent>('logistics');
+export const StepLogisticsContainer = ({ isEditing, isLegacy }: Props) => {
+  const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'logistics'>('logistics');
 
   return (
-    <StepLogistics defaultValue={defaultValue} onChange={updateContent} isEditing={isEditing} />
+    <StepLogistics
+      defaultValue={defaultValue}
+      onChange={updateContent}
+      isEditing={isEditing}
+      isLegacy={isLegacy}
+    />
   );
 };

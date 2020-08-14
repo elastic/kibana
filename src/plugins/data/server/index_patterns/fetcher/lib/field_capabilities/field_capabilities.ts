@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, indexBy, sortBy } from 'lodash';
+import { defaults, keyBy, sortBy } from 'lodash';
 
 import { LegacyAPICaller } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
@@ -44,7 +44,7 @@ export async function getFieldCapabilities(
   metaFields: string[] = []
 ) {
   const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
-  const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))

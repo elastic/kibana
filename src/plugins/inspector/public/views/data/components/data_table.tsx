@@ -37,7 +37,6 @@ import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
 import { TabularData } from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
-import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../../../share/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];
@@ -59,8 +58,8 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
     isFormatted: PropTypes.bool,
   };
 
-  csvSeparator = this.props.uiSettings.get(CSV_SEPARATOR_SETTING, ',');
-  quoteValues = this.props.uiSettings.get(CSV_QUOTE_VALUES_SETTING, true);
+  csvSeparator = this.props.uiSettings.get('csv:separator', ',');
+  quoteValues = this.props.uiSettings.get('csv:quoteValues', true);
   state = {} as DataTableFormatState;
 
   static renderCell(dataColumn: any, value: any, isFormatted: boolean = false) {

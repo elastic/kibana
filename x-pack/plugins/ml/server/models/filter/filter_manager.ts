@@ -58,18 +58,17 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _client: ILegacyScopedClusterClient['callAsCurrentUser'];
-
-  constructor(client: ILegacyScopedClusterClient['callAsCurrentUser']) {
-    this._client = client;
+  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
+  constructor({ callAsInternalUser }: ILegacyScopedClusterClient) {
+    this._callAsInternalUser = callAsInternalUser;
   }
 
   async getFilter(filterId: string) {
     try {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
-        this._client('ml.jobs'),
-        this._client('ml.filters', { filterId }),
+        this._callAsInternalUser('ml.jobs'),
+        this._callAsInternalUser('ml.filters', { filterId }),
       ]);
 
       if (results[FILTERS] && results[FILTERS].filters.length) {
@@ -91,7 +90,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const filtersResp = await this._client('ml.filters');
+      const filtersResp = await this._callAsInternalUser('ml.filters');
       return filtersResp.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -101,7 +100,10 @@ export class FilterManager {
   async getAllFilterStats() {
     try {
       const [JOBS, FILTERS] = [0, 1];
-      const results = await Promise.all([this._client('ml.jobs'), this._client('ml.filters')]);
+      const results = await Promise.all([
+        this._callAsInternalUser('ml.jobs'),
+        this._callAsInternalUser('ml.filters'),
+      ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
       let filtersInUse: FiltersInUse = {};
@@ -138,7 +140,7 @@ export class FilterManager {
     delete filter.filterId;
     try {
       // Returns the newly created filter.
-      return await this._client('ml.addFilter', { filterId, body: filter });
+      return await this._callAsInternalUser('ml.addFilter', { filterId, body: filter });
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -158,7 +160,7 @@ export class FilterManager {
       }
 
       // Returns the newly updated filter.
-      return await this._client('ml.updateFilter', {
+      return await this._callAsInternalUser('ml.updateFilter', {
         filterId,
         body,
       });
@@ -168,7 +170,7 @@ export class FilterManager {
   }
 
   async deleteFilter(filterId: string) {
-    return this._client('ml.deleteFilter', { filterId });
+    return this._callAsInternalUser('ml.deleteFilter', { filterId });
   }
 
   buildFiltersInUse(jobsList: PartialJob[]) {

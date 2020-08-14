@@ -21,7 +21,6 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       },
     ]
   }
-  compressed={true}
   data-test-subj="jobs-table"
   items={
     Array [

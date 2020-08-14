@@ -6,14 +6,16 @@
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
-import { DataProvidersAnd, QueryOperator } from './data_provider';
+import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
 import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
 import { useManageTimeline } from '../../manage_timeline';
 
@@ -32,7 +34,9 @@ interface ProviderItemBadgeProps {
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
+  toggleTypeProvider: () => void;
   val: string | number;
+  type?: DataProviderType;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -51,8 +55,12 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
+    toggleTypeProvider,
     val,
+    type = DataProviderType.default,
   }) => {
+    const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
+    const timelineType = timelineId ? timelineById[timelineId]?.timelineType : TimelineType.default;
     const { getManageTimelineById } = useManageTimeline();
     const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
       getManageTimelineById,
@@ -71,14 +79,17 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
       closePopover();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [toggleEnabledProvider]);
+    }, [closePopover, toggleEnabledProvider]);
 
     const onToggleExcludedProvider = useCallback(() => {
       toggleExcludedProvider();
       closePopover();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [toggleExcludedProvider]);
+    }, [toggleExcludedProvider, closePopover]);
+
+    const onToggleTypeProvider = useCallback(() => {
+      toggleTypeProvider();
+      closePopover();
+    }, [toggleTypeProvider, closePopover]);
 
     const [providerRegistered, setProviderRegistered] = useState(false);
 
@@ -86,7 +97,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
     useEffect(() => {
       // optionally register the provider if provided
-      if (!providerRegistered && register != null) {
+      if (register != null) {
         dispatch(dragAndDropActions.registerProvider({ provider: { ...register, and: [] } }));
         setProviderRegistered(true);
       }
@@ -102,27 +113,31 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       () => () => {
         unRegisterProvider();
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+      [unRegisterProvider]
+    );
+
+    const button = (
+      <ProviderBadge
+        deleteProvider={!isLoading ? deleteProvider : noop}
+        field={field}
+        kqlQuery={kqlQuery}
+        isEnabled={isEnabled}
+        isExcluded={isExcluded}
+        providerId={providerId}
+        togglePopover={togglePopover}
+        toggleType={onToggleTypeProvider}
+        val={val}
+        operator={operator}
+        type={type}
+        timelineType={timelineType}
+      />
     );
 
     return (
       <ProviderItemActions
         andProviderId={andProviderId}
         browserFields={browserFields}
-        button={
-          <ProviderBadge
-            deleteProvider={!isLoading ? deleteProvider : noop}
-            field={field}
-            kqlQuery={kqlQuery}
-            isEnabled={isEnabled}
-            isExcluded={isExcluded}
-            providerId={providerId}
-            togglePopover={togglePopover}
-            val={val}
-            operator={operator}
-          />
-        }
+        button={button}
         closePopover={closePopover}
         deleteProvider={deleteProvider}
         field={field}
@@ -135,9 +150,12 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
         operator={operator}
         providerId={providerId}
         timelineId={timelineId}
+        timelineType={timelineType}
         toggleEnabledProvider={onToggleEnabledProvider}
         toggleExcludedProvider={onToggleExcludedProvider}
+        toggleTypeProvider={onToggleTypeProvider}
         value={val}
+        type={type}
       />
     );
   }

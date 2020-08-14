@@ -19,28 +19,18 @@ import {
   ID as OverviewNetworkQueryId,
   OverviewNetworkQuery,
 } from '../../containers/overview_network';
-import { inputsModel } from '../../../common/store/inputs';
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
 import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
 import { InspectButtonContainer } from '../../../common/components/inspect';
+import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
 
 export interface OverviewNetworkProps {
-  startDate: number;
-  endDate: number;
+  startDate: GlobalTimeArgs['from'];
+  endDate: GlobalTimeArgs['to'];
   filterQuery?: ESQuery | string;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: inputsModel.InspectQuery | null;
-    loading: boolean;
-    refetch: inputsModel.Refetch;
-  }) => void;
+  setQuery: GlobalTimeArgs['setQuery'];
 }
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);

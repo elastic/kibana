@@ -24,6 +24,7 @@ export interface State {
   optimizerCacheKey?: unknown;
   cacheKey?: unknown;
   moduleCount?: number;
+  workUnits?: number;
   files?: string[];
   bundleRefExportIds?: string[];
 }
@@ -96,7 +97,25 @@ export class BundleCache {
     return this.get().cacheKey;
   }
 
+  public getWorkUnits() {
+    return this.get().workUnits;
+  }
+
   public getOptimizerCacheKey() {
     return this.get().optimizerCacheKey;
+  }
+
+  public clear() {
+    this.state = undefined;
+
+    if (this.path) {
+      try {
+        Fs.unlinkSync(this.path);
+      } catch (error) {
+        if (error.code !== 'ENOENT') {
+          throw error;
+        }
+      }
+    }
   }
 }

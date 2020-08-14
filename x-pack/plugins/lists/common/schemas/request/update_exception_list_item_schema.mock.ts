@@ -9,6 +9,7 @@ import {
   DESCRIPTION,
   ENTRIES,
   ID,
+  ITEM_ID,
   ITEM_TYPE,
   LIST_ITEM_ID,
   META,
@@ -22,6 +23,7 @@ import { UpdateExceptionListItemSchema } from './update_exception_list_item_sche
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
   _tags: _TAGS,
+  _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
   entries: ENTRIES,
@@ -31,5 +33,17 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
   tags: TAGS,
+  type: ITEM_TYPE,
+});
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ * after doing a get of the structure.
+ */
+export const getUpdateMinimalExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
+  description: DESCRIPTION,
+  entries: ENTRIES,
+  item_id: ITEM_ID,
+  name: NAME,
   type: ITEM_TYPE,
 });

@@ -67,12 +67,12 @@ interface Props {
   exceedsMax: boolean;
 }
 
-export const Waterfall: React.FC<Props> = ({
+export function Waterfall({
   waterfall,
   exceedsMax,
   waterfallItemId,
   location,
-}) => {
+}: Props) {
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
@@ -81,7 +81,7 @@ export const Waterfall: React.FC<Props> = ({
   const agentMarks = getAgentMarks(waterfall.entryTransaction);
   const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
 
-  const renderWaterfallItem = (item: IWaterfallItem) => {
+  function renderWaterfallItem(item: IWaterfallItem) {
     const errorCount =
       item.docType === 'transaction'
         ? waterfall.errorsPerTransaction[item.doc.transaction.id]
@@ -99,7 +99,7 @@ export const Waterfall: React.FC<Props> = ({
         onClick={() => toggleFlyout({ item, location })}
       />
     );
-  };
+  }
 
   return (
     <Container>
@@ -134,4 +134,4 @@ export const Waterfall: React.FC<Props> = ({
       />
     </Container>
   );
-};
+}

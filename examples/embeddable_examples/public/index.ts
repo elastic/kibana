@@ -26,6 +26,8 @@ export {
 export { ListContainer, LIST_CONTAINER, ListContainerFactory } from './list_container';
 export { TODO_EMBEDDABLE, TodoEmbeddableFactory } from './todo';
 
+export { BOOK_EMBEDDABLE } from './book';
+
 import { EmbeddableExamplesPlugin } from './plugin';
 
 export {

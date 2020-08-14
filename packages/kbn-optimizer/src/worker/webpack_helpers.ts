@@ -155,6 +155,7 @@ export interface WebpackConcatenatedModule {
   id: number;
   dependencies: Dependency[];
   usedExports: string[];
+  modules: unknown[];
 }
 
 export function isConcatenatedModule(module: any): module is WebpackConcatenatedModule {

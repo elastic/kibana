@@ -4,7 +4,7 @@
 
 ## ReduxLikeStateContainer interface
 
-Fully featured state container which matches Redux store interface. Extends [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md) Allows to use state container with redux libraries
+Fully featured state container which matches Redux store interface. Extends [StateContainer](./kibana-plugin-plugins-kibana_utils-common-state_containers.statecontainer.md)<!-- -->. Allows to use state container with redux libraries.
 
 <b>Signature:</b>
 

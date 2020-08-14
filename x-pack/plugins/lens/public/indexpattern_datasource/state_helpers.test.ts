@@ -42,6 +42,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -95,6 +96,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -145,6 +147,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -185,6 +188,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -218,6 +222,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -279,6 +284,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -331,6 +337,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',
@@ -410,6 +417,7 @@ describe('state_helpers', () => {
         existingFields: {},
         indexPatterns: {},
         currentIndexPatternId: '1',
+        isFirstExistenceFetch: false,
         layers: {
           first: {
             indexPatternId: '1',

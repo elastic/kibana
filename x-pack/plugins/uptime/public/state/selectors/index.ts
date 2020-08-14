@@ -59,6 +59,8 @@ export const hasNewMLJobSelector = ({ ml }: AppState) => ml.createJob;
 export const isMLJobCreatingSelector = ({ ml }: AppState) => ml.createJob.loading;
 
 export const isMLJobDeletingSelector = ({ ml }: AppState) => ml.deleteJob.loading;
+export const isAnomalyAlertDeletingSelector = ({ alerts }: AppState) =>
+  alerts.alertDeletion.loading;
 
 export const isMLJobDeletedSelector = ({ ml }: AppState) => ml.deleteJob;
 
@@ -88,3 +90,7 @@ export const esKuerySelector = ({ ui: { esKuery } }: AppState) => esKuery;
 export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchText;
 
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;
+
+export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
+
+export const alertSelector = ({ alerts }: AppState) => alerts.alert;

@@ -80,7 +80,6 @@ describe('ExceptionsViewerPagination', () => {
     wrapper.find('button[data-test-subj="exceptionsPerPageItem"]').at(0).simulate('click');
 
     expect(mockOnPaginationChange).toHaveBeenCalledWith({
-      filter: {},
       pagination: { pageIndex: 0, pageSize: 20, totalItemCount: 1 },
     });
   });
@@ -127,8 +126,7 @@ describe('ExceptionsViewerPagination', () => {
     wrapper.find('[data-test-subj="pagination-button-next"]').at(1).simulate('click');
 
     expect(mockOnPaginationChange).toHaveBeenCalledWith({
-      filter: {},
-      pagination: { pageIndex: 2, pageSize: 50, totalItemCount: 160 },
+      pagination: { pageIndex: 1, pageSize: 50, totalItemCount: 160 },
     });
   });
 
@@ -151,8 +149,7 @@ describe('ExceptionsViewerPagination', () => {
     wrapper.find('button[data-test-subj="pagination-button-3"]').simulate('click');
 
     expect(mockOnPaginationChange).toHaveBeenCalledWith({
-      filter: {},
-      pagination: { pageIndex: 4, pageSize: 50, totalItemCount: 160 },
+      pagination: { pageIndex: 3, pageSize: 50, totalItemCount: 160 },
     });
   });
 });

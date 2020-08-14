@@ -6,9 +6,8 @@
     app-name="'discover'"
     config="topNavMenu"
     index-patterns="[indexPattern]"
-    on-query-submit="updateQuery"
+    on-query-submit="handleRefresh"
     on-saved-query-id-change="updateSavedQueryId"
-    query="state.query"
     saved-query-id="state.savedQuery"
     screen-title="screenTitle"
     show-date-picker="indexPattern.isTimeBased()"
@@ -135,6 +134,7 @@
               <div
                 ng-if="rows.length == opts.sampleSize"
                 class="dscTable__footer"
+                data-test-subj="discoverDocTableFooter"
               >
                 <span
                   i18n-id="discover.howToSeeOtherMatchingDocumentsDescription"

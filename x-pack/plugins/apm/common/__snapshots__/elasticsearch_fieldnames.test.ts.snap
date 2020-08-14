@@ -8,6 +8,12 @@ exports[`Error CLIENT_GEO 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Error CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Error CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
@@ -31,6 +37,8 @@ exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Error HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
@@ -61,6 +69,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Error OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -146,6 +156,12 @@ exports[`Span CLIENT_GEO 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Span CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Span CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
@@ -169,6 +185,8 @@ exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
@@ -199,6 +217,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Span OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
@@ -284,6 +304,12 @@ exports[`Transaction CLIENT_GEO 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Transaction CLOUD_AVAILABILITY_ZONE 1`] = `"europe-west1-c"`;
+
+exports[`Transaction CLOUD_PROVIDER 1`] = `"gcp"`;
+
+exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
+
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
@@ -307,6 +333,8 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
@@ -337,6 +365,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_NAME 1`] = `"an observer"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 

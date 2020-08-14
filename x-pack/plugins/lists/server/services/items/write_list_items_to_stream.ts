@@ -11,6 +11,7 @@ import { LegacyAPICaller } from 'kibana/server';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
+import { findSourceValue } from '../utils/find_source_value';
 
 /**
  * How many results to page through from the network at a time
@@ -144,10 +145,9 @@ export const writeResponseHitsToStream = ({
   const stringToAppendOrEmpty = stringToAppend ?? '';
 
   response.hits.hits.forEach((hit) => {
-    if (hit._source.ip != null) {
-      stream.push(`${hit._source.ip}${stringToAppendOrEmpty}`);
-    } else if (hit._source.keyword != null) {
-      stream.push(`${hit._source.keyword}${stringToAppendOrEmpty}`);
+    const value = findSourceValue(hit._source);
+    if (value != null) {
+      stream.push(`${value}${stringToAppendOrEmpty}`);
     } else {
       throw new ErrorWithStatusCode(
         `Encountered an error where hit._source was an unexpected type: ${JSON.stringify(

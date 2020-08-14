@@ -14,8 +14,8 @@ import {
   findTestSubject,
 } from '../../../../../test_utils';
 import { DataStream } from '../../../common';
-import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { IndexManagementHome } from '../../../public/application/sections/home';
+import { indexManagementStore } from '../../../public/application/store';
 import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
@@ -166,7 +166,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
 export const createDataStreamPayload = (name: string): DataStream => ({
   name,
-  timeStampField: { name: '@timestamp', mapping: { type: 'date' } },
+  timeStampField: { name: '@timestamp' },
   indices: [
     {
       name: 'indexName',

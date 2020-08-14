@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -185,27 +185,27 @@ export class ChromeService {
           />
         ),
       });
+    }
 
-      if (isIE()) {
-        notifications.toasts.addWarning({
-          title: mountReactNode(
-            <FormattedMessage
-              id="core.chrome.browserDeprecationWarning"
-              defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
-              values={{
-                link: (
-                  <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                    <FormattedMessage
-                      id="core.chrome.browserDeprecationLink"
-                      defaultMessage="the support matrix on our website"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-        });
-      }
+    if (isIE()) {
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.browserDeprecationWarning"
+            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            values={{
+              link: (
+                <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
+                  <FormattedMessage
+                    id="core.chrome.browserDeprecationLink"
+                    defaultMessage="the support matrix on our website"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
+      });
     }
 
     return {

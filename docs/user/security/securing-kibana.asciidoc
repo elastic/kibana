@@ -5,21 +5,21 @@
 <titleabbrev>Configure security</titleabbrev>
 ++++
 
-{kib} users have to log in when {security} is enabled on your cluster. You
-configure {security} roles for your {kib} users to control what data those users
-can access.
+{kib} users have to log in when {stack-security-features} are enabled on your
+cluster. You configure roles for your {kib} users to control what data those
+users can access.
 
 Most requests made through {kib} to {es} are authenticated by using the
 credentials of the logged-in user. There are, however, a few internal requests
 that the {kib} server needs to make to the {es} cluster. For this reason, you
 must configure credentials for the {kib} server to use for those requests.
 
-With {security} enabled, if you load a {kib} dashboard that accesses data in an
-index that you are not authorized to view, you get an error that indicates the
-index does not exist. {security} do not currently provide a way to control which
-users can load which dashboards.
+With {security-features} enabled, if you load a {kib} dashboard that accesses
+data in an index that you are not authorized to view, you get an error that
+indicates the index does not exist. The {security-features} do not currently
+provide a way to control which users can load which dashboards.
 
-To use {kib} with {security}:
+To use {kib} with {security-features}:
 
 . {ref}/configuring-security.html[Configure security in {es}].
 
@@ -38,8 +38,8 @@ elasticsearch.password: "kibanapassword"
 The {kib} server submits requests as this user to access the cluster monitoring
 APIs and the `.kibana` index. The server does _not_ need access to user indices.
 
-The password for the built-in `kibana_system` user is typically set as part of the
-{security} configuration process on {es}. For more information, see
+The password for the built-in `kibana_system` user is typically set as part of
+the security configuration process on {es}. For more information, see
 {ref}/built-in-users.html[Built-in users].
 --
 
@@ -53,7 +53,7 @@ as the encryption key.
 xpack.security.encryptionKey: "something_at_least_32_characters"
 --------------------------------------------------------------------------------
 
-For more information, see <<security-settings-kb,Security Settings in {kib}>>.
+For more information, see <<security-settings-kb,Security settings in {kib}>>.
 --
 
 . Optional: Set a timeout to expire idle sessions. By default, a session stays

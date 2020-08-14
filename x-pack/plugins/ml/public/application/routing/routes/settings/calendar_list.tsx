@@ -12,6 +12,8 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { NavigateToPath } from '../../../contexts/kibana';
+
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 
@@ -23,24 +25,22 @@ import {
 } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { CalendarsList } from '../../../settings/calendars';
-import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
+import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  SETTINGS,
-  {
-    text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-      defaultMessage: 'Calendar management',
-    }),
-    href: '#/settings/calendars_list',
-  },
-];
-
-export const calendarListRoute: MlRoute = {
+export const calendarListRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
   path: '/settings/calendars_list',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
-  breadcrumbs,
-};
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
+    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath),
+    {
+      text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
+        defaultMessage: 'Calendar management',
+      }),
+      onClick: breadcrumbOnClickFactory('/settings/calendars_list', navigateToPath),
+    },
+  ],
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {

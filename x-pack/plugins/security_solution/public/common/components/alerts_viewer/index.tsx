@@ -7,6 +7,8 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import { useFullScreen } from '../../containers/use_full_screen';
+
 import { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';
@@ -35,6 +37,7 @@ export const AlertsView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+  const { globalFullScreen } = useFullScreen();
   const alertsHistogramConfigs: MatrixHisrogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
@@ -52,16 +55,18 @@ export const AlertsView = ({
 
   return (
     <>
-      <MatrixHistogramContainer
-        endDate={endDate}
-        filterQuery={filterQuery}
-        id={ID}
-        setQuery={setQuery}
-        sourceId="default"
-        startDate={startDate}
-        type={type}
-        {...alertsHistogramConfigs}
-      />
+      {!globalFullScreen && (
+        <MatrixHistogramContainer
+          endDate={endDate}
+          filterQuery={filterQuery}
+          id={ID}
+          setQuery={setQuery}
+          sourceId="default"
+          startDate={startDate}
+          type={type}
+          {...alertsHistogramConfigs}
+        />
+      )}
       <AlertsTable
         timelineId={timelineId}
         endDate={endDate}
