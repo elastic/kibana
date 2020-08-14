@@ -70,9 +70,9 @@ describe('Field', () => {
 
       const fields = aggParam.getAvailableFields(agg);
 
-      expect(fields.length).toBe(1);
+      expect(fields?.length).toBe(1);
 
-      for (const field of fields) {
+      for (const field of fields!) {
         expect(field.aggregatable).toBe(true);
       }
     });
@@ -87,7 +87,7 @@ describe('Field', () => {
 
       const fields = aggParam.getAvailableFields(agg);
 
-      expect(fields.length).toBe(2);
+      expect(fields?.length).toBe(2);
     });
 
     it('should return all fields if filterFieldTypes was not specified', () => {
@@ -100,7 +100,7 @@ describe('Field', () => {
 
       const fields = aggParam.getAvailableFields(agg);
 
-      expect(fields.length).toBe(2);
+      expect(fields?.length).toBe(2);
     });
   });
 });

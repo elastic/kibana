@@ -34,7 +34,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, search
         <QueryStringInput
           bubbleSubmitEvent={true}
           query={searchInput}
-          indexPatterns={[indexPattern]}
+          indexPatterns={[indexPattern.toSpec()]}
           onChange={searchChangeHandler}
           onSubmit={searchSubmitHandler}
           placeholder={

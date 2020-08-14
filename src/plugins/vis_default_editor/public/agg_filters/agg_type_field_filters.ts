@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IAggConfig, IndexPatternField } from '../../../data/public';
+import { IAggConfig, FieldSpec, getAggregationRestrictions } from '../../../data/public';
 
-type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: IAggConfig) => boolean;
+type AggTypeFieldFilter = (field: FieldSpec, aggConfig: IAggConfig) => boolean;
 
 const filters: AggTypeFieldFilter[] = [
   /**
@@ -28,7 +28,7 @@ const filters: AggTypeFieldFilter[] = [
    */
   (field, aggConfig) => {
     const indexPattern = aggConfig.getIndexPattern();
-    const aggRestrictions = indexPattern.getAggregationRestrictions();
+    const aggRestrictions = getAggregationRestrictions(indexPattern);
 
     if (!aggRestrictions) {
       return true;
@@ -40,7 +40,7 @@ const filters: AggTypeFieldFilter[] = [
   },
 ];
 
-export function filterAggTypeFields(fields: IndexPatternField[], aggConfig: IAggConfig) {
+export function filterAggTypeFields(fields: FieldSpec[], aggConfig: IAggConfig) {
   const allowedAggTypeFields = fields.filter((field) => {
     const isAggTypeFieldAllowed = filters.every((filter) => filter(field, aggConfig));
     return isAggTypeFieldAllowed;

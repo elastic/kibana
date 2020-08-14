@@ -18,7 +18,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPatternSpec } from 'src/plugins/data/public';
+import { getAggregationRestrictions } from '../../../../data/public';
 
 /**
  * A hidden parameter can be hidden from the UI completely.
@@ -60,11 +61,11 @@ export interface EditorConfig {
 }
 
 export function getEditorConfig(
-  indexPattern: IndexPattern,
+  indexPattern: IndexPatternSpec,
   aggTypeName: string,
   fieldName: string
 ): EditorConfig {
-  const aggRestrictions = indexPattern.getAggregationRestrictions();
+  const aggRestrictions = getAggregationRestrictions(indexPattern);
 
   if (!aggRestrictions || !aggTypeName || !fieldName) {
     return {};

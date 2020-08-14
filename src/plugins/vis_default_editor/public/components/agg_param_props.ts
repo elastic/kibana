@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  IAggConfig,
-  AggParam,
-  IndexPatternField,
-  OptionedValueProp,
-} from 'src/plugins/data/public';
+import { IAggConfig, AggParam, FieldSpec, OptionedValueProp } from 'src/plugins/data/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';
@@ -38,7 +33,7 @@ export interface AggParamCommonProps<T, P = AggParam> {
   disabled?: boolean;
   editorConfig: EditorConfig;
   formIsTouched: boolean;
-  indexedFields?: ComboBoxGroupedOptions<IndexPatternField>;
+  indexedFields?: ComboBoxGroupedOptions<FieldSpec>;
   showValidation: boolean;
   state: EditorVisState;
   value?: T;

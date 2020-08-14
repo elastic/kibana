@@ -156,11 +156,12 @@ export interface FieldSpec {
   format?: SerializedFieldFormat;
 
   name: string;
+  displayName?: string;
   type: string;
   esTypes?: string[];
   scripted?: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
+  searchable?: boolean;
+  aggregatable?: boolean;
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;

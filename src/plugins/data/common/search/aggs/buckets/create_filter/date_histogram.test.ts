@@ -36,20 +36,14 @@ describe('AggConfig Filters', () => {
     const init = (interval: string = 'auto', duration: any = moment.duration(15, 'minutes')) => {
       field = {
         name: 'date',
+        type: 'date',
+        aggregatable: true,
       };
 
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
-        fields: {
-          getByName: () => field,
-          filter: () => [field],
-        },
-        toSpec: () => ({
-          id: '1234',
-          title: 'logstash-*',
-          fields: [field],
-        }),
+        fields: [field],
       } as any;
       const aggConfigs = new AggConfigs(
         indexPattern,

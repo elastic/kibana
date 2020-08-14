@@ -24,8 +24,8 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
-  IndexPattern,
-  IndexPatternField,
+  IndexPatternSpec,
+  FieldSpec,
 } from 'src/plugins/data/public';
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
@@ -47,7 +47,7 @@ interface ParamInstanceBase {
 
 export interface ParamInstance extends ParamInstanceBase {
   aggParam: AggParam;
-  indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
+  indexedFields: ComboBoxGroupedOptions<FieldSpec>;
   paramEditor: React.ComponentType<AggParamEditorProps<unknown>>;
   value: unknown;
 }
@@ -75,15 +75,15 @@ function getAggParamsToRender({
   const schema = getSchemaByName(schemas, agg.schema);
   // build collection of agg params components
   paramsToRender.forEach((param: AggParam, index: number) => {
-    let indexedFields: ComboBoxGroupedOptions<IndexPatternField> = [];
-    let fields: IndexPatternField[];
+    let indexedFields: ComboBoxGroupedOptions<FieldSpec> = [];
+    let fields: FieldSpec[];
 
     if (hideCustomLabel && param.name === 'customLabel') {
       return;
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      let availableFields: IndexPatternField[] = (param as IFieldParamType).getAvailableFields(agg);
+      let availableFields = (param as IFieldParamType).getAvailableFields(agg) || [];
       // should be refactored in the future to provide a more general way
       // for visualization to override some agg config settings
       if (agg.type.name === 'top_hits' && param.name === 'field') {
@@ -141,7 +141,7 @@ function getAggParamsToRender({
 function getAggTypeOptions(
   aggTypes: any,
   agg: IAggConfig,
-  indexPattern: IndexPattern,
+  indexPattern: IndexPatternSpec,
   groupName: string,
   allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {

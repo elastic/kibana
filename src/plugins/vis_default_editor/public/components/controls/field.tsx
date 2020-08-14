@@ -24,7 +24,7 @@ import { useMount } from 'react-use';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
+import { AggParam, IAggConfig, IFieldParamType, FieldSpec } from 'src/plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -33,7 +33,7 @@ const label = i18n.translate('visDefaultEditor.controls.field.fieldLabel', {
   defaultMessage: 'Field',
 });
 
-export interface FieldParamEditorProps extends AggParamEditorProps<IndexPatternField> {
+export interface FieldParamEditorProps extends AggParamEditorProps<FieldSpec> {
   customError?: string;
   customLabel?: string;
 }
@@ -51,12 +51,12 @@ function FieldParamEditor({
   setValue,
 }: FieldParamEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
-  const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
+  const selectedOptions: ComboBoxGroupedOptions<FieldSpec> = value
     ? [{ label: value.displayName || value.name, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {
-    const selectedOption: IndexPatternField = get(options, '0.target');
+    const selectedOption: FieldSpec = get(options, '0.target');
     if (!(aggParam.required && !selectedOption)) {
       setValue(selectedOption);
     }

@@ -23,7 +23,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } fr
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { IAggType, IndexPattern } from 'src/plugins/data/public';
+import { IAggType, IndexPatternSpec } from 'src/plugins/data/public';
 import { useKibana } from '../../../kibana_react/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
@@ -32,7 +32,7 @@ interface DefaultEditorAggSelectProps {
   aggError?: string;
   aggTypeOptions: ComboBoxGroupedOptions<IAggType>;
   id: string;
-  indexPattern: IndexPattern;
+  indexPattern: IndexPatternSpec;
   showValidation: boolean;
   isSubAggregation: boolean;
   value: IAggType;

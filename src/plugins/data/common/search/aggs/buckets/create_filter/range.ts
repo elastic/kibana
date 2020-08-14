@@ -30,7 +30,7 @@ export const createFilterRange = (
     return buildRangeFilter(
       aggConfig.params.field,
       params,
-      aggConfig.getIndexPattern().toSpec(),
+      aggConfig.getIndexPattern(),
       deserialize(aggConfig.toSerializedFieldFormat()).convert(params)
     );
   };

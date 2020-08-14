@@ -25,7 +25,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPatternSpec } from '../../index_patterns';
 import { TimeRange } from '../../../common';
 
 function removeParentAggs(obj: any) {
@@ -65,14 +65,14 @@ export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string |
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
-  public indexPattern: IndexPattern;
+  public indexPattern: IndexPatternSpec;
   public timeRange?: TimeRange;
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
 
   constructor(
-    indexPattern: IndexPattern,
+    indexPattern: IndexPatternSpec,
     configStates: CreateAggConfigParams[] = [],
     opts: AggConfigsOptions
   ) {

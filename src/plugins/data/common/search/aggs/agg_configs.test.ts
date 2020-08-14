@@ -22,16 +22,15 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import type { IndexPatternField } from '../../index_patterns';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
+import { IndexPatternSpec } from '../../index_patterns';
 import { stubIndexPattern, stubIndexPatternWithFields } from '../../../common/stubs';
 
 describe('AggConfigs', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IndexPatternSpec;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
-    indexPattern = stubIndexPatternWithFields as IndexPattern;
+    indexPattern = stubIndexPatternWithFields as IndexPatternSpec;
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -219,8 +218,7 @@ describe('AggConfigs', () => {
 
   describe('#toDsl', () => {
     beforeEach(() => {
-      indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (name as unknown) as IndexPatternField;
+      indexPattern = stubIndexPattern as IndexPatternSpec;
     });
 
     it('uses the sorted aggs', () => {

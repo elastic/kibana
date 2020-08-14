@@ -27,19 +27,17 @@ import { Filter, ExistsFilter } from '../../../../../common';
 describe('AggConfig Filters', () => {
   describe('terms', () => {
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
+      const field = {
+        name: 'field',
+        aggregatable: true,
+        type: 'ip',
+      };
+
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
-        fields: {
-          getByName: () => field,
-          filter: () => [field],
-        },
+        fields: [field],
       } as any;
-
-      const field = {
-        name: 'field',
-        indexPattern,
-      };
 
       return new AggConfigs(indexPattern, aggs, {
         typesRegistry: mockAggTypesRegistry(),

@@ -33,7 +33,7 @@ export const createFilterHistogram = (
     return buildRangeFilter(
       aggConfig.params.field,
       params,
-      aggConfig.getIndexPattern().toSpec(),
+      aggConfig.getIndexPattern(),
       deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
     );
   };

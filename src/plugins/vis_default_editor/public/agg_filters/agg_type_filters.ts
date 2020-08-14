@@ -17,14 +17,20 @@
  * under the License.
  */
 
-import { IAggType, IAggConfig, IndexPattern, search } from '../../../data/public';
+import {
+  IAggType,
+  IAggConfig,
+  IndexPatternSpec,
+  search,
+  getAggregationRestrictions,
+} from '../../../data/public';
 
 const { propFilter } = search.aggs;
 const filterByName = propFilter('name');
 
 type AggTypeFilter = (
   aggType: IAggType,
-  indexPattern: IndexPattern,
+  indexPattern: IndexPatternSpec,
   aggConfig: IAggConfig,
   aggFilter: string[]
 ) => boolean;
@@ -42,7 +48,7 @@ const filters: AggTypeFilter[] = [
    * Check index pattern aggregation restrictions and limit available aggTypes.
    */
   (aggType, indexPattern, aggConfig, aggFilter) => {
-    const aggRestrictions = indexPattern.getAggregationRestrictions();
+    const aggRestrictions = getAggregationRestrictions(indexPattern);
 
     if (!aggRestrictions) {
       return true;
@@ -61,7 +67,7 @@ const filters: AggTypeFilter[] = [
 
 export function filterAggTypes(
   aggTypes: IAggType[],
-  indexPattern: IndexPattern,
+  indexPattern: IndexPatternSpec,
   aggConfig: IAggConfig,
   aggFilter: string[]
 ) {

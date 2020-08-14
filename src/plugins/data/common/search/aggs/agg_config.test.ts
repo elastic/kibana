@@ -17,44 +17,32 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
-
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { IIndexPatternFieldList } from '../../index_patterns/fields';
+import { IndexPatternSpec } from '../../index_patterns';
 
 describe('AggConfig', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: IndexPatternSpec;
   let typesRegistry: AggTypesRegistryStart;
   const fields = [
     {
       name: '@timestamp',
       type: 'date',
       aggregatable: true,
-      format: {
-        toJSON: () => ({}),
-      },
     },
     {
       name: 'bytes',
       type: 'number',
       aggregatable: true,
-      format: {
-        toJSON: () => ({}),
-      },
     },
     {
       name: 'machine.os.keyword',
       type: 'string',
       aggregatable: true,
-      format: {
-        toJSON: () => ({}),
-      },
     },
   ];
 
@@ -63,11 +51,8 @@ describe('AggConfig', () => {
     indexPattern = {
       id: '1234',
       title: 'logstash-*',
-      fields: ({
-        getByName: (name: string) => fields.find((f) => f.name === name),
-        filter: () => fields,
-      } as unknown) as IndexPattern['fields'],
-    } as IndexPattern;
+      fields,
+    };
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -399,10 +384,6 @@ describe('AggConfig', () => {
   });
 
   describe('#toSerializedFieldFormat', () => {
-    beforeEach(() => {
-      indexPattern.fields.getByName = identity as IIndexPatternFieldList['getByName'];
-    });
-
     it('works with aggs that have a special format type', () => {
       const configStates = [
         {

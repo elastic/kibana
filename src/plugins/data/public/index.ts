@@ -112,6 +112,7 @@ export {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
+  getAggregationRestrictions,
 } from '../common';
 
 /*
@@ -263,6 +264,7 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   FieldList,
+  FieldSpec,
 } from '../common';
 
 /*

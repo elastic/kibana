@@ -23,7 +23,7 @@ import { SavedObjectNotFound } from '../../../../../../plugins/kibana_utils/comm
 import { BaseParamType } from './base';
 import { propFilter } from '../utils';
 import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
-import { isNestedField, IndexPatternField } from '../../../index_patterns/fields';
+import { isNestedField, IndexPatternField, FieldSpec } from '../../../index_patterns';
 
 const filterByType = propFilter('type');
 
@@ -77,13 +77,12 @@ export class FieldParamType extends BaseParamType {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
-      const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
-
+      const field = aggConfig.getIndexPattern().fields?.find((fld) => fld.name === fieldName);
       if (!field) {
         throw new SavedObjectNotFound('index-pattern-field', fieldName);
       }
 
-      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
+      const validField = this.getAvailableFields(aggConfig)?.find((f: any) => f.name === fieldName);
       if (!validField) {
         throw new Error(
           i18n.translate(
@@ -108,7 +107,7 @@ export class FieldParamType extends BaseParamType {
    */
   getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
-    const filteredFields = fields.filter((field: IndexPatternField) => {
+    const filteredFields = fields?.filter((field: FieldSpec) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (

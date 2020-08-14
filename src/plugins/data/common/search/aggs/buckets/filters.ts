@@ -80,12 +80,7 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
               }
 
               const esQueryConfigs = getEsQueryConfig({ get: getConfig });
-              const query = buildEsQuery(
-                aggConfig.getIndexPattern().toSpec(),
-                [input],
-                [],
-                esQueryConfigs
-              );
+              const query = buildEsQuery(aggConfig.getIndexPattern(), [input], [], esQueryConfigs);
 
               if (!query) {
                 console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console

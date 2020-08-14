@@ -18,7 +18,7 @@
  */
 
 import { find } from 'lodash';
-import { SavedObjectsClientCommon, SavedObject } from '..';
+import { SavedObjectsClientCommon, SavedObject, IndexPatternSpec } from '..';
 
 /**
  * Returns an object matching a given title
@@ -47,4 +47,8 @@ export async function findByTitle(
     savedObjects,
     (obj: SavedObject<any>) => obj.attributes.title.toLowerCase() === title.toLowerCase()
   );
+}
+
+export function getAggregationRestrictions(indexPattern: IndexPatternSpec) {
+  return indexPattern.typeMeta?.aggs;
 }

@@ -115,7 +115,7 @@ export const SearchPanel: FC<Props> = ({
             <QueryStringInput
               bubbleSubmitEvent={true}
               query={searchInput}
-              indexPatterns={[indexPattern]}
+              indexPatterns={[indexPattern.toSpec()]}
               onChange={searchChangeHandler}
               onSubmit={searchHandler}
               placeholder={i18n.translate(

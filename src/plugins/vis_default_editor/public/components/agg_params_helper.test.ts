@@ -17,13 +17,7 @@
  * under the License.
  */
 
-import {
-  AggGroupNames,
-  BUCKET_TYPES,
-  IAggConfig,
-  IAggType,
-  IndexPattern,
-} from 'src/plugins/data/public';
+import { AggGroupNames, BUCKET_TYPES, IAggConfig, IAggType } from 'src/plugins/data/public';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -119,7 +113,7 @@ describe('DefaultEditorAggParams helpers', () => {
               getAvailableFields: jest.fn((aggConfig: IAggConfig) =>
                 aggConfig
                   .getIndexPattern()
-                  .fields.filter(({ type }) => filterFieldTypes.includes(type))
+                  .fields?.filter(({ type }) => filterFieldTypes.includes(type))
               ),
             },
             {
@@ -174,7 +168,7 @@ describe('DefaultEditorAggParams helpers', () => {
 
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
-      const indexPattern = {} as IndexPattern;
+      const indexPattern = {};
       const aggs = getAggTypeOptions(
         { metrics: [] },
         {} as IAggConfig,

@@ -35,7 +35,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { IDataPluginServices, IndexPatternSpec, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
@@ -46,7 +46,7 @@ import { SuggestionsComponent } from '..';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;
-  indexPatterns: Array<IIndexPattern | string>;
+  indexPatterns: Array<IndexPatternSpec | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -69,7 +69,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: IndexPatternSpec[];
 }
 
 const KEY_CODES = {
@@ -112,13 +112,13 @@ export class QueryStringInputUI extends Component<Props, State> {
     ) as string[];
     const objectPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern !== 'string'
-    ) as IIndexPattern[];
+    ) as IndexPatternSpec[];
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.savedObjects!.client,
       stringPatterns,
       this.services.uiSettings!
-    )) as IIndexPattern[];
+    )) as IndexPatternSpec[]; // todo change to specs
 
     this.setState({
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
@@ -157,6 +157,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       const suggestions =
         (await this.services.data.autocomplete.getQuerySuggestions({
           language,
+          // @ts-expect-error
           indexPatterns,
           query: queryString,
           selectionStart,

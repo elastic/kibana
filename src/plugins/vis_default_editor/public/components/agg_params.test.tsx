@@ -20,7 +20,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
+import { IAggConfig, AggGroupNames } from 'src/plugins/data/public';
 import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
@@ -106,7 +106,7 @@ describe('DefaultEditorAggParams component', () => {
       } as any) as IAggConfig,
       groupName: AggGroupNames.Metrics,
       formIsTouched: false,
-      indexPattern: {} as IndexPattern,
+      indexPattern: {},
       metricAggs: [],
       state: {} as EditorVisState,
       setAggParamValue,

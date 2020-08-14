@@ -29,21 +29,13 @@ describe('AggConfig Filters', () => {
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
-        format: {},
+        type: 'date',
       };
 
       const indexPattern = {
         id: '1234',
         title: 'logstash-*',
-        fields: {
-          getByName: () => field,
-          filter: () => [field],
-        },
-        toSpec: () => ({
-          id: '1234',
-          title: 'logstash-*',
-          fields: [field],
-        }),
+        fields: [field],
       } as any;
 
       return new AggConfigs(
