@@ -11,6 +11,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { FieldsConfig } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
+import { TargetField } from './common_fields/target_field';
 
 const { emptyField } = fieldValidators;
 
@@ -38,19 +39,6 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
-
-  /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText', {
-      defaultMessage:
-        'The field to assign the joined value to. If empty, the field is updated in-place.',
-    }),
-  },
 };
 
 export const Join: FunctionComponent = () => {
@@ -65,7 +53,15 @@ export const Join: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.joinForm.targetFieldHelpText',
+          {
+            defaultMessage:
+              'The field to assign the joined value to. If empty, the field is updated in-place.',
+          }
+        )}
+      />
     </>
   );
 };

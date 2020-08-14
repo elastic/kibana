@@ -34,7 +34,6 @@ export const TargetField: FunctionComponent<Props> = (props) => {
     <UseField
       config={{
         ...fieldsConfig.target_field,
-        helpText: props.helpText ?? fieldsConfig.target_field.helpText,
         ...props,
       }}
       component={Field}

@@ -14,10 +14,13 @@ import {
   ToggleField,
   NumericField,
   SelectField,
+  ValidationConfig,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { TargetField } from './common_fields/target_field';
+
 import { FieldsConfig, from, to } from './shared';
 
 const { emptyField, numberSmallerThanField, numberGreaterThanField } = fieldValidators;
@@ -41,6 +44,14 @@ const maxMatchesValidators = {
   }),
 };
 
+const targetFieldValidator: ValidationConfig = {
+  validator: emptyField(
+    i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldRequiredError', {
+      defaultMessage: 'A target field value is required.',
+    })
+  ),
+};
+
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
   policy_name: {
@@ -58,31 +69,6 @@ const fieldsConfig: FieldsConfig = {
             'xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameRequiredError',
             {
               defaultMessage: 'A field value is required.',
-            }
-          )
-        ),
-      },
-    ],
-  },
-
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldLabel', {
-      defaultMessage: 'Target field',
-    }),
-    helpText: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldHelpText',
-      {
-        defaultMessage: 'Field added to incoming documents to contain enrich data.',
-      }
-    ),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldRequiredError',
-            {
-              defaultMessage: 'A target field value is required.',
             }
           )
         ),
@@ -173,7 +159,18 @@ export const Enrich: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.policy_name} component={Field} path="fields.policy_name" />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        label={i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldLabel', {
+          defaultMessage: 'Target field',
+        })}
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.enrichForm.targetFieldHelpText',
+          {
+            defaultMessage: 'Field added to incoming documents to contain enrich data.',
+          }
+        )}
+        validations={[targetFieldValidator]}
+      />
 
       <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
 

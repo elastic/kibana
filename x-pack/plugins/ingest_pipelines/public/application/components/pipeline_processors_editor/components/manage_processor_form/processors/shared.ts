@@ -53,8 +53,9 @@ export const from = {
   optionalJson: (v: string) => {
     if (v) {
       try {
-        if (Object.keys(JSON.parse(v)).length) {
-          return v;
+        const json = JSON.parse(v);
+        if (Object.keys(json).length) {
+          return json;
         }
       } catch (e) {
         // Ignore

@@ -20,19 +20,10 @@ import {
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, from, to } from './shared';
+import { TargetField } from './common_fields/target_field';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional field config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldHelpText', {
-      defaultMessage:
-        'The field that will hold the geographical information looked up from the Maxmind database.',
-    }),
-  },
   database_file: {
     type: FIELD_TYPES.TEXT,
     serializer: (v) => (v === 'GeoLite2-City.mmdb' ? undefined : v),
@@ -84,7 +75,15 @@ export const GeoIP: FunctionComponent = () => {
         )}
       />
 
-      <UseField component={Field} config={fieldsConfig.target_field} path="fields.target_field" />
+      <TargetField
+        helpText={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldHelpText',
+          {
+            defaultMessage:
+              'The field that will hold the geographical information looked up from the Maxmind database.',
+          }
+        )}
+      />
 
       <UseField component={Field} config={fieldsConfig.database_file} path="fields.database_file" />
 

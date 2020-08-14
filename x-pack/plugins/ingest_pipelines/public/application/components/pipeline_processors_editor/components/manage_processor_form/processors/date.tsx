@@ -19,6 +19,7 @@ import {
 
 import { FieldsConfig, to } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
+import { TargetField } from './common_fields/target_field';
 
 const { minLengthField } = fieldValidators;
 
@@ -49,22 +50,6 @@ const fieldsConfig: FieldsConfig = {
     ],
   },
   /* Optional fields config */
-  target_field: {
-    type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? undefined : v),
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldFieldLabel', {
-      defaultMessage: 'Target field (optional)',
-    }),
-    helpText: (
-      <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
-        defaultMessage="The field that will hold the parsed date. Default field is {defaultField}."
-        values={{
-          defaultField: <EuiCode inline>{'@timestamp'}</EuiCode>,
-        }}
-      />
-    ),
-  },
   timezone: {
     type: FIELD_TYPES.TEXT,
     serializer: (v) => (v ? v : undefined),
@@ -110,7 +95,17 @@ export const DateProcessor: FunctionComponent = () => {
 
       <UseField config={fieldsConfig.formats} component={ComboBoxField} path="fields.formats" />
 
-      <UseField config={fieldsConfig.target_field} component={Field} path="fields.target_field" />
+      <TargetField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
+            defaultMessage="The field that will hold the parsed date. Default field is {defaultField}."
+            values={{
+              defaultField: <EuiCode inline>{'@timestamp'}</EuiCode>,
+            }}
+          />
+        }
+      />
 
       <UseField config={fieldsConfig.timezone} component={Field} path="fields.timezone" />
 
