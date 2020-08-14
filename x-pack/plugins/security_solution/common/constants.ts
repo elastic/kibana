@@ -10,6 +10,7 @@ export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
 export const APP_PATH = `/app/security`;
 export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
+export const ADD_INDEX_PATH = `/app/management/kibana/indexPatterns/create`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
