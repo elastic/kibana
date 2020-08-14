@@ -46,7 +46,7 @@ export class UiActionsExecutionService {
     context: BaseContext;
     trigger: Trigger;
   }): Promise<void> {
-    const shouldBatch = !(await action.shouldAutoExecute?.(context)) ?? false;
+    const shouldBatch = !(await action.shouldAutoExecute?.({ ...context, trigger })) ?? false;
     const task: ExecuteActionTask = {
       action,
       context,
@@ -59,7 +59,7 @@ export class UiActionsExecutionService {
     } else {
       this.pendingTasks.add(task);
       try {
-        await action.execute(context);
+        await action.execute({ ...context, trigger });
         this.pendingTasks.delete(task);
       } catch (e) {
         this.pendingTasks.delete(task);
@@ -96,9 +96,12 @@ export class UiActionsExecutionService {
     }, 0);
   }
 
-  private async executeSingleTask({ context, action, defer }: ExecuteActionTask) {
+  private async executeSingleTask({ context, action, defer, trigger }: ExecuteActionTask) {
     try {
-      await action.execute(context);
+      await action.execute({
+        ...context,
+        trigger,
+      });
       defer.resolve();
     } catch (e) {
       defer.reject(e);
@@ -107,7 +110,11 @@ export class UiActionsExecutionService {
 
   private async executeMultipleActions(tasks: ExecuteActionTask[]) {
     const panel = await buildContextMenuForActions({
-      actions: tasks.map(({ action, context }) => [action, context]),
+      actions: tasks.map(({ action, context, trigger }) => ({
+        action,
+        context,
+        trigger,
+      })),
       title: '', // intentionally don't have any title
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());

@@ -14,6 +14,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/ui_actions/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 
 function isValidUrl(url: string) {
   try {
@@ -120,7 +121,15 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, UrlTrigger> {
     return config.url;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
+  public readonly execute = async (
+    config: Config,
+    context: ActionExecutionContext<ActionContext>
+  ) => {
+    // Just for showcasing:
+    // we can get trigger a which caused this drilldown execution
+    // eslint-disable-next-line no-console
+    console.log(context.trigger?.id);
+
     const url = await this.getHref(config, context);
 
     if (config.openInNewTab) {
