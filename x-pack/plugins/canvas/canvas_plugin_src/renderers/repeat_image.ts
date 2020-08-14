@@ -9,25 +9,27 @@ import { times } from 'lodash';
 import { elasticOutline } from '../lib/elastic_outline';
 import { isValidUrl } from '../../common/lib/url';
 import { RendererStrings, ErrorStrings } from '../../i18n';
+import { Return as Arguments } from '../functions/common/repeat_image';
+import { RendererFactory } from '../../types';
 
 const { repeatImage: strings } = RendererStrings;
 const { RepeatImage: errors } = ErrorStrings;
 
-export const repeatImage = () => ({
+export const repeatImage: RendererFactory<Arguments> = () => ({
   name: 'repeatImage',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const settings = {
-      count: 10,
       ...config,
       image: isValidUrl(config.image) ? config.image : elasticOutline,
+      emptyImage: config.emptyImage || '',
     };
 
     const container = $('<div class="repeatImage" style="pointer-events: none;">');
 
-    function setSize(img) {
+    function setSize(img: HTMLImageElement) {
       if (img.naturalHeight > img.naturalWidth) {
         img.height = settings.size;
       } else {
@@ -36,7 +38,7 @@ export const repeatImage = () => ({
     }
 
     function finish() {
-      $(domNode).html(container);
+      $(domNode).append(container);
       handlers.done();
     }
 
@@ -46,7 +48,7 @@ export const repeatImage = () => ({
       if (settings.max && settings.count > settings.max) {
         settings.count = settings.max;
       }
-      times(settings.count, () => container.append(img.cloneNode(true)));
+      times(settings.count, () => container.append($(img).clone()));
 
       if (isValidUrl(settings.emptyImage)) {
         if (settings.max == null) {
@@ -56,7 +58,7 @@ export const repeatImage = () => ({
         const emptyImage = new Image();
         emptyImage.onload = function () {
           setSize(emptyImage);
-          times(settings.max - settings.count, () => container.append(emptyImage.cloneNode(true)));
+          times(settings.max - settings.count, () => container.append($(emptyImage).clone()));
           finish();
         };
         emptyImage.src = settings.emptyImage;

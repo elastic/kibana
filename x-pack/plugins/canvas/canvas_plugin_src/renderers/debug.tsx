@@ -6,29 +6,29 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { elasticLogo } from '../lib/elastic_logo';
-import { isValidUrl } from '../../common/lib/url';
+import { Debug } from '../../public/components/debug';
 import { RendererStrings } from '../../i18n';
+import { RendererFactory } from '../../types';
 
-const { image: strings } = RendererStrings;
+const { debug: strings } = RendererStrings;
 
-export const image = () => ({
-  name: 'image',
+export const debug: RendererFactory<any> = () => ({
+  name: 'debug',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const dataurl = isValidUrl(config.dataurl) ? config.dataurl : elasticLogo;
+    const renderDebug = () => (
+      <div style={{ width: domNode.offsetWidth, height: domNode.offsetHeight }}>
+        <Debug payload={config} />
+      </div>
+    );
 
-    const style = {
-      height: '100%',
-      backgroundImage: `url(${dataurl})`,
-      backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center center',
-      backgroundSize: config.mode,
-    };
+    ReactDOM.render(renderDebug(), domNode, () => handlers.done());
 
-    ReactDOM.render(<div style={style} />, domNode, () => handlers.done());
+    handlers.onResize(() => {
+      ReactDOM.render(renderDebug(), domNode, () => handlers.done());
+    });
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

@@ -7,13 +7,20 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 // @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-expect-error .png file
 import { elasticOutline } from '../../lib/elastic_outline';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   image: string | null;
+  size: number;
+  max: number;
+  emptyImage: string | null;
+}
+
+export interface Return {
+  count: number;
+  image: string;
   size: number;
   max: number;
   emptyImage: string | null;

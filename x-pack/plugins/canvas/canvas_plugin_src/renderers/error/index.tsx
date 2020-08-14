@@ -5,15 +5,20 @@
  */
 
 import ReactDOM from 'react-dom';
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { Error } from '../../../public/components/error';
 import { Popover } from '../../../public/components/popover';
 import { RendererStrings } from '../../../i18n';
+import { RendererFactory } from '../../../types';
+
+interface Config {
+  error: Error;
+}
 
 const { error: strings } = RendererStrings;
 
-export const error = () => ({
+export const error: RendererFactory<Config> = () => ({
   name: 'error',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
@@ -21,7 +26,7 @@ export const error = () => ({
   render(domNode, config, handlers) {
     const draw = () => {
       const buttonSize = Math.min(domNode.clientHeight, domNode.clientWidth);
-      const button = (handleClick) => (
+      const button = (handleClick: MouseEventHandler<any>) => (
         <EuiIcon
           className="canvasRenderError__icon"
           onClick={handleClick}

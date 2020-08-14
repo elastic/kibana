@@ -6,22 +6,30 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { get } from 'lodash';
-import { Datatable } from '../../public/components/datatable';
+import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
+import { RendererFactory, Style, Datatable } from '../../types';
 
 const { dropdownFilter: strings } = RendererStrings;
 
-export const table = () => ({
+interface TableArguments {
+  font?: Style;
+  paginate: boolean;
+  perPage: number;
+  showHeader: boolean;
+  datatable: Datatable;
+}
+
+export const table: RendererFactory<TableArguments> = () => ({
   name: 'table',
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    const { datatable, paginate, perPage, font, showHeader } = config;
+    const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
     ReactDOM.render(
-      <div style={{ ...get(font, 'spec'), height: '100%' }}>
-        <Datatable
+      <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
+        <DatatableComponent
           datatable={datatable}
           perPage={perPage}
           paginate={paginate}
