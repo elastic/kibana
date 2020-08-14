@@ -37,7 +37,7 @@ import {
   WriteOperations,
   ReadOperations,
 } from './authorization/alerts_authorization';
-import { SavedObjectsClientWithoutPartialUpdates } from './saved_objects';
+import { SavedObjectsClientWithoutUpdates } from './saved_objects';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -53,7 +53,7 @@ export type InvalidateAPIKeyResult =
 export interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  unsecuredSavedObjectsClient: SavedObjectsClientWithoutPartialUpdates;
+  unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
   authorization: AlertsAuthorization;
   actionsAuthorization: ActionsAuthorization;
   alertTypeRegistry: AlertTypeRegistry;
@@ -135,7 +135,7 @@ export class AlertsClient {
   private readonly spaceId?: string;
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutPartialUpdates;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
@@ -228,15 +228,16 @@ export class AlertsClient {
         }
         throw e;
       }
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        createdAlert.id,
         {
           ...createdAlert.attributes,
           ...encryptedAttributes,
           scheduledTaskId: scheduledTask.id,
         },
         {
+          id: createdAlert.id,
+          overwrite: true,
           references,
         }
       );
@@ -430,9 +431,8 @@ export class AlertsClient {
       : null;
     const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
-    const updatedObject = await this.unsecuredSavedObjectsClient.update<RawAlert>(
+    const updatedObject = await this.unsecuredSavedObjectsClient.create<RawAlert>(
       'alert',
-      id,
       {
         ...attributes,
         ...data,
@@ -442,6 +442,8 @@ export class AlertsClient {
         updatedBy: username,
       },
       {
+        id,
+        overwrite: true,
         version,
         references,
       }
@@ -506,9 +508,8 @@ export class AlertsClient {
     }
 
     const username = await this.getUserName();
-    await this.unsecuredSavedObjectsClient.update<RawAlert>(
+    await this.unsecuredSavedObjectsClient.create<RawAlert>(
       'alert',
-      id,
       {
         ...attributes,
         ...this.apiKeyAsAlertAttributes(
@@ -517,7 +518,15 @@ export class AlertsClient {
         ),
         updatedBy: username,
       },
-      omitBy({ version, references }, isUndefined)
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          version,
+          references,
+        },
+        isUndefined
+      )
     );
 
     if (apiKeyToInvalidate) {
@@ -588,21 +597,35 @@ export class AlertsClient {
         ),
         updatedBy: username,
       };
-      const updatedAlert = await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      const updatedAlert = await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        id,
         updatedAttributes,
-        omitBy({ version, references }, isUndefined)
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            version,
+            references,
+          },
+          isUndefined
+        )
       );
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        id,
         {
           ...updatedAttributes,
           scheduledTaskId: scheduledTask.id,
         },
-        omitBy({ version: updatedAlert.version, references: updatedAlert.references }, isUndefined)
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            version: updatedAlert.version,
+            references: updatedAlert.references,
+          },
+          isUndefined
+        )
       );
       if (apiKeyToInvalidate) {
         await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
@@ -643,9 +666,8 @@ export class AlertsClient {
     );
 
     if (attributes.enabled === true) {
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        id,
         {
           ...(omit(
             attributes,
@@ -656,7 +678,15 @@ export class AlertsClient {
           enabled: false,
           updatedBy: await this.getUserName(),
         },
-        omitBy({ version, references }, isUndefined)
+        omitBy(
+          {
+            id,
+            overwrite: true,
+            version,
+            references,
+          },
+          isUndefined
+        )
       );
 
       await Promise.all([
@@ -686,16 +716,23 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update<RawAlert>(
+    await this.unsecuredSavedObjectsClient.create<RawAlert>(
       'alert',
-      id,
       {
         ...attributes,
         muteAll: true,
         mutedInstanceIds: [],
         updatedBy: await this.getUserName(),
       },
-      omitBy({ version, references }, isUndefined)
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          version,
+          references,
+        },
+        isUndefined
+      )
     );
   }
 
@@ -717,16 +754,23 @@ export class AlertsClient {
       await this.actionsAuthorization.ensureAuthorized('execute');
     }
 
-    await this.unsecuredSavedObjectsClient.update<RawAlert>(
+    await this.unsecuredSavedObjectsClient.create<RawAlert>(
       'alert',
-      id,
       {
         ...attributes,
         muteAll: false,
         mutedInstanceIds: [],
         updatedBy: await this.getUserName(),
       },
-      omitBy({ version, references }, isUndefined)
+      omitBy(
+        {
+          id,
+          overwrite: true,
+          version,
+          references,
+        },
+        isUndefined
+      )
     );
   }
 
@@ -756,15 +800,22 @@ export class AlertsClient {
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        alertId,
         {
           ...attributes,
           mutedInstanceIds,
           updatedBy: await this.getUserName(),
         },
-        omitBy({ version, references }, isUndefined)
+        omitBy(
+          {
+            id: alertId,
+            overwrite: true,
+            version,
+            references,
+          },
+          isUndefined
+        )
       );
     }
   }
@@ -798,15 +849,22 @@ export class AlertsClient {
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.unsecuredSavedObjectsClient.update<RawAlert>(
+      await this.unsecuredSavedObjectsClient.create<RawAlert>(
         'alert',
-        alertId,
         {
           ...attributes,
           updatedBy: await this.getUserName(),
           mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
         },
-        omitBy({ version, references }, isUndefined)
+        omitBy(
+          {
+            id: alertId,
+            overwrite: true,
+            version,
+            references,
+          },
+          isUndefined
+        )
       );
     }
   }

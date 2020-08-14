@@ -6,7 +6,6 @@
 import Boom from 'boom';
 import {
   ILegacyScopedClusterClient,
-  SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
   KibanaRequest,
@@ -31,6 +30,7 @@ import {
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionType } from '../common';
+import { SavedObjectsClientWithoutUpdates } from './saved_objects';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -55,7 +55,7 @@ interface ConstructorOptions {
   defaultKibanaIndex: string;
   scopedClusterClient: ILegacyScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer;
@@ -71,7 +71,7 @@ interface UpdateOptions {
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
   private readonly scopedClusterClient: ILegacyScopedClusterClient;
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientWithoutUpdates;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly actionExecutor: ActionExecutorContract;
@@ -162,9 +162,8 @@ export class ActionsClient {
 
     this.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
-    const result = await this.unsecuredSavedObjectsClient.update<RawAction>(
+    const result = await this.unsecuredSavedObjectsClient.create<RawAction>(
       'action',
-      id,
       {
         ...attributes,
         actionTypeId,
@@ -174,6 +173,8 @@ export class ActionsClient {
       },
       omitBy(
         {
+          id,
+          overwrite: true,
           references,
           version,
         },

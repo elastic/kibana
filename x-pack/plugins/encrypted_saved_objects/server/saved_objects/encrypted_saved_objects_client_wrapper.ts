@@ -60,13 +60,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
     // since IDs are part of the AAD used during encryption, that's why we control them within this
     // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id) {
+    if (options.id && !options.overwrite) {
       throw new Error(
         'Predefined IDs are not allowed for saved objects with encrypted attributes.'
       );
     }
 
-    const id = generateID();
+    const id = options.id ?? generateID();
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -89,7 +89,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async bulkCreate<T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBaseOptions & Pick<SavedObjectsCreateOptions, 'overwrite'>
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
@@ -103,13 +103,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
         // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id) {
+        if (object.id && !options?.overwrite) {
           throw new Error(
             'Predefined IDs are not allowed for saved objects with encrypted attributes.'
           );
         }
 
-        const id = generateID();
+        const id = object?.id ?? generateID();
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -137,41 +137,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
-    const {
-      nonEncryptedObjects,
-      nonEncryptedObjectsIndicies,
-      encryptableObjects,
-      encryptableObjectsIndicies,
-    } = objects.reduce<{
-      nonEncryptedObjects: Array<SavedObjectsBulkUpdateObject<T>>;
-      encryptableObjects: Array<SavedObjectsBulkUpdateObject<T>>;
-      nonEncryptedObjectsIndicies: number[];
-      encryptableObjectsIndicies: number[];
-    }>(
-      (partition, object, index) => {
-        if (this.options.service.isRegistered(object.type)) {
-          partition.encryptableObjects.push(object);
-          partition.encryptableObjectsIndicies.push(index);
-        } else {
-          partition.nonEncryptedObjects.push(object);
-          partition.nonEncryptedObjectsIndicies.push(index);
-        }
-        return partition;
-      },
-      {
-        nonEncryptedObjects: [],
-        encryptableObjects: [],
-        nonEncryptedObjectsIndicies: [],
-        encryptableObjectsIndicies: [],
-      }
-    );
-
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
     const encryptedObjects = await Promise.all(
-      encryptableObjects.map(async (object) => {
+      objects.map(async (object) => {
         const { type, id, attributes } = object;
+        if (!this.options.service.isRegistered(type)) {
+          return object;
+        }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
@@ -189,38 +163,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
 
     return await this.handleEncryptedAttributesInBulkResponse(
-      {
-        saved_objects: [
-          // match up each object in the response with
-          // the index it had in the original input.
-          // if the object didn't have an index then assign
-          // the max possible index so it'll get pushed to the bottom
-          ...this.zip(
-            encryptedObjects.length
-              ? (
-                  await this.options.baseClient.bulkCreate(encryptedObjects, {
-                    ...options,
-                    overwrite: true,
-                  })
-                ).saved_objects
-              : [],
-            encryptableObjectsIndicies,
-            Number.MAX_VALUE
-          ),
-          ...this.zip(
-            nonEncryptedObjects.length
-              ? (await this.options.baseClient.bulkUpdate(nonEncryptedObjects, options))
-                  .saved_objects
-              : [],
-            nonEncryptedObjectsIndicies,
-            Number.MAX_VALUE
-          ),
-        ]
-          // sort by the index in the original input
-          .sort(([, leftIndex], [, rightIndex]) => leftIndex - rightIndex)
-          // drop the index now that we've sorted
-          .map(([object]) => object),
-      },
+      await this.options.baseClient.bulkUpdate(encryptedObjects, options),
       objects
     );
   }
@@ -257,7 +200,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   public async update<T>(
     type: string,
     id: string,
-    attributes: T,
+    attributes: Partial<T>,
     options?: SavedObjectsUpdateOptions
   ) {
     if (!this.options.service.isRegistered(type)) {
@@ -269,20 +212,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       options?.namespace
     );
     return this.handleEncryptedAttributesInResponse(
-      await this.options.baseClient.create<T>(
+      await this.options.baseClient.update(
         type,
-        (await this.options.service.encryptAttributes(
-          { type, id, namespace },
-          attributes as Record<string, unknown>,
-          {
-            user: this.options.getCurrentUser(),
-          }
-        )) as T,
-        {
-          ...options,
-          id,
-          overwrite: true,
-        }
+        id,
+        await this.options.service.encryptAttributes({ type, id, namespace }, attributes, {
+          user: this.options.getCurrentUser(),
+        }),
+        options
       ),
       attributes,
       namespace
@@ -365,17 +301,5 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     return response;
-  }
-
-  /**
-   * Zip two arrays together so each cell contains a tupple of two item, one from each array in that index.
-   * All items from the left array will be retained, and only as many items as needed will be pulled from right
-   * @param left array of items of any type
-   * @param right array of items of any type
-   * @param defaultZipValue default value to use when pulling from the left array and
-   *   a corresponding item is missing in the right array
-   */
-  private zip<T, G>(left: T[], right: G[], defaultZipValue: G) {
-    return left.map<[T, G]>((leftItem, index) => [leftItem, right[index] ?? defaultZipValue]);
   }
 }

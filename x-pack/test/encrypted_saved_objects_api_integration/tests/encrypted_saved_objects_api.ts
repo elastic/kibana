@@ -41,7 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
       publicPropertyStoredEncrypted: string;
       privateProperty: string;
       publicPropertyExcludedFromAAD: string;
-      publicDeepProperty: Record<string, string>;
     };
 
     let savedObject: SavedObject;
@@ -51,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
         publicPropertyExcludedFromAAD: randomness.string(),
-        publicDeepProperty: { [randomness.string()]: randomness.string() },
       };
 
       const { body } = await supertest
@@ -68,16 +66,12 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject);
       expect(rawAttributes.publicProperty).to.be(savedObjectOriginalAttributes.publicProperty);
       expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
         savedObjectOriginalAttributes.publicPropertyExcludedFromAAD
-      );
-      expect(rawAttributes.publicDeepProperty).to.eql(
-        savedObjectOriginalAttributes.publicDeepProperty
       );
 
       expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
@@ -214,7 +208,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(response.error).to.be(undefined);
     });
@@ -224,13 +217,9 @@ export default function ({ getService }: FtrProviderContext) {
       // encrypted attributes.
       const updatedPublicProperty = randomness.string();
       await supertest
-        .put(
-          `${getURLAPIBaseURL()}update-with-partial/${encryptedSavedObjectType}/${savedObject.id}`
-        )
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          attributes: { publicProperty: updatedPublicProperty },
-        })
+        .send({ attributes: { publicProperty: updatedPublicProperty } })
         .expect(200);
 
       const { body: response } = await supertest
@@ -240,7 +229,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.attributes).to.eql({
         publicProperty: updatedPublicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(response.error).to.eql({
         message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
@@ -260,7 +248,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(savedObjects[0].error).to.be(undefined);
     });
@@ -270,9 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
       // encrypted attributes.
       const updatedPublicProperty = randomness.string();
       await supertest
-        .put(
-          `${getURLAPIBaseURL()}update-with-partial/${encryptedSavedObjectType}/${savedObject.id}`
-        )
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: { publicProperty: updatedPublicProperty } })
         .expect(200);
@@ -288,7 +273,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: updatedPublicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(savedObjects[0].error).to.eql({
         message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
@@ -310,7 +294,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(savedObjects[0].error).to.be(undefined);
     });
@@ -320,13 +303,9 @@ export default function ({ getService }: FtrProviderContext) {
       // encrypted attributes.
       const updatedPublicProperty = randomness.string();
       await supertest
-        .put(
-          `${getURLAPIBaseURL()}update-with-partial/${encryptedSavedObjectType}/${savedObject.id}`
-        )
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          attributes: { publicProperty: updatedPublicProperty },
-        })
+        .send({ attributes: { publicProperty: updatedPublicProperty } })
         .expect(200);
 
       const {
@@ -342,7 +321,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: updatedPublicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicDeepProperty: savedObjectOriginalAttributes.publicDeepProperty,
       });
       expect(savedObjects[0].error).to.eql({
         message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
@@ -355,7 +333,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicPropertyExcludedFromAAD: randomness.string(),
         publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
-        publicDeepProperty: { [randomness.string()]: randomness.string() },
       };
 
       const { body: response } = await supertest
@@ -368,7 +345,6 @@ export default function ({ getService }: FtrProviderContext) {
         publicProperty: updatedAttributes.publicProperty,
         publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: updatedAttributes.publicPropertyStoredEncrypted,
-        publicDeepProperty: updatedAttributes.publicDeepProperty,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject);
@@ -383,32 +359,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(rawAttributes.privateProperty).to.not.be.empty();
       expect(rawAttributes.privateProperty).to.not.be(updatedAttributes.privateProperty);
-    });
-
-    it('#update overwrites objects in their entirety', async () => {
-      const updatedAttributes = {
-        publicProperty: randomness.string(),
-        publicPropertyExcludedFromAAD: randomness.string(),
-        publicPropertyStoredEncrypted: randomness.string(),
-        privateProperty: randomness.string(),
-        publicDeepProperty: { [randomness.string()]: randomness.string() },
-      };
-
-      await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({ attributes: updatedAttributes })
-        .expect(200);
-
-      const { body: decryptedResponse } = await supertest
-        .get(
-          `${getURLAPIBaseURL()}get-decrypted-as-internal-user/${encryptedSavedObjectType}/${
-            savedObject.id
-          }`
-        )
-        .expect(200);
-
-      expect(decryptedResponse.attributes).to.eql(updatedAttributes);
     });
 
     it('#getDecryptedAsInternalUser decrypts and returns all attributes', async () => {
@@ -427,9 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
       const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
-        .put(
-          `${getURLAPIBaseURL()}update-with-partial/${encryptedSavedObjectType}/${savedObject.id}`
-        )
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes })
         .expect(200);
@@ -456,9 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
       const updatedAttributes = { publicProperty: randomness.string() };
 
       const { body: response } = await supertest
-        .put(
-          `${getURLAPIBaseURL()}update-with-partial/${encryptedSavedObjectType}/${savedObject.id}`
-        )
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes })
         .expect(200);

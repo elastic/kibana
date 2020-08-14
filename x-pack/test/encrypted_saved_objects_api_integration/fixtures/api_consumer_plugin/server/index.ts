@@ -62,10 +62,6 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
             publicPropertyExcludedFromAAD: { type: 'keyword' },
             publicPropertyStoredEncrypted: { type: 'binary' },
             privateProperty: { type: 'binary' },
-            publicDeepProperty: {
-              enabled: false,
-              type: 'object',
-            },
           },
         }),
       });
@@ -115,31 +111,6 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         }
       }
     );
-
-    for (const route of ['saved_objects', 'hidden_saved_objects']) {
-      router.put(
-        {
-          path: `/api/${route}/update-with-partial/{type}/{id}`,
-          validate: { params: (value) => ({ value }), body: (value) => ({ value }) },
-        },
-        async (context, request, response) => {
-          const [{ savedObjects }] = await core.getStartServices();
-          const { type, id } = request.params;
-          const { attributes } = request.body as { attributes: any };
-
-          return response.ok({
-            body: await savedObjects
-              .getScopedClient(request, {
-                includedHiddenTypes: [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE],
-                excludedWrappers: ['encryptedSavedObjects'],
-              })
-              .update(type, id, attributes, {
-                refresh: true,
-              }),
-          });
-        }
-      );
-    }
 
     registerHiddenSORoutes(router, core, deps, [HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE]);
   },
