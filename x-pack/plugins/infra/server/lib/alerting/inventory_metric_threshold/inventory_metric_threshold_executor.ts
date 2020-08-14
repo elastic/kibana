@@ -140,10 +140,6 @@ export const FIRED_ACTIONS = {
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {
-  // if (SnapshotCustomMetricInputRT.is(metric)) {
-  //   const formatter = createFormatterForMetric(metric);
-  //   return formatter(val);
-  // }
   const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
   if (value == null) {
     return '';
