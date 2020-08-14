@@ -118,7 +118,7 @@ export interface PutAgentReassignRequest {
   params: {
     agentId: string;
   };
-  body: { agent_policy_id: string };
+  body: { policy_id: string };
 }
 
 export interface PutAgentReassignResponse {

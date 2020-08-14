@@ -29,7 +29,7 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object({
     name: schema.maybe(schema.string()),
-    agent_policy_id: schema.string(),
+    policy_id: schema.string(),
     expiration: schema.maybe(schema.string()),
   }),
 };

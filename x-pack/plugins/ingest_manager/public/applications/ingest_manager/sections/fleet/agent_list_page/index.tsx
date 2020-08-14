@@ -284,22 +284,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 {policyName || policyId}
               </EuiLink>
             </EuiFlexItem>
-            {agent.agent_policy_revision && (
+            {agent.policy_revision && (
               <EuiFlexItem grow={false}>
                 <EuiText color="default" size="xs" className="eui-textNoWrap">
                   <FormattedMessage
                     id="xpack.ingestManager.agentList.revisionNumber"
                     defaultMessage="rev. {revNumber}"
-                    values={{ revNumber: agent.agent_policy_revision }}
+                    values={{ revNumber: agent.policy_revision }}
                   />
                 </EuiText>
               </EuiFlexItem>
             )}
-            {agent.agent_policy_id &&
-              agent.agent_policy_revision &&
-              agentPoliciesIndexedById[agent.agent_policy_id] &&
-              agentPoliciesIndexedById[agent.agent_policy_id].revision >
-                agent.agent_policy_revision && (
+            {agent.policy_id &&
+              agent.policy_revision &&
+              agentPoliciesIndexedById[agent.policy_id] &&
+              agentPoliciesIndexedById[agent.policy_id].revision > agent.policy_revision && (
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                     <EuiIcon size="m" type="alert" color="warning" />

@@ -4143,7 +4143,7 @@
           "config_id": {
             "type": "string"
           },
-          "agent_policy_revision": {
+          "policy_revision": {
             "type": ["number", "null"]
           },
           "last_checkin": {

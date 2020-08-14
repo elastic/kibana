@@ -310,11 +310,7 @@ export const putAgentsReassignHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    await AgentService.reassignAgent(
-      soClient,
-      request.params.agentId,
-      request.body.agent_policy_id
-    );
+    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.policy_id);
 
     const body: PutAgentReassignResponse = {
       success: true,

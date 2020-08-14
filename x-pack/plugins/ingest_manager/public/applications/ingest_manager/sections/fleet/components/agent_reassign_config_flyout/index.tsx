@@ -36,7 +36,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useCore();
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    agent.agent_policy_id
+    agent.policy_id
   );
 
   const agentPoliciesRequest = useGetAgentPolicies({
@@ -54,7 +54,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         throw new Error('No selected agent policy id');
       }
       const res = await sendPutAgentReassign(agent.id, {
-        agent_policy_id: selectedAgentPolicyId,
+        policy_id: selectedAgentPolicyId,
       });
       if (res.error) {
         throw res.error;
@@ -134,7 +134,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={selectedAgentPolicyId === agent.agent_policy_id}
+              disabled={selectedAgentPolicyId === agent.policy_id}
               fill
               onClick={onSubmit}
               isLoading={isSubmitting}

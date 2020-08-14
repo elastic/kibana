@@ -17,7 +17,7 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { migrateAgentToV7100 } from './migrations/to_v7_10_0.ts';
+import { migrateAgentToV7100 } from './migrations/to_v7_10_0';
 
 /*
  * Saved object types and mappings
@@ -62,8 +62,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         version: { type: 'keyword' },
         user_provided_metadata: { type: 'flattened' },
         local_metadata: { type: 'flattened' },
-        agent_policy_id: { type: 'keyword' },
-        agent_policy_revision: { type: 'integer' },
+        policy_id: { type: 'keyword' },
+        policy_revision: { type: 'integer' },
         last_updated: { type: 'date' },
         last_checkin: { type: 'date' },
         last_checkin_status: { type: 'keyword' },
@@ -320,8 +320,8 @@ export function registerEncryptedSavedObjects(
       'version',
       'user_provided_metadata',
       'local_metadata',
-      'agent_policy_id',
-      'agent_policy_revision',
+      'policy_id',
+      'policy_revision',
       'last_updated',
       'last_checkin',
       'last_checkin_status',

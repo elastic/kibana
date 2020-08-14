@@ -9,19 +9,19 @@ import { cloneDeep } from 'lodash';
 import { Agent } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
-  Exclude<Agent, 'agent_policy_id' | 'agent_policy_revision'> & {
+  Exclude<Agent, 'policy_id' | 'policy_revision'> & {
     config_id?: string;
-    agent_policy_revision?: number | null;
+    policy_revision?: number | null;
   },
   Agent
 > = (agentDoc) => {
   const updatedAgentDoc = cloneDeep(agentDoc);
 
-  updatedAgentDoc.attributes.agent_policy_id = agentDoc.attributes.config_id;
+  updatedAgentDoc.attributes.policy_id = agentDoc.attributes.config_id;
   delete updatedAgentDoc.attributes.config_id;
 
-  updatedAgentDoc.attributes.agent_policy_revision = agentDoc.attributes.agent_policy_revision;
-  delete updatedAgentDoc.attributes.agent_policy_revision;
+  updatedAgentDoc.attributes.policy_revision = agentDoc.attributes.policy_revision;
+  delete updatedAgentDoc.attributes.policy_revision;
 
   return updatedAgentDoc;
 };

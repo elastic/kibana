@@ -85,7 +85,7 @@ export const PutAgentReassignRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
-    agent_policy_id: schema.string(),
+    policy_id: schema.string(),
   }),
 };
 

@@ -45,7 +45,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: testAgentId,
-        agent_policy_id: 'randoAgentPolicyId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,
@@ -82,7 +82,7 @@ export const mockFleetObjectsResponse = (
       attributes: {
         active: true,
         id: 'oldTestAgentId',
-        agent_policy_id: 'randoAgentPolicyId',
+        policy_id: 'randoAgentPolicyId',
         type: 'PERMANENT',
         user_provided_metadata: {},
         enrolled_at: lastCheckIn,

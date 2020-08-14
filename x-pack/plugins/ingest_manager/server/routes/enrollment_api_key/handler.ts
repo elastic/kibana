@@ -51,7 +51,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
     const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, {
       name: request.body.name,
       expiration: request.body.expiration,
-      agentPolicyId: request.body.agent_policy_id,
+      agentPolicyId: request.body.policy_id,
     });
 
     const body: PostEnrollmentAPIKeyResponse = { item: apiKey, success: true, action: 'created' };

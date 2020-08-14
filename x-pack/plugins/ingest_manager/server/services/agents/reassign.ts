@@ -21,7 +21,7 @@ export async function reassignAgent(
   }
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    agent_policy_id: newAgentPolicyId,
-    agent_policy_revision: null,
+    policy_id: newAgentPolicyId,
+    policy_revision: null,
   });
 }
