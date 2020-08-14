@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
