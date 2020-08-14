@@ -59,7 +59,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isLoading: isAgentPolicyLoading,
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
-  } = useGetOneAgentPolicy(agentData?.item?.config_id);
+  } = useGetOneAgentPolicy(agentData?.item?.agent_policy_id);
 
   const {
     application: { navigateToApp },
@@ -134,13 +134,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                 <Loading size="m" />
               ) : agentPolicyData?.item ? (
                 <EuiLink
-                  href={getHref('policy_details', { policyId: agentData.item.config_id! })}
+                  href={getHref('policy_details', { policyId: agentData.item.agent_policy_id! })}
                   className="eui-textBreakWord"
                 >
-                  {agentPolicyData.item.name || agentData.item.config_id}
+                  {agentPolicyData.item.name || agentData.item.agent_policy_id}
                 </EuiLink>
               ) : (
-                agentData.item.config_id || '-'
+                agentData.item.agent_policy_id || '-'
               ),
             },
             { isDivider: true },

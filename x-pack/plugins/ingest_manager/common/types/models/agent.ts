@@ -89,8 +89,8 @@ interface AgentBase {
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;
-  config_id?: string;
-  config_revision?: number | null;
+  agent_policy_id?: string;
+  agent_policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded';
   user_provided_metadata: AgentMetadata;

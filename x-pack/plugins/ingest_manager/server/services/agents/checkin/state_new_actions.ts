@@ -102,7 +102,7 @@ function shouldCreateAgentPolicyAction(agent: Agent, agentPolicy: FullAgentPolic
     return false;
   }
   const isAgentPolicyOutdated =
-    !agent.config_revision || agent.config_revision < agentPolicy.revision;
+    !agent.agent_policy_revision || agent.agent_policy_revision < agentPolicy.revision;
   if (!isAgentPolicyOutdated) {
     return false;
   }
@@ -150,10 +150,10 @@ export function agentCheckinStateNewActionsFactory() {
     agent: Agent,
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
-    if (!agent.config_id) {
+    if (!agent.agent_policy_id) {
       throw new Error('Agent does not have a policy');
     }
-    const agentPolicyId = agent.config_id;
+    const agentPolicyId = agent.agent_policy_id;
     if (!agentPolicies$.has(agentPolicyId)) {
       agentPolicies$.set(agentPolicyId, createAgentPolicySharedObservable(agentPolicyId));
     }

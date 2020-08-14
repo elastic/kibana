@@ -53,13 +53,13 @@ export const AgentDetailsContent: React.FunctionComponent<{
           }),
           description: agentPolicy ? (
             <EuiLink
-              href={getHref('policy_details', { policyId: agent.config_id! })}
+              href={getHref('policy_details', { policyId: agent.agent_policy_id! })}
               className="eui-textBreakWord"
             >
-              {agentPolicy.name || agent.config_id}
+              {agentPolicy.name || agent.agent_policy_id}
             </EuiLink>
           ) : (
-            agent.config_id || '-'
+            agent.agent_policy_id || '-'
           ),
         },
         {

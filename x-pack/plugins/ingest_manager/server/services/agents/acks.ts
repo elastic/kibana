@@ -87,11 +87,11 @@ function getLatestAgentPolicyIfUpdated(agent: Agent, actions: AgentAction[]) {
     }
     const data = action.data || {};
 
-    if (data?.config?.id !== agent.config_id) {
+    if (data?.config?.id !== agent.agent_policy_id) {
       return acc;
     }
 
-    const currentRevision = (acc && acc.revision) || agent.config_revision || 0;
+    const currentRevision = (acc && acc.revision) || agent.agent_policy_revision || 0;
 
     return data?.config?.revision > currentRevision ? data?.config : acc;
   }, null);
@@ -110,7 +110,7 @@ function buildUpdateAgentPolicy(agentId: string, agentPolicy: FullAgentPolicy) {
     type: AGENT_SAVED_OBJECT_TYPE,
     id: agentId,
     attributes: {
-      config_revision: agentPolicy.revision,
+      agent_policy_revision: agentPolicy.revision,
       packages,
     },
   };

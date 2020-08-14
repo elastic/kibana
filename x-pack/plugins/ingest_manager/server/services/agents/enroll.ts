@@ -33,7 +33,7 @@ export async function enroll(
   const agentData: AgentSOAttributes = {
     shared_id: sharedId,
     active: true,
-    config_id: agentPolicyId,
+    agent_policy_id: agentPolicyId,
     type,
     enrolled_at: enrolledAt,
     user_provided_metadata: metadata?.userProvided ?? {},

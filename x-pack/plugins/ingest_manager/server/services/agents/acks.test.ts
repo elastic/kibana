@@ -224,7 +224,7 @@ describe('test agent acks services', () => {
     expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
-          "config_revision": 4,
+          "agent_policy_revision": 4,
           "packages": Array [
             "system",
           ],
@@ -350,7 +350,7 @@ describe('test agent acks services', () => {
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
         config_id: 'config1',
-        config_revision: 100,
+        agent_policy_revision: 100,
       } as unknown) as Agent,
       [
         {

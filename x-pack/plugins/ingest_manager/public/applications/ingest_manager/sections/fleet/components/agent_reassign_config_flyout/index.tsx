@@ -36,7 +36,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useCore();
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    agent.config_id
+    agent.agent_policy_id
   );
 
   const agentPoliciesRequest = useGetAgentPolicies({
@@ -134,7 +134,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={selectedAgentPolicyId === agent.config_id}
+              disabled={selectedAgentPolicyId === agent.agent_policy_id}
               fill
               onClick={onSubmit}
               isLoading={isSubmitting}
