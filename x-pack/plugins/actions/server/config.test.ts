@@ -16,7 +16,7 @@ describe('config validation', () => {
         ],
         "preconfigured": Object {},
         "rejectUnauthorizedCertificates": true,
-        "whitelistedHosts": Array [
+        "hostsAllowList": Array [
           "*",
         ],
       }
@@ -53,7 +53,7 @@ describe('config validation', () => {
           },
         },
         "rejectUnauthorizedCertificates": false,
-        "whitelistedHosts": Array [
+        "hostsAllowList": Array [
           "*",
         ],
       }

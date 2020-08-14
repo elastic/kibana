@@ -47,7 +47,7 @@ export interface ActionsPlugin {
 
 export interface ActionsConfigType {
   enabled: boolean;
-  whitelistedHosts: string[];
+  hostsAllowList: string[];
   enabledActionTypes: string[];
 }
 
@@ -100,8 +100,8 @@ interface ValidatorType<Type> {
 }
 
 export interface ActionValidationService {
-  isWhitelistedHostname(hostname: string): boolean;
-  isWhitelistedUri(uri: string): boolean;
+  isAllowListedHostname(hostname: string): boolean;
+  isAllowListedUri(uri: string): boolean;
 }
 
 export interface ActionType<

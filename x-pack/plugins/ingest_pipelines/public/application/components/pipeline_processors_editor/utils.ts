@@ -75,7 +75,7 @@ export const setValue = <Target = any, Value = any>(
     if (!WHITELISTED_KEYS_REGEX.test(key)) {
       // eslint-disable-next-line no-console
       console.error(
-        `Received non-whitelisted key "${key}". Aborting set value operation; returning original.`
+        `Received non-existing in hostsAllowList key "${key}". Aborting set value operation; returning original.`
       );
       return dumbCopy(source);
     }

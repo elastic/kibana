@@ -295,7 +295,7 @@ describe('create()', () => {
     const localConfigUtils = getActionsConfigurationUtilities({
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
-      whitelistedHosts: ['*'],
+      hostsAllowList: ['*'],
     });
 
     const localActionTypeRegistryParams = {

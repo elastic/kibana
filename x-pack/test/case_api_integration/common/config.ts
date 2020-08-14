@@ -73,7 +73,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          `--xpack.actions.whitelistedHosts=${JSON.stringify([
+          `--xpack.actions.hostsAllowList=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
           ])}`,

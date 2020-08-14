@@ -13,7 +13,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfigType } from './types';
 import { ActionTypeDisabledError } from './lib';
 
-export enum WhitelistedHosts {
+export enum HostsAllowList {
   Any = '*',
 }
 
@@ -21,24 +21,24 @@ export enum EnabledActionTypes {
   Any = '*',
 }
 
-enum WhitelistingField {
+enum AllowingField {
   url = 'url',
   hostname = 'hostname',
 }
 
 export interface ActionsConfigurationUtilities {
-  isWhitelistedHostname: (hostname: string) => boolean;
-  isWhitelistedUri: (uri: string) => boolean;
+  isAllowListedHostname: (hostname: string) => boolean;
+  isAllowListedUri: (uri: string) => boolean;
   isActionTypeEnabled: (actionType: string) => boolean;
-  ensureWhitelistedHostname: (hostname: string) => void;
-  ensureWhitelistedUri: (uri: string) => void;
+  ensureAllowListedHostname: (hostname: string) => void;
+  ensureAllowListedUri: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
 }
 
-function whitelistingErrorMessage(field: WhitelistingField, value: string) {
-  return i18n.translate('xpack.actions.urlWhitelistConfigurationError', {
+function allowingErrorMessage(field: AllowingField, value: string) {
+  return i18n.translate('xpack.actions.urlHostsAllowListConfigurationError', {
     defaultMessage:
-      'target {field} "{value}" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+      'target {field} "{value}" is not present in the Kibana config xpack.actions.hostsAllowList',
     values: {
       value,
       field,
@@ -56,18 +56,18 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string): boolean {
-  const whitelisted = new Set(whitelistedHosts);
-  if (whitelisted.has(WhitelistedHosts.Any)) return true;
-  if (whitelisted.has(hostname)) return true;
+function isAllowed({ hostsAllowList }: ActionsConfigType, hostname: string): boolean {
+  const allowed = new Set(hostsAllowList);
+  if (allowed.has(HostsAllowList.Any)) return true;
+  if (allowed.has(hostname)) return true;
   return false;
 }
 
-function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
+function isAllowListedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
     tryCatch(() => new URL(uri)),
     map((url) => url.hostname),
-    mapNullable((hostname) => isWhitelisted(config, hostname)),
+    mapNullable((hostname) => isAllowListed(config, hostname)),
     getOrElse<boolean>(() => false)
   );
 }
@@ -85,21 +85,21 @@ function isActionTypeEnabledInConfig(
 export function getActionsConfigurationUtilities(
   config: ActionsConfigType
 ): ActionsConfigurationUtilities {
-  const isWhitelistedHostname = curry(isWhitelisted)(config);
-  const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);
+  const isAllowedHostname = curry(isAllowed)(config);
+  const isAllowedUri = curry(isAllowListedHostnameInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   return {
-    isWhitelistedHostname,
-    isWhitelistedUri,
+    isAllowListedHostname,
+    isAllowListedUri,
     isActionTypeEnabled,
-    ensureWhitelistedUri(uri: string) {
-      if (!isWhitelistedUri(uri)) {
-        throw new Error(whitelistingErrorMessage(WhitelistingField.url, uri));
+    ensureAllowListedUri(uri: string) {
+      if (!isAllowListedUri(uri)) {
+        throw new Error(allowingErrorMessage(AllowingField.url, uri));
       }
     },
-    ensureWhitelistedHostname(hostname: string) {
-      if (!isWhitelistedHostname(hostname)) {
-        throw new Error(whitelistingErrorMessage(WhitelistingField.hostname, hostname));
+    ensureAllowListedHostname(hostname: string) {
+      if (!isAllowListedHostname(hostname)) {
+        throw new Error(allowingErrorMessage(AllowingField.hostname, hostname));
       }
     },
     ensureActionTypeEnabled(actionType: string) {

@@ -121,56 +121,56 @@ describe('config validation', () => {
   const NODEMAILER_AOL_SERVICE = 'AOL';
   const NODEMAILER_AOL_SERVICE_HOST = 'smtp.aol.com';
 
-  test('config validation handles email host whitelisting', () => {
+  test('config validation handles email host in hostsAllowList', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        isWhitelistedHostname: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
+        isAllowListedHostname: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
       },
     });
     const baseConfig = {
       from: 'bob@example.com',
     };
-    const whitelistedConfig1 = {
+    const hostsAllowList1 = {
       ...baseConfig,
       service: NODEMAILER_AOL_SERVICE,
     };
-    const whitelistedConfig2 = {
+    const hostsAllowList2 = {
       ...baseConfig,
       host: NODEMAILER_AOL_SERVICE_HOST,
       port: 42,
     };
-    const notWhitelistedConfig1 = {
+    const notHostsAllowList1 = {
       ...baseConfig,
       service: 'gmail',
     };
 
-    const notWhitelistedConfig2 = {
+    const notHostsAllowList2 = {
       ...baseConfig,
       host: 'smtp.gmail.com',
       port: 42,
     };
 
-    const validatedConfig1 = validateConfig(actionType, whitelistedConfig1);
-    expect(validatedConfig1.service).toEqual(whitelistedConfig1.service);
-    expect(validatedConfig1.from).toEqual(whitelistedConfig1.from);
+    const validatedConfig1 = validateConfig(actionType, hostsAllowList1);
+    expect(validatedConfig1.service).toEqual(hostsAllowList1.service);
+    expect(validatedConfig1.from).toEqual(hostsAllowList1.from);
 
-    const validatedConfig2 = validateConfig(actionType, whitelistedConfig2);
-    expect(validatedConfig2.host).toEqual(whitelistedConfig2.host);
-    expect(validatedConfig2.port).toEqual(whitelistedConfig2.port);
-    expect(validatedConfig2.from).toEqual(whitelistedConfig2.from);
+    const validatedConfig2 = validateConfig(actionType, hostsAllowList2);
+    expect(validatedConfig2.host).toEqual(hostsAllowList2.host);
+    expect(validatedConfig2.port).toEqual(hostsAllowList2.port);
+    expect(validatedConfig2.from).toEqual(hostsAllowList2.from);
 
     expect(() => {
-      validateConfig(actionType, notWhitelistedConfig1);
+      validateConfig(actionType, notHostsAllowList1);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the whitelistedHosts configuration"`
+      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the hostsAllowList configuration"`
     );
 
     expect(() => {
-      validateConfig(actionType, notWhitelistedConfig2);
+      validateConfig(actionType, notHostsAllowList1);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the whitelistedHosts configuration"`
+      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the hostsAllowList configuration"`
     );
   });
 });

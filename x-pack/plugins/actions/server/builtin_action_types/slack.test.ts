@@ -96,12 +96,12 @@ describe('validateActionTypeSecrets()', () => {
     );
   });
 
-  test('should validate and pass when the slack webhookUrl is whitelisted', () => {
+  test('should validate and pass when the slack webhookUrl is added to hostsAllowList', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (url) => {
+        ensureAllowListedUri: (url) => {
           expect(url).toEqual('https://api.slack.com/');
         },
       },
@@ -112,13 +112,13 @@ describe('validateActionTypeSecrets()', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to hostsAllowList', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedHostname: () => {
-          throw new Error(`target hostname is not whitelisted`);
+        ensureAllowListedHostname: () => {
+          throw new Error(`target hostname is not added to hostsAllowList`);
         },
       },
     });
@@ -126,7 +126,7 @@ describe('validateActionTypeSecrets()', () => {
     expect(() => {
       validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not whitelisted"`
+      `"error validating action type secrets: error configuring slack action: target hostname is not added to hostsAllowList"`
     );
   });
 });
