@@ -23,6 +23,7 @@ import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import * as builder from '../builder';
 import * as helpers from '../helpers';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { EntriesArray } from '../../../../../../lists/common/schemas/types';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
@@ -136,6 +137,9 @@ describe('When the add exception modal is opened', () => {
         wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
       ).toBeFalsy();
     });
+    it('should contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
+    });
   });
 
   describe('when there is alert data passed to an endpoint list exception', () => {
@@ -183,6 +187,9 @@ describe('When the add exception modal is opened', () => {
           .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
           .getDOMNode()
       ).toBeDisabled();
+    });
+    it('should contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
     });
   });
 
@@ -236,6 +243,7 @@ describe('When the add exception modal is opened', () => {
 
   describe('when there is bulk-closeable alert data passed to an endpoint list exception', () => {
     let wrapper: ReactWrapper;
+    let callProps;
     beforeEach(() => {
       // Mocks the index patterns to contain the pre-populated endpoint fields so that the exception qualifies as bulk closable
       (useFetchIndexPatterns as jest.Mock).mockImplementation(() => [
@@ -270,7 +278,7 @@ describe('When the add exception modal is opened', () => {
           />
         </ThemeProvider>
       );
-      const callProps = ExceptionBuilderComponent.mock.calls[0][0];
+      callProps = ExceptionBuilderComponent.mock.calls[0][0];
       act(() => callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] }));
     });
     it('has the add exception button enabled', () => {
@@ -290,12 +298,38 @@ describe('When the add exception modal is opened', () => {
         wrapper.find('[data-test-subj="close-alert-on-add-add-exception-checkbox"]').exists()
       ).toBeTruthy();
     });
+    it('should contain the endpoint specific documentation text', () => {
+      expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
+    });
     it('should have the bulk close checkbox enabled', () => {
       expect(
         wrapper
           .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
           .getDOMNode()
       ).not.toBeDisabled();
+    });
+    describe('when a "is in list" entry is added', () => {
+      it('should have the bulk close checkbox disabled', () => {
+        act(() =>
+          callProps.onChange({
+            exceptionItems: [
+              ...callProps.exceptionListItems,
+              {
+                ...getExceptionListItemSchemaMock(),
+                entries: [
+                  { field: 'event.code', operator: 'included', type: 'list' },
+                ] as EntriesArray,
+              },
+            ],
+          })
+        );
+
+        expect(
+          wrapper
+            .find('input[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]')
+            .getDOMNode()
+        ).toBeDisabled();
+      });
     });
   });
 });

@@ -369,7 +369,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 {exceptionListType === 'endpoint' && (
                   <>
                     <EuiSpacer />
-                    <EuiText color="subdued" size="s">
+                    <EuiText data-test-subj="add-exception-endpoint-text" color="subdued" size="s">
                       {i18n.ENDPOINT_QUARANTINE_TEXT}
                     </EuiText>
                   </>

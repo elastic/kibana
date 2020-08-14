@@ -99,7 +99,7 @@ describe('When the edit exception modal is opened', () => {
   });
 
   describe('when an endpoint exception with exception data is passed', () => {
-    describe('with data that matches index patterns', () => {
+    describe('when exception entry fields are included in the index pattern', () => {
       let wrapper: ReactWrapper;
       beforeEach(() => {
         const exceptionItemMock = {
@@ -147,7 +147,7 @@ describe('When the edit exception modal is opened', () => {
       });
     });
 
-    describe('without data that matches index patterns', () => {
+    describe("when exception entry fields aren't included in the index pattern", () => {
       let wrapper: ReactWrapper;
       beforeEach(() => {
         wrapper = mount(
@@ -228,7 +228,7 @@ describe('When the edit exception modal is opened', () => {
     });
   });
 
-  describe('when an exception is passed with no exception data', () => {
+  describe('when an exception with no entries is passed', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
