@@ -12,7 +12,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
 
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
-    const retry = getService('retry');
 
     this.tags('ciGroup7');
     const log = getService('log');
@@ -25,9 +24,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
-      await retry.try(async () => {
-        await ingestManager.setup();
-      });
+      await ingestManager.setup();
     });
     loadTestFile(require.resolve('./resolver/index'));
     loadTestFile(require.resolve('./metadata'));
