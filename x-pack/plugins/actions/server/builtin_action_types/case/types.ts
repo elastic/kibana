@@ -23,7 +23,6 @@ import {
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
 import { LicenseType } from '../../../../../legacy/common/constants';
-import { ProxySettings } from '../../types';
 
 export interface AnyParams {
   [index: string]: string | number | object | undefined | null;
@@ -127,7 +126,7 @@ export interface CreateExternalServiceBasicArgs {
   createExternalService: (
     credentials: ExternalServiceCredentials,
     logger: Logger,
-    proxySettings?: ProxySettings
+    proxySettings?: any
   ) => ExternalService;
   logger: Logger;
 }
