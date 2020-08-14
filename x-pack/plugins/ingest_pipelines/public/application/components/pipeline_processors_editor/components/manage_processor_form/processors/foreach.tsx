@@ -12,14 +12,15 @@ import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { FieldsConfig } from './shared';
+import { FieldsConfig, to } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 
 const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
   processor: {
     type: FIELD_TYPES.TEXT,
-    deserializer: (v) => (v ? JSON.stringify(v, null, 2) : '{}'),
+    deserializer: to.jsonString,
     serializer: JSON.parse,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.foreachForm.processorFieldLabel', {
       defaultMessage: 'Processor',

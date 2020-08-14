@@ -17,11 +17,50 @@ export function isArrayOfStrings(v: unknown): v is string[] {
 }
 
 /**
- * Shared deserializer functions
+ * Shared deserializer functions.
+ *
+ * These are intended to be used in @link{FieldsConfig} as the "deserializer".
+ *
+ * Example:
+ * {
+ *   ...
+ *   deserialize: to.booleanOrUndef,
+ *   ...
+ * }
+ *
  */
 export const to = {
   booleanOrUndef: (v: unknown): boolean | undefined => (typeof v === 'boolean' ? v : undefined),
   arrayOfStrings: (v: unknown): string[] => (isArrayOfStrings(v) ? v : []),
+  jsonString: (v: unknown) => (v ? JSON.stringify(v, null, 2) : '{}'),
+};
+
+/**
+ * Shared serializer functions.
+ *
+ * These are intended to be used in @link{FieldsConfig} as the "serializer".
+ *
+ * Example:
+ * {
+ *   ...
+ *   serializer: from.optionalJson,
+ *   ...
+ * }
+ *
+ */
+export const from = {
+  /* Works with `to.jsonString` as deserializer. */
+  optionalJson: (v: string) => {
+    if (v) {
+      try {
+        if (Object.keys(JSON.parse(v)).length) {
+          return v;
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+  },
 };
 
 export type FieldsConfig = Record<string, FieldConfig>;

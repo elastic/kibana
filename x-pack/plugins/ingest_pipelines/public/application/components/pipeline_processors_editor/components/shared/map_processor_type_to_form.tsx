@@ -25,6 +25,7 @@ import {
   Grok,
   Gsub,
   HtmlStrip,
+  Inference,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -162,7 +163,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   inference: {
-    FieldsComponent: undefined, // TODO: Implement
+    FieldsComponent: Inference,
     docLinkPath: '/inference-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.inference', {
       defaultMessage: 'Inference',
