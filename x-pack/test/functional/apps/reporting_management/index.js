@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export default ({ loadTestFile }: FtrProviderContext) => {
+export default ({ loadTestFile }) => {
   describe('reporting management app', function () {
     this.tags('ciGroup7');
     loadTestFile(require.resolve('./report_listing'));

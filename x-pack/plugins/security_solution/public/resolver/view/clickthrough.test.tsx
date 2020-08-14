@@ -169,7 +169,7 @@ describe('Resolver, when analyzing a tree that has two related events for the or
           button.simulate('click');
         }
       });
-      it('should open the submenu', async () => {
+      it('should open the submenu and display exactly one option with the correct count', async () => {
         await expect(
           simulator.map(() =>
             simulator.testSubject('resolver:map:node-submenu-item').map((node) => node.text())
