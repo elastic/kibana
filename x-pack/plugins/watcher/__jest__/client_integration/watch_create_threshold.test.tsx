@@ -299,14 +299,8 @@ describe('<ThresholdWatchEdit /> create route', () => {
 
           expect(exists('watchActionAccordion')).toBe(true);
 
-          // First, provide invalid field and verify
+          // Verify an empty index is allowed
           form.setInputValue('indexInput', '');
-
-          expect(form.getErrorsMessages()).toContain('Index name is required.');
-          expect(find('simulateActionButton').props().disabled).toEqual(true);
-
-          // Next, provide valid field and verify
-          form.setInputValue('indexInput', INDEX);
 
           await act(async () => {
             actions.clickSimulateButton();
@@ -327,7 +321,7 @@ describe('<ThresholdWatchEdit /> create route', () => {
                 id: 'index_1',
                 type: 'index',
                 index: {
-                  index: INDEX,
+                  index: '',
                 },
               },
             ],
