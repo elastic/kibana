@@ -17,16 +17,18 @@
  * under the License.
  */
 
-// @ts-ignore
-export { extractMessagesFromPathToMap } from './extract_default_translations';
-// @ts-ignore
-export { matchEntriesWithExctractors } from './extract_default_translations';
-export { arrayify, writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
-export { serializeToJson, serializeToJson5 } from './serializers';
-export {
-  I18nConfig,
-  filterConfigPaths,
-  assignConfigFromPath,
-  checkConfigNamespacePrefix,
-} from './config';
-export { integrateLocaleFiles } from './integrate_locale_files';
+import os from 'os';
+import execa from 'execa';
+
+export async function getBuildNumber() {
+  if (/^win/.test(os.platform())) {
+    // Windows does not have the wc process and `find /C /V ""` does not consistently work
+    const log = await execa('git', ['log', '--format="%h"']);
+    return log.stdout.split('\n').length;
+  }
+
+  const wc = await execa.command('git log --format="%h" | wc -l', {
+    shell: true,
+  });
+  return parseFloat(wc.stdout.trim());
+}
