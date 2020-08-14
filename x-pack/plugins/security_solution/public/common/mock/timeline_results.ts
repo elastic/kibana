@@ -8,7 +8,13 @@ import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_q
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import {
+  GetAllTimeline,
+  SortFieldTimeline,
+  TimelineResult,
+  Direction,
+  DetailItem,
+} from '../../graphql/types';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
@@ -2252,5 +2258,32 @@ export const defaultTimelineProps: CreateTimelineProps = {
     width: 1100,
   },
   to: '2018-11-05T19:03:25.937Z',
+  notes: null,
   ruleNote: '# this is some markdown documentation',
+};
+
+export const mockTimelineDetails: DetailItem[] = [
+  {
+    field: 'host.name',
+    values: ['apache'],
+    originalValue: 'apache',
+  },
+  {
+    field: 'user.id',
+    values: ['1'],
+    originalValue: 1,
+  },
+];
+
+export const mockTimelineDetailsApollo = {
+  data: {
+    source: {
+      TimelineDetails: {
+        data: mockTimelineDetails,
+      },
+    },
+  },
+  loading: false,
+  networkStatus: 7,
+  stale: false,
 };

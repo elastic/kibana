@@ -40,10 +40,14 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
-  optimize: boolean;
   open: boolean;
   oss: boolean;
+  /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
+  optimize?: boolean;
   runExamples: boolean;
+  disableOptimizer: boolean;
+  cache: boolean;
+  dist: boolean;
 }
 
 export class Env {

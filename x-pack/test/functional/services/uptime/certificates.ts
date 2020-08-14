@@ -24,14 +24,6 @@ export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderCo
   };
 
   return {
-    async isUptimeDataMissing() {
-      return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('data-missing', { timeout: 0 })) {
-          await refreshApp();
-        }
-        await testSubjects.missingOrFail('data-missing');
-      });
-    },
     async hasViewCertButton() {
       return retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail('uptimeCertificatesLink');

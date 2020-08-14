@@ -6,7 +6,6 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createHttpServer, createCoreContext } from 'src/core/server/http/test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ContextService } from 'src/core/server/context/context_service';

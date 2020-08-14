@@ -3,21 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { decode } from 'rison-node';
 import { HttpStart } from 'kibana/public';
 import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { ImmutableMiddlewareFactory } from '../../../../common/store';
 import {
-  isOnHostPage,
-  hasSelectedHost,
+  isOnEndpointPage,
+  hasSelectedEndpoint,
   uiQueryParams,
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
 } from './selectors';
-import { HostState } from '../types';
+import { EndpointState } from '../types';
 import {
   sendGetEndpointSpecificPackageConfigs,
   sendGetEndpointSecurityPackage,
@@ -27,7 +26,7 @@ import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager
 import { metadataIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
+export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
   depsStart
 ) => {
@@ -40,16 +39,15 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
     };
     return [indexPattern];
   }
-
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
 
-    // Host list
+    // Endpoint list
     if (
       action.type === 'userChangedUrl' &&
-      isOnHostPage(state) &&
-      hasSelectedHost(state) !== true
+      isOnEndpointPage(state) &&
+      hasSelectedEndpoint(state) !== true
     ) {
       if (!endpointPackageInfo(state)) {
         sendGetEndpointSecurityPackage(coreStart.http)
@@ -68,7 +66,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
       const { page_index: pageIndex, page_size: pageSize, admin_query: adminQuery } = uiQueryParams(
         state
       );
-      let hostResponse;
+      let endpointResponse;
 
       try {
         // get index pattern and fields for search bar
@@ -94,28 +92,28 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
           decodedQuery = { query: '', language: 'kuery' };
         }
 
-        hostResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
+        endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filters: { kql: decodedQuery.query },
+            filters: decodedQuery.query,
           }),
         });
-        hostResponse.request_page_index = Number(pageIndex);
+        endpointResponse.request_page_index = Number(pageIndex);
 
         dispatch({
-          type: 'serverReturnedHostList',
-          payload: hostResponse,
+          type: 'serverReturnedEndpointList',
+          payload: endpointResponse,
         });
 
-        getNonExistingPoliciesForHostsList(
+        getNonExistingPoliciesForEndpointsList(
           coreStart.http,
-          hostResponse.hosts,
+          endpointResponse.hosts,
           nonExistingPolicies(state)
         )
           .then((missingPolicies) => {
             if (missingPolicies !== undefined) {
               dispatch({
-                type: 'serverReturnedHostNonExistingPolicies',
+                type: 'serverReturnedEndpointNonExistingPolicies',
                 payload: missingPolicies,
               });
             }
@@ -125,24 +123,24 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
           .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostList',
+          type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
       }
 
-      // No hosts, so we should check to see if there are policies for onboarding
-      if (hostResponse && hostResponse.hosts.length === 0) {
+      // No endpoints, so we should check to see if there are policies for onboarding
+      if (endpointResponse && endpointResponse.hosts.length === 0) {
         const http = coreStart.http;
 
         // The original query to the list could have had an invalid param (ex. invalid page_size),
-        // so we check first if hosts actually do exist before pulling in data for the onboarding
+        // so we check first if endpoints actually do exist before pulling in data for the onboarding
         // messages.
-        if (await doHostsExist(http)) {
+        if (await doEndpointsExist(http)) {
           return;
         }
 
         dispatch({
-          type: 'serverReturnedHostExistValue',
+          type: 'serverReturnedEndpointExistValue',
           payload: false,
         });
 
@@ -177,13 +175,13 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
       }
     }
 
-    // Host Details
-    if (action.type === 'userChangedUrl' && hasSelectedHost(state) === true) {
+    // Endpoint Details
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(state) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',
       });
 
-      // If user navigated directly to a host details page, load the host list
+      // If user navigated directly to a endpoint details page, load the endpoint list
       if (listData(state).length === 0) {
         const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
         try {
@@ -194,11 +192,11 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
           });
           response.request_page_index = Number(pageIndex);
           dispatch({
-            type: 'serverReturnedHostList',
+            type: 'serverReturnedEndpointList',
             payload: response,
           });
 
-          getNonExistingPoliciesForHostsList(
+          getNonExistingPoliciesForEndpointsList(
             coreStart.http,
             response.hosts,
             nonExistingPolicies(state)
@@ -206,7 +204,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
             .then((missingPolicies) => {
               if (missingPolicies !== undefined) {
                 dispatch({
-                  type: 'serverReturnedHostNonExistingPolicies',
+                  type: 'serverReturnedEndpointNonExistingPolicies',
                   payload: missingPolicies,
                 });
               }
@@ -216,31 +214,35 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
             .catch((error) => console.error(error));
         } catch (error) {
           dispatch({
-            type: 'serverFailedToReturnHostList',
+            type: 'serverFailedToReturnEndpointList',
             payload: error,
           });
         }
       } else {
         dispatch({
-          type: 'serverCancelledHostListLoading',
+          type: 'serverCancelledEndpointListLoading',
         });
       }
 
-      // call the host details api
-      const { selected_host: selectedHost } = uiQueryParams(state);
+      // call the endpoint details api
+      const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
       try {
         const response = await coreStart.http.get<HostInfo>(
-          `/api/endpoint/metadata/${selectedHost}`
+          `/api/endpoint/metadata/${selectedEndpoint}`
         );
         dispatch({
-          type: 'serverReturnedHostDetails',
+          type: 'serverReturnedEndpointDetails',
           payload: response,
         });
-        getNonExistingPoliciesForHostsList(coreStart.http, [response], nonExistingPolicies(state))
+        getNonExistingPoliciesForEndpointsList(
+          coreStart.http,
+          [response],
+          nonExistingPolicies(state)
+        )
           .then((missingPolicies) => {
             if (missingPolicies !== undefined) {
               dispatch({
-                type: 'serverReturnedHostNonExistingPolicies',
+                type: 'serverReturnedEndpointNonExistingPolicies',
                 payload: missingPolicies,
               });
             }
@@ -250,7 +252,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
           .catch((error) => console.error(error));
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostDetails',
+          type: 'serverFailedToReturnEndpointDetails',
           payload: error,
         });
       }
@@ -258,15 +260,15 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedHost },
+          query: { hostId: selectedEndpoint },
         });
         dispatch({
-          type: 'serverReturnedHostPolicyResponse',
+          type: 'serverReturnedEndpointPolicyResponse',
           payload: policyResponse,
         });
       } catch (error) {
         dispatch({
-          type: 'serverFailedToReturnHostPolicyResponse',
+          type: 'serverFailedToReturnEndpointPolicyResponse',
           payload: error,
         });
       }
@@ -274,11 +276,11 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (
   };
 };
 
-const getNonExistingPoliciesForHostsList = async (
+const getNonExistingPoliciesForEndpointsList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
-  currentNonExistingPolicies: HostState['nonExistingPolicies']
-): Promise<HostState['nonExistingPolicies'] | undefined> => {
+  currentNonExistingPolicies: EndpointState['nonExistingPolicies']
+): Promise<EndpointState['nonExistingPolicies'] | undefined> => {
   if (hosts.length === 0) {
     return;
   }
@@ -308,14 +310,14 @@ const getNonExistingPoliciesForHostsList = async (
         )})`,
       },
     })
-  ).items.reduce<HostState['nonExistingPolicies']>((list, agentConfig) => {
+  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentConfig) => {
     (agentConfig.package_configs as string[]).forEach((packageConfig) => {
       list[packageConfig as string] = true;
     });
     return list;
   }, {});
 
-  const nonExisting = policyIdsToCheck.reduce<HostState['nonExistingPolicies']>(
+  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
     (list, policyId) => {
       if (policiesFound[policyId]) {
         return list;
@@ -333,7 +335,7 @@ const getNonExistingPoliciesForHostsList = async (
   return nonExisting;
 };
 
-const doHostsExist = async (http: HttpStart): Promise<boolean> => {
+const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (
       (
@@ -346,7 +348,7 @@ const doHostsExist = async (http: HttpStart): Promise<boolean> => {
     );
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error(`error while trying to check if hosts exist`);
+    console.error(`error while trying to check if endpoints exist`);
     // eslint-disable-next-line no-console
     console.error(error);
   }

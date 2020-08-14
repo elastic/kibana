@@ -55,12 +55,7 @@ export class SymbolIcon extends Component<Props, State> {
       return null;
     }
 
-    const {
-      symbolId, // eslint-disable-line no-unused-vars
-      fill, // eslint-disable-line no-unused-vars
-      stroke, // eslint-disable-line no-unused-vars
-      ...rest
-    } = this.props;
+    const { symbolId, fill, stroke, ...rest } = this.props;
 
     return (
       <img

@@ -6,6 +6,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataCurrentStream, deleteMetadataStream } from './data_stream_helper';
+import { deleteTransform, putTransform } from './transform_helper';
 
 /**
  * The number of host documents in the es archive.
@@ -15,11 +16,11 @@ const numberOfHostsInFixture = 3;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const esClient = getService('es');
   const transformId = 'endpoint_metadata_transform';
   describe('test metadata api', () => {
     describe.skip('POST /api/endpoint/metadata when index is empty', () => {
       it('metadata api should return empty result when index is empty', async () => {
+        await deleteTransform(getService, transformId);
         // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
         // to do it manually
         await deleteMetadataStream(getService);
@@ -39,66 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('POST /api/endpoint/metadata when index is not empty', () => {
       before(async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await esClient.transform.putTransform({
-          transform_id: transformId,
-          defer_validation: false,
-          body: {
-            source: {
-              index: 'metrics-endpoint.metadata-default',
-            },
-            dest: {
-              index: 'metrics-endpoint.metadata_current-default',
-            },
-            pivot: {
-              group_by: {
-                'agent.id': {
-                  terms: {
-                    field: 'agent.id',
-                  },
-                },
-              },
-              aggregations: {
-                Host_details: {
-                  scripted_metric: {
-                    init_script: '',
-                    map_script: "state.doc = new HashMap(params['_source'])",
-                    combine_script: 'return state',
-                    reduce_script:
-                      "def all_docs = []; for (s in states) {     all_docs.add(s.doc); }  all_docs.sort((HashMap o1, HashMap o2)->o1['@timestamp'].millis.compareTo(o2['@timestamp'].millis)); def size = all_docs.size(); return all_docs[size-1];",
-                  },
-                },
-              },
-            },
-            description: 'collapse and update the latest document for each host',
-            frequency: '1m',
-            sync: {
-              time: {
-                field: 'event.created',
-                delay: '60s',
-              },
-            },
-          },
-        });
-
-        await esClient.transform.startTransform({
-          transform_id: transformId,
-          timeout: '60s',
-        });
-
-        // wait for transform to apply
-        await new Promise((r) => setTimeout(r, 70000));
-        await esClient.transform.getTransformStats({
-          transform_id: transformId,
-        });
+        await putTransform(getService, transformId);
       });
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
       after(async () => {
-        await esClient.transform.deleteTransform({
-          transform_id: transformId,
-          force: true,
-        });
-
+        await deleteTransform(getService, transformId);
         await deleteMetadataStream(getService);
         await deleteMetadataCurrentStream(getService);
       });
@@ -108,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -129,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(1);
         expect(body.request_page_index).to.eql(1);
@@ -153,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(0);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(30);
@@ -183,11 +130,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not Host_details.host.ip:10.46.229.234',
+              kql: 'not HostDetails.host.ip:10.46.229.234',
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(2);
+        expect(body.total).to.eql(2);
         expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -208,11 +155,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not Host_details.host.ip:${notIncludedIp}`,
+              kql: `not HostDetails.host.ip:${notIncludedIp}`,
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(2);
+        expect(body.total).to.eql(2);
         const resultIps: string[] = [].concat(
           ...body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.ip)
         );
@@ -231,22 +178,22 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('metadata api should return page based on host.os.Ext.variant filter.', async () => {
-        const variantValue = 'Windows Server 2012';
+        const variantValue = 'Windows Pro';
         const { body } = await supertest
           .post('/api/endpoint/metadata')
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(2);
         const resultOsVariantValue: Set<string> = new Set(
           body.hosts.map((hostInfo: Record<string, any>) => hostInfo.metadata.host.os.Ext.variant)
         );
         expect(Array.from(resultOsVariantValue)).to.eql([variantValue]);
-        expect(body.hosts.length).to.eql(1);
+        expect(body.hosts.length).to.eql(2);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
       });
@@ -258,16 +205,16 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(1);
         const resultIp: string = body.hosts[0].metadata.host.ip.filter(
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        // expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -279,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not Host_details.Endpoint.policy.applied.status:success`,
+              kql: `not HostDetails.Endpoint.policy.applied.status:success`,
             },
           })
           .expect(200);
@@ -300,16 +247,16 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `Host_details.elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(1);
+        expect(body.total).to.eql(1);
         const resultHostId: string = body.hosts[0].metadata.host.id;
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        // expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
         expect(body.hosts[0].host_status).to.eql('error');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
@@ -326,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(200);
-        expect(body.total.value).to.eql(numberOfHostsInFixture);
+        expect(body.total).to.eql(numberOfHostsInFixture);
         expect(body.hosts.length).to.eql(numberOfHostsInFixture);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);

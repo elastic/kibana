@@ -19,7 +19,6 @@ import {
   TaskManagerUtils,
 } from '../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');

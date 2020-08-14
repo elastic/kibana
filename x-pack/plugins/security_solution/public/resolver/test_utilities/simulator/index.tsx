@@ -10,13 +10,13 @@ import { mount, ReactWrapper } from 'enzyme';
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { connectEnzymeWrapperAndStore } from '../connect_enzyme_wrapper_and_store';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware } from '../../types';
+import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
+import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -44,10 +44,16 @@ export class Simulator {
    * This is used by `debugActions`.
    */
   private readonly spyMiddleware: SpyMiddleware;
+  /**
+   * Simulator which allows you to explicitly simulate resize events and trigger animation frames
+   */
+  private readonly sideEffectSimulator: SideEffectSimulator;
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    history,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -61,6 +67,7 @@ export class Simulator {
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
     databaseDocumentID?: string;
+    history?: HistoryPackageHistoryInterface<never>;
   }) {
     this.resolverComponentInstanceID = resolverComponentInstanceID;
     // create the spy middleware (for debugging tests)
@@ -79,25 +86,26 @@ export class Simulator {
     // Create a redux store w/ the top level Resolver reducer and the enhancer that includes the Resolver middleware and the `spyMiddleware`
     this.store = createStore(resolverReducer, middlewareEnhancer);
 
-    // Create a fake 'history' instance that Resolver will use to read and write query string values
-    this.history = createMemoryHistory();
+    // If needed, create a fake 'history' instance.
+    // Resolver will use to read and write query string values.
+    this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
     const coreStart: CoreStart = coreMock.createStart();
+
+    this.sideEffectSimulator = sideEffectSimulatorFactory();
 
     // Render Resolver via the `MockResolver` component, using `enzyme`.
     this.wrapper = mount(
       <MockResolver
         resolverComponentInstanceID={this.resolverComponentInstanceID}
         history={this.history}
+        sideEffectSimulator={this.sideEffectSimulator}
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
       />
     );
-
-    // Update the enzyme wrapper after each state transition
-    connectEnzymeWrapperAndStore(this.store, this.wrapper);
   }
 
   /**
@@ -113,83 +121,32 @@ export class Simulator {
   }
 
   /**
-   * Return a promise that resolves after the `store`'s next state transition.
-   * Used by `mapStateTransitions`
+   * EUI uses a component called `AutoSizer` that won't render its children unless it has sufficient size.
+   * This forces any `AutoSizer` instances to have a large size.
    */
-  private stateTransitioned(): Promise<void> {
-    // keep track of the resolve function of the promise that has been returned.
-    let resolveState: (() => void) | null = null;
-
-    const promise: Promise<undefined> = new Promise((resolve) => {
-      // Immediately expose the resolve function in the outer scope. It will be resolved when the next state transition occurs.
-      resolveState = resolve;
-    });
-
-    // Subscribe to the store
-    const unsubscribe = this.store.subscribe(() => {
-      // Once a state transition occurs, unsubscribe.
-      unsubscribe();
-      // Resolve the promise. The null assertion is safe here as Promise initializers run immediately (according to spec and node/browser implementations.)
-      // NB: the state is not resolved here. Code using the simulator should not rely on state or selectors of state.
-      resolveState!();
-    });
-
-    // Return the promise that will be resolved on the next state transition, allowing code to `await` for the next state transition.
-    return promise;
+  private forceAutoSizerOpen() {
+    this.wrapper
+      .find('AutoSizer')
+      .forEach((wrapper) => wrapper.setState({ width: 10000, height: 10000 }));
   }
 
   /**
-   * This will yield the return value of `mapper` after each state transition. If no state transition occurs for 10 event loops in a row, this will give up.
+   * Yield the result of `mapper` over and over, once per event-loop cycle.
+   * After 10 times, quit.
+   * Use this to continually check a value. See `toYieldEqualTo`.
    */
-  public async *mapStateTransitions<R>(mapper: () => R): AsyncIterable<R> {
-    // Yield the value before any state transitions have occurred.
-    yield mapper();
-
-    /** Increment this each time an event loop completes without a state transition.
-     * If this value hits `10`, end the loop.
-     *
-     * Code will test assertions after each state transition. If the assertion hasn't passed and no further state transitions occur,
-     * then the jest timeout will happen. The timeout doesn't give a useful message about the assertion.
-     * By short-circuiting this function, code that uses it can short circuit the test timeout and print a useful error message.
-     *
-     * NB: the logic to short-circuit the loop is here because knowledge of state is a concern of the simulator, not tests.
-     */
+  public async *map<R>(mapper: () => R): AsyncIterable<R> {
     let timeoutCount = 0;
-    while (true) {
-      /**
-       * `await` a race between the next state transition and a timeout that happens after `0`ms.
-       * If the timeout wins, no `dispatch` call caused a state transition in the last loop.
-       * If this keeps happening, assume that Resolver isn't going to do anything else.
-       *
-       * If Resolver adds intentional delay logic (e.g. waiting before making a request), this code might have to change.
-       * In that case, Resolver should use the side effect context to schedule future work. This code could then subscribe to some event published by the side effect context. That way, this code will be aware of Resolver's intention to do work.
-       */
-      const timedOut: boolean = await Promise.race([
-        (async (): Promise<false> => {
-          await this.stateTransitioned();
-          // If a state transition occurs, return false for `timedOut`
-          return false;
-        })(),
-        new Promise<true>((resolve) => {
-          setTimeout(() => {
-            // If a timeout occurs, resolve `timedOut` as true
-            return resolve(true);
-          }, 0);
-        }),
-      ]);
-
-      if (timedOut) {
-        // If a timout occurred, note it.
-        timeoutCount++;
-        if (timeoutCount === 10) {
-          // if 10 timeouts happen in a row, end the loop early
-          return;
-        }
-      } else {
-        // If a state transition occurs, reset the timeout count and yield the value
-        timeoutCount = 0;
-        yield mapper();
-      }
+    while (timeoutCount < 10) {
+      timeoutCount++;
+      yield mapper();
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          this.forceAutoSizerOpen();
+          this.wrapper.update();
+          resolve();
+        }, 0);
+      });
     }
   }
 
@@ -198,26 +155,51 @@ export class Simulator {
    * returns a `ReactWrapper` even if nothing is found, as that is how `enzyme` does things.
    */
   public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): ReactWrapper {
-    return this.findInDOM(processNodeElementSelector(options));
+    return this.domNodes(processNodeElementSelector(options));
   }
 
   /**
-   * true if a process node element is found for the entityID and if it has an [aria-selected] attribute.
+   * Return an Enzyme ReactWrapper for any child elements of a specific processNodeElement
+   *
+   * @param entityID The entity ID of the proocess node to select in
+   * @param selector The selector for the child element of the process node
    */
-  public processNodeElementLooksSelected(entityID: string): boolean {
-    return this.processNodeElements({ entityID, selected: true }).length === 1;
-  }
-
-  /**
-   * true if a process node element is found for the entityID and if it *does not have* an [aria-selected] attribute.
-   */
-  public processNodeElementLooksUnselected(entityID: string): boolean {
-    //  find the process node, then exclude it if its selected.
-    return (
-      this.processNodeElements({ entityID }).not(
-        processNodeElementSelector({ entityID, selected: true })
-      ).length === 1
+  public processNodeChildElements(entityID: string, selector: string): ReactWrapper {
+    return this.domNodes(
+      `${processNodeElementSelector({ entityID })} [data-test-subj="${selector}"]`
     );
+  }
+
+  /**
+   * Return the node element with the given `entityID`.
+   */
+  public selectedProcessNode(entityID: string): ReactWrapper {
+    return this.processNodeElements({ entityID, selected: true });
+  }
+
+  /**
+   * Return the node element with the given `entityID`. It will only be returned if it is not selected.
+   */
+  public unselectedProcessNode(entityID: string): ReactWrapper {
+    return this.processNodeElements({ entityID }).not(
+      processNodeElementSelector({ entityID, selected: true })
+    );
+  }
+
+  /**
+   * Dump all contents of the outer ReactWrapper (to be `console.log`ged as appropriate)
+   * This will include both DOM (div, span, etc.) and React/JSX (MyComponent, MyGrid, etc.)
+   */
+  public debugWrapper() {
+    return this.wrapper.debug();
+  }
+
+  /**
+   * This manually runs the animation frames tied to a configurable timestamp in the future
+   */
+  public runAnimationFramesTimeFromNow(time: number = 0) {
+    this.sideEffectSimulator.controls.time = time;
+    this.sideEffectSimulator.controls.provideAnimationFrame();
   }
 
   /**
@@ -231,45 +213,65 @@ export class Simulator {
   }
 
   /**
-   * The element that shows when Resolver is waiting for the graph data.
+   * Given a 'data-test-subj' value, it will resolve the react wrapper or undefined if not found
    */
-  public graphLoadingElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:graph:loading"]');
+  public async resolve(selector: string): Promise<ReactWrapper | undefined> {
+    return this.resolveWrapper(() => this.domNodes(`[data-test-subj="${selector}"]`));
   }
 
   /**
-   * The element that shows if Resolver couldn't draw the graph.
+   * Given a 'data-test-subj' selector, it will return the domNode
    */
-  public graphErrorElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:graph:error"]');
+  public testSubject(selector: string): ReactWrapper {
+    return this.domNodes(`[data-test-subj="${selector}"]`);
   }
 
   /**
-   * The element where nodes get drawn.
+   * Return DOM nodes that match `enzymeSelector`.
    */
-  public graphElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:graph"]');
+  private domNodes(enzymeSelector: string): ReactWrapper {
+    return this.wrapper
+      .find(enzymeSelector)
+      .filterWhere((wrapper) => typeof wrapper.type() === 'string');
   }
 
   /**
-   * The outer panel container.
+   * The titles and descriptions (as text) from the node detail panel.
    */
-  public panelElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj="resolver:panel"]');
+  public nodeDetailDescriptionListEntries(): Array<[string, string]> {
+    /**
+     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     */
+    const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
+    /**
+     * The details of the selected node are shown in a description list. This returns the description elements of the description list.
+     */
+    const descriptions = this.domNodes('[data-test-subj="resolver:node-detail:entry-description"]');
+    const entries: Array<[string, string]> = [];
+    for (let index = 0; index < Math.min(titles.length, descriptions.length); index++) {
+      const title = titles.at(index).text();
+      const description = descriptions.at(index).text();
+
+      // Exclude timestamp since we can't currently calculate the expected description for it from tests
+      if (title !== '@timestamp') {
+        entries.push([title, description]);
+      }
+    }
+    return entries;
   }
 
   /**
-   * The panel content element (which may include tables, lists, other data depending on the view).
+   * Resolve the wrapper returned by `wrapperFactory` only once it has at least 1 element in it.
    */
-  public panelContentElement(): ReactWrapper {
-    return this.findInDOM('[data-test-subj^="resolver:panel:"]');
-  }
-
-  /**
-   * Like `this.wrapper.find` but only returns DOM nodes.
-   */
-  private findInDOM(selector: string): ReactWrapper {
-    return this.wrapper.find(selector).filterWhere((wrapper) => typeof wrapper.type() === 'string');
+  public async resolveWrapper(
+    wrapperFactory: () => ReactWrapper,
+    predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
+  ): Promise<ReactWrapper | undefined> {
+    for await (const wrapper of this.map(wrapperFactory)) {
+      if (predicate(wrapper)) {
+        return wrapper;
+      }
+    }
   }
 }
 

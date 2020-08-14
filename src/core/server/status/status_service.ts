@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { Observable, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, shareReplay, take } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';

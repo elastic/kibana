@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isOnHostPage, hasSelectedHost } from './selectors';
-import { HostState } from '../types';
+import { isOnEndpointPage, hasSelectedEndpoint } from './selectors';
+import { EndpointState } from '../types';
 import { AppAction } from '../../../../common/store/actions';
 import { ImmutableReducer } from '../../../../common/store';
 import { Immutable } from '../../../../../common/endpoint/types';
 
-export const initialHostListState: Immutable<HostState> = {
+export const initialEndpointListState: Immutable<EndpointState> = {
   hosts: [],
   pageSize: 10,
   pageIndex: 0,
@@ -29,16 +29,16 @@ export const initialHostListState: Immutable<HostState> = {
   policyItemsLoading: false,
   endpointPackageInfo: undefined,
   nonExistingPolicies: {},
-  hostsExist: true,
+  endpointsExist: true,
   patterns: [],
 };
 
 /* eslint-disable-next-line complexity */
-export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
-  state = initialHostListState,
+export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
+  state = initialEndpointListState,
   action
 ) => {
-  if (action.type === 'serverReturnedHostList') {
+  if (action.type === 'serverReturnedEndpointList') {
     const {
       hosts,
       total,
@@ -54,13 +54,13 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       loading: false,
       error: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostList') {
+  } else if (action.type === 'serverFailedToReturnEndpointList') {
     return {
       ...state,
       error: action.payload,
       loading: false,
     };
-  } else if (action.type === 'serverReturnedHostNonExistingPolicies') {
+  } else if (action.type === 'serverReturnedEndpointNonExistingPolicies') {
     return {
       ...state,
       nonExistingPolicies: {
@@ -74,14 +74,14 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       patterns: action.payload,
     };
-  } else if (action.type === 'serverReturnedHostDetails') {
+  } else if (action.type === 'serverReturnedEndpointDetails') {
     return {
       ...state,
       details: action.payload.metadata,
       detailsLoading: false,
       detailsError: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostDetails') {
+  } else if (action.type === 'serverFailedToReturnEndpointDetails') {
     return {
       ...state,
       detailsError: action.payload,
@@ -99,14 +99,14 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       error: action.payload,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedHostPolicyResponse') {
+  } else if (action.type === 'serverReturnedEndpointPolicyResponse') {
     return {
       ...state,
       policyResponse: action.payload.policy_response,
       policyResponseLoading: false,
       policyResponseError: undefined,
     };
-  } else if (action.type === 'serverFailedToReturnHostPolicyResponse') {
+  } else if (action.type === 'serverFailedToReturnEndpointPolicyResponse') {
     return {
       ...state,
       policyResponseError: action.payload,
@@ -118,7 +118,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       selectedPolicyId: action.payload.selectedPolicyId,
       policyResponseLoading: false,
     };
-  } else if (action.type === 'serverCancelledHostListLoading') {
+  } else if (action.type === 'serverCancelledEndpointListLoading') {
     return {
       ...state,
       loading: false,
@@ -133,22 +133,22 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       ...state,
       endpointPackageInfo: action.payload,
     };
-  } else if (action.type === 'serverReturnedHostExistValue') {
+  } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
-      hostsExist: action.payload,
+      endpointsExist: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
-    const newState: Immutable<HostState> = {
+    const newState: Immutable<EndpointState> = {
       ...state,
       location: action.payload,
     };
-    const isCurrentlyOnListPage = isOnHostPage(newState) && !hasSelectedHost(newState);
-    const wasPreviouslyOnListPage = isOnHostPage(state) && !hasSelectedHost(state);
-    const isCurrentlyOnDetailsPage = isOnHostPage(newState) && hasSelectedHost(newState);
-    const wasPreviouslyOnDetailsPage = isOnHostPage(state) && hasSelectedHost(state);
+    const isCurrentlyOnListPage = isOnEndpointPage(newState) && !hasSelectedEndpoint(newState);
+    const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
+    const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
+    const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
 
-    // if on the host list page for the first time, return new location and load list
+    // if on the endpoint list page for the first time, return new location and load list
     if (isCurrentlyOnListPage) {
       if (!wasPreviouslyOnListPage) {
         return {
@@ -161,7 +161,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
         };
       }
     } else if (isCurrentlyOnDetailsPage) {
-      // if previous page was the list or another host details page, load host details only
+      // if previous page was the list or another endpoint details page, load endpoint details only
       if (wasPreviouslyOnDetailsPage || wasPreviouslyOnListPage) {
         return {
           ...state,
@@ -173,7 +173,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           policyResponseError: undefined,
         };
       } else {
-        // if previous page was not host list or host details, load both list and details
+        // if previous page was not endpoint list or endpoint details, load both list and details
         return {
           ...state,
           location: action.payload,
@@ -187,14 +187,14 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
         };
       }
     }
-    // otherwise we are not on a host list or details page
+    // otherwise we are not on a endpoint list or details page
     return {
       ...state,
       location: action.payload,
       error: undefined,
       detailsError: undefined,
       policyResponseError: undefined,
-      hostsExist: true,
+      endpointsExist: true,
     };
   }
   return state;

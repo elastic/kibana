@@ -12,6 +12,7 @@ import { RuleTypeParams } from '../types';
 import { SearchResponse } from '../../types';
 
 // used for gap detection code
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type unitType = 's' | 'm' | 'h';
 export const isValidUnit = (unitParam: string): unitParam is unitType =>
   ['s', 'm', 'h'].includes(unitParam);

@@ -32,7 +32,7 @@ const formatBuckets = async (
 ): Promise<GetMonitorStatusResult[]> => {
   return buckets
     .filter((monitor: any) => monitor?.doc_count > numTimes)
-    .map(({ key, doc_count }: any) => ({ ...key, count: doc_count }));
+    .map(({ key, doc_count: count }: any) => ({ ...key, count }));
 };
 
 const getLocationClause = (locations: string[]) => ({

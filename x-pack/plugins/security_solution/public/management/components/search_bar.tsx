@@ -8,12 +8,18 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import styled from 'styled-components';
-import { Query, SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public/';
+import {
+  IIndexPattern,
+  Query,
+  SearchBar,
+  TimeHistory,
+} from '../../../../../../src/plugins/data/public/';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { urlFromQueryParams } from '../pages/endpoint_hosts/view/url_from_query_params';
-import { useHostSelector } from '../pages/endpoint_hosts/view/hooks';
+import { useEndpointSelector } from '../pages/endpoint_hosts/view/hooks';
 import * as selectors from '../pages/endpoint_hosts/store/selectors';
 import { clone } from '../pages/endpoint_hosts/models/index_pattern';
+import { Immutable } from '../../../common/endpoint/types';
 
 const AdminQueryBar = styled.div`
   margin-bottom: ${(props) => props.theme.eui.ruleMargins.marginMedium};
@@ -24,11 +30,11 @@ const AdminQueryBar = styled.div`
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useHostSelector(selectors.uiQueryParams);
-  const searchBarIndexPatterns = useHostSelector(selectors.patterns);
-  const searchBarQuery = useHostSelector(selectors.searchBarQuery);
+  const queryParams = useEndpointSelector(selectors.uiQueryParams);
+  const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
+  const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
   const clonedIndexPatterns = useMemo(
-    () => searchBarIndexPatterns.map((pattern) => clone(pattern)),
+    () => searchBarIndexPatterns.map((pattern: Immutable<IIndexPattern>) => clone(pattern)),
     [searchBarIndexPatterns]
   );
 

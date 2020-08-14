@@ -200,7 +200,7 @@ export async function getHostData(
     return undefined;
   }
 
-  const hostMetadata: HostMetadata = response.hits.hits[0]._source.Host_details;
+  const hostMetadata: HostMetadata = response.hits.hits[0]._source.HostDetails;
   const agent = await findAgent(metadataRequestContext, hostMetadata);
 
   if (agent && !agent.active) {
@@ -249,7 +249,7 @@ async function mapToHostResultList(
       request_page_index: queryParams.from,
       hosts: await Promise.all(
         searchResponse.hits.hits.map(async (entry) =>
-          enrichHostMetadata(entry._source.Host_details, metadataRequestContext)
+          enrichHostMetadata(entry._source.HostDetails, metadataRequestContext)
         )
       ),
       total: totalNumberOfHosts,

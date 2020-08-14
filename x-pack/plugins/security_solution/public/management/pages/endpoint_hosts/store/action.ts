@@ -12,36 +12,36 @@ import {
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
-import { HostState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { EndpointState } from '../types';
 
-interface ServerReturnedHostList {
-  type: 'serverReturnedHostList';
+interface ServerReturnedEndpointList {
+  type: 'serverReturnedEndpointList';
   payload: HostResultList;
 }
 
-interface ServerFailedToReturnHostList {
-  type: 'serverFailedToReturnHostList';
+interface ServerFailedToReturnEndpointList {
+  type: 'serverFailedToReturnEndpointList';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostDetails {
-  type: 'serverReturnedHostDetails';
+interface ServerReturnedEndpointDetails {
+  type: 'serverReturnedEndpointDetails';
   payload: HostInfo;
 }
 
-interface ServerFailedToReturnHostDetails {
-  type: 'serverFailedToReturnHostDetails';
+interface ServerFailedToReturnEndpointDetails {
+  type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostPolicyResponse {
-  type: 'serverReturnedHostPolicyResponse';
+interface ServerReturnedEndpointPolicyResponse {
+  type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
 }
 
-interface ServerFailedToReturnHostPolicyResponse {
-  type: 'serverFailedToReturnHostPolicyResponse';
+interface ServerFailedToReturnEndpointPolicyResponse {
+  type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
 }
 
@@ -64,8 +64,8 @@ interface UserSelectedEndpointPolicy {
   };
 }
 
-interface ServerCancelledHostListLoading {
-  type: 'serverCancelledHostListLoading';
+interface ServerCancelledEndpointListLoading {
+  type: 'serverCancelledEndpointListLoading';
 }
 
 interface ServerCancelledPolicyItemsLoading {
@@ -77,13 +77,13 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
-interface ServerReturnedHostNonExistingPolicies {
-  type: 'serverReturnedHostNonExistingPolicies';
-  payload: HostState['nonExistingPolicies'];
+interface ServerReturnedEndpointNonExistingPolicies {
+  type: 'serverReturnedEndpointNonExistingPolicies';
+  payload: EndpointState['nonExistingPolicies'];
 }
 
-interface ServerReturnedHostExistValue {
-  type: 'serverReturnedHostExistValue';
+interface ServerReturnedEndpointExistValue {
+  type: 'serverReturnedEndpointExistValue';
   payload: boolean;
 }
 
@@ -97,20 +97,20 @@ interface ServerFailedToReturnMetadataPatterns {
   payload: ServerApiError;
 }
 
-export type HostAction =
-  | ServerReturnedHostList
-  | ServerFailedToReturnHostList
-  | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails
-  | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse
+export type EndpointAction =
+  | ServerReturnedEndpointList
+  | ServerFailedToReturnEndpointList
+  | ServerReturnedEndpointDetails
+  | ServerFailedToReturnEndpointDetails
+  | ServerReturnedEndpointPolicyResponse
+  | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
-  | ServerCancelledHostListLoading
-  | ServerReturnedHostExistValue
+  | ServerCancelledEndpointListLoading
+  | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedHostNonExistingPolicies
   | ServerReturnedMetadataPatterns
-  | ServerFailedToReturnMetadataPatterns;
+  | ServerFailedToReturnMetadataPatterns
+  | ServerReturnedEndpointNonExistingPolicies;

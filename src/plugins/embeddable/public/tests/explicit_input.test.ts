@@ -33,7 +33,6 @@ import {
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { esFilters, Filter } from '../../../../plugins/data/public';
 import { createEmbeddablePanelMock } from '../mocks';

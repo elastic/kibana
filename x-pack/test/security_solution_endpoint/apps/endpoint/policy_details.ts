@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.endpoint.navigateToHostList();
+        await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packageConfig.id);
 
         expect(await (await testSubjects.find('policyWindowsEvent_process')).isSelected()).to.equal(
@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           inputs: [
             {
               id: policyInfo.packageConfig.id,
-              dataset: { namespace: 'default' },
+              data_stream: { namespace: 'default' },
               name: 'Protect East Coast',
               meta: {
                 package: {
