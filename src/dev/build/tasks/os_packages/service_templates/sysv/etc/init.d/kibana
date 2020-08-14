@@ -17,6 +17,7 @@
 
 #
 # Source function libraries if present.
+# (It improves integration with systemd)
 #
 # Red Hat
 if [ -f /etc/rc.d/init.d/functions ]; then
