@@ -17,10 +17,11 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_filter_trigger';
-export * from './default_trigger';
+import { Trigger } from '.';
+
+export const DEFAULT_TRIGGER = '';
+export const defaultTrigger: Trigger<''> = {
+  id: DEFAULT_TRIGGER,
+  title: 'Unknown',
+  description: 'Unknown trigger.',
+};
