@@ -25,6 +25,7 @@ import {
   APPLY_FILTER_TRIGGER,
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
+  DEFAULT_TRIGGER,
 } from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 import type { ApplyGlobalFilterActionContext } from '../../data/public';
