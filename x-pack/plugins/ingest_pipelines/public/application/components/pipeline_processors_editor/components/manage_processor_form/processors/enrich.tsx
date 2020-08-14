@@ -42,6 +42,7 @@ const maxMatchesValidators = {
 };
 
 const fieldsConfig: FieldsConfig = {
+  /* Required fields config */
   policy_name: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.policyNameFieldLabel', {
@@ -89,6 +90,7 @@ const fieldsConfig: FieldsConfig = {
     ],
   },
 
+  /* Optional fields config */
   override: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
@@ -115,7 +117,7 @@ const fieldsConfig: FieldsConfig = {
       return n === 1 ? undefined : n;
     },
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldLabel', {
-      defaultMessage: 'Max matches',
+      defaultMessage: 'Max matches (optional)',
     }),
     helpText: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.maxMatchesFieldHelpText',
@@ -143,7 +145,7 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldLabel',
       {
-        defaultMessage: 'Shape relation',
+        defaultMessage: 'Shape relation (optional)',
       }
     ),
     helpText: i18n.translate(
