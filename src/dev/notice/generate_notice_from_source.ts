@@ -65,7 +65,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
   const noticeComments: string[] = [];
   await new Promise((resolve, reject) => {
     files
-      .on('data', file => {
+      .on('data', (file) => {
         log.verbose(`Checking for @notice comments in ${file.relative}`);
 
         const source = file.contents.toString('utf8');
@@ -89,7 +89,7 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
     noticeText += '\n---\n';
     noticeText += comment
       .split(NEWLINE_RE)
-      .map(line =>
+      .map((line) =>
         line
           // trim whitespace
           .trim()
