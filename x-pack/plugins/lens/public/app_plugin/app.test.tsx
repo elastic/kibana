@@ -1120,7 +1120,7 @@ describe('Lens App', () => {
       act(() =>
         onChange({
           filterableIndexPatterns: [],
-          doc: ({ id: undefined } as unknown) as Document,
+          doc: ({ id: undefined, state: {} } as unknown) as Document,
           isSaveable: true,
         })
       );

@@ -177,13 +177,33 @@ export function App({
     history,
   ]);
 
+  const getLastKnownDocWithoutPinnedFilters = useCallback(
+    function () {
+      if (!lastKnownDoc) return undefined;
+      const [pinnedFilters, appFilters] = _.partition(
+        injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
+        esFilters.isFilterPinned
+      );
+      return pinnedFilters?.length
+        ? {
+            ...lastKnownDoc,
+            state: {
+              ...lastKnownDoc.state,
+              filters: appFilters,
+            },
+          }
+        : lastKnownDoc;
+    },
+    [lastKnownDoc]
+  );
+
   useEffect(() => {
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing doc
       // or when the user has configured something without saving
       if (
         core.application.capabilities.visualize.save &&
-        !_.isEqual(state.persistedDoc, lastKnownDoc)
+        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -197,7 +217,13 @@ export function App({
         return actions.default();
       }
     });
-  }, [lastKnownDoc, onAppLeave, state.persistedDoc, core.application.capabilities.visualize.save]);
+  }, [
+    lastKnownDoc,
+    onAppLeave,
+    state.persistedDoc,
+    core.application.capabilities.visualize.save,
+    getLastKnownDocWithoutPinnedFilters,
+  ]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
@@ -288,22 +314,9 @@ export function App({
     if (!lastKnownDoc) {
       return;
     }
-    const [pinnedFilters, appFilters] = _.partition(
-      injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
-      esFilters.isFilterPinned
-    );
-    const lastDocWithoutPinned = pinnedFilters?.length
-      ? {
-          ...lastKnownDoc,
-          state: {
-            ...lastKnownDoc.state,
-            filters: appFilters,
-          },
-        }
-      : lastKnownDoc;
 
     const doc = {
-      ...lastDocWithoutPinned,
+      ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
       id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
       title: saveProps.newTitle,
