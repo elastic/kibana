@@ -1,7 +1,17 @@
 ---
-description: Pipeline for parsing test logs
-  plugins.
+description: Pipeline test
 processors:
-- set:
-    field: error.message
-    value: '{{ _ingest.on_failure_message }}'
+  - pipeline:
+      if: ctx.message.charAt(0) == (char)("{")
+      name: '{{IngestPipeline "pipeline1" }}'
+  - script:
+      lang: painless
+      source: >
+        ctx.event.created = ctx['@timestamp'];
+        ctx['@timestamp'] = ctx['timestamp'];
+        ctx.remove('timestamp');
+      ignore_failure: true
+on_failure:
+  - set:
+      field: error.message
+      value: "{{ _ingest.on_failure_message }}"
