@@ -45,7 +45,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
         <EuiModalBody>
           <FormattedMessage
-            id="xpack.ml.inference.modelsList.deleteModal.cancelButtonLabel"
+            id="xpack.ml.inference.modelsList.deleteModal.warningMessage"
             defaultMessage="Are you sure you want to delete {modelsCount, plural, one{this model} other {these models}}?"
             values={{ modelsCount: models.length }}
           />
