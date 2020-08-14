@@ -79,8 +79,8 @@ const fieldsConfig: FieldsConfig = {
   trace_match: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
-    serializer: (v) => (v === false ? undefined : v),
     deserializer: to.booleanOrUndef,
+    serializer: from.defaultBoolToUndef(false),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.traceMatchFieldLabel', {
       defaultMessage: 'Trace match',
     }),
@@ -110,8 +110,8 @@ const fieldsConfig: FieldsConfig = {
   first_only: {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
-    serializer: (v) => (v === true ? undefined : v),
     deserializer: to.booleanOrUndef,
+    serializer: from.defaultBoolToUndef(true),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.firstOnlyFieldLabel', {
       defaultMessage: 'First only',
     }),
