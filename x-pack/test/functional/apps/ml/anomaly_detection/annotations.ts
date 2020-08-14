@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('single metric viewer', function () {
+  describe('annotations', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -46,6 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+      // Points the read/write aliases of annotations to an index with wrong mappings
+      // so we can simulate errors when requesting annotations.
+      await ml.testResources.setupBrokenAnnotationsIndexState(JOB_CONFIG.job_id);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
@@ -75,20 +78,32 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.singleMetricViewer.assertDetectorInputValue('0');
     });
 
-    it('displays the chart', async () => {
-      await ml.singleMetricViewer.assertChartExsist();
+    it('should display the annotations section showing an error', async () => {
+      await ml.singleMetricViewer.assertAnnotationsExists('error');
     });
 
-    it('should display the annotations section', async () => {
+    it('should navigate to anomaly explorer', async () => {
+      await ml.navigation.navigateToAnomalyExplorerViaSingleMetricViewer();
+    });
+
+    it('should display the annotations section showing an error', async () => {
+      await ml.anomalyExplorer.assertAnnotationsPanelExists('error');
+    });
+
+    it('should display the annotations section without an error', async () => {
+      // restores the aliases to point to the original working annotations index
+      // so we can run tests against successfully loaded annotations sections.
+      await ml.testResources.restoreAnnotationsIndexState();
+      await ml.anomalyExplorer.refreshPage();
+      await ml.anomalyExplorer.assertAnnotationsPanelExists('loaded');
+    });
+
+    it('should navigate to single metric viewer', async () => {
+      await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
+    });
+
+    it('should display the annotations section without an error', async () => {
       await ml.singleMetricViewer.assertAnnotationsExists('loaded');
-    });
-
-    it('displays the anomalies table', async () => {
-      await ml.anomaliesTable.assertTableExists();
-    });
-
-    it('anomalies table is not empty', async () => {
-      await ml.anomaliesTable.assertTableNotEmpty();
     });
   });
 }

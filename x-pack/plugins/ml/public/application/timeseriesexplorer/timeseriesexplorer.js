@@ -1320,7 +1320,10 @@ export class TimeSeriesExplorer extends React.Component {
                 </div>
                 {focusAnnotationError !== undefined && (
                   <>
-                    <EuiTitle className="panel-title">
+                    <EuiTitle
+                      className="panel-title"
+                      data-test-subj="mlAnomalyExplorerAnnotations error"
+                    >
                       <h2>
                         <FormattedMessage
                           id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
@@ -1369,6 +1372,7 @@ export class TimeSeriesExplorer extends React.Component {
                         </h2>
                       </EuiTitle>
                     }
+                    data-test-subj="mlAnomalyExplorerAnnotations loaded"
                   >
                     <AnnotationsTable
                       chartDetails={chartDetails}

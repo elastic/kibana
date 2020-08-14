@@ -305,7 +305,10 @@ export class Explorer extends React.Component {
             <EuiSpacer size="m" />
             {annotationsError !== undefined && (
               <>
-                <EuiTitle className="panel-title">
+                <EuiTitle
+                  className="panel-title"
+                  data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
+                >
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsErrorTitle"
@@ -329,7 +332,7 @@ export class Explorer extends React.Component {
             )}
             {annotationsData.length > 0 && (
               <>
-                <EuiPanel>
+                <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
