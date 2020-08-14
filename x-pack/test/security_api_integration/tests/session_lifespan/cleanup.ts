@@ -31,11 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   describe('Session Lifespan cleanup', () => {
-    before(async () => {
-      await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
-    });
-
     beforeEach(async () => {
+      await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
       await es.deleteByQuery({
         index: '.kibana_security_session*',
         q: '*',
