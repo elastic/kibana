@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateUrls } from '../../common';
 import { cryptoFactory } from '../../../lib';
-import { ESQueueCreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { CreateJobFn, ScheduleTaskFnFactory } from '../../../types';
+import { validateUrls } from '../../common';
 import { JobParamsPDF } from '../types';
 
-export const scheduleTaskFnFactory: ScheduleTaskFnFactory<ESQueueCreateJobFn<
+export const scheduleTaskFnFactory: ScheduleTaskFnFactory<CreateJobFn<
   JobParamsPDF
 >> = function createJobFactoryFn(reporting) {
   const config = reporting.getConfig();
