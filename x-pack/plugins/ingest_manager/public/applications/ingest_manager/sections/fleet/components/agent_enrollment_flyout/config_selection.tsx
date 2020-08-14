@@ -109,7 +109,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           }
 
           setEnrollmentAPIKeys(
-            res.data.list.filter((key) => key.config_id === selectedState.agentPolicyId)
+            res.data.list.filter((key) => key.policy_id === selectedState.agentPolicyId)
           );
         } catch (error) {
           notifications.toasts.addError(error, {
@@ -130,7 +130,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
       if (
         !selectedState.enrollmentAPIKeyId &&
         enrollmentAPIKeys.length > 0 &&
-        enrollmentAPIKeys[0].config_id === selectedState.agentPolicyId
+        enrollmentAPIKeys[0].policy_id === selectedState.agentPolicyId
       ) {
         const enrollmentAPIKeyId = enrollmentAPIKeys[0].id;
         setSelectedState({

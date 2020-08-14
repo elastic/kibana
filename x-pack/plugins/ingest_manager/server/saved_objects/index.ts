@@ -17,7 +17,11 @@ import {
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { migrateAgentToV7100, migrateAgentPolicyToV7100 } from './migrations/to_v7_10_0';
+import {
+  migrateAgentToV7100,
+  migrateAgentPolicyToV7100,
+  migrateEnrollmentApiKeysToV7100,
+} from './migrations/to_v7_10_0';
 
 /*
  * Saved object types and mappings
@@ -155,12 +159,15 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         type: { type: 'keyword' },
         api_key: { type: 'binary' },
         api_key_id: { type: 'keyword' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         created_at: { type: 'date' },
         updated_at: { type: 'date' },
         expire_at: { type: 'date' },
         active: { type: 'boolean' },
       },
+    },
+    migrations: {
+      '7.10.0': migrateEnrollmentApiKeysToV7100,
     },
   },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
@@ -292,7 +299,7 @@ export function registerEncryptedSavedObjects(
       'name',
       'type',
       'api_key_id',
-      'config_id',
+      'policy_id',
       'created_at',
       'updated_at',
       'expire_at',

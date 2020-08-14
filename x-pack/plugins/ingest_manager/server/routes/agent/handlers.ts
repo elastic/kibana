@@ -239,7 +239,7 @@ export const postAgentEnrollHandler: RequestHandler<
     const agent = await AgentService.enroll(
       soClient,
       request.body.type,
-      enrollmentAPIKey.config_id as string,
+      enrollmentAPIKey.policy_id as string,
       {
         userProvided: request.body.metadata.user_provided,
         local: request.body.metadata.local,

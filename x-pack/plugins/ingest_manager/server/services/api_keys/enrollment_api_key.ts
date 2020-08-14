@@ -141,7 +141,7 @@ export async function generateEnrollmentAPIKey(
       api_key_id: key.id,
       api_key: apiKey,
       name,
-      config_id: agentPolicyId,
+      policy_id: agentPolicyId,
       created_at: new Date().toISOString(),
     }
   );
