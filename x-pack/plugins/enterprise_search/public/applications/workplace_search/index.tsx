@@ -52,7 +52,7 @@ export const WorkplaceSearch: React.FC = () => {
             <Switch>
               <Route exact path="/groups">
                 {/* Will replace with groups component subsequent PR */}
-                <Overview />
+                <div />
               </Route>
             </Switch>
           </Layout>
