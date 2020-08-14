@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
@@ -123,32 +123,46 @@ export function DiscoverField({
   let actionButton;
   if (field.name !== '_source' && !selected) {
     actionButton = (
-      <EuiButtonIcon
-        iconType="plusInCircleFilled"
-        className="dscSidebarItem__action"
-        onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          toggleDisplay(field);
-        }}
-        data-test-subj={`fieldToggle-${field.name}`}
-        arial-label={addLabelAria}
-      />
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+          defaultMessage: 'Add field as column',
+        })}
+      >
+        <EuiButtonIcon
+          iconType="plusInCircleFilled"
+          className="dscSidebarItem__action"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={addLabelAria}
+        />
+      </EuiToolTip>
     );
   } else if (field.name !== '_source' && selected) {
     actionButton = (
-      <EuiButtonIcon
-        color="danger"
-        iconType="cross"
-        className="dscSidebarItem__action"
-        onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          toggleDisplay(field);
-        }}
-        data-test-subj={`fieldToggle-${field.name}`}
-        arial-label={removeLabelAria}
-      />
+      <EuiToolTip
+        delay="long"
+        content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+          defaultMessage: 'Remove field from table',
+        })}
+      >
+        <EuiButtonIcon
+          color="danger"
+          iconType="cross"
+          className="dscSidebarItem__action"
+          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            toggleDisplay(field);
+          }}
+          data-test-subj={`fieldToggle-${field.name}`}
+          aria-label={removeLabelAria}
+        />
+      </EuiToolTip>
     );
   }
 

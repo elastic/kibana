@@ -63,21 +63,14 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   buttonProps?: ButtonHTMLAttributes<HTMLButtonElement> & CommonProps;
 }
 
-/**
- * Wraps Object.keys with proper typescript definition of the resulting array
- */
-function keysOf<T, K extends keyof T>(obj: T): K[] {
-  return Object.keys(obj) as K[];
-}
-
-export type ButtonSize = 's' | 'm';
-
-const sizeToClassNameMap: { [size in ButtonSize]: string | null } = {
+const sizeToClassNameMap = {
   s: 'kbnFieldButton--small',
   m: null,
-};
+} as const;
 
-export const SIZES = keysOf(sizeToClassNameMap);
+export type ButtonSize = keyof typeof sizeToClassNameMap;
+
+export const SIZES = Object.keys(sizeToClassNameMap) as ButtonSize[];
 
 export function FieldButton({
   size = 'm',
