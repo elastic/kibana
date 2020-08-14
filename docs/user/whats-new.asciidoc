@@ -117,8 +117,8 @@ image::images/7.9-whats_new_maps.png[Vector tile layer with Mapbox vector tile s
 [[alert-7-9]]
 === ServiceNow action in Alerts
 
-Alerting introduces a ServiceNow action that pushes or updates
-data to a new incident in ServiceNow. See the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
+Alerting introduces a ServiceNow action that creates incidents in ServiceNow.
+See the {kibana-ref}/servicenow-action-type.html[ServiceNow docs]
 for details.
 
 [role="screenshot"]
