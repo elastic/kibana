@@ -34,11 +34,11 @@ module.exports = function (grunt) {
     'verifyDependencyVersions',
     'run:checkLockfileSymlinks',
     'run:verifyNotice',
-    'test:server',
+    'test:server', // TODO
     'test:jest',
     'test:jest_integration',
     'test:projects',
-    'test:browser-ci',
+    'test:browser-ci', // TODO
     'run:apiIntegrationTests',
   ]);
 };
