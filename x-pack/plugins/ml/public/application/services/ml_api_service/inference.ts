@@ -86,6 +86,23 @@ export function inferenceApiProvider(httpService: HttpService) {
     },
 
     /**
+     * Fetches pipelines associated with provided models
+     *
+     * @param modelId - Model ID, collection of Model IDs.
+     */
+    getInferenceModelPipelines(modelId: string | string[]) {
+      let model = modelId;
+      if (Array.isArray(modelId)) {
+        model = modelId.join(',');
+      }
+
+      return httpService.http<any>({
+        path: `${apiBasePath}/inference/${model}/pipelines`,
+        method: 'GET',
+      });
+    },
+
+    /**
      * Deletes an existing trained inference model.
      *
      * @param modelId - Model ID

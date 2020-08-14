@@ -76,6 +76,47 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup Inference
    *
+   * @api {get} /api/ml/inference/:modelId/pipelines Get model pipelines
+   * @apiName GetModelPipelines
+   * @apiDescription Retrieves pipelines associated with a model
+   */
+  router.get(
+    {
+      path: '/api/ml/inference/{modelId}/pipelines',
+      validate: {
+        params: modelIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const modelsIds = modelId.split(',');
+
+        const { body } = await client.asCurrentUser.ingest.getPipeline();
+
+        const result = Object.entries(body).reduce((acc, [pipelineName, pipelineDefinition]) => {
+          const { processors } = pipelineDefinition as { processors: Array<Record<string, any>> };
+          if (processors.some((processor) => modelsIds.includes(processor.inference?.model_id))) {
+            acc[pipelineName] = pipelineDefinition;
+          }
+          return acc;
+        }, {} as Record<string, any>);
+
+        return response.ok({
+          body: result,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup Inference
+   *
    * @api {delete} /api/ml/inference/:modelId Get stats of a trained inference model
    * @apiName DeleteInferenceModel
    * @apiDescription Deletes an existing trained inference model that is currently not referenced by an ingest pipeline.
