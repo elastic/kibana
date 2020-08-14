@@ -66,7 +66,7 @@ export const Navigation = ({
         iconType="arrowRight"
         iconSide="right"
         onClick={goToNextStep}
-        isDisabled={!canGoToNextStep}
+        disabled={!canGoToNextStep}
         fill
         data-test-subj="rollupJobNextButton"
       >

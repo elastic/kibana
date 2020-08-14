@@ -36,6 +36,9 @@ export function GraphPageProvider({ getService, getPageObjects }: FtrProviderCon
         'aria-disabled',
         'false'
       );
+      // Need document focus to not be on `graphDatasourceButton` so its tooltip does not
+      // obscure the next intended click area. Focus the adjaecnt input instead.
+      await testSubjects.click('queryInput');
     }
 
     async clickAddField() {
