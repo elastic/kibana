@@ -7,7 +7,7 @@
 import {
   Filter,
   Query,
-  IIndexPattern,
+  IndexPatternSpec,
   isFilterDisabled,
   buildEsQuery,
   EsQueryConfig,
@@ -27,7 +27,7 @@ export const getQueryFilter = (
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
 ) => {
-  const indexPattern: IIndexPattern = {
+  const indexPattern = {
     fields: [],
     title: index.join(),
   };
@@ -64,12 +64,12 @@ export const getQueryFilter = (
   }
   const initialQuery = { query, language };
 
-  return buildEsQuery(indexPattern.toSpec(), initialQuery, enabledFilters, config);
+  return buildEsQuery(indexPattern, initialQuery, enabledFilters, config);
 };
 
 export const buildExceptionFilter = (
   exceptionQueries: Query[],
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternSpec,
   config: EsQueryConfig,
   excludeExceptions: boolean,
   chunkSize: number
@@ -87,13 +87,13 @@ export const buildExceptionFilter = (
     },
   };
   if (exceptionQueries.length <= chunkSize) {
-    const query = buildEsQuery(indexPattern.toSpec(), exceptionQueries, [], config);
+    const query = buildEsQuery(indexPattern, exceptionQueries, [], config);
     exceptionFilter.query.bool.should = query.bool.filter;
   } else {
     const chunkedFilters: Filter[] = [];
     for (let index = 0; index < exceptionQueries.length; index += chunkSize) {
       const exceptionQueriesChunk = exceptionQueries.slice(index, index + chunkSize);
-      const esQueryChunk = buildEsQuery(indexPattern.toSpec(), exceptionQueriesChunk, [], config);
+      const esQueryChunk = buildEsQuery(indexPattern, exceptionQueriesChunk, [], config);
       const filterChunk: Filter = {
         meta: {
           alias: null,
@@ -114,7 +114,7 @@ export const buildExceptionFilter = (
     // This gets around the problem with buildEsQuery not allowing callers to specify whether queries passed in
     // should be ANDed or ORed together.
     exceptionFilter.query.bool.should = buildEsQuery(
-      indexPattern.toSpec(),
+      indexPattern,
       [],
       chunkedFilters,
       config

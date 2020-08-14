@@ -71,7 +71,9 @@ describe('search_bar', () => {
     isLoading: false,
     onQuerySubmit: jest.fn(),
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve(({ fields: [] } as unknown) as IndexPattern)),
+      get: jest.fn(() =>
+        Promise.resolve(({ fields: [], toSpec: () => ({ fields: [] }) } as unknown) as IndexPattern)
+      ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();

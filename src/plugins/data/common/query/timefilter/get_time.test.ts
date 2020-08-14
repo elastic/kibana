@@ -26,21 +26,28 @@ describe('get_time', () => {
     test('build range filter in iso format', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
+      const indexPattern = {
+        id: 'test',
+        title: 'test',
+        timeFieldName: 'date',
+        fields: [
+          {
+            name: 'date',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            filterable: true,
+          },
+        ],
+      };
+
       const filter = getTime(
         {
-          id: 'test',
-          title: 'test',
-          timeFieldName: 'date',
-          fields: [
-            {
-              name: 'date',
-              type: 'date',
-              esTypes: ['date'],
-              aggregatable: true,
-              searchable: true,
-              filterable: true,
-            },
-          ],
+          ...indexPattern,
+          toSpec: () => ({
+            ...indexPattern,
+          }),
         } as any,
         { from: 'now-60y', to: 'now' }
       );
@@ -55,29 +62,36 @@ describe('get_time', () => {
     test('build range filter for non-primary field', () => {
       const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
 
+      const indexPattern = {
+        id: 'test',
+        title: 'test',
+        timeFieldName: 'date',
+        fields: [
+          {
+            name: 'date',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            filterable: true,
+          },
+          {
+            name: 'myCustomDate',
+            type: 'date',
+            esTypes: ['date'],
+            aggregatable: true,
+            searchable: true,
+            filterable: true,
+          },
+        ],
+      };
+
       const filter = getTime(
         {
-          id: 'test',
-          title: 'test',
-          timeFieldName: 'date',
-          fields: [
-            {
-              name: 'date',
-              type: 'date',
-              esTypes: ['date'],
-              aggregatable: true,
-              searchable: true,
-              filterable: true,
-            },
-            {
-              name: 'myCustomDate',
-              type: 'date',
-              esTypes: ['date'],
-              aggregatable: true,
-              searchable: true,
-              filterable: true,
-            },
-          ],
+          ...indexPattern,
+          toSpec: () => ({
+            ...indexPattern,
+          }),
         } as any,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }

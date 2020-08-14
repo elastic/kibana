@@ -52,6 +52,11 @@ describe('createFilter', () => {
         getByName: () => field,
         filter: () => [field],
       },
+      toSpec: () => ({
+        id: '1234',
+        title: 'logstash-*',
+        fields: [field],
+      }),
     } as any;
 
     return new AggConfigs(

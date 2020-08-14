@@ -36,6 +36,11 @@ const indexPattern = {
     },
   },
   title: 'my index pattern',
+  toSpec: () => ({
+    id: 'indexPatternId',
+    fields: [indexPatternField],
+    title: 'my index pattern',
+  }),
 } as IndexPattern;
 
 describe('getESFilters', () => {

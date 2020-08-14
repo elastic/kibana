@@ -45,6 +45,10 @@ describe('RangeFilterManager', function () {
           return fields[name];
         },
       },
+      toSpec: () => ({
+        id: indexPatternId,
+        fields: [fieldMock],
+      }),
     } as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;

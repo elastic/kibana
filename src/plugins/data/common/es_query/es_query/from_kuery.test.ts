@@ -25,7 +25,6 @@ import { Query } from '../../query/types';
 describe('build query', () => {
   const indexPattern = {
     fields,
-    title: 'title',
   };
 
   describe('buildQueryFromKuery', () => {

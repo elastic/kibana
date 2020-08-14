@@ -44,6 +44,11 @@ describe('Filters Agg', () => {
           filter: () => [field],
           find: () => field,
         },
+        toSpec: () => ({
+          id: '1234',
+          title: 'logstash-*',
+          fields: [field],
+        }),
       } as any;
 
       const field = {

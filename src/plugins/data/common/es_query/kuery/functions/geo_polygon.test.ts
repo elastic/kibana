@@ -46,7 +46,6 @@ describe('kuery functions', () => {
     beforeEach(() => {
       indexPattern = {
         fields,
-        title: 'title',
       };
     });
 

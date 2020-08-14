@@ -81,6 +81,10 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
+        toSpec: () => ({
+          id: 'logstash-*',
+          fields: [mockField],
+        }),
       }),
     } as unknown) as IndexPatternsContract);
   });

@@ -34,7 +34,6 @@ describe('kuery AST API', () => {
   beforeEach(() => {
     indexPattern = {
       fields,
-      title: 'title',
     };
   });
 

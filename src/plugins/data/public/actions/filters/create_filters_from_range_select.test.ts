@@ -38,6 +38,10 @@ describe('brushEvent', () => {
       getByName: () => undefined,
       filter: () => [],
     },
+    toSpec: () => ({
+      id: 'indexPatternId',
+      timeFieldName: 'time',
+    }),
   };
 
   const aggConfigs = [

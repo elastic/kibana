@@ -31,7 +31,6 @@ describe('Phrase filter builder', () => {
   beforeEach(() => {
     indexPattern = {
       id: 'id',
-      title: 'title',
     };
   });
 
@@ -104,7 +103,6 @@ describe('buildInlineScriptForPhraseFilter', () => {
 describe('getPhraseFilterField', function () {
   const indexPattern: IndexPatternSpec = {
     fields,
-    title: 'title',
   };
 
   it('should return the name of the field a phrase query is targeting', () => {

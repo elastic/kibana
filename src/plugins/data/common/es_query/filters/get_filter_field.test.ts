@@ -26,7 +26,6 @@ describe('getFilterField', function () {
   const indexPattern = {
     id: 'logstash-*',
     fields,
-    title: 'title',
   };
 
   it('should return the field name from known filter types that target a specific field', () => {

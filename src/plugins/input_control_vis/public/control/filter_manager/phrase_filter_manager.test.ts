@@ -33,7 +33,7 @@ describe('PhraseFilterManager', function () {
         convert: (value: any) => value,
       },
     };
-    const indexPatternMock: IndexPattern = {
+    const indexPatternMock: IndexPattern = ({
       id: indexPatternId,
       fields: {
         getByName: (name: string) => {
@@ -41,7 +41,11 @@ describe('PhraseFilterManager', function () {
           return fields[name];
         },
       },
-    } as IndexPattern;
+      toSpec: () => ({
+        id: indexPatternId,
+        fields: [fieldMock],
+      }),
+    } as unknown) as IndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(() => {

@@ -24,7 +24,6 @@ import { fields } from '../../index_patterns/mocks';
 describe('build query', () => {
   const indexPattern = {
     fields,
-    title: 'title',
   };
 
   describe('buildQueryFromFilters', () => {
