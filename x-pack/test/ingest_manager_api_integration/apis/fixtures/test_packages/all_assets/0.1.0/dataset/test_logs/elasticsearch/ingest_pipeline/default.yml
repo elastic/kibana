@@ -1,20 +1,7 @@
 ---
-description: Pipeline for normalizing Kubernetes CoreDNS logs.
+description: Pipeline for parsing test logs
+  plugins.
 processors:
-  - pipeline:
-      if: ctx.message.charAt(0) == (char)("{")
-      name: '{{IngestPipeline "pipeline1" }}'
-  - pipeline:
-      if: ctx.message.charAt(0) != (char)("{")
-      name: '{{IngestPipeline "pipeline2" }}'
-  - script:
-      lang: painless
-      source: >
-        ctx.event.created = ctx['@timestamp'];
-        ctx['@timestamp'] = ctx['timestamp'];
-        ctx.remove('timestamp');
-      ignore_failure: true
-on_failure:
-  - set:
-      field: error.message
-      value: "{{ _ingest.on_failure_message }}"
+- set:
+    field: error.message
+    value: '{{ _ingest.on_failure_message }}'
