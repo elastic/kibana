@@ -48,6 +48,17 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   };
 
+  function formatToListItems(items: Record<string, any>) {
+    return Object.entries(items)
+      .map(([title, value]) => ({
+        title,
+        description: typeof value === 'object' ? JSON.stringify(value) : value,
+      }))
+      .filter(({ description }) => {
+        return description !== undefined;
+      });
+  }
+
   const tabs = [
     {
       id: 'details',
@@ -60,89 +71,90 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       content: (
         <>
           <EuiSpacer size={'m'} />
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.detailsTitle"
-                  defaultMessage="Details"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-            <EuiDescriptionList
-              type="column"
-              listItems={Object.entries(details).map(([title, value]) => ({
-                title,
-                description: typeof value === 'object' ? JSON.stringify(value) : value,
-              }))}
-            />
-          </EuiPanel>
-        </>
-      ),
-    },
-    {
-      id: 'config',
-      name: (
-        <FormattedMessage
-          id="xpack.ml.inference.modelsList.expandedRow.configTabLabel"
-          defaultMessage="Config"
-        />
-      ),
-      content: (
-        <>
-          <EuiSpacer size={'m'} />
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
               <EuiPanel>
                 <EuiTitle size={'xs'}>
                   <h5>
                     <FormattedMessage
-                      id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
-                      defaultMessage="Inference configuration"
+                      id="xpack.ml.inference.modelsList.expandedRow.detailsTitle"
+                      defaultMessage="Details"
                     />
                   </h5>
                 </EuiTitle>
                 <EuiSpacer size={'m'} />
                 <EuiDescriptionList
+                  compressed={true}
                   type="column"
-                  listItems={Object.entries(inferenceConfig[Object.keys(inferenceConfig)[0]]).map(
-                    ([title, value]) => ({
-                      title,
-                      description:
-                        typeof value === 'object' ? JSON.stringify(value) : (value as any),
-                    })
-                  )}
+                  listItems={formatToListItems(details)}
                 />
               </EuiPanel>
             </EuiFlexItem>
-            {metadata?.analytics_config && (
-              <EuiFlexItem>
-                <EuiPanel>
-                  <EuiTitle size={'xs'}>
-                    <h5>
-                      <FormattedMessage
-                        id="xpack.ml.inference.modelsList.expandedRow.analyticsConfigTitle"
-                        defaultMessage="Analytics configuration"
-                      />
-                    </h5>
-                  </EuiTitle>
-                  <EuiSpacer size={'m'} />
-                  <EuiDescriptionList
-                    type="column"
-                    listItems={Object.entries(metadata?.analytics_config).map(([title, value]) => ({
-                      title,
-                      description:
-                        typeof value === 'object' ? JSON.stringify(value) : (value as any),
-                    }))}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            )}
           </EuiFlexGrid>
         </>
       ),
     },
+    ...(inferenceConfig
+      ? [
+          {
+            id: 'config',
+            name: (
+              <FormattedMessage
+                id="xpack.ml.inference.modelsList.expandedRow.configTabLabel"
+                defaultMessage="Config"
+              />
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'m'} />
+                <EuiFlexGrid columns={2}>
+                  <EuiFlexItem>
+                    <EuiPanel>
+                      <EuiTitle size={'xs'}>
+                        <h5>
+                          <FormattedMessage
+                            id="xpack.ml.inference.modelsList.expandedRow.inferenceConfigTitle"
+                            defaultMessage="Inference configuration"
+                          />
+                        </h5>
+                      </EuiTitle>
+                      <EuiSpacer size={'m'} />
+                      <EuiDescriptionList
+                        compressed={true}
+                        type="column"
+                        listItems={formatToListItems(
+                          inferenceConfig[Object.keys(inferenceConfig)[0]]
+                        )}
+                      />
+                    </EuiPanel>
+                  </EuiFlexItem>
+                  {metadata?.analytics_config && (
+                    <EuiFlexItem>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.inference.modelsList.expandedRow.analyticsConfigTitle"
+                              defaultMessage="Analytics configuration"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <EuiDescriptionList
+                          compressed={true}
+                          type="column"
+                          listItems={formatToListItems(metadata?.analytics_config)}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGrid>
+              </>
+            ),
+          },
+        ]
+      : []),
+
     {
       id: 'stats',
       name: (
@@ -154,24 +166,26 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
       content: (
         <>
           <EuiSpacer size={'m'} />
-          <EuiPanel>
-            <EuiTitle size={'xs'}>
-              <h5>
-                <FormattedMessage
-                  id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
-                  defaultMessage="Inference Stats"
+          <EuiFlexGrid columns={2}>
+            <EuiFlexItem>
+              <EuiPanel>
+                <EuiTitle size={'xs'}>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.ml.inference.modelsList.expandedRow.statsTitle"
+                      defaultMessage="Inference Stats"
+                    />
+                  </h5>
+                </EuiTitle>
+                <EuiSpacer size={'m'} />
+                <EuiDescriptionList
+                  compressed={true}
+                  type="column"
+                  listItems={formatToListItems(stats.inference_stats)}
                 />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size={'m'} />
-            <EuiDescriptionList
-              type="column"
-              listItems={Object.entries(stats.inference_stats).map(([title, value]) => ({
-                title,
-                description: typeof value === 'object' ? JSON.stringify(value) : value,
-              }))}
-            />
-          </EuiPanel>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGrid>
         </>
       ),
     },

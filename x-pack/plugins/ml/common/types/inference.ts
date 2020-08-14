@@ -59,5 +59,5 @@ export interface ModelConfigResponse {
   model_id: string;
   tags: string;
   version: string;
-  inference_config: any;
+  inference_config?: Record<string, any>;
 }
