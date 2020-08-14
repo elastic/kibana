@@ -21,6 +21,7 @@ import {
 
 interface Props {
   close: () => void;
+  // TODO add types for lifecycle after policy is typed
   lifecycle: any;
   policyName: string;
 }

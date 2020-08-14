@@ -24,9 +24,10 @@ import { NodeAttrsDetails } from './node_attrs_details';
 
 interface Props {
   phase: string;
-  setPhaseData: (dataKey: string, value: any) => void;
-  errors: any;
+  errors: Record<string, string[]>;
+  // TODO add types for phaseData and setPhaseData after policy is typed
   phaseData: any;
+  setPhaseData: (dataKey: string, value: any) => void;
   isShowingErrors: boolean;
 }
 

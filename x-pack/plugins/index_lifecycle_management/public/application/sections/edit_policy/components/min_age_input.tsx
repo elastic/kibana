@@ -71,8 +71,9 @@ function getUnitsAriaLabelForPhase(phase: string) {
 interface Props {
   rolloverEnabled: boolean;
   errors: Record<string, string[]>;
-  phaseData: any;
   phase: string;
+  // TODO add types for phaseData and setPhaseData after policy is typed
+  phaseData: any;
   setPhaseData: (dataKey: string, value: any) => void;
   isShowingErrors: boolean;
 }

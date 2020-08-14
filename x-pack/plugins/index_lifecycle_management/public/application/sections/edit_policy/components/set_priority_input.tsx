@@ -15,8 +15,9 @@ import { ErrableFormRow } from './';
 
 interface Props {
   errors: Record<string, string[]>;
-  phaseData: any;
+  // TODO add types for phaseData and setPhaseData after policy is typed
   phase: string;
+  phaseData: any;
   setPhaseData: (dataKey: string, value: any) => void;
   isShowingErrors: boolean;
 }
