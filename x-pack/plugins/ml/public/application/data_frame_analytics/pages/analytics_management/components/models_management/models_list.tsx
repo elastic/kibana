@@ -60,7 +60,6 @@ export const ModelsList: FC = () => {
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const [isLoading, setIsLoading] = useState(false);
-  const [modelsStats, setModelsStats] = useState<ModelsBarStats | undefined>();
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
 
@@ -68,6 +67,9 @@ export const ModelsList: FC = () => {
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
 
+  /**
+   * Fetches inference trained models.
+   */
   async function fetchData() {
     setIsLoading(true);
     try {
@@ -80,16 +82,6 @@ export const ModelsList: FC = () => {
             : {}),
         }))
       );
-
-      setModelsStats({
-        total: {
-          show: true,
-          value: response.trained_model_configs.length,
-          label: i18n.translate('xpack.ml.inference.modelsList.totalAmountLabel', {
-            defaultMessage: 'Total inference trained models',
-          }),
-        },
-      });
     } catch (error) {
       toasts.addError(new Error(error.body.message), {
         title: i18n.translate('xpack.ml.inference.modelsList.fetchFailedErrorMessage', {
@@ -99,6 +91,18 @@ export const ModelsList: FC = () => {
     }
     setIsLoading(false);
   }
+
+  const modelsStats: ModelsBarStats = useMemo(() => {
+    return {
+      total: {
+        show: true,
+        value: items.length,
+        label: i18n.translate('xpack.ml.inference.modelsList.totalAmountLabel', {
+          defaultMessage: 'Total inference trained models',
+        }),
+      },
+    };
+  }, [items]);
 
   useEffect(() => {
     fetchData();
@@ -167,20 +171,38 @@ export const ModelsList: FC = () => {
     }
   }
 
+  /**
+   * Deletes the models marked for deletion.
+   */
   async function deleteModels() {
+    const modelsToDeleteIds = modelsToDelete.map((model) => model.model_id);
+
     try {
       await Promise.all(
-        modelsToDelete.map((model) => inferenceApiService.deleteInferenceModel(model.model_id))
+        modelsToDeleteIds.map((modelId) => inferenceApiService.deleteInferenceModel(modelId))
       );
       setItems(
         items.filter(
           (model) => !modelsToDelete.some((toDelete) => toDelete.model_id === model.model_id)
         )
       );
+      toasts.addSuccess(
+        i18n.translate('xpack.ml.inference.modelsList.successfullyDeletedMessage', {
+          defaultMessage:
+            '{modelsCount, plural, one {Model} other {Models}} {modelsToDeleteIds} {modelsCount, plural, one {has} other {have}} been successfully deleted',
+          values: {
+            modelsCount: modelsToDeleteIds.length,
+            modelsToDeleteIds: modelsToDeleteIds.join(', '),
+          },
+        })
+      );
     } catch (error) {
-      toasts.addError(new Error(error.body.message), {
+      toasts.addError(new Error(error?.body?.message), {
         title: i18n.translate('xpack.ml.inference.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage: 'Model deletion failed',
+          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+          values: {
+            modelsCount: modelsToDeleteIds.length,
+          },
         }),
       });
     }
