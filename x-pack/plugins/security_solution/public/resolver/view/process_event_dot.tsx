@@ -404,6 +404,8 @@ const UnstyledProcessEventDot = React.memo(
               }}
               tabIndex={-1}
               title={eventModel.processNameSafeVersion(event)}
+              data-test-subj="resolver:node:primary-button"
+              data-test-resolver-node-id={nodeID}
             >
               <span className="euiButton__content">
                 <span className="euiButton__text" data-test-subj={'euiButton__text'}>
