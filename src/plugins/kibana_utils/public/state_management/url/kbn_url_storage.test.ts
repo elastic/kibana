@@ -78,6 +78,27 @@ describe('kbn_url_storage', () => {
       const retrievedState2 = getStateFromKbnUrl('_s', newUrl);
       expect(retrievedState2).toEqual(state2);
     });
+
+    it('should set query to url with storeInHashQuery: false', () => {
+      let newUrl = setStateToKbnUrl(
+        '_a',
+        { tab: 'other' },
+        { useHash: false, storeInHashQuery: false },
+        'http://localhost:5601/oxf/app/kibana/yourApp'
+      );
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana/yourApp?_a=(tab:other)"`
+      );
+      newUrl = setStateToKbnUrl(
+        '_b',
+        { f: 'test', i: '', l: '' },
+        { useHash: false, storeInHashQuery: false },
+        newUrl
+      );
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana/yourApp?_a=(tab:other)&_b=(f:test,i:'',l:'')"`
+      );
+    });
   });
 
   describe('urlControls', () => {
