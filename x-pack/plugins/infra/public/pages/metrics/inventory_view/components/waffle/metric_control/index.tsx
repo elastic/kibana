@@ -8,7 +8,7 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
-import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label.ts';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,

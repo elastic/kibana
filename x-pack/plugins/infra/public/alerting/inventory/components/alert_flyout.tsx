@@ -5,7 +5,6 @@
  */
 
 import React, { useContext } from 'react';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -13,26 +12,22 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
-  customMetrics: SnapshotCustomMetricInput[];
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertFlyout = ({
-  options,
-  nodeType,
-  filter,
-  customMetrics,
-  visible,
-  setVisible,
-}: Props) => {
+export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
   const { services } = useKibana();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { customMetrics } = inventoryPrefill;
 
   return (
     <>

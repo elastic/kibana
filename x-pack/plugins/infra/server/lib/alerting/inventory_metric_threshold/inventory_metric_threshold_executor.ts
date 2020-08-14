@@ -6,7 +6,7 @@
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label.ts';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import { AlertExecutorOptions } from '../../../../../alerts/server';

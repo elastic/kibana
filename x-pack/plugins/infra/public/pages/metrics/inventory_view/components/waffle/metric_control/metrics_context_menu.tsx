@@ -5,7 +5,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenu } from '@elastic/eui';
-import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label.ts';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
