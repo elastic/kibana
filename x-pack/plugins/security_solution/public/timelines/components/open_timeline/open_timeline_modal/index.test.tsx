@@ -6,7 +6,7 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
@@ -44,6 +44,15 @@ jest.mock('../use_timeline_status', () => {
   return {
     useTimelineStatus: jest.fn(),
   };
+});
+
+// mock for EuiSelectable's virtualization
+jest.mock('react-virtualized-auto-sizer', () => {
+  return ({
+    children,
+  }: {
+    children: (dimensions: { width: number; height: number }) => ReactElement;
+  }) => children({ width: 100, height: 500 });
 });
 
 describe('OpenTimelineModal', () => {
