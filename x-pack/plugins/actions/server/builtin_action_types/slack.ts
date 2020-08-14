@@ -119,6 +119,7 @@ async function slackExecutor(
   let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
   if (execOptions.proxySettings) {
     proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
+    logger.info(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
   }
 
   try {

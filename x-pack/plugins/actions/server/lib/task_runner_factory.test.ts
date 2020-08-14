@@ -64,9 +64,6 @@ const actionExecutorInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
-  proxyUrl: 'https//:localhost:900',
-  proxyHeaders: {},
-  rejectUnauthorizedCertificates: false,
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

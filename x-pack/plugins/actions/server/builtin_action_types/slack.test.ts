@@ -12,6 +12,14 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
 
+jest.mock('@slack/webhook', () => {
+  return {
+    IncomingWebhook: jest.fn().mockImplementation(() => {
+      return { send: (message: string) => {} };
+    }),
+  };
+});
+
 const ACTION_TYPE_ID = '.slack';
 
 const services: Services = actionsMock.createServices();
@@ -157,6 +165,10 @@ describe('execute()', () => {
       config: {},
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
+      proxySettings: {
+        proxyUrl: 'https://someproxyhost',
+        rejectUnauthorizedCertificates: false,
+      },
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -178,6 +190,27 @@ describe('execute()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
+    );
+  });
+
+  test('calls the mock executor with success proxy', async () => {
+    const actionTypeProxy = getActionType({
+      logger: mockedLogger,
+      configurationUtilities: actionsConfigMock.create(),
+    });
+    await actionTypeProxy.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+      proxySettings: {
+        proxyUrl: 'https://someproxyhost',
+        rejectUnauthorizedCertificates: false,
+      },
+    });
+    expect(mockedLogger.info).toHaveBeenCalledWith(
+      'IncomingWebhook was called with proxyUrl https://someproxyhost'
     );
   });
 });
