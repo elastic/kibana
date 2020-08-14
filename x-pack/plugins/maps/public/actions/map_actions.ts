@@ -207,7 +207,7 @@ export function setQuery({
   filters = [],
   forceRefresh = false,
 }: {
-  filters: Filter[];
+  filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   forceRefresh?: boolean;
