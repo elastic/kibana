@@ -12,7 +12,7 @@ export const createNewPackagePolicyMock = (): NewPackagePolicy => {
     description: '',
     namespace: 'default',
     enabled: true,
-    config_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+    policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
     output_id: '',
     package: {
       name: 'endpoint',

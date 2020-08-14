@@ -38,8 +38,8 @@ export async function getAgentStatusForAgentPolicy(
         page: 1,
         kuery: agentPolicyId
           ? kuery
-            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.config_id:"${agentPolicyId}")`
-            : `${AGENT_SAVED_OBJECT_TYPE}.config_id:"${agentPolicyId}"`
+            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}")`
+            : `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"`
           : kuery,
       })
     )

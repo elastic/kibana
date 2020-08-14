@@ -144,7 +144,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
   const validPackagePolicy: NewPackagePolicy = {
     name: 'pkgPolicy1-1',
     namespace: 'default',
-    config_id: 'test-policy',
+    policy_id: 'test-policy',
     enabled: true,
     output_id: 'test-output',
     inputs: [

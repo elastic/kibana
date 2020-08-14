@@ -187,7 +187,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (kuery) {
       kuery = `(${kuery}) and`;
     }
-    kuery = `${kuery} ${AGENT_SAVED_OBJECT_TYPE}.config_id : (${selectedAgentPolicies
+    kuery = `${kuery} ${AGENT_SAVED_OBJECT_TYPE}.policy_id : (${selectedAgentPolicies
       .map((agentPolicy) => `"${agentPolicy}"`)
       .join(' or ')})`;
   }
@@ -267,7 +267,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
-      field: 'config_id',
+      field: 'policy_id',
       name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),

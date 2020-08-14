@@ -117,7 +117,7 @@ describe('test agent acks services', () => {
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
             config: {
-              id: 'config1',
+              id: 'policy1',
               revision: 4,
               settings: {
                 monitoring: {
@@ -207,7 +207,7 @@ describe('test agent acks services', () => {
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
-        config_id: 'config1',
+        policy_id: 'policy1',
       } as unknown) as Agent,
       [
         {
@@ -259,7 +259,7 @@ describe('test agent acks services', () => {
           created_at: '2020-03-14T19:45:02.620Z',
           data: JSON.stringify({
             config: {
-              id: 'config1',
+              id: 'policy1',
               revision: 4,
               settings: {
                 monitoring: {
@@ -349,7 +349,7 @@ describe('test agent acks services', () => {
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
-        config_id: 'config1',
+        policy_id: 'policy1',
         policy_revision: 100,
       } as unknown) as Agent,
       [

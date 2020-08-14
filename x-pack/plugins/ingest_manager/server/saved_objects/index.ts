@@ -21,6 +21,7 @@ import {
   migrateAgentToV7100,
   migrateAgentPolicyToV7100,
   migrateEnrollmentApiKeysToV7100,
+  migratePackagePolicyToV7100,
 } from './migrations/to_v7_10_0';
 
 /*
@@ -203,7 +204,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         enabled: { type: 'boolean' },
-        config_id: { type: 'keyword' },
+        policy_id: { type: 'keyword' },
         output_id: { type: 'keyword' },
         package: {
           properties: {
@@ -244,6 +245,9 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         created_at: { type: 'date' },
         created_by: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.10.0': migratePackagePolicyToV7100,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

@@ -318,7 +318,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
   describe('packageToPackagePolicy', () => {
     it('returns package policy with default name', () => {
       expect(packageToPackagePolicy(mockPackage, '1', '2')).toEqual({
-        config_id: '1',
+        policy_id: '1',
         namespace: '',
         enabled: true,
         inputs: [],
@@ -333,7 +333,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
     });
     it('returns package policy with custom name', () => {
       expect(packageToPackagePolicy(mockPackage, '1', '2', 'default', 'pkgPolicy-1')).toEqual({
-        config_id: '1',
+        policy_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [],
@@ -357,7 +357,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           'Test description'
         )
       ).toEqual({
-        config_id: '1',
+        policy_id: '1',
         enabled: true,
         inputs: [],
         name: 'pkgPolicy-1',
@@ -380,7 +380,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
       expect(
         packageToPackagePolicy(mockPackageWithConfigTemplates, '1', '2', 'default', 'pkgPolicy-1')
       ).toEqual({
-        config_id: '1',
+        policy_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],

@@ -198,7 +198,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'config_id',
+      field: 'policy_id',
       name: i18n.translate('xpack.ingestManager.enrollmentTokensList.policyTitle', {
         defaultMessage: 'Agent policy',
       }),

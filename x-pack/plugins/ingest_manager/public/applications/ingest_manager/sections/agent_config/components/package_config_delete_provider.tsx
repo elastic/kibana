@@ -51,7 +51,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         query: {
           page: 1,
           perPage: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentPolicy.id}`,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicy.id}`,
         },
       });
       setAgentsCount(data?.total || 0);

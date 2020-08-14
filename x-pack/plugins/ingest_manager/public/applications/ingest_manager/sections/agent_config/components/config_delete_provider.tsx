@@ -98,7 +98,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentPolicyToCheck}`,
+        kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id : ${agentPolicyToCheck}`,
       },
     });
     setAgentsCount(data?.total || 0);

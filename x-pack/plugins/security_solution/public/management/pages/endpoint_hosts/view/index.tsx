@@ -156,9 +156,9 @@ export const EndpointList = () => {
   const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
     return policyItems.map((item) => {
       return {
-        key: item.config_id,
+        key: item.policy_id,
         label: item.name,
-        checked: selectedPolicyId === item.config_id ? 'on' : undefined,
+        checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
       };
     });
   }, [policyItems, selectedPolicyId]);

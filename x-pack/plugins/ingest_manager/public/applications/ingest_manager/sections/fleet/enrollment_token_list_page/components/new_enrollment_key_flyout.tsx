@@ -43,7 +43,7 @@ function useCreateApiKeyForm(
         path: enrollmentAPIKeyRouteService.getCreatePath(),
         body: JSON.stringify({
           name: apiKeyNameInput.value,
-          config_id: policyIdInput.value,
+          policy_id: policyIdInput.value,
         }),
       });
       policyIdInput.clear();

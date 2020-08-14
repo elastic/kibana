@@ -14,7 +14,7 @@ classDiagram
 	class agents {
 		status
     access_api_key_id
-    config_id
+    policy_id
     last_checkin
     local_metadata
     user_provided_metadata
@@ -47,7 +47,7 @@ classDiagram
 	class package_policies {
     name
     namespace
-    config_id
+    policy_id
     enabled
     package
     output_id
@@ -64,7 +64,7 @@ classDiagram
 	}
 
   class enrollment_api_keys {
-    config_id
+    policy_id
     api_key_id
     api_key // Encrypted
   }

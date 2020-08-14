@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
           name: 'filetest-1',
           description: '',
           namespace: 'default',
-          config_id: agentPolicyId,
+          policy_id: agentPolicyId,
           enabled: true,
           output_id: '',
           inputs: [],

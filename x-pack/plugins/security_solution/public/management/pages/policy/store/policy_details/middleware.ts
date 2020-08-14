@@ -53,8 +53,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       // Agent summary is secondary data, so its ok for it to come after the details
       // page is populated with the main content
-      if (policyItem.config_id) {
-        const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.config_id);
+      if (policyItem.policy_id) {
+        const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.policy_id);
         dispatch({
           type: 'serverReturnedPolicyDetailsAgentSummaryData',
           payload: {

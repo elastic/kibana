@@ -342,9 +342,9 @@ export const PolicyList = React.memo(() => {
                       <LinkToApp
                         data-test-subj="agentPolicyLink"
                         appId="ingestManager"
-                        appPath={`#/policies/${item.config_id}`}
+                        appPath={`#/policies/${item.policy_id}`}
                         href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
-                          item.config_id
+                          item.policy_id
                         }`}
                       >
                         <FormattedMessage
@@ -356,9 +356,9 @@ export const PolicyList = React.memo(() => {
                     <DangerEuiContextMenuItem
                       data-test-subj="policyDeleteButton"
                       icon="trash"
-                      key="policyDeletAction"
+                      key="policyDeleteAction"
                       onClick={() => {
-                        handleDeleteOnClick({ agentPolicyId: item.config_id, policyId: item.id });
+                        handleDeleteOnClick({ agentPolicyId: item.policy_id, policyId: item.id });
                       }}
                     >
                       <FormattedMessage

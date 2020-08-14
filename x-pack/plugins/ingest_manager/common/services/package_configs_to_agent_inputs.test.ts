@@ -15,7 +15,7 @@ describe('Ingest Manager - storedPackagePoliciesToAgentInputs', () => {
     created_by: '',
     updated_at: '',
     updated_by: '',
-    config_id: '',
+    policy_id: '',
     enabled: true,
     output_id: '',
     namespace: 'default',

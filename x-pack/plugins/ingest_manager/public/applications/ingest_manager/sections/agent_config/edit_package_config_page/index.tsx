@@ -75,7 +75,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     name: '',
     description: '',
     namespace: '',
-    config_id: '',
+    policy_id: '',
     enabled: true,
     output_id: '',
     inputs: [],

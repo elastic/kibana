@@ -53,3 +53,17 @@ export const migrateEnrollmentApiKeysToV7100: SavedObjectMigrationFn<
 
   return updatedEnrollmentApiKeyDoc;
 };
+
+export const migratePackagePolicyToV7100: SavedObjectMigrationFn<
+  Exclude<PackagePolicy, 'policy_id'> & {
+    config_id: string;
+  },
+  PackagePolicy
+> = (packagePolicyDoc) => {
+  const updatedPackagePolicyDoc = cloneDeep(packagePolicyDoc);
+
+  updatedPackagePolicyDoc.attributes.policy_id = packagePolicyDoc.attributes.config_id;
+  delete updatedPackagePolicyDoc.attributes.config_id;
+
+  return updatedPackagePolicyDoc;
+};

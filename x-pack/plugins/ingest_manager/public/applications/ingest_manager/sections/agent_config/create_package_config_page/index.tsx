@@ -108,7 +108,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     name: '',
     description: '',
     namespace: '',
-    config_id: '',
+    policy_id: '',
     enabled: true,
     output_id: '', // TODO: Blank for now as we only support default output
     inputs: [],
@@ -194,7 +194,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       const hasValidationErrors = newValidationResults
         ? validationHasErrors(newValidationResults)
         : false;
-      const hasAgentPolicy = newPackagePolicy.config_id && newPackagePolicy.config_id !== '';
+      const hasAgentPolicy = newPackagePolicy.policy_id && newPackagePolicy.policy_id !== '';
       if (hasPackage && hasAgentPolicy && !hasValidationErrors) {
         setFormState('VALID');
       }

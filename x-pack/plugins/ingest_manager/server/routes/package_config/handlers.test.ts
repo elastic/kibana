@@ -89,7 +89,7 @@ describe('When calling package policy', () => {
         body: newData || {
           name: 'endpoint-1',
           description: '',
-          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           enabled: true,
           output_id: '',
           inputs: [],
@@ -169,7 +169,7 @@ describe('When calling package policy', () => {
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
         expect(callbackOne).toHaveBeenCalledWith({
-          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
           inputs: [],
@@ -183,7 +183,7 @@ describe('When calling package policy', () => {
           },
         });
         expect(callbackTwo).toHaveBeenCalledWith({
-          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
           inputs: [
@@ -214,7 +214,7 @@ describe('When calling package policy', () => {
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
         expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
-          config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+          policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,
           inputs: [
@@ -295,7 +295,7 @@ describe('When calling package policy', () => {
           await routeHandler(context, request, response);
           expect(response.ok).toHaveBeenCalled();
           expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
-            config_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
+            policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
             description: '',
             enabled: true,
             inputs: [

@@ -85,7 +85,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
     const { items } = await listEnrollmentApiKeys(soClient, {
       page: page++,
       perPage: 100,
-      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.config_id:${agentPolicyId}`,
+      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.policy_id:${agentPolicyId}`,
     });
 
     if (items.length === 0) {

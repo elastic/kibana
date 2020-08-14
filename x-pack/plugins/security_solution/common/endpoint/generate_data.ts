@@ -1043,7 +1043,7 @@ export class EndpointDocGenerator {
       created_by: 'elastic',
       updated_at: new Date().toISOString(),
       updated_by: 'elastic',
-      config_id: this.seededUUIDv4(),
+      policy_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
       inputs: [

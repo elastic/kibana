@@ -24,7 +24,7 @@ export const ConfigureEndpointPackagePolicy = memo<CustomConfigurePackagePolicyC
   ({
     from,
     packagePolicyId,
-    packagePolicy: { config_id: agentPolicyId },
+    packagePolicy: { policy_id: agentPolicyId },
   }: CustomConfigurePackagePolicyProps) => {
     let policyUrl = '';
     if (from === 'edit' && packagePolicyId) {

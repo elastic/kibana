@@ -68,15 +68,15 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     }
 
     // If agent policy has changed, update package policy's agent policy ID and namespace
-    if (packagePolicy.config_id !== agentPolicy.id) {
+    if (packagePolicy.policy_id !== agentPolicy.id) {
       updatePackagePolicy({
-        config_id: agentPolicy.id,
+        policy_id: agentPolicy.id,
         namespace: agentPolicy.namespace,
       });
     }
   }, [
     packagePolicy.package,
-    packagePolicy.config_id,
+    packagePolicy.policy_id,
     agentPolicy,
     packageInfo,
     updatePackagePolicy,

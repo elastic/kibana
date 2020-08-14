@@ -49,7 +49,7 @@ export interface NewPackagePolicy {
   description?: string;
   namespace: string;
   enabled: boolean;
-  config_id: string;
+  policy_id: string;
   output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];

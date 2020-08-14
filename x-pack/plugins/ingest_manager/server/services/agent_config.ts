@@ -344,7 +344,7 @@ class AgentPolicyService {
       showInactive: false,
       perPage: 0,
       page: 1,
-      kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${id}`,
+      kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${id}`,
     });
 
     if (total > 0) {

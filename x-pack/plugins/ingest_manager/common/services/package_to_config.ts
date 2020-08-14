@@ -129,7 +129,7 @@ export const packageToPackagePolicy = (
       version: packageInfo.version,
     },
     enabled: true,
-    config_id: agentPolicyId,
+    policy_id: agentPolicyId,
     output_id: outputId,
     inputs: packageToPackagePolicyInputs(packageInfo),
   };

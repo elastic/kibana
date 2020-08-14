@@ -45,7 +45,7 @@ class PackagePolicyService {
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy> {
     // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id);
+    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
     } else {
@@ -76,7 +76,7 @@ class PackagePolicyService {
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id, true);
+        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new Error(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
@@ -102,7 +102,7 @@ class PackagePolicyService {
     );
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.config_id, [newSo.id], {
+    await agentPolicyService.assignPackagePolicies(soClient, packagePolicy.policy_id, [newSo.id], {
       user: options?.user,
       bumpRevision: options?.bumpRevision ?? true,
     });
@@ -127,7 +127,7 @@ class PackagePolicyService {
         type: SAVED_OBJECT_TYPE,
         attributes: {
           ...packagePolicy,
-          config_id: agentPolicyId,
+          policy_id: agentPolicyId,
           revision: 1,
           created_at: isoDate,
           created_by: options?.user?.username ?? 'system',
@@ -246,7 +246,7 @@ class PackagePolicyService {
     }
 
     // Check that its agent policy does not have a package policy with the same name
-    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.config_id);
+    const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
     } else {
@@ -275,7 +275,7 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, packagePolicy.config_id, {
+    await agentPolicyService.bumpRevision(soClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
@@ -298,7 +298,7 @@ class PackagePolicyService {
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
             soClient,
-            oldPackagePolicy.config_id,
+            oldPackagePolicy.policy_id,
             [oldPackagePolicy.id],
             {
               user: options?.user,

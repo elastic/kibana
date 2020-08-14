@@ -59,7 +59,7 @@ export const getAgentPoliciesHandler: RequestHandler<
           showInactive: false,
           perPage: 0,
           page: 1,
-          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentPolicy.id}`,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicy.id}`,
         }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
       { concurrency: 10 }
     );
@@ -131,7 +131,7 @@ export const createAgentPolicyHandler: RequestHandler<
 
     // Create the system monitoring package policy and add it to agent policy.
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
-      newSysPackagePolicy.config_id = agentPolicy.id;
+      newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
       await packagePolicyService.create(soClient, callCluster, newSysPackagePolicy, {
         user,

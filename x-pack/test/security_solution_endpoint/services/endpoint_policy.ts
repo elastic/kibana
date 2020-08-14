@@ -157,7 +157,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
           name: 'Protect East Coast',
           description: 'Protect the worlds data - but in the East Coast',
-          config_id: agentPolicy!.id,
+          policy_id: agentPolicy!.id,
           enabled: true,
           output_id: '',
           inputs: [

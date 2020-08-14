@@ -17,7 +17,7 @@ const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
   namespace: schema.string({ minLength: 1 }),
-  config_id: schema.string(),
+  policy_id: schema.string(),
   enabled: schema.boolean(),
   package: schema.maybe(
     schema.object({
