@@ -13,6 +13,15 @@ import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { KibanaContext, IKibanaContext } from '../index';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
+import {
+  ROOT_PATH,
+  SETUP_GUIDE_PATH,
+  SETTINGS_PATH,
+  CREDENTIALS_PATH,
+  ROLE_MAPPINGS_PATH,
+  ENGINES_PATH,
+} from './routes';
+
 import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
@@ -21,11 +30,11 @@ export const AppSearch: React.FC = () => {
   if (!enterpriseSearchUrl)
     return (
       <Switch>
-        <Route exact path="/setup_guide">
+        <Route exact path={SETUP_GUIDE_PATH}>
           <SetupGuide />
         </Route>
         <Route>
-          <Redirect to="/setup_guide" />
+          <Redirect to={SETUP_GUIDE_PATH} />
           <SetupGuide /> {/* Kibana displays a blank page on redirect if this isn't included */}
         </Route>
       </Switch>
@@ -33,17 +42,17 @@ export const AppSearch: React.FC = () => {
 
   return (
     <Switch>
-      <Route exact path="/setup_guide">
+      <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route>
         <Layout navigation={<AppSearchNav />}>
           <Switch>
-            <Route exact path="/">
+            <Route exact path={ROOT_PATH}>
               {/* For some reason a Redirect to /engines just doesn't work here - it shows a blank page */}
               <EngineOverview />
             </Route>
-            <Route exact path="/engines">
+            <Route exact path={ENGINES_PATH}>
               <EngineOverview />
             </Route>
           </Switch>
@@ -59,22 +68,22 @@ export const AppSearchNav: React.FC = () => {
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to="/engines" isRoot>
+      <SideNavLink to={ENGINES_PATH} isRoot>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
           defaultMessage: 'Engines',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={`${externalUrl}/settings/account`}>
+      <SideNavLink isExternal to={externalUrl + SETTINGS_PATH}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
           defaultMessage: 'Account Settings',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={`${externalUrl}/credentials`}>
+      <SideNavLink isExternal to={externalUrl + CREDENTIALS_PATH}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
           defaultMessage: 'Credentials',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={`${externalUrl}/role-mappings`}>
+      <SideNavLink isExternal to={externalUrl + ROLE_MAPPINGS_PATH}>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
           defaultMessage: 'Role Mappings',
         })}
