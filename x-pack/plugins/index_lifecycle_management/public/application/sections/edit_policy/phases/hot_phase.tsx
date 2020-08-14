@@ -7,7 +7,6 @@
 import React, { Fragment, PureComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
+import { HotPhase as HotPhaseInterface } from '../../../services/policies/policies';
 
 import {
   PHASE_HOT,
@@ -26,7 +26,6 @@ import {
   PHASE_ROLLOVER_MAX_DOCUMENTS,
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
-  PHASE_ROLLOVER_ENABLED,
 } from '../../../constants';
 import {
   LearnMoreLink,
@@ -39,7 +38,7 @@ import {
 interface Props {
   errors: Record<string, string[]>;
   isShowingErrors: boolean;
-  phaseData: any;
+  phaseData: HotPhaseInterface;
   setPhaseData: (key: string, value: any) => void;
   setWarmPhaseOnRollover: (value: boolean) => void;
 }
@@ -104,18 +103,16 @@ export class HotPhase extends PureComponent<Props> {
           >
             <EuiSwitch
               data-test-subj="rolloverSwitch"
-              checked={phaseData[PHASE_ROLLOVER_ENABLED]}
+              checked={phaseData.rolloverEnabled}
               onChange={async (e) => {
-                const { checked } = e.target;
-                setPhaseData(PHASE_ROLLOVER_ENABLED, checked);
-                setWarmPhaseOnRollover(checked);
+                setWarmPhaseOnRollover(e.target.checked);
               }}
               label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
                 defaultMessage: 'Enable rollover',
               })}
             />
           </EuiFormRow>
-          {phaseData[PHASE_ROLLOVER_ENABLED] ? (
+          {phaseData.rolloverEnabled ? (
             <Fragment>
               <EuiSpacer size="m" />
               <EuiFlexGroup>
@@ -134,7 +131,7 @@ export class HotPhase extends PureComponent<Props> {
                   >
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
-                      value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
+                      value={phaseData.selectedMaxSizeStored}
                       onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED, e.target.value);
                       }}
@@ -157,7 +154,7 @@ export class HotPhase extends PureComponent<Props> {
                           defaultMessage: 'Maximum index size units',
                         }
                       )}
-                      value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
+                      value={phaseData.selectedMaxSizeStoredUnits}
                       onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS, e.target.value);
                       }}
@@ -220,7 +217,7 @@ export class HotPhase extends PureComponent<Props> {
                   >
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
-                      value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
+                      value={phaseData.selectedMaxDocuments}
                       onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_DOCUMENTS, e.target.value);
                       }}
@@ -243,7 +240,7 @@ export class HotPhase extends PureComponent<Props> {
                   >
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
-                      value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
+                      value={phaseData.selectedMaxAge}
                       onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
                       }}
@@ -266,7 +263,7 @@ export class HotPhase extends PureComponent<Props> {
                           defaultMessage: 'Maximum age units',
                         }
                       )}
-                      value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
+                      value={phaseData.selectedMaxAgeUnits}
                       onChange={(e) => {
                         setPhaseData(PHASE_ROLLOVER_MAX_AGE_UNITS, e.target.value);
                       }}

@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const findFirstError = (object, topLevel = true) => {
+export const findFirstError = (errors: any): string | undefined => {
   let firstError;
-  const keys = topLevel ? ['policyName', 'hot', 'warm', 'cold', 'delete'] : Object.keys(object);
+  const keys = Object.keys(errors);
   for (const key of keys) {
-    const value = object[key];
+    const value = errors[key];
     if (Array.isArray(value) && value.length > 0) {
       firstError = key;
       break;
     } else if (value) {
-      firstError = findFirstError(value, false);
+      firstError = findFirstError(value);
       if (firstError) {
         firstError = `${key}.${firstError}`;
         break;

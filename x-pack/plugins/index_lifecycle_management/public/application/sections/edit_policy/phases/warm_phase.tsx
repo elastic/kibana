@@ -39,9 +39,11 @@ import {
   MinAgeInput,
 } from '../components';
 
+import { WarmPhase as WarmPhaseInterface } from '../../../services/policies/policies';
+
 interface Props {
   setPhaseData: (key: string, value: any) => void;
-  phaseData: any;
+  phaseData: WarmPhaseInterface;
   isShowingErrors: boolean;
   errors: Record<string, string[]>;
   hotPhaseRolloverEnabled: boolean;
@@ -85,7 +87,7 @@ export class WarmPhase extends PureComponent<Props> {
                   defaultMessage="Warm phase"
                 />
               </h2>{' '}
-              {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
+              {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
           }
@@ -109,7 +111,7 @@ export class WarmPhase extends PureComponent<Props> {
                   />
                 }
                 id={`${PHASE_WARM}-${PHASE_ENABLED}`}
-                checked={phaseData[PHASE_ENABLED]}
+                checked={phaseData.phaseEnabled}
                 onChange={(e) => {
                   setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
@@ -120,7 +122,7 @@ export class WarmPhase extends PureComponent<Props> {
           fullWidth
         >
           <Fragment>
-            {phaseData[PHASE_ENABLED] ? (
+            {phaseData.phaseEnabled ? (
               <Fragment>
                 {hotPhaseRolloverEnabled ? (
                   <EuiFormRow id={`${PHASE_WARM}-${WARM_PHASE_ON_ROLLOVER}`}>
@@ -128,14 +130,14 @@ export class WarmPhase extends PureComponent<Props> {
                       data-test-subj="warmPhaseOnRolloverSwitch"
                       label={moveToWarmPhaseOnRolloverLabel}
                       id={`${PHASE_WARM}-${WARM_PHASE_ON_ROLLOVER}`}
-                      checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
+                      checked={phaseData.warmPhaseOnRollover}
                       onChange={(e) => {
                         setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
                       }}
                     />
                   </EuiFormRow>
                 ) : null}
-                {!phaseData[WARM_PHASE_ON_ROLLOVER] ? (
+                {!phaseData.warmPhaseOnRollover ? (
                   <Fragment>
                     <EuiSpacer size="m" />
                     <MinAgeInput
@@ -184,7 +186,7 @@ export class WarmPhase extends PureComponent<Props> {
                     >
                       <EuiFieldNumber
                         id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
-                        value={phaseData[PHASE_REPLICA_COUNT]}
+                        value={phaseData.selectedReplicaCount}
                         onChange={(e) => {
                           setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
                         }}
@@ -199,7 +201,7 @@ export class WarmPhase extends PureComponent<Props> {
             ) : null}
           </Fragment>
         </EuiDescribedFormGroup>
-        {phaseData[PHASE_ENABLED] ? (
+        {phaseData.phaseEnabled ? (
           <Fragment>
             <EuiDescribedFormGroup
               title={
@@ -225,7 +227,7 @@ export class WarmPhase extends PureComponent<Props> {
               <Fragment>
                 <EuiSwitch
                   data-test-subj="shrinkSwitch"
-                  checked={phaseData[PHASE_SHRINK_ENABLED]}
+                  checked={phaseData.shrinkEnabled}
                   onChange={(e) => {
                     setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   }}
@@ -235,7 +237,7 @@ export class WarmPhase extends PureComponent<Props> {
                 />
 
                 <div id="shrinkContent" aria-live="polite" role="region">
-                  {phaseData[PHASE_SHRINK_ENABLED] ? (
+                  {phaseData.shrinkEnabled ? (
                     <Fragment>
                       <EuiSpacer />
                       <EuiFlexGroup>
@@ -254,7 +256,7 @@ export class WarmPhase extends PureComponent<Props> {
                           >
                             <EuiFieldNumber
                               id={`${PHASE_WARM}-${PHASE_PRIMARY_SHARD_COUNT}`}
-                              value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
+                              value={phaseData.selectedPrimaryShardCount}
                               onChange={(e) => {
                                 setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
                               }}
@@ -294,7 +296,7 @@ export class WarmPhase extends PureComponent<Props> {
                 data-test-subj="forceMergeSwitch"
                 label={forcemergeLabel}
                 aria-label={forcemergeLabel}
-                checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
+                checked={phaseData.forceMergeEnabled}
                 onChange={(e) => {
                   setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
                 }}
@@ -303,7 +305,7 @@ export class WarmPhase extends PureComponent<Props> {
 
               <EuiSpacer />
               <div id="forcemergeContent" aria-live="polite" role="region">
-                {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
+                {phaseData.forceMergeEnabled ? (
                   <ErrableFormRow
                     id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
                     label={i18n.translate(
@@ -318,7 +320,7 @@ export class WarmPhase extends PureComponent<Props> {
                   >
                     <EuiFieldNumber
                       id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
-                      value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
+                      value={phaseData.selectedForceMergeSegments}
                       onChange={(e) => {
                         setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
                       }}

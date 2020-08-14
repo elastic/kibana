@@ -17,10 +17,11 @@ import {
   MinAgeInput,
   SnapshotPolicies,
 } from '../components';
+import { DeletePhase as DeletePhaseInterface } from '../../../services/policies/policies';
 
 interface Props {
   setPhaseData: (key: string, value: any) => void;
-  phaseData: any;
+  phaseData: DeletePhaseInterface;
   isShowingErrors: boolean;
   errors: Record<string, string[]>;
   hotPhaseRolloverEnabled: boolean;
@@ -55,7 +56,7 @@ export class DeletePhase extends PureComponent<Props> {
                   defaultMessage="Delete phase"
                 />
               </h2>{' '}
-              {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
+              {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
           }
@@ -77,7 +78,7 @@ export class DeletePhase extends PureComponent<Props> {
                   />
                 }
                 id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
-                checked={phaseData[PHASE_ENABLED]}
+                checked={phaseData.phaseEnabled}
                 onChange={(e) => {
                   setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
@@ -87,7 +88,7 @@ export class DeletePhase extends PureComponent<Props> {
           }
           fullWidth
         >
-          {phaseData[PHASE_ENABLED] ? (
+          {phaseData.phaseEnabled ? (
             <MinAgeInput
               errors={errors}
               phaseData={phaseData}
@@ -100,7 +101,7 @@ export class DeletePhase extends PureComponent<Props> {
             <div />
           )}
         </EuiDescribedFormGroup>
-        {phaseData[PHASE_ENABLED] ? (
+        {phaseData.phaseEnabled ? (
           <EuiDescribedFormGroup
             title={
               <h3>
@@ -135,7 +136,7 @@ export class DeletePhase extends PureComponent<Props> {
               }
             >
               <SnapshotPolicies
-                value={phaseData[PHASE_WAIT_FOR_SNAPSHOT_POLICY]}
+                value={phaseData.waitForSnapshotPolicy}
                 onChange={(value) => setPhaseData(PHASE_WAIT_FOR_SNAPSHOT_POLICY, value)}
                 getUrlForApp={getUrlForApp}
               />

@@ -8,23 +8,12 @@ import { handleActions } from 'redux-actions';
 import {
   fetchedPolicies,
   setSelectedPolicy,
-  unsetSelectedPolicy,
-  setSelectedPolicyName,
-  setSaveAsNewPolicy,
-  setPhaseData,
   policyFilterChanged,
   policyPageChanged,
   policyPageSizeChanged,
   policySortChanged,
 } from '../actions';
-import { policyFromES } from '../selectors';
-import {
-  PHASE_HOT,
-  PHASE_WARM,
-  PHASE_COLD,
-  PHASE_DELETE,
-  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
-} from '../../constants';
+import { PHASE_HOT, PHASE_WARM, PHASE_COLD, PHASE_DELETE } from '../../constants';
 
 import {
   defaultColdPhase,
@@ -32,6 +21,7 @@ import {
   defaultHotPhase,
   defaultWarmPhase,
 } from '../defaults';
+import { deserializePolicy } from '../../services/policies/policy_serialization';
 export const defaultPolicy = {
   name: '',
   saveAsNew: true,
@@ -85,53 +75,7 @@ export const policies = handleActions(
         selectedPolicySet: true,
         selectedPolicy: {
           ...defaultPolicy,
-          ...policyFromES(selectedPolicy),
-        },
-      };
-    },
-    [unsetSelectedPolicy]() {
-      return defaultState;
-    },
-    [setSelectedPolicyName](state, { payload: name }) {
-      return {
-        ...state,
-        selectedPolicy: {
-          ...state.selectedPolicy,
-          name,
-        },
-      };
-    },
-    [setSaveAsNewPolicy](state, { payload: saveAsNew }) {
-      return {
-        ...state,
-        selectedPolicy: {
-          ...state.selectedPolicy,
-          saveAsNew,
-        },
-      };
-    },
-    [setPhaseData](state, { payload }) {
-      const { phase, key } = payload;
-
-      let value = payload.value;
-      if (PHASE_ATTRIBUTES_THAT_ARE_NUMBERS.includes(key)) {
-        value = parseInt(value);
-        if (isNaN(value)) {
-          value = '';
-        }
-      }
-
-      return {
-        ...state,
-        selectedPolicy: {
-          ...state.selectedPolicy,
-          phases: {
-            ...state.selectedPolicy.phases,
-            [phase]: {
-              ...state.selectedPolicy.phases[phase],
-              [key]: value,
-            },
-          },
+          ...deserializePolicy(selectedPolicy),
         },
       };
     },
