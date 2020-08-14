@@ -40,7 +40,9 @@ interface Props {
   onChange: (args: OnSourceChangeArgs) => void;
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
+  supportsMvt: boolean;
   clusteringDisabledReason?: string | null;
+  mvtDisabledReason?: string | null;
   termFields: IFieldType[];
   topHitsSplitField: string | null;
   topHitsSize: number;
@@ -231,13 +233,22 @@ export class ScalingForm extends Component<Props, State> {
         />
       </>
     );
-    return (
+    const mvtRadio = (
       <EuiRadio
         id={SCALING_TYPES.MVT}
         label={label}
         checked={this.props.scalingType === SCALING_TYPES.MVT}
         onChange={() => this._onScalingTypeChange(SCALING_TYPES.MVT)}
+        disabled={!this.props.supportsMvt}
       />
+    );
+
+    return this.props.mvtDisabledReason ? (
+      <EuiToolTip position="left" content={this.props.mvtDisabledReason}>
+        {mvtRadio}
+      </EuiToolTip>
+    ) : (
+      mvtRadio
     );
   }
 
