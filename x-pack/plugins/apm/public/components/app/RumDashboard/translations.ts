@@ -46,6 +46,9 @@ export const I18LABELS = {
   seconds: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
     defaultMessage: 'seconds',
   }),
+  coreWebVitals: i18n.translate('xpack.apm.rum.filterGroup.seconds', {
+    defaultMessage: 'Core web vitals',
+  }),
 };
 
 export const VisitorBreakdownLabel = i18n.translate(
