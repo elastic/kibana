@@ -65,13 +65,15 @@ export class TiledVectorLayer extends VectorLayer {
 
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      const canSkipBecauseNoChanges =
-        data.layerName === this._source.getLayerName() &&
-        data.minSourceZoom === this._source.getMinZoom() &&
-        data.maxSourceZoom === this._source.getMaxZoom();
+      if (data) {
+        const canSkipBecauseNoChanges =
+          data.layerName === this._source.getLayerName() &&
+          data.minSourceZoom === this._source.getMinZoom() &&
+          data.maxSourceZoom === this._source.getMaxZoom();
 
-      if (canSkipBecauseNoChanges) {
-        return null;
+        if (canSkipBecauseNoChanges) {
+          return null;
+        }
       }
     }
 

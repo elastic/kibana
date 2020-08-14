@@ -6,12 +6,14 @@
 
 import rison from 'rison-node';
 import { schema } from '@kbn/config-schema';
+import { Logger } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { MVT_GETTILE_API_PATH, API_ROOT_PATH } from '../../common/constants';
 import { getTile } from './get_tile';
 
 const CACHE_TIMEOUT = 0; // Todo. determine good value. Unsure about full-implications (e.g. wrt. time-based data).
 
-export function initMVTRoutes({ router, logger }) {
+export function initMVTRoutes({ router, logger }: { logger: Logger; router: IRouter }) {
   router.get(
     {
       path: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}`,
@@ -30,32 +32,20 @@ export function initMVTRoutes({ router, logger }) {
     async (context, request, response) => {
       const { query } = request;
 
-      const callElasticSearch = async (...args) => {
-        return await context.core.elasticsearch.legacy.client.callAsCurrentUser(...args);
+      const callElasticsearch = async (type: string, ...args: any[]): Promise<unknown> => {
+        return await context.core.elasticsearch.legacy.client.callAsCurrentUser(type, ...args);
       };
 
-      const indexPattern = query.indexPattern;
-
-      const x = parseInt(query.x, 10);
-      const y = parseInt(query.y, 10);
-      const z = parseInt(query.z, 10);
-
-      const geometryFieldName = query.geometryFieldName;
-      const fields = query.fields ? query.fields.split(',') : [];
-      const size = parseInt(query.size, 10) || 10000;
       const requestBodyDSL = rison.decode(query.requestBody);
 
       const tile = await getTile({
         logger,
-        callElasticSearch,
-        request,
-        size,
-        geometryFieldName,
-        fields,
-        x,
-        y,
-        z,
-        indexPattern,
+        callElasticsearch,
+        geometryFieldName: query.geometryFieldName,
+        x: query.x,
+        y: query.y,
+        z: query.z,
+        indexPattern: query.indexPattern,
         requestBody: requestBodyDSL,
       });
 
@@ -64,7 +54,7 @@ export function initMVTRoutes({ router, logger }) {
           body: tile,
           headers: {
             'content-disposition': 'inline',
-            'content-length': tile.length,
+            'content-length': `${tile.length}`,
             'Content-Type': 'application/x-protobuf',
             'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
           },
@@ -73,7 +63,7 @@ export function initMVTRoutes({ router, logger }) {
         return response.ok({
           headers: {
             'content-disposition': 'inline',
-            'content-length': 0,
+            'content-length': '0',
             'Content-Type': 'application/x-protobuf',
             'Cache-Control': `max-age=${CACHE_TIMEOUT}`,
           },
