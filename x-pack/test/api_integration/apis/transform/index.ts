@@ -27,7 +27,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.resetKibanaTimeZone();
     });
 
-    // loadTestFile(require.resolve('./delete_transforms'));
+    loadTestFile(require.resolve('./delete_transforms'));
     loadTestFile(require.resolve('./transforms'));
   });
 }
