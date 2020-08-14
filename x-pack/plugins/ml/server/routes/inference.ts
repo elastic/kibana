@@ -23,7 +23,7 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         params: optionalModelIdSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
@@ -55,7 +55,7 @@ export function inferenceRoutes({ router, mlLicense }: RouteInitialization) {
         params: modelIdSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
