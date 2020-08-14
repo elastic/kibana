@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { CoreSetup } from 'src/core/public';
-import { Action, IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsActionDefinition as ActionDefinition,
+  IncompatibleActionError,
+} from '../../../../../src/plugins/ui_actions/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { checkLicense } from '../lib/license_check';
 
@@ -31,7 +34,7 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-export class GetCsvReportPanelAction implements Action<ActionContext> {
+export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> {
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
