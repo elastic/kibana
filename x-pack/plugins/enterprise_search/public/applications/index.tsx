@@ -15,7 +15,7 @@ import { LicenseProvider } from './shared/licensing';
 import { IExternalUrl } from './shared/enterprise_search_url';
 
 export interface IKibanaContext {
-  enterpriseSearchUrl?: string;
+  config: { host?: string };
   externalUrl: IExternalUrl;
   http: HttpSetup;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
@@ -32,18 +32,18 @@ export const KibanaContext = React.createContext({});
 
 export const renderApp = (
   App: React.FC,
-  core: CoreStart,
   params: AppMountParameters,
-  config: ClientConfigType,
+  core: CoreStart,
   plugins: PluginsSetup,
+  config: ClientConfigType,
   data: ClientData
 ) => {
   ReactDOM.render(
     <I18nProvider>
       <KibanaContext.Provider
         value={{
+          config,
           http: core.http,
-          enterpriseSearchUrl: config.host,
           externalUrl: data.externalUrl,
           setBreadcrumbs: core.chrome.setBreadcrumbs,
           setDocTitle: core.chrome.docTitle.change,

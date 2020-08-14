@@ -15,6 +15,6 @@ export const mockKibanaContext = {
   http: httpServiceMock.createSetupContract(),
   setBreadcrumbs: jest.fn(),
   setDocTitle: jest.fn(),
-  enterpriseSearchUrl: 'http://localhost:3002',
+  config: { host: 'http://localhost:3002' },
   externalUrl: new ExternalUrl('http://localhost:3002'),
 };

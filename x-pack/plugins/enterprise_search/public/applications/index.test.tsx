@@ -17,11 +17,11 @@ import { WorkplaceSearch } from './workplace_search';
 describe('renderApp', () => {
   let params: AppMountParameters;
   const core = coreMock.createStart();
-  const config = {};
   const plugins = {
     licensing: licensingMock.createSetup(),
   } as any;
-  const data = { externalUrl: {} } as any;
+  const config = {};
+  const data = {} as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,19 +31,19 @@ describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
     const MockApp = () => <div className="hello-world">Hello world!</div>;
 
-    const unmount = renderApp(MockApp, core, params, config, plugins, data);
+    const unmount = renderApp(MockApp, params, core, plugins, config, data);
     expect(params.element.querySelector('.hello-world')).not.toBeNull();
     unmount();
     expect(params.element.innerHTML).toEqual('');
   });
 
   it('renders AppSearch', () => {
-    renderApp(AppSearch, core, params, config, plugins, data);
+    renderApp(AppSearch, params, core, plugins, config, data);
     expect(params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 
   it('renders WorkplaceSearch', () => {
-    renderApp(WorkplaceSearch, core, params, config, plugins, data);
+    renderApp(WorkplaceSearch, params, core, plugins, config, data);
     expect(params.element.querySelector('.setupGuide')).not.toBeNull();
   });
 });

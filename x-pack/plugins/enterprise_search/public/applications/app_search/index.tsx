@@ -26,9 +26,9 @@ import { SetupGuide } from './components/setup_guide';
 import { EngineOverview } from './components/engine_overview';
 
 export const AppSearch: React.FC = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useContext(KibanaContext) as IKibanaContext;
 
-  if (!enterpriseSearchUrl)
+  if (!config.host)
     return (
       <Switch>
         <Route exact path={SETUP_GUIDE_PATH}>
