@@ -83,7 +83,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
       );
 
-      proxyServer = getHttpProxyServer(servicenowSimulatorURL, () => {
+      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));

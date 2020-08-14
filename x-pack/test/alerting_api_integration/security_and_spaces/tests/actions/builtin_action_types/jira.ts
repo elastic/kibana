@@ -83,7 +83,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       jiraSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
-      proxyServer = getHttpProxyServer(jiraSimulatorURL, () => {
+      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));

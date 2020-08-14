@@ -32,7 +32,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY)
       );
 
-      proxyServer = getHttpProxyServer(pagerdutySimulatorURL, () => {
+      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));

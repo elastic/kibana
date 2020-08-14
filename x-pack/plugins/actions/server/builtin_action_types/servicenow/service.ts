@@ -78,6 +78,8 @@ export const createExternalService = (
 
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     try {
+      logger.warn(`incident error : ${JSON.stringify(proxySettings)}`);
+      logger.warn(`incident error : ${url}`);
       const res = await request({
         axios: axiosInstance,
         url: `${incidentUrl}`,

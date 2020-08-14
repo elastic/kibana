@@ -83,7 +83,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
       resilientSimulatorURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
-      proxyServer = getHttpProxyServer(resilientSimulatorURL, () => {
+      proxyServer = getHttpProxyServer(kibanaServer.resolveUrl('/'), () => {
         proxyHaveBeenCalled = true;
       });
       const proxyUrl = getProxyUrl(config.get('kbnTestServer.serverArgs'));
