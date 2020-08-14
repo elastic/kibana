@@ -129,7 +129,6 @@ export const renderApp = (
       deps={deps}
       routerHistory={history}
       config={config}
-      app={<App />}
     />,
     element
   );
