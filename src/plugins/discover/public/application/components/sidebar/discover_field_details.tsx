@@ -21,7 +21,11 @@ import { EuiLink, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
-import { triggerVisualizeActions, isFieldVisualizable } from './lib/visualize_trigger_utils';
+import {
+  triggerVisualizeActions,
+  isFieldVisualizable,
+  getVisualizeHref,
+} from './lib/visualize_trigger_utils';
 import { Bucket, FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 
@@ -39,18 +43,41 @@ export function DiscoverFieldDetails({
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
-  const [showVisualizeLink, setShowVisualizeLink] = useState<boolean | undefined>(false);
+  const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
+  const [visualizeLink, setVisualizeLink] = useState<string | undefined>('');
 
   useEffect(() => {
     isFieldVisualizable(field, indexPattern.id, details.columns).then(
       (flag) => {
         setShowVisualizeLink(flag);
+        // get href only if Visualize button is enabled
+        getVisualizeHref(field, indexPattern.id, details.columns).then(
+          (uri) => {
+            setVisualizeLink(uri);
+          },
+          () => {
+            setVisualizeLink('');
+          }
+        );
       },
       () => {
         setShowVisualizeLink(false);
       }
     );
   }, [field, indexPattern.id, details.columns]);
+
+  const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    if (
+      !event.defaultPrevented && // onClick prevented default
+      event.button === 0 && // ignore everything but left clicks
+      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+    ) {
+      // regular link click. let the uiActions code handle the navigation and show popup if needed
+      event.preventDefault();
+      triggerVisualizeActions(field, indexPattern.id, details.columns);
+    }
+  };
 
   return (
     <div className="dscFieldDetails">
@@ -89,23 +116,21 @@ export function DiscoverFieldDetails({
       )}
 
       {showVisualizeLink && (
-        <>
-          <EuiLink
-            onClick={() => {
-              triggerVisualizeActions(field, indexPattern.id, details.columns);
-            }}
-            className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
-            data-test-subj={`fieldVisualize-${field.name}`}
-          >
-            <FormattedMessage
-              id="discover.fieldChooser.detailViews.visualizeLinkText"
-              defaultMessage="Visualize"
-            />
-            {warnings.length > 0 && (
-              <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
-            )}
-          </EuiLink>
-        </>
+        // eslint-disable-next-line @elastic/eui/href-or-on-click
+        <EuiLink
+          onClick={(e) => handleVisualizeLinkClick(e)}
+          href={visualizeLink}
+          className="kuiButton kuiButton--secondary kuiButton--small kuiVerticalRhythmSmall"
+          data-test-subj={`fieldVisualize-${field.name}`}
+        >
+          <FormattedMessage
+            id="discover.fieldChooser.detailViews.visualizeLinkText"
+            defaultMessage="Visualize"
+          />
+          {warnings.length > 0 && (
+            <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
+          )}
+        </EuiLink>
       )}
     </div>
   );

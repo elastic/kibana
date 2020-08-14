@@ -20,9 +20,8 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
 } from '../../../../../../ui_actions/public';
-import { getUiActions, getServices } from '../../../../kibana_services';
+import { getUiActions } from '../../../../kibana_services';
 import { IndexPatternField, KBN_FIELD_TYPES } from '../../../../../../data/public';
-import { DiscoverServices } from '../../../../build_services';
 
 function getTrigger(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -34,14 +33,36 @@ async function getCompatibleActions(
   fieldName: string,
   indexPatternId: string,
   contextualFields: string[],
-  action: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
+  trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
-  const compatibleActions = await getUiActions().getTriggerCompatibleActions(action, {
+  const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
     indexPatternId,
     fieldName,
     contextualFields,
   });
   return compatibleActions;
+}
+
+export async function getVisualizeHref(
+  field: IndexPatternField,
+  indexPatternId: string | undefined,
+  contextualFields: string[]
+) {
+  const trigger = getTrigger(field.type);
+  if (!indexPatternId) return '';
+  const triggerOptions = {
+    indexPatternId,
+    fieldName: field.name,
+    contextualFields,
+  };
+  const compatibleActions = await getCompatibleActions(
+    field.name,
+    indexPatternId,
+    contextualFields,
+    trigger
+  );
+  // enable the link only if only one action is registered
+  return compatibleActions.length === 1 ? compatibleActions[0].getHref?.(triggerOptions) : '';
 }
 
 export function triggerVisualizeActions(
@@ -64,20 +85,16 @@ export async function isFieldVisualizable(
   indexPatternId: string | undefined,
   contextualFields: string[]
 ) {
-  if (!indexPatternId) return;
-  if (field.name === '_id') {
-    // Else you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
+  if (field.name === '_id' || !indexPatternId) {
+    // for first condition you'd get a 'Fielddata access on the _id field is disallowed' error on ES side.
     return false;
   }
   const trigger = getTrigger(field.type);
-  const services: DiscoverServices = getServices();
   const compatibleActions = await getCompatibleActions(
     field.name,
     indexPatternId,
     contextualFields,
     trigger
   );
-  return (
-    compatibleActions.length > 0 && field.visualizable && !!services.capabilities.visualize.show
-  );
+  return compatibleActions.length > 0 && field.visualizable;
 }

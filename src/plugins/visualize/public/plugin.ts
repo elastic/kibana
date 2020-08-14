@@ -48,11 +48,7 @@ import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
-import {
-  UiActionsStart,
-  VISUALIZE_FIELD_TRIGGER,
-  VisualizeFieldContext,
-} from '../../ui_actions/public';
+import { UiActionsStart, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
 import {
   setUISettings,
   setApplication,
@@ -60,7 +56,7 @@ import {
   setQueryService,
   setShareService,
 } from './services';
-import { visualizeFieldAction, ACTION_VISUALIZE_FIELD } from './actions/visualize_field_action';
+import { visualizeFieldAction } from './actions/visualize_field_action';
 import {
   VisualizeUrlGeneratorState,
   VISUALIZE_APP_URL_GENERATOR,
@@ -83,12 +79,6 @@ export interface VisualizePluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
   data: DataPublicPluginSetup;
   share?: SharePluginSetup;
-}
-
-declare module '../../ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
-  }
 }
 
 declare module '../../share/public' {

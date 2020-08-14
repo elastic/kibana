@@ -52,10 +52,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import {
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   MapsUrlGeneratorState,
   MAPS_APP_URL_GENERATOR,
@@ -70,10 +67,7 @@ import { ILicense } from '../../licensing/common/types';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 import { MapsStartApi } from './api';
 import { createSecurityLayerDescriptors, registerLayerWizard, registerSource } from './api';
-import {
-  visualizeGeoFieldAction,
-  ACTION_VISUALIZE_GEO_FIELD,
-} from './trigger_actions/visualize_geo_field_action';
+import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -85,12 +79,6 @@ export interface MapsPluginSetupDependencies {
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_VISUALIZE_GEO_FIELD]: VisualizeFieldContext;
-  }
-}
 
 declare module '../../../../src/plugins/share/public' {
   export interface UrlGeneratorStateMapping {
