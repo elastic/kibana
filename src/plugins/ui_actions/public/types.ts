@@ -40,8 +40,6 @@ export interface VisualizeFieldContext {
   contextualFields?: string[];
 }
 
-const DEFAULT_TRIGGER = '';
-
 export type TriggerId = keyof TriggerContextMapping;
 
 export type BaseContext = object;
