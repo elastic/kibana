@@ -17,14 +17,23 @@
  * under the License.
  */
 
-import moment from 'moment';
+import { ExprVisAPIEvents } from '../../../../visualizations/public';
 
-const TIME_MODE = 'absolute';
-
-export const createBrushHandler = (timefilter) => (from, to) => {
-  timefilter.setTime({
-    from: moment(from).toISOString(),
-    to: moment(to).toISOString(),
-    mode: TIME_MODE,
+export const createBrushHandler = (applyFilter: ExprVisAPIEvents['applyFilter']) => (
+  gte: string,
+  lte: string
+) => {
+  return applyFilter({
+    timeFieldName: '*',
+    filters: [
+      {
+        range: {
+          '*': {
+            gte,
+            lte,
+          },
+        },
+      },
+    ],
   });
 };
