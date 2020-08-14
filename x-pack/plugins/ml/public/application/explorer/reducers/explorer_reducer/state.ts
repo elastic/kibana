@@ -64,7 +64,7 @@ function getDefaultIndexPattern() {
 export function getExplorerDefaultState(): ExplorerState {
   return {
     annotations: {
-      error: null,
+      error: undefined,
       annotationsData: [],
       aggregations: {},
     },

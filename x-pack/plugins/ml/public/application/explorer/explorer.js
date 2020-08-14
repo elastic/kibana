@@ -303,7 +303,7 @@ export class Explorer extends React.Component {
               setSelectedCells={this.props.setSelectedCells}
             />
             <EuiSpacer size="m" />
-            {annotationsError !== null && (
+            {annotationsError !== undefined && (
               <>
                 <EuiTitle className="panel-title">
                   <h2>
@@ -321,12 +321,8 @@ export class Explorer extends React.Component {
                     color="danger"
                     iconType="alert"
                   >
-                    <p>
-                      {typeof annotationsError === 'string'
-                        ? annotationsError
-                        : JSON.stringify(annotationsError)}
-                    </p>
-                  </EuiCallOut>{' '}
+                    <p>{annotationsError}</p>
+                  </EuiCallOut>
                 </EuiPanel>
                 <EuiSpacer size="m" />
               </>

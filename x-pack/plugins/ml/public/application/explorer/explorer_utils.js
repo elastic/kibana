@@ -16,6 +16,7 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { extractErrorMessage } from '../../../common/util/errors';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -406,10 +407,11 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
       .toPromise()
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
+          const errorMessage = extractErrorMessage(resp.error);
           return resolve({
             annotationsData: [],
             aggregations: {},
-            error: typeof resp.error === 'string' ? resp.error : JSON.stringify(resp.error),
+            error: errorMessage !== '' ? errorMessage : undefined,
           });
         }
 
@@ -431,21 +433,14 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
               return d;
             }),
           aggregations: resp.aggregations,
-          error: null,
         });
       })
       .catch((resp) => {
-        console.log('Error loading list of annotations for jobs list:', resp);
+        const errorMessage = extractErrorMessage(resp);
         return resolve({
           annotationsData: [],
           aggregations: {},
-          error:
-            resp &&
-            typeof resp.body.statusCode === 'number' &&
-            typeof resp.body.error === 'string' &&
-            typeof resp.body.message === 'string'
-              ? `${resp.body.error} (${resp.body.statusCode}): ${resp.body.message}`
-              : resp,
+          error: errorMessage !== '' ? errorMessage : undefined,
         });
       });
   });

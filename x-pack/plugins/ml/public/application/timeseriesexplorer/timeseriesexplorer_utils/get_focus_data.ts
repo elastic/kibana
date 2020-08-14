@@ -11,6 +11,7 @@ import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../../common/constants/search';
+import { extractErrorMessage } from '../../../../common/util/errors';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
 import { mlResultsService, CriteriaField } from '../../services/results_service';
 import { Job } from '../../../../common/types/anomaly_detection_jobs';
@@ -36,7 +37,7 @@ export interface FocusData {
   anomalyRecords: any;
   scheduledEvents: any;
   showForecastCheckbox?: any;
-  focusAnnotationError?: null | string;
+  focusAnnotationError?: string;
   focusAnnotationData?: any[];
   focusForecastData?: any;
   focusAggregations?: any;
@@ -101,13 +102,7 @@ export function getFocusData(
           of({
             annotations: {},
             aggregations: {},
-            error:
-              resp &&
-              typeof resp.body.statusCode === 'number' &&
-              typeof resp.body.error === 'string' &&
-              typeof resp.body.message === 'string'
-                ? `${resp.body.error} (${resp.body.statusCode}): ${resp.body.message}`
-                : resp,
+            error: extractErrorMessage(resp),
             success: false,
           } as GetAnnotationsResponse)
         )
@@ -164,7 +159,6 @@ export function getFocusData(
           refreshFocusData.focusAnnotationData = [];
           refreshFocusData.focusAggregations = {};
         } else {
-          refreshFocusData.focusAnnotationError = null;
           refreshFocusData.focusAnnotationData = (annotations.annotations[selectedJob.job_id] ?? [])
             .sort((a, b) => {
               return a.timestamp - b.timestamp;

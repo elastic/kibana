@@ -112,8 +112,6 @@ export function isAnnotations(arg: any): arg is Annotations {
   return arg.every((d: Annotation) => isAnnotation(d));
 }
 
-export type AnnotationsError = null | string | Record<string, any>;
-
 export interface FieldToBucket {
   field: string;
   missing?: string | number;
@@ -142,5 +140,5 @@ export interface GetAnnotationsResponse {
 export interface AnnotationsTable {
   annotationsData: Annotations;
   aggregations: EsAggregationResult;
-  error: AnnotationsError;
+  error?: string;
 }

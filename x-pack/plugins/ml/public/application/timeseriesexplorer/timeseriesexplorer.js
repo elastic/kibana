@@ -1318,7 +1318,7 @@ export class TimeSeriesExplorer extends React.Component {
                     )}
                   </MlTooltipComponent>
                 </div>
-                {typeof focusAnnotationError === 'string' && (
+                {focusAnnotationError !== undefined && (
                   <>
                     <EuiTitle className="panel-title">
                       <h2>
@@ -1340,7 +1340,7 @@ export class TimeSeriesExplorer extends React.Component {
                         iconType="alert"
                       >
                         <p>{focusAnnotationError}</p>
-                      </EuiCallOut>{' '}
+                      </EuiCallOut>
                     </EuiPanel>
                     <EuiSpacer size="m" />
                   </>
