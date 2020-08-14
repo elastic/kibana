@@ -19,14 +19,14 @@ export default function ({ getService }: FtrProviderContext) {
       // to do it manually
       after(async () => await deletePolicyStream(getService));
 
-      it('should return one policy response for host', async () => {
+      it('should return one policy response for an id', async () => {
         const expectedAgentId = 'a10ac658-a3bc-4ac6-944a-68d9bd1c5a5e';
         const { body } = await supertest
           .get(`/api/endpoint/policy_response?agentId=${expectedAgentId}`)
           .send()
           .expect(200);
 
-        expect(body.policy_response.host.id).to.eql(expectedAgentId);
+        expect(body.policy_response.agent.id).to.eql(expectedAgentId);
         expect(body.policy_response.Endpoint.policy).to.not.be(undefined);
       });
 
