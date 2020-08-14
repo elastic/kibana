@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -33,6 +33,11 @@ import { useMlKibana, useNotifications } from '../../../../../contexts/kibana';
 import { ExpandedRow } from './expanded_row';
 import { getResultsUrl } from '../analytics_list/common';
 import { ModelConfigResponse, TrainedModelStat } from '../../../../../../../common/types/inference';
+import {
+  REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
+  useRefreshAnalyticsList,
+} from '../../../../common';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -67,11 +72,16 @@ export const ModelsList: FC = () => {
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
 
+  // Subscribe to the refresh observable to trigger reloading the model list.
+  useRefreshAnalyticsList({
+    isLoading: setIsLoading,
+    onRefresh: () => fetchData(),
+  });
+
   /**
    * Fetches inference trained models.
    */
   async function fetchData() {
-    setIsLoading(true);
     try {
       const response = await inferenceApiService.getInferenceModel();
       setItems(
@@ -90,6 +100,7 @@ export const ModelsList: FC = () => {
       });
     }
     setIsLoading(false);
+    refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
   }
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -103,10 +114,6 @@ export const ModelsList: FC = () => {
       },
     };
   }, [items]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   /**
    * Fetches models stats and update the original object
