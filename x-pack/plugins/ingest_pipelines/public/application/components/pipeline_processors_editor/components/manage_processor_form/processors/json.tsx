@@ -19,7 +19,6 @@ import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField, TARGET_FIELD_PATH } from './common_fields/target_field';
 
 const ADD_TO_ROOT_FIELD_PATH = 'fields.add_to_root';
-const ADD_TO_ROOT_TARGET_FIELD_CONFLICT = 'ADD_TO_ROOT_TARGET_FIELD_CONFLICT';
 
 const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
