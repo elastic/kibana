@@ -106,18 +106,6 @@ export default function (providerContext: FtrProviderContext) {
         });
         expect(resSearch.id).equal('sample_search');
       });
-      it('should have installed placeholder indices', async function () {
-        const resLogsIndexPatternPlaceholder = await es.transport.request({
-          method: 'GET',
-          path: `/logs-index_pattern_placeholder`,
-        });
-        expect(resLogsIndexPatternPlaceholder.statusCode).equal(200);
-        const resMetricsIndexPatternPlaceholder = await es.transport.request({
-          method: 'GET',
-          path: `/metrics-index_pattern_placeholder`,
-        });
-        expect(resMetricsIndexPatternPlaceholder.statusCode).equal(200);
-      });
       it('should have created the correct saved object', async function () {
         const res = await kibanaServer.savedObjects.get({
           type: 'epm-packages',
