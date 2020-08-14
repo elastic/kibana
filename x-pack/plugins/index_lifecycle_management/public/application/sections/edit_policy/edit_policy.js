@@ -38,7 +38,6 @@ import {
 import { toasts } from '../../services/notification';
 import { findFirstError } from '../../services/find_errors';
 import { LearnMoreLink } from '../components';
-import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
 import { HotPhase } from './components/hot_phase';
@@ -56,8 +55,6 @@ export class EditPolicy extends Component {
     super(props);
     this.state = {
       isShowingErrors: false,
-      isShowingNodeDetailsFlyout: false,
-      selectedNodeAttrsForDetails: undefined,
       isShowingPolicyJsonFlyout: false,
     };
   }
@@ -122,10 +119,6 @@ export class EditPolicy extends Component {
         this.backToPolicyList();
       }
     }
-  };
-
-  showNodeDetailsFlyout = (selectedNodeAttrsForDetails) => {
-    this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
   };
 
   togglePolicyJsonFlyout = () => {
@@ -291,7 +284,6 @@ export class EditPolicy extends Component {
 
               <WarmPhase
                 errors={errors[PHASE_WARM]}
-                showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
               />
 
@@ -299,7 +291,6 @@ export class EditPolicy extends Component {
 
               <ColdPhase
                 errors={errors[PHASE_COLD]}
-                showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
               />
 
@@ -369,13 +360,6 @@ export class EditPolicy extends Component {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
-
-              {this.state.isShowingNodeDetailsFlyout ? (
-                <NodeAttrsDetails
-                  selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
-                  close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
-                />
-              ) : null}
 
               {this.state.isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout

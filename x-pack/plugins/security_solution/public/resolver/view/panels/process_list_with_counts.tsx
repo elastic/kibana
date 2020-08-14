@@ -111,8 +111,11 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
                 });
               }}
             >
-              <CubeForProcess isProcessTerminated={isTerminated} />
-              {name}
+              <CubeForProcess
+                running={!isTerminated}
+                data-test-subj="resolver:node-list:node-link:icon"
+              />
+              <span data-test-subj="resolver:node-list:node-link:title">{name}</span>
             </EuiButtonEmpty>
           );
         },
@@ -150,18 +153,10 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const processTableView: ProcessTableView[] = useMemo(
     () =>
       [...processNodePositions.keys()].map((processEvent) => {
-        let dateTime;
-        const eventTime = event.timestampSafeVersion(processEvent);
         const name = event.processNameSafeVersion(processEvent);
-        if (eventTime) {
-          const date = new Date(eventTime);
-          if (isFinite(date.getTime())) {
-            dateTime = date;
-          }
-        }
         return {
           name,
-          timestamp: dateTime,
+          timestamp: event.timestampAsDateSafeVersion(processEvent),
           event: processEvent,
         };
       }),
@@ -172,12 +167,9 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const crumbs = useMemo(() => {
     return [
       {
-        text: i18n.translate(
-          'xpack.securitySolution.endpoint.resolver.panel.processListWithCounts.events',
-          {
-            defaultMessage: 'All Process Events',
-          }
-        ),
+        text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
+          defaultMessage: 'All Process Events',
+        }),
         onClick: () => {},
       },
     ];
@@ -186,13 +178,15 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
   const children = useSelector(selectors.hasMoreChildren);
   const ancestors = useSelector(selectors.hasMoreAncestors);
   const showWarning = children === true || ancestors === true;
+  const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       {showWarning && <StyledLimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView>
-        data-test-subj="resolver:panel:process-list"
+        rowProps={rowProps}
+        data-test-subj="resolver:node-list"
         items={processTableView}
         columns={columns}
         sorting
@@ -200,4 +194,3 @@ export const ProcessListWithCounts = memo(function ProcessListWithCounts({
     </>
   );
 });
-ProcessListWithCounts.displayName = 'ProcessListWithCounts';

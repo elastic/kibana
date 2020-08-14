@@ -33,7 +33,6 @@ import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
-import { EmptyState } from './components/empty_state';
 
 import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
@@ -125,7 +124,13 @@ export class CreateIndexPatternWizard extends Component<
     // query local and remote indices, updating state independently
     ensureMinimumTime(
       this.catchAndWarn(
-        getIndices(this.context.services.http, this.state.indexPatternCreationType, `*`, false),
+        getIndices(
+          this.context.services.http,
+          (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
+          `*`,
+          false
+        ),
+
         [],
         indicesFailMsg
       )
@@ -136,7 +141,13 @@ export class CreateIndexPatternWizard extends Component<
     this.catchAndWarn(
       // if we get an error from remote cluster query, supply fallback value that allows user entry.
       // ['a'] is fallback value
-      getIndices(this.context.services.http, this.state.indexPatternCreationType, `*:*`, false),
+      getIndices(
+        this.context.services.http,
+        (indexName: string) => this.state.indexPatternCreationType.getIndexTags(indexName),
+        `*:*`,
+        false
+      ),
+
       ['a'],
       clustersFailMsg
     ).then((remoteIndices: string[] | MatchedItem[]) =>
@@ -200,37 +211,22 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   renderHeader() {
+    const { docLinks, indexPatternCreationType } = this.state;
     return (
       <Header
-        prompt={this.state.indexPatternCreationType.renderPrompt()}
-        indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
-        isBeta={this.state.indexPatternCreationType.getIsBeta()}
-        docLinks={this.state.docLinks}
+        prompt={indexPatternCreationType.renderPrompt()}
+        indexPatternName={indexPatternCreationType.getIndexPatternName()}
+        isBeta={indexPatternCreationType.getIsBeta()}
+        docLinks={docLinks}
       />
     );
   }
 
   renderContent() {
-    const {
-      allIndices,
-      isInitiallyLoadingIndices,
-      step,
-      indexPattern,
-      remoteClustersExist,
-    } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern } = this.state;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
-    }
-
-    const hasDataIndices = allIndices.some(({ name }: MatchedItem) => !name.startsWith('.'));
-    if (!hasDataIndices && !remoteClustersExist) {
-      return (
-        <EmptyState
-          onRefresh={this.fetchData}
-          prependBasePath={this.context.services.http.basePath.prepend}
-        />
-      );
     }
 
     const header = this.renderHeader();

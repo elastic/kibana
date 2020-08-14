@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, HTMLAttributes } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from 'react-intl';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import * as selectors from '../../store/selectors';
 import * as event from '../../../../common/endpoint/models/event';
 import { CrumbInfo, formatDate, StyledBreadcrumbs } from './panel_content_utilities';
@@ -51,9 +52,9 @@ export const ProcessDetails = memo(function ProcessDetails({
   const processName = event.eventName(processEvent);
   const entityId = event.entityId(processEvent);
   const isProcessTerminated = useSelector(selectors.isProcessTerminated)(entityId);
-  const processInfoEntry = useMemo(() => {
+  const processInfoEntry: EuiDescriptionListProps['listItems'] = useMemo(() => {
     const eventTime = event.eventTimestamp(processEvent);
-    const dateTime = eventTime ? formatDate(eventTime) : '';
+    const dateTime = eventTime === undefined ? null : formatDate(eventTime);
 
     const createdEntry = {
       title: '@timestamp',
@@ -95,7 +96,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       description: argsForProcess(processEvent),
     };
 
-    // This is the data in {title, description} form for the EUIDescriptionList to display
+    // This is the data in {title, description} form for the EuiDescriptionList to display
     const processDescriptionListData = [
       createdEntry,
       pathEntry,
@@ -107,7 +108,7 @@ export const ProcessDetails = memo(function ProcessDetails({
       commandLineEntry,
     ]
       .filter((entry) => {
-        return entry.description;
+        return entry.description !== undefined;
       })
       .map((entry) => {
         return {
@@ -128,6 +129,7 @@ export const ProcessDetails = memo(function ProcessDetails({
             defaultMessage: 'Events',
           }
         ),
+        'data-test-subj': 'resolver:node-detail:breadcrumbs:node-list-link',
         onClick: () => {
           pushToQueryParams({ crumbId: '', crumbEvent: '' });
         },
@@ -154,31 +156,45 @@ export const ProcessDetails = memo(function ProcessDetails({
     return cubeAssetsForNode(isProcessTerminated, false);
   }, [processEvent, cubeAssetsForNode, isProcessTerminated]);
 
-  const titleId = useMemo(() => htmlIdGenerator('resolverTable')(), []);
+  const titleID = useMemo(() => htmlIdGenerator('resolverTable')(), []);
   return (
     <>
       <StyledBreadcrumbs breadcrumbs={crumbs} />
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
-        <h4 aria-describedby={titleId}>
-          <CubeForProcess isProcessTerminated={isProcessTerminated} />
-          {processName}
+        <h4 aria-describedby={titleID}>
+          <CubeForProcess
+            data-test-subj="resolver:node-detail:title-icon"
+            running={!isProcessTerminated}
+          />
+          <span data-test-subj="resolver:node-detail:title">{processName}</span>
         </h4>
       </EuiTitle>
       <EuiText>
         <EuiTextColor color="subdued">
-          <span id={titleId}>{descriptionText}</span>
+          <span id={titleID}>{descriptionText}</span>
         </EuiTextColor>
       </EuiText>
       <EuiSpacer size="l" />
       <StyledDescriptionList
+        data-test-subj="resolver:node-detail"
         type="column"
         align="left"
-        titleProps={{ className: 'desc-title' }}
+        titleProps={
+          {
+            'data-test-subj': 'resolver:node-detail:entry-title',
+            className: 'desc-title',
+            // Casting this to allow data attribute
+          } as HTMLAttributes<HTMLElement>
+        }
+        descriptionProps={
+          { 'data-test-subj': 'resolver:node-detail:entry-description' } as HTMLAttributes<
+            HTMLElement
+          >
+        }
         compressed
         listItems={processInfoEntry}
       />
     </>
   );
 });
-ProcessDetails.displayName = 'ProcessDetails';
