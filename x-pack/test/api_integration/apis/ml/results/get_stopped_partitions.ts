@@ -16,7 +16,8 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   const testJobId = `sample_logs_${Date.now()}`;
-  const PARTITION_FIELD_NAME = 'event.dataset';
+  // non-aggregatable field to cause some partitions to change status to warn
+  const PARTITION_FIELD_NAME = 'agent';
 
   interface TestConfig {
     testDescription: string;
@@ -24,7 +25,11 @@ export default ({ getService }: FtrProviderContext) => {
     jobConfig: Job;
     datafeedConfig: Datafeed;
   }
-  const setupTestConfigs = (jobId: string, stopOnWarn: boolean): TestConfig => {
+  const setupTestConfigs = (
+    jobId: string,
+    stopOnWarn: boolean,
+    enabledPerPartitionCat: boolean = true
+  ): TestConfig => {
     const commonJobConfig = {
       groups: ['sample_logs', 'bootstrap', 'categorization'],
       description: "count by mlcategory (message) on 'sample logs' dataset with 15m bucket span",
@@ -50,7 +55,10 @@ export default ({ getService }: FtrProviderContext) => {
         analysis_config: {
           bucket_span: '1m',
           categorization_field_name: 'message',
-          per_partition_categorization: { enabled: true, stop_on_warn: stopOnWarn },
+          per_partition_categorization: {
+            enabled: enabledPerPartitionCat,
+            stop_on_warn: stopOnWarn,
+          },
           detectors: [
             {
               function: 'count',
@@ -70,7 +78,6 @@ export default ({ getService }: FtrProviderContext) => {
     setupTestConfigs(`${testJobId}_f`, false),
     setupTestConfigs(`${testJobId}_viewer`, true),
     setupTestConfigs(`${testJobId}_unauthorized`, true),
-    setupTestConfigs(`${testJobId}_t_2`, true),
   ];
 
   const testJobIds = testSetUps.map((t) => t.jobId);
@@ -98,9 +105,9 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ jobIds: [jobId] })
         .set(COMMON_REQUEST_HEADERS)
         .expect(200);
-
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs[jobId]).to.be.an('array');
+      expect(body.jobs[jobId].length).to.be.greaterThan(0);
     });
 
     it('should not return jobId in response if stopped_on_warn is false', async () => {
@@ -126,6 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.jobs).to.not.be(undefined);
       expect(body.jobs[jobId]).to.be.an('array');
+      expect(body.jobs[jobId].length).to.be.greaterThan(0);
     });
 
     it('should not fetch stopped partitions for unauthorized user', async () => {
@@ -155,6 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
       Object.keys(body.jobs).forEach((currentJobId: string) => {
         expect(testJobIds).to.contain(currentJobId);
         expect(body.jobs[currentJobId]).to.be.an('array');
+        expect(body.jobs[currentJobId].length).to.be.greaterThan(0);
       });
     });
 
