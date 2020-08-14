@@ -23,6 +23,7 @@ import {
   Foreach,
   GeoIP,
   Grok,
+  Gsub,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -146,7 +147,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
   },
   gsub: {
-    FieldsComponent: undefined,
+    FieldsComponent: Gsub,
     docLinkPath: '/gsub-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.gsub', {
       defaultMessage: 'Gsub',
