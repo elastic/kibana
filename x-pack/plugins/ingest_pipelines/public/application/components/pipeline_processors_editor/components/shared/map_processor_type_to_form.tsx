@@ -22,6 +22,7 @@ import {
   Fail,
   Foreach,
   GeoIP,
+  Grok,
 } from '../manage_processor_form/processors';
 
 // import { SetProcessor } from './processors/set';
@@ -135,6 +136,13 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     docLinkPath: '/geoip-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.geoip', {
       defaultMessage: 'GeoIP',
+    }),
+  },
+  grok: {
+    FieldsComponent: Grok,
+    docLinkPath: '/grok-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
+      defaultMessage: 'Grok',
     }),
   },
   gsub: {
@@ -270,13 +278,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     docLinkPath: '/set-processor.html',
     label: i18n.translate('xpack.ingestPipelines.processors.label.set', {
       defaultMessage: 'Set',
-    }),
-  },
-  grok: {
-    FieldsComponent: undefined,
-    docLinkPath: '/grok-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
-      defaultMessage: 'Grok',
     }),
   },
 };

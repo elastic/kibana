@@ -22,6 +22,7 @@ import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {
+  /* Optional field config */
   target_field: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.targetFieldLabel', {
@@ -78,7 +79,7 @@ export const GeoIP: FunctionComponent = () => {
     <>
       <FieldNameField
         helpText={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.failForm.fieldNameHelpText',
+          'xpack.ingestPipelines.pipelineEditor.grokForm.fieldNameHelpText',
           { defaultMessage: 'The array field.' }
         )}
       />
