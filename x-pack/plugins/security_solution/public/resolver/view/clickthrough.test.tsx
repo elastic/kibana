@@ -241,7 +241,7 @@ function pxNum(px: string): number {
  */
 function getComputedNodeBoundaries(entityID: string) {
   const { left, top, width, height } = getComputedStyle(
-    simulator.processNodeElements({ entityID }).first().getDOMNode()
+    simulator.processNodeElements({ entityID }).getDOMNode()
   );
   return {
     xMin: pxNum(left),
