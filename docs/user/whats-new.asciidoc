@@ -103,7 +103,7 @@ you’ll see individual lines and polygons.
 
 [float]
 [[maps-7-9-vector-tile]]
-=== Vector tile layers available in Maps
+=== Vector tile layers in Maps
 
 Maps also introduces a new {kibana-ref}//tile-layer.html[vector tile layer]&mdash;you can add
 layers to your map for data services that implement the
