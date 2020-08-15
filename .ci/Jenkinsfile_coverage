@@ -15,9 +15,10 @@ kibanaPipeline(timeoutMinutes: 240) {
           def counts = kibanaCoverage.counts()
           print "### Artfacts Counts: ..."
           print counts
+
 //          kibanaCoverage.runTests()
 //          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
-//          handleIngestion(TIME_STAMP)
+          handleIngestion(TIME_STAMP, counts)
         }
         handleFail()
       }
@@ -26,14 +27,15 @@ kibanaPipeline(timeoutMinutes: 240) {
   }
 }
 
-def handleIngestion(timestamp) {
-  def previousSha = handlePreviousSha()
-  kibanaPipeline.downloadCoverageArtifacts()
+def handleIngestion(timestamp, artifactsCounts) {
+//  def previousSha = handlePreviousSha()
+//  kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.prokLinks("### Process HTML Links")
-  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
-  kibanaCoverage.generateReports("### Merge coverage reports")
-  kibanaCoverage.uploadCombinedReports()
-  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
+  kibanaCoverage.prokVizData("### Process Visualization Data", artifactsCounts)
+//  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
+//  kibanaCoverage.generateReports("### Merge coverage reports")
+//  kibanaCoverage.uploadCombinedReports()
+//  kibanaCoverage.ingest(env.JOB_NAME, BUILD_NUMBER, BUILD_URL, timestamp, previousSha, '### Ingest && Upload')
   kibanaCoverage.uploadCoverageStaticSite(timestamp)
 }
 
