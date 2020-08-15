@@ -1,11 +1,11 @@
 def counts() {
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/1000/coverage/"
-  def storageLocation = "gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage/"
-  def grep = "grep -v \"/:\" |grep -v \"TOTAL\" | grep -v \"^\$\""
-  def cmd = "gsutil ls -lhr '${storageLocation}' | '${grep}'"
-//  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
-  return sh ( script: cmd, returnStdout: true ).trim()
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage"
+  def grep = ''' grep -v "/:" |grep -v "TOTAL" | grep -v "^$" '''
+//  def cmd = "gsutil ls -lhr '${storageLocation}' | '${grep}'"
+  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
+//  return sh ( script: cmd, returnStdout: true ).trim()
 }
 
 def downloadPrevious(title) {
