@@ -15,7 +15,7 @@ def prokVizData(title, artifactStats) {
 
   kibanaPipeline.bash("""
 cat << EOF > '${statDatFilePath}'
-const artifactStats = '${artifactStats}'
+const artifactStats = `${artifactStats}`
 
 if (!isInBrowser()) {
   module.exports.default = {}
