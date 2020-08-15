@@ -97,45 +97,54 @@ export function getTimelionRequestHandler({
     const filter = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
 
     const MAX_INTERVAL = 120000;
+    let requestId: string | undefined;
 
-    async function runPolling(interval: number): Promise<TimelionSuccessResponse> {
+    async function runPolling(fetch: Function, interval: number): Promise<TimelionSuccessResponse> {
       async function checkCondition(resolve: Function, reject: Function) {
-        const resp = await http.post('/api/timelion/run', {
-          body: JSON.stringify({
-            sheet: [expression],
-            extended: {
-              es: {
-                filter,
-              },
-            },
-            time: {
-              from: timeRangeBounds.min,
-              to: timeRangeBounds.max,
-              interval: visParams.interval,
-              timezone,
-            },
-          }),
-        });
+        const response = await fetch(requestId);
+
+        requestId = response.body.id;
 
         if (interval > MAX_INTERVAL) {
           reject('Reach max interval');
         }
 
-        if (resp.sheet.some((sheet: any) => sheet.is_running || sheet.is_partial)) {
+        if (response.response.status === 202) {
           setTimeout(() => {
             interval = interval * Math.log10(interval / 10);
             checkCondition(resolve, reject);
           }, interval);
         } else {
-          resolve(resp);
+          resolve(response.body);
         }
       }
 
       return new Promise(checkCondition);
     }
 
+    async function runSearch(searchId: string | undefined) {
+      return await http.post('/api/timelion/run', {
+        body: JSON.stringify({
+          sheet: [expression],
+          searchId,
+          extended: {
+            es: {
+              filter,
+            },
+          },
+          time: {
+            from: timeRangeBounds.min,
+            to: timeRangeBounds.max,
+            interval: visParams.interval,
+            timezone,
+          },
+        }),
+        asResponse: true,
+      });
+    }
+
     try {
-      return await runPolling(500);
+      return await runPolling(runSearch, 500);
     } catch (e) {
       if (e && e.body) {
         const err = new Error(

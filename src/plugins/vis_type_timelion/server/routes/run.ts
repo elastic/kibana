@@ -53,6 +53,7 @@ export function runRoute(
       validate: {
         body: schema.object({
           sheet: schema.arrayOf(schema.string()),
+          searchId: schema.maybe(schema.string()),
           extended: schema.maybe(
             schema.object({
               es: schema.object({
@@ -95,7 +96,17 @@ export function runRoute(
           esDataClient: data.search.search,
         });
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+        const sheet: any[] = await Bluebird.all(chainRunner.processRequest(request.body));
+
+        if (sheet[0].is_partial || sheet[0].is_running) {
+          return response.accepted({
+            body: {
+              id: sheet[0].id,
+              sheet,
+              stats: chainRunner.getStats(),
+            },
+          });
+        }
 
         return response.ok({
           body: {

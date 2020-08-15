@@ -29,8 +29,10 @@ describe('Timelion request handler', function () {
 
   beforeEach(function () {
     core.http.post
-      .mockReturnValueOnce(Promise.resolve({ sheet: [{ is_running: true }] }))
-      .mockReturnValueOnce(Promise.resolve({ sheet: [{ is_running: false }] }));
+      .mockReturnValueOnce(Promise.resolve({ response: { status: 202 }, body: { id: 'test' } }))
+      .mockReturnValueOnce(
+        Promise.resolve({ response: { status: 200 }, body: { sheet: [{ list: ['es'] }] } })
+      );
 
     data.query.timefilter.timefilter.calculateBounds = () => {
       return { min: moment(), max: moment() };
@@ -43,12 +45,13 @@ describe('Timelion request handler', function () {
   });
 
   it('checking polling', async function () {
-    await timelionRequestHandler({
+    const resp = await timelionRequestHandler({
       timeRange: {},
       filters: [],
       query: { query: 'es' },
       visParams: { expression: 'es' },
     });
     expect(core.http.post).toHaveBeenCalledTimes(2);
+    expect(resp).toEqual({ sheet: [{ list: ['es'] }] });
   });
 });

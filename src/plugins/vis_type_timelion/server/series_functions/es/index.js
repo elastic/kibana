@@ -133,11 +133,12 @@ export default new Datasource('es', {
       tlConfig.context,
       {
         params: body,
+        id: tlConfig.request.body.searchId,
       },
       {}
     );
 
-    if (!resp.rawResponse._shards.total) {
+    if (!resp.is_running && !resp.is_partial && !resp.rawResponse._shards.total) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {
           defaultMessage: 'Elasticsearch index not found: {index}',
@@ -148,6 +149,7 @@ export default new Datasource('es', {
       );
     }
     return {
+      id: resp.id,
       is_running: resp.is_running,
       is_partial: resp.is_partial,
       type: 'seriesList',
