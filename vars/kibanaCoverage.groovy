@@ -28,6 +28,8 @@ function isInBrowser() {
   return !!(typeof window !== 'undefined');
 }
 
+console.log('\n### Stat Data loaded!');
+
 EOF
 
   echo "### Generated Viz Data: ..."
@@ -137,6 +139,7 @@ cat << EOF > src/dev/code_coverage/www/index_partial_2.html
     </div>
   </footer>
 </div>
+<script src="./stat_data.js"></script>
 </body>
 </html>
 EOF
