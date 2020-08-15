@@ -28,7 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Listing of Reports', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75044
+  describe.skip('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'reporting_user']);
       await esArchiver.load('empty_kibana');
@@ -67,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('Paginates historical reports', async () => {
+    it('Paginates historical reports', async () => {
       // wait for first row of page 1
       await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
 
