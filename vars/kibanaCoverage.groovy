@@ -4,8 +4,9 @@ def counts() {
   def storageLocation = "gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage"
   def grep = ''' grep -v "/:" |grep -v "TOTAL" | grep -v "^$" '''
 //  def cmd = "gsutil ls -lhr '${storageLocation}' | '${grep}'"
-  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
+//  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
 //  return sh ( script: cmd, returnStdout: true ).trim()
+  return sh ( script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true ).trim()
 }
 
 def downloadPrevious(title) {
