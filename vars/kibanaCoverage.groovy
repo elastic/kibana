@@ -14,8 +14,9 @@ def prokVizData(title, artifactStats) {
   def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
 
   kibanaPipeline.bash("""
-cat << EOF > '${statDatFilePath}'
-const artifactStats = `${artifactStats}`
+    echo "const artifactStats = `${artifactStats}`" > '${statDatFilePath}'
+
+cat << EOF >> '${statDatFilePath}'
 
 if (!isInBrowser()) {
   module.exports.default = {}
@@ -28,12 +29,12 @@ function isInBrowser() {
   return !!(typeof window !== 'undefined');
 }
 
-console.log('\n### Stat Data loaded!');
+console.log('### Stat Data loaded!');
 
 EOF
 
-  echo "### Generated Viz Data: ..."
-  cat '${statDatFilePath}'
+    echo "### Generated Viz Data: ..."
+    cat '${statDatFilePath}'
   """, title)
   return statDatFilePath
 }
