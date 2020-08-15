@@ -1,24 +1,24 @@
-def stats() {
+def storeStats(title, dest) {
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/1000/coverage/"
 //  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
-
 //  return sh ( script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true ).trim()
-  return sh(script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true).trim()
+
+
+  kibanaPipeline.bash("""
+    touch ${dest}
+    gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$" > ${dest}
+  """, title)
 }
 
-def prokVizData(title, artifactStats) {
-  print "### Stats: ..."
-  print artifactStats
-
-  def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
+def prokVizData(title, statDatFilePath) {
 
   kibanaPipeline.bash("""
 
-    . src/dev/code_coverage/shell_scripts/bootstrap_stats.sh ${statDatFilePath} ${artifactStats}
+    . src/dev/code_coverage/shell_scripts/bootstrap_stats.sh ${statDatFilePath}
 
     echo "### List stat file contents: ..."
-    cat src/dev/code_coverage/www/stat_data.js
+    cat ${statDatFilePath}
 
 
 cat << EOF >> '${statDatFilePath}'
@@ -41,7 +41,6 @@ EOF
     echo "### Generated Viz Data: ..."
     cat '${statDatFilePath}'
   """, title)
-  return statDatFilePath
 }
 
 def downloadPrevious(title) {

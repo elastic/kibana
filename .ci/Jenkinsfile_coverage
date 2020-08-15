@@ -14,7 +14,7 @@ kibanaPipeline(timeoutMinutes: 240) {
         catchError {
 //          kibanaCoverage.runTests()
 //          kibanaTeamAssign.load('team_assignment', "### Upload Team Assignment JSON")
-          handleIngestion(TIME_STAMP, kibanaCoverage.stats())
+          handleIngestion(TIME_STAMP)
         }
         handleFail()
       }
@@ -23,11 +23,14 @@ kibanaPipeline(timeoutMinutes: 240) {
   }
 }
 
-def handleIngestion(timestamp, artifactStats) {
+def handleIngestion(timestamp) {
 //  def previousSha = handlePreviousSha()
 //  kibanaPipeline.downloadCoverageArtifacts()
   kibanaCoverage.prokLinks("### Process HTML Links")
-  def statDatFilePath = kibanaCoverage.prokVizData("### Process Visualization Data", artifactStats)
+  def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
+
+  kibanaCoverage.storeStats("### Create the dat file using GSUTIL", statDatFilePath)
+  kibanaCoverage.prokVizData("### Process Visualization Data", statDatFilePath)
 //  kibanaCoverage.collectVcsInfo("### Collect VCS Info")
 //  kibanaCoverage.generateReports("### Merge coverage reports")
 //  kibanaCoverage.uploadCombinedReports()
