@@ -27,6 +27,7 @@ import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { ESAPICaller } from '../adapters/framework';
 import { getUptimeIndexPattern } from '../requests/get_index_pattern';
+import { UMServerLibs } from '../lib';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
