@@ -89,7 +89,7 @@ def uploadCoverageStaticSite(timestamp, statDatFilePath) {
 
 def uploadBaseWebsiteFiles(prefix, statDatFilePath) {
   [
-    statDatFilePath,
+    statDatFilePath, // gs://elastic-bekitzur-kibana-coverage-live/stat_data.js
     'src/dev/code_coverage/www/index.html',
     'src/dev/code_coverage/www/404.html'
   ].each { uploadWithVault(prefix, it) }
