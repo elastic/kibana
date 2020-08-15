@@ -321,8 +321,8 @@ export async function pushBackportBranch({
     return;
   }
 
+  const remoteName = getRemoteName(options);
   try {
-    const remoteName = getRemoteName(options);
     const res = await exec(
       `git push ${remoteName} ${backportBranch}:${backportBranch} --force`,
       { cwd: getRepoPath(options) }
@@ -331,6 +331,13 @@ export async function pushBackportBranch({
     return res;
   } catch (e) {
     spinner.fail();
+
+    if (e.stderr?.toLowerCase().includes(`repository not found`)) {
+      throw new HandledError(
+        `Error pushing to https://github.com/${remoteName}/${options.repoName}. Repository does not exist. Either fork the source repository (https://github.com/${options.repoOwner}/${options.repoName}) or disable fork mode "--fork false".  Read more about "fork mode" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork`
+      );
+    }
+
     throw e;
   }
 }

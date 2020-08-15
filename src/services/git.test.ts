@@ -8,6 +8,7 @@ import {
   cherrypick,
   getConflictingFiles,
   createBackportBranch,
+  pushBackportBranch,
 } from '../services/git';
 import { ExecError } from '../test/ExecError';
 
@@ -407,6 +408,35 @@ describe('addRemote', () => {
     ).toHaveBeenCalledWith(
       'git remote add sqren https://myAccessToken@github.my-company.com/sqren/kibana.git',
       { cwd: '/myHomeDir/.backport/repositories/elastic/kibana' }
+    );
+  });
+});
+
+describe('pushBackportBranch', () => {
+  const options = {
+    fork: true,
+    username: 'sqren',
+    repoOwner: 'elastic',
+    repoName: 'kibana',
+  } as BackportOptions;
+
+  const backportBranch = 'backport/7.x/pr-2';
+
+  it('should handle missing fork error', async () => {
+    jest.spyOn(childProcess, 'exec').mockRejectedValueOnce({
+      killed: false,
+      code: 128,
+      signal: null,
+      cmd: 'git push sqren backport/7.x/pr-2:backport/7.x/pr-2 --force',
+      stdout: '',
+      stderr:
+        "remote: Repository not found.\nfatal: repository 'https://github.com/sqren/kibana.git/' not found\n",
+    });
+
+    await expect(
+      pushBackportBranch({ options, backportBranch })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error pushing to https://github.com/sqren/kibana. Repository does not exist. Either fork the source repository (https://github.com/elastic/kibana) or disable fork mode \\"--fork false\\".  Read more about \\"fork mode\\" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork"`
     );
   });
 });
