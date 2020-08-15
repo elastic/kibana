@@ -16,8 +16,8 @@ def prokVizData(title, artifactStats) {
   kibanaPipeline.bash("""
     echo "const artifactStats = `" > '${statDatFilePath}'
     echo "${artifactStats}" >> '${statDatFilePath}'
-    echo "`;"
-    echo " "
+    echo "`;" >> '${statDatFilePath}'
+    echo " " >> '${statDatFilePath}'
 
 cat << EOF >> '${statDatFilePath}'
 
