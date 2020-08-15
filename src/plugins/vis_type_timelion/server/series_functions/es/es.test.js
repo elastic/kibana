@@ -42,6 +42,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
         });
       },
     },
+    request: { body: {} },
   };
 }
 
