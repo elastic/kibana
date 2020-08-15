@@ -22,4 +22,4 @@
 /**
  * Set the default timeout for the unit tests to 30 seconds, temporarily
  */
-jest.setTimeout(10 * 60 * 1000);
+jest.setTimeout(30 * 1000);
