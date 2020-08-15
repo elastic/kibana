@@ -23,6 +23,10 @@ import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
 
+jest.mock('../query_bar_wrapper', () => ({
+  QueryBarWrapper: jest.fn(() => null),
+}));
+
 describe('TSVB Filter Ratio', () => {
   const setup = (metric) => {
     const series = { ...SERIES, metrics: [metric] };
