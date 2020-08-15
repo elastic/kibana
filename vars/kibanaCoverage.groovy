@@ -1,24 +1,39 @@
-def counts() {
+def stats() {
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
 //  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/1000/coverage/"
 //  return sh ( script: "gsutil ls -lhr '${storageLocation}' | '${grep}'", returnStdout: true ).trim()
 
 //  return sh ( script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true ).trim()
-  return sh ( script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true ).trim()
+  return sh(script: '''gsutil ls -lhr gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/1000/coverage | grep -v "/:" |grep -v "TOTAL" | grep -v "^$"''', returnStdout: true).trim()
 }
 
-def prokVizData(title, artifactsCounts) {
-//  kibanaPipeline.bash('''
-//cat << EOF > src/dev/code_coverage/www/data.js
-//
-//EOF
-//
-//  echo "### Generated Viz Data: ..."
-//  cat src/dev/code_coverage/www/data.js
-//  ''', title)
-  print title
-  print "### Artfacts Counts: ..."
-  print artifactsCounts
+def prokVizData(title, artifactStats) {
+  print "### Stats: ..."
+  print artifactStats
+
+  def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
+
+  kibanaPipeline.bash("""
+cat << EOF > '${statDatFilePath}'
+const artifactStats = '${artifactStats}'
+
+if (!isInBrowser()) {
+  module.exports.default = {}
+  module.exports.default = artifactStats
+} else {
+  window.initialData = artifactStats;
+}
+
+function isInBrowser() {
+  return !!(typeof window !== 'undefined');
+}
+
+EOF
+
+  echo "### Generated Viz Data: ..."
+  cat '${statDatFilePath}'
+  """, title)
+  return statDatFilePath
 }
 
 def downloadPrevious(title) {
@@ -64,16 +79,17 @@ def uploadPrevious(title) {
   }
 }
 
-def uploadCoverageStaticSite(timestamp) {
+def uploadCoverageStaticSite(timestamp, statDatFilePath) {
   def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
   def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
 
-  uploadBaseWebsiteFiles(uploadPrefix)
+  uploadBaseWebsiteFiles(uploadPrefix, statDatFilePath)
   uploadCoverageHtmls(uploadPrefixWithTimeStamp)
 }
 
-def uploadBaseWebsiteFiles(prefix) {
+def uploadBaseWebsiteFiles(prefix, statDatFilePath) {
   [
+    statDatFilePath,
     'src/dev/code_coverage/www/index.html',
     'src/dev/code_coverage/www/404.html'
   ].each { uploadWithVault(prefix, it) }
