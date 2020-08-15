@@ -34,11 +34,7 @@ import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
-    esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function () {
-        return Bluebird.resolve(response);
-      },
-    }),
+    esDataClient: sinon.stub().returns(Bluebird.resolve(response)),
     savedObjectsClient: {
       find: function () {
         return Bluebird.resolve({
@@ -55,7 +51,9 @@ describe('es', () => {
   describe('seriesList processor', () => {
     it('throws an error then the index is missing', () => {
       tlConfig = stubRequestAndServer({
-        _shards: { total: 0 },
+        rawResponse: {
+          _shards: { total: 0 },
+        },
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
@@ -65,7 +63,7 @@ describe('es', () => {
     });
 
     it('returns a seriesList', () => {
-      tlConfig = stubRequestAndServer(esResponse);
+      tlConfig = stubRequestAndServer({ rawResponse: esResponse });
       return invoke(es, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });

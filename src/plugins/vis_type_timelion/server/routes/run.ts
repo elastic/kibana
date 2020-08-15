@@ -26,6 +26,7 @@ import chainRunnerFn from '../handlers/chain_runner.js';
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
 import getTlConfig from '../handlers/lib/tl_config';
+import { PluginStart } from '../../../../../src/plugins/data/server';
 import { TimelionFunctionInterface } from '../types';
 import { ConfigManager } from '../lib/config_manager';
 
@@ -37,10 +38,12 @@ export function runRoute(
     logger,
     getFunction,
     configManager,
+    data,
   }: {
     logger: Logger;
     getFunction: (name: string) => TimelionFunctionInterface;
     configManager: ConfigManager;
+    data: PluginStart;
   }
 ) {
   router.post(
@@ -87,7 +90,7 @@ export function runRoute(
           allowedGraphiteUrls: configManager.getGraphiteUrls(),
           esShardTimeout: configManager.getEsShardTimeout(),
           savedObjectsClient: context.core.savedObjects.client,
-          esDataClient: () => context.core.elasticsearch.legacy.client,
+          esDataClient: data.search.search,
         });
         const chainRunner = chainRunnerFn(tlConfig);
         const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
