@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
-// @ts-ignore
-import { JsonUploadAndParse } from './components/json_upload_and_parse';
+import { getFileUploadComponent } from './get_file_upload_component';
 // @ts-ignore
 import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
 import { IDataPluginServices } from '../../../../src/plugins/data/public';
@@ -35,7 +33,7 @@ export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploa
   public start(core: CoreStart, plugins: FileUploadPluginStartDependencies) {
     startInitServicesAndConstants(core, plugins);
     return {
-      JsonUploadAndParse,
+      getFileUploadComponent,
     };
   }
 }

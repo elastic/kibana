@@ -14,7 +14,10 @@ export {
   IEventLogClientService,
   IEvent,
   IValidatedEvent,
+  IEventLogClient,
+  QueryEventsBySavedObjectResult,
   SAVED_OBJECT_REL_PRIMARY,
 } from './types';
+
 export const config = { schema: ConfigSchema };
 export const plugin = (context: PluginInitializerContext) => new Plugin(context);
