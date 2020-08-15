@@ -5,7 +5,7 @@
  */
 import * as React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
@@ -39,29 +39,54 @@ export function CoreVitals() {
     [start, end, serviceName, uiFilters]
   );
 
+  const lcpRanks = (data?.lcpRanks ?? [0, 0]).map(({ value }) => value);
+  const fcpRanks = (data?.fcpRanks ?? [0, 0]).map(({ value }) => value);
+
   return (
-    <ClFlexGroup wrap>
+    <EuiFlexGrid gutterSize="xl">
       <EuiFlexItem>
         <CoreVitalItem
           title={'Largest Contentful Paint'}
-          value={data?.lcp?.toFixed(0) ?? '0s'}
+          value={(data?.lcp?.toFixed(2) ?? 0) + 's'}
+          ranks={[
+            lcpRanks?.[0],
+            lcpRanks?.[1] - lcpRanks?.[0],
+            100 - lcpRanks?.[1],
+          ]}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <CoreVitalItem title="First Input Delay" value={'0.14'} />
+        <CoreVitalItem
+          title="First Input Delay"
+          value={'0.14'}
+          ranks={[0, 0, 0]}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        <CoreVitalItem title={'Cumulative Layout Shift'} value={'3.6s'} />
+        <CoreVitalItem
+          title={'Cumulative Layout Shift'}
+          value={'3.6s'}
+          ranks={[0, 0, 0]}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <CoreVitalItem
           title={'First Contentful Paint'}
-          value={data?.fcp?.toFixed(0) ?? '0s'}
+          value={(data?.fcp?.toFixed(2) ?? 0) + 's'}
+          ranks={[
+            fcpRanks?.[0],
+            fcpRanks?.[1] - fcpRanks?.[0],
+            100 - fcpRanks?.[1],
+          ]}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <CoreVitalItem title={'Total Blocking Time'} value={'3.6s'} />
+        <CoreVitalItem
+          title={'Total Blocking Time'}
+          value={'3.6s'}
+          ranks={[0, 0, 0]}
+        />
       </EuiFlexItem>
-    </ClFlexGroup>
+    </EuiFlexGrid>
   );
 }

@@ -25,19 +25,40 @@ export async function getWebCoreVitals({
     body: {
       size: 0,
       query: {
-        bool: projection.body.query.bool,
+        bool: {
+          filter: [
+            ...projection.body.query.bool.filter,
+            {
+              term: {
+                'user_agent.name': 'Chrome',
+              },
+            },
+          ],
+        },
       },
       aggs: {
         fcp: {
           avg: {
             field: 'transaction.marks.agent.firstContentfulPaint',
-            missing: 0,
+          },
+        },
+        fcpRanks: {
+          percentile_ranks: {
+            field: 'transaction.marks.agent.firstContentfulPaint',
+            values: [1000, 2000],
+            keyed: false,
           },
         },
         lcp: {
           avg: {
             field: 'transaction.marks.agent.largestContentfulPaint',
-            missing: 0,
+          },
+        },
+        lcpRanks: {
+          percentile_ranks: {
+            field: 'transaction.marks.agent.largestContentfulPaint',
+            values: [2500, 4000],
+            keyed: false,
           },
         },
       },
@@ -47,11 +68,19 @@ export async function getWebCoreVitals({
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(params);
-  const { fcp, lcp } = response.aggregations!;
+  const { fcp, lcp, fcpRanks, lcpRanks } = response.aggregations!;
 
   // Divide by 1000 to convert ms into seconds
   return {
-    fcp: fcp.value / 1000,
-    lcp: lcp.value / 1000,
+    fcpRanks: fcpRanks.values.map(({ key, value }) => ({
+      key: key / 1000,
+      value: value?.toFixed(0) ?? 0,
+    })),
+    lcpRanks: lcpRanks.values.map(({ key, value }) => ({
+      key: key / 1000,
+      value: value?.toFixed(0) ?? 0,
+    })),
+    fcp: (fcp?.value ?? 0) / 1000,
+    lcp: (lcp?.value ?? 0) / 1000,
   };
 }

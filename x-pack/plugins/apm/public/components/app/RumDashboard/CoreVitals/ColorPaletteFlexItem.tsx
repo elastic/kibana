@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiFlexGroup,
@@ -12,37 +12,62 @@ import {
   euiPaletteForStatus,
   EuiSpacer,
   EuiStat,
-  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { PaletteLegends } from './PaletteLegends';
 
-const ColoredSpan = styled.span`
+const ColoredSpan = styled.div`
   height: 16px;
   width: 100px;
+  cursor: pointer;
 `;
 
-export const ColorPaletteFlexItem = ({ hexCode, className, first, last }) => {
+export const ColorPaletteFlexItem = ({
+  hexCode,
+  className,
+  first,
+  last,
+  inFocus,
+}: {
+  hexCode: string;
+  className: string;
+  first: boolean;
+  last: boolean;
+}) => {
   return (
     <EuiFlexItem
       key={hexCode}
       grow={false}
       className={classNames('guideColorPalette__swatch', className)}
     >
-      <ColoredSpan
-        title={hexCode}
-        style={{
-          backgroundColor: hexCode,
-          borderTopLeftRadius: first ? 4 : 0,
-          borderBottomLeftRadius: first ? 4 : 0,
-          borderTopRightRadius: last ? 4 : 0,
-          borderBottomRightRadius: last ? 4 : 0,
-        }}
-      />
+      <EuiToolTip content={'you dont believe me?'}>
+        <ColoredSpan
+          title={hexCode}
+          style={{
+            backgroundColor: hexCode,
+            borderTopLeftRadius: first ? 4 : 0,
+            borderBottomLeftRadius: first ? 4 : 0,
+            borderTopRightRadius: last ? 4 : 0,
+            borderBottomRightRadius: last ? 4 : 0,
+            opacity: !inFocus ? 1 : 0.4,
+          }}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 };
-export const CoreVitalItem = ({ title, value, color }) => {
+
+interface Props {
+  title: string;
+  value: string;
+  ranks: number[];
+}
+
+export const CoreVitalItem = ({ title, value, ranks }: Props) => {
   const palette = euiPaletteForStatus(3);
+
+  const [inFocusInd, setInFocusInd] = useState<number | null>(null);
 
   return (
     <Fragment>
@@ -66,21 +91,17 @@ export const CoreVitalItem = ({ title, value, color }) => {
             key={hexCode}
             first={ind === 0}
             last={ind === 2}
+            inFocus={inFocusInd !== ind && inFocusInd !== null}
           />
         ))}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">64%</EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHealth color="subdued">10%</EuiHealth>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHealth color="subdued">5%</EuiHealth>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <PaletteLegends
+        ranks={ranks}
+        onItemHover={(ind) => {
+          setInFocusInd(ind);
+        }}
+      />
       <EuiSpacer size="xl" />
     </Fragment>
   );
