@@ -14,11 +14,12 @@ def prokVizData(title, artifactStats) {
   def statDatFilePath = 'src/dev/code_coverage/www/stat_data.js'
 
   kibanaPipeline.bash("""
-    touch ${statDatFilePath}
-    echo "const artifactStats = `" > ${statDatFilePath}
-    echo "${artifactStats}" >> ${statDatFilePath}
-    echo "`;" >> ${statDatFilePath}
-    echo " " >> ${statDatFilePath}
+
+    . src/dev/code_coverage/shell_scripts/bootstrap_stats.sh ${statDatFilePath}
+
+    echo "### List stat file contents: ..."
+    cat src/dev/code_coverage/www/stat_data.js
+
 
 cat << EOF >> '${statDatFilePath}'
 
