@@ -10,7 +10,7 @@ import Hapi from 'hapi';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { CONTENT_TYPE_CSV, CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory, LevelLogger } from '../../lib';
-import { ESQueueWorkerExecuteFn, RunTaskFnFactory } from '../../types';
+import { WorkerExecuteFn, RunTaskFnFactory } from '../../types';
 import { ScheduledTaskParamsCSV } from './types';
 import { createGenerateCsv } from './generate_csv';
 
@@ -54,7 +54,7 @@ const getRequest = async (headers: string | undefined, crypto: Crypto, logger: L
   } as Hapi.Request);
 };
 
-export const runTaskFnFactory: RunTaskFnFactory<ESQueueWorkerExecuteFn<
+export const runTaskFnFactory: RunTaskFnFactory<WorkerExecuteFn<
   ScheduledTaskParamsCSV
 >> = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
