@@ -81,16 +81,16 @@ describe(`VegaParser._setDefaultColors`, () => {
         mark: { color: '#54B399' },
         style: {
           'group-title': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
           'guide-label': {
             fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-title': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
           'group-subtitle': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
         },
         title: {
@@ -122,16 +122,16 @@ describe(`VegaParser._setDefaultColors`, () => {
         trail: { fill: '#54B399' },
         style: {
           'group-title': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
           'guide-label': {
             fill: euiThemeVars.euiColorDarkShade,
           },
           'guide-title': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
           'group-subtitle': {
-            fill: euiThemeVars.euiColorDarkShade,
+            fill: euiThemeVars.euiColorDarkestShade,
           },
         },
         title: {

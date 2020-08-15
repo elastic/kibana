@@ -664,10 +664,22 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     // provide right colors for light and dark themes
     this._setDefaultValue(euiThemeVars.euiColorDarkestShade, 'config', 'title', 'color');
     this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-label', 'fill');
-    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'guide-title', 'fill');
-    this._setDefaultValue(euiThemeVars.euiColorDarkShade, 'config', 'style', 'group-title', 'fill');
     this._setDefaultValue(
-      euiThemeVars.euiColorDarkShade,
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'guide-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
+      'config',
+      'style',
+      'group-title',
+      'fill'
+    );
+    this._setDefaultValue(
+      euiThemeVars.euiColorDarkestShade,
       'config',
       'style',
       'group-subtitle',
