@@ -8,7 +8,7 @@ describe('addAssigneesToPullRequest', () => {
     const assignees = ['sqren'];
 
     const scope = nock('https://api.github.com')
-      .post('/repos/sqren/backport-demo/issues/216/assignees', {
+      .post('/repos/backport-org/backport-demo/issues/216/assignees', {
         assignees: ['sqren'],
       })
       .reply(200, 'some response');
@@ -17,7 +17,7 @@ describe('addAssigneesToPullRequest', () => {
       {
         githubApiBaseUrlV3: 'https://api.github.com',
         repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        repoOwner: 'backport-org',
         accessToken: 'my-token',
         username: 'sqren',
         dryRun: false,

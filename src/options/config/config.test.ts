@@ -12,7 +12,7 @@ describe('getOptionsFromConfigFiles', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
       targetBranchChoices: ['6.0', '5.9'],
-      upstream: 'elastic/backport-demo',
+      upstream: 'backport-org/backport-demo',
       username: 'sqren',
     });
   });

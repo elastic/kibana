@@ -14,8 +14,8 @@ describe('fetchDefaultRepoBranchAndPerformStartupChecks', () => {
       const options = {
         accessToken: 'foo',
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
       } as BackportOptions;
 
       await expect(
@@ -31,8 +31,8 @@ describe('fetchDefaultRepoBranchAndPerformStartupChecks', () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
       } as BackportOptions;
 
       expect(

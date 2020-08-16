@@ -4,7 +4,7 @@ import { getDevAccessToken } from './private/getDevAccessToken';
 
 const execOptions = { stdio: 'pipe', encoding: 'utf-8' } as const;
 
-describe('CLI blackbox', () => {
+describe('inquirer cli', () => {
   let devAccessToken: string;
 
   beforeAll(async () => {
@@ -78,7 +78,7 @@ describe('CLI blackbox', () => {
       '--branch',
       'foo',
       '--upstream',
-      'sqren/backport-demo',
+      'backport-org/backport-e2e',
       '--username',
       'sqren',
       '--accessToken',
@@ -91,12 +91,12 @@ describe('CLI blackbox', () => {
 
     expect(output).toMatchInlineSnapshot(`
       "? Select commit (Use arrow keys)
-      ❯ 1. Add branch label mapping (#225)
-        2. Create \\"conflicting-file.txt\\" in master (f8bb8b70)
-        3. Update romeo-and-juliet.txt (91eee967)
-        4. Add 👻 (2e63475c)
-        5. Add witch (#85)
-        6. Add SF mention (#80) 6.3"
+      ❯ 1. Add sheep emoji (#9) 7.8
+        2. Change Ulysses to Gretha (conflict) (#8)
+        3. Add 🍏 emoji (#5) 7.x, 7.8
+        4. Add family emoji (#2) 7.x
+        5. Add \`backport\` dep (823178be)
+        6. Merge pull request #1 from backport-org/add-heart-emoji (#1)"
     `);
   });
 
@@ -105,7 +105,7 @@ describe('CLI blackbox', () => {
       '--branch',
       'foo',
       '--upstream',
-      'sqren/backport-demo',
+      'backport-org/backport-e2e',
       '--username',
       'sqren',
       '--accessToken',
@@ -120,12 +120,12 @@ describe('CLI blackbox', () => {
 
     expect(output).toMatchInlineSnapshot(`
       "? Select commit (Use arrow keys)
-      ❯ 1. Change to be forwardported (#181)
-        2. Create \\"conflicting-file.txt\\" in master (72f94e76)
-        3. Update romeo-and-juliet.txt (91eee967)
-        4. Add 👻 (2e63475c)
-        5. Add witch (#85)
-        6. Add SF mention (#80) 6.3"
+      ❯ 1. Add 🍏 emoji (#5) (#6)
+        2. Change Ulysses to Carol (2722c78c)
+        3. Add family emoji (#2) (#4)
+        4. Update .backportrc.json (0d602b25)
+        5. Branch off: 7.9.0 (7.x) (908c7686)
+        6. Bump to 8.0.0 (16cfd987)"
     `);
   });
 });

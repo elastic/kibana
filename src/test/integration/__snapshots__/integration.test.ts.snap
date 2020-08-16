@@ -23,7 +23,7 @@ Array [
   ",
     "variables": Object {
       "repoName": "backport-demo",
-      "repoOwner": "elastic",
+      "repoOwner": "backport-org",
     },
   },
 ]
@@ -134,7 +134,7 @@ Array [
       "historyPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
-      "repoOwner": "elastic",
+      "repoOwner": "backport-org",
       "sourceBranch": "master",
     },
   },
@@ -164,7 +164,7 @@ Array [
   ",
     "variables": Object {
       "repoName": "backport-demo",
-      "repoOwner": "elastic",
+      "repoOwner": "backport-org",
     },
   },
 ]
@@ -275,7 +275,7 @@ Array [
       "historyPath": null,
       "maxNumber": 10,
       "repoName": "backport-demo",
-      "repoOwner": "elastic",
+      "repoOwner": "backport-org",
       "sourceBranch": "master",
     },
   },

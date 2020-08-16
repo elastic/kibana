@@ -3,7 +3,7 @@ export type GithubV3Error = {
   name: string;
   status: number;
   documentation_url: string;
-  message: string;
+  message?: string;
   errors?: Array<{
     resource: string;
     code: string;
@@ -17,6 +17,12 @@ export function getGithubV3ErrorMessage(e: GithubV3Error) {
     return e.message;
   }
 
-  const errorMessages = e.errors.map((error) => error.message);
+  const errorMessages = e.errors.map((error) => {
+    if (error.message) {
+      return error.message;
+    }
+
+    return JSON.stringify(error);
+  });
   return `${errorMessages.join(', ')} (Github v3)`;
 }

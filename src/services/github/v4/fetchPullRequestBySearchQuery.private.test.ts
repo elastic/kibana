@@ -18,8 +18,8 @@ describe('fetchPullRequestBySearchQuery', () => {
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         maxNumber: 10,
         prFilter: 'label:non-existing',
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
         sourceBranch: 'master',
       } as BackportOptions;
 
@@ -29,34 +29,34 @@ describe('fetchPullRequestBySearchQuery', () => {
     });
   });
 
-  describe('when filter matches at least one PR', () => {
-    it('throws an error', async () => {
+  describe('when filter matches PRs', () => {
+    it('returns the merge commits for those PRs', async () => {
       const options = {
         accessToken: devAccessToken,
         all: false,
         author: 'sqren',
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         maxNumber: 10,
-        prFilter: 'label:6.3',
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        prFilter: 'label:v7.8.0',
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
         sourceBranch: 'master',
       } as BackportOptions;
 
       expect(await fetchPullRequestBySearchQuery(options)).toEqual([
         {
           existingTargetPullRequests: [],
-          formattedMessage: 'Add branch label mapping (#225)',
-          pullNumber: 225,
-          sha: 'f287d1ea35ae9ec6b45394c5c40b76c1f2cfa79d',
+          formattedMessage: 'Add sheep emoji (#9)',
+          pullNumber: 9,
+          sha: 'eebf165c82a4b718d95c11b3877e365b1949ff28',
           sourceBranch: 'master',
           targetBranchesFromLabels: [],
         },
         {
           existingTargetPullRequests: [],
-          formattedMessage: 'Deleted Bernado line (#223)',
-          pullNumber: 223,
-          sha: '176b2df25726dfd995dccc9b633d81fc6baf3e91',
+          formattedMessage: 'Add 🍏 emoji (#5)',
+          pullNumber: 5,
+          sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
           sourceBranch: 'master',
           targetBranchesFromLabels: [],
         },

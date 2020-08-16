@@ -12,7 +12,7 @@ export const HOMEDIR_PATH = resolve(
 );
 
 export const REMOTE_ORIGIN_REPO_PATH = resolve(
-  './src/test/integration/mock-environment/github.com/elastic/backport-demo/.git'
+  './src/test/integration/mock-environment/github.com/backport-org/backport-demo/.git'
 );
 
 export const REMOTE_FORK_REPO_PATH = resolve(

@@ -28,7 +28,7 @@ describe('getOptionsFromCliArgs', () => {
       '--branch',
       '6.1',
       '--upstream',
-      'sqren/backport-demo',
+      'backport-org/backport-demo',
       '--all',
       '--username',
       'sqren',
@@ -57,7 +57,7 @@ describe('getOptionsFromCliArgs', () => {
       targetBranchChoices: [],
       targetBranches: ['6.0', '6.1'],
       targetPRLabels: [],
-      upstream: 'sqren/backport-demo',
+      upstream: 'backport-org/backport-demo',
       username: 'sqren',
       verbose: false,
     });

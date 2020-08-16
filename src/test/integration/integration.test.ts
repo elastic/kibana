@@ -62,7 +62,7 @@ describe('integration', () => {
       expect(spies.commitsByAuthorCalls).toMatchSnapshot();
     });
 
-    it('should not create new branches in origin (elastic/backport-demo)', async () => {
+    it('should not create new branches in origin (backport-org/backport-demo)', async () => {
       const branches = await getBranches(REMOTE_ORIGIN_REPO_PATH);
       expect(branches).toEqual(['6.0', '* master']);
     });
@@ -137,7 +137,7 @@ describe('integration', () => {
       expect(spies.commitsByAuthorCalls).toMatchSnapshot();
     });
 
-    it('should not create new branches in origin (elastic/backport-demo)', async () => {
+    it('should not create new branches in origin (backport-org/backport-demo)', async () => {
       const branches = await getBranches(REMOTE_ORIGIN_REPO_PATH);
       expect(branches).toEqual(['6.0', '* master']);
     });
@@ -207,7 +207,7 @@ describe('integration', () => {
         {
           base: '6.0',
           body: 'Backports the following commits to 6.0:\n - Add witch (#85)',
-          head: 'elastic:backport/6.0/pr-85',
+          head: 'backport-org:backport/6.0/pr-85',
           title: '[6.0] Add witch (#85)',
         },
       ]);
@@ -219,7 +219,7 @@ describe('integration', () => {
       ]);
     });
 
-    it('should create new branches in origin (elastic/backport-demo)', async () => {
+    it('should create new branches in origin (backport-org/backport-demo)', async () => {
       const branches = await getBranches(REMOTE_ORIGIN_REPO_PATH);
       expect(branches).toEqual(['6.0', 'backport/6.0/pr-85', '* master']);
     });

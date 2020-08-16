@@ -12,8 +12,8 @@ describe('fetchExistingPullRequest', () => {
   describe('when PR does not exist', () => {
     it('returns undefined', async () => {
       const options = {
-        repoOwner: 'sqren',
-        repoName: 'backport-demo',
+        repoOwner: 'backport-org',
+        repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;
@@ -32,8 +32,8 @@ describe('fetchExistingPullRequest', () => {
   describe.skip('when PR exists', () => {
     it('returns the PR number and url', async () => {
       const options = {
-        repoOwner: 'sqren',
-        repoName: 'backport-demo',
+        repoOwner: 'backport-org',
+        repoName: 'backport-e2e',
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as BackportOptions;

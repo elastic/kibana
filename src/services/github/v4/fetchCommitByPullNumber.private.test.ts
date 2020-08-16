@@ -14,15 +14,15 @@ describe('fetchCommitByPullNumber', () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-        pullNumber: 85,
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        pullNumber: 5,
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
       } as BackportOptions & { pullNumber: number };
 
       expect(await fetchCommitByPullNumber(options)).toEqual({
-        formattedMessage: 'Add witch (#85)',
-        pullNumber: 85,
-        sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+        formattedMessage: 'Add 🍏 emoji (#5)',
+        pullNumber: 5,
+        sha: 'ee8c492334cef1ca077a56addb79a26f79821d2f',
         sourceBranch: 'master',
         targetBranchesFromLabels: [],
       });
@@ -34,13 +34,13 @@ describe('fetchCommitByPullNumber', () => {
       const options = {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
-        pullNumber: 123,
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        pullNumber: 11,
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
       } as BackportOptions & { pullNumber: number };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
-        `The PR #123 is not merged`
+        `The PR #11 is not merged`
       );
     });
   });
@@ -51,8 +51,8 @@ describe('fetchCommitByPullNumber', () => {
         accessToken: devAccessToken,
         githubApiBaseUrlV4: 'https://api.github.com/graphql',
         pullNumber: 9999999999999,
-        repoName: 'backport-demo',
-        repoOwner: 'sqren',
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
       } as BackportOptions & { pullNumber: number };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
