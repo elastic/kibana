@@ -58,6 +58,7 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
+  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -139,4 +140,10 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 export interface ActionTaskExecutorParams {
   spaceId: string;
   actionTaskParamsId: string;
+}
+
+export interface ProxySettings {
+  proxyUrl: string;
+  proxyHeaders?: Record<string, string>;
+  rejectUnauthorizedCertificates: boolean;
 }

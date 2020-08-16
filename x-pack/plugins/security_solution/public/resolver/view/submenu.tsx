@@ -137,6 +137,7 @@ const NodeSubMenuComponents = React.memo(
     optionsWithActions,
     className,
     projectionMatrix,
+    nodeID,
   }: {
     menuTitle: string;
     className?: string;
@@ -148,6 +149,7 @@ const NodeSubMenuComponents = React.memo(
      * Receive the projection matrix, so we can see when the camera position changed, so we can force the submenu to reposition itself.
      */
     projectionMatrix: Matrix3;
+    nodeID: string;
   } & {
     optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
   }) => {
@@ -236,6 +238,7 @@ const NodeSubMenuComponents = React.memo(
         iconSide="right"
         tabIndex={-1}
         data-test-subj="resolver:submenu:button"
+        data-test-resolver-node-id={nodeID}
       >
         {count ? <EuiI18nNumber value={count} /> : ''} {menuTitle}
       </EuiButton>

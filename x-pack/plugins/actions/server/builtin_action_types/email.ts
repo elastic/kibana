@@ -184,6 +184,7 @@ async function executor(
       subject: params.subject,
       message: params.message,
     },
+    proxySettings: execOptions.proxySettings,
   };
 
   let result;
