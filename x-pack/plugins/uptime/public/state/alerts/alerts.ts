@@ -29,7 +29,7 @@ import { AlertsResult, MonitorIdParam } from '../actions/types';
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
-export const createAlertAction = createAsyncAction<NewAlertParams, Alert>('CREATE ALERT');
+export const createAlertAction = createAsyncAction<NewAlertParams, Alert | null>('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult>('GET ALERTS');
 export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Alert>(
@@ -72,8 +72,9 @@ export function* fetchAlertsEffect() {
 
   yield takeLatest(deleteAlertAction.get, function* (action: Action<{ alertId: string }>) {
     try {
-      const response = yield call(disableAnomalyAlert, action.payload);
-      yield put(deleteAlertAction.success(response));
+      yield call(disableAnomalyAlert, action.payload);
+      yield put(createAlertAction.success(null));
+      yield put(deleteAlertAction.success(action.payload.alertId));
       kibanaService.core.notifications.toasts.addSuccess('Alert successfully deleted!');
       const monitorId = yield select(monitorIdSelector);
       yield put(getAnomalyAlertAction.get({ monitorId }));
@@ -117,4 +118,4 @@ export const connectorsSelector = ({ alerts }: AppState) => alerts.connectors;
 export const newAlertSelector = ({ alerts }: AppState) => alerts.newAlert;
 export const anomalyAlertSelector = ({ alerts }: AppState) => alerts.anomalyAlert;
 export const alertsSelector = ({ alerts }: AppState) => alerts.alerts;
-export const isAlertDeleting = ({ alerts }: AppState) => alerts.alertDeletion.loading;
+export const isAlertDeletedSelector = ({ alerts }: AppState) => alerts.alertDeletion;

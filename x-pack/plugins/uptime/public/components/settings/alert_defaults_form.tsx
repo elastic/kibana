@@ -64,6 +64,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   const options = (data ?? []).map((connectorAction) => ({
     value: connectorAction.id,
     label: connectorAction.name,
+    'data-test-subj': connectorAction.name,
   }));
 
   const renderOption = (option: ConnectorOption) => {

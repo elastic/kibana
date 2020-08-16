@@ -6,25 +6,27 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { useRouteMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../../../state/selectors';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   alertsSelector,
   connectorsSelector,
   createAlertAction,
   deleteAlertAction,
-  isAlertDeleting,
+  isAlertDeletedSelector,
   newAlertSelector,
 } from '../../../state/alerts/alerts';
 import { BellIcon } from './bell_icon';
+import { ReactRouterEuiLink } from '../../common/react_router_helpers';
+import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 
 interface Props {
   monitorId: string;
@@ -33,26 +35,31 @@ interface Props {
 
 export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
+
   const dss = useSelector(selectDynamicSettings);
+
+  const isMonitorPage = useRouteMatch(MONITOR_ROUTE);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const kibana = useKibana();
   const dispatch = useDispatch();
-
-  const path = kibana.services?.application?.getUrlForApp('uptime', { path: 'settings' });
 
   const onButtonClick = () => setIsPopoverOpen((val) => !val);
   const closePopover = () => setIsPopoverOpen(false);
 
   const { data: actionConnectors } = useSelector(connectorsSelector);
 
-  const { data: alerts, loading } = useSelector(alertsSelector);
-  const { loading: isCreating } = useSelector(newAlertSelector);
+  const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
 
-  const isDeleting = useSelector(isAlertDeleting);
+  const { data: deletedAlertId } = useSelector(isAlertDeletedSelector);
 
-  const hasAlert = (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
+  const { data: newAlert } = useSelector(newAlertSelector);
+
+  const currentAlert = newAlert?.params.search.includes(monitorId);
+
+  const hasAlert = currentAlert
+    ? newAlert
+    : (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
 
   const defaultActions = (actionConnectors ?? []).filter((act) =>
     dss.settings?.defaultConnectors.includes(act.id)
@@ -82,21 +89,53 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
 
   useEffect(() => {
     setIsLoading(false);
-  }, [hasAlert]);
+  }, [hasAlert, deletedAlertId]);
 
   const defaultConnectors = dss?.settings?.defaultConnectors ?? [];
 
-  return defaultConnectors.length > 0 ? (
+  const showSpinner = isLoading || (alertsLoading && !alerts);
+
+  const onAlertClick = () => {
+    if (hasAlert) {
+      disableAlert();
+    } else {
+      if (defaultConnectors.length > 0) {
+        enableAlert();
+      } else {
+        onButtonClick();
+      }
+    }
+  };
+
+  const MonitorPageAlertBtn = (
+    <EuiButtonEmpty
+      onClick={onAlertClick}
+      iconType={hasAlert ? BellIcon : 'bell'}
+      iconSide={'right'}
+      isLoading={showSpinner}
+    >
+      {hasAlert ? 'Disable down alert' : 'Enable down alert'}
+    </EuiButtonEmpty>
+  );
+
+  return defaultConnectors.length > 0 || hasAlert ? (
     <div className="eui-displayInlineBlock" style={{ marginRight: 15 }}>
-      {((isCreating || isDeleting) && isLoading) || loading ? (
+      {isMonitorPage ? (
+        MonitorPageAlertBtn
+      ) : showSpinner ? (
         <EuiLoadingSpinner />
       ) : (
         <EuiToolTip content={hasAlert ? 'Disable down alert' : 'Enable down alert'}>
           <EuiButtonIcon
-            aria-label={'Enable down alert'}
-            onClick={hasAlert ? disableAlert : enableAlert}
+            aria-label={hasAlert ? 'Disable down alert' : 'Enable down alert'}
+            onClick={onAlertClick}
             iconType={hasAlert ? BellIcon : 'bell'}
             size="m"
+            data-test-subj={
+              hasAlert
+                ? 'uptimeDisableSimpleDownAlert' + monitorId
+                : 'uptimeEnableSimpleDownAlert' + monitorId
+            }
           />
         </EuiToolTip>
       )}
@@ -104,19 +143,26 @@ export const EnableMonitorAlert = ({ monitorId, monitorName }: Props) => {
   ) : (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          aria-label={'Enable down alert'}
-          style={{ marginRight: 15 }}
-          iconType={'bell'}
-          onClick={onButtonClick}
-        />
+        isMonitorPage ? (
+          MonitorPageAlertBtn
+        ) : (
+          <EuiButtonIcon
+            aria-label={'Enable down alert'}
+            style={{ marginRight: 15 }}
+            iconType={'bell'}
+            onClick={onButtonClick}
+            data-test-subj={'uptimeDisplayDefineConnector'}
+          />
+        )
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <EuiText style={{ width: '350px' }}>
+      <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>
         To start enabling alerts, please define a default alert action connector in{' '}
-        <EuiLink href={path}>Settings</EuiLink>.
+        <ReactRouterEuiLink to={SETTINGS_ROUTE} data-test-subj={'uptimeSettingsLink'}>
+          Settings
+        </ReactRouterEuiLink>
       </EuiText>
     </EuiPopover>
   );

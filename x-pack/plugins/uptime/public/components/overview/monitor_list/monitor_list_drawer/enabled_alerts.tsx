@@ -27,11 +27,11 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
 
   const deleteAlert = (alertId: string) => dispatch(deleteAlertAction.get({ alertId }));
 
-  (monitorAlerts ?? []).forEach((alert) => {
+  (monitorAlerts ?? []).forEach((alert, ind) => {
     listItems.push({
       label: alert.name,
       href: basePath + '/app/management/insightsAndAlerting/triggersActions/alert/' + alert.id,
-      iconType: 'dot',
+      iconType: () => <span style={{ marginRight: 5, whiteSpace: 'nowrap' }}>{ind + 1}.</span>,
       size: 's',
       extraAction: {
         color: 'subdued',
@@ -41,6 +41,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
         'aria-label': 'Delete the alert',
         alwaysShow: true,
       },
+      'data-test-subj': 'uptimeMonitorListDrawerAlert' + ind,
     });
   });
 
