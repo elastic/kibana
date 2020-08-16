@@ -132,7 +132,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       endpointsExist: action.payload,
     };
-  } else if (action.type === 'serverToggledEndpointListAutoRefresh') {
+  } else if (action.type === 'appToggledEndpointListAutoRefresh') {
     return {
       ...state,
       isAutoRefreshEnabled: action.payload,

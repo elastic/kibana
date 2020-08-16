@@ -135,7 +135,7 @@ describe('endpoint list middleware', () => {
     });
 
     // Poll should toggle off
-    const action = await waitForAction('serverToggledEndpointListAutoRefresh');
+    const action = await waitForAction('appToggledEndpointListAutoRefresh');
     expect(action.payload).toEqual(false);
 
     // This action should timeout since polling is off
