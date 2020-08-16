@@ -43,7 +43,8 @@
 
 .dscSidebarItem {
   &:hover,
-  &:focus-within {
+  &:focus-within,
+  &[class*='-isActive'] {
     .dscSidebarItem__action {
       opacity: 1;
     }
