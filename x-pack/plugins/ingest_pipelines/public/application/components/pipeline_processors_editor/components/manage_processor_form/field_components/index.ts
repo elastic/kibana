@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { OnXJsonEditorUpdateHandler, XJsonEditor } from './xjson_editor';
+export { XJsonEditor } from './xjson_editor';
+export { TextEditor } from './text_editor';

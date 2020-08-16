@@ -19,15 +19,18 @@
 
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  APPLY_FILTER_TRIGGER,
+  DEFAULT_TRIGGER,
+} from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
 import type { ApplyGlobalFilterActionContext } from '../../data/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
-
-const DEFAULT_TRIGGER = '';
 
 export type TriggerId = keyof TriggerContextMapping;
 
