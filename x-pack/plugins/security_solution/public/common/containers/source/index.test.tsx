@@ -7,6 +7,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useWithSource, indicesExistOrDataTemporarilyUnavailable } from '.';
+import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { mockBrowserFields, mockIndexFields, mocksSource } from './mock';
 
 jest.mock('../../lib/kibana');
@@ -77,6 +78,17 @@ describe('Index Fields & Browser Fields', () => {
       },
       error: undefined,
     });
+  });
+
+  test('Make sure we are not querying for NO_ALERT_INDEX and it is not includes in the index pattern', async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useWithSource('default', [NO_ALERT_INDEX])
+    );
+
+    await waitForNextUpdate();
+    return expect(result.current.indexPattern.title).toEqual(
+      'apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*'
+    );
   });
 
   describe('indicesExistOrDataTemporarilyUnavailable', () => {

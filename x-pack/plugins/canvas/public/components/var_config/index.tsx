@@ -7,27 +7,19 @@
 import React, { FC } from 'react';
 import copy from 'copy-to-clipboard';
 import { VarConfig as ChildComponent } from './var_config';
-import {
-  withKibana,
-  KibanaReactContextValue,
-  KibanaServices,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { CanvasServices } from '../../services';
-
+import { useNotifyService } from '../../services';
 import { ComponentStrings } from '../../../i18n';
-
 import { CanvasVariable } from '../../../types';
 
 const { VarConfig: strings } = ComponentStrings;
 
 interface Props {
-  kibana: KibanaReactContextValue<{ canvas: CanvasServices } & KibanaServices>;
-
   variables: CanvasVariable[];
   setVariables: (variables: CanvasVariable[]) => void;
 }
 
-const WrappedComponent: FC<Props> = ({ kibana, variables, setVariables }) => {
+export const VarConfig: FC<Props> = ({ variables, setVariables }) => {
+  const { success } = useNotifyService();
   const onDeleteVar = (v: CanvasVariable) => {
     const index = variables.findIndex((targetVar: CanvasVariable) => {
       return targetVar.name === v.name;
@@ -36,15 +28,14 @@ const WrappedComponent: FC<Props> = ({ kibana, variables, setVariables }) => {
       const newVars = [...variables];
       newVars.splice(index, 1);
       setVariables(newVars);
-
-      kibana.services.canvas.notify.success(strings.getDeleteNotificationDescription());
+      success(strings.getDeleteNotificationDescription());
     }
   };
 
   const onCopyVar = (v: CanvasVariable) => {
     const snippetStr = `{var "${v.name}"}`;
     copy(snippetStr, { debug: true });
-    kibana.services.canvas.notify.success(strings.getCopyNotificationDescription());
+    success(strings.getCopyNotificationDescription());
   };
 
   const onAddVar = (v: CanvasVariable) => {
@@ -62,5 +53,3 @@ const WrappedComponent: FC<Props> = ({ kibana, variables, setVariables }) => {
 
   return <ChildComponent {...{ variables, onCopyVar, onDeleteVar, onAddVar, onEditVar }} />;
 };
-
-export const VarConfig = withKibana(WrappedComponent);

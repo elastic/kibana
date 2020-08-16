@@ -152,7 +152,6 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
       title: i18n.translate('xpack.ingestManager.agentEnrollment.stepCheckForDataTitle', {
         defaultMessage: 'Check for data',
       }),
-      status: 'incomplete',
       children: (
         <>
           <EuiText>

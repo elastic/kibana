@@ -25,6 +25,7 @@ import { TimeCache } from './data_model/time_cache';
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
 import { getData, getInjectedMetadata } from './services';
+import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
   query: Query;
@@ -33,9 +34,14 @@ interface VegaRequestHandlerParams {
   visParams: VisParams;
 }
 
+interface VegaRequestHandlerContext {
+  abortSignal?: AbortSignal;
+  inspectorAdapters?: VegaInspectorAdapters;
+}
+
 export function createVegaRequestHandler(
   { plugins: { data }, core: { uiSettings }, serviceSettings }: VegaVisualizationDependencies,
-  abortSignal?: AbortSignal
+  context: VegaRequestHandlerContext = {}
 ) {
   let searchAPI: SearchAPI;
   const { timefilter } = data.query.timefilter;
@@ -54,7 +60,8 @@ export function createVegaRequestHandler(
           search: getData().search,
           injectedMetadata: getInjectedMetadata(),
         },
-        abortSignal
+        context.abortSignal,
+        context.inspectorAdapters
       );
     }
 

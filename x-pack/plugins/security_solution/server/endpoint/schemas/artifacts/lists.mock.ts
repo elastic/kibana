@@ -15,13 +15,13 @@ export const getTranslatedExceptionListMock = (): WrappedTranslatedExceptionList
           {
             entries: [
               {
-                field: 'some.not.nested.field',
+                field: 'some.nested.field',
                 operator: 'included',
                 type: 'exact_cased',
                 value: 'some value',
               },
             ],
-            field: 'some.field',
+            field: 'some.parentField',
             type: 'nested',
           },
           {

@@ -16,6 +16,8 @@ import {
 import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { CloudSetup } from '../../cloud/server';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -36,12 +38,14 @@ export interface LegacyAPI {
 }
 
 export interface PluginsSetup {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
   alerts: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
+  cloud: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -56,6 +60,7 @@ export interface MonitoringCoreConfig {
 export interface RouteDependencies {
   router: IRouter;
   licenseService: MonitoringLicenseService;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface MonitoringCore {

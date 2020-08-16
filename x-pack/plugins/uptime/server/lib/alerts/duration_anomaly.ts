@@ -8,16 +8,16 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ILegacyScopedClusterClient } from 'kibana/server';
 import { updateState } from './common';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
-import { getLatestMonitor } from '../requests';
 import { savedObjectsAdapter } from '../saved_objects';
 import { UptimeCorePlugins } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
+import { getLatestMonitor } from '../requests/get_latest_monitor';
 
 const { DURATION_ANOMALY } = ACTION_GROUP_DEFINITIONS;
 

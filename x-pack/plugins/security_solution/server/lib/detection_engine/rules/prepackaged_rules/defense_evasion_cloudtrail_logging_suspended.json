@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS CloudTrail Log Suspended",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:StopLogging and event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.outcome:success",
   "references": [
     "https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_StopLogging.html",
@@ -24,7 +25,10 @@
   "severity": "medium",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Logging",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

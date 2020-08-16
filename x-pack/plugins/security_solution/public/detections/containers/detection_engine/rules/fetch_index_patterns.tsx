@@ -12,7 +12,7 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import {
   BrowserFields,
   getBrowserFields,
-  getdocValueFields,
+  getDocValueFields,
   getIndexFields,
   sourceQuery,
   DocValueFields,
@@ -38,7 +38,14 @@ const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
 const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
 
-export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => {
+// Fun fact: When using this hook multiple times within a component (e.g. add_exception_modal & edit_exception_modal),
+// the apolloClient will perform queryDeduplication and prevent the first query from executing. A deep compare is not
+// performed on `indices`, so another field must be passed to circumvent this.
+// For details, see https://github.com/apollographql/react-apollo/issues/2202
+export const useFetchIndexPatterns = (
+  defaultIndices: string[] = [],
+  queryDeduplication?: string
+): Return => {
   const apolloClient = useApolloClient();
   const [indices, setIndices] = useState<string[]>(defaultIndices);
 
@@ -74,6 +81,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
             variables: {
               sourceId: 'default',
               defaultIndex: indices,
+              ...(queryDeduplication != null ? { queryDeduplication } : {}),
             },
             context: {
               fetchOptions: {
@@ -89,7 +97,7 @@ export const useFetchIndexPatterns = (defaultIndices: string[] = []): Return => 
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),
-                  docValueFields: getdocValueFields(
+                  docValueFields: getDocValueFields(
                     indices.join(),
                     get('data.source.status.indexFields', result)
                   ),

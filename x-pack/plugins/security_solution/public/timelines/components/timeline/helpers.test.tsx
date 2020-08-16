@@ -9,7 +9,7 @@ import { mockIndexPattern } from '../../../common/mock';
 
 import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { buildGlobalQuery, combineQueries } from './helpers';
+import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { EsQueryConfig, Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
@@ -499,5 +499,45 @@ describe('Combined Queries', () => {
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
+  });
+
+  describe('resolverIsShowing', () => {
+    test('it returns true when graphEventId is NOT an empty string', () => {
+      expect(resolverIsShowing('a valid id')).toBe(true);
+    });
+
+    test('it returns false when graphEventId is undefined', () => {
+      expect(resolverIsShowing(undefined)).toBe(false);
+    });
+
+    test('it returns false when graphEventId is an empty string', () => {
+      expect(resolverIsShowing('')).toBe(false);
+    });
+  });
+
+  describe('showGlobalFilters', () => {
+    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
+    });
+
+    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
+    });
+
+    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
+      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+    });
   });
 });

@@ -3,8 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { notificationServiceMock } from 'src/core/public/mocks';
+
 import { setup, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
+import { apiService } from '../../../services';
 
 const testProcessors: Pick<Pipeline, 'processors'> = {
   processors: [
@@ -46,6 +49,8 @@ describe('Pipeline Editor', () => {
       links: {
         esDocsBasePath: 'test',
       },
+      toasts: notificationServiceMock.createSetupContract().toasts,
+      api: apiService,
     });
   });
 
@@ -177,6 +182,14 @@ describe('Pipeline Editor', () => {
       expect(data2.on_failure.length).toBe(1);
       expect(data2.processors).toEqual(testProcessors.processors);
       expect(data2.on_failure).toEqual([{ test: { if: '1 == 5' } }]);
+    });
+
+    it('prevents moving a processor while in edit mode', () => {
+      const { find, exists } = testBed;
+      find('processors>0.manageItemButton').simulate('click');
+      expect(exists('processorSettingsForm')).toBe(true);
+      expect(find('processors>0.moveItemButton').props().disabled).toBe(true);
+      expect(find('processors>1.moveItemButton').props().disabled).toBe(true);
     });
   });
 });

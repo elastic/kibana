@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import sortBy from 'lodash/sortBy';
+import slice from 'lodash/slice';
+import get from 'lodash/get';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
@@ -31,7 +33,7 @@ interface Influencer {
 }
 
 export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
-  const { callAsCurrentUser } = mlClusterClient;
+  const { callAsInternalUser } = mlClusterClient;
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -134,7 +136,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       });
     }
 
-    const resp: SearchResponse<any> = await callAsCurrentUser('search', {
+    const resp: SearchResponse<any> = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: maxRecords,
@@ -175,7 +177,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       });
 
       // Sort anomalies in ascending time order.
-      records = _.sortBy(records, 'timestamp');
+      records = sortBy(records, 'timestamp');
       tableData.interval = aggregationInterval;
       if (aggregationInterval === 'auto') {
         // Determine the actual interval to use if aggregating.
@@ -197,7 +199,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
 
         const categoryIdsByJobId: { [key: string]: any } = {};
         categoryAnomalies.forEach((anomaly) => {
-          if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
+          if (categoryIdsByJobId[anomaly.jobId] === undefined) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
           if (categoryIdsByJobId[anomaly.jobId].indexOf(anomaly.entityValue) === -1) {
@@ -288,8 +290,8 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       },
     };
 
-    const resp = await callAsCurrentUser('search', query);
-    const maxScore = _.get(resp, ['aggregations', 'max_score', 'value'], null);
+    const resp = await callAsInternalUser('search', query);
+    const maxScore = get(resp, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
   }
@@ -326,7 +328,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       size: 0,
       body: {
@@ -353,7 +355,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
       },
     });
 
-    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = _.get(
+    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
       resp,
       ['aggregations', 'byJobId', 'buckets'],
       []
@@ -370,7 +372,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
@@ -387,7 +389,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
     if (resp.hits.total !== 0) {
       resp.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
-          examplesByCategoryId[hit._source.category_id] = _.slice(
+          examplesByCategoryId[hit._source.category_id] = slice(
             hit._source.examples,
             0,
             Math.min(hit._source.examples.length, maxExamples)
@@ -405,7 +407,7 @@ export function resultsServiceProvider(mlClusterClient: ILegacyScopedClusterClie
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const resp = await callAsCurrentUser('search', {
+    const resp = await callAsInternalUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: 1,

@@ -61,10 +61,10 @@ describe('actions_connectors_list component empty', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        siem: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: scopedHistoryMock.create(),
@@ -168,10 +168,10 @@ describe('actions_connectors_list component with items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: scopedHistoryMock.create(),
@@ -256,10 +256,10 @@ describe('actions_connectors_list component empty with show only capability', ()
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
       history: scopedHistoryMock.create(),
@@ -287,7 +287,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 
   it('renders no permissions to create connector', async () => {
     await setup();
-    expect(wrapper.find('[defaultMessage="No permissions to create connector"]')).toHaveLength(1);
+    expect(wrapper.find('[defaultMessage="No permissions to create connectors"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="createActionButton"]')).toHaveLength(0);
   });
 });
@@ -345,10 +345,10 @@ describe('actions_connectors_list with show only capability', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': false,
-          'actions:delete': false,
+        actions: {
+          show: true,
+          save: false,
+          delete: false,
         },
       },
       history: scopedHistoryMock.create(),
@@ -446,10 +446,10 @@ describe('actions_connectors_list component with disabled items', () => {
       navigateToApp,
       capabilities: {
         ...capabilities,
-        securitySolution: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
       history: scopedHistoryMock.create(),

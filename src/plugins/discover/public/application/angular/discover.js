@@ -70,9 +70,7 @@ import {
   indexPatterns as indexPatternsUtils,
   connectToQueryState,
   syncQueryStateWithUrl,
-  getDefaultQuery,
   search,
-  UI_SETTINGS,
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
@@ -191,16 +189,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController(
-  $element,
-  $route,
-  $scope,
-  $timeout,
-  $window,
-  Promise,
-  localStorage,
-  uiCapabilities
-) {
+function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const $fetchObservable = new Subject();
@@ -231,6 +220,7 @@ function discoverController(
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
+    toasts: core.notifications.toasts,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -246,11 +236,15 @@ function discoverController(
 
   // sync initial app filters from state to filterManager
   filterManager.setAppFilters(_.cloneDeep(appStateContainer.getState().filters));
+  data.query.queryString.setQuery(appStateContainer.getState().query);
 
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
     data.query,
     appStateContainer,
-    { filters: esFilters.FilterStateStore.APP_STATE }
+    {
+      filters: esFilters.FilterStateStore.APP_STATE,
+      query: true,
+    }
   );
 
   const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
@@ -262,7 +256,7 @@ function discoverController(
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort', 'query'].filter(
+        const changes = ['interval', 'sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
@@ -593,12 +587,7 @@ function discoverController(
   };
 
   function getStateDefaults() {
-    const query =
-      $scope.searchSource.getField('query') ||
-      getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') ||
-          config.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
-      );
+    const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
     return {
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
@@ -635,12 +624,7 @@ function discoverController(
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
-      const searchBarChanges = merge(
-        timefilter.getAutoRefreshFetch$(),
-        timefilter.getFetch$(),
-        filterManager.getFetches$(),
-        $fetchObservable
-      ).pipe(debounceTime(100));
+      const searchBarChanges = merge(data.query.state$, $fetchObservable).pipe(debounceTime(100));
 
       subscriptions.add(
         subscribeWithScope(
@@ -824,9 +808,8 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function ({ query }, isUpdate = true) {
-    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
-      setAppState({ query });
+  $scope.handleRefresh = function (_payload, isUpdate) {
+    if (isUpdate === false) {
       $fetchObservable.next();
     }
   };
@@ -874,7 +857,7 @@ function discoverController(
   }
 
   function onResults(resp) {
-    inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
       const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
@@ -976,7 +959,7 @@ function discoverController(
           config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
-      .setField('query', $scope.state.query || null)
+      .setField('query', data.query.queryString.getQuery() || null)
       .setField('filter', filterManager.getFilters());
     return Promise.resolve();
   };

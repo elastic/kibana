@@ -10,7 +10,9 @@
 
 import React from 'react';
 import './_explorer.scss';
-import _, { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import d3 from 'd3';
 import moment from 'moment';
 import DragSelect from 'dragselect';
@@ -176,9 +178,9 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
             }
           );
 
-          selectedData.laneLabels = _.uniq(selectedData.laneLabels);
-          selectedData.times = _.uniq(selectedData.times);
-          if (_.isEqual(selectedData, previousSelectedData) === false) {
+          selectedData.laneLabels = uniq(selectedData.laneLabels);
+          selectedData.times = uniq(selectedData.times);
+          if (isEqual(selectedData, previousSelectedData) === false) {
             // If no cells containing anomalies have been selected,
             // immediately clear the selection, otherwise trigger
             // a reload with the updated selected cells.
@@ -204,6 +206,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     });
 
     this.renderSwimlane();
+
+    this.dragSelect.stop();
   }
 
   componentDidUpdate() {
@@ -211,11 +215,11 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   componentWillUnmount() {
-    if (this.dragSelectSubscriber !== null) {
-      this.dragSelectSubscriber.unsubscribe();
-    }
-    const element = d3.select(this.rootNode.current!);
-    element.html('');
+    this.dragSelectSubscriber!.unsubscribe();
+    // Remove selector element from DOM
+    this.dragSelect.selector.remove();
+    // removes all mousedown event handlers
+    this.dragSelect.stop(true);
   }
 
   selectCell(cellsToSelect: any[], { laneLabels, bucketScore, times }: SelectedData) {
@@ -244,7 +248,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       selectedTimes: d3.extent(times),
     };
 
-    if (_.isEqual(oldSelection, newSelection)) {
+    if (isEqual(oldSelection, newSelection)) {
       triggerNewSelection = false;
     }
 
@@ -275,8 +279,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     // Check for selection and reselect the corresponding swimlane cell
     // if the time range and lane label are still in view.
     const selectionState = selection;
-    const selectedType = _.get(selectionState, 'type', undefined);
-    const selectionViewByFieldName = _.get(selectionState, 'viewByFieldName', '');
+    const selectedType = get(selectionState, 'type', undefined);
+    const selectionViewByFieldName = get(selectionState, 'viewByFieldName', '');
 
     // If a selection was done in the other swimlane, add the "masked" classes
     // to de-emphasize the swimlane cells.
@@ -286,8 +290,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }
 
     const cellsToSelect: Node[] = [];
-    const selectedLanes = _.get(selectionState, 'lanes', []);
-    const selectedTimes = _.get(selectionState, 'times', []);
+    const selectedLanes = get(selectionState, 'lanes', []);
+    const selectedTimes = get(selectionState, 'times', []);
     const selectedTimeExtent = d3.extent(selectedTimes);
 
     if (

@@ -25,6 +25,7 @@ import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
+  ALERTS,
 } from '../common/constants';
 import { MonitoringConfig, createConfig, configSchema } from './config';
 // @ts-ignore
@@ -125,10 +126,17 @@ export class Plugin {
       const coreStart = (await core.getStartServices())[0];
       return coreStart.uiSettings;
     };
-
+    const isCloud = Boolean(plugins.cloud?.isCloudEnabled);
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
-      alert.initializeAlertType(getUiSettingsService, cluster, this.getLogger, config, kibanaUrl);
+      alert.initializeAlertType(
+        getUiSettingsService,
+        cluster,
+        this.getLogger,
+        config,
+        kibanaUrl,
+        isCloud
+      );
       plugins.alerts.registerType(alert.getAlertType());
     }
 
@@ -203,6 +211,7 @@ export class Plugin {
       requireUIRoutes(this.monitoringCore, {
         router,
         licenseService: this.licenseService,
+        encryptedSavedObjects: plugins.encryptedSavedObjects,
       });
       initInfraSource(config, plugins.infra);
     }
@@ -241,6 +250,7 @@ export class Plugin {
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
+      alerting: ALERTS,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -254,6 +264,9 @@ export class Plugin {
               savedObject: {
                 all: [],
                 read: [],
+              },
+              alerting: {
+                all: ALERTS,
               },
               ui: [],
             },
@@ -312,8 +325,22 @@ export class Plugin {
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
             getUiSettingsService: () => context.core.uiSettings.client,
             getActionTypeRegistry: () => context.actions?.listTypes(),
-            getAlertsClient: () => plugins.alerts.getAlertsClientWithRequest(req),
-            getActionsClient: () => plugins.actions.getActionsClientWithRequest(req),
+            getAlertsClient: () => {
+              try {
+                return plugins.alerts.getAlertsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
+            getActionsClient: () => {
+              try {
+                return plugins.actions.getActionsClientWithRequest(req);
+              } catch (err) {
+                // If security is disabled, this call will throw an error unless a certain config is set for dist builds
+                return null;
+              }
+            },
             server: {
               config: legacyConfigWrapper,
               newPlatform: {

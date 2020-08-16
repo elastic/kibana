@@ -22,7 +22,6 @@ const minWidthPixels = 550; // do not allow the flyout to shrink below this widt
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 interface FlyoutPaneComponentProps {
   children: React.ReactNode;
-  flyoutHeight: number;
   onClose: () => void;
   timelineId: string;
   width: number;
@@ -43,6 +42,8 @@ const StyledResizable = styled(Resizable)`
 `;
 
 const RESIZABLE_ENABLE = { left: true };
+
+const RESIZABLE_DISABLED = { left: false };
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
   children,
@@ -98,10 +99,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
         size="l"
       >
         <StyledResizable
-          enable={RESIZABLE_ENABLE}
+          enable={timelineFullScreen ? RESIZABLE_DISABLED : RESIZABLE_ENABLE}
           defaultSize={resizableDefaultSize}
-          minWidth={timelineFullScreen ? '100vw' : minWidthPixels}
-          maxWidth={timelineFullScreen ? '100vw' : `${maxWidthPercent}vw`}
+          minWidth={timelineFullScreen ? 'calc(100vw - 8px)' : minWidthPixels}
+          maxWidth={timelineFullScreen ? 'calc(100vw - 8px)' : `${maxWidthPercent}vw`}
           handleComponent={resizableHandleComponent}
           onResizeStop={onResizeStop}
         >

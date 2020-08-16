@@ -20,6 +20,7 @@ import {
   roundCoordinates,
   extractFeaturesFromFilters,
   makeESBbox,
+  scaleBounds,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
@@ -685,5 +686,22 @@ describe('makeESBbox', () => {
       maxLat: 100,
     });
     expect(bbox).toEqual({ bottom_right: [-170, -89], top_left: [-175, 89] });
+  });
+});
+
+describe('scaleBounds', () => {
+  it('Should scale bounds', () => {
+    const bounds = {
+      maxLat: 10,
+      maxLon: 100,
+      minLat: 5,
+      minLon: 95,
+    };
+    expect(scaleBounds(bounds, 0.5)).toEqual({
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    });
   });
 });

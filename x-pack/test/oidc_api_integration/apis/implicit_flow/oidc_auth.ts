@@ -11,7 +11,6 @@ import { format as formatURL } from 'url';
 import { createTokens, getStateAndNonce } from '../../fixtures/oidc_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');

@@ -53,6 +53,9 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
+jest.mock('../../components/alerts_info', () => ({
+  useAlertInfo: jest.fn().mockReturnValue([]),
+}));
 
 const state: State = {
   ...mockGlobalState,
@@ -82,6 +85,7 @@ describe('DetectionEnginePageComponent', () => {
       <TestProviders store={store}>
         <Router history={mockHistory}>
           <DetectionEnginePageComponent
+            graphEventId={undefined}
             query={{ query: 'query', language: 'language' }}
             filters={[]}
             setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}

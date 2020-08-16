@@ -85,7 +85,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
 
     const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
     const timelineType = TimelineType.default;
-    const { templateTimelineType, timelineStatus } = useTimelineStatus({ timelineType });
+    const { timelineStatus } = useTimelineStatus({ timelineType });
     useEffect(() => {
       fetchAllTimeline({
         pageInfo: {
@@ -100,9 +100,8 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         onlyUserFavorite: filterBy === 'favorites',
         status: timelineStatus,
         timelineType,
-        templateTimelineType,
       });
-    }, [fetchAllTimeline, filterBy, timelineStatus, timelineType, templateTimelineType]);
+    }, [fetchAllTimeline, filterBy, timelineStatus, timelineType]);
 
     return (
       <>

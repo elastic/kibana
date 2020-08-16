@@ -13,9 +13,11 @@ import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../constants';
 
 function agentCheckinStateFactory() {
   const agentConnected = agentCheckinStateConnectedAgentsFactory();
-  const newActions = agentCheckinStateNewActionsFactory();
+  let newActions: ReturnType<typeof agentCheckinStateNewActionsFactory>;
   let interval: NodeJS.Timeout;
+
   function start() {
+    newActions = agentCheckinStateNewActionsFactory();
     interval = setInterval(async () => {
       try {
         await agentConnected.updateLastCheckinAt();
@@ -31,15 +33,20 @@ function agentCheckinStateFactory() {
     }
   }
   return {
-    subscribeToNewActions: (
+    subscribeToNewActions: async (
       soClient: SavedObjectsClientContract,
       agent: Agent,
       options?: { signal: AbortSignal }
-    ) =>
-      agentConnected.wrapPromise(
+    ) => {
+      if (!newActions) {
+        throw new Error('Agent checkin state not initialized');
+      }
+
+      return agentConnected.wrapPromise(
         agent.id,
         newActions.subscribeToNewActions(soClient, agent, options)
-      ),
+      );
+    },
     start,
     stop,
   };

@@ -7,10 +7,10 @@
 import classNames from 'classnames';
 import React, { FunctionComponent, memo } from 'react';
 import {
-  EuiButtonIcon,
   EuiButtonToggle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -21,6 +21,8 @@ import { selectorToDataTestSubject } from '../../utils';
 import { ProcessorsDispatch } from '../../processors_reducer';
 
 import { ProcessorInfo } from '../processors_tree';
+
+import { getProcessorDescriptor } from '../shared';
 
 import './pipeline_processors_editor_item.scss';
 
@@ -51,26 +53,25 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     editor,
     processorsDispatch,
   }) {
-    const isDisabled = editor.mode.id !== 'idle';
+    const isEditorNotInIdleMode = editor.mode.id !== 'idle';
     const isInMoveMode = Boolean(movingProcessor);
     const isMovingThisProcessor = processor.id === movingProcessor?.id;
     const isEditingThisProcessor =
-      editor.mode.id === 'editingProcessor' && processor.id === editor.mode.arg.processor.id;
+      editor.mode.id === 'managingProcessor' && processor.id === editor.mode.arg.processor.id;
     const isEditingOtherProcessor =
-      editor.mode.id === 'editingProcessor' && !isEditingThisProcessor;
+      editor.mode.id === 'managingProcessor' && !isEditingThisProcessor;
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
     const panelClasses = classNames('pipelineProcessorsEditor__item', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--selected': isMovingThisProcessor || isEditingThisProcessor,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--dimmed': isDimmed,
     });
 
-    const actionElementClasses = classNames({
-      'pipelineProcessorsEditor__item--displayNone': isInMoveMode,
-    });
-
     const inlineTextInputContainerClasses = classNames({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'pipelineProcessorsEditor__item--displayNone': isInMoveMode && !processor.options.description,
     });
 
@@ -80,9 +81,11 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
         : i18nTexts.cancelMoveButtonLabel;
       const dataTestSubj = !isMovingThisProcessor ? 'moveItemButton' : 'cancelMoveItemButton';
       const moveButtonClasses = classNames('pipelineProcessorsEditor__item__moveButton', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'pipelineProcessorsEditor__item__moveButton--cancel': isMovingThisProcessor,
       });
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
+      const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
         <EuiButtonToggle
           isEmpty={!isMovingThisProcessor}
@@ -91,10 +94,16 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
           iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"
-          disabled={isDisabled && !isMovingThisProcessor}
+          isDisabled={disabled}
           label={label}
           aria-label={label}
-          onChange={() => (!isMovingThisProcessor ? onMove() : onCancelMove())}
+          onChange={() => {
+            if (isMovingThisProcessor) {
+              onCancelMove();
+            } else {
+              onMove();
+            }
+          }}
         />
       );
       // Remove the tooltip from the DOM to prevent it from lingering if the mouse leave event
@@ -127,16 +136,27 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   className="pipelineProcessorsEditor__item__processorTypeLabel"
                   color={isDimmed ? 'subdued' : undefined}
                 >
-                  <b>{processor.type}</b>
+                  <EuiLink
+                    disabled={isEditorNotInIdleMode}
+                    onClick={() => {
+                      editor.setMode({
+                        id: 'managingProcessor',
+                        arg: { processor, selector },
+                      });
+                    }}
+                    data-test-subj="manageItemButton"
+                  >
+                    <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
+                  </EuiLink>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem className={inlineTextInputContainerClasses} grow={false}>
                 <InlineTextInput
-                  disabled={isDisabled}
+                  disabled={isEditorNotInIdleMode}
                   onChange={(nextDescription) => {
                     let nextOptions: Record<string, any>;
                     if (!nextDescription) {
-                      const { description: __, ...restOptions } = processor.options;
+                      const { description: _description, ...restOptions } = processor.options;
                       nextOptions = restOptions;
                     } else {
                       nextOptions = {
@@ -160,30 +180,12 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
-              <EuiFlexItem className={actionElementClasses} grow={false}>
-                {!isInMoveMode && (
-                  <EuiToolTip content={i18nTexts.editButtonLabel}>
-                    <EuiButtonIcon
-                      disabled={isDisabled}
-                      aria-label={i18nTexts.editButtonLabel}
-                      iconType="pencil"
-                      size="s"
-                      onClick={() => {
-                        editor.setMode({
-                          id: 'editingProcessor',
-                          arg: { processor, selector },
-                        });
-                      }}
-                    />
-                  </EuiToolTip>
-                )}
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ContextMenu
               data-test-subj="moreMenu"
-              disabled={isDisabled}
+              disabled={isEditorNotInIdleMode}
               hidden={isInMoveMode}
               showAddOnFailure={!processor.onFailure?.length}
               onAddOnFailure={() => {

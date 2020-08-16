@@ -31,7 +31,7 @@ export const DonutChart = ({ height, width, data }: DonutChartProps) => {
         .ordinal()
         // @ts-ignore
         .domain(data)
-        .range(['#017D73', '#98A2B3', '#BD271E']);
+        .range(['#017D73', '#98A2B3', '#BD271E', '#F5A700']);
       const pieGenerator = d3.layout
         .pie()
         .value(({ value }: any) => value)

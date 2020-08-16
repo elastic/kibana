@@ -4,7 +4,8 @@
   ],
   "description": "Adversaries may attempt to clear the bash command line history in an attempt to evade detection or forensic investigations.",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "lucene",
   "license": "Elastic License",

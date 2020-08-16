@@ -16,7 +16,8 @@ import {
   ReturnSignalIndex,
 } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { mocksSource } from '../../../common/containers/source/mock';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { Direction } from '../../../graphql/types';
 import { timelineQuery } from '../../containers/index.gql_query';
@@ -124,12 +125,13 @@ describe('StatefulTimeline', () => {
         </TestProviders>
       );
       await act(async () => {
-        await wait();
-        wrapper.update();
-        const timeline = wrapper.find(Timeline);
-        expect(timeline.props().indexToAdd).toEqual([
-          'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
-        ]);
+        await waitFor(() => {
+          wrapper.update();
+          const timeline = wrapper.find(Timeline);
+          expect(timeline.props().indexToAdd).toEqual([
+            'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
+          ]);
+        });
       });
     });
 
@@ -147,10 +149,11 @@ describe('StatefulTimeline', () => {
         </TestProviders>
       );
       await act(async () => {
-        await wait();
-        wrapper.update();
-        const timeline = wrapper.find(Timeline);
-        expect(timeline.props().indexToAdd).toEqual(['mock-siem-signals-index']);
+        await waitFor(() => {
+          wrapper.update();
+          const timeline = wrapper.find(Timeline);
+          expect(timeline.props().indexToAdd).toEqual(['mock-siem-signals-index']);
+        });
       });
     });
   });

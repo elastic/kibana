@@ -45,12 +45,15 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
         const [coreStart] = await getStartServices();
         const {
+          chrome: { docTitle },
           i18n: { Context: I18nContext },
           docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
           application: { getUrlForApp },
         } = coreStart;
 
-        return mountApp({
+        docTitle.change(PLUGIN.TITLE);
+
+        const unmountAppCallback = await mountApp({
           element,
           setBreadcrumbs,
           I18nContext,
@@ -59,6 +62,11 @@ export class CrossClusterReplicationPlugin implements Plugin {
           history,
           getUrlForApp,
         });
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
 

@@ -22,7 +22,8 @@ import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
 import { overviewNetworkQuery } from '../../containers/overview_network/index.gql_query';
 import { GetOverviewHostQuery } from '../../../graphql/types';
-import { wait } from '../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -155,12 +156,13 @@ describe('OverviewNetwork', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
-      'Showing: 9 events'
-    );
+      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
+        'Showing: 9 events'
+      );
+    });
   });
 
   it('it renders View Network', () => {

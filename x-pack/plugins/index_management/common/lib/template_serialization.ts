@@ -109,7 +109,7 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
     version,
     order,
     indexPatterns,
-    template: { settings, aliases, mappings },
+    template: { settings, aliases, mappings } = {},
   } = template;
 
   return {

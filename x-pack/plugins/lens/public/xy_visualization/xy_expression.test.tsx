@@ -22,7 +22,16 @@ import { LensMultiTable } from '../types';
 import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
-import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+import {
+  XYArgs,
+  LegendConfig,
+  legendConfig,
+  layerConfig,
+  LayerArgs,
+  AxesSettingsConfig,
+  tickLabelsConfig,
+  gridlinesConfig,
+} from './types';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -211,6 +220,18 @@ const createArgsWithLayers = (layers: LayerArgs[] = [sampleLayer]): XYArgs => ({
     isVisible: false,
     position: Position.Top,
   },
+  showXAxisTitle: true,
+  showYAxisTitle: true,
+  tickLabelsVisibilitySettings: {
+    type: 'lens_xy_tickLabelsConfig',
+    x: true,
+    y: false,
+  },
+  gridlinesVisibilitySettings: {
+    type: 'lens_xy_gridlinesConfig',
+    x: true,
+    y: false,
+  },
   layers,
 });
 
@@ -264,6 +285,34 @@ describe('xy_expression', () => {
         type: 'lens_xy_layer',
         ...args,
       });
+    });
+  });
+
+  test('tickLabelsConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      y: false,
+    };
+
+    const result = tickLabelsConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_tickLabelsConfig',
+      ...args,
+    });
+  });
+
+  test('gridlinesConfig produces the correct arguments', () => {
+    const args: AxesSettingsConfig = {
+      x: true,
+      y: false,
+    };
+
+    const result = gridlinesConfig.fn(null, args, createMockExecutionContext());
+
+    expect(result).toEqual({
+      type: 'lens_xy_gridlinesConfig',
+      ...args,
     });
   });
 
@@ -1365,6 +1414,35 @@ describe('xy_expression', () => {
       expect(convertSpy).toHaveBeenCalledWith('I');
     });
 
+    test('it should not pass the formatter function to the x axis if the visibility of the tick labels is off', () => {
+      const { data, args } = sampleArgs();
+
+      args.tickLabelsVisibilitySettings = { x: false, y: true, type: 'lens_xy_tickLabelsConfig' };
+
+      const instance = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
+
+      if (!tickFormatter) {
+        throw new Error('tickFormatter prop not found');
+      }
+
+      tickFormatter('I');
+
+      expect(convertSpy).toHaveBeenCalledTimes(0);
+    });
+
     test('it should remove invalid rows', () => {
       const data: LensMultiTable = {
         type: 'lens_multitable',
@@ -1400,6 +1478,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: true,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1469,6 +1557,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1525,6 +1623,16 @@ describe('xy_expression', () => {
         xTitle: '',
         yTitle: '',
         legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        tickLabelsVisibilitySettings: {
+          type: 'lens_xy_tickLabelsConfig',
+          x: true,
+          y: false,
+        },
+        gridlinesVisibilitySettings: {
+          type: 'lens_xy_gridlinesConfig',
+          x: true,
+          y: false,
+        },
         layers: [
           {
             layerId: 'first',
@@ -1554,6 +1662,73 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it should always show legend if showSingleSeries is set', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            layers: [{ ...args.layers[0], accessors: ['a'], splitAccessor: undefined }],
+            legend: { ...args.legend, isVisible: true, showSingleSeries: true },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
+
+    test('it not show legend if isVisible is set to false', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, isVisible: false },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(false);
+    });
+
+    test('it should show legend on right side', () => {
+      const { data, args } = sampleArgs();
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{
+            ...args,
+            legend: { ...args.legend, position: 'top' },
+          }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Settings).prop('legendPosition')).toEqual('top');
     });
 
     test('it should apply the fitting function to all non-bar series', () => {
@@ -1615,6 +1790,69 @@ describe('xy_expression', () => {
       );
 
       expect(component.find(LineSeries).prop('fit')).toEqual({ type: Fit.None });
+    });
+
+    test('it should apply the xTitle if is specified', () => {
+      const { data, args } = sampleArgs();
+
+      args.xTitle = 'My custom x-axis title';
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('title')).toEqual('My custom x-axis title');
+    });
+
+    test('it should hide the X axis title if the corresponding switch is off', () => {
+      const { data, args } = sampleArgs();
+
+      args.showXAxisTitle = false;
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('title')).toEqual(undefined);
+    });
+
+    test('it should show the X axis gridlines if the setting is on', () => {
+      const { data, args } = sampleArgs();
+
+      args.gridlinesVisibilitySettings = { x: true, y: false, type: 'lens_xy_gridlinesConfig' };
+
+      const component = shallow(
+        <XYChart
+          data={{ ...data }}
+          args={{ ...args }}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartsThemeService={chartsThemeService}
+          histogramBarTarget={50}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
+        />
+      );
+
+      expect(component.find(Axis).at(0).prop('showGridLines')).toBeTruthy();
     });
   });
 });

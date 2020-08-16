@@ -10,6 +10,9 @@ export function shouldShowAlertBadge(
   alerts: { [alertTypeId: string]: CommonAlertStatus },
   alertTypeIds: string[]
 ) {
+  if (!alerts) {
+    return false;
+  }
   const inSetupMode = isInSetupMode();
   return inSetupMode || alertTypeIds.find((name) => alerts[name] && alerts[name].states.length);
 }

@@ -258,8 +258,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
-  > button.euiButtonIcon,
-  > .euiToolTipAnchor > button.euiButtonIcon {
+  button.euiButtonIcon {
     margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
   }
 `;

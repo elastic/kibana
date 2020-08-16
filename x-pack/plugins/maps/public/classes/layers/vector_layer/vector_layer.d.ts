@@ -35,6 +35,7 @@ export interface IVectorLayer extends ILayer {
   getStyle(): IVectorStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -81,4 +82,5 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getStyle(): IVectorStyle;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  hasJoins(): boolean;
 }

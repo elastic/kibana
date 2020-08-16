@@ -11,7 +11,8 @@ import { act } from 'react-dom/test-utils';
 import '../../../../../common/mock/match_media';
 import { createKibanaContextProviderMock } from '../../../../../common/mock/kibana_react';
 import { TestProviders } from '../../../../../common/mock';
-import { wait } from '../../../../../common/lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { AllRules } from './index';
 
 jest.mock('react-router-dom', () => {
@@ -202,10 +203,10 @@ describe('AllRules', () => {
     );
 
     await act(async () => {
-      await wait();
-
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      await waitFor(() => {
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeTruthy();
+      });
     });
   });
 
@@ -234,11 +235,11 @@ describe('AllRules', () => {
     monitoringTab.simulate('click');
 
     await act(async () => {
-      wrapper.update();
-      await wait();
-
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeTruthy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeTruthy();
+        expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
+      });
     });
   });
 });

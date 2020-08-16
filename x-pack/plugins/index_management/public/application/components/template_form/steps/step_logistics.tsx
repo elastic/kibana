@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -153,25 +153,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
       serializer: formSerializer,
       deserializer: formDeserializer,
     });
+    const { subscribe, submit, isSubmitted, isValid: isFormValid, getErrors: getFormErrors } = form;
 
     /**
      * When the consumer call validate() on this step, we submit the form so it enters the "isSubmitted" state
      * and we can display the form errors on top of the forms if there are any.
      */
-    const validate = async () => {
-      return (await form.submit()).isValid;
-    };
+    const validate = useCallback(async () => {
+      return (await submit()).isValid;
+    }, [submit]);
 
     useEffect(() => {
-      onChange({
-        isValid: form.isValid,
-        validate,
-        getData: form.getFormData,
-      });
-    }, [form.isValid, onChange]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    useEffect(() => {
-      const subscription = form.subscribe(({ data, isValid }) => {
+      const subscription = subscribe(({ data, isValid }) => {
         onChange({
           isValid,
           validate,
@@ -179,7 +172,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
         });
       });
       return subscription.unsubscribe;
-    }, [onChange]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [onChange, validate, subscribe]);
 
     const { name, indexPatterns, dataStream, order, priority, version } = getFieldsMeta(
       documentationService.getEsDocsBase()
@@ -204,7 +197,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={documentationService.getTemplatesDocumentationLink()}
+              href={documentationService.getTemplatesDocumentationLink(isLegacy)}
               target="_blank"
               iconType="help"
             >
@@ -220,8 +213,8 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
         <Form
           form={form}
-          isInvalid={form.isSubmitted && !form.isValid}
-          error={form.getErrors()}
+          isInvalid={isSubmitted && !isFormValid}
+          error={getFormErrors()}
           data-test-subj="stepLogistics"
         >
           {/* Name */}

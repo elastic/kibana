@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { Request } from 'hapi';
-import { RequestHandlerContext } from 'kibana/server';
+import { ILegacyScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { capabilitiesProvider } from '../lib/capabilities';
@@ -21,9 +21,9 @@ export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
   { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
-  async function getNodeCount(context: RequestHandlerContext) {
+  async function getNodeCount(legacyClient: ILegacyScopedClusterClient) {
     const filterPath = 'nodes.*.attributes';
-    const resp = await context.ml!.mlClient.callAsInternalUser('nodes.info', {
+    const resp = await legacyClient.callAsInternalUser('nodes.info', {
       filterPath,
     });
 
@@ -58,9 +58,9 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const { callAsCurrentUser, callAsInternalUser } = context.ml!.mlClient;
+        const { callAsCurrentUser, callAsInternalUser } = legacyClient;
         let upgradeInProgress = false;
         try {
           const info = await callAsInternalUser('ml.info');
@@ -115,7 +115,7 @@ export function systemRoutes(
       path: '/api/ml/ml_capabilities',
       validate: false,
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
@@ -129,7 +129,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          context.ml!.mlClient,
+          legacyClient,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -159,10 +159,10 @@ export function systemRoutes(
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         return response.ok({
-          body: await getNodeCount(context),
+          body: await getNodeCount(legacyClient),
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -185,9 +185,9 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
-        const info = await context.ml!.mlClient.callAsInternalUser('ml.info');
+        const info = await legacyClient.callAsInternalUser('ml.info');
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
           body: { ...info, cloudId },
@@ -216,10 +216,54 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
       try {
         return response.ok({
-          body: await context.ml!.mlClient.callAsCurrentUser('search', request.body),
+          body: await legacyClient.callAsCurrentUser('search', request.body),
+        });
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup SystemRoutes
+   *
+   * @api {post} /api/ml/index_exists ES Field caps wrapper checks if index exists
+   * @apiName MlIndexExists
+   */
+  router.post(
+    {
+      path: '/api/ml/index_exists',
+      validate: {
+        body: schema.object({ index: schema.string() }),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+      try {
+        const { index } = request.body;
+
+        const options = {
+          index: [index],
+          fields: ['*'],
+          ignoreUnavailable: true,
+          allowNoIndices: true,
+          ignore: 404,
+        };
+
+        const fieldsResult = await legacyClient.callAsCurrentUser('fieldCaps', options);
+        const result = { exists: false };
+
+        if (Array.isArray(fieldsResult.indices) && fieldsResult.indices.length !== 0) {
+          result.exists = true;
+        }
+
+        return response.ok({
+          body: result,
         });
       } catch (error) {
         return response.customError(wrapError(error));

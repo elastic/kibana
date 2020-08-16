@@ -31,12 +31,7 @@ interface Props {
   onChangeUrl: (url: string) => void;
 }
 
-export const LinkSection = ({
-  label,
-  onChangeLabel,
-  url,
-  onChangeUrl,
-}: Props) => {
+export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
   const inputFields: InputField[] = [
     {
       name: 'label',
@@ -145,4 +140,4 @@ export const LinkSection = ({
       })}
     </>
   );
-};
+}

@@ -32,7 +32,7 @@ export interface CrumbInfo {
 }
 
 const ThemedBreadcrumbs = styled(EuiBreadcrumbs)<{ background: string; text: string }>`
-  &.euiBreadcrumbs.euiBreadcrumbs--responsive {
+  &.euiBreadcrumbs {
     background-color: ${(props) => props.background};
     color: ${(props) => props.text};
     padding: 1em;

@@ -19,9 +19,9 @@ import { fontSize, px } from '../../../../style/variables';
 import { asInteger, asDuration } from '../../../../utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { getSeverityColor, popoverWidth } from '../cytoscapeOptions';
-import { getSeverity } from '../../../../../common/ml_job_constants';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
+import { getSeverity } from './getSeverity';
 
 const HealthStatusTitle = styled(EuiTitle)`
   display: inline;

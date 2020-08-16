@@ -103,7 +103,7 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
         const { lat, lon, zoom } = await PageObjects.maps.getView();
-        expect(Math.round(lat)).to.equal(42);
+        expect(Math.round(lat)).to.equal(43);
         expect(Math.round(lon)).to.equal(-102);
         expect(Math.round(zoom)).to.equal(5);
       });

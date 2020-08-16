@@ -14,6 +14,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "AWS EC2 Flow Log Deletion",
+  "note": "The AWS Filebeat module must be enabled to use this rule.",
   "query": "event.action:DeleteFlowLogs and event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.outcome:success",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/delete-flow-logs.html",
@@ -24,7 +25,10 @@
   "severity": "high",
   "tags": [
     "AWS",
-    "Elastic"
+    "Elastic",
+    "SecOps",
+    "Logging",
+    "Continuous Monitoring"
   ],
   "threat": [
     {

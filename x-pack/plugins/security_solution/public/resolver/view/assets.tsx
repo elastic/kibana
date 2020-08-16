@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React, { memo } from 'react';
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
 import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
@@ -11,7 +13,7 @@ import { htmlIdGenerator, ButtonColor } from '@elastic/eui';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../common/lib/kibana';
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { DEFAULT_DARK_MODE as defaultDarkMode } from '../../../common/constants';
 import { ResolverProcessType } from '../types';
 
 type ResolverColorNames =
@@ -140,8 +142,6 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
     )}
   </>
 ));
-
-PaintServers.displayName = 'PaintServers';
 
 /**
  * Ids of symbols to be linked by <use> elements
@@ -376,8 +376,6 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => (
   </>
 ));
 
-SymbolsAndShapes.displayName = 'SymbolsAndShapes';
-
 /**
  * This `<defs>` element is used to define the reusable assets for the Resolver
  * It confers several advantages, including but not limited to:
@@ -386,7 +384,7 @@ SymbolsAndShapes.displayName = 'SymbolsAndShapes';
  *  3. `<use>` elements can be handled by compositor (faster)
  */
 const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
   return (
     <svg className={className}>
       <defs>
@@ -396,8 +394,6 @@ const SymbolDefinitionsComponent = memo(({ className }: { className?: string }) 
     </svg>
   );
 });
-
-SymbolDefinitionsComponent.displayName = 'SymbolDefinitions';
 
 export const SymbolDefinitions = styled(SymbolDefinitionsComponent)`
   position: absolute;
@@ -422,9 +418,9 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
 export const useResolverTheme = (): {
   colorMap: ColorMap;
   nodeAssets: NodeStyleMap;
-  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessOrigin: boolean) => NodeStyleConfig;
+  cubeAssetsForNode: (isProcessTerimnated: boolean, isProcessTrigger: boolean) => NodeStyleConfig;
 } => {
-  const isDarkMode = useUiSetting<boolean>(DEFAULT_DARK_MODE);
+  const isDarkMode = useUiSetting<boolean>(defaultDarkMode);
   const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
 
   const getThemedOption = (lightOption: string, darkOption: string): string => {
@@ -497,10 +493,14 @@ export const useResolverTheme = (): {
     },
   };
 
-  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessOrigin: boolean) {
+  function cubeAssetsForNode(isProcessTerminated: boolean, isProcessTrigger: boolean) {
     if (isProcessTerminated) {
-      return nodeAssets[processTypeToCube.processTerminated];
-    } else if (isProcessOrigin) {
+      if (isProcessTrigger) {
+        return nodeAssets.terminatedTriggerCube;
+      } else {
+        return nodeAssets[processTypeToCube.processTerminated];
+      }
+    } else if (isProcessTrigger) {
       return nodeAssets[processTypeToCube.processCausedAlert];
     } else {
       return nodeAssets[processTypeToCube.processRan];

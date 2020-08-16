@@ -7,8 +7,8 @@
 import { useEffect, useState, useCallback } from 'react';
 
 import { useReadListPrivileges } from '../../../../shared_imports';
-import { useHttp, useToasts, useKibana } from '../../../../common/lib/kibana';
-import { isApiError } from '../../../../common/utils/api';
+import { useHttp, useKibana } from '../../../../common/lib/kibana';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 
 export interface UseListsPrivilegesState {
@@ -79,8 +79,8 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
   });
   const { lists } = useKibana().services;
   const http = useHttp();
-  const toasts = useToasts();
-  const { loading, start: readListPrivileges, ...privilegesState } = useReadListPrivileges();
+  const { addError } = useAppToasts();
+  const { loading, start: readListPrivileges, ...readState } = useReadListPrivileges();
 
   const readPrivileges = useCallback(() => {
     if (lists) {
@@ -90,20 +90,20 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
 
   // initRead
   useEffect(() => {
-    if (!loading && state.isAuthenticated === null) {
+    if (!loading && !readState.error && state.isAuthenticated === null) {
       readPrivileges();
     }
-  }, [loading, readPrivileges, state.isAuthenticated]);
+  }, [loading, readState.error, readPrivileges, state.isAuthenticated]);
 
   // handleReadResult
   useEffect(() => {
-    if (privilegesState.result != null) {
+    if (readState.result != null) {
       try {
         const {
           is_authenticated: isAuthenticated,
           lists: { index: listsPrivileges },
           listItems: { index: listItemsPrivileges },
-        } = privilegesState.result as ListPrivileges;
+        } = readState.result as ListPrivileges;
 
         setState({
           isAuthenticated,
@@ -114,19 +114,18 @@ export const useListsPrivileges = (): UseListsPrivilegesReturn => {
         setState({ isAuthenticated: null, canManageIndex: false, canWriteIndex: false });
       }
     }
-  }, [privilegesState.result]);
+  }, [readState.result]);
 
   // handleReadError
   useEffect(() => {
-    const error = privilegesState.error;
-    if (isApiError(error)) {
-      setState({ isAuthenticated: null, canManageIndex: false, canWriteIndex: false });
-      toasts.addError(error, {
+    const error = readState.error;
+    if (error != null) {
+      setState({ isAuthenticated: false, canManageIndex: false, canWriteIndex: false });
+      addError(error, {
         title: i18n.LISTS_PRIVILEGES_READ_FAILURE,
-        toastMessage: error.body.message,
       });
     }
-  }, [privilegesState.error, toasts]);
+  }, [addError, readState.error]);
 
   return { loading, ...state };
 };

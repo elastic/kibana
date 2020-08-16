@@ -8,8 +8,10 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { ActionsPlugin } from './plugin';
 import { configSchema } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
+import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
+export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 
 export {
   ActionsPlugin,

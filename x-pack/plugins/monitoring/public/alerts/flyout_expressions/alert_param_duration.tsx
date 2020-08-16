@@ -49,7 +49,7 @@ interface Props {
   setAlertParams: (property: string, value: any) => void;
 }
 
-const parseRegex = /(\d+)(\smhd)/;
+const parseRegex = /(\d+)([smhd]{1})/;
 export const AlertParamDuration: React.FC<Props> = (props: Props) => {
   const { name, label, setAlertParams, errors } = props;
   const parsed = parseRegex.exec(props.duration);

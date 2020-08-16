@@ -35,7 +35,5 @@ export const NonEmptyStringArray = new t.Type<string[], string, unknown>(
   String
 );
 
-export type NonEmptyStringArrayC = typeof NonEmptyStringArray;
-
-export type NonEmptyStringArrayEncoded = t.OutputOf<typeof NonEmptyStringArray>;
+export type NonEmptyStringArray = t.OutputOf<typeof NonEmptyStringArray>;
 export type NonEmptyStringArrayDecoded = t.TypeOf<typeof NonEmptyStringArray>;

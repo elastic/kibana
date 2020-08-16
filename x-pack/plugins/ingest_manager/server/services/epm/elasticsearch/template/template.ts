@@ -249,6 +249,15 @@ function getBaseTemplate(
   packageName: string,
   composedOfTemplates: string[]
 ): IndexTemplate {
+  // Meta information to identify Ingest Manager's managed templates and indices
+  const _meta = {
+    package: {
+      name: packageName,
+    },
+    managed_by: 'ingest-manager',
+    managed: true,
+  };
+
   return {
     // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
     // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
@@ -304,19 +313,14 @@ function getBaseTemplate(
         date_detection: false,
         // All the properties we know from the fields.yml file
         properties: mappings.properties,
+        _meta,
       },
       // To be filled with the aliases that we need
       aliases: {},
     },
     data_stream: {},
     composed_of: composedOfTemplates,
-    _meta: {
-      package: {
-        name: packageName,
-      },
-      managed_by: 'ingest-manager',
-      managed: true,
-    },
+    _meta,
   };
 }
 
@@ -389,14 +393,14 @@ const updateExistingIndex = async ({
   // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
-  delete mappings.properties.dataset;
+  delete mappings.properties.data_stream;
 
-  // get the dataset values from the index template to compose data stream name
+  // get the data_stream values from the index template to compose data stream name
   const indexMappings = await getIndexMappings(indexName, callCluster);
-  const dataset = indexMappings[indexName].mappings.properties.dataset.properties;
-  if (!dataset.type.value || !dataset.name.value || !dataset.namespace.value)
-    throw new Error(`dataset values are missing from the index template ${indexName}`);
-  const dataStreamName = `${dataset.type.value}-${dataset.name.value}-${dataset.namespace.value}`;
+  const dataStream = indexMappings[indexName].mappings.properties.data_stream.properties;
+  if (!dataStream.type.value || !dataStream.dataset.value || !dataStream.namespace.value)
+    throw new Error(`data_stream values are missing from the index template ${indexName}`);
+  const dataStreamName = `${dataStream.type.value}-${dataStream.dataset.value}-${dataStream.namespace.value}`;
 
   // try to update the mappings first
   try {

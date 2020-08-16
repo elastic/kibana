@@ -43,7 +43,10 @@ export const toPromiseAbortable = <T>(
     }
   });
 
-export function createLimiter(ratelimitIntervalMs: number, ratelimitRequestPerInterval: number) {
+export function createRateLimiter(
+  ratelimitIntervalMs: number,
+  ratelimitRequestPerInterval: number
+) {
   function createCurrentInterval() {
     return {
       startedAt: Rx.asyncScheduler.now(),

@@ -19,15 +19,11 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
-import { IAggConfigs } from '../aggs';
-import { ISearchSource } from '../search_source';
-import { tabifyAggResponse } from '../tabify';
 import {
   calculateBounds,
   EsaggsExpressionFunctionDefinition,
@@ -38,6 +34,13 @@ import {
   Query,
   TimeRange,
 } from '../../../common';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  IAggConfigs,
+  tabifyAggResponse,
+} from '../../../common/search';
+
 import { FilterManager } from '../../query';
 import {
   getFieldFormats,
@@ -45,8 +48,9 @@ import {
   getQueryService,
   getSearchService,
 } from '../../services';
+import { ISearchSource } from '../search_source';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
+import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -160,7 +164,7 @@ const handleCourierRequest = async ({
 
       (searchSource as any).lastQuery = queryHash;
 
-      request.stats(getResponseInspectorStats(searchSource, response)).ok({ json: response });
+      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
 
       (searchSource as any).rawResponse = response;
     } catch (e) {

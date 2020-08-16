@@ -33,8 +33,8 @@ export const getInspector = () => {
 
 let fileUploadPlugin;
 export const setFileUpload = (fileUpload) => (fileUploadPlugin = fileUpload);
-export const getFileUploadComponent = () => {
-  return fileUploadPlugin.JsonUploadAndParse;
+export const getFileUploadComponent = async () => {
+  return await fileUploadPlugin.getFileUploadComponent();
 };
 
 let uiSettings;
@@ -80,7 +80,7 @@ export async function fetchSearchSourceAndRecordWithInspector({
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch({ abortSignal });
-    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+    inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
   } catch (error) {
     inspectorRequest.error({ error });
     throw error;
@@ -177,3 +177,16 @@ export const setIsGoldPlus = (igp) => {
 export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
+
+let embeddableService;
+export const setEmbeddableService = (_embeddableService) => {
+  embeddableService = _embeddableService;
+};
+export const getEmbeddableService = () => {
+  return embeddableService;
+};
+
+export let navigateToApp;
+export function setNavigateToApp(_navigateToApp) {
+  navigateToApp = _navigateToApp;
+}

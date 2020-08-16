@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
@@ -23,17 +23,18 @@ export async function getDistributionMax(
   transactionType: string,
   setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, uiFiltersES, apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
             {
@@ -59,6 +60,6 @@ export async function getDistributionMax(
     },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(params);
   return resp.aggregations ? resp.aggregations.stats.max : null;
 }

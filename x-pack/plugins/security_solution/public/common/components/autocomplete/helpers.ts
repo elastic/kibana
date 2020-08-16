@@ -7,7 +7,7 @@
 import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { IFieldType, Ipv4Address } from '../../../../../../../src/plugins/data/common';
+import { IFieldType } from '../../../../../../../src/plugins/data/common';
 
 import {
   EXCEPTION_OPERATORS,
@@ -30,29 +30,32 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export function validateParams(params: string | undefined, type: string) {
-  // Box would show error state if empty otherwise
-  if (params == null || params === '') {
+export const paramIsValid = (
+  params: string | undefined,
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
+): boolean => {
+  if (isRequired && touched && (params == null || params === '')) {
+    return false;
+  }
+
+  if ((isRequired && !touched) || (!isRequired && (params == null || params === ''))) {
     return true;
   }
 
-  switch (type) {
-    case 'date':
-      const moment = dateMath.parse(params);
-      return Boolean(moment && moment.isValid());
-    case 'ip':
-      try {
-        return Boolean(new Ipv4Address(params));
-      } catch (e) {
-        return false;
-      }
-    case 'number':
-      const val = parseFloat(params);
-      return typeof val === 'number' && !isNaN(val);
-    default:
-      return true;
-  }
-}
+  const types = field != null && field.esTypes != null ? field.esTypes : [];
+
+  return types.reduce<boolean>((acc, type) => {
+    switch (type) {
+      case 'date':
+        const moment = dateMath.parse(params ?? '');
+        return Boolean(moment && moment.isValid());
+      default:
+        return acc;
+    }
+  }, true);
+};
 
 export function getGenericComboBoxProps<T>({
   options,
@@ -66,11 +69,12 @@ export function getGenericComboBoxProps<T>({
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions
+    .map(getLabel)
     .filter((option) => {
-      return options.indexOf(option) !== -1;
+      return newLabels.indexOf(option) !== -1;
     })
     .map((option) => {
-      return newComboOptions[options.indexOf(option)];
+      return newComboOptions[newLabels.indexOf(option)];
     });
 
   return {

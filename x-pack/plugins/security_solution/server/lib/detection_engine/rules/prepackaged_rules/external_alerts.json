@@ -2,7 +2,15 @@
   "author": [
     "Elastic"
   ],
-  "description": "Generates a detection alert for each external alert written to the configured securitySolution:defaultIndex. Enabling this rule allows you to immediately begin investigating external alerts in the app.",
+  "description": "Generates a detection alert for each external alert written to the configured indices. Enabling this rule allows you to immediately begin investigating external alerts in the app.",
+  "index": [
+    "apm-*-transaction*",
+    "auditbeat-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*"
+  ],
   "language": "kuery",
   "license": "Elastic License",
   "max_signals": 10000,

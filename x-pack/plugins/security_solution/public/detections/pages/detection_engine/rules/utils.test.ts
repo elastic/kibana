@@ -23,6 +23,6 @@ describe('getBreadcrumbs', () => {
         [],
         getUrlForAppMock
       )
-    ).toEqual([{ href: 'securitySolution:detections', text: 'Detection alerts' }]);
+    ).toEqual([{ href: 'securitySolution:detections', text: 'Detections' }]);
   });
 });

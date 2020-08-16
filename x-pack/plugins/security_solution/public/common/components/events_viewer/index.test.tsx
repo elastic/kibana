@@ -9,7 +9,8 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
-import { wait } from '../../lib/helpers';
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
@@ -54,10 +55,11 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+    });
   });
 
   // InspectButtonContainer controls displaying InspectButton components
@@ -75,9 +77,10 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
+      expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
+    });
   });
 });

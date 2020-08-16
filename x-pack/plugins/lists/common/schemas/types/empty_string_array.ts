@@ -39,7 +39,5 @@ export const EmptyStringArray = new t.Type<string[], string | undefined | null, 
   String
 );
 
-export type EmptyStringArrayC = typeof EmptyStringArray;
-
 export type EmptyStringArrayEncoded = t.OutputOf<typeof EmptyStringArray>;
 export type EmptyStringArrayDecoded = t.TypeOf<typeof EmptyStringArray>;

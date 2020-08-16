@@ -156,8 +156,8 @@ export function getFocusData(
           .sort((a, b) => {
             return a.timestamp - b.timestamp;
           })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
+          .map((d, i: number) => {
+            d.key = (i + 1).toString();
             return d;
           });
 

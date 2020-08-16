@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -58,26 +60,6 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const AdvancedSettingsAccordion = styled(EuiAccordion)`
-  .euiAccordion__iconWrapper {
-    display: none;
-  }
-
-  .euiAccordion__childWrapper {
-    transition-duration: 1ms; /* hack to fire Step accordion to set proper content's height */
-  }
-
-  &.euiAccordion-isOpen .euiButtonEmpty__content > svg {
-    transform: rotate(90deg);
-  }
-`;
-
-const AdvancedSettingsAccordionButton = (
-  <EuiButtonEmpty flush="left" size="s" iconType="arrowRight">
-    {I18n.ADVANCED_SETTINGS}
-  </EuiButtonEmpty>
-);
-
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues,
@@ -92,8 +74,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
   const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    defineRuleData?.index ?? []
+    defineRuleData?.index ?? [],
+    'step_about_rule'
   );
+  const canUseExceptions =
+    defineRuleData?.ruleType &&
+    !isMlRule(defineRuleData.ruleType) &&
+    !isThresholdRule(defineRuleData.ruleType);
 
   const { form } = useForm({
     defaultValue: initialState,
@@ -157,7 +144,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="severity"
               component={SeverityField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleSeverityField',
+                dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
@@ -171,7 +158,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               path="riskScore"
               component={RiskScoreField}
               componentProps={{
-                'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
+                dataTestSubj: 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
                 indices: indexPatterns,
@@ -193,10 +180,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
           </TagContainer>
           <EuiSpacer size="l" />
-          <AdvancedSettingsAccordion
+          <EuiAccordion
             data-test-subj="advancedSettings"
             id="advancedSettingsAccordion"
-            buttonContent={AdvancedSettingsAccordionButton}
+            buttonContent={I18n.ADVANCED_SETTINGS}
           >
             <EuiSpacer size="l" />
             <UseField
@@ -274,8 +261,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading || !canUseExceptions,
                   },
                 }}
               />
@@ -287,8 +273,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleBuildingBlock',
                   'data-test-subj': 'detectionEngineStepAboutRuleBuildingBlock',
                   euiFieldProps: {
-                    fullWidth: true,
-                    isDisabled: isLoading,
+                    disabled: isLoading,
                   },
                 }}
               />
@@ -319,7 +304,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 placeholder: '',
               }}
             />
-          </AdvancedSettingsAccordion>
+          </EuiAccordion>
           <FormDataProvider pathsToWatch="severity">
             {({ severity }) => {
               const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];

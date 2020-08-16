@@ -15,7 +15,7 @@ export const ComponentStrings = {
       }),
     getTitleText: () =>
       i18n.translate('xpack.canvas.embedObject.titleText', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
   },
   AdvancedFilter: {
@@ -110,26 +110,24 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.asset.thumbnailAltText', {
         defaultMessage: 'Asset thumbnail',
       }),
+    getConfirmModalButtonLabel: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
+    getConfirmModalMessageText: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalDetail', {
+        defaultMessage: 'Are you sure you want to remove this asset?',
+      }),
+    getConfirmModalTitle: () =>
+      i18n.translate('xpack.canvas.asset.confirmModalTitle', {
+        defaultMessage: 'Remove Asset',
+      }),
   },
   AssetManager: {
     getButtonLabel: () =>
       i18n.translate('xpack.canvas.assetManager.manageButtonLabel', {
         defaultMessage: 'Manage assets',
       }),
-    getConfirmModalButtonLabel: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalButtonLabel', {
-        defaultMessage: 'Remove',
-      }),
-    getConfirmModalMessageText: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalDetail', {
-        defaultMessage: 'Are you sure you want to remove this asset?',
-      }),
-    getConfirmModalTitle: () =>
-      i18n.translate('xpack.canvas.assetManager.confirmModalTitle', {
-        defaultMessage: 'Remove Asset',
-      }),
-  },
-  AssetModal: {
     getDescription: () =>
       i18n.translate('xpack.canvas.assetModal.modalDescription', {
         defaultMessage:
@@ -160,6 +158,13 @@ export const ComponentStrings = {
         defaultMessage: '{percentageUsed}% space used',
         values: {
           percentageUsed,
+        },
+      }),
+    getCopyAssetMessage: (id: string) =>
+      i18n.translate('xpack.canvas.assetModal.copyAssetMessage', {
+        defaultMessage: `Copied '{id}' to clipboard`,
+        values: {
+          id,
         },
       }),
   },
@@ -567,6 +572,22 @@ export const ComponentStrings = {
           pageNumber,
         },
       }),
+    getAddPageTooltip: () =>
+      i18n.translate('xpack.canvas.pageManager.addPageTooltip', {
+        defaultMessage: 'Add a new page to this workpad',
+      }),
+    getConfirmRemoveTitle: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveTitle', {
+        defaultMessage: 'Remove Page',
+      }),
+    getConfirmRemoveDescription: () =>
+      i18n.translate('xpack.canvas.pageManager.confirmRemoveDescription', {
+        defaultMessage: 'Are you sure you want to remove this page?',
+      }),
+    getConfirmRemoveButtonLabel: () =>
+      i18n.translate('xpack.canvas.pageManager.removeButtonLabel', {
+        defaultMessage: 'Remove',
+      }),
   },
   PagePreviewPageControls: {
     getClonePageAriaLabel: () =>
@@ -891,6 +912,13 @@ export const ComponentStrings = {
     getWorkpadManagerCloseButtonLabel: () =>
       i18n.translate('xpack.canvas.toolbar.workpadManagerCloseButtonLabel', {
         defaultMessage: 'Close',
+      }),
+    getErrorMessage: (message: string) =>
+      i18n.translate('xpack.canvas.toolbar.errorMessage', {
+        defaultMessage: 'TOOLBAR ERROR: {message}',
+        values: {
+          message,
+        },
       }),
   },
   ToolbarTray: {
@@ -1280,7 +1308,7 @@ export const ComponentStrings = {
       }),
     getEmbedObjectMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
-        defaultMessage: 'Add from Visualize library',
+        defaultMessage: 'Add from Kibana',
       }),
     getFilterMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {

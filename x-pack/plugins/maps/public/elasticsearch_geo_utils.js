@@ -469,3 +469,23 @@ export function extractFeaturesFromFilters(filters) {
 
   return features;
 }
+
+export function scaleBounds(bounds, scaleFactor) {
+  const width = bounds.maxLon - bounds.minLon;
+  const height = bounds.maxLat - bounds.minLat;
+  return {
+    minLon: bounds.minLon - width * scaleFactor,
+    minLat: bounds.minLat - height * scaleFactor,
+    maxLon: bounds.maxLon + width * scaleFactor,
+    maxLat: bounds.maxLat + height * scaleFactor,
+  };
+}
+
+export function turfBboxToBounds(turfBbox) {
+  return {
+    minLon: turfBbox[0],
+    minLat: turfBbox[1],
+    maxLon: turfBbox[2],
+    maxLat: turfBbox[3],
+  };
+}

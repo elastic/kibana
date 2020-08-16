@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash/fp';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import {
   getDetectionEngineTabUrl,
@@ -57,7 +56,7 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
-      text: i18nDetections.PAGE_TITLE,
+      text: i18nDetections.BREADCRUMB_TITLE,
       href: getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
         path: !isEmpty(search[0]) ? search[0] : '',
       }),

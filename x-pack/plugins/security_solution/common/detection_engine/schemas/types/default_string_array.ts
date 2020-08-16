@@ -9,14 +9,13 @@ import { Either } from 'fp-ts/lib/Either';
 
 /**
  * Types the DefaultStringArray as:
- *   - If null or undefined, then a default array will be set
+ *   - If undefined, then a default array will be set
+ *   - If an array is sent in, then the array will be validated to ensure all elements are a string
  */
-export const DefaultStringArray = new t.Type<string[], string[], unknown>(
+export const DefaultStringArray = new t.Type<string[], string[] | undefined, unknown>(
   'DefaultStringArray',
   t.array(t.string).is,
   (input, context): Either<t.Errors, string[]> =>
     input == null ? t.success([]) : t.array(t.string).validate(input, context),
   t.identity
 );
-
-export type DefaultStringArrayC = typeof DefaultStringArray;

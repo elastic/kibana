@@ -5,10 +5,10 @@
  */
 
 export {
-  ProcessorSettingsForm,
-  ProcessorSettingsFromOnSubmitArg,
+  ManageProcessorForm,
+  ManageProcessorFormOnSubmitArg,
   OnSubmitHandler,
-} from './processor_settings_form';
+} from './manage_processor_form';
 
 export { ProcessorsTree, ProcessorInfo, OnActionHandler } from './processors_tree';
 
@@ -19,3 +19,7 @@ export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item'
 export { ProcessorRemoveModal } from './processor_remove_modal';
 
 export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
+
+export { TestPipelineButton } from './test_pipeline';
+
+export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';

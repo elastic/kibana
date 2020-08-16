@@ -30,7 +30,7 @@ interface Props {
   onHover?: () => void;
 }
 
-const TransactionLineChart: React.FC<Props> = (props: Props) => {
+function TransactionLineChart(props: Props) {
   const {
     series,
     tickFormatY,
@@ -68,6 +68,6 @@ const TransactionLineChart: React.FC<Props> = (props: Props) => {
       {...(stacked ? { stackBy: 'y' } : {})}
     />
   );
-};
+}
 
 export { TransactionLineChart };

@@ -5,6 +5,8 @@
  */
 
 import '../../../__mocks__/shallow_usecontext.mock';
+import './__mocks__/overview_logic.mock';
+import { setMockValues } from './__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -16,7 +18,6 @@ import { sendTelemetry } from '../../../shared/telemetry';
 
 import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 import { OnboardingCard } from './onboarding_card';
-import { defaultServerData } from './overview';
 
 const account = {
   id: '1',
@@ -30,7 +31,8 @@ const account = {
 describe('OnboardingSteps', () => {
   describe('Shared Sources', () => {
     it('renders 0 sources state', () => {
-      const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
+      setMockValues({ canCreateContentSources: true });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(1);
       expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(ORG_SOURCES_PATH);
@@ -40,9 +42,8 @@ describe('OnboardingSteps', () => {
     });
 
     it('renders completed sources state', () => {
-      const wrapper = shallow(
-        <OnboardingSteps {...defaultServerData} sourcesCount={2} hasOrgSources />
-      );
+      setMockValues({ sourcesCount: 2, hasOrgSources: true });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard).prop('description')).toEqual(
         'You have added 2 shared sources. Happy searching.'
@@ -50,9 +51,8 @@ describe('OnboardingSteps', () => {
     });
 
     it('disables link when the user cannot create sources', () => {
-      const wrapper = shallow(
-        <OnboardingSteps {...defaultServerData} canCreateContentSources={false} />
-      );
+      setMockValues({ canCreateContentSources: false });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(undefined);
     });
@@ -60,15 +60,14 @@ describe('OnboardingSteps', () => {
 
   describe('Users & Invitations', () => {
     it('renders 0 users when not on federated auth', () => {
-      const wrapper = shallow(
-        <OnboardingSteps
-          {...defaultServerData}
-          isFederatedAuth={false}
-          fpAccount={account}
-          accountsCount={0}
-          hasUsers={false}
-        />
-      );
+      setMockValues({
+        canCreateInvitations: true,
+        isFederatedAuth: false,
+        fpAccount: account,
+        accountsCount: 0,
+        hasUsers: false,
+      });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(2);
       expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(USERS_PATH);
@@ -78,15 +77,13 @@ describe('OnboardingSteps', () => {
     });
 
     it('renders completed users state', () => {
-      const wrapper = shallow(
-        <OnboardingSteps
-          {...defaultServerData}
-          isFederatedAuth={false}
-          fpAccount={account}
-          accountsCount={1}
-          hasUsers
-        />
-      );
+      setMockValues({
+        isFederatedAuth: false,
+        fpAccount: account,
+        accountsCount: 1,
+        hasUsers: true,
+      });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard).last().prop('description')).toEqual(
         'Nice, you’ve invited colleagues to search with you.'
@@ -94,21 +91,15 @@ describe('OnboardingSteps', () => {
     });
 
     it('disables link when the user cannot create invitations', () => {
-      const wrapper = shallow(
-        <OnboardingSteps
-          {...defaultServerData}
-          isFederatedAuth={false}
-          canCreateInvitations={false}
-        />
-      );
-
+      setMockValues({ isFederatedAuth: false, canCreateInvitations: false });
+      const wrapper = shallow(<OnboardingSteps />);
       expect(wrapper.find(OnboardingCard).last().prop('actionPath')).toBe(undefined);
     });
   });
 
   describe('Org Name', () => {
     it('renders button to change name', () => {
-      const wrapper = shallow(<OnboardingSteps {...defaultServerData} />);
+      const wrapper = shallow(<OnboardingSteps />);
 
       const button = wrapper
         .find(OrgNameOnboarding)
@@ -120,15 +111,13 @@ describe('OnboardingSteps', () => {
     });
 
     it('hides card when name has been changed', () => {
-      const wrapper = shallow(
-        <OnboardingSteps
-          {...defaultServerData}
-          organization={{
-            name: 'foo',
-            defaultOrgName: 'bar',
-          }}
-        />
-      );
+      setMockValues({
+        organization: {
+          name: 'foo',
+          defaultOrgName: 'bar',
+        },
+      });
+      const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OrgNameOnboarding)).toHaveLength(0);
     });

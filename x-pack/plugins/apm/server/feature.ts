@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertType } from '../common/alert_types';
 
 export const APM_FEATURE = {
   id: 'apm',
@@ -16,57 +17,43 @@ export const APM_FEATURE = {
   navLinkId: 'apm',
   app: ['apm', 'kibana'],
   catalogue: ['apm'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
+  alerting: Object.values(AlertType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'apm_write',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm', 'apm_write'],
       catalogue: ['apm'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: [],
         read: [],
       },
-      ui: [
-        'show',
-        'save',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      alerting: {
+        all: Object.values(AlertType),
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
       app: ['apm', 'kibana'],
-      api: [
-        'apm',
-        'actions-read',
-        'actions-all',
-        'alerting-read',
-        'alerting-all',
-      ],
+      api: ['apm'],
       catalogue: ['apm'],
       savedObject: {
-        all: ['alert', 'action', 'action_task_params'],
+        all: [],
         read: [],
       },
-      ui: [
-        'show',
-        'alerting:show',
-        'actions:show',
-        'alerting:save',
-        'actions:save',
-        'alerting:delete',
-        'actions:delete',
-      ],
+      alerting: {
+        all: Object.values(AlertType),
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      ui: ['show', 'alerting:show', 'alerting:save'],
     },
   },
 };

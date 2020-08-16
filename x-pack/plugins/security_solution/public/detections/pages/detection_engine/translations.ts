@@ -6,6 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const BREADCRUMB_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.detectionsBreadcrumbTitle',
+  {
+    defaultMessage: 'Detections',
+  }
+);
+
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
@@ -29,7 +36,7 @@ export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.sig
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
-  defaultMessage: 'External alerts',
+  defaultMessage: 'Detection alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate(
@@ -51,8 +58,8 @@ export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.detectionEngin
     'It looks like you don’t have any indices relevant to the detection engine in the Security application',
 });
 
-export const EMPTY_ACTION_PRIMARY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.emptyActionPrimary',
+export const EMPTY_ACTION_BEATS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.emptyActionBeats',
   {
     defaultMessage: 'View setup instructions',
   }
@@ -72,13 +79,33 @@ export const NO_INDEX_TITLE = i18n.translate(
   }
 );
 
-export const NO_INDEX_MSG_BODY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.noIndexMsgBody',
+export const NEEDS_SIGNALS_AND_LISTS_INDEXES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.needsSignalsAndListsIndexesMessage',
   {
-    defaultMessage:
-      'To use the detection engine, a user with the required cluster and index privileges must first access this page. For more help, contact your administrator.',
+    defaultMessage: 'You need permissions for the signals and lists indices.',
   }
 );
+
+export const NEEDS_SIGNALS_INDEX = i18n.translate(
+  'xpack.securitySolution.detectionEngine.needsSignalsIndexMessage',
+  {
+    defaultMessage: 'You need permissions for the signals index.',
+  }
+);
+
+export const NEEDS_LISTS_INDEXES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.needsListsIndexesMessage',
+  {
+    defaultMessage: 'You need permissions for the lists indices.',
+  }
+);
+
+export const NEEDS_INDEX_PERMISSIONS = (additionalContext: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.needsIndexPermissionsMessage', {
+    values: { additionalContext },
+    defaultMessage:
+      'To use the detection engine, a user with the required cluster and index privileges must first access this page. {additionalContext} For more help, contact your Elastic Stack administrator.',
+  });
 
 export const GO_TO_DOCUMENTATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.goToDocumentationButton',

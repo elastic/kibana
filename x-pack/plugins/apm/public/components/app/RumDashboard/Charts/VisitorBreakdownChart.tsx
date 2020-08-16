@@ -29,7 +29,7 @@ interface Props {
   }>;
 }
 
-export const VisitorBreakdownChart = ({ options }: Props) => {
+export function VisitorBreakdownChart({ options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
@@ -93,4 +93,4 @@ export const VisitorBreakdownChart = ({ options }: Props) => {
       </Chart>
     </ChartWrapper>
   );
-};
+}

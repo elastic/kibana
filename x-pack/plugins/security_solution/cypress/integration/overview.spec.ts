@@ -11,7 +11,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-describe.skip('Overview Page', () => {
+describe('Overview Page', () => {
   before(() => {
     cy.stubSecurityApi('overview');
     loginAndWaitForPage(OVERVIEW_URL);

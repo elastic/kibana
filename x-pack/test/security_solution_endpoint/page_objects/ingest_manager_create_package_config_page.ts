@@ -63,6 +63,13 @@ export function IngestManagerCreatePackageConfig({
     },
 
     /**
+     * Returns the package config name currently populated on the input field
+     */
+    async getPackageConfigName() {
+      return testSubjects.getAttribute('packageConfigNameInput', 'value');
+    },
+
+    /**
      * Set the name of the package config on the input field
      * @param name
      */

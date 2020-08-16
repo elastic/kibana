@@ -12,7 +12,6 @@ import d3 from 'd3';
 import { scaleUtc } from 'd3-scale';
 import { mean } from 'lodash';
 import React from 'react';
-import { px } from '../../../../style/variables';
 import { asRelativeDateTimeRange } from '../../../../utils/formatters';
 import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
@@ -89,7 +88,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <Histogram
-        height={px(180)}
+        height={180}
         noHits={distribution.noHits}
         tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
@@ -108,7 +107,8 @@ export function ErrorDistribution({ distribution, title }: Props) {
         }
         formatYLong={(value: number) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
-            defaultMessage: '{occCount} occurrences',
+            defaultMessage:
+              '{occCount} {occCount, plural, one {occurrence} other {occurrences}}',
             values: { occCount: value },
           })
         }

@@ -22,5 +22,10 @@
  * the raw document format as stored in ElasticSearch.
  */
 
-export { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc, SavedObjectsRawDoc } from './types';
+export {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from './types';
 export { SavedObjectsSerializer } from './serializer';

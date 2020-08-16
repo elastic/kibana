@@ -173,5 +173,6 @@ export interface GetAgentStatusResponse {
     online: number;
     error: number;
     offline: number;
+    other: number;
   };
 }

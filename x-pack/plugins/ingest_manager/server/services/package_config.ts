@@ -42,7 +42,7 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     callCluster: CallESAsCurrentUser,
     packageConfig: NewPackageConfig,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options?: { id?: string; user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig> {
     // Check that its agent config does not have a package config with the same name
     const parentAgentConfig = await agentConfigService.get(soClient, packageConfig.config_id);
@@ -104,6 +104,7 @@ class PackageConfigService {
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(soClient, packageConfig.config_id, [newSo.id], {
       user: options?.user,
+      bumpRevision: options?.bumpConfigRevision ?? true,
     });
 
     return {
@@ -117,10 +118,11 @@ class PackageConfigService {
     soClient: SavedObjectsClientContract,
     packageConfigs: NewPackageConfig[],
     configId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; bumpConfigRevision?: boolean }
   ): Promise<PackageConfig[]> {
     const isoDate = new Date().toISOString();
-    const { saved_objects: newSos } = await soClient.bulkCreate<PackageConfigSOAttributes>(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { saved_objects } = await soClient.bulkCreate<PackageConfigSOAttributes>(
       packageConfigs.map((packageConfig) => ({
         type: SAVED_OBJECT_TYPE,
         attributes: {
@@ -135,6 +137,9 @@ class PackageConfigService {
       }))
     );
 
+    // Filter out invalid SOs
+    const newSos = saved_objects.filter((so) => !so.error && so.attributes);
+
     // Assign it to the given agent config
     await agentConfigService.assignPackageConfigs(
       soClient,
@@ -142,6 +147,7 @@ class PackageConfigService {
       newSos.map((newSo) => newSo.id),
       {
         user: options?.user,
+        bumpRevision: options?.bumpConfigRevision ?? true,
       }
     );
 
@@ -373,14 +379,14 @@ async function _assignPackageStreamToStream(
   if (!stream.enabled) {
     return { ...stream, compiled_stream: undefined };
   }
-  const datasetPath = getDataset(stream.dataset.name);
+  const datasetPath = getDataset(stream.data_stream.dataset);
   const packageDatasets = pkgInfo.datasets;
   if (!packageDatasets) {
     throw new Error('Stream template not found, no datasets');
   }
 
   const packageDataset = packageDatasets.find(
-    (pkgDataset) => pkgDataset.name === stream.dataset.name
+    (pkgDataset) => pkgDataset.name === stream.data_stream.dataset
   );
   if (!packageDataset) {
     throw new Error(`Stream template not found, unable to find dataset ${datasetPath}`);

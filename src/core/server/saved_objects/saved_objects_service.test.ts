@@ -25,18 +25,20 @@ import {
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { errors as esErrors } from '@elastic/elasticsearch';
+
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
-import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { elasticsearchClientMock } from '../elasticsearch/client/mocks';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 import { SavedObjectsRepository } from './service/lib/repository';
-import { KibanaRequest } from '../http';
 
 jest.mock('./service/lib/repository');
 
@@ -70,7 +72,7 @@ describe('SavedObjectsService', () => {
   const createStartDeps = (pluginsInitialized: boolean = true) => {
     return {
       pluginsInitialized,
-      elasticsearch: elasticsearchServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createInternalStart(),
     };
   };
 
@@ -161,26 +163,27 @@ describe('SavedObjectsService', () => {
   });
 
   describe('#start()', () => {
-    it('creates a KibanaMigrator which retries NoConnections errors from callAsInternalUser', async () => {
+    it('creates a KibanaMigrator which retries NoLivingConnectionsError errors from ES client', async () => {
       const coreContext = createCoreContext();
 
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = createSetupDeps();
       const coreStart = createStartDeps();
 
-      let i = 0;
-      coreStart.elasticsearch.legacy.client.callAsInternalUser = jest
+      coreStart.elasticsearch.client.asInternalUser.indices.create = jest
         .fn()
-        .mockImplementation(() =>
-          i++ <= 2
-            ? Promise.reject(new legacyElasticsearch.errors.NoConnections())
-            : Promise.resolve('success')
+        .mockImplementationOnce(() =>
+          Promise.reject(new esErrors.NoLivingConnectionsError('reason', {} as any))
+        )
+        .mockImplementationOnce(() =>
+          elasticsearchClientMock.createSuccessTransportRequestPromise('success')
         );
 
       await soService.setup(coreSetup);
       await soService.start(coreStart, 1);
 
-      return expect(KibanaMigratorMock.mock.calls[0][0].callCluster()).resolves.toMatch('success');
+      const response = await KibanaMigratorMock.mock.calls[0][0].client.indices.create();
+      return expect(response.body).toBe('success');
     });
 
     it('skips KibanaMigrator migrations when pluginsInitialized=false', async () => {
@@ -291,22 +294,15 @@ describe('SavedObjectsService', () => {
         const coreStart = createStartDeps();
         const { createScopedRepository } = await soService.start(coreStart);
 
-        const req = {} as KibanaRequest;
+        const req = httpServerMock.createKibanaRequest();
         createScopedRepository(req);
 
-        expect(coreStart.elasticsearch.legacy.client.asScoped).toHaveBeenCalledWith(req);
+        expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
 
         const [
-          {
-            value: { callAsCurrentUser },
-          },
-        ] = coreStart.elasticsearch.legacy.client.asScoped.mock.results;
-
-        const [
-          [, , , callCluster, includedHiddenTypes],
+          [, , , , includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
-        expect(callCluster).toBe(callAsCurrentUser);
         expect(includedHiddenTypes).toEqual([]);
       });
 
@@ -318,7 +314,7 @@ describe('SavedObjectsService', () => {
         const coreStart = createStartDeps();
         const { createScopedRepository } = await soService.start(coreStart);
 
-        const req = {} as KibanaRequest;
+        const req = httpServerMock.createKibanaRequest();
         createScopedRepository(req, ['someHiddenType']);
 
         const [
@@ -341,11 +337,10 @@ describe('SavedObjectsService', () => {
         createInternalRepository();
 
         const [
-          [, , , callCluster, includedHiddenTypes],
+          [, , , client, includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
-        expect(coreStart.elasticsearch.legacy.client.callAsInternalUser).toBe(callCluster);
-        expect(callCluster).toBe(coreStart.elasticsearch.legacy.client.callAsInternalUser);
+        expect(coreStart.elasticsearch.client.asInternalUser).toBe(client);
         expect(includedHiddenTypes).toEqual([]);
       });
 

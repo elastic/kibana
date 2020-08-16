@@ -135,11 +135,13 @@ describe('ExceptionsViewerHeader', () => {
     expect(mockOnFilterChange).toHaveBeenCalledWith({
       filter: {
         filter: '',
-        showDetectionsList: true,
-        showEndpointList: false,
         tags: [],
       },
-      pagination: {},
+      pagination: {
+        pageIndex: 0,
+      },
+      showDetectionsListsOnly: true,
+      showEndpointListsOnly: false,
     });
   });
 
@@ -175,11 +177,13 @@ describe('ExceptionsViewerHeader', () => {
     expect(mockOnFilterChange).toHaveBeenCalledWith({
       filter: {
         filter: '',
-        showDetectionsList: false,
-        showEndpointList: true,
         tags: [],
       },
-      pagination: {},
+      pagination: {
+        pageIndex: 0,
+      },
+      showDetectionsListsOnly: false,
+      showEndpointListsOnly: true,
     });
   });
 

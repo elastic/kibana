@@ -20,29 +20,39 @@
 import { run } from '@kbn/dev-utils';
 import { TEAM_ASSIGNMENT_PIPELINE_NAME } from '../constants';
 import { fetch } from './get_data';
-import { noop } from '../utils';
 import { update } from './update_ingest_pipeline';
-
-export const uploadTeamAssignmentJson = () => run(execute, { description });
 
 const updatePipeline = update(TEAM_ASSIGNMENT_PIPELINE_NAME);
 
-function execute({ flags, log }) {
+const execute = ({ flags, log }) => {
   if (flags.verbose) log.verbose(`### Verbose logging enabled`);
 
-  fetch().fold(noop, updatePipeline(log));
+  const logLeft = handleErr(log);
+  const updateAndLog = updatePipeline(log);
+
+  const { path } = flags;
+
+  fetch(path).fold(logLeft, updateAndLog);
+};
+
+function handleErr(log) {
+  return (msg) => log.error(msg);
 }
 
-function description() {
-  return `
+const description = `
 
 Upload the latest team assignment pipeline def from src,
 to the cluster.
 
-
-Examples:
-
-node scripts/load_team_assignment.js --verbose
-
       `;
-}
+
+const flags = {
+  string: ['path', 'verbose'],
+  help: `
+--path             Required, path to painless definition for team assignment.
+        `,
+};
+
+const usage = 'node scripts/load_team_assignment.js --verbose --path PATH_TO_PAINLESS_SCRIPT.json';
+
+export const uploadTeamAssignmentJson = () => run(execute, { description, flags, usage });

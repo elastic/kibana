@@ -15,6 +15,7 @@ import {
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
 import {
   RuleStep,
   RuleStepProps,
@@ -33,11 +34,10 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
 import { APP_ID } from '../../../../../common/constants';
-import { SecurityPageName } from '../../../../app/types';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: string[];
+  actionMessageParams: ActionVariable[];
 }
 
 const stepActionsDefaultValue = {
@@ -86,16 +86,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   });
   const { submit } = form;
 
-  // TO DO need to make sure that logic is still valid
-  const kibanaAbsoluteUrl = useMemo(() => {
-    const url = application.getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
-      absolute: true,
-    });
-    if (url != null && url.includes('app/security/alerts')) {
-      return url.replace('app/security/alerts', 'app/security');
-    }
-    return url;
-  }, [application]);
+  const kibanaAbsoluteUrl = useMemo(
+    () =>
+      application.getUrlForApp(`${APP_ID}`, {
+        absolute: true,
+      }),
+    [application]
+  );
 
   const onSubmit = useCallback(
     async (enabled: boolean) => {

@@ -16,7 +16,7 @@ import React, { useMemo, Fragment } from 'react';
 import styled, { css } from 'styled-components';
 
 import { DescriptionListItem } from '../../types';
-import { getDescriptionListContent } from '../../helpers';
+import { getDescriptionListContent } from '../helpers';
 import * as i18n from '../../translations';
 import { ExceptionListItemSchema } from '../../../../../../public/lists_plugin_deps';
 

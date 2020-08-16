@@ -20,7 +20,7 @@ export const readPrivilegesRoute = (
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: LIST_PRIVILEGES_URL,
       validate: false,

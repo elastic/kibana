@@ -72,21 +72,5 @@ export const createUsageCollector = (
         SEARCH_EVENT_TYPE.LONG_QUERY_RUN_BEYOND_TIMEOUT
       );
     },
-    trackError: async (duration: number) => {
-      return core.http.post('/api/search/usage', {
-        body: JSON.stringify({
-          eventType: 'error',
-          duration,
-        }),
-      });
-    },
-    trackSuccess: async (duration: number) => {
-      return core.http.post('/api/search/usage', {
-        body: JSON.stringify({
-          eventType: 'success',
-          duration,
-        }),
-      });
-    },
   };
 };

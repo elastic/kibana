@@ -21,10 +21,9 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, catchError } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test/src/functional_test_runner/lib/lifecycle';
 import { ToolingLog } from '@kbn/dev-utils';
-import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
@@ -54,9 +53,15 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
-const chromiumDownloadPrefs = {
+const chromiumUserPrefs = {
   'download.default_directory': downloadDir,
   'download.prompt_for_download': false,
+  'profile.content_settings.exceptions.clipboard': {
+    '[*.],*': {
+      last_modified: Date.now(),
+      setting: 1,
+    },
+  },
 };
 
 /**
@@ -136,7 +141,7 @@ async function attemptToCreateCommand(
 
         const prefs = new logging.Preferences();
         prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.setUserPreferences(chromiumDownloadPrefs);
+        chromeOptions.setUserPreferences(chromiumUserPrefs);
         chromeOptions.setLoggingPrefs(prefs);
         chromeOptions.set('unexpectedAlertBehaviour', 'accept');
         chromeOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
@@ -186,7 +191,7 @@ async function attemptToCreateCommand(
           edgeOptions.setBinaryPath(edgePaths.browserPath);
           const options = edgeOptions.get('ms:edgeOptions');
           // overriding options to include preferences
-          Object.assign(options, { prefs: chromiumDownloadPrefs });
+          Object.assign(options, { prefs: chromiumUserPrefs });
           edgeOptions.set('ms:edgeOptions', options);
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
@@ -337,25 +342,33 @@ export async function initWebDriver(
     edgePaths = await installDriver();
   }
 
-  return await Promise.race([
-    (async () => {
-      await delay(2 * MINUTE);
-      throw new Error('remote failed to start within 2 minutes');
-    })(),
+  return await Rx.race(
+    Rx.timer(2 * MINUTE).pipe(
+      map(() => {
+        throw new Error('remote failed to start within 2 minutes');
+      })
+    ),
 
-    (async () => {
-      while (true) {
-        const command = await Promise.race([
-          delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType, lifecycle, config),
-        ]);
-
+    Rx.race(
+      Rx.defer(async () => {
+        const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
         if (!command) {
-          continue;
+          throw new Error('remote creation aborted');
         }
-
         return command;
-      }
-    })(),
-  ]);
+      }),
+      Rx.timer(30 * SECOND).pipe(
+        map(() => {
+          throw new Error('remote failed to start within 30 seconds');
+        })
+      )
+    ).pipe(
+      catchError((error, resubscribe) => {
+        log.warning('Failure while creating webdriver instance');
+        log.warning(error);
+        log.warning('...retrying...');
+        return resubscribe;
+      })
+    )
+  ).toPromise();
 }

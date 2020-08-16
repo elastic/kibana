@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -15,7 +14,7 @@ import {
 } from '../../../../common/endpoint/schema/common';
 import { validate } from '../../../../common/validate';
 import { ManifestConstants } from '../../lib/artifacts';
-import { InternalManifestSchema } from '../../schemas/artifacts';
+import { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
 
 interface UpdateManifestOpts {
   version: string;
@@ -57,9 +56,12 @@ export class ManifestClient {
   public async createManifest(
     manifest: InternalManifestSchema
   ): Promise<SavedObject<InternalManifestSchema>> {
-    return this.savedObjectsClient.create<InternalManifestSchema>(
+    return this.savedObjectsClient.create<InternalManifestCreateSchema>(
       ManifestConstants.SAVED_OBJECT_TYPE,
-      manifest,
+      {
+        ...manifest,
+        created: Date.now(),
+      },
       { id: this.getManifestId() }
     );
   }

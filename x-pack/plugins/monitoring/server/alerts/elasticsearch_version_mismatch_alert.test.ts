@@ -22,7 +22,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     const alert = new ElasticsearchVersionMismatchAlert();
     expect(alert.type).toBe(ALERT_ELASTICSEARCH_VERSION_MISMATCH);
     expect(alert.label).toBe('Elasticsearch version mismatch');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
@@ -115,7 +115,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -166,7 +167,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -214,7 +216,8 @@ describe('ElasticsearchVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

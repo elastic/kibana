@@ -15,7 +15,9 @@ import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { wait } from '../../../common/lib/helpers';
+
+// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
+import { wait as waitFor } from '@testing-library/react';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
@@ -108,30 +110,39 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    await wait();
-    expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
-      data.title
-    );
-    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(data.status);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag"]`)
-        .first()
-        .text()
-    ).toEqual(data.tags[0]);
-    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
-      data.createdBy.username
-    );
-    expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-    expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
-      data.createdAt
-    );
-    expect(
-      wrapper
-        .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
-        .first()
-        .prop('raw')
-    ).toEqual(data.description);
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
+        data.title
+      );
+      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
+        data.status
+      );
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-coke"]`)
+          .first()
+          .text()
+      ).toEqual(data.tags[0]);
+      expect(
+        wrapper
+          .find(`[data-test-subj="case-view-tag-list"] [data-test-subj="case-tag-pepsi"]`)
+          .first()
+          .text()
+      ).toEqual(data.tags[1]);
+      expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
+        data.createdBy.username
+      );
+      expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
+      expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
+        data.createdAt
+      );
+      expect(
+        wrapper
+          .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
+          .first()
+          .prop('raw')
+      ).toEqual(data.description);
+    });
   });
 
   it('should show closed indicators in header when case is closed', async () => {
@@ -146,14 +157,15 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    await wait();
-    expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-    expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
-      basicCaseClosed.closedAt
-    );
-    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
-      basicCaseClosed.status
-    );
+    await waitFor(() => {
+      expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
+      expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
+        basicCaseClosed.closedAt
+      );
+      expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
+        basicCaseClosed.status
+      );
+    });
   });
 
   it('should dispatch update state when button is toggled', async () => {
@@ -164,11 +176,12 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
-    await wait();
-    wrapper
-      .find('input[data-test-subj="toggle-case-status"]')
-      .simulate('change', { target: { checked: true } });
-    expect(updateCaseProperty).toHaveBeenCalled();
+    await waitFor(() => {
+      wrapper
+        .find('input[data-test-subj="toggle-case-status"]')
+        .simulate('change', { target: { checked: true } });
+      expect(updateCaseProperty).toHaveBeenCalled();
+    });
   });
 
   it('should display EditableTitle isLoading', () => {
@@ -296,17 +309,17 @@ describe('CaseView ', () => {
       </TestProviders>
     );
 
-    await wait();
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
+      ).toBeTruthy();
 
-    expect(
-      wrapper.find('[data-test-subj="has-data-to-push-button"]').first().exists()
-    ).toBeTruthy();
+      wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
 
-    wrapper.find('[data-test-subj="push-to-external-service"]').first().simulate('click');
+      wrapper.update();
 
-    wrapper.update();
-
-    expect(postPushToService).toHaveBeenCalled();
+      expect(postPushToService).toHaveBeenCalled();
+    });
   });
 
   it('should return null if error', () => {
@@ -408,5 +421,35 @@ describe('CaseView ', () => {
     expect(
       wrapper.find('button[data-test-subj="push-to-external-service"]').first().prop('disabled')
     ).toBeTruthy();
+  });
+
+  it('should revert to the initial connector in case of failure', async () => {
+    updateCaseProperty.mockImplementation(({ onError }) => {
+      onError();
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...caseProps}
+            caseData={{ ...caseProps.caseData, connectorId: 'servicenow-1' }}
+          />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.update();
+      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
+      wrapper.update();
+    });
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper.find('[data-test-subj="dropdown-connectors"]').at(0).prop('valueOfSelected')
+      ).toBe('servicenow-1');
+    });
   });
 });

@@ -29,7 +29,7 @@ describe('LicenseExpirationAlert', () => {
     const alert = new LicenseExpirationAlert();
     expect(alert.type).toBe(ALERT_LICENSE_EXPIRATION);
     expect(alert.label).toBe('License expiration');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
@@ -122,7 +122,8 @@ describe('LicenseExpirationAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -195,7 +196,8 @@ describe('LicenseExpirationAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -243,7 +245,8 @@ describe('LicenseExpirationAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

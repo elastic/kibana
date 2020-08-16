@@ -297,6 +297,10 @@ export const getLayerList = createSelector(
   }
 );
 
+export const getLayerListConfigOnly = createSelector(getLayerListRaw, (layerDescriptorList) => {
+  return copyPersistentState(layerDescriptorList);
+});
+
 export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find((layer) => {
     return layerId === layer.getId();

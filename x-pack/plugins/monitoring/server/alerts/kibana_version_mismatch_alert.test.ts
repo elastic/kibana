@@ -22,7 +22,7 @@ describe('KibanaVersionMismatchAlert', () => {
     const alert = new KibanaVersionMismatchAlert();
     expect(alert.type).toBe(ALERT_KIBANA_VERSION_MISMATCH);
     expect(alert.label).toBe('Kibana version mismatch');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
@@ -118,7 +118,8 @@ describe('KibanaVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -168,7 +169,8 @@ describe('KibanaVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -216,7 +218,8 @@ describe('KibanaVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

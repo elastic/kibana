@@ -12,11 +12,7 @@ import {
 } from './embeddable_swim_lane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
-import {
-  AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { CoreStart } from 'kibana/public';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
@@ -25,6 +21,7 @@ import { MlDependencies } from '../../application/app';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { TriggerId } from 'src/plugins/ui_actions/public';
+import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {

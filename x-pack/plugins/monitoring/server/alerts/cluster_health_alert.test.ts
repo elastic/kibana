@@ -22,7 +22,7 @@ describe('ClusterHealthAlert', () => {
     const alert = new ClusterHealthAlert();
     expect(alert.type).toBe(ALERT_CLUSTER_HEALTH);
     expect(alert.label).toBe('Cluster health');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
@@ -112,7 +112,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -175,7 +176,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -223,7 +225,8 @@ describe('ClusterHealthAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

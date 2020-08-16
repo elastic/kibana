@@ -7,6 +7,10 @@
 export { NonEmptyString } from './detection_engine/schemas/types/non_empty_string';
 export { DefaultUuid } from './detection_engine/schemas/types/default_uuid';
 export { DefaultStringArray } from './detection_engine/schemas/types/default_string_array';
+export {
+  DefaultVersionNumber,
+  DefaultVersionNumberDecoded,
+} from './detection_engine/schemas/types/default_version_number';
 export { exactCheck } from './exact_check';
 export { getPaths, foldLeftRight } from './test_utils';
 export { validate, validateEither } from './validate';

@@ -14,37 +14,45 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 
-import React, { HTMLAttributes } from 'react';
+import React, { HTMLAttributes, ReactNode } from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import styled from 'styled-components';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
-export const SectionTitle: React.FC<{}> = (props) => (
-  <>
-    <EuiText size={'s'} grow={false}>
-      <h5>{props.children}</h5>
-    </EuiText>
-    <EuiSpacer size={'s'} />
-  </>
-);
+export function SectionTitle({ children }: { children?: ReactNode }) {
+  return (
+    <>
+      <EuiText size={'s'} grow={false}>
+        <h5>{children}</h5>
+      </EuiText>
+      <EuiSpacer size={'s'} />
+    </>
+  );
+}
 
-export const SectionSubtitle: React.FC<{}> = (props) => (
-  <>
-    <EuiText size={'xs'} color={'subdued'} grow={false}>
-      <small>{props.children}</small>
-    </EuiText>
-    <EuiSpacer size={'s'} />
-  </>
-);
+export function SectionSubtitle({ children }: { children?: ReactNode }) {
+  return (
+    <>
+      <EuiText size={'xs'} color={'subdued'} grow={false}>
+        <small>{children}</small>
+      </EuiText>
+      <EuiSpacer size={'s'} />
+    </>
+  );
+}
 
-export const SectionLinks: React.FC<{}> = (props) => (
-  <EuiListGroup flush={true} bordered={false}>
-    {props.children}
-  </EuiListGroup>
-);
+export function SectionLinks({ children }: { children?: ReactNode }) {
+  return (
+    <EuiListGroup flush={true} bordered={false}>
+      {children}
+    </EuiListGroup>
+  );
+}
 
-export const SectionSpacer: React.FC<{}> = () => <EuiSpacer size={'l'} />;
+export function SectionSpacer() {
+  return <EuiSpacer size={'l'} />;
+}
 
 export const Section = styled.div`
   margin-bottom: 24px;
@@ -54,10 +62,14 @@ export const Section = styled.div`
 `;
 
 export type SectionLinkProps = EuiListGroupItemProps;
-export const SectionLink: React.FC<EuiListGroupItemProps> = (props) => (
-  <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />
-);
+export function SectionLink(props: SectionLinkProps) {
+  return <EuiListGroupItem style={{ padding: 0 }} size={'s'} {...props} />;
+}
 
-export const ActionMenuDivider: React.FC<{}> = (props) => <EuiHorizontalRule margin={'s'} />;
+export function ActionMenuDivider() {
+  return <EuiHorizontalRule margin={'s'} />;
+}
 
-export const ActionMenu: React.FC<Props> = (props) => <EuiPopover {...props} ownFocus={true} />;
+export function ActionMenu(props: Props) {
+  return <EuiPopover {...props} ownFocus={true} />;
+}

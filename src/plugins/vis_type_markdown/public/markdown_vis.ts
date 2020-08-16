@@ -66,4 +66,5 @@ export const markdownVisDefinition = {
   },
   requestHandler: 'none',
   responseHandler: 'none',
+  inspectorAdapters: {},
 };

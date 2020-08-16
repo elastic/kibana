@@ -66,6 +66,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
             online: agentStatus?.online || 0,
             offline: agentStatus?.offline || 0,
             error: agentStatus?.error || 0,
+            other: agentStatus?.other || 0,
           }}
         />
       </EuiFlexItem>

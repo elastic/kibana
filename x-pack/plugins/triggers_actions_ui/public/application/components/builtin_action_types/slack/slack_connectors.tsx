@@ -12,7 +12,7 @@ import { SlackActionConnector } from '../types';
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors, docLinks }) => {
+>> = ({ action, editActionSecrets, errors, readOnly, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (
@@ -44,6 +44,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           fullWidth
           isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
           name="webhookUrl"
+          readOnly={readOnly}
           placeholder="Example: https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"

@@ -153,8 +153,11 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
       name: i18n.translate('xpack.ingestManager.agentEventsList.messageColumnTitle', {
         defaultMessage: 'Message',
       }),
-      render: (message: string) => <EuiText size="xs">{message}</EuiText>,
-      truncateText: true,
+      render: (value: string) => (
+        <EuiText size="xs" className="eui-textTruncate">
+          {value}
+        </EuiText>
+      ),
     },
     {
       align: RIGHT_ALIGNMENT,

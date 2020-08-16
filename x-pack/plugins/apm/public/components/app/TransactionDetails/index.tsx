@@ -27,7 +27,7 @@ import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
@@ -52,7 +52,7 @@ export function TransactionDetails() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionResult', 'serviceVersion'],
-      projection: PROJECTION.TRANSACTIONS,
+      projection: Projection.transactions,
       params: {
         transactionName,
         transactionType,

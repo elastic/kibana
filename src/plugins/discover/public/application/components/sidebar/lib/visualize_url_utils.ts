@@ -155,7 +155,7 @@ export function getVisualizeUrl(
       params: {
         field: field.name,
         size: parseInt(aggsTermSize, 10),
-        orderBy: '2',
+        orderBy: '1',
       },
     };
   }
@@ -169,7 +169,7 @@ export function getVisualizeUrl(
         query: state.query,
         vis: {
           type,
-          aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
+          aggs: [{ schema: 'metric', type: 'count', id: '1' }, agg],
         },
       } as any),
     },

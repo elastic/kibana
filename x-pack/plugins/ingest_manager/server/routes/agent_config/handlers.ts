@@ -135,6 +135,7 @@ export const createAgentConfigHandler: RequestHandler<
       newSysPackageConfig.namespace = agentConfig.namespace;
       await packageConfigService.create(soClient, callCluster, newSysPackageConfig, {
         user,
+        bumpConfigRevision: false,
       });
     }
 

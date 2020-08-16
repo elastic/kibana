@@ -37,7 +37,7 @@ export function getMlSystemProvider(
   return {
     mlSystemProvider(mlClusterClient: ILegacyScopedClusterClient, request: KibanaRequest) {
       // const hasMlCapabilities = getHasMlCapabilities(request);
-      const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
+      const { callAsInternalUser } = mlClusterClient;
       return {
         async mlCapabilities() {
           isMinimumLicense();
@@ -77,7 +77,7 @@ export function getMlSystemProvider(
           // integration and currently alerting does not supply a request object.
           // await hasMlCapabilities(['canAccessML']);
 
-          return callAsCurrentUser('search', {
+          return callAsInternalUser('search', {
             ...searchParams,
             index: ML_RESULTS_INDEX_PATTERN,
           });

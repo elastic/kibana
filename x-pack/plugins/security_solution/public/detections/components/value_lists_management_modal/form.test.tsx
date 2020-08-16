@@ -16,7 +16,7 @@ const mockUseImportList = useImportList as jest.Mock;
 
 const mockFile = ({
   name: 'foo.csv',
-  path: '/home/foo.csv',
+  type: 'text/csv',
 } as unknown) as File;
 
 const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<void> = async (
@@ -26,7 +26,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   const fileChange = container.find('EuiFilePicker').prop('onChange');
   act(() => {
     if (fileChange) {
-      fileChange(([file] as unknown) as FormEvent);
+      fileChange(({ item: () => file } as unknown) as FormEvent);
     }
   });
 };
@@ -81,6 +81,29 @@ describe('ValueListsForm', () => {
     );
 
     expect(onError).toHaveBeenCalledWith('whoops');
+  });
+
+  it('disables upload and displays an error if file has invalid extension', async () => {
+    const badMockFile = ({
+      name: 'foo.pdf',
+      type: 'application/pdf',
+    } as unknown) as File;
+
+    const container = mount(
+      <TestProviders>
+        <ValueListsForm onError={jest.fn()} onSuccess={jest.fn()} />
+      </TestProviders>
+    );
+
+    await mockSelectFile(container, badMockFile);
+
+    expect(
+      container.find('button[data-test-subj="value-lists-form-import-action"]').prop('disabled')
+    ).toEqual(true);
+
+    expect(container.find('div[data-test-subj="value-list-file-picker-row"]').text()).toContain(
+      'File must be one of the following types: [text/csv, text/plain]'
+    );
   });
 
   it('calls onSuccess if import succeeds', async () => {

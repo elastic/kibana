@@ -63,7 +63,7 @@ describe('BaseAlert', () => {
             interval: '1m',
           },
           tags: [],
-          throttle: '1m',
+          throttle: '1d',
         },
       });
     });

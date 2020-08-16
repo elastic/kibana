@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { deflateSync, inflateSync } from 'zlib';
+import LRU from 'lru-cache';
 import {
   ILegacyClusterClient,
   IRouter,
@@ -22,7 +23,6 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from 'src/core/server/mocks';
-import { ExceptionsCache } from '../../lib/artifacts/cache';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadExceptionListRoute } from './download_exception_list';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -97,7 +97,7 @@ describe('test alerts route', () => {
   let routeConfig: RouteConfig<unknown, unknown, unknown, never>;
   let routeHandler: RequestHandler<unknown, unknown, unknown>;
   let endpointAppContextService: EndpointAppContextService;
-  let cache: ExceptionsCache;
+  let cache: LRU<string, Buffer>;
   let ingestSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
@@ -108,7 +108,7 @@ describe('test alerts route', () => {
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
     endpointAppContextService = new EndpointAppContextService();
-    cache = new ExceptionsCache(5);
+    cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
     const startContract = createMockEndpointAppContextServiceStartContract();
 
     // The authentication with the Fleet Plugin needs a separate scoped SO Client
@@ -164,7 +164,7 @@ describe('test alerts route', () => {
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
 
-    expect(routeConfig.options).toEqual(undefined);
+    expect(routeConfig.options).toEqual({ tags: ['endpoint:limited-concurrency'] });
 
     await routeHandler(
       ({

@@ -12,7 +12,7 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_LIST_NAME,
 } from '../../../common/constants';
-import { ExceptionListSchema, ExceptionListSoSchema } from '../../../common/schemas';
+import { ExceptionListSchema, ExceptionListSoSchema, Version } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 
@@ -20,12 +20,14 @@ interface CreateEndpointListOptions {
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
   tieBreaker?: string;
+  version: Version;
 }
 
 export const createEndpointList = async ({
   savedObjectsClient,
   user,
   tieBreaker,
+  version,
 }: CreateEndpointListOptions): Promise<ExceptionListSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType: 'agnostic' });
   const dateNow = new Date().toISOString();
@@ -39,6 +41,7 @@ export const createEndpointList = async ({
         created_by: user,
         description: ENDPOINT_LIST_DESCRIPTION,
         entries: undefined,
+        immutable: false,
         item_id: undefined,
         list_id: ENDPOINT_LIST_ID,
         list_type: 'list',
@@ -48,6 +51,7 @@ export const createEndpointList = async ({
         tie_breaker_id: tieBreaker ?? uuid.v4(),
         type: 'endpoint',
         updated_by: user,
+        version,
       },
       {
         // We intentionally hard coding the id so that there can only be one exception list within the space
@@ -56,7 +60,7 @@ export const createEndpointList = async ({
     );
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    if (err.status === 409) {
+    if (savedObjectsClient.errors.isConflictError(err)) {
       return null;
     } else {
       throw err;

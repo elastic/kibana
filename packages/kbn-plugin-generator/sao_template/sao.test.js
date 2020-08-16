@@ -80,12 +80,14 @@ describe('plugin generator sao integration', () => {
       generateApi: true,
       generateScss: false,
       generateEslint: false,
+      generateTsconfig: false,
     });
 
     // check output files
     expect(res.fileList).toContain('public/plugin.ts');
     expect(res.fileList).not.toContain('public/index.scss');
     expect(res.fileList).not.toContain('.eslintrc.js');
+    expect(res.fileList).not.toContain('tsconfig.json');
   });
 
   it('plugin package has correct title', async () => {
@@ -136,6 +138,7 @@ describe('plugin generator sao integration', () => {
 
   it('includes dotfiles', async () => {
     const res = await sao.mockPrompt(template);
+    expect(res.files['tsconfig.json']).toBeTruthy();
     expect(res.files['.eslintrc.js']).toBeTruthy();
     expect(res.files['.i18nrc.json']).toBeTruthy();
   });

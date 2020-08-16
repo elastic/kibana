@@ -63,25 +63,6 @@ program
   );
 
 program
-  .command('test')
-  .description('Run the server and browser tests')
-  .on('--help', docs('test/all'))
-  .action(createCommanderAction('testAll'));
-
-program
-  .command('test:karma')
-  .description('Run the browser tests in a real web browser')
-  .option('--dev', 'Enable dev mode, keeps the test server running')
-  .option('-p, --plugins <plugin-ids>', "Manually specify which plugins' test bundles to run")
-  .on('--help', docs('test/karma'))
-  .action(
-    createCommanderAction('testKarma', (command) => ({
-      dev: Boolean(command.dev),
-      plugins: command.plugins,
-    }))
-  );
-
-program
   .command('test:mocha [files...]')
   .description('Run the server tests using mocha')
   .on('--help', docs('test/mocha'))

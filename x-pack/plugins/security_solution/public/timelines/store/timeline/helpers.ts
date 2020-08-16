@@ -154,7 +154,7 @@ interface AddNewTimelineParams {
 export const addNewTimeline = ({
   columns,
   dataProviders = [],
-  dateRange: mayDateRange,
+  dateRange: maybeDateRange,
   excludedRowRendererIds = [],
   filters = timelineDefaults.filters,
   id,
@@ -167,7 +167,7 @@ export const addNewTimeline = ({
   timelineType,
 }: AddNewTimelineParams): TimelineById => {
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
-  const dateRange = mayDateRange ?? { start: startDateRange, end: endDateRange };
+  const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {

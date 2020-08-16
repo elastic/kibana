@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { MBMapContainer } from './view';
+import { MBMap } from './view';
 import {
   mapExtentChanged,
   mapReady,
@@ -72,7 +72,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
+const connectedMBMap = connect(mapStateToProps, mapDispatchToProps, null, {
   forwardRef: true,
-})(MBMapContainer);
-export { connectedMBMapContainer as MBMapContainer };
+})(MBMap);
+export { connectedMBMap as MBMap };

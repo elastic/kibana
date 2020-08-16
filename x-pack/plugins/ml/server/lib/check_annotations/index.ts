@@ -18,17 +18,17 @@ import {
 // - ML_ANNOTATIONS_INDEX_ALIAS_READ alias is present
 // - ML_ANNOTATIONS_INDEX_ALIAS_WRITE alias is present
 export async function isAnnotationsFeatureAvailable({
-  callAsCurrentUser,
+  callAsInternalUser,
 }: ILegacyScopedClusterClient) {
   try {
     const indexParams = { index: ML_ANNOTATIONS_INDEX_PATTERN };
 
-    const annotationsIndexExists = await callAsCurrentUser('indices.exists', indexParams);
+    const annotationsIndexExists = await callAsInternalUser('indices.exists', indexParams);
     if (!annotationsIndexExists) {
       return false;
     }
 
-    const annotationsReadAliasExists = await callAsCurrentUser('indices.existsAlias', {
+    const annotationsReadAliasExists = await callAsInternalUser('indices.existsAlias', {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       name: ML_ANNOTATIONS_INDEX_ALIAS_READ,
     });
@@ -37,7 +37,7 @@ export async function isAnnotationsFeatureAvailable({
       return false;
     }
 
-    const annotationsWriteAliasExists = await callAsCurrentUser('indices.existsAlias', {
+    const annotationsWriteAliasExists = await callAsInternalUser('indices.existsAlias', {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       name: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
     });

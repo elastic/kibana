@@ -19,6 +19,7 @@ const createActionsClientMock = () => {
     getBulk: jest.fn(),
     execute: jest.fn(),
     enqueueExecution: jest.fn(),
+    listTypes: jest.fn(),
   };
   return mocked;
 };

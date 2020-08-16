@@ -22,7 +22,7 @@ describe('LogstashVersionMismatchAlert', () => {
     const alert = new LogstashVersionMismatchAlert();
     expect(alert.type).toBe(ALERT_LOGSTASH_VERSION_MISMATCH);
     expect(alert.label).toBe('Logstash version mismatch');
-    expect(alert.defaultThrottle).toBe('1m');
+    expect(alert.defaultThrottle).toBe('1d');
     // @ts-ignore
     expect(alert.actionVariables).toStrictEqual([
       {
@@ -115,7 +115,8 @@ describe('LogstashVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -165,7 +166,8 @@ describe('LogstashVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({
@@ -213,7 +215,8 @@ describe('LogstashVersionMismatchAlert', () => {
         monitoringCluster as any,
         getLogger as any,
         config as any,
-        kibanaUrl
+        kibanaUrl,
+        false
       );
       const type = alert.getAlertType();
       await type.executor({

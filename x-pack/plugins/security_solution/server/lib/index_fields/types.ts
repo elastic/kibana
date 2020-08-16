@@ -6,6 +6,7 @@
 
 import { IndexField } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
+import { IFieldSubType } from '../../../../../../src/plugins/data/common';
 
 export interface FieldsAdapter {
   getIndexFields(req: FrameworkRequest, indices: string[]): Promise<IndexField[]>;
@@ -16,4 +17,6 @@ export interface IndexFieldDescriptor {
   type: string;
   searchable: boolean;
   aggregatable: boolean;
+  esTypes?: string[];
+  subType?: IFieldSubType;
 }

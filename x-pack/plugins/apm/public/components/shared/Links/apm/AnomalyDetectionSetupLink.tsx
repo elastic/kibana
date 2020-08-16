@@ -6,34 +6,76 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMLink } from './APMLink';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
+import { useLicense } from '../../../../hooks/useLicense';
+
+export type AnomalyDetectionApiResponse = APIReturnType<
+  '/api/apm/settings/anomaly-detection',
+  'GET'
+>;
+
+const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 
 export function AnomalyDetectionSetupLink() {
   const { uiFilters } = useUrlParams();
   const environment = uiFilters.environment;
-
-  const { data = { jobs: [], hasLegacyJobs: false }, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
-    [],
-    { preservePreviousData: false }
-  );
-  const isFetchSuccess = status === FETCH_STATUS.SUCCESS;
+  const plugin = useApmPluginContext();
+  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
+  const license = useLicense();
+  const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
 
   return (
-    <APMLink path="/settings/anomaly-detection">
+    <APMLink
+      path="/settings/anomaly-detection"
+      style={{ whiteSpace: 'nowrap' }}
+    >
       <EuiButtonEmpty size="s" color="primary" iconType="inspect">
         {ANOMALY_DETECTION_LINK_LABEL}
       </EuiButtonEmpty>
-      {isFetchSuccess && showAlert(data.jobs, environment) && (
-        <EuiToolTip position="bottom" content={getTooltipText(environment)}>
-          <EuiIcon type="alert" color="danger" />
-        </EuiToolTip>
-      )}
+
+      {canGetJobs && hasValidLicense ? (
+        <MissingJobsAlert environment={environment} />
+      ) : null}
     </APMLink>
+  );
+}
+
+export function MissingJobsAlert({ environment }: { environment?: string }) {
+  const { data = DEFAULT_DATA, status } = useFetcher(
+    (callApmApi) =>
+      callApmApi({ pathname: `/api/apm/settings/anomaly-detection` }),
+    [],
+    { preservePreviousData: false, showToastOnError: false }
+  );
+
+  if (status !== FETCH_STATUS.SUCCESS) {
+    return null;
+  }
+
+  const isEnvironmentSelected = !!environment;
+
+  // there are jobs for at least one environment
+  if (!isEnvironmentSelected && data.jobs.length > 0) {
+    return null;
+  }
+
+  // there are jobs for the selected environment
+  if (
+    isEnvironmentSelected &&
+    data.jobs.some((job) => environment === job.environment)
+  ) {
+    return null;
+  }
+
+  return (
+    <EuiToolTip position="bottom" content={getTooltipText(environment)}>
+      <EuiIcon type="alert" color="danger" />
+    </EuiToolTip>
   );
 }
 
@@ -47,7 +89,7 @@ function getTooltipText(environment?: string) {
   return i18n.translate(
     'xpack.apm.anomalyDetectionSetup.notEnabledForEnvironmentText',
     {
-      defaultMessage: `Anomaly detection is not yet enabled for the "{currentEnvironment}" environment. Click to continue setup.`,
+      defaultMessage: `Anomaly detection is not yet enabled for the environment "{currentEnvironment}". Click to continue setup.`,
       values: { currentEnvironment: getEnvironmentLabel(environment) },
     }
   );
@@ -57,16 +99,3 @@ const ANOMALY_DETECTION_LINK_LABEL = i18n.translate(
   'xpack.apm.anomalyDetectionSetup.linkLabel',
   { defaultMessage: `Anomaly detection` }
 );
-
-export function showAlert(
-  jobs: Array<{ environment: string }> = [],
-  environment: string | undefined
-) {
-  return (
-    // No job exists, or
-    jobs.length === 0 ||
-    // no job exists for the selected environment
-    (environment !== undefined &&
-      jobs.every((job) => environment !== job.environment))
-  );
-}

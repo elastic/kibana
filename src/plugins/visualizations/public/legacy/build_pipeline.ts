@@ -52,16 +52,18 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (
+type BuildVisFunction = (
   params: VisParams,
   schemas: Schemas,
   uiState: any,
   meta?: { savedObjectId?: string }
 ) => string;
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
-  [key: string]: buildVisFunction;
+  [key: string]: BuildVisFunction;
 }
 
 interface BuildVisConfigFunction {
@@ -255,7 +257,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
-  metrics: (params, schemas, uiState = {}) => {
+  metrics: ({ title, ...params }, schemas, uiState = {}) => {
     const paramsJson = prepareJson('params', params);
     const uiStateJson = prepareJson('uiState', uiState);
 
@@ -535,7 +537,10 @@ export const buildPipeline = async (
     metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
+      pipeline += `${prepareString('index', indexPattern.id)} `;
+      if (vis.data.aggs) {
+        pipeline += `${prepareJson('aggConfigs', vis.data.aggs!.aggs)}`;
+      }
     }
   }
 

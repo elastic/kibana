@@ -41,7 +41,8 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     agentConfig: Partial<AgentConfigSOAttributes>,
-    user?: AuthenticatedUser
+    user?: AuthenticatedUser,
+    options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -60,7 +61,7 @@ class AgentConfigService {
 
     await soClient.update<AgentConfigSOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
-      revision: oldAgentConfig.revision + 1,
+      ...(options.bumpRevision ? { revision: oldAgentConfig.revision + 1 } : {}),
       updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
@@ -217,6 +218,7 @@ class AgentConfigService {
     if (!baseAgentConfig) {
       throw new Error('Agent config not found');
     }
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { namespace, monitoring_enabled } = baseAgentConfig;
     const newAgentConfig = await this.create(
       soClient,
@@ -232,16 +234,14 @@ class AgentConfigService {
     if (baseAgentConfig.package_configs.length) {
       const newPackageConfigs = (baseAgentConfig.package_configs as PackageConfig[]).map(
         (packageConfig: PackageConfig) => {
-          const { id: packageConfigId, ...newPackageConfig } = packageConfig;
+          const { id: packageConfigId, version, ...newPackageConfig } = packageConfig;
           return newPackageConfig;
         }
       );
-      await packageConfigService.bulkCreate(
-        soClient,
-        newPackageConfigs,
-        newAgentConfig.id,
-        options
-      );
+      await packageConfigService.bulkCreate(soClient, newPackageConfigs, newAgentConfig.id, {
+        ...options,
+        bumpConfigRevision: false,
+      });
     }
 
     // Get updated config
@@ -265,7 +265,7 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string,
     packageConfigIds: string[],
-    options?: { user?: AuthenticatedUser }
+    options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentConfig> {
     const oldAgentConfig = await this.get(soClient, id, false);
 
@@ -281,7 +281,8 @@ class AgentConfigService {
           [...((oldAgentConfig.package_configs || []) as string[])].concat(packageConfigIds)
         ),
       },
-      options?.user
+      options?.user,
+      { bumpRevision: options.bumpRevision }
     );
   }
 
@@ -334,7 +335,7 @@ class AgentConfigService {
       throw new Error('Agent configuration not found');
     }
 
-    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
+    const { id: defaultConfigId } = await this.ensureDefaultAgentConfig(soClient);
     if (id === defaultConfigId) {
       throw new Error('The default agent configuration cannot be deleted');
     }
@@ -393,6 +394,7 @@ class AgentConfigService {
       outputs: {
         // TEMPORARY as we only support a default output
         ...[defaultOutput].reduce(
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
             outputs[name] = {
               type,

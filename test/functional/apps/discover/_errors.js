@@ -22,12 +22,13 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('invalid_scripted_field');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
@@ -35,8 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.unload('invalid_scripted_field');
     });
 
-    // ES issue https://github.com/elastic/elasticsearch/issues/54235
-    describe.skip('invalid scripted field error', () => {
+    describe('invalid scripted field error', () => {
       it('is rendered', async () => {
         const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
         expect(isFetchErrorVisible).to.be(true);

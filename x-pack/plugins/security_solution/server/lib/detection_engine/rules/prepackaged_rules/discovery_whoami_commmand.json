@@ -7,7 +7,8 @@
     "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
   ],
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",

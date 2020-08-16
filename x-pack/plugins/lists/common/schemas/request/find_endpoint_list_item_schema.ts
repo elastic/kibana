@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import { filter, sort_field, sort_order } from '../common/schemas';
@@ -22,16 +20,9 @@ export const findEndpointListItemSchema = t.exact(
   })
 );
 
-export type FindEndpointListItemSchemaPartial = t.OutputOf<typeof findEndpointListItemSchema>;
-
-// This type is used after a decode since some things are defaults after a decode.
-export type FindEndpointListItemSchemaPartialDecoded = t.TypeOf<typeof findEndpointListItemSchema>;
+export type FindEndpointListItemSchema = t.OutputOf<typeof findEndpointListItemSchema>;
 
 // This type is used after a decode since some things are defaults after a decode.
 export type FindEndpointListItemSchemaDecoded = RequiredKeepUndefined<
-  FindEndpointListItemSchemaPartialDecoded
->;
-
-export type FindEndpointListItemSchema = RequiredKeepUndefined<
   t.TypeOf<typeof findEndpointListItemSchema>
 >;

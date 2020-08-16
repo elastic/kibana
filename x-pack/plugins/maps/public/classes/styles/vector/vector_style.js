@@ -48,6 +48,11 @@ const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
 const POLYGONS = [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON];
 
+function getNumericalMbFeatureStateValue(value) {
+  const valueAsFloat = parseFloat(value);
+  return isNaN(valueAsFloat) ? null : valueAsFloat;
+}
+
 export class VectorStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
 
@@ -518,14 +523,14 @@ export class VectorStyle extends AbstractStyle {
         const computedName = getComputedFieldName(dynamicStyleProp.getStyleName(), name);
         const rawValue = feature.properties[name];
         if (dynamicStyleProp.supportsMbFeatureState()) {
-          tmpFeatureState[name] = dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
+          tmpFeatureState[name] = getNumericalMbFeatureStateValue(rawValue); //the same value will be potentially overridden multiple times, if the name remains identical
         } else {
           //in practice, a new system property will only be created for:
           // - label text: this requires the value to be formatted first.
           // - icon orientation: this is a lay-out property which do not support feature-state (but we're still coercing to a number)
 
           const formattedValue = dynamicStyleProp.isOrdinal()
-            ? dynamicStyleProp.getNumericalMbFeatureStateValue(rawValue)
+            ? getNumericalMbFeatureStateValue(rawValue)
             : dynamicStyleProp.formatField(rawValue);
 
           feature.properties[computedName] = formattedValue;

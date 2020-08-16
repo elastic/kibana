@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const RELATIVE_DATE_FORMAT = /\d (?:seconds|minutes) ago/i;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/71951
-  describe.skip('When on the Endpoint Policy List', function () {
+  describe('When on the Endpoint Policy List', function () {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.policy.navigateToPolicyList();
@@ -79,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Protect East Coastrev. 1',
           'elastic',
           'elastic',
-          `${policyInfo.packageConfig.package?.title} v${policyInfo.packageConfig.package?.version}`,
+          `v${policyInfo.packageConfig.package?.version}`,
           '',
         ]);
         [policyRow[2], policyRow[4]].forEach((relativeDate) => {
@@ -130,6 +129,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
         const endpointConfig = await pageObjects.policy.findPackageConfigEndpointCustomConfiguration();
         expect(endpointConfig).not.to.be(undefined);
+      });
+
+      it('should have empty value for package configuration name', async () => {
+        await pageObjects.ingestManagerCreatePackageConfig.selectAgentConfig();
+        expect(await pageObjects.ingestManagerCreatePackageConfig.getPackageConfigName()).to.be('');
       });
 
       it('should redirect user back to Policy List after a successful save', async () => {

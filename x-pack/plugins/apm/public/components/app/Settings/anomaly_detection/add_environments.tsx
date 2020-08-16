@@ -17,8 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ML_ERRORS } from '../../../../../common/anomaly_detection';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { createJobs } from './create_jobs';
@@ -29,12 +31,14 @@ interface Props {
   onCreateJobSuccess: () => void;
   onCancel: () => void;
 }
-export const AddEnvironments = ({
+export function AddEnvironments({
   currentEnvironments,
   onCreateJobSuccess,
   onCancel,
-}: Props) => {
-  const { toasts } = useApmPluginContext().core.notifications;
+}: Props) {
+  const { notifications, application } = useApmPluginContext().core;
+  const canCreateJob = !!application.capabilities.ml.canCreateJob;
+  const { toasts } = notifications;
   const { data = [], status } = useFetcher(
     (callApmApi) =>
       callApmApi({
@@ -55,6 +59,17 @@ export const AddEnvironments = ({
   const [selectedOptions, setSelected] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >([]);
+
+  if (!canCreateJob) {
+    return (
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="alert"
+          body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
+        />
+      </EuiPanel>
+    );
+  }
 
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
@@ -160,4 +175,4 @@ export const AddEnvironments = ({
       <EuiSpacer size="l" />
     </EuiPanel>
   );
-};
+}

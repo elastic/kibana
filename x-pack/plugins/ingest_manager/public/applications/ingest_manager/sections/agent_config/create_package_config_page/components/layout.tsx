@@ -153,7 +153,9 @@ export const CreatePackageConfigPageLayout: React.FunctionComponent<{
               defaultMessage="Agent configuration"
             />
           </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>{agentConfig?.name || '-'}</EuiDescriptionListDescription>
+          <EuiDescriptionListDescription className="eui-textBreakWord">
+            {agentConfig?.name || '-'}
+          </EuiDescriptionListDescription>
         </EuiDescriptionList>
       ) : undefined;
 

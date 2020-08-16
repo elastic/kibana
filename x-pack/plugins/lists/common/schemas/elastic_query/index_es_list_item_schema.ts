@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
@@ -38,4 +36,4 @@ export const indexEsListItemSchema = t.intersection([
   esDataTypeUnion,
 ]);
 
-export type IndexEsListItemSchema = t.TypeOf<typeof indexEsListItemSchema>;
+export type IndexEsListItemSchema = t.OutputOf<typeof indexEsListItemSchema>;

@@ -8,13 +8,12 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { RuleType } from '../../../../../common/detection_engine/types';
 import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-
-const isThresholdRule = (ruleType: RuleType) => ruleType === 'threshold';
 
 interface SelectRuleTypeProps {
   describedByIds?: string[];

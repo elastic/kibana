@@ -193,4 +193,39 @@ describe('getThresholdSignalQueryFields', () => {
       'event.dataset': 'traefik.access',
     });
   });
+
+  it('should return proper object for exists filters', () => {
+    const filters = {
+      bool: {
+        should: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'process.name',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: 'event.type',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+    expect(getThresholdSignalQueryFields(filters)).toEqual({});
+  });
 });

@@ -14,6 +14,7 @@ import { FirstUseCallout } from '../log_analysis_results';
 export const LogAnalysisJobProblemIndicator: React.FC<{
   hasOutdatedJobConfigurations: boolean;
   hasOutdatedJobDefinitions: boolean;
+  hasSetupCapabilities: boolean;
   hasStoppedJobs: boolean;
   isFirstUse: boolean;
   moduleName: string;
@@ -22,6 +23,7 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
 }> = ({
   hasOutdatedJobConfigurations,
   hasOutdatedJobDefinitions,
+  hasSetupCapabilities,
   hasStoppedJobs,
   isFirstUse,
   moduleName,
@@ -32,12 +34,14 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
     <>
       {hasOutdatedJobDefinitions ? (
         <JobDefinitionOutdatedCallout
+          hasSetupCapabilities={hasSetupCapabilities}
           moduleName={moduleName}
           onRecreateMlJob={onRecreateMlJobForUpdate}
         />
       ) : null}
       {hasOutdatedJobConfigurations ? (
         <JobConfigurationOutdatedCallout
+          hasSetupCapabilities={hasSetupCapabilities}
           moduleName={moduleName}
           onRecreateMlJob={onRecreateMlJobForReconfiguration}
         />

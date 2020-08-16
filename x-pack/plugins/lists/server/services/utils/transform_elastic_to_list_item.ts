@@ -9,6 +9,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
+import { encodeHitVersion } from './encode_hit_version';
 import { findSourceValue } from './find_source_value';
 
 export interface TransformElasticToListItemOptions {
@@ -24,6 +25,7 @@ export const transformElasticToListItem = ({
     const {
       _id,
       _source: {
+        /* eslint-disable @typescript-eslint/naming-convention */
         created_at,
         deserializer,
         serializer,
@@ -33,6 +35,7 @@ export const transformElasticToListItem = ({
         list_id,
         tie_breaker_id,
         meta,
+        /* eslint-enable @typescript-eslint/naming-convention */
       },
     } = hit;
     const value = findSourceValue(hit._source);
@@ -40,6 +43,7 @@ export const transformElasticToListItem = ({
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
     } else {
       return {
+        _version: encodeHitVersion(hit),
         created_at,
         created_by,
         deserializer,

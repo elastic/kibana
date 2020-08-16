@@ -30,15 +30,17 @@ const HTTP_VERBS = ['post', 'put'];
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   WebhookActionConnector
->> = ({ action, editActionConfig, editActionSecrets, errors }) => {
+>> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
+  const { user, password } = action.secrets;
+  const { method, url, headers } = action.config;
+
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
 
-  const { user, password } = action.secrets;
-  const { method, url, headers } = action.config;
-
-  editActionConfig('method', 'post'); // set method to POST by default
+  if (!method) {
+    editActionConfig('method', 'post'); // set method to POST by default
+  }
 
   const headerErrors = {
     keyHeader: new Array<string>(),
@@ -80,7 +82,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
   function viewHeaders() {
     setHasHeaders(!hasHeaders);
-    if (!hasHeaders) {
+    if (!hasHeaders && !headers) {
       editActionConfig('headers', {});
     }
   }
@@ -126,6 +128,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 fullWidth
                 isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
                 name="keyHeader"
+                readOnly={readOnly}
                 value={httpHeaderKey}
                 data-test-subj="webhookHeadersKeyInput"
                 onChange={(e) => {
@@ -151,6 +154,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 fullWidth
                 isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
                 name="valueHeader"
+                readOnly={readOnly}
                 value={httpHeaderValue}
                 data-test-subj="webhookHeadersValueInput"
                 onChange={(e) => {
@@ -220,6 +224,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             <EuiSelect
               name="method"
               value={method || 'post'}
+              disabled={readOnly}
               data-test-subj="webhookMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
               onChange={(e) => {
@@ -245,6 +250,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               name="url"
               isInvalid={errors.url.length > 0 && url !== undefined}
               fullWidth
+              readOnly={readOnly}
               value={url || ''}
               placeholder="https://<site-url> or http://<site-url>"
               data-test-subj="webhookUrlText"
@@ -278,6 +284,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               fullWidth
               isInvalid={errors.user.length > 0 && user !== undefined}
               name="user"
+              readOnly={readOnly}
               value={user || ''}
               data-test-subj="webhookUserInput"
               onChange={(e) => {
@@ -307,6 +314,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             <EuiFieldPassword
               fullWidth
               name="password"
+              readOnly={readOnly}
               isInvalid={errors.password.length > 0 && password !== undefined}
               value={password || ''}
               data-test-subj="webhookPasswordInput"
@@ -326,6 +334,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <EuiSpacer size="m" />
       <EuiSwitch
         data-test-subj="webhookViewHeadersSwitch"
+        disabled={readOnly}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.viewHeadersSwitch',
           {
@@ -338,8 +347,8 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 
       <EuiSpacer size="m" />
       <div>
-        {hasHeaders && Object.keys(headers || {}).length > 0 ? (
-          <Fragment>
+        {Object.keys(headers || {}).length > 0 ? (
+          <>
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
               <h5>
@@ -351,10 +360,10 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             </EuiTitle>
             <EuiSpacer size="s" />
             {headersList}
-          </Fragment>
+          </>
         ) : null}
         <EuiSpacer size="m" />
-        {headerControl}
+        {hasHeaders && headerControl}
         <EuiSpacer size="m" />
       </div>
     </Fragment>

@@ -14,12 +14,10 @@ export type NamespaceType = t.TypeOf<typeof namespaceType>;
  * Types the DefaultNamespace as:
  *   - If null or undefined, then a default string/enumeration of "single" will be used.
  */
-export const DefaultNamespace = new t.Type<NamespaceType, NamespaceType, unknown>(
+export const DefaultNamespace = new t.Type<NamespaceType, NamespaceType | undefined, unknown>(
   'DefaultNamespace',
   namespaceType.is,
   (input, context): Either<t.Errors, NamespaceType> =>
     input == null ? t.success('single') : namespaceType.validate(input, context),
   t.identity
 );
-
-export type DefaultNamespaceC = typeof DefaultNamespace;

@@ -83,7 +83,7 @@ export const getThresholdSignalQueryFields = (filter: unknown) => {
         return { ...acc, ...item.match_phrase };
       }
 
-      if (item.bool.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
+      if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
         return { ...acc, ...(item.bool.should[0].match || item.bool.should[0].match_phrase) };
       }
 
@@ -134,6 +134,7 @@ const getTransformedHits = (
   }
 
   return results.aggregations.threshold.buckets.map(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     ({ key, doc_count }: { key: string; doc_count: number }) => {
       const source = {
         '@timestamp': new Date().toISOString(),

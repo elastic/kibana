@@ -21,12 +21,13 @@ import {
   EditButtonFlyout,
 } from '../action_edit';
 import { useStartAction, StartButton, StartButtonModal } from '../action_start';
-import { StopButton } from '../action_stop';
+import { StopButton, useForceStopAction, StopButtonModal } from '../action_stop';
 import { getViewAction } from '../action_view';
 
 import {
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsRunning,
+  isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from './common';
 
@@ -43,7 +44,7 @@ export const useActions = (
   let modals: JSX.Element | null = null;
 
   const actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] = [
-    getViewAction(isManagementTable),
+    getViewAction(),
   ];
 
   // isManagementTable will be the same for the lifecycle of the component
@@ -53,11 +54,13 @@ export const useActions = (
     const deleteAction = useDeleteAction();
     const editAction = useEditAction();
     const startAction = useStartAction();
+    const stopAction = useForceStopAction();
     /* eslint-disable react-hooks/rules-of-hooks */
 
     modals = (
       <>
         {startAction.isModalVisible && <StartButtonModal {...startAction} />}
+        {stopAction.isModalVisible && <StopButtonModal {...stopAction} />}
         {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
         {isEditActionFlyoutVisible(editAction) && <EditButtonFlyout {...editAction} />}
       </>
@@ -78,7 +81,10 @@ export const useActions = (
       ...[
         {
           render: (item: DataFrameAnalyticsListRow) => {
-            if (!isDataFrameAnalyticsRunning(item.stats.state)) {
+            if (
+              !isDataFrameAnalyticsRunning(item.stats.state) &&
+              !isDataFrameAnalyticsFailed(item.stats.state)
+            ) {
               return (
                 <StartButton
                   canStartStopDataFrameAnalytics={canStartStopDataFrameAnalytics}
@@ -99,7 +105,11 @@ export const useActions = (
                 item={item}
                 onClick={() => {
                   if (canStartStopDataFrameAnalytics) {
-                    stopAnalytics(item);
+                    if (isDataFrameAnalyticsFailed(item.stats.state)) {
+                      stopAction.openModal(item);
+                    } else {
+                      stopAnalytics(item);
+                    }
                   }
                 }}
               />

@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   ReadEndpointListItemSchemaDecoded,
   exceptionListItemSchema,
@@ -21,7 +21,7 @@ export const readEndpointListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-read'],
       },
       path: ENDPOINT_LIST_ITEM_URL,
       validate: {

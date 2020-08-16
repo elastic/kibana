@@ -7,6 +7,7 @@
 import { InternalArtifactSchema } from '../../schemas/artifacts';
 import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
 import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
+import { getArtifactId } from './common';
 
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;
@@ -16,7 +17,7 @@ export class ManifestEntry {
   }
 
   public getDocId(): string {
-    return `${this.getIdentifier()}-${this.getDecodedSha256()}`;
+    return getArtifactId(this.artifact);
   }
 
   public getIdentifier(): string {

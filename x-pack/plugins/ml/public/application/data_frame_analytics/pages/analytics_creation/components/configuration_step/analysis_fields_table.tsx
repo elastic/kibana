@@ -54,7 +54,7 @@ const columns = [
     id: 'is_included',
     alignment: LEFT_ALIGNMENT,
     isSortable: true,
-    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
   },
   {
@@ -64,7 +64,7 @@ const columns = [
     id: 'is_required',
     alignment: LEFT_ALIGNMENT,
     isSortable: true,
-    // eslint-disable-next-line @typescript-eslint/camelcase
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
   },
   {
@@ -172,6 +172,7 @@ export const AnalysisFieldsTable: FC<{
   return (
     <Fragment>
       <EuiFormRow
+        data-test-subj="mlAnalyticsCreateJobWizardIncludesTable"
         label={i18n.translate('xpack.ml.dataframe.analytics.create.includedFieldsLabel', {
           defaultMessage: 'Included fields',
         })}

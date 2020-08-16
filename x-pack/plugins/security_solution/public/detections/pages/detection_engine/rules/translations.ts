@@ -27,6 +27,14 @@ export const UPLOAD_VALUE_LISTS = i18n.translate(
   }
 );
 
+export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip',
+  {
+    defaultMessage:
+      'Use value lists to create an exception when a field value matches a value found in a list',
+  }
+);
+
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {

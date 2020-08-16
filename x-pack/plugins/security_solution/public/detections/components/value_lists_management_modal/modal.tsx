@@ -6,6 +6,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiBasicTable,
   EuiButton,
   EuiModal,
   EuiModalBody,
@@ -13,7 +14,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
 import {
@@ -23,11 +26,12 @@ import {
   useDeleteList,
   useCursor,
 } from '../../../shared_imports';
-import { useToasts, useKibana } from '../../../common/lib/kibana';
-import { GenericDownloader } from '../../../common/components/generic_downloader';
+import { useKibana } from '../../../common/lib/kibana';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { ValueListsTable } from './table';
+import { buildColumns } from './table_helpers';
 import { ValueListsForm } from './form';
+import { AutoDownload } from './auto_download';
 
 interface ValueListsModalProps {
   onClose: () => void;
@@ -44,8 +48,10 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const { http } = useKibana().services;
   const { start: findLists, ...lists } = useFindLists();
   const { start: deleteList, result: deleteResult } = useDeleteList();
-  const [exportListId, setExportListId] = useState<string>();
-  const toasts = useToasts();
+  const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
+  const [exportingListIds, setExportingListIds] = useState<string[]>([]);
+  const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const { addError, addSuccess } = useAppToasts();
 
   const fetchLists = useCallback(() => {
     findLists({ cursor, http, pageIndex: pageIndex + 1, pageSize });
@@ -53,24 +59,33 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   const handleDelete = useCallback(
     ({ id }: { id: string }) => {
+      setDeletingListIds([...deletingListIds, id]);
       deleteList({ http, id });
     },
-    [deleteList, http]
+    [deleteList, deletingListIds, http]
   );
 
   useEffect(() => {
     if (deleteResult != null) {
+      setDeletingListIds((ids) => [...ids.filter((id) => id !== deleteResult.id)]);
       fetchLists();
     }
   }, [deleteResult, fetchLists]);
 
   const handleExport = useCallback(
-    async ({ ids }: { ids: string[] }) =>
-      exportList({ http, listId: ids[0], signal: new AbortController().signal }),
-    [http]
+    async ({ id }: { id: string }) => {
+      try {
+        setExportingListIds((ids) => [...ids, id]);
+        const blob = await exportList({ http, listId: id, signal: new AbortController().signal });
+        setExportDownload({ name: id, blob });
+      } catch (error) {
+        addError(error, { title: i18n.EXPORT_ERROR });
+      } finally {
+        setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
+      }
+    },
+    [addError, http]
   );
-  const handleExportClick = useCallback(({ id }: { id: string }) => setExportListId(id), []);
-  const handleExportComplete = useCallback(() => setExportListId(undefined), []);
 
   const handleTableChange = useCallback(
     ({ page: { index, size } }: { page: { index: number; size: number } }) => {
@@ -82,21 +97,21 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const handleUploadError = useCallback(
     (error: Error) => {
       if (error.name !== 'AbortError') {
-        toasts.addError(error, { title: i18n.UPLOAD_ERROR });
+        addError(error, { title: i18n.UPLOAD_ERROR });
       }
     },
-    [toasts]
+    [addError]
   );
   const handleUploadSuccess = useCallback(
     (response: ListSchema) => {
-      toasts.addSuccess({
+      addSuccess({
         text: i18n.uploadSuccessMessage(response.name),
         title: i18n.UPLOAD_SUCCESS_TITLE,
       });
       fetchLists();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toasts]
+    [addSuccess]
   );
 
   useEffect(() => {
@@ -115,12 +130,19 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     return null;
   }
 
+  const tableItems = (lists.result?.data ?? []).map((item) => ({
+    ...item,
+    isDeleting: deletingListIds.includes(item.id),
+    isExporting: exportingListIds.includes(item.id),
+  }));
+
   const pagination = {
     pageIndex,
     pageSize,
     totalItemCount: lists.result?.total ?? 0,
     hidePerPageOptions: true,
   };
+  const columns = buildColumns(handleExport, handleDelete);
 
   return (
     <EuiOverlayMask onClick={onClose}>
@@ -131,14 +153,19 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         <EuiModalBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
-          <ValueListsTable
-            lists={lists.result?.data ?? []}
-            loading={lists.loading}
-            onDelete={handleDelete}
-            onExport={handleExportClick}
-            onChange={handleTableChange}
-            pagination={pagination}
-          />
+          <EuiPanel>
+            <EuiText size="s">
+              <h2>{i18n.TABLE_TITLE}</h2>
+            </EuiText>
+            <EuiBasicTable
+              data-test-subj="value-lists-table"
+              columns={columns}
+              items={tableItems}
+              loading={lists.loading}
+              onChange={handleTableChange}
+              pagination={pagination}
+            />
+          </EuiPanel>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButton data-test-subj="value-lists-modal-close-action" onClick={onClose}>
@@ -146,12 +173,10 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
           </EuiButton>
         </EuiModalFooter>
       </EuiModal>
-      <GenericDownloader
-        filename={exportListId ?? 'download.txt'}
-        ids={exportListId != null ? [exportListId] : undefined}
-        onExportSuccess={handleExportComplete}
-        onExportFailure={handleExportComplete}
-        exportSelectedData={handleExport}
+      <AutoDownload
+        blob={exportDownload.blob}
+        name={exportDownload.name}
+        onDownload={() => setExportDownload({})}
       />
     </EuiOverlayMask>
   );

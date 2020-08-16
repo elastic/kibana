@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { LocationDurationLine } from '../../../../common/types';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
 import { AnomalyRecords } from '../../../state/actions';
@@ -35,8 +35,8 @@ export const MonitorDurationComponent = ({
     <EuiPanel paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
+          <EuiTitle size="s">
+            <h3>
               {hasMLJob ? (
                 <FormattedMessage
                   id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
@@ -49,13 +49,14 @@ export const MonitorDurationComponent = ({
                   defaultMessage="Monitor duration"
                 />
               )}
-            </h4>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <MLIntegrationComponent />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <DurationChartComponent
         locationDurationLines={locationDurationLines}
         loading={loading}

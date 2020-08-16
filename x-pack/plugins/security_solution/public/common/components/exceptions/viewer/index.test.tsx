@@ -17,6 +17,7 @@ import {
   useApi,
 } from '../../../../../public/lists_plugin_deps';
 import { getExceptionListSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../../public/lists_plugin_deps');
@@ -36,6 +37,7 @@ describe('ExceptionsViewer', () => {
 
     (useApi as jest.Mock).mockReturnValue({
       deleteExceptionItem: jest.fn().mockResolvedValue(true),
+      getExceptionListsItems: jest.fn().mockResolvedValue(getFoundExceptionListItemSchemaMock()),
     });
 
     (useExceptionList as jest.Mock).mockReturnValue([
@@ -67,10 +69,12 @@ describe('ExceptionsViewer', () => {
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
           ruleId={'123'}
+          ruleIndices={['filebeat-*']}
           ruleName={ruleName}
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },
@@ -88,6 +92,7 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
           ruleName={ruleName}
           exceptionListsMeta={[]}
@@ -116,11 +121,13 @@ describe('ExceptionsViewer', () => {
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
         <ExceptionsViewer
+          ruleIndices={['filebeat-*']}
           ruleId={'123'}
           ruleName={ruleName}
           exceptionListsMeta={[
             {
               id: '5b543420',
+              listId: 'list_id',
               type: 'endpoint',
               namespaceType: 'single',
             },

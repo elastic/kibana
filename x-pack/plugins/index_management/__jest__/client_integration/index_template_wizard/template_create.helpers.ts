@@ -5,7 +5,7 @@
  */
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
-import { TemplateCreate } from '../../../public/application/sections/template_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';

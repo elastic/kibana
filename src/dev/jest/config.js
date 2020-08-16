@@ -32,6 +32,7 @@ export default {
     '<rootDir>/src/cli_plugin',
     '<rootDir>/packages/kbn-test/target/functional_test_runner',
     '<rootDir>/src/dev',
+    '<rootDir>/src/optimize',
     '<rootDir>/src/legacy/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
@@ -52,7 +53,6 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,mjs,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    '!src/legacy/core_plugins/tests_bundle/**',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
@@ -78,6 +78,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
+    '<rootDir>/src/dev/jest/setup/default_timeout.js',
   ],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
