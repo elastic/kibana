@@ -243,8 +243,8 @@ function computedNodeBoundaries(entityID: string): AABB {
     simulator.processNodeElements({ entityID }).getDOMNode()
   );
   return {
-    minimum: [pxNum(left), pxNum(top),],
-    maximum: [pxNum(left) + pxNum(width), pxNum(top) + pxNum(height),],
+    minimum: [pxNum(left), pxNum(top)],
+    maximum: [pxNum(left) + pxNum(width), pxNum(top) + pxNum(height)],
   };
 }
 
@@ -273,7 +273,7 @@ function computedEdgeTerminalCoordinates(): Vector2[] {
     const edgeLineRotationInRadians = parseFloat(transform.match(/rotateZ\((-?\d+\.?\d+)/i)![1]);
     const rotateDownTo = Math.sin(edgeLineRotationInRadians) * pxNum(width);
     const rotateLeftTo = Math.cos(edgeLineRotationInRadians) * pxNum(width);
-    return [pxNum(left) + rotateLeftTo,  pxNum(top) + rotateDownTo]
+    return [pxNum(left) + rotateLeftTo, pxNum(top) + rotateDownTo];
   });
 }
 
