@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteMetadataStream } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
-import { POLL_INTERVAL } from '../../../../plugins/security_solution/public/management/common/polling';
+import { DEFAULT_POLL_INTERVAL } from '../../../../plugins/security_solution/public/management/common/constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('finds data after load and polling', async () => {
         await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true });
-        await sleep(POLL_INTERVAL);
+        await sleep(DEFAULT_POLL_INTERVAL);
         const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
         expect(tableData).to.eql(expectedData);
       });

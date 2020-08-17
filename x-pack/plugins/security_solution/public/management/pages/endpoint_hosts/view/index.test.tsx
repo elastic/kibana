@@ -148,6 +148,9 @@ describe('when on the list page', () => {
           });
         });
       });
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
 
       it('should display rows in the table', async () => {
         const renderResult = render();
@@ -218,6 +221,36 @@ describe('when on the list page', () => {
         const firstPolicyName = (await renderResult.findAllByTestId('policyNameCellLink'))[0];
         expect(firstPolicyName).not.toBeNull();
         expect(firstPolicyName.getAttribute('href')).toContain(`policy/${firstPolicyID}`);
+      });
+
+      it('should poll', async () => {
+        const pollInterval = 10;
+        await reactTestingLibrary.act(async () => {
+          store.dispatch({
+            type: 'userUpdatedEndpointListAutoRefreshInterval',
+            payload: pollInterval,
+          });
+        });
+        let renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const total = await renderResult.findAllByTestId('endpointListTableTotal');
+        expect(total[0].textContent).toEqual('4 Hosts');
+
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockEndpointResultList({ total: 1 }).hosts,
+        });
+
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('appRequestedEndpointList');
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+
+        renderResult = render();
+
+        const updatedTotal = await renderResult.findAllByTestId('endpointListTableTotal');
+        expect(updatedTotal[0].textContent).toEqual('1 Host');
       });
 
       describe('when the user clicks the first hostname in the table', () => {

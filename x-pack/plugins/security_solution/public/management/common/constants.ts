@@ -23,3 +23,7 @@ export const MANAGEMENT_STORE_POLICY_LIST_NAMESPACE = 'policyList';
 export const MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE = 'policyDetails';
 /** Namespace within the Management state where endpoint-host state is maintained */
 export const MANAGEMENT_STORE_ENDPOINTS_NAMESPACE = 'endpoints';
+
+// --[ DEFAULTS ]---------------------------------------------------------------------------
+/** The default polling interval to start all polling pages */
+export const DEFAULT_POLL_INTERVAL = 10000;

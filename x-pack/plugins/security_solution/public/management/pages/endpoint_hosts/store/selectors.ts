@@ -47,6 +47,8 @@ export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.en
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
+export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
+
 export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined

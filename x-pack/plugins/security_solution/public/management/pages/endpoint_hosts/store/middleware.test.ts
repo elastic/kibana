@@ -21,20 +21,12 @@ import { listData } from './selectors';
 import { EndpointState } from '../types';
 import { endpointListReducer } from './reducer';
 import { endpointMiddlewareFactory } from './middleware';
-import { getEndpointListPath, getPolicyDetailPath } from '../../../common/routing';
+import { getEndpointListPath } from '../../../common/routing';
 
 jest.mock('../../policy/store/policy_list/services/ingest', () => ({
   sendGetEndpointSecurityPackage: () => Promise.resolve({}),
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
 }));
-
-jest.mock('../../../common/polling', () => {
-  const { startPoll } = jest.requireActual('../../../common/polling');
-  return {
-    startPoll,
-    POLL_INTERVAL: 10,
-  };
-});
 
 describe('endpoint list middleware', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -45,7 +37,6 @@ describe('endpoint list middleware', () => {
   let getState: EndpointListStore['getState'];
   let dispatch: EndpointListStore['dispatch'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
-  let actionShouldTimeout: MiddlewareActionSpyHelper['actionShouldTimeout'];
   let actionSpyMiddleware;
 
   let history: History<never>;
@@ -56,9 +47,7 @@ describe('endpoint list middleware', () => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    ({ actionSpyMiddleware, waitForAction, actionShouldTimeout } = createSpyMiddleware<
-      EndpointState
-    >());
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<EndpointState>());
     store = createStore(
       endpointListReducer,
       applyMiddleware(endpointMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
@@ -88,7 +77,7 @@ describe('endpoint list middleware', () => {
     expect(listData(getState())).toEqual(apiResponse.hosts);
   });
 
-  it('handles `appRequestedEndpointList` and poll', async () => {
+  it('handles `appRequestedEndpointList`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -114,32 +103,5 @@ describe('endpoint list middleware', () => {
       }),
     });
     expect(listData(getState())).toEqual(apiResponse.hosts);
-
-    // Wait for the poll
-    await waitForAction('appRequestedEndpointList');
-    await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-      }),
-    });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
-
-    // Navigate away
-    dispatch({
-      type: 'userChangedUrl',
-      payload: {
-        ...history.location,
-        pathname: getPolicyDetailPath('123'),
-      },
-    });
-
-    // Poll should toggle off
-    const action = await waitForAction('appToggledEndpointListAutoRefresh');
-    expect(action.payload).toEqual(false);
-
-    // This action should timeout since polling is off
-    await actionShouldTimeout('appRequestedEndpointList');
-    expect(fakeHttpServices.post).toBeCalledTimes(3);
   });
 });

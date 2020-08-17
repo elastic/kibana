@@ -91,6 +91,16 @@ interface AppToggledEndpointListAutoRefresh {
   payload: boolean;
 }
 
+interface UserToggledEndpointListAutoRefresh {
+  type: 'userToggledEndpointListAutoRefresh';
+  payload: boolean;
+}
+
+interface UserUpdatedEndpointListAutoRefreshInterval {
+  type: 'userUpdatedEndpointListAutoRefreshInterval';
+  payload: number;
+}
+
 interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
 }
@@ -111,4 +121,6 @@ export type EndpointAction =
   | ServerReturnedEndpointPackageInfo
   | AppToggledEndpointListAutoRefresh
   | AppRequestedEndpointList
-  | ServerReturnedEndpointNonExistingPolicies;
+  | ServerReturnedEndpointNonExistingPolicies
+  | UserToggledEndpointListAutoRefresh
+  | UserUpdatedEndpointListAutoRefreshInterval;
