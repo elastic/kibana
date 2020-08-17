@@ -14,8 +14,8 @@ import {
   i18nServiceMock,
 } from '../../../../../../../../../../src/core/public/mocks';
 
-import { DeleteButton } from './delete_button';
-import { DeleteButtonModal } from './delete_button_modal';
+import { DeleteActionName } from './delete_action_name';
+import { DeleteActionModal } from './delete_action_modal';
 import { useDeleteAction } from './use_delete_action';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
@@ -50,13 +50,17 @@ describe('DeleteAction', () => {
   });
 
   it('should display a tooltip when isDisabled prop is true.', () => {
-    const { container } = render(<DeleteButton isDisabled={true} item={mockAnalyticsListItem} />);
+    const { container } = render(
+      <DeleteActionName isDisabled={true} item={mockAnalyticsListItem} />
+    );
 
     expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
   });
 
   it('should not display a tooltip when isDisabled prop is false.', () => {
-    const { container } = render(<DeleteButton isDisabled={false} item={mockAnalyticsListItem} />);
+    const { container } = render(
+      <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
+    );
 
     expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
   });
@@ -71,12 +75,12 @@ describe('DeleteAction', () => {
 
         return (
           <>
-            {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
+            {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
             <button
               data-test-subj="mlAnalyticsJobDeleteButton"
               onClick={() => deleteAction.openModal(mockAnalyticsListItem)}
             >
-              <DeleteButton isDisabled={false} item={mockAnalyticsListItem} />
+              <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
             </button>
           </>
         );

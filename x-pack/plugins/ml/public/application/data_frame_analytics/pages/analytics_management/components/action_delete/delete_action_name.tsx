@@ -10,19 +10,19 @@ import { EuiToolTip } from '@elastic/eui';
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-export const deleteActionButtonText = i18n.translate(
-  'xpack.ml.dataframe.analyticsList.deleteActionName',
+export const deleteActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.deleteActionNameText',
   {
     defaultMessage: 'Delete',
   }
 );
 
-interface DeleteButtonProps {
+interface DeleteActionNameProps {
   isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
 }
 
-export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item }) => {
+export const DeleteActionName: FC<DeleteActionNameProps> = ({ isDisabled, item }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
@@ -38,10 +38,10 @@ export const DeleteButton: FC<DeleteButtonProps> = ({ isDisabled, item }) => {
             : createPermissionFailureMessage('canStartStopDataFrameAnalytics')
         }
       >
-        <>{deleteActionButtonText}</>
+        <>{deleteActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{deleteActionButtonText}</>;
+  return <>{deleteActionNameText}</>;
 };

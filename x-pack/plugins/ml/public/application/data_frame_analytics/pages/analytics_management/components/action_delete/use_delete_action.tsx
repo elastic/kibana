@@ -27,7 +27,7 @@ import {
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 
-import { deleteActionButtonText, DeleteButton } from './delete_button';
+import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;
 export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
@@ -39,7 +39,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
-  const { savedObjects, notifications } = useMlKibana().services;
+  const { savedObjects } = useMlKibana().services;
   const savedObjectsClient = savedObjects.client;
 
   const indexName = item?.config.dest.index ?? '';
@@ -64,10 +64,9 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
         setIndexPatternExists(false);
       }
     } catch (e) {
-      const { toasts } = notifications;
       const error = extractErrorMessage(e);
 
-      toasts.addDanger(
+      toastNotificationService.displayDangerToast(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
           {
@@ -81,15 +80,14 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   };
   const checkUserIndexPermission = () => {
     try {
-      const userCanDelete = canDeleteIndex(indexName);
+      const userCanDelete = canDeleteIndex(indexName, toastNotificationService);
       if (userCanDelete) {
         setUserCanDeleteIndex(true);
       }
     } catch (e) {
-      const { toasts } = notifications;
       const error = extractErrorMessage(e);
 
-      toasts.addDanger(
+      toastNotificationService.displayDangerToast(
         i18n.translate(
           'xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
           {
@@ -139,14 +137,14 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       name: (i: DataFrameAnalyticsListRow) => (
-        <DeleteButton
+        <DeleteActionName
           isDisabled={isDataFrameAnalyticsRunning(i.stats.state) || !canDeleteDataFrameAnalytics}
           item={i}
         />
       ),
       enabled: (i: DataFrameAnalyticsListRow) =>
         !isDataFrameAnalyticsRunning(i.stats.state) && canDeleteDataFrameAnalytics,
-      description: deleteActionButtonText,
+      description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',
       onClick: (i: DataFrameAnalyticsListRow) => openModal(i),

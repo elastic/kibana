@@ -11,10 +11,10 @@ import { EuiTableActionsColumnType } from '@elastic/eui';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 import { useCloneAction } from '../action_clone';
-import { useDeleteAction, DeleteButtonModal } from '../action_delete';
-import { isEditActionFlyoutVisible, useEditAction, EditButtonFlyout } from '../action_edit';
-import { useStartAction, StartButtonModal } from '../action_start';
-import { useStopAction, StopButtonModal } from '../action_stop';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
+import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
+import { useStartAction, StartActionModal } from '../action_start';
+import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
 
 import { DataFrameAnalyticsListRow } from './common';
@@ -47,10 +47,10 @@ export const useActions = (
   if (isManagementTable === false) {
     modals = (
       <>
-        {startAction.isModalVisible && <StartButtonModal {...startAction} />}
-        {stopAction.isModalVisible && <StopButtonModal {...stopAction} />}
-        {deleteAction.isModalVisible && <DeleteButtonModal {...deleteAction} />}
-        {isEditActionFlyoutVisible(editAction) && <EditButtonFlyout {...editAction} />}
+        {startAction.isModalVisible && <StartActionModal {...startAction} />}
+        {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
+        {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
+        {isEditActionFlyoutVisible(editAction) && <EditActionFlyout {...editAction} />}
       </>
     );
 

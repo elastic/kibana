@@ -12,20 +12,20 @@ import { createPermissionFailureMessage } from '../../../../../capabilities/chec
 
 import { DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-export const startActionButtonText = i18n.translate(
-  'xpack.ml.dataframe.analyticsList.startActionName',
+export const startActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.startActionNameText',
   {
     defaultMessage: 'Start',
   }
 );
 
-interface StartButtonProps {
+interface StartActionNameProps {
   canStartStopDataFrameAnalytics: boolean;
   isDisabled: boolean;
   item: DataFrameAnalyticsListRow;
 }
 
-export const StartButton: FC<StartButtonProps> = ({
+export const StartActionName: FC<StartActionNameProps> = ({
   canStartStopDataFrameAnalytics,
   isDisabled,
   item,
@@ -44,10 +44,10 @@ export const StartButton: FC<StartButtonProps> = ({
               })
         }
       >
-        <>{startActionButtonText}</>
+        <>{startActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{startActionButtonText}</>;
+  return <>{startActionNameText}</>;
 };

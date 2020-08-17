@@ -15,7 +15,7 @@ import {
 import { startAnalytics } from '../../services/analytics_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 
-import { startActionButtonText, StartButton } from './start_button';
+import { startActionNameText, StartActionName } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
@@ -50,7 +50,7 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       name: (i: DataFrameAnalyticsListRow) => (
-        <StartButton
+        <StartActionName
           isDisabled={!startButtonEnabled(i)}
           item={i}
           canStartStopDataFrameAnalytics={canStartStopDataFrameAnalytics}
@@ -58,7 +58,7 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
       ),
       available: (i: DataFrameAnalyticsListRow) => !isDataFrameAnalyticsRunning(i.stats.state),
       enabled: startButtonEnabled,
-      description: startActionButtonText,
+      description: startActionNameText,
       icon: 'play',
       type: 'icon',
       onClick: openModal,

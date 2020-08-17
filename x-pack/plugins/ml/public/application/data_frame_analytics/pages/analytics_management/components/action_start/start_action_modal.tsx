@@ -6,43 +6,42 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
-import { StopAction } from './use_stop_action';
+import { StartAction } from './use_start_action';
 
-export const StopButtonModal: FC<StopAction> = ({ closeModal, item, forceStopAndCloseModal }) => {
+export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCloseModal }) => {
   return (
     <>
       {item !== undefined && (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={i18n.translate('xpack.ml.dataframe.analyticsList.forceStopModalTitle', {
-              defaultMessage: 'Force this job to stop?',
+            title={i18n.translate('xpack.ml.dataframe.analyticsList.startModalTitle', {
+              defaultMessage: 'Start {analyticsId}',
+              values: { analyticsId: item.config.id },
             })}
             onCancel={closeModal}
-            onConfirm={forceStopAndCloseModal}
+            onConfirm={startAndCloseModal}
             cancelButtonText={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.forceStopModalCancelButton',
+              'xpack.ml.dataframe.analyticsList.startModalCancelButton',
               {
                 defaultMessage: 'Cancel',
               }
             )}
             confirmButtonText={i18n.translate(
-              'xpack.ml.dataframe.analyticsList.forceStopModalStartButton',
+              'xpack.ml.dataframe.analyticsList.startModalStartButton',
               {
-                defaultMessage: 'Force stop',
+                defaultMessage: 'Start',
               }
             )}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             buttonColor="primary"
           >
             <p>
-              <FormattedMessage
-                id="xpack.ml.dataframe.analyticsList.forceStopModalBody"
-                defaultMessage="{analyticsId} is in a failed state. You must stop the job and fix the failure."
-                values={{ analyticsId: item.config.id }}
-              />
+              {i18n.translate('xpack.ml.dataframe.analyticsList.startModalBody', {
+                defaultMessage:
+                  'A data frame analytics job will increase search and indexing load in your cluster. Please stop the analytics job if excessive load is experienced. Are you sure you want to start this analytics job?',
+              })}
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>

@@ -11,28 +11,28 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { createPermissionFailureMessage } from '../../../../../capabilities/check_capabilities';
 
-export const stopActionButtonText = i18n.translate(
-  'xpack.ml.dataframe.analyticsList.stopActionName',
+export const stopActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.stopActionNameText',
   {
     defaultMessage: 'Stop',
   }
 );
 
-interface StopButtonProps {
+interface StopActionNameProps {
   isDisabled: boolean;
 }
 
-export const StopButton: FC<StopButtonProps> = ({ isDisabled }) => {
+export const StopActionName: FC<StopActionNameProps> = ({ isDisabled }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
         position="top"
         content={createPermissionFailureMessage('canStartStopDataFrameAnalytics')}
       >
-        <>{stopActionButtonText}</>
+        <>{stopActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{stopActionButtonText}</>;
+  return <>{stopActionNameText}</>;
 };

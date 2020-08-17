@@ -325,8 +325,8 @@ export function extractCloningConfig({
   }) as unknown) as CloneDataFrameAnalyticsConfig;
 }
 
-export const cloneActionButtonText = i18n.translate(
-  'xpack.ml.dataframe.analyticsList.cloneButtonLabel',
+export const cloneActionNameText = i18n.translate(
+  'xpack.ml.dataframe.analyticsList.cloneActionNameText',
   {
     defaultMessage: 'Clone',
   }
@@ -389,7 +389,7 @@ export const useNavigateToWizardWithClonedJob = () => {
   };
 };
 
-interface CloneButtonProps {
+interface CloneActionNameProps {
   isDisabled: boolean;
 }
 
@@ -398,7 +398,7 @@ interface CloneButtonProps {
  * Replace with {@link getCloneAction} as soon as all the actions are refactored
  * to support EuiContext with a valid DOM structure without nested buttons.
  */
-export const CloneButton: FC<CloneButtonProps> = ({ isDisabled }) => {
+export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
   if (isDisabled) {
     return (
       <EuiToolTip
@@ -407,10 +407,10 @@ export const CloneButton: FC<CloneButtonProps> = ({ isDisabled }) => {
           defaultMessage: 'You do not have permission to clone analytics jobs.',
         })}
       >
-        <>{cloneActionButtonText}</>
+        <>{cloneActionNameText}</>
       </EuiToolTip>
     );
   }
 
-  return <>{cloneActionButtonText}</>;
+  return <>{cloneActionNameText}</>;
 };

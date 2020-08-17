@@ -14,7 +14,7 @@ import {
 } from '../analytics_list/common';
 import { stopAnalytics } from '../../services/analytics_service';
 
-import { stopActionButtonText, StopButton } from './stop_button';
+import { stopActionNameText, StopActionName } from './stop_action_name';
 
 export type StopAction = ReturnType<typeof useStopAction>;
 export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
@@ -50,10 +50,10 @@ export const useStopAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () => <StopButton isDisabled={!canStartStopDataFrameAnalytics} />,
+      name: () => <StopActionName isDisabled={!canStartStopDataFrameAnalytics} />,
       available: (i: DataFrameAnalyticsListRow) => isDataFrameAnalyticsRunning(i.stats.state),
       enabled: () => canStartStopDataFrameAnalytics,
-      description: stopActionButtonText,
+      description: stopActionNameText,
       icon: 'stop',
       type: 'icon',
       onClick: clickHandler,

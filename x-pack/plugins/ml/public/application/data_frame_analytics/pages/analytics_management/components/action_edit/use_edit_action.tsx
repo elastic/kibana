@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
-import { editActionButtonText, EditButton } from './edit_button';
+import { editActionNameText, EditActionName } from './edit_action_name';
 
 export const isEditActionFlyoutVisible = (editAction: any): editAction is Required<EditAction> => {
   return editAction.isFlyoutVisible === true && editAction.item !== undefined;
@@ -32,9 +32,9 @@ export const useEditAction = (canStartStopDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: () => <EditButton isDisabled={!canStartStopDataFrameAnalytics} />,
+      name: () => <EditActionName isDisabled={!canStartStopDataFrameAnalytics} />,
       enabled: () => canStartStopDataFrameAnalytics,
-      description: editActionButtonText,
+      description: editActionNameText,
       icon: 'pencil',
       type: 'icon',
       onClick: (i: DataFrameAnalyticsListRow) => openFlyout(i),

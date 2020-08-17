@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteAction } from './use_delete_action';
 
-export const DeleteButtonModal: FC<DeleteAction> = ({
+export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
   deleteAndCloseModal,
   deleteTargetIndex,

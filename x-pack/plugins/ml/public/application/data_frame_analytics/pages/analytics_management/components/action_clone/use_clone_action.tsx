@@ -9,10 +9,10 @@ import React, { useCallback, useMemo } from 'react';
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 import {
-  cloneActionButtonText,
+  cloneActionNameText,
   useNavigateToWizardWithClonedJob,
-  CloneButton,
-} from './clone_button';
+  CloneActionName,
+} from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
@@ -25,10 +25,10 @@ export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       name: (item: DataFrameAnalyticsListRow) => (
-        <CloneButton isDisabled={!canCreateDataFrameAnalytics} />
+        <CloneActionName isDisabled={!canCreateDataFrameAnalytics} />
       ),
       enabled: () => canCreateDataFrameAnalytics,
-      description: cloneActionButtonText,
+      description: cloneActionNameText,
       icon: 'copy',
       type: 'icon',
       onClick: clickHandler,

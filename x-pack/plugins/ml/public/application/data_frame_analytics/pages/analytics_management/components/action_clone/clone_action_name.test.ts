@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isAdvancedConfig } from './clone_button';
+import { isAdvancedConfig } from './clone_action_name';
 
 describe('Analytics job clone action', () => {
   describe('isAdvancedConfig', () => {

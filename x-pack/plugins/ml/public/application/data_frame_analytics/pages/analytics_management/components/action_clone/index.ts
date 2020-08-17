@@ -8,5 +8,5 @@ export {
   extractCloningConfig,
   isAdvancedConfig,
   CloneDataFrameAnalyticsConfig,
-} from './clone_button';
+} from './clone_action_name';
 export { useCloneAction } from './use_clone_action';
