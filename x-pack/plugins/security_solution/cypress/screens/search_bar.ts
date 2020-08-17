@@ -26,4 +26,4 @@ export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams
 
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
-export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '[data-test-subj="filter"]';
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';

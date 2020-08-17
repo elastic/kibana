@@ -347,7 +347,6 @@ export function FilterItem(props: Props) {
       anchorPosition="downLeft"
       withTitle={true}
       panelPaddingSize="none"
-      data-test-subj="filter"
     >
       <EuiContextMenu initialPanelId={0} panels={getPanels()} />
     </EuiPopover>
