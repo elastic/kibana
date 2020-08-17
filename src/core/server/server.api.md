@@ -714,10 +714,9 @@ export class ElasticsearchConfig {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
-    // @deprecated
-    readonly config$: Observable<ElasticsearchConfig>;
     // @deprecated (undocumented)
     legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
         readonly client: ILegacyClusterClient;
     };
@@ -729,6 +728,7 @@ export interface ElasticsearchServiceStart {
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
     // @deprecated (undocumented)
     legacy: {
+        readonly config$: Observable<ElasticsearchConfig>;
         readonly createClient: (type: string, clientConfig?: Partial<LegacyElasticsearchClientConfig>) => ILegacyCustomClusterClient;
         readonly client: ILegacyClusterClient;
     };

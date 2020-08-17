@@ -38,7 +38,7 @@ export default function (kibana) {
       const adminCluster = new Cluster(client);
       const dataCluster = new Cluster(client);
 
-      const esConfig = await server.newPlatform.__internals.elasticsearch.config$
+      const esConfig = await server.newPlatform.__internals.elasticsearch.legacy.config$
         .pipe(first())
         .toPromise();
 

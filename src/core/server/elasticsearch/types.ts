@@ -35,17 +35,16 @@ import { ServiceStatus } from '../status';
  */
 export interface ElasticsearchServiceSetup {
   /**
-   * Provide direct access to the current elasticsearch configuration.
-   *
-   * @deprecated this will be removed in a later version.
-   */
-  readonly config$: Observable<ElasticsearchConfig>;
-
-  /**
    * @deprecated
    * Use {@link ElasticsearchServiceStart.legacy} instead.
    */
   legacy: {
+    /**
+     * Provide direct access to the current elasticsearch configuration.
+     *
+     * @deprecated this will be removed in a later version.
+     */
+    readonly config$: Observable<ElasticsearchConfig>;
     /**
      * @deprecated
      * Use {@link ElasticsearchServiceStart.legacy | ElasticsearchServiceStart.legacy.createClient} instead.
@@ -134,6 +133,12 @@ export interface ElasticsearchServiceStart {
    * Switch to the new elasticsearch client as soon as https://github.com/elastic/kibana/issues/35508 done.
    * */
   legacy: {
+    /**
+     * Provide direct access to the current elasticsearch configuration.
+     *
+     * @deprecated this will be removed in a later version.
+     */
+    readonly config$: Observable<ElasticsearchConfig>;
     /**
      * Create application specific Elasticsearch cluster API client with customized config. See {@link ILegacyClusterClient}.
      *
