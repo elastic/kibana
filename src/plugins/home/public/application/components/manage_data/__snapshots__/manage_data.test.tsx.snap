@@ -10,7 +10,7 @@ exports[`ManageData render 1`] = `
     size="s"
   />
   <section
-    aria-labelledby="homManageData"
+    aria-labelledby="homManageData__title"
     className="homManageData"
   >
     <EuiTitle
