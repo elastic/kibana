@@ -69,16 +69,15 @@ beforeEach(async () => {
 
   if (isErrorEmbeddable(contactCardEmbeddable)) {
     throw new Error('Failed to create embeddable');
-  } else {
-    embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-      ContactCardEmbeddable,
-      ContactCardEmbeddableInput
-    >(contactCardEmbeddable, {
-      mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-      mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
-    });
-    embeddable.updateInput({ viewMode: ViewMode.EDIT });
   }
+  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
+    ContactCardEmbeddable,
+    ContactCardEmbeddableInput
+  >(contactCardEmbeddable, {
+    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
+    mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+  });
+  embeddable.updateInput({ viewMode: ViewMode.EDIT });
 });
 
 test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
