@@ -199,11 +199,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         explicitInput: {
           ...explicitInput,
           // TS does not catch up with the typeguard above, so it needs to be explicit
-          id: explicitInput.id,
+          id: idToReplace,
         },
       });
+    } else {
+      return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
     }
-    return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
   }
 
   public render(dom: HTMLElement) {
