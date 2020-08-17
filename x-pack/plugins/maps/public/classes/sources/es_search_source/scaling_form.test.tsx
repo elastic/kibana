@@ -27,6 +27,7 @@ const defaultProps = {
   termFields: [],
   topHitsSplitField: null,
   topHitsSize: 1,
+  supportsMvt: false,
 };
 
 test('should render', async () => {
