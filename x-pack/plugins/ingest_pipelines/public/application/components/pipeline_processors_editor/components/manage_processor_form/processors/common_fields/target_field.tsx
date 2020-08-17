@@ -15,13 +15,16 @@ const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.jsonForm.targetFieldLabel', {
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldLabel', {
       defaultMessage: 'Target field (optional)',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.jsonForm.targetFieldHelpText', {
-      defaultMessage:
-        'The field to assign the joined value to. If empty, the field is updated in-place.',
-    }),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldHelpText',
+      {
+        defaultMessage:
+          'The field to assign the joined value to. If empty, the field is updated in-place.',
+      }
+    ),
   },
 };
 
