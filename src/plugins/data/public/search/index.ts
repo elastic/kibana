@@ -17,11 +17,16 @@
  * under the License.
  */
 
-export * from './aggs';
 export * from './expressions';
-export * from './tabify';
 
-export { ISearch, ISearchOptions, ISearchGeneric, ISearchSetup, ISearchStart } from './types';
+export {
+  ISearch,
+  ISearchOptions,
+  ISearchGeneric,
+  ISearchSetup,
+  ISearchStart,
+  SearchEnhancements,
+} from './types';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
@@ -34,7 +39,6 @@ export {
   FetchOptions,
   SearchRequest,
   SearchResponse,
-  getSearchErrorType,
   getSearchParamsFromRequest,
 } from './fetch';
 

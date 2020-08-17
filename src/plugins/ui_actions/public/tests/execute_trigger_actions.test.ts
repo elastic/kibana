@@ -82,7 +82,7 @@ test('executes a single action mapped to a trigger', async () => {
   jest.runAllTimers();
 
   expect(executeFn).toBeCalledTimes(1);
-  expect(executeFn).toBeCalledWith(context);
+  expect(executeFn).toBeCalledWith(expect.objectContaining(context));
 });
 
 test('throws an error if there are no compatible actions to execute', async () => {
@@ -200,5 +200,27 @@ test("doesn't show a context menu for auto executable actions", async () => {
   await wait(() => {
     expect(executeFn).toBeCalledTimes(2);
     expect(openContextMenu).toHaveBeenCalledTimes(0);
+  });
+});
+
+test('passes trigger into execute', async () => {
+  const { setup, doStart } = uiActions;
+  const trigger = {
+    id: 'MY-TRIGGER' as TriggerId,
+    title: 'My trigger',
+  };
+  const action = createTestAction<{ foo: string }>('test', () => true);
+
+  setup.registerTrigger(trigger);
+  setup.addTriggerAction(trigger.id, action);
+
+  const start = doStart();
+
+  const context = { foo: 'bar' };
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+  jest.runAllTimers();
+  expect(executeFn).toBeCalledWith({
+    ...context,
+    trigger,
   });
 });

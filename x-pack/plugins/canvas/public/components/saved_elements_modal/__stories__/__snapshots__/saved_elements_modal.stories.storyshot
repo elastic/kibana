@@ -36,6 +36,11 @@ Array [
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiModal canvasModal--fixedSize"
@@ -158,7 +163,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <span
                 className="euiButton__text"
@@ -225,6 +230,11 @@ Array [
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiModal canvasModal--fixedSize"
@@ -311,7 +321,7 @@ Array [
                 className="euiFlexItem canvasElementCard__wrapper"
               >
                 <div
-                  className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                  className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                   onClick={[Function]}
                 >
                   <div
@@ -417,7 +427,7 @@ Array [
                 className="euiFlexItem canvasElementCard__wrapper"
               >
                 <div
-                  className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                  className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                   onClick={[Function]}
                 >
                   <div
@@ -523,7 +533,7 @@ Array [
                 className="euiFlexItem canvasElementCard__wrapper"
               >
                 <div
-                  className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                  className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                   onClick={[Function]}
                 >
                   <div
@@ -638,7 +648,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <span
                 className="euiButton__text"
@@ -705,6 +715,11 @@ Array [
     data-focus-lock-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
+    onMouseDown={[Function]}
+    onScrollCapture={[Function]}
+    onTouchMoveCapture={[Function]}
+    onTouchStart={[Function]}
+    onWheelCapture={[Function]}
   >
     <div
       className="euiModal canvasModal--fixedSize"
@@ -806,7 +821,7 @@ Array [
                 className="euiFlexItem canvasElementCard__wrapper"
               >
                 <div
-                  className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                  className="euiCard euiCard--paddingMedium euiCard--leftAligned euiCard--isClickable canvasElementCard"
                   onClick={[Function]}
                 >
                   <div
@@ -921,7 +936,7 @@ Array [
             type="button"
           >
             <span
-              className="euiButton__content"
+              className="euiButtonContent euiButton__content"
             >
               <span
                 className="euiButton__text"

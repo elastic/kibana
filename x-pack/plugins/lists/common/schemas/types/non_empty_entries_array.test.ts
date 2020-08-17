@@ -125,10 +125,6 @@ describe('non_empty_entries_array', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
-      'Invalid value "1" supplied to "NonEmptyEntriesArray"',
     ]);
     expect(message.schema).toEqual({});
   });
