@@ -45,7 +45,6 @@ export async function extractUntrackedMessagesTask({
   const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
-    '**/webpackShims/**',
     '**/__fixtures__/**',
     '**/packages/kbn-i18n/**',
     '**/packages/kbn-plugin-generator/sao_template/**',

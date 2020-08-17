@@ -24,7 +24,7 @@ const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { REPO_ROOT, ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
+const { ASSET_DIR, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
 exports.runStorybookCli = (config) => {
@@ -43,14 +43,6 @@ exports.runStorybookCli = (config) => {
         rebuildDll: flags.rebuildDll,
         log,
         procRunner,
-      });
-
-      // Build sass and continue when initial build complete
-      await procRunner.run('watch sass', {
-        cmd: process.execPath,
-        args: ['scripts/build_sass', '--watch'],
-        cwd: REPO_ROOT,
-        wait: /scss bundles created/,
       });
 
       const subj = new Rx.ReplaySubject(1);

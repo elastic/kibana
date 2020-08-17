@@ -33,8 +33,8 @@ export const getInspector = () => {
 
 let fileUploadPlugin;
 export const setFileUpload = (fileUpload) => (fileUploadPlugin = fileUpload);
-export const getFileUploadComponent = () => {
-  return fileUploadPlugin.JsonUploadAndParse;
+export const getFileUploadComponent = async () => {
+  return await fileUploadPlugin.getFileUploadComponent();
 };
 
 let uiSettings;
@@ -177,3 +177,16 @@ export const setIsGoldPlus = (igp) => {
 export const getIsGoldPlus = () => {
   return isGoldPlus;
 };
+
+let embeddableService;
+export const setEmbeddableService = (_embeddableService) => {
+  embeddableService = _embeddableService;
+};
+export const getEmbeddableService = () => {
+  return embeddableService;
+};
+
+export let navigateToApp;
+export function setNavigateToApp(_navigateToApp) {
+  navigateToApp = _navigateToApp;
+}
