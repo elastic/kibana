@@ -220,6 +220,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
+    toasts: core.notifications.toasts,
   });
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid

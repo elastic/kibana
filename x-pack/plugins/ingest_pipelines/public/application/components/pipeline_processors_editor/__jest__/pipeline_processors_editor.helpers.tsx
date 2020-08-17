@@ -7,7 +7,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 import { registerTestBed, TestBed } from '../../../../../../../test_utils';
 import {
-  PipelineProcessorsContextProvider,
+  ProcessorsEditorContextProvider,
   Props,
   ProcessorsEditor,
   GlobalOnFailureProcessorsEditor,
@@ -62,9 +62,9 @@ jest.mock('react-virtualized', () => {
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => (
-    <PipelineProcessorsContextProvider {...props}>
+    <ProcessorsEditorContextProvider {...props}>
       <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
-    </PipelineProcessorsContextProvider>
+    </ProcessorsEditorContextProvider>
   ),
   {
     doMountAsync: false,
@@ -89,7 +89,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async addProcessor(processorsSelector: string, type: string, options: Record<string, any>) {
       find(`${processorsSelector}.addProcessorButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {
@@ -129,7 +129,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.button`).simulate('click');
       find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {

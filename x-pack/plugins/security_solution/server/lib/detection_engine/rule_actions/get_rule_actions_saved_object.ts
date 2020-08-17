@@ -26,6 +26,7 @@ export const getRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
 }: GetRuleActionsSavedObject): Promise<RulesActionsSavedObject | null> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { saved_objects } = await savedObjectsClient.find<
     IRuleActionsAttributesSavedObjectAttributes
   >({
