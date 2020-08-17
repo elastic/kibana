@@ -19,6 +19,9 @@
 
 .homSolutions {
   margin-top: -($euiSizeXL + $euiSizeL + $euiSizeM);
+}
+
+.homSolutions__content {
   min-height: $euiSize * 16;
 
   @include euiBreakpoint('xs', 's') {

@@ -194,7 +194,7 @@ export class Home extends Component {
         </header>
 
         <div className="homContent">
-          <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+          {solutions.length && <SolutionsSection addBasePath={addBasePath} solutions={solutions} />}
 
           <EuiFlexGroup
             className={`homData ${
