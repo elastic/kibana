@@ -41,7 +41,7 @@ search for suspicious activity on your network and hosts. Additionally, you can
 create your own rules.
 
 See {security-guide}/detection-engine-overview.html[Detections] for information
-on managing detection rules and signals via the UI or the Detections API.
+on managing detection rules and alerts via the UI or the Detections API.
 
 [role="screenshot"]
 image::siem/images/detections-ui.png[]
