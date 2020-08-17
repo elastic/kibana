@@ -30,6 +30,9 @@ import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
+import { setHelpExtension } from '../setHelpExtension';
+import { setReadonlyBadge } from '../updateBadge';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
 
 const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -102,14 +105,21 @@ export function CsmAppRoot({
 }
 
 /**
- * This module is rendered asynchronously in the Kibana platform.
+ * These module is rendered asynchronously in the Kibana platform.
  */
+
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
+  // render APM feedback link in global help menu
+  setHelpExtension(core);
+  setReadonlyBadge(core);
+
+  createCallApmApi(core.http);
+
   resetHistory();
   ReactDOM.render(
     <CsmAppRoot
